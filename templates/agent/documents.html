@@ -1,0 +1,24 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Centralized files</p>
+  <h1>Document Center</h1>
+  <p>A future home for contracts, disclosures, and shared files, all organized by client and transaction.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>What This Will Include</h2>
+    <ul style="font-size:0.95rem;margin:1rem 0 0 1.5rem;padding:0;line-height:1.8;">
+      <li>Drag and drop upload for common document types</li>
+      <li>Automatic sorting by category and transaction</li>
+      <li>One click sending to clients, co-agents, title, and lenders</li>
+      <li>Simple visibility for your clients so they know what is done</li>
+    </ul>
+    <p class="card-subtext" style="margin-top:1rem;">
+      While the full document center is in progress you can still track key stages and contacts in the <a href="{{ url_for('agent_transactions') }}" style="color:var(--olive-green);font-weight:600;">coordinator</a> and <a href="{{ url_for('agent_crm') }}" style="color:var(--olive-green);font-weight:600;">CRM</a> views.
+    </p>
+  </div>
+</div>
+{% endblock %}

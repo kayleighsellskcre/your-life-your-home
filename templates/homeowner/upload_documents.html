@@ -1,0 +1,190 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Documents Library{% endblock %}
+
+{% block homeowner_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Everything in one organized place</p>
+  <h1>Documents Library</h1>
+  <p>Store important documents and maintain your home's complete history—all beautifully organized.</p>
+</div>
+
+<!-- DOCUMENTS SECTION -->
+<div id="documentsTab" class="tab-content">
+  <!-- Upload Section -->
+  <div class="dashboard-section">
+    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+      <h2>📄 Add New Document</h2>
+      <p class="card-subtext">Upload closing packets, warranties, appraisals, invoices, and inspection reports with optional details</p>
+
+      <form method="post" enctype="multipart/form-data" style="display: grid; gap: 1.5rem; max-width: 650px; margin-top: 1.5rem;">
+        <div>
+          <label for="doc_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+            Document Date <span style="font-weight: 400; color: #999;">(optional)</span>
+          </label>
+          <input type="date" id="doc_date" name="doc_date" />
+        </div>
+
+        <div>
+          <label for="doc_title" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+            Document Title <span style="font-weight: 400; color: #999;">(optional)</span>
+          </label>
+          <input type="text" id="doc_title" name="doc_title" placeholder="Example: Roof warranty, HVAC service contract" />
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+          <div>
+            <label for="file" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+              Choose File
+            </label>
+            <input type="file" id="file" name="file" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx,.xls" />
+          </div>
+
+          <div>
+            <label for="category" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+              Category
+            </label>
+            <select id="category" name="category" required>
+              <option value="">Select a category...</option>
+              <option value="Closing">🏠 Closing Documents</option>
+              <option value="Inspection">🔍 Inspection Reports</option>
+              <option value="Warranty">✓ Warranties</option>
+              <option value="Receipts">💳 Receipts & Invoices</option>
+              <option value="Renovation">🔨 Renovation Records</option>
+              <option value="Insurance">🛡️ Insurance</option>
+              <option value="Taxes">📊 Taxes</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="doc_cost" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+            Cost <span style="font-weight: 400; color: #999;">(optional)</span>
+          </label>
+          <input type="text" id="doc_cost" name="doc_cost" placeholder="$0.00" />
+        </div>
+
+        <div>
+          <label for="doc_notes" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+            Details <span style="font-weight: 400; color: #999;">(optional)</span>
+          </label>
+          <textarea id="doc_notes" name="doc_notes" rows="4" placeholder="Contractor info, warranty dates, or other important details..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
+          Upload Document
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Documents Library Section -->
+  <div class="dashboard-section">
+    {% if docs %}
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Your Documents</h2>
+        <span style="background: var(--olive-green); color: white; padding: 0.35rem 0.7rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 600;">
+          {{ docs|length }} file{% if docs|length != 1 %}s{% endif %}
+        </span>
+      </div>
+
+      {% set categories = {
+        'Closing': [],
+        'Inspection': [],
+        'Warranty': [],
+        'Receipts': [],
+        'Renovation': [],
+        'Insurance': [],
+        'Taxes': [],
+        'Other': []
+      } %}
+      
+      {% for doc in docs %}
+        {% set cat = doc.category if doc.category in categories else 'Other' %}
+        {% set _ = categories[cat].append(doc) %}
+      {% endfor %}
+
+      {% for category_name, category_docs in categories.items() %}
+        {% if category_docs|length > 0 %}
+          <div style="margin-bottom: 3rem;">
+            <h3 style="color: var(--olive-green); font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--taupe-beige); display: flex; align-items: center; gap: 0.5rem;">
+              {% if category_name == 'Closing' %}🏠 Closing Documents
+              {% elif category_name == 'Inspection' %}🔍 Inspection Reports
+              {% elif category_name == 'Warranty' %}✓ Warranties
+              {% elif category_name == 'Receipts' %}💳 Receipts & Invoices
+              {% elif category_name == 'Renovation' %}🔨 Renovation Records
+              {% elif category_name == 'Insurance' %}🛡️ Insurance
+              {% elif category_name == 'Taxes' %}📊 Taxes
+              {% else %}📁 Other Documents
+              {% endif %}
+              <span style="background: var(--light-cream); color: var(--charcoal-brown); padding: 0.2rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
+                {{ category_docs|length }}
+              </span>
+            </h3>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+              {% for doc in category_docs %}
+                <div class="card">
+                  <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="font-size: 2rem; min-width: 2.5rem; text-align: center;">
+                      {% if doc.filename.lower().endswith('.pdf') %}
+                        📋
+                      {% elif doc.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
+                        🖼️
+                      {% elif doc.filename.lower().endswith(('.doc', '.docx')) %}
+                        📝
+                      {% elif doc.filename.lower().endswith(('.xls', '.xlsx')) %}
+                        📊
+                      {% else %}
+                        📄
+                      {% endif %}
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.95rem; word-break: break-word; margin-bottom: 0.5rem;">
+                        {{ doc.filename }}
+                      </div>
+                      <div style="color: #888; font-size: 0.8rem;">
+                        📅 {{ doc.created_at }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--taupe-beige);">
+                    <a href="{{ url_for('static', filename='uploads/homeowner_docs/' + doc.filename) }}"
+                       target="_blank" class="btn btn-outline" style="flex: 1; text-align: center; padding: 0.6rem;">
+                      VIEW
+                    </a>
+
+                    <form method="post" action="{{ url_for('homeowner_upload_documents') }}"
+                          enctype="multipart/form-data" style="flex: 1; margin: 0;">
+                      <input type="hidden" name="reattach_id" value="{{ doc.id }}">
+                      <label class="btn btn-outline" style="width: 100%; text-align: center; padding: 0.6rem; cursor: pointer; margin: 0; display: block;">
+                        REPLACE
+                        <input type="file" name="file" accept="*/*" style="display: none;"
+                               onchange="this.form.submit()">
+                      </label>
+                    </form>
+
+                    <form method="post" action="{{ url_for('homeowner_upload_documents') }}"
+                          style="flex: 1; margin: 0;"
+                          onsubmit="return confirm('Delete this document? This action cannot be undone.');">
+                      <input type="hidden" name="delete_id" value="{{ doc.id }}">
+                      <button class="btn btn-outline" type="submit" style="width: 100%; padding: 0.6rem; color: #b3574a; border-color: #b3574a;">
+                        DELETE
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <h3>📁 No Documents Yet</h3>
+        <p>Start by uploading your closing packet, warranty documents, appraisals, invoices, or inspection reports.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

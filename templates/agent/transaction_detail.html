@@ -1,0 +1,29 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Transaction details</p>
+  <h1>{{ tx.property_address }}</h1>
+  <p>{{ tx.client_name }} on the {{ tx.side|capitalize }} side — Target close: {{ tx.close_date or "To be determined" }}</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Transaction Stages</h2>
+    <ol class="steps-list" style="font-size:0.95rem;margin:1.5rem 0 0 1.5rem;padding:0;line-height:1.8;">
+      {% for stage in stages %}
+        <li style="margin-bottom:0.5rem;">
+          {% if tx.stage == stage.key %}
+            <strong style="color:var(--olive-green);">{{ stage.label }} (current)</strong>
+          {% else %}
+            {{ stage.label }}
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+    <p class="card-subtext" style="margin-top:1.5rem;">
+      As the automation tools grow, document uploads and confirmations will move this file along and notify the right people.
+    </p>
+  </div>
+</div>
+{% endblock %}

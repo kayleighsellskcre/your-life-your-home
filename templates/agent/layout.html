@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set path = request.path %}
+
+{% set open_overview = path == url_for('agent_dashboard')
+  or path.startswith('/agent/settings/profile')
+%}
+{% set open_clients = path.startswith('/agent/crm')
+  or path.startswith('/agent/clients')
+  or path.startswith('/agent/transactions')
+  or path.startswith('/agent/documents')
+%}
+{% set open_comms = path.startswith('/agent/communications')
+  or path.startswith('/agent/marketing')
+  or path.startswith('/agent/power-tools')
+%}
+
+<div class="dashboard-container">
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-sidebar__header">
+      <p class="dashboard-sidebar__subtitle">Professional tools</p>
+      <h2 class="dashboard-sidebar__title">Agent Dashboard</h2>
+      <p class="dashboard-sidebar__tagline">A calm command center for people, deals, and marketing.</p>
+    </div>
+
+    <nav class="dashboard-sidebar__nav">
+      <!-- Overview -->
+      <button
+        type="button"
+        class="sidebar-menu-button {% if open_overview %}is-open{% endif %}"
+        data-menu-toggle="agent-overview"
+      >
+        <span>
+          <span class="sidebar-menu-icon">🏠</span>
+          <span>Overview</span>
+        </span>
+        <span class="sidebar-menu-chevron">
+          {% if open_overview %}▾{% else %}▸{% endif %}
+        </span>
+      </button>
+      <div
+        class="sidebar-submenu"
+        data-menu-section="agent-overview"
+        data-open="{{ 'true' if open_overview else 'false' }}"
+        style="display: {{ 'block' if open_overview else 'none' }};"
+      >
+        <ul class="sidebar-submenu__list">
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_dashboard') }}"
+              class="sidebar-submenu__link {% if path == url_for('agent_dashboard') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Dashboard
+            </a>
+          </li>
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_settings_profile') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/settings/profile') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Profile & Branding
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Clients & Pipeline -->
+      <button
+        type="button"
+        class="sidebar-menu-button {% if open_clients %}is-open{% endif %}"
+        data-menu-toggle="agent-clients"
+      >
+        <span>
+          <span class="sidebar-menu-icon">👥</span>
+          <span>Clients & Pipeline</span>
+        </span>
+        <span class="sidebar-menu-chevron">
+          {% if open_clients %}▾{% else %}▸{% endif %}
+        </span>
+      </button>
+      <div
+        class="sidebar-submenu"
+        data-menu-section="agent-clients"
+        data-open="{{ 'true' if open_clients else 'false' }}"
+        style="display: {{ 'block' if open_clients else 'none' }};"
+      >
+        <ul class="sidebar-submenu__list">
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_crm') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/crm') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              CRM & Leads
+            </a>
+          </li>
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_clients') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/clients') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Client Dashboard
+            </a>
+          </li>
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_transactions') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/transactions') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Transactions
+            </a>
+          </li>
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_documents') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/documents') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Documents
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Communication & Marketing -->
+      <button
+        type="button"
+        class="sidebar-menu-button {% if open_comms %}is-open{% endif %}"
+        data-menu-toggle="agent-comms"
+      >
+        <span>
+          <span class="sidebar-menu-icon">📢</span>
+          <span>Communication & Marketing</span>
+        </span>
+        <span class="sidebar-menu-chevron">
+          {% if open_comms %}▾{% else %}▸{% endif %}
+        </span>
+      </button>
+      <div
+        class="sidebar-submenu"
+        data-menu-section="agent-comms"
+        data-open="{{ 'true' if open_comms else 'false' }}"
+        style="display: {{ 'block' if open_comms else 'none' }};"
+      >
+        <ul class="sidebar-submenu__list">
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_communications') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/communications') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Communication Hub
+            </a>
+          </li>
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_marketing') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/marketing') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Marketing Templates
+            </a>
+          </li>
+          <li class="sidebar-submenu__item">
+            <a
+              href="{{ url_for('agent_power_tools') }}"
+              class="sidebar-submenu__link {% if path.startswith('/agent/power-tools') %}active{% endif %}"
+            >
+              <span class="sidebar-submenu__bullet"></span>
+              Power Tools
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <main class="dashboard-main">
+    {% block agent_content %}{% endblock %}
+  </main>
+</div>
+
+<script>
+  // Sidebar menu toggle functionality
+  document.querySelectorAll('[data-menu-toggle]').forEach(button => {
+    button.addEventListener('click', function() {
+      const menuId = this.getAttribute('data-menu-toggle');
+      const submenu = document.querySelector(`[data-menu-section="${menuId}"]`);
+      const chevron = this.querySelector('.sidebar-menu-chevron');
+      
+      if (submenu) {
+        const isOpen = submenu.getAttribute('data-open') === 'true';
+        submenu.style.display = isOpen ? 'none' : 'block';
+        submenu.setAttribute('data-open', isOpen ? 'false' : 'true');
+        chevron.textContent = isOpen ? '▸' : '▾';
+        this.classList.toggle('is-open');
+      }
+    });
+  });
+</script>
+{% endblock %}

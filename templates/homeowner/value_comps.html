@@ -1,0 +1,1662 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Comparable Sales{% endblock %}
+
+{% block homeowner_content %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  .comps-hero {
+    background: linear-gradient(135deg, #6B6A45 0%, #8B8A65 100%);
+    padding: 3rem;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .comps-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+  
+  .search-bar {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+  }
+  
+  .filter-chips {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  
+  .chip {
+    padding: 0.5rem 1.25rem;
+    border-radius: 25px;
+    border: 2px solid #E0DED5;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  .chip:hover {
+    border-color: #6B6A45;
+    background: #F6F2E8;
+  }
+  
+  .chip.active {
+    background: #6B6A45;
+    color: white;
+    border-color: #6B6A45;
+  }
+  
+  .comp-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 12px;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  
+  .comp-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+  }
+  
+  .comp-image {
+    width: 100%;
+    height: 250px;
+    background: linear-gradient(135deg, #E0DED5 0%, #C8B497 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .comp-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #6B6A45;
+    backdrop-filter: blur(10px);
+  }
+  
+  .comp-status {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .status-sold {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .status-pending {
+    background: #FF9800;
+    color: white;
+  }
+  
+  .status-active {
+    background: #2196F3;
+    color: white;
+  }
+  
+  .comp-content {
+    padding: 1.5rem;
+  }
+  
+  .comp-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #3A352C;
+    margin-bottom: 0.5rem;
+  }
+  
+  .comp-address {
+    font-size: 1.1rem;
+    color: #6B6A45;
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  
+  .comp-specs {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: #F6F2E8;
+    border-radius: 8px;
+  }
+  
+  .spec-item {
+    text-align: center;
+  }
+  
+  .spec-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #3A352C;
+  }
+  
+  .spec-label {
+    font-size: 0.75rem;
+    color: #6B6A45;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.25rem;
+  }
+  
+  .comp-highlights {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  
+  .highlight-tag {
+    padding: 0.4rem 0.9rem;
+    background: #EFE9DC;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #3A352C;
+  }
+  
+  .market-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #6B6A45;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .comparison-slider {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .price-distribution {
+    height: 200px;
+    background: #F6F2E8;
+    border-radius: 8px;
+    margin-top: 1rem;
+    position: relative;
+  }
+  
+  .interactive-map {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .map-placeholder {
+    height: 600px;
+    background: #f8f8f8;
+    border-radius: 8px;
+    border: 2px solid #E0DED5;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  #map {
+    height: 100%;
+    width: 100%;
+  }
+  
+  .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    padding: 0;
+  }
+  
+  .leaflet-popup-content {
+    margin: 0;
+    min-width: 250px;
+  }
+  
+  .map-popup-card {
+    padding: 0;
+  }
+  
+  .map-popup-image {
+    width: 100%;
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  
+  .map-popup-content {
+    padding: 1rem;
+  }
+  
+  .map-popup-price {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #6B6A45;
+    margin-bottom: 0.5rem;
+  }
+  
+  .map-popup-address {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+  }
+  
+  .map-popup-specs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .map-popup-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background: #6B6A45;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .map-popup-btn:hover {
+    background: #5A5938;
+  }
+  
+  /* Custom marker colors */
+  .marker-sold {
+    filter: hue-rotate(90deg);
+  }
+  
+  .marker-pending {
+    filter: hue-rotate(30deg);
+  }
+  
+  .marker-active {
+    filter: hue-rotate(200deg);
+  }
+  
+  
+  .insights-panel {
+    background: linear-gradient(135deg, #FFF9F0 0%, #F6F2E8 100%);
+    border: 2px solid #C8B497;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .insight-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+  }
+  
+  .insight-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+  
+  .sort-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .toggle-view {
+    display: flex;
+    gap: 0.5rem;
+    background: #F6F2E8;
+    padding: 0.5rem;
+    border-radius: 8px;
+  }
+  
+  .view-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+  
+  .view-btn.active {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+</style>
+
+<div class="comps-hero">
+  <div style="position: relative; z-index: 1;">
+    <p style="font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; opacity: 0.9;">Kansas MLS Market Intelligence</p>
+    <h1 style="font-size: 2.5rem; margin: 0 0 1rem; font-family: 'Playfair Display', serif;">Comparable Sales Explorer</h1>
+    <p style="font-size: 1.1rem; opacity: 0.95; max-width: 700px; line-height: 1.6;">Discover what homes like yours are selling for across Kansas. Powered by Heartland MLS, Sunflower MLS, and Lawrence Board of Realtors.</p>
+    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <div style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 20px; font-size: 0.85rem; font-weight: 500;">📍 KC Metro</div>
+      <div style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 20px; font-size: 0.85rem; font-weight: 500;">📍 Wichita</div>
+      <div style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 20px; font-size: 0.85rem; font-weight: 500;">📍 Lawrence</div>
+      <div style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border-radius: 20px; font-size: 0.85rem; font-weight: 500;">📍 Topeka</div>
+    </div>
+  </div>
+</div>
+
+<!-- Market Overview Stats -->
+<div class="market-stats">
+  <div class="stat-card">
+    <div class="stat-value">$335K</div>
+    <div class="stat-label">Median Sale Price (Kansas)</div>
+    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #4CAF50;">↑ 3.8% vs last month</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">15</div>
+    <div class="stat-label">Avg Days on Market</div>
+    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #4CAF50;">↓ 5 days vs last month</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">99.2%</div>
+    <div class="stat-label">Price to List Ratio</div>
+    <div style="margin-top: 0.5rem; font-size: 0.9rem; color: #4CAF50;">↑ 0.8% vs last month</div>
+  </div>
+</div>
+
+<!-- Smart Search & Filters -->
+<div class="search-bar">
+  <div style="display: flex; gap: 1rem; align-items: center;">
+    <div style="flex: 1;">
+      <input type="text" id="address-search" placeholder="Enter address in Kansas (Overland Park, Lawrence, Wichita, etc.)" style="width: 100%; padding: 1rem; border: 2px solid #E0DED5; border-radius: 8px; font-size: 1rem;">
+    </div>
+    <button onclick="searchComps()" style="padding: 1rem 2rem; background: #6B6A45; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap;">Search Comps</button>
+  </div>
+  
+  <div style="margin-top: 1.5rem;">
+    <div style="font-size: 0.85rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Filter Results</div>
+    <div class="filter-chips">
+      <div class="chip active" onclick="toggleChip(this)">All Types</div>
+      <div class="chip" onclick="toggleChip(this)">Single Family</div>
+      <div class="chip" onclick="toggleChip(this)">Condo</div>
+      <div class="chip" onclick="toggleChip(this)">Townhouse</div>
+      <div class="chip" onclick="toggleChip(this)">Recently Sold</div>
+      <div class="chip" onclick="toggleChip(this)">Under Contract</div>
+      <div class="chip" onclick="toggleChip(this)">Active Listings</div>
+    </div>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 1.5rem;">
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Price Range</label>
+      <select style="width: 100%; padding: 0.75rem; border: 2px solid #E0DED5; border-radius: 8px;">
+        <option>Any</option>
+        <option>Under $200K</option>
+        <option>$200K - $300K</option>
+        <option>$300K - $400K</option>
+        <option>$400K - $500K</option>
+        <option>$500K+</option>
+      </select>
+    </div>
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Bedrooms</label>
+      <select style="width: 100%; padding: 0.75rem; border: 2px solid #E0DED5; border-radius: 8px;">
+        <option>Any</option>
+        <option>2+</option>
+        <option>3+</option>
+        <option>4+</option>
+        <option>5+</option>
+      </select>
+    </div>
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Bathrooms</label>
+      <select style="width: 100%; padding: 0.75rem; border: 2px solid #E0DED5; border-radius: 8px;">
+        <option>Any</option>
+        <option>1+</option>
+        <option>2+</option>
+        <option>3+</option>
+      </select>
+    </div>
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Square Feet</label>
+      <select style="width: 100%; padding: 0.75rem; border: 2px solid #E0DED5; border-radius: 8px;">
+        <option>Any</option>
+        <option>1,000 - 1,500</option>
+        <option>1,500 - 2,000</option>
+        <option>2,000 - 2,500</option>
+        <option>2,500+</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- AI-Powered Insights -->
+<div class="insights-panel">
+  <h2 style="margin: 0 0 1.5rem; color: #3A352C;">💡 Smart Market Insights</h2>
+  <div class="insight-item">
+    <div class="insight-icon">🔥</div>
+    <div>
+      <div style="font-weight: 600; color: #3A352C; margin-bottom: 0.5rem;">Hot Market Alert</div>
+      <div style="color: #666; line-height: 1.6;">Homes in your neighborhood are selling 23% faster than the city average. Properties with updated kitchens sell within 12 days.</div>
+    </div>
+  </div>
+  <div class="insight-item">
+    <div class="insight-icon">📊</div>
+    <div>
+      <div style="font-weight: 600; color: #3A352C; margin-bottom: 0.5rem;">Price Trend</div>
+      <div style="color: #666; line-height: 1.6;">Similar 3-bed, 2-bath homes have appreciated 6.8% over the past 6 months. Your home value is likely between $418K - $442K.</div>
+    </div>
+  </div>
+  <div class="insight-item">
+    <div class="insight-icon">🎯</div>
+    <div>
+      <div style="font-weight: 600; color: #3A352C; margin-bottom: 0.5rem;">Best Time to Sell</div>
+      <div style="color: #666; line-height: 1.6;">Spring listings typically sell for 3-5% more in your area. Consider listing between March-May for optimal results.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Map View -->
+<div class="interactive-map">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2 style="margin: 0;">Neighborhood Map View</h2>
+    <div class="toggle-view">
+      <button class="view-btn" onclick="switchView('map')">🗺️ Map</button>
+      <button class="view-btn active" onclick="switchView('list')">📋 List</button>
+    </div>
+  </div>
+  <div class="map-placeholder" style="display: none;">
+    <div id="map"></div>
+  </div>
+</div>
+
+<!-- Sort & View Controls -->
+<div class="sort-controls">
+  <div style="font-weight: 600; color: #3A352C;">Showing 12 comparable properties</div>
+  <div style="flex: 1;"></div>
+  <label style="font-size: 0.9rem; color: #666; margin-right: 0.5rem;">Sort by:</label>
+  <select onchange="sortComps(this.value)" style="padding: 0.75rem 1rem; border: 2px solid #E0DED5; border-radius: 8px; cursor: pointer;">
+    <option value="recent">Most Recent</option>
+    <option value="price-low">Price: Low to High</option>
+    <option value="price-high">Price: High to Low</option>
+    <option value="similar">Most Similar</option>
+    <option value="dom">Days on Market</option>
+  </select>
+</div>
+
+<!-- Data Source Indicator -->
+<div id="data-source-badge" style="text-align: center; padding: 1rem; margin: 1rem 0; background: linear-gradient(135deg, #FFF9E6 0%, #FFE4B5 100%); border-radius: 12px; border: 2px solid #FFC870; display: none;">
+  <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+    <span style="font-size: 1.5rem;">ℹ️</span>
+    <div>
+      <strong style="color: #D97706; font-size: 1rem;">Using Demo Data</strong>
+      <p style="margin: 0.25rem 0 0; color: #92400E; font-size: 0.85rem;">
+        To see live MLS listings with real photos, 
+        <a href="https://rapidapi.com/s.mahmoud97/api/zillow-com1/" target="_blank" style="color: #EA580C; text-decoration: underline;">get a free RapidAPI key</a>
+        (500 searches/month free!)
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Comparable Properties Grid -->
+<div id="comps-grid">
+  <!-- Properties will be loaded dynamically by JavaScript -->
+  <div style="text-align: center; padding: 4rem; background: white; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.3);">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">⏳</div>
+    <h2 style="margin: 0 0 0.5rem; color: #3A352C;">Loading Properties...</h2>
+    <p style="color: #666;">Please wait while we fetch comparable properties</p>
+  </div>
+</div>
+
+<!-- Price Distribution Analysis -->
+<div class="comparison-slider">
+  <h2 style="margin: 0 0 1rem;">📊 Price Distribution Analysis</h2>
+  <p style="color: #666; margin-bottom: 1.5rem;">See how comparable properties are priced in your neighborhood</p>
+  
+  <div class="price-distribution" style="position: relative;">
+    <svg width="100%" height="200" style="position: absolute; inset: 0;">
+      <!-- Price bars (sample data) -->
+      <rect x="10%" y="60%" width="8%" height="40%" fill="#4CAF50" opacity="0.7" rx="4"/>
+      <rect x="20%" y="45%" width="8%" height="55%" fill="#4CAF50" opacity="0.8" rx="4"/>
+      <rect x="30%" y="30%" width="8%" height="70%" fill="#6B6A45" opacity="0.9" rx="4"/>
+      <rect x="40%" y="25%" width="8%" height="75%" fill="#6B6A45" rx="4"/>
+      <rect x="50%" y="20%" width="8%" height="80%" fill="#FF9800" rx="4"/>
+      <rect x="60%" y="35%" width="8%" height="65%" fill="#6B6A45" opacity="0.8" rx="4"/>
+      <rect x="70%" y="50%" width="8%" height="50%" fill="#4CAF50" opacity="0.7" rx="4"/>
+      <rect x="80%" y="70%" width="8%" height="30%" fill="#4CAF50" opacity="0.6" rx="4"/>
+      
+      <!-- Your home indicator -->
+      <line x1="44%" y1="0" x2="44%" y2="100%" stroke="#FF5722" stroke-width="3" stroke-dasharray="5,5"/>
+      <text x="44%" y="10%" fill="#FF5722" font-weight="bold" font-size="12" text-anchor="middle">↓ Your Home</text>
+    </svg>
+    
+    <div style="position: absolute; bottom: -2rem; left: 0; right: 0; display: flex; justify-content: space-between; font-size: 0.85rem; color: #666;">
+      <span>$380K</span>
+      <span>$410K</span>
+      <span>$440K</span>
+      <span>$470K</span>
+      <span>$500K</span>
+    </div>
+  </div>
+  
+  <div style="margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid #E0DED5;">
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center;">
+      <div>
+        <div style="font-weight: 600; color: #3A352C; font-size: 1.2rem;">$380K</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Lowest</div>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: #3A352C; font-size: 1.2rem;">$425K</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Average</div>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: #3A352C; font-size: 1.2rem;">$432K</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Median</div>
+      </div>
+      <div>
+        <div style="font-weight: 600; color: #3A352C; font-size: 1.2rem;">$495K</div>
+        <div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Highest</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Call to Action -->
+<div style="background: linear-gradient(135deg, #6B6A45 0%, #8B8A65 100%); padding: 3rem; border-radius: 12px; color: white; text-align: center;">
+  <h2 style="margin: 0 0 1rem; font-size: 2rem;">Want a Deeper Analysis?</h2>
+  <p style="font-size: 1.1rem; opacity: 0.95; margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">Get a comprehensive market analysis with personalized insights and recommendations from our team.</p>
+  <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+    <button onclick="window.location.href='{{ url_for('homeowner_support_ask_question') }}'" style="padding: 1rem 2rem; background: white; color: #6B6A45; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">Request Full CMA</button>
+    <button onclick="window.location.href='{{ url_for('homeowner_support_schedule_chat') }}'" style="padding: 1rem 2rem; background: transparent; color: white; border: 2px solid white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 1rem;">Schedule a Consultation</button>
+  </div>
+</div>
+
+<script>
+// State management
+let allProperties = [];
+let filteredProperties = [];
+let currentSort = 'recent';
+
+// Initialize sample data
+function initializeData() {
+  allProperties = [
+    {
+      id: 1,
+      price: 385000,
+      address: '8425 W 151st Street, Overland Park, KS',
+      beds: 4,
+      baths: 2.5,
+      sqft: 2100,
+      days: 5,
+      status: 'sold',
+      statusLabel: 'Sold',
+      statusClass: 'status-sold',
+      badge: '5 days ago',
+      soldOverList: 8500,
+      soldOverListPct: 2.3,
+      pricePerSqft: 183,
+      highlights: ['🔥 Multiple Offers', '✨ Updated Kitchen', '🚗 3-Car Garage', '🏫 Blue Valley Schools'],
+      type: 'Single Family',
+      soldDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800',
+      mlsNumber: 'HMLS-2458932',
+      mlsSource: 'Heartland MLS',
+      description: 'Beautiful 4-bedroom home in desirable Overland Park. Open concept living, updated kitchen with granite countertops, and finished basement. Top-rated Blue Valley schools.',
+      yearBuilt: 2012,
+      lotSize: 8500,
+      schoolRating: 9,
+      walkScore: 45,
+      neighborhood: 'Overland Park',
+      city: 'Overland Park',
+      state: 'KS',
+      zipCode: '66223',
+      lat: 38.8892,
+      lng: -94.7358
+    },
+    {
+      id: 2,
+      price: 295000,
+      address: '1521 Massachusetts Street, Lawrence, KS',
+      beds: 3,
+      baths: 2,
+      sqft: 1650,
+      days: 3,
+      status: 'pending',
+      statusLabel: 'Pending',
+      statusClass: 'status-pending',
+      badge: '3 days ago',
+      soldOverList: null,
+      soldOverListPct: null,
+      pricePerSqft: 179,
+      highlights: ['🎓 Near KU Campus', '🔨 New Roof 2023', '🎨 Fresh Paint', '🌳 Mature Trees'],
+      type: 'Single Family',
+      soldDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=800',
+      mlsNumber: 'LBOR-158742',
+      mlsSource: 'Lawrence Board of Realtors',
+      description: 'Charming craftsman home near KU and downtown Lawrence. Recently updated with new roof, HVAC, and fresh paint throughout. Walking distance to Mass Street.',
+      yearBuilt: 1985,
+      lotSize: 6800,
+      schoolRating: 8,
+      walkScore: 78,
+      neighborhood: 'Old West Lawrence',
+      city: 'Lawrence',
+      state: 'KS',
+      zipCode: '66044',
+      lat: 38.9717,
+      lng: -95.2353
+    },
+    {
+      id: 3,
+      price: 425000,
+      address: '5847 N Cypress Court, Wichita, KS',
+      beds: 4,
+      baths: 3,
+      sqft: 2450,
+      days: 0,
+      status: 'active',
+      statusLabel: 'Active',
+      statusClass: 'status-active',
+      badge: 'Listed today',
+      soldOverList: null,
+      soldOverListPct: null,
+      pricePerSqft: 173,
+      highlights: ['⭐ Open House Sun 2-4pm', '🏊 Community Pool', '🔥 Gas Fireplace', '🏡 Maize Schools'],
+      type: 'Single Family',
+      soldDate: new Date(),
+      imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800',
+      mlsNumber: 'SMLS-987654',
+      mlsSource: 'Sunflower MLS',
+      description: 'Stunning 4-bedroom home in Maize school district. Gourmet kitchen, finished walkout basement, master suite with spa bath. Community pool and park.',
+      yearBuilt: 2018,
+      lotSize: 9200,
+      schoolRating: 9,
+      walkScore: 42,
+      neighborhood: 'Maize',
+      city: 'Wichita',
+      state: 'KS',
+      zipCode: '67205',
+      lat: 37.7828,
+      lng: -97.4664
+    },
+    {
+      id: 4,
+      price: 335000,
+      address: '12450 W 119th Terrace, Olathe, KS',
+      beds: 3,
+      baths: 2,
+      sqft: 1850,
+      days: 12,
+      status: 'sold',
+      statusLabel: 'Sold',
+      statusClass: 'status-sold',
+      badge: '1 week ago',
+      soldOverList: 0,
+      soldOverListPct: 0,
+      pricePerSqft: 181,
+      highlights: ['🌿 Corner Lot', '🏫 Olathe Schools', '🚗 2-Car Garage', '🏡 Cul-de-sac'],
+      type: 'Single Family',
+      soldDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800',
+      mlsNumber: 'HMLS-2459108',
+      mlsSource: 'Heartland MLS',
+      description: 'Well-maintained ranch on quiet cul-de-sac. Updated kitchen and baths, hardwood floors, large deck overlooking private backyard. Olathe school district.',
+      yearBuilt: 2008,
+      lotSize: 10500,
+      schoolRating: 8,
+      walkScore: 38,
+      neighborhood: 'Ridgeview',
+      city: 'Olathe',
+      state: 'KS',
+      zipCode: '66061',
+      lat: 38.8837,
+      lng: -94.8169
+    },
+    {
+      id: 5,
+      price: 215000,
+      address: '2847 E Douglas Avenue, Wichita, KS',
+      beds: 2,
+      baths: 2,
+      sqft: 1200,
+      days: 8,
+      status: 'sold',
+      statusLabel: 'Sold',
+      statusClass: 'status-sold',
+      badge: '8 days ago',
+      soldOverList: 5000,
+      soldOverListPct: 2.4,
+      pricePerSqft: 179,
+      highlights: ['🏢 Condo', '🏋️ Fitness Center', '🅿️ Covered Parking', '🌆 Downtown Views'],
+      type: 'Condo',
+      soldDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800',
+      mlsNumber: 'SMLS-987698',
+      mlsSource: 'Sunflower MLS',
+      description: 'Modern downtown Wichita condo with stunning views. Open floor plan, stainless appliances, granite counters. Building features fitness center, pool, and secure parking.',
+      yearBuilt: 2015,
+      lotSize: 0,
+      schoolRating: 7,
+      walkScore: 88,
+      neighborhood: 'Downtown Wichita',
+      city: 'Wichita',
+      state: 'KS',
+      zipCode: '67202',
+      lat: 37.6872,
+      lng: -97.3301
+    },
+    {
+      id: 6,
+      price: 362000,
+      address: '745 Coachlight Drive, Lawrence, KS',
+      beds: 3,
+      baths: 2.5,
+      sqft: 1850,
+      days: 4,
+      status: 'pending',
+      statusLabel: 'Pending',
+      statusClass: 'status-pending',
+      badge: '4 days ago',
+      soldOverList: null,
+      soldOverListPct: null,
+      pricePerSqft: 196,
+      highlights: ['🏘️ Townhouse', '🆕 Built 2021', '⚡ Smart Home', '🎓 Near KU'],
+      type: 'Townhouse',
+      soldDate: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800',
+      mlsNumber: 'LBOR-158801',
+      mlsSource: 'Lawrence Board of Realtors',
+      description: 'Brand new luxury townhome near KU campus. Smart home technology, quartz counters, LVP flooring, Energy Star appliances. Low maintenance living!',
+      yearBuilt: 2021,
+      lotSize: 0,
+      schoolRating: 8,
+      walkScore: 72,
+      neighborhood: 'West Lawrence',
+      city: 'Lawrence',
+      state: 'KS',
+      zipCode: '66049',
+      lat: 38.9575,
+      lng: -95.2761
+    },
+    {
+      id: 7,
+      price: 525000,
+      address: '16789 Rosewood Drive, Leawood, KS',
+      beds: 5,
+      baths: 4,
+      sqft: 3200,
+      days: 2,
+      status: 'active',
+      statusLabel: 'Active',
+      statusClass: 'status-active',
+      badge: '2 days ago',
+      soldOverList: null,
+      soldOverListPct: null,
+      pricePerSqft: 164,
+      highlights: ['🏊 In-ground Pool', '🎾 Tennis Courts', '✨ Gourmet Kitchen', '🏫 Blue Valley Schools'],
+      type: 'Single Family',
+      soldDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?w=800',
+      mlsNumber: 'HMLS-2459234',
+      mlsSource: 'Heartland MLS',
+      description: 'Luxury estate in prestigious Leawood. Chef\'s kitchen, finished walkout basement, master on main. Resort-style pool, mature landscaping, 3-car garage.',
+      yearBuilt: 2015,
+      lotSize: 15000,
+      schoolRating: 10,
+      walkScore: 35,
+      neighborhood: 'Leawood Estates',
+      city: 'Leawood',
+      state: 'KS',
+      zipCode: '66224',
+      lat: 38.9167,
+      lng: -94.6169
+    },
+    {
+      id: 8,
+      price: 189000,
+      address: '4521 SW Huntoon Street, Topeka, KS',
+      beds: 3,
+      baths: 1.5,
+      sqft: 1450,
+      days: 14,
+      status: 'active',
+      statusLabel: 'Active',
+      statusClass: 'status-active',
+      badge: '2 weeks ago',
+      soldOverList: null,
+      soldOverListPct: null,
+      pricePerSqft: 130,
+      highlights: ['🏡 Starter Home', '🔨 Hardwood Floors', '🌳 Large Lot', '💰 Great Value'],
+      type: 'Single Family',
+      soldDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      imageUrl: 'https://images.unsplash.com/photo-1605146769289-440113cc3d00?w=800',
+      mlsNumber: 'HMLS-2458756',
+      mlsSource: 'Heartland MLS',
+      description: 'Solid brick ranch in SW Topeka. Hardwood floors, updated kitchen, 1-car garage. Large fenced yard. Perfect starter home or investment property.',
+      yearBuilt: 1965,
+      lotSize: 7500,
+      schoolRating: 6,
+      walkScore: 52,
+      neighborhood: 'SW Topeka',
+      city: 'Topeka',
+      state: 'KS',
+      zipCode: '66604',
+      lat: 39.0228,
+      lng: -95.7108
+    }
+  ];
+  
+  filteredProperties = [...allProperties];
+  console.log('Initialized with', allProperties.length, 'properties');
+  console.log('Calling renderProperties()...');
+  renderProperties();
+  updateStats();
+  initializeMap();
+}
+
+// Initialize interactive map
+let map = null;
+let markers = [];
+
+function initializeMap() {
+  // Initialize map centered on Kansas
+  if (map) {
+    map.remove();
+  }
+  
+  map = L.map('map').setView([38.5, -96.0], 7);
+  
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 18
+  }).addTo(map);
+  
+  // Add property markers
+  updateMapMarkers();
+}
+
+function updateMapMarkers() {
+  if (!map) return;
+  
+  // Clear existing markers
+  markers.forEach(marker => map.removeLayer(marker));
+  markers = [];
+  
+  // Add markers for filtered properties
+  filteredProperties.forEach(prop => {
+    if (!prop.lat || !prop.lng) return;
+    
+    // Create custom icon based on status
+    const iconColor = prop.status === 'sold' ? '#4CAF50' : 
+                     prop.status === 'pending' ? '#FF9800' : '#2196F3';
+    
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      html: `<div style="background: ${iconColor}; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(45deg); font-size: 14px; color: white; font-weight: bold;">$${Math.round(prop.price / 1000)}K</div></div>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 30],
+      popupAnchor: [0, -30]
+    });
+    
+    const marker = L.marker([prop.lat, prop.lng], { icon: customIcon }).addTo(map);
+    
+    // Create popup content
+    const popupContent = `
+      <div class="map-popup-card">
+        <div class="map-popup-image" style="background-image: url('${prop.imageUrl}');">
+          <div style="position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+            ${prop.statusLabel}
+          </div>
+          <div style="position: absolute; bottom: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.7); color: white; padding: 0.3rem 0.6rem; border-radius: 4px; font-size: 0.7rem;">
+            ${prop.mlsNumber}
+          </div>
+        </div>
+        <div class="map-popup-content">
+          <div class="map-popup-price">$${prop.price.toLocaleString()}</div>
+          <div class="map-popup-address">${prop.address}</div>
+          <div class="map-popup-specs">
+            <span><strong>${prop.beds}</strong> beds</span>
+            <span><strong>${prop.baths}</strong> baths</span>
+            <span><strong>${prop.sqft.toLocaleString()}</strong> sqft</span>
+          </div>
+          <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.75rem;">
+            ${prop.highlights.slice(0, 2).join(' • ')}
+          </div>
+          <button class="map-popup-btn" onclick='openCompDetailById("${prop.id}")'>View Details</button>
+        </div>
+      </div>
+    `;
+    
+    marker.bindPopup(popupContent, {
+      maxWidth: 300,
+      className: 'custom-popup'
+    });
+    
+    markers.push(marker);
+  });
+  
+  // Fit map to show all markers
+  if (markers.length > 0) {
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds().pad(0.1));
+  }
+}
+
+// Toggle filter chip
+function toggleChip(element) {
+  const allTypes = element.textContent === 'All Types';
+  
+  if (allTypes) {
+    // If "All Types" is clicked, activate it and deactivate property type chips
+    element.classList.add('active');
+    document.querySelectorAll('.chip').forEach(chip => {
+      if (chip.textContent === 'Single Family' || chip.textContent === 'Condo' || chip.textContent === 'Townhouse') {
+        chip.classList.remove('active');
+      }
+    });
+  } else {
+    // Toggle the clicked chip
+    element.classList.toggle('active');
+    
+    // If it's a property type chip, deactivate "All Types"
+    if (['Single Family', 'Condo', 'Townhouse'].includes(element.textContent)) {
+      document.querySelector('.chip').classList.remove('active');
+    }
+  }
+  
+  filterComps();
+}
+
+// Search functionality
+function searchComps() {
+  const address = document.getElementById('address-search').value.trim();
+  
+  if (!address) {
+    alert('Please enter an address to search');
+    return;
+  }
+  
+  // Visual feedback
+  const searchBtn = event.target;
+  const originalText = searchBtn.innerHTML;
+  searchBtn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">🔍</span> Searching...';
+  searchBtn.disabled = true;
+  
+  // Call API
+  fetch('/api/search-comps', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ address: address })
+  })
+  .then(response => response.json())
+  .then(data => {
+    searchBtn.innerHTML = originalText;
+    searchBtn.disabled = false;
+    
+    if (data.success && data.properties) {
+      // Update properties with real data
+      allProperties = data.properties.map(prop => ({
+        id: prop.zpid || prop.id,
+        price: prop.price,
+        address: prop.address,
+        beds: prop.beds,
+        baths: prop.baths,
+        sqft: prop.sqft,
+        days: prop.daysOnMarket,
+        status: prop.statusType,
+        statusLabel: prop.status,
+        statusClass: `status-${prop.statusType}`,
+        badge: formatDateBadge(prop.listingDate, prop.soldDate),
+        soldOverList: prop.priceChange,
+        soldOverListPct: prop.priceChange ? ((prop.priceChange / prop.listPrice) * 100).toFixed(1) : null,
+        pricePerSqft: prop.pricePerSqft,
+        highlights: prop.highlights || [],
+        type: prop.propertyType,
+        soldDate: prop.soldDate ? new Date(prop.soldDate) : new Date(prop.listingDate),
+        imageUrl: prop.imageUrl,
+        images: prop.images || [prop.imageUrl],
+        mlsNumber: prop.mlsNumber,
+        description: prop.description,
+        yearBuilt: prop.yearBuilt,
+        lotSize: prop.lotSize,
+        schoolRating: prop.schoolRating,
+        walkScore: prop.walkScore,
+        taxAssessment: prop.taxAssessment,
+        neighborhood: prop.neighborhood
+      }));
+      
+      filteredProperties = [...allProperties];
+      renderProperties();
+      updateStats();
+      
+      // Show success message
+      showNotification('✅ Found ' + allProperties.length + ' comparable properties!', 'success');
+      
+      // Scroll to results
+      setTimeout(() => {
+        document.getElementById('comps-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    } else {
+      showNotification('⚠️ No properties found. Try a different address.', 'warning');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    searchBtn.innerHTML = originalText;
+    searchBtn.disabled = false;
+    showNotification('❌ Search failed. Please try again.', 'error');
+  });
+}
+
+// Auto-search without requiring button click
+function autoSearchComps(location) {
+  console.log('Auto-loading live MLS listings for:', location);
+  
+  fetch('/api/search-comps', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ address: location })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success && data.properties && data.properties.length > 0) {
+      console.log('✅ Loaded', data.properties.length, 'properties');
+      
+      // Check if using live or demo data
+      const isLiveData = data.properties[0].dataSource && data.properties[0].dataSource.includes('Live');
+      const badge = document.getElementById('data-source-badge');
+      
+      if (isLiveData) {
+        badge.style.display = 'none';
+        console.log('✅ Using LIVE MLS data with real photos from Zillow');
+      } else {
+        badge.style.display = 'block';
+        console.log('ℹ️ Using demo data - add RAPIDAPI_KEY for live listings');
+      }
+      
+      // Update properties with real data
+      allProperties = data.properties.map(prop => ({
+        id: prop.zpid || prop.id,
+        price: prop.price,
+        address: prop.address,
+        beds: prop.beds,
+        baths: prop.baths,
+        sqft: prop.sqft,
+        days: prop.daysOnMarket,
+        status: prop.statusType,
+        statusLabel: prop.status,
+        statusClass: `status-${prop.statusType}`,
+        badge: formatDateBadge(prop.listingDate, prop.soldDate),
+        soldOverList: prop.priceChange,
+        soldOverListPct: prop.priceChange ? ((prop.priceChange / prop.listPrice) * 100).toFixed(1) : null,
+        pricePerSqft: prop.pricePerSqft,
+        highlights: prop.highlights || [],
+        type: prop.propertyType,
+        soldDate: prop.soldDate ? new Date(prop.soldDate) : new Date(prop.listingDate),
+        imageUrl: prop.imageUrl,
+        images: prop.images || [prop.imageUrl],
+        mlsNumber: prop.mlsNumber,
+        description: prop.description,
+        yearBuilt: prop.yearBuilt,
+        lotSize: prop.lotSize,
+        schoolRating: prop.schoolRating,
+        walkScore: prop.walkScore,
+        taxAssessment: prop.taxAssessment,
+        neighborhood: prop.neighborhood,
+        lat: prop.latitude,
+        lng: prop.longitude
+      }));
+      
+      filteredProperties = [...allProperties];
+      renderProperties();
+      updateStats();
+      updateMapMarkers();
+      
+      // Show success notification
+      if (isLiveData) {
+        showNotification(`✅ Loaded ${allProperties.length} live MLS listings with real photos!`, 'success');
+      } else {
+        showNotification(`ℹ️ Loaded ${allProperties.length} demo properties - add API key for live data`, 'info');
+      }
+    } else {
+      console.log('No live data available, using demo properties');
+    }
+  })
+  .catch(error => {
+    console.log('API unavailable, using demo data:', error);
+    document.getElementById('data-source-badge').style.display = 'block';
+  });
+}
+
+// Format date badge
+function formatDateBadge(listingDate, soldDate) {
+  const date = soldDate ? new Date(soldDate) : new Date(listingDate);
+  const now = new Date();
+  const diffTime = Math.abs(now - date);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  if (diffDays === 0) return 'Listed today';
+  if (diffDays === 1) return '1 day ago';
+  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays < 14) return '1 week ago';
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+  return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) > 1 ? 's' : ''} ago`;
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    background: ${type === 'success' ? '#4CAF50' : type === 'error' ? '#f44336' : '#FF9800'};
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 10001;
+    animation: slideIn 0.3s;
+    font-weight: 500;
+  `;
+  notification.textContent = message;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Allow Enter key in search
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('address-search');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchComps();
+      }
+    });
+  }
+  
+  // Initialize data
+  initializeData();
+  
+  // Setup dropdown change handlers
+  setupDropdownHandlers();
+  
+  // Auto-load live listings after page loads
+  setTimeout(() => {
+    const defaultCity = 'Lawrence, KS';
+    document.getElementById('address-search').value = defaultCity;
+    autoSearchComps(defaultCity);
+  }, 1500);
+});
+
+// Setup dropdown handlers
+function setupDropdownHandlers() {
+  const dropdowns = document.querySelectorAll('.search-bar select');
+  dropdowns.forEach(dropdown => {
+    dropdown.addEventListener('change', filterComps);
+  });
+}
+
+// Filter properties
+function filterComps() {
+  let filtered = [...allProperties];
+  
+  // Get active type filters
+  const activeChips = Array.from(document.querySelectorAll('.chip.active'));
+  const typeFilters = activeChips
+    .map(chip => chip.textContent.trim())
+    .filter(text => ['Single Family', 'Condo', 'Townhouse'].includes(text));
+  
+  // Filter by property type
+  if (typeFilters.length > 0 && !activeChips.some(chip => chip.textContent === 'All Types')) {
+    filtered = filtered.filter(prop => typeFilters.includes(prop.type));
+  }
+  
+  // Filter by status
+  const statusFilters = activeChips
+    .map(chip => chip.textContent.trim())
+    .filter(text => ['Recently Sold', 'Under Contract', 'Active Listings'].includes(text));
+  
+  if (statusFilters.length > 0) {
+    filtered = filtered.filter(prop => {
+      if (statusFilters.includes('Recently Sold') && prop.status === 'sold') return true;
+      if (statusFilters.includes('Under Contract') && prop.status === 'pending') return true;
+      if (statusFilters.includes('Active Listings') && prop.status === 'active') return true;
+      return false;
+    });
+  }
+  
+  // Get dropdown values
+  const priceRange = document.querySelector('.search-bar select:nth-of-type(1)').value;
+  const beds = document.querySelector('.search-bar select:nth-of-type(2)').value;
+  const baths = document.querySelector('.search-bar select:nth-of-type(3)').value;
+  const sqft = document.querySelector('.search-bar select:nth-of-type(4)').value;
+  
+  // Apply price filter
+  if (priceRange && priceRange !== 'Any') {
+    const [min, max] = priceRange.replace('$', '').replace('K', '000').replace('+', '-999999999').split(' - ').map(Number);
+    filtered = filtered.filter(prop => prop.price >= min && prop.price <= max);
+  }
+  
+  // Apply bedroom filter
+  if (beds && beds !== 'Any') {
+    const minBeds = parseInt(beds.replace('+', ''));
+    filtered = filtered.filter(prop => prop.beds >= minBeds);
+  }
+  
+  // Apply bathroom filter
+  if (baths && baths !== 'Any') {
+    const minBaths = parseInt(baths.replace('+', ''));
+    filtered = filtered.filter(prop => prop.baths >= minBaths);
+  }
+  
+  // Apply sqft filter
+  if (sqft && sqft !== 'Any') {
+    if (sqft.includes('+')) {
+      const min = parseInt(sqft.replace(',', '').replace('+', ''));
+      filtered = filtered.filter(prop => prop.sqft >= min);
+    } else {
+      const [min, max] = sqft.replace(',', '').split(' - ').map(Number);
+      filtered = filtered.filter(prop => prop.sqft >= min && prop.sqft <= max);
+    }
+  }
+  
+  filteredProperties = filtered;
+  sortComps(currentSort);
+  updateMapMarkers(); // Update map when filters change
+}
+
+// Sort properties
+function sortComps(sortBy) {
+  currentSort = sortBy;
+  
+  switch(sortBy) {
+    case 'recent':
+      filteredProperties.sort((a, b) => b.soldDate - a.soldDate);
+      break;
+    case 'price-low':
+      filteredProperties.sort((a, b) => a.price - b.price);
+      break;
+    case 'price-high':
+      filteredProperties.sort((a, b) => b.price - a.price);
+      break;
+    case 'similar':
+      // Sort by similarity to average (simplified)
+      const avgPrice = allProperties.reduce((sum, p) => sum + p.price, 0) / allProperties.length;
+      filteredProperties.sort((a, b) => Math.abs(a.price - avgPrice) - Math.abs(b.price - avgPrice));
+      break;
+    case 'dom':
+      filteredProperties.sort((a, b) => a.days - b.days);
+      break;
+  }
+  
+  renderProperties();
+}
+
+// Render properties
+function renderProperties() {
+  const grid = document.getElementById('comps-grid');
+  console.log('renderProperties called, grid element:', grid);
+  console.log('filteredProperties count:', filteredProperties.length);
+  
+  if (filteredProperties.length === 0) {
+    grid.innerHTML = `
+      <div style="text-align: center; padding: 4rem; background: white; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.3);">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+        <h2 style="margin: 0 0 0.5rem; color: #3A352C;">No Properties Found</h2>
+        <p style="color: #666;">Try adjusting your filters to see more results</p>
+        <button onclick="resetFilters()" style="margin-top: 1.5rem; padding: 1rem 2rem; background: #6B6A45; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Reset Filters</button>
+      </div>
+    `;
+    updateResultCount(0);
+    return;
+  }
+  
+  grid.innerHTML = filteredProperties.map(prop => `
+    <div class="comp-card" onclick='openCompDetailById("${prop.id}")'>
+      <div class="comp-image" style="background-image: url('${prop.imageUrl || ''}'); background-size: cover; background-position: center;">
+        ${!prop.imageUrl ? `<div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 4rem; color: rgba(255,255,255,0.3);">${prop.id % 3 === 0 ? '🏘️' : prop.id % 2 === 0 ? '🏠' : '🏡'}</div>` : ''}
+        <div class="comp-status ${prop.statusClass}">${prop.statusLabel}</div>
+        <div class="comp-badge">${prop.badge}</div>
+        ${prop.mlsNumber ? `<div style="position: absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.7); color: white; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.75rem; font-weight: 600;">MLS# ${prop.mlsNumber}</div>` : ''}
+      </div>
+      <div class="comp-content">
+        <div class="comp-price">$${prop.price.toLocaleString()}</div>
+        <div class="comp-address">${prop.address}</div>
+        
+        <div class="comp-specs">
+          <div class="spec-item">
+            <div class="spec-value">${prop.beds}</div>
+            <div class="spec-label">Beds</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-value">${prop.baths}</div>
+            <div class="spec-label">Baths</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-value">${prop.sqft.toLocaleString()}</div>
+            <div class="spec-label">Sq Ft</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-value">${prop.days}</div>
+            <div class="spec-label">Days</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-top: 1px solid #E0DED5;">
+          <div>
+            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">
+              ${prop.soldOverList !== null ? 'Sale Price vs List' : (prop.status === 'pending' ? 'Under Contract' : 'Listing Status')}
+            </div>
+            <div style="font-weight: 600; color: ${prop.soldOverList > 0 ? '#4CAF50' : prop.status === 'pending' ? '#FF9800' : '#2196F3'};">
+              ${prop.soldOverList !== null ? (prop.soldOverList === 0 ? 'At Asking' : `+$${prop.soldOverList.toLocaleString()} (${prop.soldOverListPct}%)`) : (prop.status === 'pending' ? 'Inspection Period' : 'New on Market')}
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: #666; margin-bottom: 0.25rem;">Price per Sq Ft</div>
+            <div style="font-weight: 600; color: #3A352C;">$${prop.pricePerSqft}</div>
+          </div>
+        </div>
+        
+        <div class="comp-highlights">
+          ${prop.highlights.slice(0, 3).map(h => `<div class="highlight-tag">${h}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  
+  console.log('Grid innerHTML set with', filteredProperties.length, 'property cards');
+  updateResultCount(filteredProperties.length);
+}
+
+// Update result count
+function updateResultCount(count) {
+  const countEl = document.querySelector('.sort-controls > div');
+  if (countEl) {
+    countEl.textContent = `Showing ${count} comparable ${count === 1 ? 'property' : 'properties'}`;
+  }
+}
+
+// Reset all filters
+function resetFilters() {
+  // Reset chips
+  document.querySelectorAll('.chip').forEach(chip => {
+    if (chip.textContent === 'All Types') {
+      chip.classList.add('active');
+    } else {
+      chip.classList.remove('active');
+    }
+  });
+  
+  // Reset dropdowns
+  document.querySelectorAll('.search-bar select').forEach(select => {
+    select.selectedIndex = 0;
+  });
+  
+  // Reset search
+  document.getElementById('address-search').value = '';
+  
+  // Refilter
+  filterComps();
+}
+
+// Switch view (map/list)
+function switchView(view) {
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  const mapEl = document.querySelector('.map-placeholder');
+  const gridEl = document.getElementById('comps-grid');
+  const sortControls = document.querySelector('.sort-controls');
+  
+  if (view === 'map') {
+    mapEl.style.display = 'block';
+    gridEl.style.display = 'none';
+    sortControls.style.display = 'none';
+    // Refresh map size after showing
+    setTimeout(() => {
+      if (map) map.invalidateSize();
+    }, 100);
+  } else {
+    mapEl.style.display = 'none';
+    gridEl.style.display = 'grid';
+    sortControls.style.display = 'flex';
+  }
+}
+
+// Open property detail modal by ID
+function openCompDetailById(id) {
+  const property = allProperties.find(p => p.id == id);
+  if (!property) return;
+  openCompDetail(property);
+}
+
+// Open property detail modal
+function openCompDetail(property) {
+  if (!property || typeof property === 'number' || typeof property === 'string') {
+    openCompDetailById(property);
+    return;
+  }
+  
+  // Create modal
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000; animation: fadeIn 0.3s;';
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 16px; max-width: 900px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative;">
+      <button onclick="this.closest('[style*=fixed]').remove()" style="position: absolute; top: 1rem; right: 1rem; background: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 10;">×</button>
+      
+      <div style="height: 400px; background: ${property.imageUrl ? `url('${property.imageUrl}')` : 'linear-gradient(135deg, #E0DED5 0%, #C8B497 100%)'}; background-size: cover; background-position: center; position: relative; border-radius: 16px 16px 0 0;">
+        ${!property.imageUrl ? `<div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 6rem; color: rgba(255,255,255,0.3);">${property.id % 3 === 0 ? '🏘️' : property.id % 2 === 0 ? '🏠' : '🏡'}</div>` : ''}
+        <div class="comp-status ${property.statusClass}" style="position: absolute; top: 1rem; left: 1rem;">${property.statusLabel}</div>
+        ${property.mlsNumber ? `<div style="position: absolute; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; font-size: 0.9rem; font-weight: 600;">MLS# ${property.mlsNumber}</div>` : ''}
+      </div>
+      
+      <div style="padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+          <div>
+            <div style="font-size: 2.5rem; font-weight: 700; color: #3A352C; margin-bottom: 0.5rem;">$${property.price.toLocaleString()}</div>
+            <div style="font-size: 1.2rem; color: #6B6A45;">${property.address}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.85rem; color: #666;">Price per Sq Ft</div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: #6B6A45;">$${property.pricePerSqft}</div>
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; padding: 1.5rem; background: #F6F2E8; border-radius: 12px;">
+          <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #3A352C;">${property.beds}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Bedrooms</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #3A352C;">${property.baths}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Bathrooms</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #3A352C;">${property.sqft.toLocaleString()}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Square Feet</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: 700; color: #3A352C;">${property.days}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Days on Market</div>
+          </div>
+        </div>
+        
+        ${property.description ? `
+        <div style="margin-bottom: 2rem; padding: 1.5rem; background: #F6F2E8; border-radius: 12px;">
+          <h3 style="margin: 0 0 0.75rem; color: #3A352C;">Description</h3>
+          <p style="margin: 0; color: #666; line-height: 1.7;">${property.description}</p>
+        </div>
+        ` : ''}
+        
+        <div style="margin-bottom: 2rem;">
+          <h3 style="margin: 0 0 1rem; color: #3A352C;">Property Highlights</h3>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            ${property.highlights.map(h => `<div style="padding: 0.5rem 1rem; background: #EFE9DC; border-radius: 20px; font-size: 0.9rem;">${h}</div>`).join('')}
+          </div>
+        </div>
+        
+        ${property.yearBuilt || property.lotSize || property.schoolRating ? `
+        <div style="margin-bottom: 2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+          ${property.yearBuilt ? `<div style="padding: 1rem; background: #F6F2E8; border-radius: 8px; text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 700; color: #3A352C;">${property.yearBuilt}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Year Built</div>
+          </div>` : ''}
+          ${property.lotSize ? `<div style="padding: 1rem; background: #F6F2E8; border-radius: 8px; text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 700; color: #3A352C;">${property.lotSize.toLocaleString()}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">Lot Size (sq ft)</div>
+          </div>` : ''}
+          ${property.schoolRating ? `<div style="padding: 1rem; background: #F6F2E8; border-radius: 8px; text-align: center;">
+            <div style="font-size: 1.3rem; font-weight: 700; color: #3A352C;">${property.schoolRating}/10</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">School Rating</div>
+          </div>` : ''}
+        </div>
+        ` : ''}
+        
+        ${property.soldOverList !== null ? `
+        <div style="padding: 1.5rem; background: ${property.soldOverList > 0 ? '#E8F5E9' : '#FFF3E0'}; border-radius: 12px; margin-bottom: 2rem;">
+          <div style="font-weight: 600; color: #3A352C; margin-bottom: 0.5rem;">Sale Performance</div>
+          <div style="font-size: 1.2rem; color: ${property.soldOverList > 0 ? '#4CAF50' : '#FF9800'}; font-weight: 700;">
+            ${property.soldOverList === 0 ? 'Sold at asking price' : `Sold $${property.soldOverList.toLocaleString()} ${property.soldOverList > 0 ? 'over' : 'under'} asking (${property.soldOverListPct}%)`}
+          </div>
+        </div>
+        ` : ''}
+        
+        <div style="display: flex; gap: 1rem;">
+          <button onclick="alert('Contact feature coming soon!')" style="flex: 1; padding: 1rem; background: #6B6A45; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Contact Agent</button>
+          <button onclick="alert('Save feature coming soon!')" style="flex: 1; padding: 1rem; background: white; color: #6B6A45; border: 2px solid #6B6A45; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Property</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Close on background click
+  modal.addEventListener('click', function(e) {
+    if (e.target === modal) {
+      modal.remove();
+    }
+  });
+}
+
+// Update market stats dynamically
+function updateStats() {
+  const soldProps = filteredProperties.filter(p => p.status === 'sold');
+  
+  if (soldProps.length > 0) {
+    const medianPrice = soldProps.sort((a,b) => a.price - b.price)[Math.floor(soldProps.length/2)].price;
+    const avgDays = Math.round(soldProps.reduce((sum, p) => sum + p.days, 0) / soldProps.length);
+    const avgRatio = soldProps.filter(p => p.soldOverListPct !== null).reduce((sum, p) => sum + (100 + p.soldOverListPct), 0) / soldProps.filter(p => p.soldOverListPct !== null).length;
+    
+    // Update UI (these selectors target the stat cards)
+    const statCards = document.querySelectorAll('.stat-value');
+    if (statCards[0]) statCards[0].textContent = `$${Math.round(medianPrice/1000)}K`;
+    if (statCards[1]) statCards[1].textContent = avgDays;
+    if (statCards[2]) statCards[2].textContent = `${avgRatio.toFixed(1)}%`;
+  }
+}
+
+// Add CSS animation
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+  }
+`;
+document.head.appendChild(style);
+</script>
+
+{% endblock %}

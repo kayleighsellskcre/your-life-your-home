@@ -1,0 +1,40 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}My Home Value{% endblock %}
+
+{% block homeowner_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Know your worth</p>
+  <h1>My Home Value</h1>
+  <p>See where your home might sit in today's market and connect that number with real life plans.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="dashboard-cards">
+    <div class="card">
+      <h2>Current Estimate</h2>
+      <div class="card-value">
+        {% if snapshot.value_estimate %}
+          ${{ "{:,.0f}".format(snapshot.value_estimate) }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <p class="card-subtext">This is a working estimate, not an appraisal. It's here to give you a starting point so decisions feel grounded, not guessed.</p>
+      <a class="btn btn-primary" href="{{ cloud_cma_url }}" target="_blank" rel="noopener" style="margin-top: 1rem;">
+        Pull Instant Home Worth
+      </a>
+    </div>
+
+    <div class="card">
+      <h2>What Happens After You Pull a Report</h2>
+      <p class="card-subtext">When you grab a new instant home worth, you can keep the number here and then explore:</p>
+      <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
+        <li>How that value affects your equity</li>
+        <li>How it lines up with your loan and payment</li>
+        <li>What it could unlock for your next home or renovation</li>
+      </ul>
+      <p class="card-subtext" style="margin-top: 1rem;">If you ever want a human to review your report with you, head to the Support section and start a conversation.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

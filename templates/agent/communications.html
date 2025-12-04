@@ -1,0 +1,75 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Stay on-brand</p>
+  <h1>Communication Hub</h1>
+  <p>Keep your most-used emails and texts in one place so you can respond quickly while staying kind and on-brand.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Create a Template</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:720px;margin-top:1.5rem;">
+      <div>
+        <label for="label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Label</label>
+        <input id="label" name="label" placeholder="Example: New lead welcome" required />
+      </div>
+      <div>
+        <label for="category" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Category</label>
+        <select id="category" name="category">
+          <option value="lead">Lead</option>
+          <option value="offer">Offer</option>
+          <option value="contract">Under Contract</option>
+          <option value="closing">Closing</option>
+          <option value="followup">Follow Up</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+      <div>
+        <label for="channel" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Channel</label>
+        <select id="channel" name="channel">
+          <option value="email">Email</option>
+          <option value="text">Text</option>
+        </select>
+      </div>
+      <div>
+        <label for="subject" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Subject (for email)</label>
+        <input id="subject" name="subject" />
+      </div>
+      <div>
+        <label for="body" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Body</label>
+        <textarea id="body" name="body" rows="5" style="width:100%;padding:0.75rem;border:1px solid var(--taupe-beige);border-radius:var(--border-radius);font-size:0.95rem;font-family:inherit;resize:vertical;"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Template</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Your Templates</h2>
+
+    {% if templates %}
+      <div class="dashboard-cards" style="margin-top:1.5rem;">
+        {% for t in templates %}
+          <div class="card" style="background:var(--light-cream);">
+            <h3>{{ t.label }}</h3>
+            <p class="card-subtext">{{ t.category|capitalize }} • {{ t.channel|capitalize }}</p>
+            {% if t.subject %}
+              <p class="card-subtext" style="margin-top:0.75rem;"><strong>Subject:</strong> {{ t.subject }}</p>
+            {% endif %}
+            {% if t.body %}
+              <p class="card-subtext" style="white-space:pre-wrap;margin-top:0.75rem;">{{ t.body }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">✉️</div>
+        <h3>No Templates Yet</h3>
+        <p>Start with one email you send often, like a warm welcome to a new lead.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Ask a Question{% endblock %}
+
+{% block homeowner_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">We're here to help</p>
+  <h1>Ask a Question</h1>
+  <p>There are no silly questions here. Curiosity is how strong homeowners are built.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <form method="post" style="display: grid; gap: 1.5rem; max-width: 650px;">
+      <div>
+        <label for="topic" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+          Topic <span style="font-weight: 400; color: #999;">(optional)</span>
+        </label>
+        <input id="topic" name="topic" placeholder="Example: value, renovation, timelines, lending" />
+      </div>
+      <div>
+        <label for="question" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+          Your Question
+        </label>
+        <textarea id="question" name="question" rows="4" placeholder="Type what's on your mind. You don't need perfect wording."></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit" style="align-self: flex-start;">
+        Send Question
+      </button>
+    </form>
+
+    <p class="card-subtext" style="margin-top: 1.5rem;">
+      A real person will review what you share and respond with care. If a conversation would be better, you can move to Chat with a human or Schedule a chat.
+    </p>
+  </div>
+</div>
+{% endblock %}

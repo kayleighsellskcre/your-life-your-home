@@ -1,0 +1,158 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Recent Activity{% endblock %}
+
+{% block homeowner_content %}
+<div class="premium-header animate-in">
+  <div>
+    <h1>Recent Activity</h1>
+    <span class="tagline">Your home story in motion — Every update in one place</span>
+  </div>
+</div>
+
+<div class="dashboard-section animate-in" style="animation-delay: 0.1s;">
+  <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--charcoal-brown); margin-bottom: 1.5rem;">Filter Your Activity</h2>
+  <form class="dashboard-filters" method="get" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; padding: 2rem; background: var(--gradient-premium); border-radius: 8px; border: 2px solid var(--taupe-beige); box-shadow: var(--shadow-premium);">
+    <div>
+      <label for="search" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Search</label>
+      <input
+        type="text"
+        id="search"
+        name="q"
+        placeholder="Kitchen, roof, lender, etc."
+        value="{{ request.args.get('q', '') }}"
+      />
+    </div>
+
+    <div>
+      <label for="type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Type</label>
+      <select id="type" name="type">
+        <option value="">All types</option>
+        <option value="note" {% if request.args.get('type') == 'note' %}selected{% endif %}>Notes</option>
+        <option value="document" {% if request.args.get('type') == 'document' %}selected{% endif %}>Documents</option>
+        <option value="renovation" {% if request.args.get('type') == 'renovation' %}selected{% endif %}>Renovation updates</option>
+        <option value="equity" {% if request.args.get('type') == 'equity' %}selected{% endif %}>Value &amp; equity</option>
+        <option value="conversation" {% if request.args.get('type') == 'conversation' %}selected{% endif %}>Conversations</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="range" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Timeframe</label>
+      <select id="range" name="range">
+        <option value="">Any time</option>
+        <option value="today" {% if request.args.get('range') == 'today' %}selected{% endif %}>Today</option>
+        <option value="7" {% if request.args.get('range') == '7' %}selected{% endif %}>Last 7 days</option>
+        <option value="30" {% if request.args.get('range') == '30' %}selected{% endif %}>Last 30 days</option>
+        <option value="365" {% if request.args.get('range') == '365' %}selected{% endif %}>This year</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="from_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">From</label>
+      <input
+        type="date"
+        id="from_date"
+        name="from_date"
+        value="{{ request.args.get('from_date', '') }}"
+      />
+    </div>
+
+    <div>
+      <label for="to_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">To</label>
+      <input
+        type="date"
+        id="to_date"
+        name="to_date"
+        value="{{ request.args.get('to_date', '') }}"
+      />
+    </div>
+
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end;">
+      <button class="btn-premium" type="submit">Apply Filters</button>
+      <button
+        class="btn-outline"
+        type="button"
+        onclick="this.form.reset(); this.form.submit();"
+      >
+        Clear
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="dashboard-section animate-in" style="animation-delay: 0.2s;">
+  <h2>Your Latest Changes</h2>
+  <p class="card-subtext" style="margin-bottom: 1.5rem;">
+    As you use Your Life, Your Home, this becomes your home's activity log: notes, documents, renovation tweaks, value updates, and more.
+  </p>
+
+  {% if activities is defined and activities %}
+    <div class="activity-list">
+      {% for item in activities %}
+        <div class="activity-item">
+          <div class="activity-header">
+            <h3 class="activity-title">{{ item.title }}</h3>
+            <span class="activity-date">{{ item.date_display }}</span>
+          </div>
+          <p class="activity-description">{{ item.summary }}</p>
+          <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
+            {{ item.type_label }}
+          </p>
+          {% if item.link_url %}
+            <a
+              class="card-link"
+              href="{{ item.link_url }}"
+              {% if item.link_external %}target="_blank" rel="noopener"{% endif %}
+            >
+              {{ item.link_label or "Open related page" }} →
+            </a>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-header">
+          <h3 class="activity-title">Updated Renovation Plan</h3>
+          <span class="activity-date">Today</span>
+        </div>
+        <p class="activity-description">You added budget notes for your kitchen project.</p>
+        <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
+          Renovation
+        </p>
+        <a class="card-link" href="{{ url_for('homeowner_reno_planner') }}">
+          Open Renovation Planner →
+        </a>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <h3 class="activity-title">Uploaded a New Document</h3>
+          <span class="activity-date">This Week</span>
+        </div>
+        <p class="activity-description">Home inspection report now stored in your document center.</p>
+        <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
+          Document
+        </p>
+        <a class="card-link" href="{{ url_for('homeowner_upload_documents') }}">
+          View Documents →
+        </a>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-header">
+          <h3 class="activity-title">Equity Check-In Idea</h3>
+          <span class="activity-date">Example</span>
+        </div>
+        <p class="activity-description">Make a note to review your value and equity once a quarter so you can spot opportunities early.</p>
+        <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
+          Value &amp; Equity
+        </p>
+        <a class="card-link" href="{{ url_for('homeowner_value_my_home') }}">
+          Open Value Dashboard →
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

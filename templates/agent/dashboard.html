@@ -1,0 +1,96 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Your command center</p>
+  <h1>Agent Dashboard</h1>
+  <p>A clear view of your leads, transactions, and follow-ups at a glance.</p>
+</div>
+
+<div class="dashboard-section">
+  <!-- Metrics Cards -->
+  <div class="dashboard-cards">
+    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+      <h3>🎯 New Leads</h3>
+      <div class="card-value">{{ metrics.new_leads|default(0) }}</div>
+      <p class="card-subtext">Waiting for first contact</p>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+      <h3>📋 Active Transactions</h3>
+      <div class="card-value">{{ metrics.active_transactions|default(0) }}</div>
+      <p class="card-subtext">Files in progress</p>
+    </div>
+
+    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+      <h3>📞 Follow-ups Today</h3>
+      <div class="card-value">{{ metrics.followups_today|default(0) }}</div>
+      <p class="card-subtext">Clients to check in with</p>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card" style="margin-top: 2rem;">
+    <h2>Quick Actions</h2>
+    <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 1.5rem;">
+      <a href="{{ url_for('agent_crm') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+        <span style="font-size: 2rem;">👤</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Add New Contact</div>
+          <div style="font-size: 0.85rem; color: #666;">Quickly add a lead to your CRM</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('agent_transactions') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+        <span style="font-size: 2rem;">🏠</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Add Transaction</div>
+          <div style="font-size: 0.85rem; color: #666;">Start tracking a new deal</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('agent_communications') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+        <span style="font-size: 2rem;">✉️</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Send Template</div>
+          <div style="font-size: 0.85rem; color: #666;">Use a saved email or text</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('agent_marketing') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+        <span style="font-size: 2rem;">📱</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Create Marketing</div>
+          <div style="font-size: 0.85rem; color: #666;">Generate social media posts</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- How to Use -->
+  <div class="card" style="margin-top: 2rem;">
+    <h2>How to Use Your Dashboard</h2>
+    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+      <div style="background: var(--light-cream); border-left: 3px solid var(--olive-green); padding: 1rem; border-radius: var(--border-radius);">
+        <strong style="color: var(--olive-green);">👥 CRM & Leads:</strong> 
+        <span style="font-size: 0.95rem; line-height: 1.6;">Manage all your contacts, from new leads to past clients. Track stages and stay organized.</span>
+      </div>
+      
+      <div style="background: var(--light-cream); border-left: 3px solid var(--olive-green); padding: 1rem; border-radius: var(--border-radius);">
+        <strong style="color: var(--olive-green);">📋 Transactions:</strong> 
+        <span style="font-size: 0.95rem; line-height: 1.6;">Track every deal from contract to close. See stages, deadlines, and key contacts in one place.</span>
+      </div>
+      
+      <div style="background: var(--light-cream); border-left: 3px solid var(--olive-green); padding: 1rem; border-radius: var(--border-radius);">
+        <strong style="color: var(--olive-green);">✉️ Communications:</strong> 
+        <span style="font-size: 0.95rem; line-height: 1.6;">Save your best emails and texts as templates for quick, on-brand responses to clients.</span>
+      </div>
+      
+      <div style="background: var(--light-cream); border-left: 3px solid var(--olive-green); padding: 1rem; border-radius: var(--border-radius);">
+        <strong style="color: var(--olive-green);">📱 Marketing:</strong> 
+        <span style="font-size: 0.95rem; line-height: 1.6;">Create professional marketing materials for listings, open houses, and social media posts.</span>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

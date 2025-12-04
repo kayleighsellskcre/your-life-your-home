@@ -1,0 +1,75 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Nurture relationships</p>
+  <h1>CRM & Lead Management</h1>
+  <p>All your people in one place: leads, active clients, past clients, and sphere. Filter by stage and reach out with ease.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Quick Add Contact</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
+      <div>
+        <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Name</label>
+        <input id="name" name="name" required />
+      </div>
+      <div>
+        <label for="email" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Email</label>
+        <input id="email" name="email" type="email" />
+      </div>
+      <div>
+        <label for="phone" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Phone</label>
+        <input id="phone" name="phone" type="tel" />
+      </div>
+      <div>
+        <label for="stage" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Stage</label>
+        <select id="stage" name="stage">
+          <option value="new">New Lead</option>
+          <option value="nurture">Nurture</option>
+          <option value="active">Active Buyer/Seller</option>
+          <option value="past">Past Client</option>
+          <option value="sphere">Sphere</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" type="submit">Add to CRM</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Your Contacts</h2>
+
+    {% if contacts %}
+      <div style="overflow-x:auto;margin-top:1.5rem;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Stage</th>
+              <th>Best Contact</th>
+              <th>Last Touch</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for contact in contacts %}
+              <tr>
+                <td><strong>{{ contact.name }}</strong></td>
+                <td><span class="badge" style="background: {% if contact.stage == 'new' %}#fee; color: #c00{% elif contact.stage == 'active' %}#efe; color: #060{% else %}#eef; color: #006{% endif %}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">{{ contact.stage|capitalize }}</span></td>
+                <td>{{ contact.best_contact }}</td>
+                <td style="color: #888;">{{ contact.last_touch }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+        <h3>No Contacts Yet</h3>
+        <p>Start by adding one new lead or past client you want to care for well.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

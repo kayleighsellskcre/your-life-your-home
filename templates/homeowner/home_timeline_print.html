@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Home Timeline Print</title>
+<style>
+body { font-family:serif; background:white; padding:2rem; }
+h1 { font-size:2.2rem; margin-bottom:1rem; }
+.card { margin-bottom:1rem; padding-bottom:.8rem; border-bottom:1px solid #ddd; }
+</style>
+</head>
+
+<body>
+<h1>Home Timeline — Printable Summary</h1>
+
+{% for i in events %}
+<div class="card">
+  <h2>{{i.title}}</h2>
+  <p><strong>{{i.category}}</strong> · {{i.event_date}}</p>
+  {% if i.cost %}<p>Cost: {{i.cost}}</p>{% endif %}
+  {% if i.notes %}<p>{{i.notes}}</p>{% endif %}
+</div>
+{% endfor %}
+</body>
+</html>

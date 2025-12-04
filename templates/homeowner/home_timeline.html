@@ -1,0 +1,144 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Home Timeline{% endblock %}
+
+{% block homeowner_content %}
+<div class="premium-header animate-in">
+  <div>
+    <h1>Home Timeline</h1>
+    <span class="tagline">Your home's life story — Track upgrades, repairs, & warranties</span>
+  </div>
+</div>
+
+<div class="dashboard-section animate-in" style="animation-delay: 0.1s;">
+  <div class="card-premium" style="background: var(--gradient-premium); border: 2px solid var(--taupe-beige);">
+    <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Add a Timeline Event</h2>
+    
+    <form method="POST" enctype="multipart/form-data" style="display: grid; gap: 1.5rem; max-width: 650px; margin-top: 1.5rem;">
+      <div>
+        <label for="event_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+          Event Date
+        </label>
+        <input type="date" id="event_date" name="event_date" required />
+      </div>
+
+      <div>
+        <label for="title" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+          Event Title
+        </label>
+        <input type="text" id="title" name="title" placeholder="Example: Roof replaced, HVAC serviced" required />
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div>
+          <label for="category" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+            Category
+          </label>
+          <select id="category" name="category" required>
+            <option>Repair</option>
+            <option>Upgrade</option>
+            <option>Warranty</option>
+            <option>Insurance</option>
+            <option>Maintenance</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="cost" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+            Cost <span style="font-weight: 400; color: #999;">(optional)</span>
+          </label>
+          <input type="text" id="cost" name="cost" placeholder="$0.00" />
+        </div>
+      </div>
+
+      <div>
+        <label for="notes" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+          Details
+        </label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Contractor info, materials used, warranty dates, or other important details..."></textarea>
+      </div>
+
+      <div>
+        <label for="files" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
+          Upload Files <span style="font-weight: 400; color: #999;">(optional)</span>
+        </label>
+        <input type="file" id="files" name="files" multiple />
+        <p style="font-size: 0.85rem; color: #999; margin: 0.5rem 0 0;">
+          PDFs, images, receipts, invoices, etc.
+        </p>
+      </div>
+
+      <button class="btn-premium" type="submit" style="align-self: flex-start;">
+        Save to Timeline
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="divider-premium"></div>
+
+<div class="dashboard-section animate-in" style="animation-delay: 0.2s;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <h2 style="margin: 0; font-family: var(--font-heading); font-size: 2.2rem; color: var(--charcoal-brown);">Timeline History</h2>
+    <a class="btn-outline" href="/homeowner/home-timeline/print" target="_blank" style="text-decoration: none;">
+      🖨 Print / Export PDF
+    </a>
+  </div>
+
+  {% if events %}
+    <div style="display: grid; gap: 1.5rem;">
+      {% for item in events %}
+        <div class="card-premium" style="animation-delay: {{ loop.index * 0.05 }}s;">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+            <div style="flex: 1; min-width: 250px;">
+              <h3 style="margin: 0 0 0.75rem; font-family: var(--font-heading); font-size: 1.4rem; color: var(--charcoal-brown);">{{ item.title }}</h3>
+              <div style="display: flex; gap: 1rem; align-items: center; font-size: 0.9rem; flex-wrap: wrap;">
+                <span class="badge-premium" style="font-size: 0.75rem; padding: 0.4rem 0.8rem;">
+                  {{ item.category }}
+                </span>
+                <span style="color: var(--olive-green); font-weight: 600;">📅 {{ item.event_date }}</span>
+              </div>
+            </div>
+            {% if item.cost %}
+              <div style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: var(--olive-green); background: rgba(107, 106, 69, 0.1); padding: 0.75rem 1.5rem; border-radius: 8px;">
+                {{ item.cost }}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if item.notes %}
+            <p style="opacity: 0.85; line-height: 1.7; margin: 1rem 0;">{{ item.notes }}</p>
+          {% endif %}
+
+          {% set files = item.files | safe | load_json %}
+          {% if files and files|length > 0 %}
+            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--taupe-beige);">
+              <strong style="font-size: 0.9rem; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; display: block; margin-bottom: 0.75rem;">Attached Files:</strong>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                {% for f in files %}
+                  <a href="/uploads/timeline/{{f}}" target="_blank" class="btn-outline" style="text-decoration: none; padding: 0.75rem 1.25rem; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.5rem; width: fit-content;">
+                    📄 {{f}}
+                  </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          <a href="/homeowner/home-timeline/delete/{{item.id}}" 
+             style="color: #b3574a; margin-top: 1.5rem; display: inline-block; font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; border: 2px solid #b3574a; border-radius: 8px; transition: all 0.3s ease; text-decoration: none;"
+             onmouseover="this.style.background='#b3574a'; this.style.color='white';"
+             onmouseout="this.style.background='transparent'; this.style.color='#b3574a';"
+             onclick="return confirm('Delete this timeline event?');">
+            🗑 Delete Event
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card-hero" style="text-align: center; padding: 4rem 2rem;">
+      <h3 style="font-family: var(--font-heading); font-size: 2rem; color: var(--charcoal-brown); margin-bottom: 1rem;">📅 No Timeline Events Yet</h3>
+      <p style="font-size: 1.1rem; opacity: 0.85; max-width: 600px; margin: 0 auto;">Start tracking your home's story by adding repairs, upgrades, warranties, and maintenance records above.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

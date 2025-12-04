@@ -1,0 +1,108 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Pipeline management</p>
+  <h1>Loan Processing Tracker</h1>
+  <p>Give borrowers and partner agents a clear, up-to-date view of where each loan stands.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Add a Loan</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
+      <div>
+        <label for="borrower_name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Borrower Name</label>
+        <input id="borrower_name" name="borrower_name" required />
+      </div>
+      <div>
+        <label for="status" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Status</label>
+        <select id="status" name="status">
+          <option value="preapproval">Pre-Approval</option>
+          <option value="processing">Processing</option>
+          <option value="underwriting">Underwriting</option>
+          <option value="clear_to_close">Clear to Close</option>
+          <option value="closed">Closed</option>
+        </select>
+      </div>
+      <div>
+        <label for="loan_type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Loan Type</label>
+        <input id="loan_type" name="loan_type" placeholder="Conventional, FHA, VA, USDA..." />
+      </div>
+      <div>
+        <label for="target_payment" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Target Payment</label>
+        <input id="target_payment" name="target_payment" placeholder="Example: $2,000/mo" />
+      </div>
+      <div>
+        <label for="stage" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Stage</label>
+        <select id="stage" name="stage">
+          <option value="preapproval_started">Pre-Approval Started</option>
+          <option value="preapproval_verified">Pre-Approval Verified</option>
+          <option value="loan_processing">Loan Processing</option>
+          <option value="appraisal_ordered">Appraisal Ordered</option>
+          <option value="appraisal_received">Appraisal Received</option>
+          <option value="uw_approval">Underwriting Approval</option>
+          <option value="clear_to_close">Clear to Close</option>
+          <option value="funding_closing">Funding and Closing</option>
+        </select>
+      </div>
+      <div>
+        <label for="close_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Target Close Date</label>
+        <input type="date" id="close_date" name="close_date" />
+      </div>
+      <button class="btn btn-primary" type="submit">Save Loan</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Your Pipeline</h2>
+
+    {% if loans %}
+      <table class="data-table" style="margin-top:1.5rem;">
+        <thead>
+          <tr>
+            <th>Borrower</th>
+            <th>Status</th>
+            <th>Loan Type</th>
+            <th>Stage</th>
+            <th>Target Payment</th>
+            <th>Close Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for loan in loans %}
+            <tr>
+              <td style="font-weight:600;">{{ loan.borrower_name }}</td>
+              <td>
+                {% if loan.status == 'preapproval' %}
+                  <span class="badge" style="background-color:var(--soft-tan);color:var(--charcoal-brown);">Pre-Approval</span>
+                {% elif loan.status == 'processing' %}
+                  <span class="badge" style="background-color:#fff3cd;color:#856404;">Processing</span>
+                {% elif loan.status == 'underwriting' %}
+                  <span class="badge" style="background-color:#d1ecf1;color:#0c5460;">Underwriting</span>
+                {% elif loan.status == 'clear_to_close' %}
+                  <span class="badge" style="background-color:#d4edda;color:#155724;">Clear to Close</span>
+                {% elif loan.status == 'closed' %}
+                  <span class="badge" style="background-color:#cce5ff;color:#004085;">Closed</span>
+                {% else %}
+                  <span class="badge" style="background-color:var(--light-cream);color:var(--charcoal-brown);">{{ loan.status|capitalize }}</span>
+                {% endif %}
+              </td>
+              <td>{{ loan.loan_type }}</td>
+              <td>{{ loan.stage|replace('_',' ')|title }}</td>
+              <td>{{ loan.target_payment }}</td>
+              <td>{{ loan.close_date or '—' }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+        <h3>No Loans Yet</h3>
+        <p>Add one file you are working on so you can track its path here.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

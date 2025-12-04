@@ -1,0 +1,24 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Centralized files</p>
+  <h1>Document Vault</h1>
+  <p>A central home for income docs, disclosures, and closing packages so files feel organized instead of scattered.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Planned Capabilities</h2>
+    <ul style="font-size:0.95rem;margin:1.5rem 0 0 1.5rem;padding:0;line-height:1.8;">
+      <li>Save and tag documents by loan and borrower</li>
+      <li>Send individual documents or full sets with a few clicks</li>
+      <li>Share with agents, title, and insurance quickly</li>
+      <li>Give borrowers a clear view of what has been received</li>
+    </ul>
+    <p class="card-subtext" style="margin-top:1rem;">
+      While the vault is being finished you can continue to track stages and contacts through the <a href="{{ url_for('lender_crm') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">CRM</a> and <a href="{{ url_for('lender_loans') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">loan tracker</a>.
+    </p>
+  </div>
+</div>
+{% endblock %}

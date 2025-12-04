@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block page_title %}Create Account • Your Life Your Home{% endblock %}
+
+{% block content %}
+<style>
+  .auth-page {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    padding: 3rem 2rem;
+  }
+  
+  .auth-card {
+    background: #FFFFFF;
+    border: 1px solid #C8B497;
+    border-radius: 2px;
+    padding: 3rem;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(58, 53, 44, 0.15);
+  }
+  
+  .auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #EFE9DC;
+    padding-bottom: 2rem;
+  }
+  
+  .auth-tagline {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.1rem;
+    color: #6B6A45;
+    margin: 0 0 0.75rem;
+    font-weight: 500;
+    font-style: italic;
+  }
+  
+  .auth-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.5rem;
+    margin: 0 0 1rem;
+    color: #3A352C;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  
+  .auth-description {
+    font-size: 1rem;
+    color: #3A352C;
+    opacity: 0.8;
+    line-height: 1.7;
+    margin: 0;
+  }
+  
+  .auth-form {
+    display: grid;
+    gap: 1.5rem;
+  }
+  
+  .auth-form-group {
+    display: grid;
+    gap: 0.5rem;
+  }
+  
+  .auth-form-group label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #3A352C;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  
+  .auth-form-group input,
+  .auth-form-group select {
+    padding: 0.875rem 1.25rem;
+    border: 2px solid #C8B497;
+    border-radius: 2px;
+    font-size: 1rem;
+    color: #3A352C;
+    background: #FFFFFF;
+    transition: all 0.3s ease;
+  }
+  
+  .auth-form-group input:focus,
+  .auth-form-group select:focus {
+    outline: none;
+    border-color: #6B6A45;
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .auth-form-group select {
+    cursor: pointer;
+  }
+  
+  .password-wrapper {
+    position: relative;
+  }
+  
+  .password-toggle {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    font-size: 0.85rem;
+    color: #6B6A45;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  
+  .password-toggle:hover {
+    color: #3A352C;
+  }
+  
+  .role-hint {
+    background: linear-gradient(135deg, #EFE9DC 0%, #F6F2E8 100%);
+    border: 1px solid #C8B497;
+    border-radius: 2px;
+    padding: 1rem 1.25rem;
+    font-size: 0.9rem;
+    color: #3A352C;
+    line-height: 1.6;
+  }
+  
+  .auth-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #EFE9DC;
+    font-size: 1rem;
+    color: #3A352C;
+    opacity: 0.8;
+  }
+  
+  .auth-footer a {
+    color: #6B6A45;
+    font-weight: 600;
+  }
+  
+  .auth-footer a:hover {
+    color: #3A352C;
+  }
+  
+  @media (max-width: 600px) {
+    .auth-card {
+      padding: 2rem 1.5rem;
+    }
+    
+    .auth-title {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <header class="auth-header">
+      <p class="auth-tagline">Begin your journey</p>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-description">
+        Choose the role that fits you best and start exploring
+      </p>
+    </header>
+
+    <form method="post" class="auth-form">
+      <div class="auth-form-group">
+        <label for="name">Full Name</label>
+        <input id="name" name="name" type="text" placeholder="Enter your full name" />
+      </div>
+      
+      <div class="auth-form-group">
+        <label for="email">Email Address</label>
+        <input id="email" name="email" type="email" required placeholder="you@example.com" />
+      </div>
+      
+      <div class="auth-form-group">
+        <label for="password">Password</label>
+        <div class="password-wrapper">
+          <input id="password" name="password" type="password" required placeholder="Create a secure password" />
+          <button type="button" onclick="togglePasswordSignup()" class="password-toggle">
+            Show
+          </button>
+        </div>
+      </div>
+      
+      <div class="auth-form-group">
+        <label for="role">I am signing up as</label>
+        <select id="role" name="role">
+          <option value="homeowner" {% if role == 'homeowner' %}selected{% endif %}>
+            🏡 Homeowner or Future Homeowner
+          </option>
+          <option value="agent" {% if role == 'agent' %}selected{% endif %}>
+            🏢 Real Estate Agent
+          </option>
+          <option value="lender" {% if role == 'lender' %}selected{% endif %}>
+            💼 Lender or Loan Officer
+          </option>
+        </select>
+      </div>
+      
+      <div class="role-hint">
+        💡 <strong>Homeowners:</strong> Free forever. 
+        <strong>Professionals:</strong> Free trial, then subscribe for full access.
+      </div>
+      
+      <button class="btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
+        Create My Account
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Already have an account?
+      <a href="{{ url_for('login') }}">Sign in here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePasswordSignup() {
+    const input = document.getElementById("password");
+    const btn = event.target;
+    if (input.type === "password") {
+      input.type = "text";
+      btn.textContent = "Hide";
+    } else {
+      input.type = "password";
+      btn.textContent = "Show";
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+  <aside class="dashboard-sidebar">
+    <div class="dashboard-sidebar__header">
+      <p class="dashboard-sidebar__title">Lender Dashboard</p>
+      <p class="dashboard-sidebar__subtitle">A warm, clear view of borrowers, files, and growth tools.</p>
+    </div>
+
+    {# current path helper #}
+    {% set path = request.path %}
+
+    {# open/closed menu states #}
+    {% set open_overview = path == url_for('lender_dashboard')
+      or path.startswith('/lender/settings/profile')
+    %}
+    {% set open_borrowers = path.startswith('/lender/crm')
+      or path.startswith('/lender/loans')
+      or path.startswith('/lender/roles')
+      or path.startswith('/lender/documents')
+    %}
+    {% set open_growth = path.startswith('/lender/messages')
+      or path.startswith('/lender/marketing')
+      or path.startswith('/lender/power-suite')
+    %}
+
+    <nav class="ylh-sidebar-nav">
+      <!-- Overview -->
+      <button
+        type="button"
+        class="ylh-menu-button {% if open_overview %}is-open{% endif %}"
+        data-menu-toggle="lender-overview"
+      >
+        <span>
+          <span class="ylh-menu-button-icon">🏡</span>
+          Overview
+        </span>
+        <span class="ylh-menu-button-chevron">
+          {% if open_overview %}▾{% else %}▸{% endif %}
+        </span>
+      </button>
+      <div
+        class="ylh-submenu"
+        data-menu-section="lender-overview"
+        data-open="{{ 'true' if open_overview else 'false' }}"
+        style="display: {{ 'block' if open_overview else 'none' }};"
+      >
+        <ul class="ylh-submenu-list">
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_dashboard') }}"
+              class="ylh-submenu-link {% if path == url_for('lender_dashboard') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Dashboard
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_settings_profile') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/settings/profile') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Profile and Branding
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Borrowers and pipeline -->
+      <button
+        type="button"
+        class="ylh-menu-button {% if open_borrowers %}is-open{% endif %}"
+        data-menu-toggle="lender-borrowers"
+      >
+        <span>
+          <span class="ylh-menu-button-icon">👥</span>
+          Borrowers & Pipeline
+        </span>
+        <span class="ylh-menu-button-chevron">
+          {% if open_borrowers %}▾{% else %}▸{% endif %}
+        </span>
+      </button>
+      <div
+        class="ylh-submenu"
+        data-menu-section="lender-borrowers"
+        data-open="{{ 'true' if open_borrowers else 'false' }}"
+        style="display: {{ 'block' if open_borrowers else 'none' }};"
+      >
+        <ul class="ylh-submenu-list">
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_crm') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/crm') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Borrower CRM
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_loans') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/loans') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Loan Processing Tracker
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_roles') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/roles') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Roles and Partners
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_documents') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/documents') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Document Vault
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Messages and growth -->
+      <button
+        type="button"
+        class="ylh-menu-button {% if open_growth %}is-open{% endif %}"
+        data-menu-toggle="lender-growth"
+      >
+        <span>
+          <span class="ylh-menu-button-icon">📢</span>
+          Messages & Growth
+        </span>
+        <span class="ylh-menu-button-chevron">
+          {% if open_growth %}▾{% else %}▸{% endif %}
+        </span>
+      </button>
+      <div
+        class="ylh-submenu"
+        data-menu-section="lender-growth"
+        data-open="{{ 'true' if open_growth else 'false' }}"
+        style="display: {{ 'block' if open_growth else 'none' }};"
+      >
+        <ul class="ylh-submenu-list">
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_messages') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/messages') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Email and Text Library
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_marketing') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/marketing') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Marketing Tools
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_power_suite') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/power-suite') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Power Suite
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <section class="dashboard-main">
+    {% block lender_content %}{% endblock %}
+  </section>
+</div>
+{% endblock %}

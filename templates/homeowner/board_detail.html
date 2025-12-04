@@ -1,0 +1,1581 @@
+{% extends "homeowner/layout.html" %}
+
+{% block homeowner_content %}
+
+<!-- Flowing Fabric Endless Scroll Background -->
+<div class="fabric-scroll-container">
+  <div class="fabric-scroll fabric-scroll-1"></div>
+  <div class="fabric-scroll fabric-scroll-2"></div>
+  <div class="fabric-scroll fabric-scroll-3"></div>
+</div>
+
+<!-- Mediterranean Plaster Base Background -->
+<div style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #F2EDE5;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22%3E%3Cg opacity=%220.2%22 fill=%22%23C4B5A0%22%3E%3Ccircle cx=%2280%22 cy=%2280%22 r=%224%22/%3E%3Ccircle cx=%2285%22 cy=%2275%22 r=%222.5%22/%3E%3Ccircle cx=%2275%22 cy=%2275%22 r=%222.5%22/%3E%3Ccircle cx=%2280%22 cy=%2270%22 r=%223%22/%3E%3Cline x1=%2280%22 y1=%2280%22 x2=%2280%22 y2=%22120%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3Ccircle cx=%22220%22 cy=%22160%22 r=%224%22/%3E%3Ccircle cx=%22225%22 cy=%22155%22 r=%222.5%22/%3E%3Ccircle cx=%22215%22 cy=%22155%22 r=%222.5%22/%3E%3Ccircle cx=%22220%22 cy=%22150%22 r=%223%22/%3E%3Cline x1=%22220%22 y1=%22160%22 x2=%22220%22 y2=%22200%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3Ccircle cx=%22150%22 cy=%22280%22 r=%224%22/%3E%3Ccircle cx=%22155%22 cy=%22275%22 r=%222.5%22/%3E%3Ccircle cx=%22145%22 cy=%22275%22 r=%222.5%22/%3E%3Ccircle cx=%22150%22 cy=%22270%22 r=%223%22/%3E%3Cline x1=%22150%22 y1=%22280%22 x2=%22150%22 y2=%22320%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3Ccircle cx=%22320%22 cy=%22240%22 r=%224%22/%3E%3Ccircle cx=%22325%22 cy=%22235%22 r=%222.5%22/%3E%3Ccircle cx=%22315%22 cy=%22235%22 r=%222.5%22/%3E%3Ccircle cx=%22320%22 cy=%22230%22 r=%223%22/%3E%3Cline x1=%22320%22 y1=%22240%22 x2=%22320%22 y2=%22280%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3C/g%3E%3C/svg%3E');
+  background-size: 400px 400px;
+  background-repeat: repeat;
+  z-index: -999;
+  pointer-events: none;
+"></div>
+
+<style>
+  /* ========================================
+     FLOWING FABRIC ENDLESS SCROLL ANIMATION
+     ======================================== */
+  
+  .fabric-scroll-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: -998;
+    pointer-events: none;
+    opacity: 0.08;
+  }
+  
+  .fabric-scroll {
+    position: absolute;
+    width: 40vw;
+    height: 200vh;
+    background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 800%22 preserveAspectRatio=%22none%22%3E%3Cpath d=%22M0,0 Q100,50 200,0 T400,0 L400,800 Q300,750 200,800 T0,800 Z%22 fill=%22%23E8DFD1%22 opacity=%220.6%22/%3E%3Cpath d=%22M50,100 Q150,150 250,100 T450,100 L450,700 Q350,650 250,700 T50,700 Z%22 fill=%22%23D4C7B3%22 opacity=%220.4%22/%3E%3Cpath d=%22M20,200 Q120,240 220,200 T420,200 L420,600 Q320,560 220,600 T20,600 Z%22 fill=%22%23F0E8DA%22 opacity=%220.5%22/%3E%3C/svg%3E');
+    background-size: 100% auto;
+    background-repeat: repeat-y;
+    filter: blur(1px);
+  }
+  
+  .fabric-scroll-1 {
+    left: -10%;
+    animation: fabricFlow1 60s linear infinite;
+    opacity: 0.7;
+  }
+  
+  .fabric-scroll-2 {
+    left: 35%;
+    animation: fabricFlow2 80s linear infinite;
+    animation-delay: -20s;
+    opacity: 0.5;
+  }
+  
+  .fabric-scroll-3 {
+    right: -10%;
+    animation: fabricFlow3 100s linear infinite;
+    animation-delay: -40s;
+    opacity: 0.6;
+  }
+  
+  @keyframes fabricFlow1 {
+    from {
+      transform: translateY(-50%) rotate(5deg);
+    }
+    to {
+      transform: translateY(0%) rotate(5deg);
+    }
+  }
+  
+  @keyframes fabricFlow2 {
+    from {
+      transform: translateY(-50%) rotate(-3deg);
+    }
+    to {
+      transform: translateY(0%) rotate(-3deg);
+    }
+  }
+  
+  @keyframes fabricFlow3 {
+    from {
+      transform: translateY(-50%) rotate(4deg);
+    }
+    to {
+      transform: translateY(0%) rotate(4deg);
+    }
+  }
+
+  /* ========================================
+     ELEGANT PINTEREST-STYLE MOOD BOARD
+     Mediterranean Plaster with Dried Botanicals
+     ======================================== */
+
+  .board-view {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 3rem 5rem;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Action Bar - Hidden on print */
+  .board-actions {
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 0 -3rem 0;
+    border-bottom: 1px solid #EDE8E3;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    z-index: 100;
+  }
+
+  .back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #9B8B7E;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: #6B6A45;
+  }
+
+  .board-actions-right {
+    margin-left: auto;
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+  }
+  
+  /* Layout Switcher */
+  .layout-switcher {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    background: #F6F2E8;
+    border-radius: 20px;
+    margin-right: 0.5rem;
+  }
+  
+  .layout-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 16px;
+    border: none;
+    background: transparent;
+    color: #7A7265;
+    font-weight: 500;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .layout-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+  
+  .layout-btn.active {
+    background: white;
+    color: #6B6A45;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+
+  .action-btn {
+    padding: 0.7rem 1.3rem;
+    border-radius: 24px;
+    border: 1px solid #E5DDD0;
+    background: white;
+    color: #7A7265;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .action-btn:hover {
+    border-color: #C9B8A8;
+    background: #FEFDFB;
+    transform: translateY(-1px);
+  }
+
+  .action-btn.primary {
+    background: #6B6A45;
+    color: white;
+    border-color: #6B6A45;
+  }
+
+  .action-btn.primary:hover {
+    background: #5a5939;
+  }
+
+  /* Elegant Header Area */
+  .board-header {
+    text-align: center;
+    padding: 5rem 2rem 4rem;
+    background: transparent;
+  }
+
+  .board-category {
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: #B8A89A;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+
+  .board-title {
+    font-size: 3.2rem;
+    margin: 0 0 1.5rem;
+    color: #3A352C;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .board-vision {
+    font-size: 1.1rem;
+    color: #7A7265;
+    font-style: italic;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* Curated Editorial Collage - Organic Layout (Default) */
+  .gallery {
+    margin-bottom: 4rem;
+    padding: 0 1rem;
+  }
+
+  .gallery-collage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    justify-content: center;
+    align-items: flex-start;
+    position: relative;
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 2rem 0;
+    transition: all 0.4s ease;
+  }
+
+  /* Organic/Collage Layout - Staggered with rotation */
+  .gallery-collage.organic .gallery-item {
+    position: relative;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: all 0.35s ease;
+  }
+
+  .gallery-collage.organic .gallery-item:nth-child(6n+1) {
+    transform: rotate(-4deg);
+    width: 180px;
+    margin-top: 20px;
+    margin-left: -10px;
+  }
+
+  .gallery-collage.organic .gallery-item:nth-child(6n+2) {
+    transform: rotate(3deg);
+    width: 160px;
+    margin-top: -15px;
+    margin-right: -8px;
+  }
+
+  .gallery-collage.organic .gallery-item:nth-child(6n+3) {
+    transform: rotate(-2deg);
+    width: 200px;
+    margin-top: 35px;
+  }
+
+  .gallery-collage.organic .gallery-item:nth-child(6n+4) {
+    transform: rotate(3.5deg);
+    width: 170px;
+    margin-top: -10px;
+    margin-left: -12px;
+  }
+
+  .gallery-collage.organic .gallery-item:nth-child(6n+5) {
+    transform: rotate(-3deg);
+    width: 150px;
+    margin-top: 25px;
+    margin-right: -10px;
+  }
+
+  .gallery-collage.organic .gallery-item:nth-child(6n) {
+    transform: rotate(2.5deg);
+    width: 190px;
+    margin-top: -5px;
+  }
+
+  /* Grid Layout - Clean & Organized */
+  .gallery-collage.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+    max-width: 900px;
+  }
+
+  .gallery-collage.grid .gallery-item {
+    width: 100% !important;
+    transform: none !important;
+    margin: 0 !important;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+
+  .gallery-collage.grid .gallery-item:hover {
+    transform: translateY(-8px) !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  }
+
+  /* Editorial/Magazine Layout - Asymmetric Featured */
+  .gallery-collage.editorial {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+    max-width: 1000px;
+  }
+
+  .gallery-collage.editorial .gallery-item {
+    transform: none !important;
+    margin: 0 !important;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(1) {
+    grid-column: span 8;
+    grid-row: span 2;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(2) {
+    grid-column: span 4;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(3) {
+    grid-column: span 4;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(4) {
+    grid-column: span 6;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(5) {
+    grid-column: span 6;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(6) {
+    grid-column: span 4;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(7) {
+    grid-column: span 8;
+    grid-row: span 2;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(8) {
+    grid-column: span 4;
+  }
+
+  .gallery-collage.editorial .gallery-item:nth-child(n+9) {
+    grid-column: span 6;
+  }
+
+  .gallery-item {
+    position: relative;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: all 0.35s ease;
+  }
+    width: 190px;
+    margin-top: -5px;
+  }
+
+  .gallery-item:hover {
+    transform: scale(1.15) rotate(0deg) !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.2);
+    z-index: 30;
+    margin: 0 !important;
+  }
+
+  .gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Handwritten-style labels */
+  .gallery-item-label {
+    position: absolute;
+    bottom: -12px;
+    right: 10px;
+    padding: 0.3rem 0.7rem;
+    background: rgba(255, 255, 255, 0.97);
+    font-family: 'Dancing Script', cursive;
+    font-size: 0.95rem;
+    color: #6B6A45;
+    font-weight: 400;
+    transform: rotate(-5deg);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    z-index: 5;
+  }
+
+  .gallery-item:nth-child(even) .gallery-item-label {
+    transform: rotate(4deg);
+    left: 10px;
+    right: auto;
+  }
+
+  .gallery-item:nth-child(3n) .gallery-item-label {
+    transform: rotate(-6deg);
+    bottom: -14px;
+  }
+
+  .gallery-item:nth-child(4n) .gallery-item-label {
+    transform: rotate(5deg);
+    bottom: -10px;
+  }
+
+  /* ========================================
+     FIXTURES - Furniture/Items Between Photos
+     ======================================== */
+  .fixture-item {
+    position: relative;
+    display: inline-block;
+    width: 180px;
+    height: auto;
+    margin: 0.8rem;
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.15));
+    transition: all 0.3s ease;
+    background: transparent;
+  }
+
+  .fixture-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    background: transparent;
+    /* Minimal CSS processing - let JS handle background removal */
+  }
+
+  .fixture-item:hover {
+    transform: scale(1.08);
+    filter: drop-shadow(0 12px 24px rgba(0,0,0,0.25));
+    z-index: 100;
+  }
+
+  /* Varied sizing and rotations for organic feel */
+  .fixture-item:nth-child(6n+1) {
+    width: 170px;
+    transform: rotate(-6deg);
+    margin-top: -8px;
+  }
+
+  .fixture-item:nth-child(6n+2) {
+    width: 190px;
+    transform: rotate(4deg);
+    margin-top: 5px;
+  }
+
+  .fixture-item:nth-child(6n+3) {
+    width: 160px;
+    transform: rotate(-3deg);
+    margin-top: -5px;
+  }
+
+  .fixture-item:nth-child(6n+4) {
+    width: 200px;
+    transform: rotate(5deg);
+    margin-top: 8px;
+  }
+
+  .fixture-item:nth-child(6n+5) {
+    width: 175px;
+    transform: rotate(-4deg);
+    margin-top: -3px;
+  }
+
+  .fixture-item:nth-child(6n) {
+    width: 185px;
+    transform: rotate(3deg);
+    margin-top: 6px;
+  }
+
+  /* Color Palette Strip at Bottom */
+  .color-palette-section {
+    background: transparent;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .color-palette-title {
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #B8A89A;
+    margin: 0 0 2rem;
+    font-weight: 500;
+  }
+
+  .color-palette-strip {
+    display: flex;
+    justify-content: center;
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .color-swatch-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    transition: all 0.3s ease;
+    border: 3px solid white;
+  }
+
+  .color-swatch-circle:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  }
+
+  /* Subtle footer branding */
+  .board-footer {
+    text-align: center;
+    padding: 2rem 0 3rem;
+    color: #C9B8A8;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Empty States */
+  .empty-gallery {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    margin-bottom: 3rem;
+  }
+
+  .empty-gallery h3 {
+    font-size: 1.3rem;
+    margin: 0 0 0.8rem;
+    color: #B8A89A;
+    font-weight: 300;
+  }
+
+  .empty-gallery p {
+    color: #C9B8A8;
+    font-size: 0.95rem;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .board-view {
+      padding: 0 1.5rem 3rem;
+    }
+
+    .board-title {
+      font-size: 2.2rem;
+    }
+
+    .gallery-item:nth-child(odd),
+    .gallery-item:nth-child(even),
+    .gallery-item:nth-child(3n) {
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: 90% !important;
+    }
+  }
+
+  /* Print Styles - Legal Size (8.5×14) Optimized */
+  @media print {
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+
+    @page {
+      size: legal;
+      margin: 0.75in 0.5in;
+    }
+
+    body, html {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #FAF8F5 !important;
+      width: 7.5in !important;
+    }
+
+    .ylh-sidebar-nav,
+    [role="banner"],
+    .board-actions,
+    nav,
+    .action-btn,
+    .back-link {
+      display: none !important;
+    }
+
+    .board-view {
+      padding: 0 !important;
+      max-width: 7.5in !important;
+      background: #FAF8F5 !important;
+    }
+
+    .board-header {
+      padding: 1in 0.5in 0.8in !important;
+      page-break-after: avoid !important;
+    }
+
+    .board-category {
+      margin-bottom: 0.3in !important;
+    }
+
+    .board-title {
+      font-size: 2.5rem !important;
+      margin-bottom: 0.4in !important;
+    }
+
+    .board-vision {
+      font-size: 0.95rem !important;
+    }
+
+    .gallery {
+      padding: 0 0.3in !important;
+      margin-bottom: 0.8in !important;
+    }
+
+    .gallery-collage {
+      gap: 0.4in !important;
+    }
+
+    .gallery-item {
+      page-break-inside: avoid !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+      width: 100% !important;
+      max-width: 5.5in !important;
+      transform: none !important;
+      align-self: center;
+    }
+
+    .gallery-item:hover {
+      transform: none !important;
+    }
+
+    .gallery-item-label {
+      font-size: 1.1rem !important;
+    }
+
+    .color-palette-section {
+      padding: 0.6in 0.5in !important;
+      page-break-inside: avoid !important;
+    }
+
+    .color-palette-strip {
+      gap: 0.3in !important;
+      margin-bottom: 0.3in !important;
+    }
+
+    .color-swatch-circle {
+      width: 50px !important;
+      height: 50px !important;
+    }
+
+    .color-swatch-circle:hover {
+      transform: none !important;
+    }
+
+    .board-footer {
+      padding: 0.3in 0 !important;
+    }
+  }
+</style>
+
+<div class="board-view">
+  <!-- Sticky Action Bar -->
+  <div class="board-actions">
+    <a href="{{ url_for('homeowner_saved_notes') }}" class="back-link">
+      ← Back to Boards
+    </a>
+    
+    <div class="board-actions-right">
+      <!-- Layout Switcher -->
+      <div class="layout-switcher">
+        <button type="button" class="layout-btn active" onclick="switchLayout('organic')" data-layout="organic">
+          Organic
+        </button>
+        <button type="button" class="layout-btn" onclick="switchLayout('grid')" data-layout="grid">
+          Grid
+        </button>
+        <button type="button" class="layout-btn" onclick="switchLayout('editorial')" data-layout="editorial">
+          Magazine
+        </button>
+      </div>
+      
+      <button type="button" class="action-btn" onclick="showOptionsMenu()">
+        ⚙️ Options
+      </button>
+      <button type="button" class="action-btn" onclick="window.print()">
+        🖨️ Print
+      </button>
+      <a href="{{ url_for('homeowner_design_board_download', board_name=selected_board) }}" class="action-btn">
+        📥 Download PDF
+      </a>
+      <button type="button" class="action-btn primary" onclick="showEditModal()">
+        ✏️ Edit Board
+      </button>
+    </div>
+  </div>
+
+  <!-- Board Header -->
+  <div class="board-header">
+    <div class="board-category">Interior Inspiration</div>
+    <h1 class="board-title">MOODBOARD</h1>
+    
+    {% if selected_details.vision_statement %}
+      <p class="board-vision">"{{ selected_details.vision_statement }}"</p>
+    {% endif %}
+  </div>
+
+  <!-- Editorial Photo Collage -->
+  {% if selected_details.photos and selected_details.photos|length > 0 %}
+    <div class="gallery" style="position: relative;">
+      <div class="gallery-collage organic" id="galleryCollage">
+        {% for photo in selected_details.photos %}
+          <div class="gallery-item">
+            <img
+              src="{{ url_for('static', filename=photo) }}"
+              alt="Inspiration photo"
+              loading="lazy"
+            />
+            {% if loop.index <= 3 %}
+              <div class="gallery-item-label">
+                {% if loop.index == 1 %}inspiration
+                {% elif loop.index == 2 %}curated style
+                {% else %}design details{% endif %}
+              </div>
+            {% endif %}
+          </div>
+          
+          <!-- Insert fixtures between photos after 2nd photo -->
+          {% if selected_details.fixtures and loop.index == 2 %}
+            {% for fixture in selected_details.fixtures %}
+              <div class="fixture-item">
+                <img
+                  src="{{ url_for('static', filename=fixture) }}"
+                  alt="Fixture item"
+                  loading="lazy"
+                />
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% else %}
+    <div class="empty-gallery">
+      <h3>✨ No Photos Yet</h3>
+      <p>Add inspiration photos to bring this board to life</p>
+    </div>
+  {% endif %}
+
+  <!-- Color Palette Section -->
+  {% if selected_details.color_palette and selected_details.color_palette|length > 0 %}
+    <div class="color-palette-section">
+      <h2 class="color-palette-title">Color Palette</h2>
+      <div class="color-palette-strip">
+        {% for color in selected_details.color_palette[:6] %}
+          <div class="color-swatch-circle" style="background-color: {{ color }};"></div>
+        {% endfor %}
+      </div>
+      <div class="board-footer">{{ selected_board }}</div>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem 0;">
+  <div style="width: 90%; max-width: 600px; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: auto; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h2 style="margin: 0; font-size: 1.8rem; color: #3A352C;">Add to Board</h2>
+      <button onclick="closeEditModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+    </div>
+
+    <form method="post" action="{{ url_for('homeowner_saved_notes') }}" enctype="multipart/form-data" style="display: grid; gap: 1.5rem;">
+      <input type="hidden" name="action" value="edit_board">
+      <input type="hidden" name="board_name" value="{{ selected_board }}">
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Add Note/Title <span style="font-weight: 400; color: #999;">(optional)</span>
+        </label>
+        <input type="text" name="edit_title" placeholder="Note title..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem;">
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Add Details
+        </label>
+        <textarea name="edit_notes" rows="4" placeholder="Add your ideas..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Add Photos
+        </label>
+        <input type="file" name="new_photos" multiple accept="image/*" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px;">
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Add Fixtures/Furniture <span style="font-weight: 400; color: #999;">(backgrounds removed)</span>
+        </label>
+        <input type="file" name="new_fixtures" multiple accept="image/*" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px;">
+      </div>
+
+      <!-- Delete Existing Fixtures -->
+      {% if selected_details.fixtures and selected_details.fixtures|length > 0 %}
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #b3574a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Remove Fixtures
+        </label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; border: 2px solid #E5DDD0; border-radius: 8px;">
+          {% for fixture in selected_details.fixtures %}
+            <label style="display: flex; flex-direction: column; align-items: center; padding: 0.5rem; border: 1px solid #E5DDD0; border-radius: 4px; cursor: pointer;">
+              <input type="checkbox" name="remove_fixtures" value="{{ fixture }}" style="margin-bottom: 0.3rem;">
+              <img src="{{ url_for('static', filename=fixture) }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+        <button type="button" onclick="closeEditModal()" style="padding: 0.9rem 1.5rem; border: 2px solid #E5DDD0; background: white; color: #6B6A45; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          Cancel
+        </button>
+        <button type="submit" style="padding: 0.9rem 1.5rem; background: linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Options Menu Modal -->
+<div id="optionsModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+  <div style="width: 90%; max-width: 500px; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h2 style="margin: 0; font-size: 1.8rem; color: #3A352C;">Board Options</h2>
+      <button onclick="closeOptionsMenu()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+    </div>
+
+    <div style="display: grid; gap: 1rem;">
+      <!-- Duplicate Board -->
+      <button onclick="duplicateBoard()" style="width: 100%; padding: 1rem 1.5rem; text-align: left; background: white; border: 2px solid #E5DDD0; border-radius: 8px; color: #3A352C; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+        📋 Duplicate Board
+      </button>
+
+      <!-- Crop Photo -->
+      <button onclick="openCropModal()" style="width: 100%; padding: 1rem 1.5rem; text-align: left; background: white; border: 2px solid #E5DDD0; border-radius: 8px; color: #3A352C; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+        ✂️ Crop a Photo
+      </button>
+
+      <!-- Layout Options -->
+      <div style="border-top: 2px solid #E5DDD0; padding-top: 1rem;">
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem;">
+          Layout Style
+        </label>
+        <div style="display: grid; gap: 0.5rem;">
+          <form method="post" action="{{ url_for('homeowner_design_board_template', board_name=selected_board) }}" style="margin: 0;">
+            <input type="hidden" name="template" value="collage">
+            <button type="submit" style="width: 100%; padding: 0.9rem; text-align: left; background: {% if selected_details.board_template == 'collage' %}linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white{% else %}white; color: #3A352C{% endif %}; border: 2px solid #E5DDD0; border-radius: 8px; font-weight: 600; cursor: pointer;">
+              🎨 Organic Collage
+            </button>
+          </form>
+          <form method="post" action="{{ url_for('homeowner_design_board_template', board_name=selected_board) }}" style="margin: 0;">
+            <input type="hidden" name="template" value="grid">
+            <button type="submit" style="width: 100%; padding: 0.9rem; text-align: left; background: {% if selected_details.board_template == 'grid' %}linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white{% else %}white; color: #3A352C{% endif %}; border: 2px solid #E5DDD0; border-radius: 8px; font-weight: 600; cursor: pointer;">
+              📐 Grid Layout
+            </button>
+          </form>
+          <form method="post" action="{{ url_for('homeowner_design_board_template', board_name=selected_board) }}" style="margin: 0;">
+            <input type="hidden" name="template" value="editorial">
+            <button type="submit" style="width: 100%; padding: 0.9rem; text-align: left; background: {% if selected_details.board_template == 'editorial' %}linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white{% else %}white; color: #3A352C{% endif %}; border: 2px solid #E5DDD0; border-radius: 8px; font-weight: 600; cursor: pointer;">
+              📰 Magazine Editorial
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Privacy Toggle -->
+      <form method="post" action="{{ url_for('homeowner_design_board_privacy', board_name=selected_board) }}" style="margin: 0;">
+        <label style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid #E5DDD0; border-radius: 8px; cursor: pointer;">
+          <input type="checkbox" name="is_private" value="1" {% if selected_details.is_private %}checked{% endif %} onchange="this.form.submit()" style="width: 20px; height: 20px; cursor: pointer;">
+          <span style="font-weight: 600; color: #3A352C;">🔒 Keep Board Private</span>
+        </label>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showEditModal() {
+    document.getElementById('editModal').style.display = 'flex';
+  }
+
+  function closeEditModal() {
+    document.getElementById('editModal').style.display = 'none';
+  }
+
+  function showOptionsMenu() {
+    document.getElementById('optionsModal').style.display = 'flex';
+  }
+
+  function closeOptionsMenu() {
+    document.getElementById('optionsModal').style.display = 'none';
+  }
+  
+  // Layout Switcher Function
+  function switchLayout(layoutType) {
+    const gallery = document.getElementById('galleryCollage');
+    const buttons = document.querySelectorAll('.layout-btn');
+    
+    // Remove all layout classes
+    gallery.classList.remove('organic', 'grid', 'editorial');
+    
+    // Add the selected layout class
+    gallery.classList.add(layoutType);
+    
+    // Update active button state
+    buttons.forEach(btn => {
+      if (btn.dataset.layout === layoutType) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+    
+    // Save preference to localStorage
+    localStorage.setItem('moodboardLayout', layoutType);
+  }
+  
+  // Load saved layout preference on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const savedLayout = localStorage.getItem('moodboardLayout') || 'organic';
+    if (savedLayout !== 'organic') {
+      switchLayout(savedLayout);
+    }
+    
+    // Auto-remove white backgrounds from fixture images
+    removeFixtureBackgrounds();
+  });
+
+  // Background removal function for fixture images
+  function removeFixtureBackgrounds() {
+    const fixtureImages = document.querySelectorAll('.fixture-item img');
+    
+    fixtureImages.forEach(img => {
+      // Wait for image to load
+      if (img.complete) {
+        processFixtureImage(img);
+      } else {
+        img.addEventListener('load', () => processFixtureImage(img));
+      }
+    });
+  }
+
+  function processFixtureImage(img) {
+    try {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      
+      ctx.drawImage(img, 0, 0);
+      
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const width = canvas.width;
+      const height = canvas.height;
+      
+      // PROFESSIONAL AI-GRADE BACKGROUND REMOVAL
+      
+      // === PHASE 1: SOPHISTICATED BACKGROUND SAMPLING ===
+      const edgeDepth = Math.max(Math.floor(Math.min(width, height) * 0.08), 10);
+      const backgroundSamples = [];
+      
+      // Sample all four edges comprehensively
+      for (let i = 0; i < edgeDepth; i++) {
+        for (let j = 0; j < width; j++) {
+          // Top edge
+          const topIdx = (i * width + j) * 4;
+          backgroundSamples.push([data[topIdx], data[topIdx + 1], data[topIdx + 2]]);
+          // Bottom edge
+          const bottomIdx = ((height - 1 - i) * width + j) * 4;
+          backgroundSamples.push([data[bottomIdx], data[bottomIdx + 1], data[bottomIdx + 2]]);
+        }
+        for (let j = 0; j < height; j++) {
+          // Left edge
+          const leftIdx = (j * width + i) * 4;
+          backgroundSamples.push([data[leftIdx], data[leftIdx + 1], data[leftIdx + 2]]);
+          // Right edge
+          const rightIdx = (j * width + (width - 1 - i)) * 4;
+          backgroundSamples.push([data[rightIdx], data[rightIdx + 1], data[rightIdx + 2]]);
+        }
+      }
+      
+      // K-means clustering to find dominant background color
+      const bgColor = kMeansColor(backgroundSamples, 1)[0];
+      const [bgR, bgG, bgB] = bgColor;
+      
+      // === PHASE 2: ADVANCED FEATURE MAPS ===
+      const pixelCount = width * height;
+      const luminance = new Float32Array(pixelCount);
+      const saturation = new Float32Array(pixelCount);
+      const gradientMag = new Float32Array(pixelCount);
+      const colorDist = new Float32Array(pixelCount);
+      
+      // Build feature maps
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = y * width + x;
+          const i = idx * 4;
+          const r = data[i];
+          const g = data[i + 1];
+          const b = data[i + 2];
+          
+          // Luminance (CIE standard)
+          luminance[idx] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          
+          // Saturation (HSV)
+          const max = Math.max(r, g, b);
+          const min = Math.min(r, g, b);
+          const delta = max - min;
+          saturation[idx] = max === 0 ? 0 : delta / max;
+          
+          // Color distance from background (CIE Delta E approximation)
+          const dr = r - bgR;
+          const dg = g - bgG;
+          const db = b - bgB;
+          colorDist[idx] = Math.sqrt(2 * dr * dr + 4 * dg * dg + 3 * db * db);
+          
+          // Gradient magnitude (Sobel operator)
+          if (x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+            const gx = (
+              -1 * luminance[idx - 1 - width] + 1 * luminance[idx + 1 - width] +
+              -2 * luminance[idx - 1] + 2 * luminance[idx + 1] +
+              -1 * luminance[idx - 1 + width] + 1 * luminance[idx + 1 + width]
+            );
+            const gy = (
+              -1 * luminance[idx - width - 1] - 2 * luminance[idx - width] - 1 * luminance[idx - width + 1] +
+              1 * luminance[idx + width - 1] + 2 * luminance[idx + width] + 1 * luminance[idx + width + 1]
+            );
+            gradientMag[idx] = Math.sqrt(gx * gx + gy * gy);
+          }
+        }
+      }
+      
+      // === PHASE 3: TRIMAP GENERATION (ULTRA-AGGRESSIVE WHITE REMOVAL) ===
+      const BACKGROUND = 0;
+      const FOREGROUND = 255;
+      const UNKNOWN = 128;
+      const trimap = new Uint8Array(pixelCount);
+      
+      // Calculate average background brightness
+      const bgBrightness = (bgR + bgG + bgB) / 3;
+      const isLightBackground = bgBrightness > 200;
+      
+      for (let idx = 0; idx < pixelCount; idx++) {
+        const i = idx * 4;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        
+        const cd = colorDist[idx];
+        const grad = gradientMag[idx];
+        const sat = saturation[idx];
+        const lum = luminance[idx];
+        
+        // For white/light backgrounds, be EXTREMELY aggressive
+        if (isLightBackground) {
+          // Mark as BACKGROUND if it's bright and close to white
+          if (lum > 220 && sat < 0.08 && cd < 50) {
+            trimap[idx] = BACKGROUND;
+          }
+          // Mark as FOREGROUND if it has ANY decent features
+          else if (cd > 25 || grad > 8 || sat > 0.1 || lum < 200) {
+            trimap[idx] = FOREGROUND;
+          }
+          else {
+            trimap[idx] = UNKNOWN;
+          }
+        } else {
+          // Standard approach for non-white backgrounds
+          if (cd > 35 || grad > 12 || sat > 0.12) {
+            trimap[idx] = FOREGROUND;
+          }
+          else if (cd < 25 && grad < 3 && sat < 0.05 && lum > 200) {
+            trimap[idx] = BACKGROUND;
+          }
+          else {
+            trimap[idx] = UNKNOWN;
+          }
+        }
+      }
+      
+      // ULTRA-AGGRESSIVE flood fill - removes all white connected regions
+      const visited = new Uint8Array(pixelCount);
+      const queue = [];
+      
+      // Start from all edges
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          if (x < edgeDepth * 2 || x >= width - edgeDepth * 2 || 
+              y < edgeDepth * 2 || y >= height - edgeDepth * 2) {
+            const idx = y * width + x;
+            const lum = luminance[idx];
+            const sat = saturation[idx];
+            
+            // If it's bright/white at edge, flood fill from here
+            if ((trimap[idx] === BACKGROUND || trimap[idx] === UNKNOWN) && 
+                lum > 210 && sat < 0.1) {
+              queue.push([x, y]);
+              visited[idx] = 1;
+              trimap[idx] = BACKGROUND;
+            }
+          }
+        }
+      }
+      
+      // Flood fill - spread to all similar connected pixels
+      while (queue.length > 0) {
+        const [x, y] = queue.shift();
+        const idx = y * width + x;
+        const currentLum = luminance[idx];
+        
+        const neighbors = [
+          [x-1, y], [x+1, y], [x, y-1], [x, y+1],
+          [x-1, y-1], [x+1, y-1], [x-1, y+1], [x+1, y+1]
+        ];
+        
+        for (const [nx, ny] of neighbors) {
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const nidx = ny * width + nx;
+            if (!visited[nidx]) {
+              visited[nidx] = 1;
+              const nLum = luminance[nidx];
+              const nSat = saturation[nidx];
+              const nGrad = gradientMag[nidx];
+              
+              // Spread to similar bright pixels (AGGRESSIVE)
+              if (nLum > 200 && nSat < 0.12 && nGrad < 10 && 
+                  Math.abs(nLum - currentLum) < 40) {
+                trimap[nidx] = BACKGROUND;
+                queue.push([nx, ny]);
+              }
+            }
+          }
+        }
+      }
+      
+      // === PHASE 4: ALPHA MATTING (ULTRA-AGGRESSIVE FOR WHITE) ===
+      const alpha = new Uint8Array(pixelCount);
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = y * width + x;
+          const i = idx * 4;
+          
+          if (trimap[idx] === FOREGROUND) {
+            alpha[idx] = 255;
+          } else if (trimap[idx] === BACKGROUND) {
+            alpha[idx] = 0;
+          } else {
+            // For unknown pixels
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const cd = colorDist[idx];
+            const grad = gradientMag[idx];
+            const sat = saturation[idx];
+            const lum = luminance[idx];
+            
+            // WHITE BACKGROUND SPECIAL HANDLING
+            // If pixel is very white, make it transparent
+            if (r > 235 && g > 235 && b > 235 && sat < 0.06) {
+              alpha[idx] = 0;
+            }
+            // If pixel is bright and nearly white
+            else if (lum > 230 && sat < 0.08 && grad < 5) {
+              alpha[idx] = 0;
+            }
+            // If pixel has moderate brightness but still very desaturated
+            else if (lum > 210 && sat < 0.1 && cd < 30 && grad < 8) {
+              // Fade out based on brightness
+              const fadeAmount = (240 - lum) / 30;
+              alpha[idx] = Math.floor(Math.min(100, fadeAmount * 255));
+            }
+            // Has some features - keep with varying alpha
+            else {
+              let alphaValue = 200;
+              
+              if (cd > 30 || grad > 10 || sat > 0.12) {
+                alphaValue = 255;
+              } else if (cd > 20) {
+                alphaValue = 220;
+              } else if (grad > 5) {
+                alphaValue = 180;
+              } else {
+                alphaValue = 100;
+              }
+              
+              // Neighborhood check
+              let fgCount = 0;
+              let bgCount = 0;
+              
+              for (let dy = -3; dy <= 3; dy++) {
+                for (let dx = -3; dx <= 3; dx++) {
+                  const nx = x + dx;
+                  const ny = y + dy;
+                  if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                    const nidx = ny * width + nx;
+                    if (trimap[nidx] === FOREGROUND) fgCount++;
+                    if (trimap[nidx] === BACKGROUND) bgCount++;
+                  }
+                }
+              }
+              
+              if (fgCount > 20) alphaValue = 255;
+              else if (bgCount > 30) alphaValue = 0;
+              
+              alpha[idx] = alphaValue;
+            }
+          }
+        }
+      }
+      
+      // === PHASE 5: AGGRESSIVE EDGE REFINEMENT + BILATERAL FILTERING ===
+      const alphaSmoothed = new Uint8Array(pixelCount);
+      const spatialSigma = 1.5;
+      const rangeSigma = 25.0;
+      
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = y * width + x;
+          const currentAlpha = alpha[idx];
+          
+          // Full opacity or full transparency - no smoothing needed
+          if (currentAlpha === 255 || currentAlpha === 0) {
+            alphaSmoothed[idx] = currentAlpha;
+            continue;
+          }
+          
+          // Edge pixels need smoothing
+          let weightSum = 0;
+          let valueSum = 0;
+          
+          for (let dy = -4; dy <= 4; dy++) {
+            for (let dx = -4; dx <= 4; dx++) {
+              const nx = x + dx;
+              const ny = y + dy;
+              if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                const nidx = ny * width + nx;
+                const nAlpha = alpha[nidx];
+                
+                // Spatial weight (Gaussian)
+                const spatialDist = dx * dx + dy * dy;
+                const spatialWeight = Math.exp(-spatialDist / (2 * spatialSigma * spatialSigma));
+                
+                // Range weight (based on alpha difference)
+                const rangeDist = Math.abs(currentAlpha - nAlpha);
+                const rangeWeight = Math.exp(-rangeDist / (2 * rangeSigma * rangeSigma));
+                
+                const weight = spatialWeight * rangeWeight;
+                weightSum += weight;
+                valueSum += weight * nAlpha;
+              }
+            }
+          }
+          
+          alphaSmoothed[idx] = Math.floor(valueSum / weightSum);
+        }
+      }
+      
+      // Additional pass: Remove isolated transparent pixels (noise)
+      const alphaFinal = new Uint8Array(pixelCount);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = y * width + x;
+          const currentAlpha = alphaSmoothed[idx];
+          
+          // If pixel is semi-transparent, check if it's isolated
+          if (currentAlpha > 0 && currentAlpha < 128) {
+            let opaqueNeighbors = 0;
+            let totalNeighbors = 0;
+            
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                  const nidx = ny * width + nx;
+                  totalNeighbors++;
+                  if (alphaSmoothed[nidx] > 200) opaqueNeighbors++;
+                }
+              }
+            }
+            
+            // If surrounded by opaque pixels, make it opaque
+            if (opaqueNeighbors > totalNeighbors * 0.6) {
+              alphaFinal[idx] = 255;
+            } else if (opaqueNeighbors === 0) {
+              alphaFinal[idx] = 0;
+            } else {
+              alphaFinal[idx] = currentAlpha;
+            }
+          } else {
+            alphaFinal[idx] = currentAlpha;
+          }
+        }
+      }
+      
+      // === PHASE 6: APPLY ALPHA CHANNEL ===
+      for (let idx = 0; idx < pixelCount; idx++) {
+        data[idx * 4 + 3] = alphaFinal[idx];
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      
+      img.src = canvas.toDataURL('image/png');
+      img.style.filter = 'drop-shadow(0 8px 20px rgba(0,0,0,0.25))';
+      
+      console.log('✓ AGGRESSIVE background removal complete');
+      
+    } catch (e) {
+      console.error('Background removal failed:', e);
+    }
+  }
+  
+  // K-means clustering helper for background detection
+  function kMeansColor(samples, k) {
+    if (samples.length === 0) return [[255, 255, 255]];
+    
+    // Initialize centroids randomly
+    const centroids = [];
+    for (let i = 0; i < k; i++) {
+      centroids.push(samples[Math.floor(Math.random() * samples.length)]);
+    }
+    
+    // Run k-means for 5 iterations
+    for (let iter = 0; iter < 5; iter++) {
+      const clusters = Array.from({ length: k }, () => []);
+      
+      // Assign samples to nearest centroid
+      samples.forEach(sample => {
+        let minDist = Infinity;
+        let bestCluster = 0;
+        
+        for (let i = 0; i < k; i++) {
+          const dist = Math.sqrt(
+            Math.pow(sample[0] - centroids[i][0], 2) +
+            Math.pow(sample[1] - centroids[i][1], 2) +
+            Math.pow(sample[2] - centroids[i][2], 2)
+          );
+          if (dist < minDist) {
+            minDist = dist;
+            bestCluster = i;
+          }
+        }
+        
+        clusters[bestCluster].push(sample);
+      });
+      
+      // Update centroids
+      for (let i = 0; i < k; i++) {
+        if (clusters[i].length > 0) {
+          const sumR = clusters[i].reduce((sum, c) => sum + c[0], 0);
+          const sumG = clusters[i].reduce((sum, c) => sum + c[1], 0);
+          const sumB = clusters[i].reduce((sum, c) => sum + c[2], 0);
+          const count = clusters[i].length;
+          centroids[i] = [
+            Math.floor(sumR / count),
+            Math.floor(sumG / count),
+            Math.floor(sumB / count)
+          ];
+        }
+      }
+    }
+    
+    return centroids;
+  }
+
+  function duplicateBoard() {
+    const newName = prompt('Enter a name for the duplicated board:', '{{ selected_board }} (Copy)');
+    if (newName && newName.trim()) {
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '{{ url_for("homeowner_design_board_duplicate", board_name=selected_board) }}';
+      
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'new_name';
+      input.value = newName.trim();
+      form.appendChild(input);
+      
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+
+  // Close modals on outside click
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeEditModal();
+  });
+
+  document.getElementById('optionsModal').addEventListener('click', function(e) {
+    if (e.target === this) closeOptionsMenu();
+  });
+</script>
+
+<!-- Crop Modal -->
+<div id="cropModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center;">
+  <div style="width: 90%; max-width: 900px; background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0; font-size: 1.8rem; color: #3A352C;">✂️ Crop Photo</h2>
+      <button onclick="closeCropModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+    </div>
+
+    <div style="margin-bottom: 1.5rem;">
+      <label style="display: block; font-size: 0.9rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.8rem;">Select Photo to Crop</label>
+      <select id="cropPhotoSelect" onchange="loadCropImage()" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem;">
+        <option value="">Choose a photo...</option>
+        {% for photo in selected_details.photos %}
+          <option value="{{ url_for('static', filename=photo) }}" data-path="{{ photo }}">Photo {{ loop.index }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div style="max-height: 500px; overflow: hidden; margin-bottom: 1.5rem; background: #f5f5f5; border-radius: 8px;">
+      <img id="cropImage" style="max-width: 100%; display: block;" />
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+      <button onclick="closeCropModal()" style="padding: 0.9rem 1.5rem; border: 2px solid #E5DDD0; background: white; color: #6B6A45; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+      <button onclick="applyCrop()" style="padding: 0.9rem 1.5rem; background: linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Apply Crop</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cropper.js Script -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<script>
+  let cropper = null;
+  let currentPhotoPath = null;
+
+  function openCropModal() {
+    document.getElementById('cropModal').style.display = 'flex';
+    closeOptionsMenu();
+  }
+
+  function closeCropModal() {
+    document.getElementById('cropModal').style.display = 'none';
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    document.getElementById('cropPhotoSelect').value = '';
+    document.getElementById('cropImage').src = '';
+  }
+
+  function loadCropImage() {
+    const select = document.getElementById('cropPhotoSelect');
+    const imgUrl = select.value;
+    const imgPath = select.options[select.selectedIndex].dataset.path;
+    
+    if (!imgUrl) return;
+    
+    currentPhotoPath = imgPath;
+    const image = document.getElementById('cropImage');
+    
+    if (cropper) {
+      cropper.destroy();
+    }
+    
+    image.src = imgUrl;
+    image.onload = function() {
+      cropper = new Cropper(image, {
+        aspectRatio: NaN,
+        viewMode: 1,
+        autoCropArea: 0.8,
+        responsive: true,
+        background: false,
+        zoomable: true,
+        scalable: true,
+      });
+    };
+  }
+
+  function applyCrop() {
+    if (!cropper || !currentPhotoPath) {
+      alert('Please select a photo first');
+      return;
+    }
+
+    const canvas = cropper.getCroppedCanvas();
+    canvas.toBlob(function(blob) {
+      const formData = new FormData();
+      formData.append('cropped_image', blob, 'cropped.png');
+      formData.append('original_path', currentPhotoPath);
+      formData.append('board_name', '{{ selected_board }}');
+
+      fetch('/homeowner/crop-photo', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('✓ Photo cropped successfully!');
+          window.location.reload();
+        } else {
+          alert('Error: ' + (data.error || 'Could not crop photo'));
+        }
+      })
+      .catch(err => {
+        alert('Error cropping photo');
+        console.error(err);
+      });
+    });
+  }
+</script>
+
+{% endblock %}

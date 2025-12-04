@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
+
+    <!-- Main CSS -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Dancing+Script:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    
+    <style>
+      /* Base overrides for full-width layouts */
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      
+      .ylh-shell {
+        margin: 0;
+        padding: 0;
+      }
+      
+      .ylh-main {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Eco-Inspired Header -->
+    <header class="site-header">
+      <div class="header-content">
+        <a href="{{ url_for('index') }}" class="brand-logo">
+          Your Life • Your Home
+        </a>
+        <nav class="main-nav">
+          <ul>
+            <li><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('homeowner_overview') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('login') }}">Sign In</a></li>
+            <li><a href="{{ url_for('signup', role='homeowner') }}">Get Started</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="ylh-shell">
+      <main class="ylh-main">
+        {# Optional flash messages section #}
+        {% with messages = get_flashed_messages(with_categories=True) %}
+          {% if messages %}
+            <div style="margin-bottom:0.8rem;">
+              {% for category, message in messages %}
+                <div class="ylh-flash {{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <!-- Sidebar menu toggle logic -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll("[data-menu-toggle]");
+        buttons.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            const target = btn.getAttribute("data-menu-toggle");
+            const submenu = document.querySelector(
+              '[data-menu-section="' + target + '"]'
+            );
+            if (!submenu) return;
+
+            const isOpen = submenu.getAttribute("data-open") === "true";
+            submenu.style.display = isOpen ? "none" : "block";
+            submenu.setAttribute("data-open", isOpen ? "false" : "true");
+            btn.classList.toggle("is-open", !isOpen);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

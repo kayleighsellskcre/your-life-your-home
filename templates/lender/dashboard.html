@@ -1,0 +1,43 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">At a glance</p>
+  <h1>Lender Overview</h1>
+  <p>A quick read on your applications, loans in motion, and nurture opportunities.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="dashboard-cards">
+    <div class="card">
+      <h2>New Applications</h2>
+      <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
+        {{ metrics.new_applications }}
+      </p>
+      <p class="card-subtext">
+        Borrowers who have started the process and need clear, kind next steps.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Loans in Process</h2>
+      <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
+        {{ metrics.loans_in_process }}
+      </p>
+      <p class="card-subtext">
+        Files that are moving through processing and underwriting that you want to keep flowing smoothly.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Nurture Contacts</h2>
+      <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
+        {{ metrics.nurture_contacts }}
+      </p>
+      <p class="card-subtext">
+        Past clients and warm leads who may benefit from check-ins, rate reviews, or simple equity updates.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

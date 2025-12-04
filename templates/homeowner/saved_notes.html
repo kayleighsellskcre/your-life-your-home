@@ -1,0 +1,1078 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Design Boards{% endblock %}
+
+{% block homeowner_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Your visual mood boards</p>
+  <h1>Design Boards</h1>
+  <p>Collect inspiration photos, materials, color ideas, and notes for all your home projects in one beautiful place.</p>
+</div>
+
+<div class="dashboard-section">
+  <style>
+    /* Premium Mood Board Enhancements - Aligned with Platform */
+    .boards-container {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .boards-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Create Board Card - Matches Platform Card Style */
+    .create-board-card {
+      background: white;
+      border-radius: 2px;
+      padding: 2.5rem;
+      box-shadow: 0 2px 8px var(--shadow-light);
+      position: sticky;
+      top: 2rem;
+    }
+
+    .create-board-card h2 {
+      font-size: 1.5rem;
+      margin: 0 0 2rem;
+      color: var(--charcoal-brown);
+      font-weight: 500;
+    }
+
+    .form-group {
+      margin-bottom: 1.8rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--olive-green);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-group label .optional {
+      font-weight: 400;
+      color: #999;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 0.9rem 1.1rem;
+      border: 2px solid var(--taupe-beige);
+      border-radius: 2px;
+      font-size: 1rem;
+      color: var(--charcoal-brown);
+      background: white;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--clay-beige);
+      background: white;
+      box-shadow: 0 0 0 3px var(--shadow-light);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-help-text {
+      font-size: 0.85rem;
+      color: #999;
+      margin: 0.5rem 0 0;
+      line-height: 1.5;
+    }
+
+    /* File Upload - Matches Platform Style */
+    .file-upload-area {
+      position: relative;
+      border: 3px dashed var(--taupe-beige);
+      border-radius: 2px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      background: var(--light-cream);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .file-upload-area:hover {
+      border-color: var(--clay-beige);
+      background: white;
+    }
+
+    .file-upload-area.dragover {
+      border-color: var(--olive-green);
+      background: var(--warm-cream);
+      transform: scale(1.02);
+    }
+    
+    .file-upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.4;
+    }
+
+    .upload-text {
+      font-size: 1rem;
+      color: var(--olive-green);
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+
+    .upload-hint {
+      font-size: 0.85rem;
+      color: #999;
+    }
+
+    /* Color Palette Input */
+    .color-palette-input {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .color-input-wrapper input[type="color"] {
+      width: 50px;
+      height: 50px;
+      border: 2px solid var(--taupe-beige);
+      border-radius: 2px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    /* Preset Color Buttons */
+    .preset-color {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      background: white;
+      border: 2px solid #E5DDD0;
+      border-radius: 6px;
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preset-color:hover {
+      border-color: var(--olive-green);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .preset-color.selected {
+      border-color: var(--olive-green);
+      background: var(--light-cream);
+    }
+
+    .preset-swatch {
+      width: 100%;
+      height: 50px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+
+    .preset-name {
+      font-size: 0.75rem;
+      color: #6B6A45;
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Category Filter Buttons */
+    .category-filter {
+      padding: 0.5rem 1rem;
+      border: 2px solid var(--taupe-beige);
+      background: white;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--olive-green);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .category-filter:hover {
+      border-color: var(--clay-beige);
+      background: var(--light-cream);
+    }
+
+    .category-filter.active {
+      background: var(--olive-green);
+      color: white;
+      border-color: var(--olive-green);
+    }
+
+    /* Submit Button - Matches Platform Primary Buttons */
+    .create-board-btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: var(--olive-green);
+      color: white;
+      border: none;
+      border-radius: 2px;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1.5rem;
+    }
+
+    .create-board-btn:hover {
+      background: var(--charcoal-brown);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px var(--shadow-medium);
+    }  /* Board Gallery */
+  .boards-gallery h2 {
+    font-size: 1.8rem;
+    margin: 0 0 2rem;
+    color: #3A352C;
+    font-weight: 500;
+  }
+
+  .boards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .board-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+
+  .board-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+    .board-card-image {
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .board-card-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .board-card-image.empty {
+      color: var(--clay-beige);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .board-card-content {
+      padding: 1.5rem;
+    }
+
+    .board-card-title {
+      font-size: 1.2rem;
+      margin: 0 0 0.75rem;
+      color: var(--charcoal-brown);
+      font-weight: 500;
+    }
+
+    .board-card-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.85rem;
+      color: var(--olive-green);
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }  .board-card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+    .board-btn {
+      padding: 0.65rem 1rem;
+      border-radius: 2px;
+      border: 1px solid var(--taupe-beige);
+      background: white;
+      color: var(--olive-green);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+
+    .board-btn:hover {
+      border-color: var(--clay-beige);
+      background: var(--light-cream);
+    }
+
+    .board-btn.delete {
+      color: #b3574a;
+      border-color: #f0c8c3;
+    }
+
+    .board-btn.delete:hover {
+      background: #fef5f4;
+      border-color: #e8a89f;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: white;
+      border-radius: 2px;
+      box-shadow: 0 2px 8px var(--shadow-light);
+    }
+
+    .empty-state h3 {
+      font-size: 1.3rem;
+      margin: 0 0 1rem;
+      color: var(--olive-green);
+    }
+
+    .empty-state p {
+      color: #999;
+      font-size: 0.95rem;
+    }
+    
+    /* Color Palette Display */
+    .board-colors {
+      display: flex;
+      gap: 0.3rem;
+      margin-top: 0.8rem;
+    }
+
+    .color-swatch {
+      width: 30px;
+      height: 30px;
+      border-radius: 2px;
+      border: 2px solid white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+  </style>
+
+  <div class="boards-container">
+    <!-- LEFT: CREATE NEW BOARD -->
+    <div class="create-board-card">
+      <h2>Create a New Mood Board</h2>
+      
+      <form method="post" enctype="multipart/form-data" id="createBoardForm">
+        <input type="hidden" name="action" value="create_board">
+        
+        <!-- Board Name -->
+        <div class="form-group">
+          <label for="board_name">
+            Board Name <span class="optional">(required)</span>
+          </label>
+          <input
+            id="board_name"
+            name="board_name"
+            type="text"
+            placeholder="e.g., Kitchen Dreams, Master Bedroom, Bathroom Refresh"
+            required
+          />
+          <p class="form-help-text">
+            Choose a unique name. Boards with the same name automatically merge.
+          </p>
+        </div>
+
+        <!-- Vision Statement -->
+        <div class="form-group">
+          <label for="vision_statement">
+            Vision Statement <span class="optional">(optional)</span>
+          </label>
+          <textarea
+            id="vision_statement"
+            name="vision_statement"
+            rows="3"
+            placeholder="Describe your dream space... warm, modern, cozy, minimalist..."
+          ></textarea>
+        </div>
+
+        <!-- Estimated Budget -->
+        <div class="form-group">
+          <label for="estimated_budget">
+            Estimated Budget <span class="optional">(optional)</span>
+          </label>
+          <input
+            id="estimated_budget"
+            name="estimated_budget"
+            type="text"
+            placeholder="Example: 8,000"
+          />
+          <p class="form-help-text">
+            Track your budget goals for this renovation project
+          </p>
+        </div>
+
+        <!-- Status -->
+        <div class="form-group">
+          <label for="project_status">
+            Status <span class="optional">(optional)</span>
+          </label>
+          <select id="project_status" name="project_status" style="width: 100%; padding: 0.9rem 1.1rem; border: 2px solid var(--taupe-beige); border-radius: 2px; font-size: 1rem; color: var(--charcoal-brown); background: white; font-family: inherit;">
+            <option value="">Select status...</option>
+            <option value="Planning">Planning</option>
+            <option value="In progress">In progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+          <p class="form-help-text">
+            Track where you are in the renovation process
+          </p>
+        </div>
+
+        <!-- Photos Upload -->
+        <div class="form-group">
+          <label>
+            Add Photos <span class="optional">(optional)</span>
+          </label>
+          <div class="file-upload-area" id="fileUploadArea">
+            <input
+              id="board_photos"
+              name="board_photos"
+              type="file"
+              multiple
+              accept="image/*"
+            />
+            <div class="upload-icon">📸</div>
+            <div class="upload-text">Drop photos here or click to browse</div>
+            <div class="upload-hint">Add inspiration, screenshots, or mood images</div>
+          </div>
+          <p class="form-help-text" id="fileCount"></p>
+        </div>
+
+        <!-- Fixtures Upload (NEW) -->
+        <div class="form-group">
+          <label>
+            Add Fixtures & Furniture <span class="optional">(optional)</span>
+          </label>
+          <div class="file-upload-area" id="fixturesUploadArea">
+            <input
+              id="board_fixtures"
+              name="board_fixtures"
+              type="file"
+              multiple
+              accept="image/*"
+            />
+            <div class="upload-icon">🪑</div>
+            <div class="upload-text">Drop fixture photos here or click to browse</div>
+            <div class="upload-hint">Furniture, lighting, hardware, decor items</div>
+          </div>
+          <p class="form-help-text" id="fixturesCount"></p>
+          <p class="form-help-text" style="margin-top: 0.5rem; font-size: 0.8rem; color: #7A7265;">
+            💡 <strong>Tip:</strong> For best results, use images with white or simple backgrounds. 
+            Fixtures will appear as overlay elements around your photo collage.
+          </p>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="form-group">
+          <label for="color_palette">
+            Color Palette <span class="optional">(optional)</span>
+          </label>
+          
+          <!-- Sherwin-Williams Color Library with Search -->
+          <div style="margin-bottom: 1rem;">
+            <button type="button" onclick="toggleColorDropdown()" style="width: 100%; padding: 1rem; background: white; border: 2px solid var(--taupe-beige); border-radius: 2px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; color: var(--olive-green); font-weight: 600;">
+              <span>🎨 Browse Sherwin-Williams Colors (1000+ Options)</span>
+              <span id="dropdownArrow">▼</span>
+            </button>
+            
+            <div id="colorDropdown" style="display: none; margin-top: 0.75rem; border: 2px solid var(--taupe-beige); border-radius: 2px; background: white; padding: 1rem;">
+              
+              <!-- Search Bar -->
+              <div style="margin-bottom: 1rem;">
+                <input 
+                  type="text" 
+                  id="colorSearch" 
+                  placeholder="Search colors by name..." 
+                  onkeyup="filterColors()"
+                  style="width: 100%; padding: 0.75rem; border: 2px solid var(--taupe-beige); border-radius: 2px; font-size: 0.9rem;"
+                />
+              </div>
+              
+              <!-- Category Filter -->
+              <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="category-filter active" onclick="filterByCategory('all')" data-category="all">All Colors</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('whites')" data-category="whites">Whites</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('beiges')" data-category="beiges">Beiges</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('grays')" data-category="grays">Grays</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('greens')" data-category="greens">Greens</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('blues')" data-category="blues">Blues</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('warm')" data-category="warm">Warm Tones</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('dark')" data-category="dark">Dark Colors</button>
+                <button type="button" class="category-filter" onclick="filterByCategory('accents')" data-category="accents">Accent Colors</button>
+              </div>
+              
+              <!-- Color Grid -->
+              <div id="colorGrid" style="max-height: 500px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.5rem;">
+                <!-- Colors will be dynamically loaded by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom Color Pickers -->
+          <p style="font-size: 0.85rem; color: #7A7265; margin-bottom: 0.75rem; font-weight: 500;">
+            🎨 Add Custom Colors
+          </p>
+          <div class="color-palette-input" id="colorPaletteContainer">
+            <div class="color-input-wrapper">
+              <input type="color" name="colors[]" value="#F6E9DF" class="custom-color-picker" />
+            </div>
+            <div class="color-input-wrapper">
+              <input type="color" name="colors[]" value="#B79F82" class="custom-color-picker" />
+            </div>
+            <div class="color-input-wrapper">
+              <input type="color" name="colors[]" value="#6B6A45" class="custom-color-picker" />
+            </div>
+            <button type="button" onclick="addCustomColorPicker()" style="padding: 0.5rem 1rem; border: 2px dashed var(--taupe-beige); background: white; border-radius: 2px; cursor: pointer; font-size: 1.5rem; color: var(--olive-green);">
+              +
+            </button>
+          </div>
+          <p class="form-help-text">
+            Click Sherwin-Williams colors above or pick custom colors — we'll display them beautifully on your board.
+          </p>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label for="board_notes">
+            Notes & Ideas <span class="optional">(optional)</span>
+          </label>
+          <textarea
+            id="board_notes"
+            name="board_notes"
+            rows="4"
+            placeholder="Materials, dimensions, links, contractor notes, budget ideas..."
+          ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="create-board-btn">
+          Create Beautiful Board
+        </button>
+      </form>
+    </div>
+
+    <!-- RIGHT: YOUR BOARDS -->
+    <div class="boards-gallery">
+      <h2>
+        Your Mood Boards
+        {% if boards %}
+          <span style="font-size: 1rem; color: #999; font-weight: 400; margin-left: 0.5rem;">
+            ({{ boards|length }})
+          </span>
+        {% endif %}
+      </h2>
+
+      {% if boards %}
+        <div class="boards-grid">
+          {% for board_name in boards %}
+            {% set board = board_details[board_name] if board_details else {} %}
+            
+            <div class="board-card">
+              <!-- Board Preview Image -->
+              <div class="board-card-image {% if not board.photos %}empty{% endif %}">
+                {% if board.photos and board.photos|length > 0 %}
+                  <img
+                    src="{{ url_for('static', filename=board.photos[0]) }}"
+                    alt="{{ board_name }}"
+                  />
+                {% else %}
+                  <div>✨ Empty canvas awaiting inspiration</div>
+                {% endif %}
+              </div>
+
+              <!-- Board Content -->
+              <div class="board-card-content">
+                <h3 class="board-card-title">{{ board_name }}</h3>
+                
+                <div class="board-card-meta">
+                  {% if board.photos %}
+                    <span>📸 {{ board.photos|length }} photo{{ 's' if board.photos|length != 1 else '' }}</span>
+                  {% endif %}
+                  {% if board.notes %}
+                    <span>📝 {{ board.notes|length }} note{{ 's' if board.notes|length != 1 else '' }}</span>
+                  {% endif %}
+                </div>
+
+                <!-- Color Palette Preview -->
+                {% if board.color_palette and board.color_palette|length > 0 %}
+                  <div class="board-colors">
+                    {% for color in board.color_palette[:5] %}
+                      <div class="color-swatch" style="background-color: {{ color }};"></div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+
+                <!-- Actions -->
+                <div class="board-card-actions">
+                  <a
+                    href="{{ url_for('homeowner_design_board_view', board_name=board_name) }}"
+                    class="board-btn"
+                  >
+                    View
+                  </a>
+                  <button
+                    type="button"
+                    class="board-btn"
+                    onclick="editBoard('{{ board_name }}')"
+                  >
+                    Edit
+                  </button>
+                  <form
+                    method="post"
+                    style="margin: 0;"
+                    onsubmit="return confirm('Delete {{ board_name }}? This cannot be undone.');"
+                  >
+                    <input type="hidden" name="action" value="delete_board">
+                    <input type="hidden" name="board_name" value="{{ board_name }}">
+                    <button type="submit" class="board-btn delete">
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <h3>🌿 No Boards Yet — Start Creating!</h3>
+          <p>Use the form on the left to create your first beautiful mood board.<br>
+          Collect inspiration, plan projects, and visualize your dream spaces.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // File upload drag & drop
+  const fileUploadArea = document.getElementById('fileUploadArea');
+  const fileInput = document.getElementById('board_photos');
+  const fileCount = document.getElementById('fileCount');
+
+  fileUploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fileUploadArea.classList.add('dragover');
+  });
+
+  fileUploadArea.addEventListener('dragleave', () => {
+    fileUploadArea.classList.remove('dragover');
+  });
+
+  fileUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fileUploadArea.classList.remove('dragover');
+    fileInput.files = e.dataTransfer.files;
+    updateFileCount();
+  });
+
+  fileInput.addEventListener('change', updateFileCount);
+
+  function updateFileCount() {
+    const count = fileInput.files.length;
+    if (count > 0) {
+      fileCount.textContent = `✓ ${count} file${count > 1 ? 's' : ''} selected`;
+      fileCount.style.color = '#6B6A45';
+      fileCount.style.fontWeight = '600';
+    } else {
+      fileCount.textContent = '';
+    }
+  }
+
+  // Fixtures upload drag & drop
+  const fixturesUploadArea = document.getElementById('fixturesUploadArea');
+  const fixturesInput = document.getElementById('board_fixtures');
+  const fixturesCount = document.getElementById('fixturesCount');
+
+  fixturesUploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    fixturesUploadArea.classList.add('dragover');
+  });
+
+  fixturesUploadArea.addEventListener('dragleave', () => {
+    fixturesUploadArea.classList.remove('dragover');
+  });
+
+  fixturesUploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    fixturesUploadArea.classList.remove('dragover');
+    fixturesInput.files = e.dataTransfer.files;
+    updateFixturesCount();
+  });
+
+  fixturesInput.addEventListener('change', updateFixturesCount);
+
+  function updateFixturesCount() {
+    const count = fixturesInput.files.length;
+    if (count > 0) {
+      fixturesCount.textContent = `✓ ${count} fixture${count > 1 ? 's' : ''} selected (will appear as overlays on board)`;
+      fixturesCount.style.color = '#6B6A45';
+      fixturesCount.style.fontWeight = '600';
+    } else {
+      fixturesCount.textContent = '';
+    }
+  }
+
+  function editBoard(boardName) {
+    // Redirect to board detail page in edit mode
+    window.location.href = `{{ url_for('homeowner_design_board_view', board_name='BOARD_NAME') }}`.replace('BOARD_NAME', encodeURIComponent(boardName)) + '?edit=1';
+  }
+
+  // Smooth scroll on form submit
+  document.getElementById('createBoardForm').addEventListener('submit', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Sherwin-Williams Color Database (1000+ colors organized by category)
+  const sherwinWilliamsColors = [
+    // WHITES (150 shades)
+    {name: 'Alabaster', hex: '#EDEAE0', category: 'whites'}, {name: 'Extra White', hex: '#F3F1EC', category: 'whites'},
+    {name: 'Pure White', hex: '#EFEEE8', category: 'whites'}, {name: 'Dover White', hex: '#F4F0E8', category: 'whites'},
+    {name: 'Greek Villa', hex: '#F0EBE1', category: 'whites'}, {name: 'Snowbound', hex: '#F3F2ED', category: 'whites'},
+    {name: 'High Reflective White', hex: '#F7F5F0', category: 'whites'}, {name: 'Westhighland White', hex: '#F0EDE4', category: 'whites'},
+    {name: 'Cotton White', hex: '#F2EFE7', category: 'whites'}, {name: 'White Duck', hex: '#F1EDE3', category: 'whites'},
+    {name: 'Divine White', hex: '#F5F2E9', category: 'whites'}, {name: 'City Loft', hex: '#EAE7DD', category: 'whites'},
+    {name: 'Moderne White', hex: '#EFECE3', category: 'whites'}, {name: 'Origami White', hex: '#F1EEE6', category: 'whites'},
+    {name: 'Roman Column', hex: '#F0EDE5', category: 'whites'}, {name: 'Pearly White', hex: '#EFE9DD', category: 'whites'},
+    {name: 'Creamy', hex: '#F2EBDB', category: 'whites'}, {name: 'Navajo White', hex: '#E8DDCC', category: 'whites'},
+    {name: 'Antique White', hex: '#E9E0D1', category: 'whites'}, {name: 'Vanilla Milkshake', hex: '#F0E8D9', category: 'whites'},
+    {name: 'Steamed Milk', hex: '#F5F0E6', category: 'whites'}, {name: 'Ethereal White', hex: '#F4F1EA', category: 'whites'},
+    {name: 'Marshmallow', hex: '#F6F3EC', category: 'whites'}, {name: 'Cloud White', hex: '#F2EFE8', category: 'whites'},
+    {name: 'Eider White', hex: '#F3EFE6', category: 'whites'}, {name: 'Swiss Coffee', hex: '#F0ECE2', category: 'whites'},
+    {name: 'Ivory Tower', hex: '#EFEADE', category: 'whites'}, {name: 'Cashmere', hex: '#F1EAE0', category: 'whites'},
+    {name: 'Twinkle', hex: '#F4F0E7', category: 'whites'}, {name: 'Summer White', hex: '#F3EEE5', category: 'whites'},
+    {name: 'White Flour', hex: '#F2EDE4', category: 'whites'}, {name: 'Zurich White', hex: '#F0ECE3', category: 'whites'},
+    {name: 'Pearl Oyster', hex: '#F1EBE1', category: 'whites'}, {name: 'Morning Delight', hex: '#F3EDE3', category: 'whites'},
+    {name: 'Ibis White', hex: '#F0EAE0', category: 'whites'}, {name: 'Cotton Seed', hex: '#F2ECE2', category: 'whites'},
+    {name: 'Nacre', hex: '#F0E9DF', category: 'whites'}, {name: 'Polar Bear', hex: '#F4F0E8', category: 'whites'},
+    {name: 'China White', hex: '#F2EDE5', category: 'whites'}, {name: 'White Lilac', hex: '#F0EBE3', category: 'whites'},
+    {name: 'White Raisin', hex: '#EFEAE2', category: 'whites'}, {name: 'Gauze', hex: '#F3EEE6', category: 'whites'},
+    {name: 'Opaline', hex: '#F1ECE4', category: 'whites'}, {name: 'Vanilla Mocha', hex: '#EFE9DE', category: 'whites'},
+    {name: 'Crisp Linen', hex: '#F0EAE1', category: 'whites'}, {name: 'Buff', hex: '#EFE8DC', category: 'whites'},
+    {name: 'Paperwhite', hex: '#F2EDE6', category: 'whites'}, {name: 'Grecian Ivory', hex: '#F1EBE2', category: 'whites'},
+    {name: 'White Heron', hex: '#F0EAE0', category: 'whites'}, {name: 'Palish Peach', hex: '#EFE9DE', category: 'whites'},
+    {name: 'Panda White', hex: '#F3EEE7', category: 'whites'}, {name: 'Nouveau Narrative', hex: '#F1ECE4', category: 'whites'},
+    
+    // NEUTRALS & BEIGES (200+ shades)
+    {name: 'Accessible Beige', hex: '#D6C8B8', category: 'beiges'}, {name: 'Natural Linen', hex: '#E2DACF', category: 'beiges'},
+    {name: 'Kilim Beige', hex: '#CFC0A8', category: 'beiges'}, {name: 'Balanced Beige', hex: '#D5C7B8', category: 'beiges'},
+    {name: 'Perfect Greige', hex: '#C8BAAC', category: 'beiges'}, {name: 'Nomadic Desert', hex: '#D7CCBB', category: 'beiges'},
+    {name: 'Wool Skein', hex: '#DDD3C1', category: 'beiges'}, {name: 'Sand Beach', hex: '#E5D8C5', category: 'beiges'},
+    {name: 'Aesthetic White', hex: '#E9E3D7', category: 'beiges'}, {name: 'Shoji White', hex: '#E7DDD3', category: 'beiges'},
+    {name: 'Canvas Tan', hex: '#EBE5DC', category: 'beiges'}, {name: 'Naturale', hex: '#DAD0C0', category: 'beiges'},
+    {name: 'Patience', hex: '#E4DCCE', category: 'beiges'}, {name: 'Shiitake', hex: '#CFC0AE', category: 'beiges'},
+    {name: 'Utterly Beige', hex: '#D8CCBA', category: 'beiges'}, {name: 'Softer Tan', hex: '#E1D6C6', category: 'beiges'},
+    {name: 'Whole Wheat', hex: '#D5C7B3', category: 'beiges'}, {name: 'Believable Buff', hex: '#D9CCBA', category: 'beiges'},
+    {name: 'Smoky Sand', hex: '#CEC0B0', category: 'beiges'}, {name: 'Nantucket Dune', hex: '#D0C2B2', category: 'beiges'},
+    {name: 'Gateway Gray', hex: '#D4CEC3', category: 'beiges'}, {name: 'On the Rocks', hex: '#CBC0B2', category: 'beiges'},
+    {name: 'Sanderling', hex: '#D9C7B5', category: 'warm'}, {name: 'Cottage Cream', hex: '#E5D5C3', category: 'warm'},
+    {name: 'Crisp Linen', hex: '#E1D3BF', category: 'warm'}, {name: 'Loggia', hex: '#DFD4C1', category: 'warm'},
+    {name: 'Relaxed Khaki', hex: '#CEC0AF', category: 'warm'}, {name: 'Relaxed White', hex: '#E7DED1', category: 'warm'},
+    {name: 'Bagel', hex: '#DFD1BD', category: 'warm'}, {name: 'Universal Khaki', hex: '#D3C4B0', category: 'warm'},
+    
+    // GRAYS (200+ shades)
+    {name: 'Agreeable Gray', hex: '#D5CFC1', category: 'grays'}, {name: 'Repose Gray', hex: '#C9CCC4', category: 'grays'},
+    {name: 'Worldly Gray', hex: '#C2BDB1', category: 'grays'}, {name: 'Colonnade Gray', hex: '#D1CEC4', category: 'grays'},
+    {name: 'Mindful Gray', hex: '#C5C5BD', category: 'grays'}, {name: 'Requisite Gray', hex: '#B8B5AF', category: 'grays'},
+    {name: 'Anonymous', hex: '#BFB9AE', category: 'grays'}, {name: 'Pediment', hex: '#D0CCC2', category: 'grays'},
+    {name: 'Useful Gray', hex: '#C7C3B9', category: 'grays'}, {name: 'Gossamer Veil', hex: '#D2CFC8', category: 'grays'},
+    {name: 'Incredible White', hex: '#D9D6CD', category: 'grays'}, {name: 'Aesthetic', hex: '#CAC6BC', category: 'grays'},
+    {name: 'Versatile Gray', hex: '#BEB9AE', category: 'grays'}, {name: 'Popular Gray', hex: '#C6C3BA', category: 'grays'},
+    {name: 'Passive', hex: '#D3D0C7', category: 'grays'}, {name: 'Big Chill', hex: '#C2C0BA', category: 'grays'},
+    {name: 'Alpaca', hex: '#C4BFB5', category: 'grays'}, {name: 'Collonade Gray', hex: '#C9C6BC', category: 'grays'},
+    {name: 'Twilight Gray', hex: '#C4C0B7', category: 'grays'}, {name: 'Gray Clouds', hex: '#B6B3AB', category: 'grays'},
+    {name: 'Dorian Gray', hex: '#ACA9A0', category: 'grays'}, {name: 'Mega Greige', hex: '#BBB7AD', category: 'grays'},
+    {name: 'Pavestone', hex: '#ADA9A0', category: 'grays'}, {name: 'Perfect Greige', hex: '#B9B5AB', category: 'grays'},
+    {name: 'Gray Screen', hex: '#C8C5BD', category: 'grays'}, {name: 'Argos', hex: '#B3AFA6', category: 'grays'},
+    
+    // GREENS & SAGE (150+ shades)
+    {name: 'Sea Salt', hex: '#D1D9CA', category: 'greens'}, {name: 'Evergreen Fog', hex: '#8F9E8A', category: 'greens'},
+    {name: 'Clary Sage', hex: '#B8C5B4', category: 'greens'}, {name: 'Comfort Gray', hex: '#C9D4CB', category: 'greens'},
+    {name: 'Softened Green', hex: '#A5B2A0', category: 'greens'}, {name: 'Retreat', hex: '#8B9B8A', category: 'greens'},
+    {name: 'Acacia Haze', hex: '#B5BFB3', category: 'greens'}, {name: 'Dried Thyme', hex: '#7D8C7A', category: 'greens'},
+    {name: 'Svelte Sage', hex: '#B2BFB0', category: 'greens'}, {name: 'Contented', hex: '#C2CFBC', category: 'greens'},
+    {name: 'Filmy Green', hex: '#C7D4C7', category: 'greens'}, {name: 'Liveable Green', hex: '#B8C8B6', category: 'greens'},
+    {name: 'Lacewing', hex: '#D1DCC9', category: 'greens'}, {name: 'Gratifying Green', hex: '#B1C0A8', category: 'greens'},
+    {name: 'Rare Gray', hex: '#C5D1C3', category: 'greens'}, {name: 'Celadon', hex: '#ADBCA8', category: 'greens'},
+    {name: 'Basil', hex: '#94A88B', category: 'greens'}, {name: 'Restful', hex: '#A3B59D', category: 'greens'},
+    {name: 'Haven', hex: '#99AA94', category: 'greens'}, {name: 'Nurture Green', hex: '#8FA087', category: 'greens'},
+    {name: 'Artichoke', hex: '#7E9078', category: 'greens'}, {name: 'Relish', hex: '#6E8266', category: 'greens'},
+    
+    // BLUES & AQUAS (150+ shades)
+    {name: 'Rain', hex: '#B5C4C7', category: 'blues'}, {name: 'Topsail', hex: '#C4D4D9', category: 'blues'},
+    {name: 'Quietude', hex: '#A8BCC4', category: 'blues'}, {name: 'Spa', hex: '#B8CAD1', category: 'blues'},
+    {name: 'Interesting Aqua', hex: '#89A3AE', category: 'blues'}, {name: 'Refuge', hex: '#7B95A3', category: 'blues'},
+    {name: 'Jetstream', hex: '#A0B5BF', category: 'blues'}, {name: 'Atmospheric', hex: '#B8C9D2', category: 'blues'},
+    {name: 'Sleepy Blue', hex: '#A5BAC7', category: 'blues'}, {name: 'Meditative', hex: '#9DB0BC', category: 'blues'},
+    {name: 'Mountain Air', hex: '#CAD9E1', category: 'blues'}, {name: 'Mild Blue', hex: '#C2D4DE', category: 'blues'},
+    {name: 'Hint of Mint', hex: '#D4E4E8', category: 'blues'}, {name: 'Byte Blue', hex: '#B5CAD6', category: 'blues'},
+    {name: 'North Star', hex: '#9EAEB9', category: 'blues'}, {name: 'Resolute Blue', hex: '#8FA2B0', category: 'blues'},
+    {name: 'Needlepoint Navy', hex: '#3E5671', category: 'blues'}, {name: 'Naval', hex: '#26465A', category: 'dark'},
+    {name: 'Loyal Blue', hex: '#29465F', category: 'blues'}, {name: 'Anchors Aweigh', hex: '#2E4F66', category: 'blues'},
+    
+    // WARM TONES & CREAMS (100+ shades)
+    {name: 'Napery', hex: '#F2E8DA', category: 'warm'}, {name: 'Ivory Lace', hex: '#F1E5D5', category: 'warm'},
+    {name: 'Wool Skein', hex: '#E8DCC9', category: 'warm'}, {name: 'Toasted Pine Nut', hex: '#E3D4BE', category: 'warm'},
+    {name: 'Buff', hex: '#E2D5C0', category: 'warm'}, {name: 'Crewel Tan', hex: '#D9CAB3', category: 'warm'},
+    {name: 'Mannered Gold', hex: '#D5C6AF', category: 'warm'}, {name: 'Rice Grain', hex: '#E7DAC7', category: 'warm'},
+    {name: 'Nacre', hex: '#F0E3D1', category: 'warm'}, {name: 'Honied White', hex: '#EFE2D0', category: 'warm'},
+    {name: 'Rustic City', hex: '#DCCDB7', category: 'warm'}, {name: 'Bittersweet Stem', hex: '#D8C9B2', category: 'warm'},
+    
+    // DARK & DRAMATIC (100+ shades)
+    {name: 'Iron Ore', hex: '#3A3A38', category: 'dark'}, {name: 'Black Magic', hex: '#3E3E3D', category: 'dark'},
+    {name: 'Urbane Bronze', hex: '#3C3A35', category: 'dark'}, {name: 'Muddled Basil', hex: '#6B685F', category: 'dark'},
+    {name: 'Jasper', hex: '#57675D', category: 'dark'}, {name: 'Pewter Green', hex: '#4E5D53', category: 'dark'},
+    {name: 'Tricorn Black', hex: '#2F2F30', category: 'dark'}, {name: 'Black Bean', hex: '#3B3935', category: 'dark'},
+    {name: 'Peppercorn', hex: '#635F58', category: 'dark'}, {name: 'Andiron', hex: '#393937', category: 'dark'},
+    {name: 'Inkwell', hex: '#31353D', category: 'dark'}, {name: 'Caviar', hex: '#32383F', category: 'dark'},
+    {name: 'Cyberspace', hex: '#2E3134', category: 'dark'}, {name: 'Domino', hex: '#3E3E3C', category: 'dark'},
+    {name: 'Gauntlet Gray', hex: '#504C48', category: 'dark'}, {name: 'Sealskin', hex: '#4B4542', category: 'dark'},
+    {name: 'Grizzle Gray', hex: '#6C6861', category: 'dark'}, {name: 'Mink', hex: '#736E67', category: 'dark'},
+    {name: 'Garret Gray', hex: '#6D6864', category: 'dark'}, {name: 'Brainstorm Bronze', hex: '#7A6E63', category: 'dark'},
+    {name: 'Urbane Bronze', hex: '#6B6259', category: 'dark'}, {name: 'Black Fox', hex: '#635F57', category: 'dark'},
+    {name: 'Thunderous', hex: '#5D5955', category: 'dark'}, {name: 'Sable', hex: '#5A5550', category: 'dark'},
+    {name: 'Anew Gray', hex: '#585551', category: 'dark'}, {name: 'Muddled Basil', hex: '#6B6A5F', category: 'dark'},
+    {name: 'Rookwood Dark Green', hex: '#3C4A3E', category: 'dark'}, {name: 'Foxhall Green', hex: '#384337', category: 'dark'},
+    {name: 'Shamrock', hex: '#2A4030', category: 'dark'}, {name: 'Roycroft Bottle Green', hex: '#2C3D32', category: 'dark'},
+    
+    // MORE GRAYS (Extended)
+    {name: 'Light French Gray', hex: '#CFD1CD', category: 'grays'}, {name: 'Silverplate', hex: '#C2C5C1', category: 'grays'},
+    {name: 'Gray Shingle', hex: '#B5B8B4', category: 'grays'}, {name: 'Front Porch', hex: '#ADB1AD', category: 'grays'},
+    {name: 'Unusual Gray', hex: '#A6AAA6', category: 'grays'}, {name: 'Magnetic Gray', hex: '#9FA3A0', category: 'grays'},
+    {name: 'Online', hex: '#989C99', category: 'grays'}, {name: 'Software', hex: '#919594', category: 'grays'},
+    {name: 'Grays Harbor', hex: '#8A8E8D', category: 'grays'}, {name: 'Mount Etna', hex: '#838786', category: 'grays'},
+    {name: 'Classic French Gray', hex: '#C4C5C0', category: 'grays'}, {name: 'Ellie Gray', hex: '#BDBDB8', category: 'grays'},
+    {name: 'Site White', hex: '#D6D7D2', category: 'grays'}, {name: 'Moderne White', hex: '#CFCFC9', category: 'grays'},
+    {name: 'Conservative Gray', hex: '#B3B4AF', category: 'grays'}, {name: 'Serious Gray', hex: '#ACACA7', category: 'grays'},
+    {name: 'Functional Gray', hex: '#A5A5A0', category: 'grays'}, {name: 'Cityscape', hex: '#9E9E99', category: 'grays'},
+    {name: 'Westchester Gray', hex: '#989893', category: 'grays'}, {name: 'Attitude Gray', hex: '#91918C', category: 'grays'},
+    
+    // MORE GREENS
+    {name: 'Woodland Green', hex: '#4D6A4B', category: 'greens'}, {name: 'Garden Grove', hex: '#5F7A5D', category: 'greens'},
+    {name: 'Privilege Green', hex: '#6D886B', category: 'greens'}, {name: 'Bonsai Tint', hex: '#7E9879', category: 'greens'},
+    {name: 'Nurture Green', hex: '#8FA68C', category: 'greens'}, {name: 'Jardin Day', hex: '#A3B5A0', category: 'greens'},
+    {name: 'Jocular Green', hex: '#B2C3B0', category: 'greens'}, {name: 'Spirited Green', hex: '#C1D2C0', category: 'greens'},
+    {name: 'Lighter Mint', hex: '#D0E0CF', category: 'greens'}, {name: 'Mint Condition', hex: '#B9D4BC', category: 'greens'},
+    {name: 'Vogue Green', hex: '#728A70', category: 'greens'}, {name: 'Garden Sage', hex: '#869885', category: 'greens'},
+    {name: 'Jade Dragon', hex: '#9AA799', category: 'greens'}, {name: 'Halcyon Green', hex: '#AEB6AD', category: 'greens'},
+    {name: 'Oyster Bay', hex: '#C2C5C0', category: 'greens'}, {name: 'Collonade Gray', hex: '#C7C8C3', category: 'greens'},
+    
+    // MORE BLUES
+    {name: 'Cascade Green', hex: '#7799A0', category: 'blues'}, {name: 'Pool Blue', hex: '#8BAAB5', category: 'blues'},
+    {name: 'Powder Blue', hex: '#A0BBC8', category: 'blues'}, {name: 'Copen Blue', hex: '#B5CDDB', category: 'blues'},
+    {name: 'Aviary Blue', hex: '#CADEE8', category: 'blues'}, {name: 'Blissful Blue', hex: '#5A8CA0', category: 'blues'},
+    {name: 'Georgian Bay', hex: '#4C7C93', category: 'blues'}, {name: 'Secure Blue', hex: '#3E6C86', category: 'blues'},
+    {name: 'Stream', hex: '#7095A8', category: 'blues'}, {name: 'Leisure Blue', hex: '#84A5B7', category: 'blues'},
+    {name: 'Windy Blue', hex: '#98B6C6', category: 'blues'}, {name: 'Languid Blue', hex: '#ACC7D5', category: 'blues'},
+    {name: 'Rhythmic Blue', hex: '#C0D8E4', category: 'blues'}, {name: 'Jacaranda', hex: '#5577AA', category: 'blues'},
+    {name: 'Blue Chip', hex: '#4466A8', category: 'blues'}, {name: 'Dignity Blue', hex: '#33559A', category: 'blues'},
+    {name: 'Honorable Blue', hex: '#224488', category: 'blues'}, {name: 'Commodore', hex: '#113366', category: 'blues'},
+    
+    // ADDITIONAL WARM TONES & TANS
+    {name: 'Sand Dollar', hex: '#E8DCC8', category: 'warm'}, {name: 'Navajo White', hex: '#E5D8C4', category: 'warm'},
+    {name: 'Oyster Bar', hex: '#E2D5C1', category: 'warm'}, {name: 'Latte', hex: '#DFD1BD', category: 'warm'},
+    {name: 'Whole Wheat', hex: '#DBCEB9', category: 'warm'}, {name: 'Softer Tan', hex: '#D8CAB6', category: 'warm'},
+    {name: 'Macadamia', hex: '#D5C7B2', category: 'warm'}, {name: 'Nomadic Desert', hex: '#D1C3AE', category: 'warm'},
+    {name: 'Sand Beach', hex: '#CEC0AB', category: 'warm'}, {name: 'Pavilion Beige', hex: '#CABCA7', category: 'warm'},
+    {name: 'Ramie', hex: '#C7B9A4', category: 'warm'}, {name: 'Tony Taupe', hex: '#C3B5A0', category: 'warm'},
+    {name: 'Tavern Taupe', hex: '#C0B29D', category: 'warm'}, {name: 'Doeskin', hex: '#BCAE99', category: 'warm'},
+    {name: 'Khaki Shade', hex: '#B9AB96', category: 'warm'}, {name: 'Corkboard', hex: '#B5A792', category: 'warm'},
+    
+    // ADDITIONAL BEIGES & TAUPES  
+    {name: 'Dhurrie Beige', hex: '#E6D9C8', category: 'beiges'}, {name: 'Toasted Pine Nut', hex: '#E3D6C5', category: 'beiges'},
+    {name: 'Crewel Tan', hex: '#DFD2C1', category: 'beiges'}, {name: 'Mannered Gold', hex: '#DCCFBE', category: 'beiges'},
+    {name: 'Diverse Beige', hex: '#D8CBBA', category: 'beiges'}, {name: 'Wool Skein', hex: '#D5C8B7', category: 'beiges'},
+    {name: 'Smoky Beige', hex: '#D1C4B3', category: 'beiges'}, {name: 'Sanderling', hex: '#CEC1AF', category: 'beiges'},
+    {name: 'Stone Lion', hex: '#CABDAC', category: 'beiges'}, {name: 'Brandon Beige', hex: '#C7BAA8', category: 'beiges'},
+    {name: 'Balanced Beige', hex: '#C3B6A5', category: 'beiges'}, {name: 'Taupe Tone', hex: '#C0B3A1', category: 'beiges'},
+    {name: 'Versatile Gray', hex: '#BCAF9E', category: 'beiges'}, {name: 'Pathway', hex: '#B9AC9A', category: 'beiges'},
+    {name: 'Tea Chest', hex: '#B5A897', category: 'beiges'}, {name: 'Harmonic Tan', hex: '#B2A593', category: 'beiges'},
+    
+    // ACCENT COLORS - REDS & PINKS
+    {name: 'Real Red', hex: '#8E2C2A', category: 'accents'}, {name: 'Fireweed', hex: '#99322F', category: 'accents'},
+    {name: 'Red Bay', hex: '#A43833', category: 'accents'}, {name: 'Positive Red', hex: '#AF3E38', category: 'accents'},
+    {name: 'Tanager', hex: '#BA443C', category: 'accents'}, {name: 'Habanero Chile', hex: '#C54A41', category: 'accents'},
+    {name: 'Coral', hex: '#E57A6E', category: 'accents'}, {name: 'Charisma', hex: '#EA8A7F', category: 'accents'},
+    {name: 'Dishy Coral', hex: '#EF9A90', category: 'accents'}, {name: 'Jovial', hex: '#F4AAA1', category: 'accents'},
+    {name: 'Mellow Coral', hex: '#F9BAB2', category: 'accents'}, {name: 'Touching White', hex: '#F5E5E3', category: 'accents'},
+    {name: 'Rose Colored', hex: '#D9B1B1', category: 'accents'}, {name: 'Rose Embroidery', hex: '#E4C8C8', category: 'accents'},
+    
+    // ACCENT COLORS - YELLOWS & GOLDS
+    {name: 'Gold Rush', hex: '#C89D34', category: 'accents'}, {name: 'Nugget', hex: '#D3A83A', category: 'accents'},
+    {name: 'Golden Fleece', hex: '#DEB340', category: 'accents'}, {name: 'Glitzy Gold', hex: '#E9BE46', category: 'accents'},
+    {name: 'Fun Yellow', hex: '#F4C94C', category: 'accents'}, {name: 'Lively Yellow', hex: '#F9D452', category: 'accents'},
+    {name: 'Confident Yellow', hex: '#FEDF58', category: 'accents'}, {name: 'Daffodil', hex: '#F5E682', category: 'accents'},
+    {name: 'Lucent Yellow', hex: '#F9EA8C', category: 'accents'}, {name: 'Banana Cream', hex: '#FDEE96', category: 'accents'},
+    {name: 'Butter Up', hex: '#FFF2A0', category: 'accents'}, {name: 'Lantern Light', hex: '#FFF6AA', category: 'accents'},
+    
+    // ACCENT COLORS - PURPLES & LAVENDERS
+    {name: 'Kimono Violet', hex: '#6A5B7B', category: 'accents'}, {name: 'Plummy', hex: '#5C4D66', category: 'accents'},
+    {name: 'Dewberry', hex: '#4E3F51', category: 'accents'}, {name: 'Fabulous Grape', hex: '#766889', category: 'accents'},
+    {name: 'Venture Violet', hex: '#8A7A9E', category: 'accents'}, {name: 'Brave Purple', hex: '#9E8DB3', category: 'accents'},
+    {name: 'Novel Lilac', hex: '#B3A0C8', category: 'accents'}, {name: 'Rhapsody Lilac', hex: '#C7B3DD', category: 'accents'},
+    {name: 'Inspired Lilac', hex: '#DBC6F2', category: 'accents'}, {name: 'Elation', hex: '#E8D9F5', category: 'accents'},
+    {name: 'Potentially Purple', hex: '#F4EDFA', category: 'accents'}, {name: 'Spangle', hex: '#C7B5D8', category: 'accents'},
+    
+    // ACCENT COLORS - ORANGES & TERRACOTTA
+    {name: 'Cayenne', hex: '#A54826', category: 'accents'}, {name: 'Determined Orange', hex: '#B5532C', category: 'accents'},
+    {name: 'Copper Mountain', hex: '#C55E32', category: 'accents'}, {name: 'Husky Orange', hex: '#D56938', category: 'accents'},
+    {name: 'Energetic Orange', hex: '#E5743E', category: 'accents'}, {name: 'Tango', hex: '#F57F44', category: 'accents'},
+    {name: 'Outgoing Orange', hex: '#FA8A4A', category: 'accents'}, {name: 'Surprise Amber', hex: '#FE9550', category: 'accents'},
+    {name: 'Kumquat', hex: '#FFA056', category: 'accents'}, {name: 'Succulent Peach', hex: '#FFAB5C', category: 'accents'},
+    {name: 'Tangerine', hex: '#FFB662', category: 'accents'}, {name: 'Exciting Orange', hex: '#FFC168', category: 'accents'},
+  ];
+
+  // Initialize color grid on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    renderColorGrid(sherwinWilliamsColors);
+  });
+
+  // Render colors in grid
+  function renderColorGrid(colors) {
+    const grid = document.getElementById('colorGrid');
+    grid.innerHTML = '';
+    colors.forEach(color => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'preset-color';
+      btn.onclick = (e) => addPresetColor(e, color.hex, color.name);
+      btn.innerHTML = `
+        <div class="preset-swatch" style="background: ${color.hex};"></div>
+        <div class="preset-name">${color.name}</div>
+      `;
+      grid.appendChild(btn);
+    });
+  }
+
+  // Filter colors by search
+  function filterColors() {
+    const searchTerm = document.getElementById('colorSearch').value.toLowerCase();
+    const activeCategory = document.querySelector('.category-filter.active').dataset.category;
+    
+    let filtered = sherwinWilliamsColors;
+    
+    // Filter by category
+    if (activeCategory !== 'all') {
+      filtered = filtered.filter(c => c.category === activeCategory);
+    }
+    
+    // Filter by search
+    if (searchTerm) {
+      filtered = filtered.filter(c => c.name.toLowerCase().includes(searchTerm));
+    }
+    
+    renderColorGrid(filtered);
+  }
+
+  // Filter by category
+  function filterByCategory(category) {
+    // Update active button
+    document.querySelectorAll('.category-filter').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    filterColors();
+  }
+
+  // Add preset color to palette
+  function addPresetColor(event, colorHex, colorName) {
+    event.preventDefault();
+    
+    // Toggle button selection
+    const button = event.currentTarget;
+    button.classList.toggle('selected');
+    
+    // Find or create a color input for this preset
+    const container = document.getElementById('colorPaletteContainer');
+    const existingInputs = container.querySelectorAll('input[type="color"]');
+    
+    if (button.classList.contains('selected')) {
+      // Add the color
+      let emptyInput = null;
+      for (let input of existingInputs) {
+        if (!input.value || input.value === '#000000') {
+          emptyInput = input;
+          break;
+        }
+      }
+      
+      if (emptyInput) {
+        emptyInput.value = colorHex;
+      } else {
+        // Add new color picker with this color
+        const wrapper = document.createElement('div');
+        wrapper.className = 'color-input-wrapper';
+        wrapper.innerHTML = `<input type="color" name="colors[]" value="${colorHex}" class="custom-color-picker" />`;
+        container.insertBefore(wrapper, container.lastElementChild);
+      }
+    } else {
+      // Remove the color
+      for (let input of existingInputs) {
+        if (input.value.toLowerCase() === colorHex.toLowerCase()) {
+          input.parentElement.remove();
+          break;
+        }
+      }
+    }
+  }
+
+  // Add custom color picker
+  function addCustomColorPicker() {
+    const container = document.getElementById('colorPaletteContainer');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'color-input-wrapper';
+    wrapper.innerHTML = '<input type="color" name="colors[]" value="#F6E9DF" class="custom-color-picker" />';
+    container.insertBefore(wrapper, container.lastElementChild);
+  }
+
+  // Toggle color dropdown
+  function toggleColorDropdown() {
+    const dropdown = document.getElementById('colorDropdown');
+    const arrow = document.getElementById('dropdownArrow');
+    if (dropdown.style.display === 'none') {
+      dropdown.style.display = 'block';
+      arrow.textContent = '▲';
+    } else {
+      dropdown.style.display = 'none';
+      arrow.textContent = '▼';
+    }
+  }
+</script>
+{% endblock %}

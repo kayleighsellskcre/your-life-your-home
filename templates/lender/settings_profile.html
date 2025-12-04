@@ -1,0 +1,27 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Your digital presence</p>
+  <h1>Lender Profile & Branding</h1>
+  <p>This is the public page borrowers and partner agents will see when they click your link. It is your digital front door.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Profile Elements</h2>
+    <p class="card-subtext" style="margin-top:1rem;">
+      In the full version of this page you will be able to add:
+    </p>
+    <ul style="font-size:0.95rem;margin:1rem 0 0 1.5rem;padding:0;line-height:1.8;">
+      <li>Your photo and company logo</li>
+      <li>Contact information and application link</li>
+      <li>Pre-approval request form and portal links</li>
+      <li>Short, friendly description of how you serve clients</li>
+    </ul>
+    <p class="card-subtext" style="margin-top:1rem;">
+      While this builder is in progress you can still use the <a href="{{ url_for('lender_crm') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">CRM</a>, <a href="{{ url_for('lender_loans') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">loan tracker</a>, and <a href="{{ url_for('lender_messages') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">messaging tools</a> to support your borrowers.
+    </p>
+  </div>
+</div>
+{% endblock %}

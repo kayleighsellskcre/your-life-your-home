@@ -1,0 +1,84 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Track relationships</p>
+  <h1>Borrower CRM</h1>
+  <p>Track pre-approvals, active loans, and past clients with clear stages and gentle follow-up.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Quick Add Borrower</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
+      <div>
+        <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Name</label>
+        <input id="name" name="name" required />
+      </div>
+      <div>
+        <label for="status" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Status</label>
+        <select id="status" name="status">
+          <option value="preapproval">Pre-Approval</option>
+          <option value="in_process">In Process</option>
+          <option value="closed">Closed</option>
+          <option value="prospect">Prospect</option>
+        </select>
+      </div>
+      <div>
+        <label for="loan_type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Loan Type</label>
+        <input id="loan_type" name="loan_type" placeholder="Conventional, FHA, VA, etc." />
+      </div>
+      <div>
+        <label for="target_payment" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Target Payment</label>
+        <input id="target_payment" name="target_payment" placeholder="Example: $2,000/mo" />
+      </div>
+      <button class="btn btn-primary" type="submit">Add Borrower</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Borrowers</h2>
+
+    {% if borrowers %}
+      <table class="data-table" style="margin-top:1.5rem;">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Loan Type</th>
+            <th>Target Payment</th>
+            <th>Last Touch</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in borrowers %}
+            <tr>
+              <td style="font-weight:600;">{{ b.name }}</td>
+              <td>
+                {% if b.status == 'preapproval' %}
+                  <span class="badge" style="background-color:var(--soft-tan);color:var(--charcoal-brown);">Pre-Approval</span>
+                {% elif b.status == 'in_process' %}
+                  <span class="badge" style="background-color:#d4edda;color:#155724;">In Process</span>
+                {% elif b.status == 'closed' %}
+                  <span class="badge" style="background-color:#cce5ff;color:#004085;">Closed</span>
+                {% else %}
+                  <span class="badge" style="background-color:var(--light-cream);color:var(--charcoal-brown);">{{ b.status|capitalize }}</span>
+                {% endif %}
+              </td>
+              <td>{{ b.loan_type }}</td>
+              <td>{{ b.target_payment }}</td>
+              <td>{{ b.last_touch }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+        <h3>No Borrowers Yet</h3>
+        <p>Add one current client or a warm prospect to begin.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

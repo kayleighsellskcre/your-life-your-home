@@ -1,0 +1,2189 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Seasonal Checklists{% endblock %}
+
+{% block homeowner_content %}
+<style>
+  .seasonal-hero {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    padding: 3rem;
+    margin: -2rem -3rem 3rem;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+  }
+  
+  .season-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+  
+  .season-nav-btn {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    padding: 1.5rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .season-nav-btn:hover {
+    border-color: rgba(107, 106, 69, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(107, 106, 69, 0.1);
+  }
+  
+  .season-nav-btn.active {
+    border-color: #6B6A45;
+    background: rgba(107, 106, 69, 0.05);
+  }
+  
+  .season-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .season-name {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #3A352C;
+    margin-bottom: 0.25rem;
+  }
+  
+  .season-progress {
+    font-size: 0.75rem;
+    color: #6B6A45;
+    font-weight: 500;
+  }
+  
+  .season-section {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+  
+  .season-section.active {
+    display: block;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .season-header {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .season-title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: #3A352C;
+    margin-bottom: 0.75rem;
+  }
+  
+  .season-subtitle {
+    font-size: 1.05rem;
+    color: #3A352C;
+    opacity: 0.8;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+  
+  .category-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+  }
+  
+  .category-icon {
+    font-size: 2rem;
+  }
+  
+  .category-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: #3A352C;
+    margin: 0;
+  }
+  
+  .category-badge {
+    margin-left: auto;
+    padding: 0.4rem 1rem;
+    background: rgba(107, 106, 69, 0.1);
+    color: #6B6A45;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+  
+  .checklist-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.15);
+    transition: all 0.2s ease;
+  }
+  
+  .checklist-item:last-child {
+    border-bottom: none;
+  }
+  
+  .checklist-item:hover {
+    background: rgba(246, 242, 232, 0.5);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  .checklist-item.completed {
+    opacity: 0.6;
+  }
+  
+  .checklist-item.completed .task-title {
+    text-decoration: line-through;
+  }
+  
+  .custom-checkbox {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    cursor: pointer;
+    margin-top: 0.2rem;
+  }
+  
+  .custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    z-index: 2;
+  }
+  
+  .checkbox-visual {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #6B6A45;
+    background: white;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .custom-checkbox input:checked ~ .checkbox-visual {
+    background: #6B6A45;
+    border-color: #6B6A45;
+  }
+  
+  .custom-checkbox input:checked ~ .checkbox-visual::after {
+    content: "✓";
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .task-content {
+    flex: 1;
+  }
+  
+  .task-title {
+    font-weight: 500;
+    color: #3A352C;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+  }
+  
+  .task-description {
+    font-size: 0.9rem;
+    color: #3A352C;
+    opacity: 0.7;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  
+  .task-meta {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+  
+  .task-priority,
+  .task-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: #6B6A45;
+    font-weight: 500;
+  }
+  
+  .priority-high { color: #BA8C61; }
+  
+  .progress-bar-container {
+    background: rgba(200, 180, 151, 0.2);
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 1rem;
+  }
+  
+  .progress-bar {
+    background: #6B6A45;
+    height: 100%;
+    transition: width 0.5s ease;
+  }
+  
+  .completion-message {
+    background: rgba(107, 106, 69, 0.1);
+    border: 1px solid #6B6A45;
+    padding: 1.5rem;
+    text-align: center;
+    margin-top: 2rem;
+    display: none;
+  }
+  
+  .completion-message.show {
+    display: block;
+    animation: slideDown 0.4s ease;
+  }
+  
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .btn-action {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid #6B6A45;
+    background: white;
+    color: #6B6A45;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .btn-action:hover {
+    background: #6B6A45;
+    color: white;
+  }
+  
+  .btn-action.primary {
+    background: #6B6A45;
+    color: white;
+  }
+  
+  .btn-action.primary:hover {
+    background: #5A5A3A;
+  }
+
+  /* PREMIUM PRINT STYLES */
+  @media print {
+    /* Hide screen-only elements */
+    .seasonal-hero,
+    .season-nav,
+    .action-buttons,
+    .completion-message {
+      display: none !important;
+    }
+
+    /* Reset page styles */
+    body {
+      background: white !important;
+      font-size: 9pt;
+      line-height: 1.3;
+      color: black;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Show all seasons or only active season */
+    .season-section {
+      display: block !important;
+      page-break-after: always;
+      padding: 0;
+      margin: 0;
+    }
+
+    .season-section:last-child {
+      page-break-after: auto;
+    }
+
+    /* Compact season header for print */
+    .season-header {
+      background: white !important;
+      border-bottom: 2px solid #6B6A45;
+      padding: 0.5rem 0 0.4rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .season-icon {
+      display: inline-block;
+      font-size: 1.2rem !important;
+      margin-right: 0.3rem;
+      vertical-align: middle;
+    }
+
+    .season-title {
+      display: inline-block;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: #3A352C;
+      margin: 0;
+      vertical-align: middle;
+    }
+
+    .season-subtitle {
+      font-size: 0.75rem;
+      color: #3A352C;
+      opacity: 0.7;
+      margin: 0.3rem 0 0;
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    .progress-bar-container {
+      display: none !important;
+    }
+
+    /* Compact category cards for print */
+    .category-card {
+      background: white;
+      border: 1px solid #C8B497;
+      padding: 0.5rem;
+      margin-bottom: 0.6rem;
+      page-break-inside: avoid;
+    }
+
+    .category-header {
+      border-bottom: 1px solid #C8B497;
+      padding-bottom: 0.3rem;
+      margin-bottom: 0.4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .category-icon {
+      font-size: 0.9rem;
+      margin-right: 0.3rem;
+    }
+
+    .category-title {
+      display: inline-block;
+      font-family: 'Playfair Display', serif;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #3A352C;
+      margin: 0;
+    }
+
+    .category-badge {
+      background: #F6F2E8;
+      color: #6B6A45;
+      padding: 0.15rem 0.4rem;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      border: 1px solid #C8B497;
+      font-weight: 500;
+    }
+
+    /* Compact checklist items */
+    .checklist-item {
+      display: flex;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #F6F2E8;
+      page-break-inside: avoid;
+    }
+
+    .checklist-item:last-child {
+      border-bottom: none;
+    }
+
+    .checklist-item:hover {
+      background: none;
+    }
+
+    /* Smaller checkbox */
+    .custom-checkbox {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      margin-right: 0.4rem;
+      margin-top: 0.1rem;
+    }
+
+    .custom-checkbox input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkbox-visual {
+      display: block;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid #6B6A45;
+      background: white;
+    }
+
+    /* Show checkmark for already-checked items */
+    .custom-checkbox input[type="checkbox"]:checked + .checkbox-visual {
+      background: white;
+    }
+
+    .custom-checkbox input[type="checkbox"]:checked + .checkbox-visual::after {
+      content: "✓";
+      display: block;
+      text-align: center;
+      line-height: 11px;
+      color: #6B6A45;
+      font-weight: bold;
+      font-size: 11px;
+    }
+
+    /* Compact task typography */
+    .task-content {
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #3A352C;
+      margin: 0 0 0.15rem;
+      line-height: 1.2;
+    }
+
+    .task-description {
+      font-size: 0.65rem;
+      color: #3A352C;
+      opacity: 0.7;
+      line-height: 1.3;
+      margin: 0 0 0.2rem;
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.15rem;
+      flex-wrap: wrap;
+    }
+
+    .task-priority,
+    .task-time {
+      font-size: 0.6rem;
+      color: #6B6A45;
+      background: #F6F2E8;
+      padding: 0.1rem 0.3rem;
+      border: 0.5px solid #C8B497;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    .task-priority.priority-critical {
+      background: #ffebee;
+      color: #c62828;
+      border-color: #ef9a9a;
+    }
+
+    .task-priority.priority-high {
+      background: #fff3e0;
+      color: #e65100;
+      border-color: #ffb74d;
+    }
+
+    .task-priority.priority-medium {
+      background: #f3f4f6;
+      color: #6B6A45;
+      border-color: #C8B497;
+    }
+
+    /* Tighter page setup */
+    @page {
+      margin: 0.4in 0.5in;
+      size: letter portrait;
+    }
+
+    /* Force color accuracy for badges */
+    * {
+      color-adjust: exact !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    /* Compact footer */
+    .season-section::after {
+      content: "☐ Check tasks as completed  •  Your Life, Your Home";
+      display: block;
+      text-align: center;
+      font-size: 0.6rem;
+      color: #6B6A45;
+      margin-top: 0.75rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid #C8B497;
+      font-weight: 300;
+      font-style: italic;
+    }
+
+    /* Minimal spacing between categories */
+    .category-card + .category-card {
+      margin-top: 0.6rem;
+    }
+
+    /* Remove extra whitespace */
+    p, h1, h2, h3, h4, h5, h6 {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  /* Print button enhancement - show print preview hint */
+  @media screen {
+    .btn-action[onclick*="printChecklist"]::before {
+      content: "📄 ";
+    }
+  }
+</style>
+
+<script>
+// Checklist state management
+const ChecklistManager = {
+  getKey(season) {
+    return `seasonal_checklist_${season}`;
+  },
+  
+  load(season) {
+    const saved = localStorage.getItem(this.getKey(season));
+    return saved ? JSON.parse(saved) : {};
+  },
+  
+  save(season, taskId, checked) {
+    const data = this.load(season);
+    data[taskId] = checked;
+    localStorage.setItem(this.getKey(season), JSON.stringify(data));
+  },
+  
+  clear(season) {
+    localStorage.removeItem(this.getKey(season));
+  },
+  
+  getProgress(season, totalTasks) {
+    const data = this.load(season);
+    const completed = Object.values(data).filter(v => v === true).length;
+    return { completed, total: totalTasks, percentage: Math.round((completed / totalTasks) * 100) };
+  }
+};
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Load saved states
+  document.querySelectorAll('.checklist-item').forEach(item => {
+    const checkbox = item.querySelector('input[type="checkbox"]');
+    const season = item.closest('.season-section').dataset.season;
+    const taskId = checkbox.id;
+    
+    const savedStates = ChecklistManager.load(season);
+    if (savedStates[taskId]) {
+      checkbox.checked = true;
+      item.classList.add('completed');
+    }
+    
+    // Add change listener
+    checkbox.addEventListener('change', function() {
+      ChecklistManager.save(season, taskId, this.checked);
+      
+      if (this.checked) {
+        item.classList.add('completed');
+      } else {
+        item.classList.remove('completed');
+      }
+      
+      updateProgress(season);
+    });
+  });
+  
+  // Initialize progress for all seasons
+  ['spring', 'summer', 'fall', 'winter'].forEach(season => {
+    updateProgress(season);
+    updateNavProgress(season);
+  });
+  
+  // Set default active season
+  showSeason('spring');
+});
+
+function showSeason(season) {
+  // Update nav buttons
+  document.querySelectorAll('.season-nav-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  document.querySelector(`[onclick="showSeason('${season}')"]`).classList.add('active');
+  
+  // Update sections
+  document.querySelectorAll('.season-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  document.getElementById(season).classList.add('active');
+  
+  // Scroll to top smoothly
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress(season) {
+  const section = document.getElementById(season);
+  const totalTasks = section.querySelectorAll('.checklist-item').length;
+  const progress = ChecklistManager.getProgress(season, totalTasks);
+  
+  // Update progress bar
+  const progressBar = section.querySelector('.progress-bar');
+  if (progressBar) {
+    progressBar.style.width = progress.percentage + '%';
+  }
+  
+  // Update completion message
+  const completionMsg = section.querySelector('.completion-message');
+  if (completionMsg) {
+    if (progress.percentage === 100) {
+      completionMsg.classList.add('show');
+    } else {
+      completionMsg.classList.remove('show');
+    }
+  }
+  
+  // Update nav progress
+  updateNavProgress(season);
+}
+
+function updateNavProgress(season) {
+  const section = document.getElementById(season);
+  const totalTasks = section.querySelectorAll('.checklist-item').length;
+  const progress = ChecklistManager.getProgress(season, totalTasks);
+  
+  const navBtn = document.querySelector(`[onclick="showSeason('${season}')"]`);
+  const progressSpan = navBtn.querySelector('.season-progress');
+  if (progressSpan) {
+    progressSpan.textContent = `${progress.completed}/${progress.total} complete`;
+  }
+}
+
+function clearProgress(season) {
+  if (confirm(`Are you sure you want to clear all progress for ${season}? This cannot be undone.`)) {
+    ChecklistManager.clear(season);
+    
+    // Uncheck all boxes
+    const section = document.getElementById(season);
+    section.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.checked = false;
+      checkbox.closest('.checklist-item').classList.remove('completed');
+    });
+    
+    updateProgress(season);
+  }
+}
+
+function printChecklist(season) {
+  window.print();
+}
+</script>
+
+<!-- Hero Section -->
+<div class="seasonal-hero">
+  <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+    <div style="display: inline-block; padding: 0.4rem 1rem; background: rgba(107, 106, 69, 0.15); color: #6B6A45; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; margin-bottom: 1rem;">
+      Interactive Home Maintenance
+    </div>
+    <h1 style="font-family: var(--font-heading); font-size: 2.8rem; font-weight: 400; margin: 0 0 1rem; color: #3A352C;">
+      Seasonal Checklists
+    </h1>
+    <p style="font-size: 1.05rem; line-height: 1.8; color: #3A352C; opacity: 0.8; margin: 0; font-weight: 300;">
+      Stay on top of home maintenance with our comprehensive seasonal guides. Check off tasks as you complete them—your progress is automatically saved!
+    </p>
+  </div>
+</div>
+
+<!-- Season Navigation -->
+<div class="season-nav">
+  <div class="season-nav-btn" onclick="showSeason('spring')">
+    <div class="season-icon">🌸</div>
+    <div class="season-name">Spring</div>
+    <div class="season-progress">0/0 complete</div>
+  </div>
+  <div class="season-nav-btn" onclick="showSeason('summer')">
+    <div class="season-icon">☀️</div>
+    <div class="season-name">Summer</div>
+    <div class="season-progress">0/0 complete</div>
+  </div>
+  <div class="season-nav-btn" onclick="showSeason('fall')">
+    <div class="season-icon">🍂</div>
+    <div class="season-name">Fall</div>
+    <div class="season-progress">0/0 complete</div>
+  </div>
+  <div class="season-nav-btn" onclick="showSeason('winter')">
+    <div class="season-icon">❄️</div>
+    <div class="season-name">Winter</div>
+    <div class="season-progress">0/0 complete</div>
+  </div>
+</div>
+
+<!-- SPRING SECTION -->
+<div id="spring" class="season-section active" data-season="spring">
+  <div class="season-header">
+    <div class="season-icon" style="font-size: 3rem; margin-bottom: 1rem;">🌸</div>
+    <h2 class="season-title">Spring Maintenance</h2>
+    <p class="season-subtitle">
+      Spring is renewal time! Inspect, clean, and prepare your home for the warmer months ahead.
+    </p>
+    <div class="progress-bar-container">
+      <div class="progress-bar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🏠</div>
+      <h3 class="category-title">Roof & Gutters</h3>
+      <span class="category-badge">High Priority</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-gutter-clean">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clean gutters and downspouts thoroughly</div>
+        <div class="task-description">Remove all debris, leaves, and buildup. Ensure water flows away from foundation 5-10 feet. Check for proper pitch and secure mounting.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 2-3 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-roof-inspect">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Inspect roof for winter damage</div>
+        <div class="task-description">Check for missing/damaged shingles, flashing issues, and areas needing repair. Look for moss or algae growth.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 30-45 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-attic-check">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check attic for leaks or water damage</div>
+        <div class="task-description">Look for water stains, mold, or damaged insulation from winter ice dams or leaks.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Inspection</span>
+          <span class="task-time">⏱️ 20 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🌡️</div>
+      <h3 class="category-title">HVAC & Air Quality</h3>
+      <span class="category-badge">Essential</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-ac-tuneup">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Schedule AC tune-up with professional</div>
+        <div class="task-description">Have system inspected, cleaned, and refrigerant levels checked before summer heat arrives.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">💰 $150-250</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-filter-replace">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Replace all HVAC filters</div>
+        <div class="task-description">Install fresh filters to improve air quality and system efficiency for cooling season.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Quick Task</span>
+          <span class="task-time">⏱️ 10 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-vents-clean">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clean all air vents and returns</div>
+        <div class="task-description">Vacuum dust and debris from vents. Wipe down registers for better airflow.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🧹 Cleaning</span>
+          <span class="task-time">⏱️ 45 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-condenser-clean">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clean outdoor condenser unit</div>
+        <div class="task-description">Remove debris, leaves, and dirt. Trim vegetation back 2 feet. Straighten bent fins carefully.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Maintenance</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🔨</div>
+      <h3 class="category-title">Exterior & Foundation</h3>
+      <span class="category-badge">Seasonal</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-foundation-inspect">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Inspect foundation for cracks or settling</div>
+        <div class="task-description">Look for new cracks, gaps, or changes from winter freeze-thaw cycles.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-drainage-test">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Test drainage during first spring rain</div>
+        <div class="task-description">Watch how water flows around foundation. Address pooling or poor grading immediately.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🌧️ Weather-Based</span>
+          <span class="task-time">⏱️ During rain</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-powerwash">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Power wash siding, deck, and walkways</div>
+        <div class="task-description">Remove winter grime, mildew, and dirt buildup. Use appropriate pressure for each surface.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🧹 Cleaning</span>
+          <span class="task-time">⏱️ 3-4 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-deck-inspect">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Inspect deck/patio for loose boards or damage</div>
+        <div class="task-description">Check railings, stairs, and structural integrity. Tighten loose fasteners. Plan repairs or sealing.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Inspection</span>
+          <span class="task-time">⏱️ 1-2 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-windows-clean">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clean all windows inside and out</div>
+        <div class="task-description">Remove winter film. Check screens for damage. Clean tracks and hardware.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">🧹 Cleaning</span>
+          <span class="task-time">⏱️ 2-3 hours</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">💧</div>
+      <h3 class="category-title">Plumbing & Water</h3>
+      <span class="category-badge">Essential</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-outdoor-faucets">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Turn on and test outdoor faucets</div>
+        <div class="task-description">Check for leaks or damage from freezing. Replace washers if dripping.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 20 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-sprinklers-test">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Test and adjust sprinkler system</div>
+        <div class="task-description">Turn on irrigation system. Check all zones, adjust spray patterns, replace broken heads.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🌱 Landscaping</span>
+          <span class="task-time">⏱️ 45 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-water-heater">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Drain and flush water heater</div>
+        <div class="task-description">Remove sediment buildup to improve efficiency and extend lifespan.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Maintenance</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-sump-pump">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Test sump pump operation</div>
+        <div class="task-description">Pour water to trigger pump. Ensure it activates and drains properly before spring rains.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🌳</div>
+      <h3 class="category-title">Landscaping & Outdoor</h3>
+      <span class="category-badge">Seasonal</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-tree-trim">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Trim trees and shrubs away from house</div>
+        <div class="task-description">Maintain 6-12 inch clearance from siding and roof. Remove dead branches.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🌱 Landscaping</span>
+          <span class="task-time">⏱️ 2-4 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-mulch-refresh">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Refresh mulch in garden beds</div>
+        <div class="task-description">Add 2-3 inches of fresh mulch. Keep 6 inches away from foundation and siding.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">🌱 Gardening</span>
+          <span class="task-time">⏱️ 3-5 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-lawn-prep">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Prep lawn: aerate, seed, fertilize</div>
+        <div class="task-description">Spring is ideal for overseeding and establishing healthy grass before summer heat.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">🌱 Landscaping</span>
+          <span class="task-time">⏱️ Half day</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">⚡</div>
+      <h3 class="category-title">Safety & Electrical</h3>
+      <span class="category-badge">Critical</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-smoke-detectors">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Test all smoke and CO detectors</div>
+        <div class="task-description">Press test buttons. Replace batteries. Replace units over 10 years old.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical Safety</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-gfci-test">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Test all GFCI outlets</div>
+        <div class="task-description">Press test/reset buttons on kitchen, bathroom, and outdoor outlets.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical Safety</span>
+          <span class="task-time">⏱️ 10 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="spring-fire-extinguisher">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check fire extinguishers</div>
+        <div class="task-description">Verify pressure gauge is in green zone. Check expiration dates.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔥 Safety</span>
+          <span class="task-time">⏱️ 5 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="completion-message">
+    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; color: #6B6A45; margin-bottom: 0.5rem;">🎉 Spring Checklist Complete!</h3>
+    <p style="font-size: 1rem; color: #3A352C; opacity: 0.8;">Your home is ready for warmer months!</p>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn-action" onclick="clearProgress('spring')">🔄 Clear Progress</button>
+    <button class="btn-action primary" onclick="showSeason('summer')">Next: Summer →</button>
+  </div>
+</div>
+
+<!-- SUMMER SECTION -->
+<div id="summer" class="season-section" data-season="summer">
+  <div class="season-header">
+    <div class="season-icon" style="font-size: 3rem; margin-bottom: 1rem;">☀️</div>
+    <h2 class="season-title">Summer Maintenance</h2>
+    <p class="season-subtitle">
+      Focus on cooling efficiency, outdoor projects, and storm preparedness during warm weather.
+    </p>
+    <div class="progress-bar-container">
+      <div class="progress-bar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">❄️</div>
+      <h3 class="category-title">AC & Cooling Systems</h3>
+      <span class="category-badge">High Priority</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-filter-monthly">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Replace AC filter monthly</div>
+        <div class="task-description">During heavy use months, change filters every 30 days for optimal efficiency and air quality.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ Monthly Task</span>
+          <span class="task-time">⏱️ 5 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-ac-monitor">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Monitor AC performance daily</div>
+        <div class="task-description">Listen for unusual sounds. Watch for ice buildup on coils. Ensure proper cooling and airflow.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Daily Check</span>
+          <span class="task-time">⏱️ Ongoing</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-ceiling-fans">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Set ceiling fans to counterclockwise</div>
+        <div class="task-description">Creates downdraft for cooling effect. Clean blades and check for wobbling.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Quick Task</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-window-treatments">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Optimize window treatments for cooling</div>
+        <div class="task-description">Close blinds/curtains on sunny sides during peak heat. Use reflective films if needed.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">💡 Energy Saving</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🔨</div>
+      <h3 class="category-title">Outdoor Projects & Maintenance</h3>
+      <span class="category-badge">Seasonal</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-deck-seal">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Seal or stain deck/fence</div>
+        <div class="task-description">Summer's warm, dry weather is perfect for wood sealing projects. Protects against UV and moisture.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔨 Weekend Project</span>
+          <span class="task-time">⏱️ 1-2 days</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-driveway-seal">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Seal asphalt driveway (every 2-3 years)</div>
+        <div class="task-description">Protects against sun damage and water infiltration. Best done in warm, dry conditions.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">🔨 Project</span>
+          <span class="task-time">⏱️ Half day</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-exterior-paint">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Paint exterior trim or touch-ups</div>
+        <div class="task-description">Address peeling paint before water damage occurs. Ideal temperature range: 50-85°F.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔨 Project</span>
+          <span class="task-time">⏱️ 2-3 days</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-concrete-repair">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Repair concrete cracks</div>
+        <div class="task-description">Fill driveway, walkway, and patio cracks before they expand. Prevents trip hazards and water damage.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Maintenance</span>
+          <span class="task-time">⏱️ 1-2 hours</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">💧</div>
+      <h3 class="category-title">Water Management & Garden</h3>
+      <span class="category-badge">Essential</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-hose-check">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Inspect hoses and outdoor faucets</div>
+        <div class="task-description">Check for leaks, cracks, or worn washers. Replace damaged hoses before heavy watering season.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Inspection</span>
+          <span class="task-time">⏱️ 20 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-water-schedule">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Optimize watering schedule</div>
+        <div class="task-description">Water early morning (4-8am) to reduce evaporation. Adjust for rainfall. Deep, infrequent watering is best.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">💡 Conservation</span>
+          <span class="task-time">⏱️ 30 min setup</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-drainage-monitor">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Monitor drainage during summer storms</div>
+        <div class="task-description">Watch for pooling water or backup during heavy rains. Address issues before fall.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">🌧️ Weather-Based</span>
+          <span class="task-time">⏱️ During storms</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-mulch-maintain">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Maintain mulch depth in garden beds</div>
+        <div class="task-description">Keep 2-3 inch depth to retain moisture and suppress weeds during hot weather.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">🌱 Gardening</span>
+          <span class="task-time">⏱️ 1-2 hours</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🏠</div>
+      <h3 class="category-title">Indoor & Safety Checks</h3>
+      <span class="category-badge">Important</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-basement-moisture">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check basement/crawlspace for moisture</div>
+        <div class="task-description">Look for water intrusion, humidity issues, or mold. Run dehumidifier if humidity exceeds 50%.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Inspection</span>
+          <span class="task-time">⏱️ 20 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-pest-prevention">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Pest prevention and inspection</div>
+        <div class="task-description">Seal entry points, check for ant/wasp nests, inspect for termites. Summer is peak pest season.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🐜 Prevention</span>
+          <span class="task-time">⏱️ 1 hour</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-emergency-kit">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Update emergency storm supplies</div>
+        <div class="task-description">Refresh flashlight batteries, water, first aid kit. Review emergency plan for summer storms.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🚨 Safety</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="summer-dryer-vent">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clean dryer vent thoroughly</div>
+        <div class="task-description">Remove lint from vent duct and exterior opening. Reduces fire risk and improves efficiency.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">🔥 Fire Safety</span>
+          <span class="task-time">⏱️ 45 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="completion-message">
+    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; color: #6B6A45; margin-bottom: 0.5rem;">☀️ Summer Checklist Complete!</h3>
+    <p style="font-size: 1rem; color: #3A352C; opacity: 0.8;">Your home is summer-ready and protected!</p>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn-action" onclick="clearProgress('summer')">🔄 Clear Progress</button>
+    <button class="btn-action primary" onclick="showSeason('fall')">Next: Fall →</button>
+  </div>
+</div>
+
+<!-- FALL SECTION -->
+<div id="fall" class="season-section" data-season="fall">
+  <div class="season-header">
+    <div class="season-icon" style="font-size: 3rem; margin-bottom: 1rem;">🍂</div>
+    <h2 class="season-title">Fall Maintenance</h2>
+    <p class="season-subtitle">
+      Prepare your home for winter: winterize systems, seal gaps, and ensure heating readiness.
+    </p>
+    <div class="progress-bar-container">
+      <div class="progress-bar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🌡️</div>
+      <h3 class="category-title">Heating System Prep</h3>
+      <span class="category-badge">Critical</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-furnace-service">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Schedule professional furnace inspection</div>
+        <div class="task-description">Annual tune-up prevents 95% of winter heating failures. Clean, adjust, and safety-check system.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical</span>
+          <span class="task-time">💰 $150-250</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-furnace-filter">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Replace furnace filter</div>
+        <div class="task-description">Start heating season with fresh filter for efficient operation and clean air.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 10 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-chimney-inspect">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Inspect and clean chimney/fireplace</div>
+        <div class="task-description">Remove creosote buildup (fire hazard). Check for damage, blockages, or animal nests.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🔥 Fire Safety</span>
+          <span class="task-time">💰 $150-300</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-thermostat-program">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Program thermostat for winter schedule</div>
+        <div class="task-description">Set lower temps when away/sleeping. Replace batteries if needed.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">💡 Energy Saving</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🏠</div>
+      <h3 class="category-title">Winterization & Sealing</h3>
+      <span class="category-badge">Essential</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-weather-strip">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Install/replace weather stripping</div>
+        <div class="task-description">Seal doors and windows to prevent heat loss. Can save 10-20% on heating costs.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 2-3 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-caulk-gaps">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Caulk exterior gaps and cracks</div>
+        <div class="task-description">Seal around windows, doors, pipes, and vents to block drafts and pests.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 2-4 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-storm-windows">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Install storm windows or plastic film</div>
+        <div class="task-description">Add insulation layer to single-pane windows. Dramatically reduces heat loss.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Insulation</span>
+          <span class="task-time">⏱️ 3-5 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-attic-insulation">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check attic insulation and ventilation</div>
+        <div class="task-description">Ensure R-38 to R-60 insulation. Proper ventilation prevents ice dams and moisture.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Inspection</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🍁</div>
+      <h3 class="category-title">Gutters & Exterior</h3>
+      <span class="category-badge">High Priority</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-gutter-clean">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clean gutters after leaves fall</div>
+        <div class="task-description">Critical fall task! Wait until most leaves have dropped, then clean thoroughly before snow/ice.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical</span>
+          <span class="task-time">⏱️ 2-4 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-gutter-guards">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Consider installing gutter guards</div>
+        <div class="task-description">Reduces future maintenance and prevents ice dams from debris backup.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">💡 Upgrade</span>
+          <span class="task-time">💰 $5-30/ft</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-roof-check">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Final roof inspection before winter</div>
+        <div class="task-description">Look for loose/damaged shingles, flashing issues. Repair before snow load arrives.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-tree-trim">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Trim tree branches near house</div>
+        <div class="task-description">Remove dead branches and limbs within 6 feet of roof. Prevents storm damage and ice buildup.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 3-5 hours</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">💧</div>
+      <h3 class="category-title">Plumbing Winterization</h3>
+      <span class="category-badge">Critical</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-outdoor-faucets">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Shut off and drain outdoor faucets</div>
+        <div class="task-description">Close interior valves, open exterior taps, drain hoses. Prevents frozen pipe bursts.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-sprinkler-winterize">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Winterize sprinkler system</div>
+        <div class="task-description">Blow out lines with compressed air or hire professional. Must be done before first freeze.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical</span>
+          <span class="task-time">💰 $75-150 pro</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-pipe-insulation">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Insulate exposed pipes</div>
+        <div class="task-description">Protect pipes in unheated areas (basement, garage, crawlspace). Use foam sleeves or heat tape.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ High Priority</span>
+          <span class="task-time">⏱️ 1-2 hours</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-water-heater-check">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Drain water heater sediment</div>
+        <div class="task-description">Flush annually to maintain efficiency during high-demand winter months.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🔧 Maintenance</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🔌</div>
+      <h3 class="category-title">Safety & Emergency Prep</h3>
+      <span class="category-badge">Important</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-detector-batteries">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Replace smoke/CO detector batteries</div>
+        <div class="task-description">Test all detectors. Replace batteries twice yearly (spring/fall). Replace units over 10 years old.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical Safety</span>
+          <span class="task-time">⏱️ 20 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-generator-test">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Test backup generator (if applicable)</div>
+        <div class="task-description">Run for 15-20 minutes. Check fuel, oil, battery. Service professionally if needed.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">⚡ Power Backup</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-emergency-supplies">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Stock winter emergency supplies</div>
+        <div class="task-description">Flashlights, batteries, non-perishable food, water, blankets, first aid kit. Prepare for power outages.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">🚨 Safety</span>
+          <span class="task-time">⏱️ 1 hour</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="fall-snow-equipment">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Prep snow removal equipment</div>
+        <div class="task-description">Service snow blower, stock salt/ice melt, check shovels. Arrange snow removal service if needed.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">❄️ Winter Prep</span>
+          <span class="task-time">⏱️ 1 hour</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="completion-message">
+    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; color: #6B6A45; margin-bottom: 0.5rem;">🍂 Fall Checklist Complete!</h3>
+    <p style="font-size: 1rem; color: #3A352C; opacity: 0.8;">Your home is fully winterized and ready!</p>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn-action" onclick="clearProgress('fall')">🔄 Clear Progress</button>
+    <button class="btn-action primary" onclick="showSeason('winter')">Next: Winter →</button>
+  </div>
+</div>
+
+<!-- WINTER SECTION -->
+<div id="winter" class="season-section" data-season="winter">
+  <div class="season-header">
+    <div class="season-icon" style="font-size: 3rem; margin-bottom: 1rem;">❄️</div>
+    <h2 class="season-title">Winter Maintenance</h2>
+    <p class="season-subtitle">
+      Monitor heating, protect against freezing, and stay ahead of ice and snow damage.
+    </p>
+    <div class="progress-bar-container">
+      <div class="progress-bar" style="width: 0%"></div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🌡️</div>
+      <h3 class="category-title">Heating & Temperature</h3>
+      <span class="category-badge">Critical</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-furnace-monitor">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Monitor heating system daily</div>
+        <div class="task-description">Listen for unusual sounds. Check for adequate heat. Address issues immediately to prevent system failure.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Daily Check</span>
+          <span class="task-time">⏱️ Ongoing</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-filter-monthly">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Replace furnace filter monthly</div>
+        <div class="task-description">During heavy heating season, check monthly and replace when dirty. Prevents system strain.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ Monthly</span>
+          <span class="task-time">⏱️ 10 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-ceiling-fans">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Reverse ceiling fans to clockwise</div>
+        <div class="task-description">Push warm air down from ceiling. Run on low speed to avoid creating drafts.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">💡 Energy Saving</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-temp-maintain">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Maintain minimum 55°F if away</div>
+        <div class="task-description">Never turn heat completely off. Keep at least 55°F to prevent frozen pipes.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Critical</span>
+          <span class="task-time">⏱️ Always</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">💧</div>
+      <h3 class="category-title">Pipe Protection</h3>
+      <span class="category-badge">Critical</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-cabinet-doors">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Open cabinet doors during extreme cold</div>
+        <div class="task-description">Allow warm air to reach pipes under sinks on exterior walls.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ Cold Snaps</span>
+          <span class="task-time">⏱️ 5 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-drip-faucets">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Let faucets drip during freeze warnings</div>
+        <div class="task-description">Slight trickle prevents pipe freezing on exterior walls. Worth the small water cost.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Below 20°F</span>
+          <span class="task-time">⏱️ During freezes</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-pipe-check">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check for frozen pipes weekly</div>
+        <div class="task-description">Test all faucets. If no water flows or only trickles, pipe may be frozen—act immediately.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Weekly</span>
+          <span class="task-time">⏱️ 10 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-shutoff-location">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Know water main shutoff location</div>
+        <div class="task-description">Critical for burst pipe emergencies. Tag it and teach all household members where it is.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Emergency Prep</span>
+          <span class="task-time">⏱️ 5 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">❄️</div>
+      <h3 class="category-title">Snow & Ice Management</h3>
+      <span class="category-badge">Essential</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-roof-monitor">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Monitor roof for ice dams</div>
+        <div class="task-description">Look for icicles at eaves or ice buildup. Remove snow from roof edges if needed (hire pro for safety).</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ After Snow</span>
+          <span class="task-time">⏱️ 15 min check</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-clear-walkways">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Clear snow from walkways promptly</div>
+        <div class="task-description">Shovel within 24 hours of snowfall. Apply salt/sand to prevent slips. Liability issue if not maintained.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ Safety & Legal</span>
+          <span class="task-time">⏱️ After each snow</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-gutters-check">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check gutters after heavy snow/thaw</div>
+        <div class="task-description">Ensure downspouts are clear and draining. Ice can block drainage causing water backup.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 After Storms</span>
+          <span class="task-time">⏱️ 20 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-driveway-salt">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Manage ice on driveway/steps</div>
+        <div class="task-description">Use ice melt products appropriately. Avoid rock salt near plants. Keep supplies stocked.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">🧊 As Needed</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🏠</div>
+      <h3 class="category-title">Indoor Maintenance</h3>
+      <span class="category-badge">Important</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-humidity-monitor">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Monitor indoor humidity levels</div>
+        <div class="task-description">Keep 30-50% humidity. Too low causes static/dry air; too high causes condensation/mold. Use humidifier if needed.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Weekly</span>
+          <span class="task-time">⏱️ 5 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-window-condensation">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check windows for condensation</div>
+        <div class="task-description">Excessive condensation indicates humidity or insulation issues. Wipe dry to prevent mold/rot.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Weekly</span>
+          <span class="task-time">⏱️ 10 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-exhaust-fans">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Use exhaust fans when cooking/showering</div>
+        <div class="task-description">Removes excess moisture to prevent mold growth and condensation issues.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">💡 Habit</span>
+          <span class="task-time">⏱️ Daily practice</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-fireplace-safe">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Practice fireplace safety</div>
+        <div class="task-description">Use fireplace screen. Never leave fire unattended. Keep area clear of flammables. Dispose of ashes safely.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🔥 Fire Safety</span>
+          <span class="task-time">⏱️ Always</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-card">
+    <div class="category-header">
+      <div class="category-icon">🚨</div>
+      <h3 class="category-title">Safety & Emergency</h3>
+      <span class="category-badge">Critical</span>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-co-awareness">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Carbon monoxide awareness</div>
+        <div class="task-description">Ensure CO detectors work. Never use generators/grills indoors. Know symptoms: headache, dizziness, nausea.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-critical">🚨 Life Safety</span>
+          <span class="task-time">⏱️ Always</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-emergency-kit">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Check emergency supplies monthly</div>
+        <div class="task-description">Verify flashlights work, batteries fresh, food/water stocked. Have backup heat source plan.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-high">⚠️ Monthly</span>
+          <span class="task-time">⏱️ 15 min</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-weather-alerts">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Monitor weather forecasts</div>
+        <div class="task-description">Stay aware of winter storm warnings. Prepare 24-48 hours in advance for severe weather.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-medium">📋 Regular</span>
+          <span class="task-time">⏱️ Daily</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="checklist-item">
+      <label class="custom-checkbox">
+        <input type="checkbox" id="winter-insurance-review">
+        <span class="checkbox-visual"></span>
+      </label>
+      <div class="task-content">
+        <div class="task-title">Review homeowners insurance coverage</div>
+        <div class="task-description">Verify coverage for winter damage: frozen pipes, ice dams, roof collapse. Update if needed.</div>
+        <div class="task-meta">
+          <span class="task-priority priority-low">📋 Annual</span>
+          <span class="task-time">⏱️ 30 min</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="completion-message">
+    <h3 style="font-family: var(--font-heading); font-size: 1.8rem; font-weight: 400; color: #6B6A45; margin-bottom: 0.5rem;">❄️ Winter Checklist Complete!</h3>
+    <p style="font-size: 1rem; color: #3A352C; opacity: 0.8;">Your home is protected through winter!</p>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn-action" onclick="clearProgress('winter')">🔄 Clear Progress</button>
+    <button class="btn-action primary" onclick="showSeason('spring')">Back to Spring →</button>
+  </div>
+</div>
+
+{% endblock %}

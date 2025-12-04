@@ -1,0 +1,67 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Growth materials</p>
+  <h1>Marketing and Growth Tools</h1>
+  <p>Save simple, re-usable pieces for loan flyers, rate comparisons, and co-branded guides so outreach feels steady, not stressful.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Create a Marketing Template</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:720px;margin-top:1.5rem;">
+      <div>
+        <label for="template_type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Type</label>
+        <select id="template_type" name="template_type">
+          <option value="loan_flyer">Loan Program Flyer</option>
+          <option value="rate_comparison">Rate Comparison Graphic</option>
+          <option value="grant_sheet">Grant or Down Payment Sheet</option>
+          <option value="social_post">Social Media Post</option>
+          <option value="drip_step">Drip Campaign Step</option>
+        </select>
+      </div>
+      <div>
+        <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Template Name</label>
+        <input id="name" name="name" placeholder="Example: First-time buyer loan flyer" required />
+      </div>
+      <div>
+        <label for="description" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Description</label>
+        <input id="description" name="description" placeholder="Short note about how you use this piece" />
+      </div>
+      <div>
+        <label for="content" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Content</label>
+        <textarea id="content" name="content" rows="5" style="width:100%;padding:0.75rem;border:1px solid var(--taupe-beige);border-radius:var(--border-radius);font-size:0.95rem;font-family:inherit;resize:vertical;" placeholder="Write copy or outline the layout here."></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Template</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Your Templates</h2>
+
+    {% if templates %}
+      <div class="dashboard-cards" style="margin-top:1.5rem;">
+        {% for t in templates %}
+          <div class="card" style="background:var(--light-cream);">
+            <h3>{{ t.name }}</h3>
+            <p class="card-subtext">{{ t.template_type|replace('_',' ')|title }}</p>
+            {% if t.description %}
+              <p class="card-subtext" style="margin-top:0.75rem;">{{ t.description }}</p>
+            {% endif %}
+            {% if t.content %}
+              <p class="card-subtext" style="white-space:pre-wrap;margin-top:0.75rem;">{{ t.content }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">📊</div>
+        <h3>No Marketing Templates Yet</h3>
+        <p>Start with one simple flyer or post that helps explain a loan program you love.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

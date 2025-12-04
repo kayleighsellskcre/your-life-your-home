@@ -1,0 +1,148 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}First Time Buyer Guide{% endblock %}
+
+{% block homeowner_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Your step-by-step guide</p>
+  <h1>🏠 First Time Buyer</h1>
+  <p>Buying your first home doesn't have to be scary. Let's break it down into simple steps that make sense.</p>
+</div>
+
+<div style="max-width: 900px; margin: 0 auto;">
+  
+  <!-- Section 1: The Money Part -->
+  <div style="background: #F6F2E8; padding: 3rem; margin-bottom: 3rem; border-radius: 0;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">Step 1: The Money Part</h2>
+    
+    <div style="margin-bottom: 2.5rem;">
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">How much money do I need?</h3>
+      <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin: 0;">Think of it like this: You need money for three things. First, the <strong>down payment</strong> - that's like the first chunk you pay (usually 3-20% of the home price). Second, <strong>closing costs</strong> - these are fees for paperwork, inspections, and other boring stuff (usually 2-5% of the home price). Third, an <strong>emergency cushion</strong> - keep some money left over for surprise repairs or moving costs.</p>
+    </div>
+
+    <div style="margin-bottom: 2.5rem;">
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">What about my credit score?</h3>
+      <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin: 0;">Your credit score is like a report card for how you handle money. Lenders use it to decide if they'll give you a loan. Good news: You don't need a perfect score! Most lenders are happy with 620 or above. If yours is lower, that's okay - there are still options, and you can work on raising it.</p>
+    </div>
+
+    <div style="background: white; padding: 2rem; border-left: 4px solid #6B6A45;">
+      <h4 style="margin: 0 0 1rem; color: #6B6A45; font-size: 1.1rem;">Quick Example</h4>
+      <p style="margin: 0; line-height: 1.8; color: #3A352C;">If you're buying a $300,000 home with 5% down, you'd need: <strong>$15,000 down payment</strong> + <strong>$9,000 closing costs</strong> + <strong>$5,000 cushion</strong> = <strong>$29,000 total</strong> to feel comfortable.</p>
+    </div>
+  </div>
+
+  <!-- Section 2: Getting Pre-Approved -->
+  <div style="background: white; padding: 3rem; margin-bottom: 3rem; border: 1px solid rgba(200, 180, 151, 0.3);">
+    <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">Step 2: Get Pre-Approved (Not Just Pre-Qualified)</h2>
+    
+    <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin-bottom: 2rem;">Think of pre-approval like getting a "yes, we'll probably lend you money" from a bank BEFORE you start looking at homes. This makes you a serious buyer and helps you know your budget.</p>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">What's the difference?</h3>
+      <ul style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.85; padding-left: 1.5rem;">
+        <li><strong>Pre-qualified</strong> = "Based on what you told us, you MIGHT be able to borrow this much" (quick, easy, not super useful)</li>
+        <li><strong>Pre-approved</strong> = "We checked everything and YES, we'll lend you this much" (takes longer, but WAY more powerful)</li>
+      </ul>
+    </div>
+
+    <div style="background: #F6F2E8; padding: 2rem;">
+      <h4 style="margin: 0 0 1rem; color: #6B6A45; font-size: 1.1rem;">What You'll Need</h4>
+      <ul style="margin: 0; line-height: 2; color: #3A352C; padding-left: 1.5rem;">
+        <li>Recent pay stubs (last 2 months)</li>
+        <li>W-2s or tax returns (last 2 years)</li>
+        <li>Bank statements (last 2-3 months)</li>
+        <li>Photo ID</li>
+        <li>List of your debts (car loans, student loans, credit cards)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Section 3: Finding Your Home -->
+  <div style="background: #F6F2E8; padding: 3rem; margin-bottom: 3rem;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">Step 3: Finding Your Home</h2>
+    
+    <div style="margin-bottom: 2.5rem;">
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">Make a "Must Have" vs "Nice to Have" List</h3>
+      <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin-bottom: 1.5rem;">Before you start scrolling through listings, get clear on what you actually need versus what would just be cool to have.</p>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div style="background: white; padding: 1.5rem;">
+          <h4 style="margin: 0 0 1rem; color: #6B6A45;">Must Haves ✓</h4>
+          <ul style="margin: 0; line-height: 2; color: #3A352C; padding-left: 1.5rem; font-size: 0.95rem;">
+            <li>Number of bedrooms</li>
+            <li>Close to work/school</li>
+            <li>Within budget</li>
+            <li>Safe neighborhood</li>
+          </ul>
+        </div>
+        <div style="background: white; padding: 1.5rem;">
+          <h4 style="margin: 0 0 1rem; color: #6B6A45;">Nice to Haves ⭐</h4>
+          <ul style="margin: 0; line-height: 2; color: #3A352C; padding-left: 1.5rem; font-size: 0.95rem;">
+            <li>Updated kitchen</li>
+            <li>Backyard</li>
+            <li>Garage</li>
+            <li>Hardwood floors</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">Don't Skip the Inspection!</h3>
+      <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin: 0;">When you find a home you love, hire a professional inspector (costs $300-500). They'll check for problems you can't see - like bad plumbing, roof issues, or electrical problems. This could save you thousands later!</p>
+    </div>
+  </div>
+
+  <!-- Section 4: Making an Offer -->
+  <div style="background: white; padding: 3rem; margin-bottom: 3rem; border: 1px solid rgba(200, 180, 151, 0.3);">
+    <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">Step 4: Making an Offer</h2>
+    
+    <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin-bottom: 2rem;">Found a home you like? Time to make an offer! Your real estate agent will help you with this. You're basically saying "I want to buy this house for $X amount."</p>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">What happens next?</h3>
+      <ol style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.85; padding-left: 1.5rem;">
+        <li><strong>You make an offer</strong> - Include how much you'll pay, what stays with the house (appliances, etc.), and any conditions</li>
+        <li><strong>They respond</strong> - They can accept, reject, or counter (suggest a different price)</li>
+        <li><strong>You negotiate</strong> - Go back and forth until you agree (or walk away)</li>
+        <li><strong>You're under contract!</strong> - Once both sides agree and sign, you move to closing</li>
+      </ol>
+    </div>
+
+    <div style="background: #F6F2E8; padding: 2rem; border-left: 4px solid #6B6A45;">
+      <h4 style="margin: 0 0 1rem; color: #6B6A45; font-size: 1.1rem;">Pro Tip</h4>
+      <p style="margin: 0; line-height: 1.8; color: #3A352C;">In hot markets, you might face competition. Don't let emotions make you overpay! Stick to your budget and remember: there will always be other homes.</p>
+    </div>
+  </div>
+
+  <!-- Section 5: Closing -->
+  <div style="background: #F6F2E8; padding: 3rem; margin-bottom: 3rem;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">Step 5: Closing Day</h2>
+    
+    <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.85; margin-bottom: 2rem;">Closing is when you sign ALL the papers and officially become a homeowner. It takes about an hour and involves a lot of signatures. Bring your ID, a cashier's check for closing costs, and maybe a pen that won't run out of ink!</p>
+
+    <div style="margin-bottom: 2rem;">
+      <h3 style="font-size: 1.3rem; color: #6B6A45; margin: 0 0 1rem; font-weight: 500;">Timeline: From Offer to Keys</h3>
+      <ul style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.85; padding-left: 1.5rem;">
+        <li><strong>Day 1:</strong> Offer accepted, you're under contract</li>
+        <li><strong>Week 1:</strong> Home inspection</li>
+        <li><strong>Week 2-3:</strong> Appraisal and finalizing loan</li>
+        <li><strong>Week 4:</strong> Final walkthrough (make sure nothing changed)</li>
+        <li><strong>Week 4-6:</strong> Closing day - YOU'RE A HOMEOWNER! 🎉</li>
+      </ul>
+    </div>
+
+    <div style="background: white; padding: 2rem;">
+      <h4 style="margin: 0 0 1rem; color: #6B6A45; font-size: 1.1rem;">After You Get the Keys</h4>
+      <p style="margin: 0; line-height: 1.8; color: #3A352C;">Change the locks, get homeowners insurance sorted, set up utilities, and start a home maintenance fund. Aim to save 1-2% of your home's value each year for repairs and upkeep.</p>
+    </div>
+  </div>
+
+  <!-- Bottom CTA -->
+  <div style="background: #6B6A45; color: white; padding: 3rem; text-align: center;">
+    <h2 style="font-family: var(--font-heading); font-size: 2rem; margin: 0 0 1.5rem; font-weight: 400;">Ready to Start Your Journey?</h2>
+    <p style="font-size: 1.1rem; line-height: 1.8; margin: 0 0 2rem; opacity: 0.9;">Connect with your agent to get started on finding your first home.</p>
+    <a href="{{ url_for('homeowner_support_chat_human') }}" style="display: inline-block; padding: 1rem 3rem; background: white; color: #6B6A45; text-decoration: none; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.9rem;">Chat With Your Agent</a>
+  </div>
+
+</div>
+{% endblock %}

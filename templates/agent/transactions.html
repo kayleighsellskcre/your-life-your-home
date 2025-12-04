@@ -1,0 +1,91 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Track every deal</p>
+  <h1>AI Transaction Coordinator</h1>
+  <p>See your files in one place and track where each one is in the contract-to-closing journey.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Add a Transaction</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
+      <div>
+        <label for="property_address" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Property Address</label>
+        <input id="property_address" name="property_address" required />
+      </div>
+      <div>
+        <label for="client_name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Client Name</label>
+        <input id="client_name" name="client_name" required />
+      </div>
+      <div>
+        <label for="side" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Side</label>
+        <select id="side" name="side">
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+      <div>
+        <label for="stage" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Stage</label>
+        <select id="stage" name="stage">
+          <option value="under_contract">Under Contract</option>
+          <option value="earnest_money">Earnest Money</option>
+          <option value="inspection">Inspection</option>
+          <option value="appraisal">Appraisal</option>
+          <option value="loan_commitment">Loan Commitment</option>
+          <option value="final_walkthrough">Final Walkthrough</option>
+          <option value="closing">Closing</option>
+        </select>
+      </div>
+      <div>
+        <label for="close_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Target Close Date</label>
+        <input type="date" id="close_date" name="close_date" />
+      </div>
+      <button class="btn btn-primary" type="submit">Save Transaction</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Your Files</h2>
+
+    {% if transactions %}
+      <div style="overflow-x:auto;margin-top:1.5rem;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Property</th>
+              <th>Client</th>
+              <th>Side</th>
+              <th>Stage</th>
+              <th>Close Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for tx in transactions %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">
+                    {{ tx.property_address }}
+                  </a>
+                </td>
+                <td>{{ tx.client_name }}</td>
+                <td><span class="badge" style="background:var(--light-cream);color:var(--charcoal-brown);padding:0.25rem 0.75rem;border-radius:12px;font-size:0.8rem;font-weight:600;">{{ tx.side|capitalize }}</span></td>
+                <td><span style="color:#888;">{{ tx.stage|replace('_',' ')|title }}</span></td>
+                <td style="color:#888;">{{ tx.close_date or '—' }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
+        <h3>No Transactions Yet</h3>
+        <p>Once you add a file, you will be able to track stages here.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

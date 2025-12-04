@@ -1,0 +1,695 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Maintenance & Care Guide{% endblock %}
+
+{% block homeowner_content %}
+<style>
+  .maintenance-hero {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    padding: 3rem 3rem 2rem;
+    margin: -2rem -3rem 3rem;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+  }
+  
+  .system-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .system-card:hover {
+    border-color: rgba(107, 106, 69, 0.4);
+    box-shadow: 0 4px 20px rgba(107, 106, 69, 0.08);
+  }
+  
+  .system-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+  }
+  
+  .system-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 400;
+    color: #3A352C;
+    margin: 0 0 0.75rem;
+    letter-spacing: 0.01em;
+  }
+  
+  .frequency-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    background: rgba(107, 106, 69, 0.1);
+    color: #6B6A45;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  
+  .task-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+  }
+  
+  .task-item {
+    padding: 1rem 0 1rem 2.5rem;
+    position: relative;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.15);
+    transition: all 0.2s ease;
+  }
+  
+  .task-item:last-child {
+    border-bottom: none;
+  }
+  
+  .task-item:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    width: 24px;
+    height: 24px;
+    background: rgba(107, 106, 69, 0.1);
+    color: #6B6A45;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  
+  .task-item:hover {
+    background: rgba(246, 242, 232, 0.5);
+  }
+  
+  .task-title {
+    font-weight: 500;
+    color: #3A352C;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .task-description {
+    font-size: 0.85rem;
+    color: #3A352C;
+    opacity: 0.7;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  
+  .pro-tip {
+    background: rgba(107, 106, 69, 0.05);
+    border-left: 3px solid #6B6A45;
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #3A352C;
+  }
+  
+  .pro-tip-label {
+    font-weight: 500;
+    color: #6B6A45;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .quick-reference {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .reference-card {
+    background: rgba(246, 242, 232, 0.5);
+    padding: 1.5rem;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    text-align: center;
+  }
+  
+  .reference-number {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 400;
+    color: #6B6A45;
+    margin-bottom: 0.5rem;
+  }
+  
+  .reference-label {
+    font-size: 0.85rem;
+    color: #3A352C;
+    opacity: 0.8;
+    font-weight: 300;
+  }
+  
+  .expandable-section {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(200, 180, 151, 0.2);
+    padding-top: 1rem;
+  }
+  
+  .expand-toggle {
+    background: none;
+    border: 1px solid #6B6A45;
+    color: #6B6A45;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .expand-toggle:hover {
+    background: #6B6A45;
+    color: white;
+  }
+  
+  .cost-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: #6B6A45;
+    margin-left: 1rem;
+  }
+  
+  .seasonal-card {
+    background: white;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .seasonal-card:hover {
+    border-color: rgba(107, 106, 69, 0.5);
+    box-shadow: 0 4px 20px rgba(107, 106, 69, 0.12);
+    transform: translateY(-4px);
+  }
+  
+  .seasonal-card.active {
+    border-color: #6B6A45;
+    background: rgba(107, 106, 69, 0.02);
+  }
+  
+  .nav-dropdown {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  
+  .nav-dropdown summary {
+    list-style: none;
+    cursor: pointer;
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #3A352C;
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: color 0.3s ease;
+  }
+  
+  .nav-dropdown summary:hover {
+    color: #6B6A45;
+  }
+  
+  .nav-dropdown summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  .nav-dropdown[open] summary {
+    color: #6B6A45;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .nav-arrow {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .nav-dropdown[open] .nav-arrow {
+    transform: rotate(180deg);
+  }
+</style>
+
+<!-- Hero Section -->
+<div class="maintenance-hero">
+  <div style="max-width: 800px;">
+    <div style="display: inline-block; padding: 0.4rem 1rem; background: rgba(107, 106, 69, 0.15); color: #6B6A45; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; margin-bottom: 1rem;">
+      Your Complete Home Care System
+    </div>
+    <h1 style="font-family: var(--font-heading); font-size: 2.8rem; font-weight: 400; margin: 0 0 1rem; color: #3A352C; letter-spacing: 0.01em;">
+      Maintenance & Care Guide
+    </h1>
+    <p style="font-size: 1.05rem; line-height: 1.8; color: #3A352C; opacity: 0.8; margin: 0; font-weight: 300;">
+      Proactive maintenance protects your investment, prevents costly repairs, and keeps your home running smoothly. This comprehensive guide provides system-by-system care instructions, timelines, and professional tips to help you maintain your home with confidence.
+    </p>
+  </div>
+</div>
+
+<!-- Quick Navigation Dropdowns -->
+<div style="margin-bottom: 3rem;">
+  <h2 style="font-family: var(--font-heading); font-size: 2rem; font-weight: 400; text-align: center; margin: 0 0 2rem; color: #3A352C;">
+    Jump to System Guide
+  </h2>
+  
+  <details class="nav-dropdown">
+    <summary>
+      <span><span style="font-size: 1.5rem; margin-right: 0.75rem;">🏠</span> Roof & Gutters</span>
+      <span class="nav-arrow">▼</span>
+    </summary>
+    <div style="padding-top: 1rem;">
+      <p style="color: #3A352C; opacity: 0.8; line-height: 1.7; margin-bottom: 1rem; font-weight: 300;">
+        Your roof is your home's first line of defense. Spring & Fall inspections recommended.
+      </p>
+      <a href="#roof-gutters" style="display: inline-block; padding: 0.6rem 1.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; font-weight: 500;">View Full Guide</a>
+    </div>
+  </details>
+  
+  <details class="nav-dropdown">
+    <summary>
+      <span><span style="font-size: 1.5rem; margin-right: 0.75rem;">🌡️</span> Heating & Cooling (HVAC)</span>
+      <span class="nav-arrow">▼</span>
+    </summary>
+    <div style="padding-top: 1rem;">
+      <p style="color: #3A352C; opacity: 0.8; line-height: 1.7; margin-bottom: 1rem; font-weight: 300;">
+        HVAC accounts for 40-50% of energy usage. Quarterly maintenance improves efficiency by 15-40%.
+      </p>
+      <a href="#hvac" style="display: inline-block; padding: 0.6rem 1.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; font-weight: 500;">View Full Guide</a>
+    </div>
+  </details>
+  
+  <details class="nav-dropdown">
+    <summary>
+      <span><span style="font-size: 1.5rem; margin-right: 0.75rem;">💧</span> Plumbing & Water Systems</span>
+      <span class="nav-arrow">▼</span>
+    </summary>
+    <div style="padding-top: 1rem;">
+      <p style="color: #3A352C; opacity: 0.8; line-height: 1.7; margin-bottom: 1rem; font-weight: 300;">
+        Water damage is the #2 most common insurance claim. Quarterly checks prevent costly repairs.
+      </p>
+      <a href="#plumbing" style="display: inline-block; padding: 0.6rem 1.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; font-weight: 500;">View Full Guide</a>
+    </div>
+  </details>
+  
+  <details class="nav-dropdown">
+    <summary>
+      <span><span style="font-size: 1.5rem; margin-right: 0.75rem;">⚡</span> Electrical & Safety Systems</span>
+      <span class="nav-arrow">▼</span>
+    </summary>
+    <div style="padding-top: 1rem;">
+      <p style="color: #3A352C; opacity: 0.8; line-height: 1.7; margin-bottom: 1rem; font-weight: 300;">
+        Electrical fires cause $1.3B in damage annually. Monthly & annual checks are critical for safety.
+      </p>
+      <a href="#electrical" style="display: inline-block; padding: 0.6rem 1.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; font-weight: 500;">View Full Guide</a>
+    </div>
+  </details>
+  
+  <details class="nav-dropdown">
+    <summary>
+      <span><span style="font-size: 1.5rem; margin-right: 0.75rem;">🎨</span> Interior Finishes & Surfaces</span>
+      <span class="nav-arrow">▼</span>
+    </summary>
+    <div style="padding-top: 1rem;">
+      <p style="color: #3A352C; opacity: 0.8; line-height: 1.7; margin-bottom: 1rem; font-weight: 300;">
+        Interior finishes protect structures from moisture and wear. Seasonal deep cleaning recommended.
+      </p>
+      <a href="#interior" style="display: inline-block; padding: 0.6rem 1.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; font-weight: 500;">View Full Guide</a>
+    </div>
+  </details>
+  
+  <details class="nav-dropdown">
+    <summary>
+      <span><span style="font-size: 1.5rem; margin-right: 0.75rem;">🏡</span> Exterior & Foundation</span>
+      <span class="nav-arrow">▼</span>
+    </summary>
+    <div style="padding-top: 1rem;">
+      <p style="color: #3A352C; opacity: 0.8; line-height: 1.7; margin-bottom: 1rem; font-weight: 300;">
+        Foundation and exterior protect your home from elements. Seasonal inspections prevent major repairs.
+      </p>
+      <a href="#exterior" style="display: inline-block; padding: 0.6rem 1.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; font-weight: 500;">View Full Guide</a>
+    </div>
+  </details>
+</div>
+
+<!-- Quick Reference Stats -->
+<div class="quick-reference" style="margin-bottom: 4rem;">
+  <div class="reference-card">
+    <div class="reference-number">52</div>
+    <div class="reference-label">Essential annual tasks</div>
+  </div>
+  <div class="reference-card">
+    <div class="reference-number">$1,200</div>
+    <div class="reference-label">Avg. yearly maintenance cost</div>
+  </div>
+  <div class="reference-card">
+    <div class="reference-number">2-4%</div>
+    <div class="reference-label">Of home value per year</div>
+  </div>
+  <div class="reference-card">
+    <div class="reference-number">10X</div>
+    <div class="reference-label">ROI on preventive care</div>
+  </div>
+</div>
+
+<!-- System 1: Roof & Gutters -->
+<div class="system-card" id="roof-gutters">
+  <div class="system-icon">🏠</div>
+  <h2 class="system-title">Roof & Gutters</h2>
+  <span class="frequency-badge">Spring & Fall inspections</span>
+  
+  <p style="color: #3A352C; opacity: 0.8; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300;">
+    Your roof is your home's first line of defense against the elements. Regular inspections and maintenance can extend its lifespan by 10-15 years and prevent water damage that could cost $10,000+.
+  </p>
+  
+  <ul class="task-list">
+    <li class="task-item">
+      <div class="task-title">Clean gutters and downspouts <span class="cost-indicator">💰 $150-300 (Pro) | DIY</span></div>
+      <div class="task-description">Remove leaves, debris, and buildup twice yearly. Ensure water flows freely away from foundation. Consider gutter guards to reduce maintenance.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect shingles for damage <span class="cost-indicator">💰 DIY Free | Pro $150-300</span></div>
+      <div class="task-description">Look for missing, cracked, or curling shingles. Check for granule loss in gutters. Early detection prevents leaks and structural damage.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Check flashing and seals <span class="cost-indicator">💰 DIY Free | Repairs $200-500</span></div>
+      <div class="task-description">Inspect chimney, vents, and skylight flashing for gaps or rust. Verify caulking around penetrations is intact and flexible.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Trim overhanging branches <span class="cost-indicator">💰 DIY Free | Pro $200-600</span></div>
+      <div class="task-description">Keep tree limbs 6-10 feet from roof to prevent damage and reduce debris. Protects against storm damage and pest access.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect attic for leaks <span class="cost-indicator">💰 DIY Free | Pro $100-200</span></div>
+      <div class="task-description">Look for water stains, moisture, or daylight through roof boards. Address issues immediately to prevent mold and structural damage.</div>
+    </li>
+  </ul>
+  
+  <div class="pro-tip">
+    <div class="pro-tip-label">💡 Pro Tip</div>
+    Most roofing issues start at penetrations (chimneys, vents) and edges. Focus your inspections here. A $200 annual professional inspection can catch problems before they become $5,000+ repairs. Document your roof's condition with photos for insurance purposes.
+  </div>
+</div>
+
+<!-- System 2: HVAC (Heating & Cooling) -->
+<div class="system-card" id="hvac">
+  <div class="system-icon">🌡️</div>
+  <h2 class="system-title">Heating & Cooling (HVAC)</h2>
+  <span class="frequency-badge">Quarterly maintenance</span>
+  
+  <p style="color: #3A352C; opacity: 0.8; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300;">
+    HVAC systems account for 40-50% of your home's energy usage. Proper maintenance improves efficiency by 15-40%, extends equipment life by 5-10 years, and maintains healthy indoor air quality.
+  </p>
+  
+  <ul class="task-list">
+    <li class="task-item">
+      <div class="task-title">Replace air filters monthly <span class="cost-indicator">💰 $5-20/month</span></div>
+      <div class="task-description">Use quality pleated filters (MERV 8-11). Mark your calendar or subscribe to filter delivery service. Dirty filters reduce efficiency by 15% and strain your system.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Schedule professional tune-ups <span class="cost-indicator">💰 $150-300 (2x/year)</span></div>
+      <div class="task-description">Service heating in fall, cooling in spring. Includes refrigerant check, electrical inspection, and calibration. Prevents 95% of breakdowns.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Clean outdoor condenser unit <span class="cost-indicator">💰 DIY $10 | Pro $80-150</span></div>
+      <div class="task-description">Remove debris, leaves, and vegetation. Spray fins gently with water. Maintain 2-foot clearance around unit. Improves efficiency by 10-15%.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Check and clean vents <span class="cost-indicator">💰 DIY Free | Duct Clean $300-500</span></div>
+      <div class="task-description">Ensure all registers are open and unblocked by furniture. Vacuum dust from vents. Balanced airflow prevents hot/cold spots and reduces energy waste.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Test thermostat accuracy <span class="cost-indicator">💰 DIY Free | New $50-250</span></div>
+      <div class="task-description">Compare thermostat reading to thermometer. Calibrate or replace if off by more than 2°F. Consider upgrading to programmable or smart thermostat (saves 10-23%).</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect ductwork for leaks <span class="cost-indicator">💰 DIY $20 sealing | Pro $300-600</span></div>
+      <div class="task-description">Feel for air leaks at connections. Seal gaps with mastic (not duct tape). Leaky ducts waste 20-30% of heating/cooling energy.</div>
+    </li>
+  </ul>
+  
+  <div class="pro-tip">
+    <div class="pro-tip-label">💡 Pro Tip</div>
+    Keep a maintenance log with filter change dates, service visits, and any issues. HVAC systems last 15-20 years with proper care but only 10-12 without. Set your thermostat 7-10°F back for 8 hours daily to save 10% annually on heating/cooling costs without sacrificing comfort.
+  </div>
+</div>
+
+<!-- System 3: Plumbing & Water -->
+<div class="system-card" id="plumbing">
+  <div class="system-icon">💧</div>
+  <h2 class="system-title">Plumbing & Water Systems</h2>
+  <span class="frequency-badge">Quarterly checks</span>
+  
+  <p style="color: #3A352C; opacity: 0.8; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300;">
+    Water damage is the #2 most common homeowner insurance claim, averaging $10,000 per incident. Regular plumbing maintenance prevents leaks, conserves water (average household wastes 10,000 gallons/year), and protects your home's foundation.
+  </p>
+  
+  <ul class="task-list">
+    <li class="task-item">
+      <div class="task-title">Inspect for leaks monthly <span class="cost-indicator">💰 DIY Free | Avg repair $150-400</span></div>
+      <div class="task-description">Check under sinks, around toilets, and at water heater. Monitor water bill for unusual spikes. A dripping faucet wastes 3,000 gallons/year.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Test water pressure <span class="cost-indicator">💰 Gauge $10 | Regulator $200-400</span></div>
+      <div class="task-description">Optimal range: 40-70 PSI. High pressure (80+ PSI) damages pipes and appliances. Install pressure regulator if needed ($200-400).</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Flush water heater annually <span class="cost-indicator">💰 DIY or $100 (Pro)</span></div>
+      <div class="task-description">Drain 1-2 gallons to remove sediment buildup. Extends heater life by 5+ years and improves efficiency by 10-15%. Inspect anode rod every 3-5 years.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Clean aerators and showerheads <span class="cost-indicator">💰 DIY Free | New fixtures $20-100</span></div>
+      <div class="task-description">Soak in vinegar to remove mineral deposits. Improves flow and prevents clogs. Replace old fixtures with WaterSense models (saves 20% water).</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect exposed pipes <span class="cost-indicator">💰 DIY Free | Insulation $50-150</span></div>
+      <div class="task-description">Look for corrosion, moisture, or white/green buildup. Check pipe insulation in crawl spaces and attics. Insulate pipes in unheated areas before winter.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Test sump pump (if applicable) <span class="cost-indicator">💰 DIY Free | Replacement $800-1,500</span></div>
+      <div class="task-description">Pour water into pit to trigger float switch. Ensure discharge line is clear. Install battery backup ($150-300) for power outage protection.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Maintain septic system <span class="cost-indicator">💰 $300-600 every 3-5 years</span></div>
+      <div class="task-description">Pump septic tank regularly (3-5 years depending on size/usage). Avoid flushing chemicals, grease, or non-biodegradables. Protects $10,000+ system.</div>
+    </li>
+  </ul>
+  
+  <div class="pro-tip">
+    <div class="pro-tip-label">💡 Pro Tip</div>
+    Know where your main water shutoff valve is and test it annually. In an emergency, shutting off water quickly can prevent $10,000s in damage. Label all shutoff valves. Consider installing smart water leak detectors ($50-200) that alert your phone—they pay for themselves with just one prevented leak.
+  </div>
+</div>
+
+<!-- System 4: Electrical & Safety -->
+<div class="system-card" id="electrical">
+  <div class="system-icon">⚡</div>
+  <h2 class="system-title">Electrical & Safety Systems</h2>
+  <span class="frequency-badge">Monthly & annual checks</span>
+  
+  <p style="color: #3A352C; opacity: 0.8; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300;">
+    Electrical fires cause $1.3 billion in property damage annually. Regular electrical maintenance and working safety systems are critical for protecting your family and investment. Most electrical issues show warning signs before becoming dangerous.
+  </p>
+  
+  <ul class="task-list">
+    <li class="task-item">
+      <div class="task-title">Test smoke & CO detectors monthly <span class="cost-indicator">💰 Batteries $15/yr | New unit $15-50</span></div>
+      <div class="task-description">Press test button on each unit. Replace batteries annually. Replace entire detector every 10 years. Install one on each level and outside bedrooms.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Test GFCI outlets monthly <span class="cost-indicator">💰 DIY Free | Replacement $15-25</span></div>
+      <div class="task-description">Press "test" button—power should cut off. Press "reset" to restore. GFCIs in bathrooms, kitchens, and outdoors prevent electrocution. Replace if non-functional.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect electrical panels <span class="cost-indicator">💰 DIY Free | Pro inspection $200-400</span></div>
+      <div class="task-description">Look for rust, burning smells, or warm breakers. Ensure panel door closes properly. If you frequently reset breakers, call an electrician—circuit may be overloaded.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Check for warning signs <span class="cost-indicator">💰 Electrician visit $100-200/hr</span></div>
+      <div class="task-description">Flickering lights, buzzing sounds, discolored outlets, or burning smells require professional inspection. Never ignore these—they indicate dangerous conditions.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect extension cords <span class="cost-indicator">💰 DIY Free | New cord $10-40</span></div>
+      <div class="task-description">Look for fraying, damage, or heat. Never daisy-chain cords or run under rugs. Extension cords are temporary—install outlets for permanent needs.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Service fire extinguishers <span class="cost-indicator">💰 DIY check free | New $20-70</span></div>
+      <div class="task-description">Check pressure gauge monthly. Shake yearly to prevent settling. Replace after 12 years or use. Keep one per level, including kitchen and garage.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect outdoor lighting <span class="cost-indicator">💰 Bulbs $5-15 | Fixtures $30-200</span></div>
+      <div class="task-description">Check motion sensors, timers, and bulbs. Clean fixtures. Ensure weatherproof covers are intact. Good outdoor lighting deters burglars by 50%.</div>
+    </li>
+  </ul>
+  
+  <div class="pro-tip">
+    <div class="pro-tip-label">💡 Pro Tip</div>
+    Schedule a professional electrical inspection every 10 years or when buying a home ($200-400). Older homes (pre-1970s) may have outdated wiring that doesn't meet current safety codes. Installing whole-home surge protection ($200-500) protects all electronics from lightning and power surges.
+  </div>
+</div>
+
+<!-- System 5: Interior Finishes -->
+<div class="system-card" id="interior">
+  <div class="system-icon">🎨</div>
+  <h2 class="system-title">Interior Finishes & Surfaces</h2>
+  <span class="frequency-badge">Seasonal deep cleaning</span>
+  
+  <p style="color: #3A352C; opacity: 0.8; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300;">
+    Interior finishes are your home's aesthetic layer but also protect underlying structures from moisture, wear, and damage. Proper care preserves value, prevents costly replacements, and maintains a healthy indoor environment.
+  </p>
+  
+  <ul class="task-list">
+    <li class="task-item">
+      <div class="task-title">Inspect and touch up paint <span class="cost-indicator">💰 Touch-up $20-50 | Full room $200-600</span></div>
+      <div class="task-description">Address chips, cracks, and peeling promptly to prevent moisture infiltration. Keep paint samples for touch-ups. Full interior repainting every 5-10 years.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Recaulk bathrooms & kitchens <span class="cost-indicator">💰 $50-100 (DIY)</span></div>
+      <div class="task-description">Check caulk around tubs, showers, sinks, and countertops annually. Remove and replace deteriorating caulk to prevent water damage behind walls.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Clean and seal grout <span class="cost-indicator">💰 DIY $20-40 | Pro $200-500</span></div>
+      <div class="task-description">Scrub tile grout with specialized cleaner. Reseal every 1-2 years to prevent staining and moisture penetration. Prevents mold growth and tile damage.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Maintain hardwood floors <span class="cost-indicator">💰 Refinish $3-8/sq ft every 7-10 yrs</span></div>
+      <div class="task-description">Sweep/vacuum regularly. Damp mop (not wet). Refinish every 7-10 years or when wear shows through. Use felt pads under furniture to prevent scratches.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Check window & door seals <span class="cost-indicator">💰 Weatherstrip $2-4/ft | Caulk $5-10</span></div>
+      <div class="task-description">Inspect weatherstripping and caulk around windows/doors. Replace worn seals. Proper sealing saves 10-20% on heating/cooling and prevents drafts.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Clean or replace cabinet hardware <span class="cost-indicator">💰 New hardware $3-15 per pull</span></div>
+      <div class="task-description">Tighten loose screws. Clean buildup from hinges and handles. Replace dated hardware for instant kitchen/bathroom refresh ($50-200).</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Deep clean carpets annually <span class="cost-indicator">💰 $100-300 (Pro)</span></div>
+      <div class="task-description">Professional steam cleaning extends carpet life by 50%. Vacuum weekly. Address stains immediately. Replace carpet every 8-12 years depending on quality and traffic.</div>
+    </li>
+  </ul>
+  
+  <div class="pro-tip">
+    <div class="pro-tip-label">💡 Pro Tip</div>
+    Create a "home maintenance kit" with touch-up paint, caulk, grout sealer, wood markers, and cleaning supplies specific to your finishes. Take photos of each room after renovations or updates—these help with insurance claims and future projects. Small cosmetic maintenance now prevents major renovations later.
+  </div>
+</div>
+
+<!-- System 6: Exterior & Foundation -->
+<div class="system-card" id="exterior">
+  <div class="system-icon">🏡</div>
+  <h2 class="system-title">Exterior & Foundation</h2>
+  <span class="frequency-badge">Seasonal inspections</span>
+  
+  <p style="color: #3A352C; opacity: 0.8; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300;">
+    Your home's exterior and foundation are constantly exposed to weather, moisture, and temperature changes. Proactive maintenance prevents water intrusion, structural damage, and pest problems—the most expensive repairs to fix.
+  </p>
+  
+  <ul class="task-list">
+    <li class="task-item">
+      <div class="task-title">Inspect foundation for cracks <span class="cost-indicator">💰 DIY Free | Pro eval $300-800</span></div>
+      <div class="task-description">Walk perimeter looking for new or widening cracks. Monitor existing cracks with date-marked photos. Horizontal cracks or bulges require immediate professional assessment.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Check drainage and grading <span class="cost-indicator">💰 DIY Free | Regrade $500-3,000</span></div>
+      <div class="task-description">Ensure ground slopes away from foundation (6" drop in 10 feet). Extend downspouts 5-10 feet from house. Poor drainage causes 60% of foundation problems.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Maintain siding and paint <span class="cost-indicator">💰 Wash $200-400 | Paint $3,000-10,000</span></div>
+      <div class="task-description">Pressure wash annually (1500 PSI max). Repair damaged siding promptly. Repaint/stain as needed. Quality exterior paint protects for 7-10 years in most climates.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Seal driveway and walkways <span class="cost-indicator">💰 $200-500 every 2-3 years</span></div>
+      <div class="task-description">Fill cracks before they spread. Sealcoat asphalt to prevent water damage and extend life to 30 years. Repair concrete before freeze-thaw cycles worsen damage.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect deck/patio annually <span class="cost-indicator">💰 Seal $200-500 | Repairs vary</span></div>
+      <div class="task-description">Check for rot, loose boards, rusted fasteners. Power wash and reseal wood decks every 2-3 years. Tighten railings—they loosen over time and pose safety hazards.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Control vegetation near home <span class="cost-indicator">💰 DIY Free | Pro trim $200-800</span></div>
+      <div class="task-description">Keep shrubs 18-24" from foundation. Trim trees touching roof/siding. Plants trap moisture and provide pest access. Proper spacing improves air circulation.</div>
+    </li>
+    <li class="task-item">
+      <div class="task-title">Inspect and maintain fences <span class="cost-indicator">💰 Seal/stain $500-2,000 | Repairs vary</span></div>
+      <div class="task-description">Check for rot, leaning posts, loose boards. Restain/seal wood fences every 2-3 years. Replace damaged sections before entire panels need replacement.</div>
+    </li>
+  </ul>
+  
+  <div class="pro-tip">
+    <div class="pro-tip-label">💡 Pro Tip</div>
+    Foundation issues are expensive but preventable. The three keys: proper drainage, consistent moisture (water foundation in drought, prevent ponding in rain), and controlling vegetation. Minor foundation repairs cost $500-3,000; major structural work runs $10,000-50,000+. An ounce of prevention is worth a ton of cure here.
+  </div>
+</div>
+
+<!-- Resource Section -->
+<div style="margin-top: 4rem; padding: 3rem; background: white; border: 1px solid rgba(200, 180, 151, 0.3);">
+  <h2 style="font-family: var(--font-heading); font-size: 2rem; font-weight: 400; text-align: center; margin: 0 0 2.5rem; color: #3A352C;">
+    Additional Resources
+  </h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 500; color: #6B6A45; margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem;">📋 Create Your Schedule</h3>
+      <p style="font-size: 0.9rem; line-height: 1.7; color: #3A352C; opacity: 0.8; font-weight: 300;">
+        Download our customizable maintenance calendar template or use a home maintenance app to set reminders. Consistency is key—schedule maintenance like you schedule important appointments.
+      </p>
+    </div>
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 500; color: #6B6A45; margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem;">💰 Budget Planning</h3>
+      <p style="font-size: 0.9rem; line-height: 1.7; color: #3A352C; opacity: 0.8; font-weight: 300;">
+        Set aside 1-4% of your home's value annually for maintenance and repairs. A $300,000 home needs $3,000-12,000/year depending on age and condition. Build an emergency fund for unexpected repairs.
+      </p>
+    </div>
+    <div>
+      <h3 style="font-size: 1.1rem; font-weight: 500; color: #6B6A45; margin: 0 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem;">🔧 When to DIY vs Hire</h3>
+      <p style="font-size: 0.9rem; line-height: 1.7; color: #3A352C; opacity: 0.8; font-weight: 300;">
+        DIY: Cleaning, filters, caulking, painting, basic landscaping. Hire Pros: Electrical, gas lines, structural work, roofing, HVAC repair, plumbing beyond simple fixes. Know your limits—improper DIY can cost more to fix.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Emergency Contacts -->
+<div style="margin-top: 3rem; padding: 2.5rem; background: rgba(107, 106, 69, 0.05); border-left: 3px solid #6B6A45;">
+  <h3 style="font-family: var(--font-heading); font-size: 1.5rem; font-weight: 400; margin: 0 0 1rem; color: #3A352C;">
+    ⚡ Keep These Numbers Handy
+  </h3>
+  <p style="font-size: 0.9rem; line-height: 1.7; color: #3A352C; opacity: 0.8; margin-bottom: 1.5rem; font-weight: 300;">
+    Create a list of trusted contractors, utility companies, and emergency contacts. Post it inside a kitchen cabinet or save in your phone. In an emergency, you don't want to be searching for phone numbers.
+  </p>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.9rem;">
+    <div><strong style="color: #6B6A45;">🔧 Plumber:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">⚡ Electrician:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">🌡️ HVAC:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">🏠 Roofer:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">💧 Water Shutoff:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">⚡ Electric Panel:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">🔥 Gas Shutoff:</strong> _____________</div>
+    <div><strong style="color: #6B6A45;">📞 Insurance:</strong> _____________</div>
+  </div>
+</div>
+
+{% endblock %}

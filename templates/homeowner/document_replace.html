@@ -1,0 +1,24 @@
+{% extends "homeowner/layout.html" %}
+
+{% block homeowner_content %}
+<section class="card" style="max-width:640px;">
+  <h1 style="margin-top:0;">Replace document</h1>
+  <p class="card-subtext">
+    You are updating: <strong>{{ document.file_name }}</strong>
+  </p>
+
+  <form method="post" enctype="multipart/form-data" style="margin-top:1rem;">
+    <div class="auth-form__group">
+      <label for="file">Choose new file</label>
+      <input id="file" name="file" type="file" required>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:1rem;">
+      <button type="submit" class="btn-primary">Upload replacement</button>
+      <a href="{{ url_for('homeowner_upload_documents') }}" class="btn-ghost">
+        Cancel
+      </a>
+    </div>
+  </form>
+</section>
+{% endblock %}

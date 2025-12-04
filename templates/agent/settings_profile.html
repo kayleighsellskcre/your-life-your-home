@@ -1,0 +1,27 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Your public presence</p>
+  <h1>Profile & Branding</h1>
+  <p>This is the public view that leads and clients will see when they click your link from emails or marketing pieces.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Your Core Details</h2>
+    <p class="card-subtext" style="margin-top:1rem;">
+      In the full version of this page you will be able to upload:
+    </p>
+    <ul style="font-size:0.95rem;margin:1rem 0 0 1.5rem;padding:0;line-height:1.8;">
+      <li>A professional photo</li>
+      <li>Brokerage logo and team branding</li>
+      <li>Links to your website and social profiles</li>
+      <li>Simple call and schedule buttons</li>
+    </ul>
+    <p class="card-subtext" style="margin-top:1rem;">
+      For now this page is a placeholder. You can still use the <a href="{{ url_for('agent_crm') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">CRM</a>, <a href="{{ url_for('agent_transactions') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">transaction tools</a>, and <a href="{{ url_for('agent_marketing') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">marketing templates</a> while this profile builder is completed.
+    </p>
+  </div>
+</div>
+{% endblock %}

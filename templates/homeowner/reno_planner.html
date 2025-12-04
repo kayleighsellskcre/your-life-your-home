@@ -1,0 +1,69 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Renovation Planner{% endblock %}
+
+{% block homeowner_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Build your vision</p>
+  <h1>Renovation Planner</h1>
+  <p>Capture your project ideas, budgets, and steps in one place so you can move forward without scattered notes.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <h2>Create a New Project</h2>
+    <form method="post" style="display: grid; gap: 1.5rem; max-width: 600px; margin-top: 1.5rem;">
+      <div>
+        <label for="project_name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Project Name</label>
+        <input id="project_name" name="project_name" placeholder="Kitchen refresh, backyard, primary bath..." required />
+      </div>
+      <div>
+        <label for="project_budget" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Estimated Budget</label>
+        <input id="project_budget" name="project_budget" placeholder="Example: 8,000" />
+      </div>
+      <div>
+        <label for="project_status" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Status</label>
+        <select id="project_status" name="project_status">
+          <option>Planning</option>
+          <option>In progress</option>
+          <option>Completed</option>
+        </select>
+      </div>
+      <div>
+        <label for="project_notes" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Notes</label>
+        <textarea id="project_notes" name="project_notes" rows="4"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit" style="align-self: flex-start;">Save Project</button>
+    </form>
+  </div>
+</div>
+
+<div class="dashboard-section">
+  <h2>Your Projects</h2>
+  {% if projects %}
+    <div class="dashboard-cards">
+      {% for project in projects %}
+        <div class="card">
+          <h3>{{ project.name }}</h3>
+          <p class="card-subtext">
+            Status: <strong>{{ project.status or "Planning" }}</strong>
+            {% if project.budget is not none %}
+              • Budget: <strong>${{ "{:,.0f}".format(project.budget) }}</strong>
+            {% endif %}
+          </p>
+          {% if project.notes %}
+            <p class="card-subtext">{{ project.notes }}</p>
+          {% endif %}
+          <p style="font-size: 0.85rem; color: #888; margin-top: 1rem;">
+            Created: {{ project.created_at }}
+          </p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <h3>🔨 No Projects Yet</h3>
+      <p>Start with the one that's on your mind the most, even if it's just in the dreaming phase.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

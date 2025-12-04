@@ -1,0 +1,68 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Professional materials</p>
+  <h1>Marketing & MLS Templates</h1>
+  <p>Create simple, re-usable pieces for "Just listed", "Open house", and more, so you are never starting from a blank page.</p>
+</div>
+
+<div class="dashboard-section">
+  <div class="card">
+    <h2>Create a Marketing Template</h2>
+    <form method="post" style="display:grid;gap:1rem;max-width:720px;margin-top:1.5rem;">
+      <div>
+        <label for="template_type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Type</label>
+        <select id="template_type" name="template_type">
+          <option value="just_listed">Just Listed</option>
+          <option value="coming_soon">Coming Soon</option>
+          <option value="open_house">Open House</option>
+          <option value="under_contract">Under Contract</option>
+          <option value="just_sold">Just Sold</option>
+          <option value="market_update">Market Update</option>
+        </select>
+      </div>
+      <div>
+        <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Template Name</label>
+        <input id="name" name="name" placeholder="Example: Just Listed - Cozy 3/2 in Shawnee" required />
+      </div>
+      <div>
+        <label for="description" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Description</label>
+        <input id="description" name="description" placeholder="Short note about how you use this piece" />
+      </div>
+      <div>
+        <label for="content" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Content</label>
+        <textarea id="content" name="content" rows="5" style="width:100%;padding:0.75rem;border:1px solid var(--taupe-beige);border-radius:var(--border-radius);font-size:0.95rem;font-family:inherit;resize:vertical;" placeholder="You can write copy here, or even a simple layout idea."></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Save Template</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top:2rem;">
+    <h2>Your Templates</h2>
+
+    {% if templates %}
+      <div class="dashboard-cards" style="margin-top:1.5rem;">
+        {% for t in templates %}
+          <div class="card" style="background:var(--light-cream);">
+            <h3>{{ t.name }}</h3>
+            <p class="card-subtext">{{ t.template_type|replace('_',' ')|title }}</p>
+            {% if t.description %}
+              <p class="card-subtext" style="margin-top:0.75rem;">{{ t.description }}</p>
+            {% endif %}
+            {% if t.content %}
+              <p class="card-subtext" style="white-space:pre-wrap;margin-top:0.75rem;">{{ t.content }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div style="font-size:3rem;margin-bottom:1rem;">📱</div>
+        <h3>No Marketing Templates Yet</h3>
+        <p>Start with the one you need most often like a simple "Just listed" card.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
