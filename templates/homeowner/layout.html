@@ -5,77 +5,135 @@
 
 {% block content %}
 <style>
-  /* Premium Sidebar Navigation */
-  .ylh-menu-button {
-    width: 100%;
+  /* Integrated Header + Dashboard Navigation */
+  .ylh-horizontal-nav {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-bottom: 3px solid rgba(107, 106, 69, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 5rem;
+    z-index: 999;
+  }
+  
+  .ylh-nav-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 60px;
+  }
+  
+  .ylh-nav-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    color: #6B6A45;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin: 0 0 0 5rem;
+    white-space: nowrap;
+  }
+  
+  .ylh-nav-items {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    justify-content: flex-end;
+    margin-right: 1rem;
+    overflow: visible;
+    position: relative;
+  }
+  
+  .ylh-nav-items::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .ylh-nav-button {
     background: transparent;
     border: none;
-    border-radius: 0;
-    padding: 1rem 0.5rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 0.85rem;
+    color: #6B6A45;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
     font-weight: 500;
-    color: #3A352C;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 0.25rem;
-    box-shadow: none;
-    text-align: left;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    position: relative;
   }
   
-  .ylh-menu-button:hover {
-    background: rgba(246, 242, 232, 0.5);
-    transform: none;
-    box-shadow: none;
+  .ylh-nav-button:hover {
+    background: rgba(107, 106, 69, 0.1);
+    color: #3A352C;
+    border-bottom-color: rgba(107, 106, 69, 0.5);
   }
   
-  .ylh-menu-button.is-open {
-    background: rgba(239, 233, 220, 0.6);
+  .ylh-nav-button.active {
+    background: rgba(107, 106, 69, 0.15);
+    color: #3A352C;
+    border-bottom-color: #6B6A45;
+    font-weight: 600;
+  }
+  
+  .ylh-nav-link {
     color: #6B6A45;
-    box-shadow: none;
-  }
-  
-  .ylh-menu-button-text {
-    display: flex;
-    align-items: center;
-    flex: 1;
-  }
-  
-  .ylh-menu-button-icon-dot {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
     display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: #6B6A45;
-    border-radius: 50%;
-    margin-right: 0.75rem;
-    box-shadow: none;
-    flex-shrink: 0;
-    opacity: 0.6;
   }
   
-  .ylh-menu-button-chevron {
-    font-size: 1.2rem;
-    color: #C8B497;
-    transition: transform 0.3s ease;
-    margin-left: auto;
-    flex-shrink: 0;
+  .ylh-nav-link:hover {
+    background: rgba(107, 106, 69, 0.1);
+    color: #3A352C;
+    border-bottom-color: rgba(107, 106, 69, 0.5);
   }
   
-  .ylh-menu-button.is-open .ylh-menu-button-chevron {
-    transform: rotate(90deg);
+  .ylh-nav-link.active {
+    background: rgba(107, 106, 69, 0.15);
+    color: #3A352C;
+    border-bottom-color: #6B6A45;
+    font-weight: 600;
   }
   
-  .ylh-submenu {
-    margin-bottom: 1.5rem;
-    animation: slideDown 0.3s ease;
+  .ylh-dropdown {
+    position: relative;
   }
   
-  @keyframes slideDown {
+  .ylh-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 280px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-top: 3px solid #6B6A45;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 9999;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  
+  .ylh-dropdown.is-open .ylh-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  @keyframes dropdownSlide {
     from {
       opacity: 0;
       transform: translateY(-10px);
@@ -86,470 +144,228 @@
     }
   }
   
-  .ylh-submenu-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .ylh-submenu-item {
-    margin-bottom: 0.25rem;
-  }
-  
-  .ylh-submenu-link {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 0.5rem 0.75rem 1.8rem;
+  .ylh-dropdown-item {
+    display: block;
+    padding: 0.875rem 1.5rem;
     color: #3A352C;
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 400;
-    transition: all 0.3s ease;
-    border-left: 1px solid transparent;
-    opacity: 0.7;
-    border-radius: 0;
-    letter-spacing: 0.01em;
-    text-align: left;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
   }
   
-  .ylh-submenu-link:hover {
-    background: rgba(246, 242, 232, 0.5);
-    opacity: 1;
+  .ylh-dropdown-item:hover {
+    background: #F6F2E8;
     border-left-color: #C8B497;
-    transform: none;
-    box-shadow: none;
-    padding-left: 2rem;
+    padding-left: 1.75rem;
   }
   
-  .ylh-submenu-link.active {
-    background: transparent;
+  .ylh-dropdown-item.active {
+    background: #EFE9DC;
     color: #6B6A45;
     font-weight: 500;
     border-left-color: #6B6A45;
-    opacity: 1;
-    box-shadow: none;
   }
   
-  .ylh-submenu-bullet {
-    display: inline-block;
-    width: 4px;
-    height: 4px;
-    background: #C8B497;
-    border-radius: 50%;
-    margin-right: 0.75rem;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    opacity: 0.5;
-  }
-  
-  .ylh-submenu-link.active .ylh-submenu-bullet {
-    background: #6B6A45;
-    box-shadow: none;
-    transform: none;
-    opacity: 1;
+  @media (max-width: 768px) {
+    .ylh-nav-container {
+      padding: 0 1rem;
+    }
+    
+    .ylh-nav-title {
+      font-size: 1.2rem;
+    }
+    
+    .ylh-nav-button,
+    .ylh-nav-link {
+      padding: 0.75rem 1rem;
+      font-size: 0.7rem;
+    }
   }
 </style>
 
   {% set path = request.path or '' %}
 
-  {# Figure out which group should be open based on the current URL #}
-  {% set open_home_base =
-    path.startswith('/homeowner/overview')
-    or path.startswith('/homeowner/upload-documents')
-  %}
-  {% set open_value = path.startswith('/homeowner/value/') %}
-  {% set open_reno = path.startswith('/homeowner/reno/') or path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}
-  {% set open_next = path.startswith('/homeowner/next/') %}
-  {% set open_care = path.startswith('/homeowner/care/') %}
-  {% set open_support = path.startswith('/homeowner/support/') %}
+  {# Figure out which section is active based on the current URL #}
+  {% set is_home_base = path.startswith('/homeowner/overview') or path.startswith('/homeowner/upload-documents') %}
+  {% set is_value = path.startswith('/homeowner/value/') %}
+  {% set is_reno = path.startswith('/homeowner/reno/') or path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}
+  {% set is_next = path.startswith('/homeowner/next/') %}
+  {% set is_care = path.startswith('/homeowner/care/') %}
+  {% set is_support = path.startswith('/homeowner/support/') %}
 
-  <div
-    style="
-      display:grid;
-      grid-template-columns:280px minmax(0,1fr);
-      gap:3rem;
-      align-items:flex-start;
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 3rem 4rem;
-    "
-  >
-    <!-- Premium Sidebar -->
-    <aside
-      style="
-        background: #ffffff;
-        border-radius: 0;
-        padding: 2.5rem 2rem;
-        box-shadow: none;
-        border-right: 1px solid rgba(200, 180, 151, 0.2);
-        position: sticky;
-        top: 8rem;
-        align-self: start;
-        max-height: calc(100vh - 10rem);
-        overflow-y: auto;
-      "
-    >
-      <div style="margin-bottom:3rem; border-bottom: 1px solid rgba(200, 180, 151, 0.3); padding-bottom: 2rem;">
-        <p style="font-family: 'Playfair Display', Georgia, serif; font-size:2rem; margin:0; color: #3A352C; font-weight: 400; letter-spacing: 0.02em;">
-          Dashboard
-        </p>
-        <p style="font-size:0.9rem; color:#6B6A45; margin:1rem 0 0; line-height: 1.8; font-weight: 400; letter-spacing: 0.01em;">
-          Your calm place for everything
-        </p>
+  <!-- Horizontal Navigation Bar -->
+  <nav class="ylh-horizontal-nav">
+    <div class="ylh-nav-container">
+      <h1 class="ylh-nav-title">Dashboard</h1>
+      
+      <div class="ylh-nav-items">
+        <!-- Home Base Dropdown -->
+        <div class="ylh-dropdown">
+          <button type="button" class="ylh-nav-button {% if is_home_base %}active{% endif %}" onclick="toggleDropdown(this, event)">
+            Home Base ▾
+          </button>
+          <div class="ylh-dropdown-menu">
+            <a href="{{ url_for('homeowner_overview') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/overview') %}active{% endif %}">
+              Dashboard Overview
+            </a>
+            <a href="{{ url_for('homeowner_upload_documents') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/upload-documents') %}active{% endif %}">
+              Upload Documents
+            </a>
+          </div>
+        </div>
+        
+        <!-- Value & Equity Dropdown -->
+        <div class="ylh-dropdown">
+          <button type="button" class="ylh-nav-button {% if is_value %}active{% endif %}" onclick="toggleDropdown(this, event)">
+            Value & Equity ▾
+          </button>
+          <div class="ylh-dropdown-menu">
+            <a href="{{ url_for('homeowner_value_my_home') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/value/my-home') %}active{% endif %}">
+              My Home Value
+            </a>
+            <a href="{{ url_for('homeowner_value_equity_overview') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/value/equity-overview') %}active{% endif %}">
+              Equity Overview
+            </a>
+          </div>
+        </div>
+        
+        <!-- Renovation & Improvement Dropdown -->
+        <div class="ylh-dropdown">
+          <button type="button" class="ylh-nav-button {% if is_reno %}active{% endif %}" onclick="toggleDropdown(this, event)">
+            Renovation ▾
+          </button>
+          <div class="ylh-dropdown-menu">
+            <a href="{{ url_for('homeowner_saved_notes') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}active{% endif %}">
+              Mood Board & Planner
+            </a>
+            <a href="{{ url_for('homeowner_reno_design_ideas') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/design-ideas') %}active{% endif %}">
+              Design Ideas
+            </a>
+            <a href="{{ url_for('homeowner_reno_material_cost') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/material-cost') %}active{% endif %}">
+              Cost Estimator
+            </a>
+            <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/roi-guide') %}active{% endif %}">
+              ROI Guide
+            </a>
+            <a href="{{ url_for('homeowner_reno_before_after') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/before-after') %}active{% endif %}">
+              Before & After
+            </a>
+          </div>
+        </div>
+        
+        <!-- Next Home Strategy Dropdown -->
+        <div class="ylh-dropdown">
+          <button type="button" class="ylh-nav-button {% if is_next %}active{% endif %}" onclick="toggleDropdown(this, event)">
+            Next Home ▾
+          </button>
+          <div class="ylh-dropdown-menu">
+            <a href="{{ url_for('homeowner_next_plan_move') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/plan-my-move') %}active{% endif %}">
+              Plan My Move
+            </a>
+            <a href="{{ url_for('homeowner_next_buy_sell_guidance') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/buy-sell-guidance') %}active{% endif %}">
+              Buy & Sell Guidance
+            </a>
+            <a href="{{ url_for('homeowner_next_pathways') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/pathways') %}active{% endif %}">
+              Next-Home Pathways
+            </a>
+            <a href="{{ url_for('homeowner_next_loan_paths') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/loan-paths') %}active{% endif %}">
+              Loan Paths
+            </a>
+            <a href="{{ url_for('homeowner_next_affordability') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/affordability') %}active{% endif %}">
+              Affordability
+            </a>
+          </div>
+        </div>
+        
+        <!-- Ownership Care Dropdown -->
+        <div class="ylh-dropdown">
+          <button type="button" class="ylh-nav-button {% if is_care %}active{% endif %}" onclick="toggleDropdown(this, event)">
+            Care ▾
+          </button>
+          <div class="ylh-dropdown-menu">
+            <a href="{{ url_for('homeowner_upload_documents') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}active{% endif %}">
+              Documents & Timeline
+            </a>
+            <a href="{{ url_for('homeowner_care_maintenance_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/maintenance-guide') %}active{% endif %}">
+              Maintenance Guide
+            </a>
+            <a href="{{ url_for('homeowner_care_seasonal_checklists') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/seasonal-checklists') %}active{% endif %}">
+              Seasonal Checklists
+            </a>
+            <a href="{{ url_for('homeowner_care_home_protection') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/home-protection') %}active{% endif %}">
+              Home Protection
+            </a>
+            <a href="{{ url_for('homeowner_care_warranty_log') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/warranty-log') %}active{% endif %}">
+              Warranty Log
+            </a>
+            <a href="{{ url_for('homeowner_care_energy_savings') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/energy-savings') %}active{% endif %}">
+              Energy Savings
+            </a>
+          </div>
+        </div>
+        
+        <!-- Support Dropdown -->
+        <div class="ylh-dropdown">
+          <button type="button" class="ylh-nav-button {% if is_support %}active{% endif %}" onclick="toggleDropdown(this, event)">
+            Support ▾
+          </button>
+          <div class="ylh-dropdown-menu">
+            <a href="{{ url_for('homeowner_support_ask_question') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/ask-question') %}active{% endif %}">
+              Ask a Question
+            </a>
+            <a href="{{ url_for('homeowner_support_chat_human') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/chat-human') %}active{% endif %}">
+              Chat with Human
+            </a>
+            <a href="{{ url_for('homeowner_support_schedule_chat') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/schedule-chat') %}active{% endif %}">
+              Schedule Chat
+            </a>
+            <a href="{{ url_for('homeowner_support_resources') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/resources') %}active{% endif %}">
+              Resources
+            </a>
+            <a href="{{ url_for('homeowner_support_meet_team') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/meet-team') %}active{% endif %}">
+              Meet Team
+            </a>
+          </div>
+        </div>
       </div>
+    </div>
+  </nav>
 
-      <nav class="ylh-sidebar-nav"
-        style="
-          --menu-bg: #F6F2E8;
-          --menu-hover: #EFE9DC;
-          --menu-active: #6B6A45;
-          --menu-text: #3A352C;
-        "
-      >
-        <!-- Home base -->
-        <a
-          href="{{ url_for('homeowner_overview') }}"
-          class="ylh-menu-button {% if path.startswith('/homeowner/overview') %}active{% endif %}"
-          style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; text-decoration: none;"
-        >
-          <span class="ylh-menu-button-text">
-            <span class="ylh-menu-button-icon-dot"></span>
-            <span>Home base</span>
-          </span>
-        </a>
-
-        <!-- Value & Equity -->
-        <button
-          type="button"
-          class="ylh-menu-button {% if open_value %}is-open{% endif %}"
-          data-menu-toggle="value-equity"
-        >
-          <span class="ylh-menu-button-text">
-            <span class="ylh-menu-button-icon-dot"></span>
-            <span>Value and equity</span>
-          </span>
-          <span class="ylh-menu-button-chevron">
-            {% if open_value %}▾{% else %}▸{% endif %}
-          </span>
-        </button>
-        <div
-          class="ylh-submenu"
-          data-menu-section="value-equity"
-          data-open="{{ 'true' if open_value else 'false' }}"
-          style="display: {{ 'block' if open_value else 'none' }};"
-        >
-          <ul class="ylh-submenu-list">
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_value_my_home') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/value/my-home') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                My home value
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_value_equity_overview') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/value/equity-overview') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Equity overview
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Renovation & Improvement -->
-        <button
-          type="button"
-          class="ylh-menu-button {% if open_reno %}is-open{% endif %}"
-          data-menu-toggle="reno"
-        >
-          <span class="ylh-menu-button-text">
-            <span class="ylh-menu-button-icon-dot"></span>
-            <span>Renovation and improvement</span>
-          </span>
-          <span class="ylh-menu-button-chevron">
-            {% if open_reno %}▾{% else %}▸{% endif %}
-          </span>
-        </button>
-        <div
-          class="ylh-submenu"
-          data-menu-section="reno"
-          data-open="{{ 'true' if open_reno else 'false' }}"
-          style="display: {{ 'block' if open_reno else 'none' }};"
-        >
-          <ul class="ylh-submenu-list">
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_saved_notes') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Mood board & Renovation Planner
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_reno_design_ideas') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/reno/design-ideas') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Design and upgrade ideas
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_reno_material_cost') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/reno/material-cost') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Material and cost estimator
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_reno_roi_guide') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/reno/roi-guide') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                ROI project guide
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_reno_before_after') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/reno/before-after') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Before and after tracker
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Next Home Strategy -->
-        <button
-          type="button"
-          class="ylh-menu-button {% if open_next %}is-open{% endif %}"
-          data-menu-toggle="next-home"
-        >
-          <span class="ylh-menu-button-text">
-            <span class="ylh-menu-button-icon-dot"></span>
-            <span>Next home strategy</span>
-          </span>
-          <span class="ylh-menu-button-chevron">
-            {% if open_next %}▾{% else %}▸{% endif %}
-          </span>
-        </button>
-        <div
-          class="ylh-submenu"
-          data-menu-section="next-home"
-          data-open="{{ 'true' if open_next else 'false' }}"
-          style="display: {{ 'block' if open_next else 'none' }};"
-        >
-          <ul class="ylh-submenu-list">
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_next_plan_move') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/next/plan-my-move') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Plan my next move
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_next_buy_sell_guidance') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/next/buy-sell-guidance') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Buy and sell guidance
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_next_pathways') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/next/pathways') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Next-home pathways
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_next_loan_paths') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/next/loan-paths') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Loan paths and payments
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_next_affordability') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/next/affordability') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Affordability breakdown
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Ownership Care -->
-        <button
-          type="button"
-          class="ylh-menu-button {% if open_care %}is-open{% endif %}"
-          data-menu-toggle="care"
-        >
-          <span class="ylh-menu-button-text">
-            <span class="ylh-menu-button-icon-dot"></span>
-            <span>Ownership care</span>
-          </span>
-          <span class="ylh-menu-button-chevron">
-            {% if open_care %}▾{% else %}▸{% endif %}
-          </span>
-        </button>
-        <div
-          class="ylh-submenu"
-          data-menu-section="care"
-          data-open="{{ 'true' if open_care else 'false' }}"
-          style="display: {{ 'block' if open_care else 'none' }};"
-        >
-          <ul class="ylh-submenu-list">
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_upload_documents') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Documents and Timeline
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_care_maintenance_guide') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/care/maintenance-guide') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Maintenance and care guide
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_care_seasonal_checklists') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/care/seasonal-checklists') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Seasonal checklists
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_care_home_protection') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/care/home-protection') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Home protection and safety
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_care_warranty_log') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/care/warranty-log') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Warranty and appliance log
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_care_energy_savings') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/care/energy-savings') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Energy savings and rebates
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Support & Conversations -->
-        <button
-          type="button"
-          class="ylh-menu-button {% if open_support %}is-open{% endif %}"
-          data-menu-toggle="support"
-        >
-          <span class="ylh-menu-button-text">
-            <span class="ylh-menu-button-icon-dot"></span>
-            <span>Support and conversations</span>
-          </span>
-          <span class="ylh-menu-button-chevron">
-            {% if open_support %}▾{% else %}▸{% endif %}
-          </span>
-        </button>
-        <div
-          class="ylh-submenu"
-          data-menu-section="support"
-          data-open="{{ 'true' if open_support else 'false' }}"
-          style="display: {{ 'block' if open_support else 'none' }};"
-        >
-          <ul class="ylh-submenu-list">
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_support_ask_question') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/support/ask-question') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Ask a question
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_support_chat_human') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/support/chat-human') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Chat with a human
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_support_schedule_chat') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/support/schedule-chat') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Schedule a chat
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_support_resources') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/support/resources') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Resource library
-              </a>
-            </li>
-            <li class="ylh-submenu-item">
-              <a
-                href="{{ url_for('homeowner_support_meet_team') }}"
-                class="ylh-submenu-link {% if path.startswith('/homeowner/support/meet-team') %}active{% endif %}"
-              >
-                <span class="ylh-submenu-bullet"></span>
-                Meet your support team
-              </a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </aside>
-
+  <div style="max-width: 1600px; margin: 0 auto; padding: 3rem 4rem;">
     <!-- Main content area -->
     <section>
       {% block homeowner_content %}{% endblock %}
     </section>
   </div>
+
+<script>
+function toggleDropdown(btn, evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+  
+  var dropdown = btn.parentElement;
+  var isOpen = dropdown.classList.contains('is-open');
+  
+  // Close all dropdowns
+  var allDropdowns = document.querySelectorAll('.ylh-dropdown');
+  for (var i = 0; i < allDropdowns.length; i++) {
+    allDropdowns[i].classList.remove('is-open');
+  }
+  
+  // Toggle this one
+  if (!isOpen) {
+    dropdown.classList.add('is-open');
+  }
+}
+
+// Close when clicking outside
+document.addEventListener('click', function() {
+  var allDropdowns = document.querySelectorAll('.ylh-dropdown');
+  for (var i = 0; i < allDropdowns.length; i++) {
+    allDropdowns[i].classList.remove('is-open');
+  }
+});
+</script>
 {% endblock %}
