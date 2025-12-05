@@ -345,73 +345,132 @@
   
   /* Mobile Specific Fixes for Overview Page */
   @media (max-width: 768px) {
+    /* Force mobile layout */
+    * {
+      max-width: 100% !important;
+    }
+    
+    body {
+      font-size: 16px !important;
+    }
+    
     .hero-visual {
-      min-height: 200px !important;
+      min-height: 250px !important;
       margin-bottom: 2rem !important;
     }
     
     .hero-visual > div {
-      font-size: 1.5rem !important;
+      font-size: 1.75rem !important;
       padding: 2rem 1rem !important;
+      line-height: 1.4 !important;
     }
     
     /* Welcome section */
     h1 {
-      font-size: 2rem !important;
+      font-size: 2.25rem !important;
       line-height: 1.3 !important;
-      margin-bottom: 1rem !important;
+      margin-bottom: 1.5rem !important;
     }
     
-    /* Financial Snapshot Grid */
-    .stat-spotlight {
-      margin-bottom: 1rem !important;
-    }
-    
-    /* Buttons */
-    .cta-button {
-      padding: 1.25rem 2rem !important;
+    p {
       font-size: 1rem !important;
+      line-height: 1.6 !important;
+    }
+    
+    /* Financial Snapshot Grid - Force single column */
+    div[style*="display: grid"][style*="grid-template-columns: 1fr 1fr 1fr"] {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1.5rem !important;
+    }
+    
+    .stat-spotlight {
+      width: 100% !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    /* Buttons - Full width and larger */
+    .cta-button,
+    a[class*="cta"],
+    button {
+      padding: 1.5rem 2rem !important;
+      font-size: 1.1rem !important;
       width: 100% !important;
       display: block !important;
       text-align: center !important;
+      margin: 0.75rem 0 !important;
     }
     
     /* Loan Info Bar */
     #overview-loan-display-bar {
       height: auto !important;
-      padding: 1.5rem 1rem !important;
+      padding: 2rem 1rem !important;
       flex-direction: column !important;
-      gap: 1.5rem !important;
+      gap: 2rem !important;
     }
     
     #overview-loan-display-bar > div:first-child {
       width: 100% !important;
       text-align: center !important;
+      flex-shrink: 0 !important;
+    }
+    
+    #overview-loan-display-bar h2 {
+      font-size: 1.5rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    #overview-loan-display-bar button {
+      width: 100% !important;
+      padding: 1rem 2rem !important;
+      font-size: 1rem !important;
     }
     
     #overview-loan-display-bar > div:last-child {
       width: 100% !important;
       flex-direction: column !important;
-      gap: 1rem !important;
+      gap: 1.5rem !important;
     }
     
     #overview-loan-display-bar > div:last-child > div {
       border-left: none !important;
       border-top: 2px solid #C8B497 !important;
       padding-left: 0 !important;
-      padding-top: 1rem !important;
+      padding-top: 1.25rem !important;
       width: 100% !important;
+      text-align: center !important;
+    }
+    
+    #overview-loan-display-bar > div:last-child > div:first-child {
+      border-top-color: #6B6A45 !important;
     }
     
     /* Form Container */
     #overview-loan-form-container {
-      padding: 1.5rem 1rem !important;
+      padding: 2rem 1rem !important;
+    }
+    
+    #overview-loan-form-container form {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1.5rem !important;
+    }
+    
+    #overview-loan-form-container input {
+      width: 100% !important;
+      padding: 1rem !important;
+      font-size: 1rem !important;
     }
     
     /* Wealth Builder Section */
     div[style*="margin: 35rem"] {
       margin: 3rem -1rem 3rem !important;
-      padding: 3rem 1rem !important;
+      padding: 3rem 1.5rem !important;
+    }
+    
+    /* All flex containers */
+    div[style*="display: flex"] {
+      flex-direction: column !important;
     }
   }
 </style>

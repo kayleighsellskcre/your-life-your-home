@@ -218,53 +218,78 @@
   
   /* Global Mobile Optimizations for All Pages */
   @media (max-width: 768px) {
+    /* Force mobile viewport */
+    html {
+      font-size: 16px !important;
+    }
+    
+    body {
+      overflow-x: hidden !important;
+    }
+    
     /* Main Content Padding */
     div[style*="max-width: 1600px"] {
-      padding: 1.5rem 1rem !important;
+      padding: 2rem 1rem !important;
+      max-width: 100% !important;
     }
     
-    /* All Flex Containers */
-    div[style*="display: flex"] {
+    /* All Flex Containers - Stack vertically */
+    div[style*="display: flex"],
+    div[style*="display:flex"] {
       flex-direction: column !important;
-      gap: 1rem !important;
+      gap: 1.5rem !important;
+      align-items: stretch !important;
     }
     
-    /* All Buttons */
+    /* All Buttons - Full width */
     button,
-    a[style*="padding"][style*="background"] {
+    a[style*="padding"][style*="background"],
+    .btn,
+    .cta-button {
       width: 100% !important;
-      padding: 1rem 1.25rem !important;
-      font-size: 0.95rem !important;
+      padding: 1.25rem 2rem !important;
+      font-size: 1rem !important;
       justify-content: center !important;
       text-align: center !important;
+      display: block !important;
+      box-sizing: border-box !important;
     }
     
-    /* All Grid Layouts */
+    /* All Grid Layouts - Single column */
     div[style*="display: grid"],
-    div[style*="grid-template-columns"] {
+    div[style*="grid-template-columns"],
+    .dashboard-cards,
+    .dashboard-grid {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 1.5rem !important;
       grid-template-columns: 1fr !important;
-      gap: 1rem !important;
     }
     
     /* All Cards and Boxes */
     div[style*="background: white"],
     div[style*="background: #"],
-    div[class*="card"] {
-      padding: 1.25rem !important;
-      margin: 0.5rem 0 !important;
+    div[class*="card"],
+    .card {
+      padding: 1.5rem 1rem !important;
+      margin: 0.75rem 0 !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
     }
     
     /* All Headings */
     h1 {
-      font-size: 1.75rem !important;
+      font-size: 2rem !important;
+      line-height: 1.3 !important;
     }
     
     h2 {
-      font-size: 1.4rem !important;
+      font-size: 1.5rem !important;
+      line-height: 1.3 !important;
     }
     
     h3 {
-      font-size: 1.2rem !important;
+      font-size: 1.25rem !important;
     }
     
     /* All Form Inputs */
@@ -276,21 +301,23 @@
     select,
     textarea {
       width: 100% !important;
-      padding: 0.875rem !important;
+      padding: 1rem !important;
       font-size: 1rem !important;
       min-height: 48px !important;
+      box-sizing: border-box !important;
     }
     
     /* All Tables */
     table {
       display: block !important;
       overflow-x: auto !important;
-      font-size: 0.85rem !important;
+      font-size: 0.9rem !important;
+      width: 100% !important;
     }
     
     th, td {
       padding: 0.75rem 0.5rem !important;
-      font-size: 0.85rem !important;
+      font-size: 0.9rem !important;
     }
     
     /* All Images */
@@ -300,34 +327,35 @@
     }
     
     /* Font Size Adjustments */
-    div[style*="font-size: 2"] {
-      font-size: 1.4rem !important;
+    div[style*="font-size: 2"],
+    div[style*="font-size:2"] {
+      font-size: 1.5rem !important;
     }
     
-    div[style*="font-size: 1.5"] {
+    div[style*="font-size: 1.5"],
+    div[style*="font-size:1.5"] {
+      font-size: 1.25rem !important;
+    }
+    
+    div[style*="font-size: 1.4"],
+    div[style*="font-size:1.4"] {
       font-size: 1.2rem !important;
     }
     
-    div[style*="font-size: 1.4"] {
-      font-size: 1.1rem !important;
-    }
-    
-    div[style*="font-size: 1.3"] {
-      font-size: 1rem !important;
-    }
-    
     /* Spacing Adjustments */
-    div[style*="padding: 2rem"] {
-      padding: 1.25rem !important;
+    div[style*="padding: 2rem"],
+    div[style*="padding:2rem"] {
+      padding: 1.5rem 1rem !important;
     }
     
-    div[style*="padding: 3rem"] {
-      padding: 1.5rem !important;
+    div[style*="padding: 3rem"],
+    div[style*="padding:3rem"] {
+      padding: 2rem 1rem !important;
     }
     
     div[style*="gap: 2rem"],
     div[style*="gap: 3rem"] {
-      gap: 1rem !important;
+      gap: 1.5rem !important;
     }
     
     /* Modals */
@@ -335,8 +363,8 @@
     div[style*="position: fixed"] > div {
       width: 95% !important;
       max-width: 95% !important;
-      padding: 1.5rem !important;
-      margin: 0.5rem !important;
+      padding: 2rem 1rem !important;
+      margin: 1rem !important;
     }
     
     /* Charts and Canvas */
@@ -345,32 +373,36 @@
       height: auto !important;
     }
     
-    /* Navigation Buttons Container */
-    div[style*="justify-content: space-between"][style*="align-items: flex-start"] {
-      flex-direction: column !important;
-      align-items: stretch !important;
-    }
-    
-    /* Stat Displays */
+    /* Stat Displays - Stack them */
     div[style*="text-align: center"][style*="border-left"] {
       border-left: none !important;
       border-top: 2px solid !important;
-      padding-top: 1rem !important;
+      padding-top: 1.25rem !important;
       padding-left: 0 !important;
       margin-top: 1rem !important;
+      width: 100% !important;
     }
     
     /* Large Value Displays */
     div[style*="font-size: 2.5rem"],
-    div[style*="font-size: 3rem"] {
-      font-size: 1.75rem !important;
+    div[style*="font-size: 3rem"],
+    div[style*="font-size:2.5rem"],
+    div[style*="font-size:3rem"] {
+      font-size: 2rem !important;
     }
     
     /* Remove fixed heights on mobile */
     div[style*="height: 108px"],
-    div[style*="min-height: 150px"] {
+    div[style*="min-height: 150px"],
+    div[style*="height:108px"],
+    div[style*="min-height:150px"] {
       height: auto !important;
       min-height: auto !important;
+    }
+    
+    /* Prevent horizontal overflow */
+    * {
+      max-width: 100vw !important;
     }
   }
 </style>
