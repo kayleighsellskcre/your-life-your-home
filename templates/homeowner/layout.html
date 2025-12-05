@@ -55,7 +55,7 @@
     border: none;
     color: #6B6A45;
     padding: 0.75rem 1.5rem;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -64,6 +64,9 @@
     white-space: nowrap;
     border-bottom: 3px solid transparent;
     position: relative;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
   }
   
   .ylh-nav-button:hover {
@@ -146,13 +149,16 @@
   
   .ylh-dropdown-item {
     display: block;
-    padding: 0.875rem 1.5rem;
+    padding: 1rem 1.5rem;
     color: #3A352C;
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 400;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
   }
   
   .ylh-dropdown-item:hover {
@@ -171,16 +177,42 @@
   @media (max-width: 768px) {
     .ylh-nav-container {
       padding: 0 1rem;
+      flex-direction: column;
+      height: auto;
+      gap: 0.5rem;
     }
     
     .ylh-nav-title {
-      font-size: 1.2rem;
+      font-size: 1.8rem;
+      margin: 1rem 0 0.5rem 0;
+    }
+    
+    .ylh-nav-items {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.25rem;
     }
     
     .ylh-nav-button,
     .ylh-nav-link {
-      padding: 0.75rem 1rem;
-      font-size: 0.7rem;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      min-height: 48px;
+    }
+    
+    .ylh-dropdown-menu {
+      min-width: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+    }
+    
+    .ylh-dropdown-item {
+      padding: 1.25rem 1.5rem;
+      font-size: 1rem;
+      min-height: 52px;
     }
   }
 </style>
