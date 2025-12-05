@@ -32,6 +32,36 @@
         margin: 0;
         padding: 0;
       }
+      
+      /* Mobile Header Fixes */
+      @media (max-width: 768px) {
+        .site-header {
+          padding: 0.75rem 0 !important;
+        }
+        
+        .header-content {
+          padding: 0 1rem !important;
+          flex-direction: column !important;
+          gap: 0.75rem !important;
+        }
+        
+        .brand-logo {
+          font-size: 1.25rem !important;
+          text-align: center !important;
+        }
+        
+        .main-nav ul {
+          flex-direction: row !important;
+          gap: 1rem !important;
+          justify-content: center !important;
+          flex-wrap: wrap !important;
+        }
+        
+        .main-nav ul li a {
+          font-size: 0.85rem !important;
+          padding: 0.5rem 1rem !important;
+        }
+      }
     </style>
   </head>
 

@@ -529,6 +529,15 @@
       {% block homeowner_content %}{% endblock %}
     </section>
   </div>
+  
+  <style>
+    @media (max-width: 768px) {
+      /* Override main content padding on mobile */
+      div[style*="max-width: 1600px"][style*="padding: 3rem 4rem"] {
+        padding: 1.5rem 1rem !important;
+      }
+    }
+  </style>
 
 <script>
 function toggleDropdown(btn, evt) {
