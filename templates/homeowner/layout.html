@@ -175,69 +175,202 @@
   }
   
   @media (max-width: 768px) {
-    .ylh-horizontal-nav {
-      top: 4rem;
-    }
-    
     .ylh-nav-container {
-      padding: 0 0.5rem;
+      padding: 0 1rem;
       flex-direction: column;
       height: auto;
       gap: 0.5rem;
-      max-width: 100%;
     }
     
     .ylh-nav-title {
-      font-size: 2rem;
-      margin: 1rem 0 0.75rem 0;
-      width: 100%;
-      text-align: center;
+      font-size: 1.8rem;
+      margin: 1rem 0 0.5rem 0;
     }
     
     .ylh-nav-items {
       width: 100%;
-      justify-content: space-evenly;
+      justify-content: center;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin: 0;
-      padding: 0 0.25rem 0.75rem;
-    }
-    
-    .ylh-dropdown {
-      flex: 1 1 45%;
-      min-width: 45%;
+      gap: 0.25rem;
     }
     
     .ylh-nav-button,
     .ylh-nav-link {
-      width: 100%;
-      padding: 1.25rem 0.75rem;
-      font-size: 1rem;
+      padding: 1rem 1.25rem;
+      font-size: 0.9rem;
       letter-spacing: 0.05em;
-      min-height: 56px;
-      justify-content: center;
-      text-align: center;
+      min-height: 48px;
     }
     
     .ylh-dropdown-menu {
-      min-width: 100vw;
+      min-width: 100%;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 1.1rem;
-      max-width: 100vw;
-      position: fixed;
+      font-size: 1rem;
     }
     
     .ylh-dropdown-item {
-      padding: 1.5rem 2rem;
-      font-size: 1.1rem;
-      min-height: 60px;
-      border-left: none;
-      border-bottom: 1px solid rgba(107, 106, 69, 0.1);
+      padding: 1.25rem 1.5rem;
+      font-size: 1rem;
+      min-height: 52px;
+    }
+  }
+  
+  /* Global Mobile Optimizations for All Pages */
+  @media (max-width: 768px) {
+    /* Main Content Padding */
+    div[style*="max-width: 1600px"] {
+      padding: 1.5rem 1rem !important;
     }
     
-    .ylh-dropdown-item:hover {
-      padding-left: 2rem;
+    /* All Flex Containers */
+    div[style*="display: flex"] {
+      flex-direction: column !important;
+      gap: 1rem !important;
+    }
+    
+    /* All Buttons */
+    button,
+    a[style*="padding"][style*="background"] {
+      width: 100% !important;
+      padding: 1rem 1.25rem !important;
+      font-size: 0.95rem !important;
+      justify-content: center !important;
+      text-align: center !important;
+    }
+    
+    /* All Grid Layouts */
+    div[style*="display: grid"],
+    div[style*="grid-template-columns"] {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+    
+    /* All Cards and Boxes */
+    div[style*="background: white"],
+    div[style*="background: #"],
+    div[class*="card"] {
+      padding: 1.25rem !important;
+      margin: 0.5rem 0 !important;
+    }
+    
+    /* All Headings */
+    h1 {
+      font-size: 1.75rem !important;
+    }
+    
+    h2 {
+      font-size: 1.4rem !important;
+    }
+    
+    h3 {
+      font-size: 1.2rem !important;
+    }
+    
+    /* All Form Inputs */
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    select,
+    textarea {
+      width: 100% !important;
+      padding: 0.875rem !important;
+      font-size: 1rem !important;
+      min-height: 48px !important;
+    }
+    
+    /* All Tables */
+    table {
+      display: block !important;
+      overflow-x: auto !important;
+      font-size: 0.85rem !important;
+    }
+    
+    th, td {
+      padding: 0.75rem 0.5rem !important;
+      font-size: 0.85rem !important;
+    }
+    
+    /* All Images */
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    
+    /* Font Size Adjustments */
+    div[style*="font-size: 2"] {
+      font-size: 1.4rem !important;
+    }
+    
+    div[style*="font-size: 1.5"] {
+      font-size: 1.2rem !important;
+    }
+    
+    div[style*="font-size: 1.4"] {
+      font-size: 1.1rem !important;
+    }
+    
+    div[style*="font-size: 1.3"] {
+      font-size: 1rem !important;
+    }
+    
+    /* Spacing Adjustments */
+    div[style*="padding: 2rem"] {
+      padding: 1.25rem !important;
+    }
+    
+    div[style*="padding: 3rem"] {
+      padding: 1.5rem !important;
+    }
+    
+    div[style*="gap: 2rem"],
+    div[style*="gap: 3rem"] {
+      gap: 1rem !important;
+    }
+    
+    /* Modals */
+    div[id*="modal"] > div,
+    div[style*="position: fixed"] > div {
+      width: 95% !important;
+      max-width: 95% !important;
+      padding: 1.5rem !important;
+      margin: 0.5rem !important;
+    }
+    
+    /* Charts and Canvas */
+    canvas {
+      max-width: 100% !important;
+      height: auto !important;
+    }
+    
+    /* Navigation Buttons Container */
+    div[style*="justify-content: space-between"][style*="align-items: flex-start"] {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+    
+    /* Stat Displays */
+    div[style*="text-align: center"][style*="border-left"] {
+      border-left: none !important;
+      border-top: 2px solid !important;
+      padding-top: 1rem !important;
+      padding-left: 0 !important;
+      margin-top: 1rem !important;
+    }
+    
+    /* Large Value Displays */
+    div[style*="font-size: 2.5rem"],
+    div[style*="font-size: 3rem"] {
+      font-size: 1.75rem !important;
+    }
+    
+    /* Remove fixed heights on mobile */
+    div[style*="height: 108px"],
+    div[style*="min-height: 150px"] {
+      height: auto !important;
+      min-height: auto !important;
     }
   }
 </style>
