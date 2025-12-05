@@ -49,7 +49,8 @@
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    cursor: pointer;
+    cursor: default;
+    border: 1px solid transparent;
   }
   
   .stat-spotlight::before {
@@ -236,14 +237,15 @@
   .info-tooltip {
     position: relative;
     display: inline-block;
-    cursor: help;
+    cursor: pointer;
+    z-index: 50;
   }
   
-  .info-tooltip .tooltip-content {
+  .tooltip-content {
     visibility: hidden;
     opacity: 0;
     position: absolute;
-    bottom: 125%;
+    bottom: 150%;
     left: 50%;
     transform: translateX(-50%);
     background: #3A352C;
@@ -253,13 +255,36 @@
     font-size: 0.8rem;
     white-space: nowrap;
     transition: all 0.3s ease;
-    z-index: 100;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   }
   
-  .info-tooltip:hover .tooltip-content {
+  .info-tooltip:hover .tooltip-content,
+  .info-tooltip.active .tooltip-content {
     visibility: visible;
     opacity: 1;
-    bottom: 135%;
+    bottom: 160%;
+  }
+  
+  .tooltip-arrow {
+    position: absolute;
+    bottom: 140%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #3A352C;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+  }
+  
+  .info-tooltip:hover .tooltip-arrow,
+  .info-tooltip.active .tooltip-arrow {
+    opacity: 1;
   }
   
   /* Progress indicators */
@@ -320,124 +345,249 @@
       Your personal wealth dashboard—tracking value, equity, and opportunities. Every number tells your story. Every update brings clarity.
     </p>
     
-    <a href="{{ url_for('homeowner_value_equity_overview') }}" class="cta-button">
-      <span style="position: relative; z-index: 1;">Explore Your Equity →</span>
-    </a>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" class="cta-button">
+        <span style="position: relative; z-index: 1;">Your Instant Home Estimate →</span>
+      </a>
+      
+      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="cta-button">
+        <span style="position: relative; z-index: 1;">Explore Your Equity →</span>
+      </a>
+    </div>
   </div>
 </div>
 
 <!-- Live Stats: Interactive Spotlight Cards -->
-<div style="margin-bottom: 6rem;" class="animate-in" style="animation-delay: 0.2s;">
-  <div style="text-align: center; margin-bottom: 4rem;">
+<div style="margin-bottom: 6rem;" class="animate-in">
+  <div style="text-align: center; margin-bottom: 2rem;">
     <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
       Your Financial Snapshot
     </h2>
     <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300;">Live data • Updated daily • Always accurate</p>
   </div>
   
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem; align-items: end;">
+  <div style="display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 0.75rem !important; width: 100% !important; grid-auto-flow: column !important;">
     <!-- Card 1: Home Value with interactive tooltip -->
-    <div class="stat-spotlight" onclick="this.querySelector('.stat-value-display').style.color='#5A6D47'">
-      <div style="aspect-ratio: 1; background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
-        <div class="info-tooltip" style="position: absolute; top: 1rem; right: 1rem; width: 24px; height: 24px; border: 1px solid #6B6A45; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #6B6A45;">
+    <div class="stat-spotlight" style="overflow: visible; display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: visible; flex: 1;">
+        <div class="info-tooltip" style="position: absolute; top: 0.5rem; right: 0.5rem; width: 18px; height: 18px; border: 1px solid #6B6A45; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #6B6A45; cursor: pointer; transition: all 0.3s ease; background: transparent;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="if(!this.classList.contains('active')){this.style.background='transparent'; this.style.color='#6B6A45'}">
           i
-          <span class="tooltip-content">Based on recent market activity</span>
+          <span class="tooltip-content">
+            {% if snapshot and snapshot.last_value_refresh %}
+              Updated {{ snapshot.last_value_refresh }}
+            {% else %}
+              Based on recent market activity
+            {% endif %}
+          </span>
+          <span class="tooltip-arrow"></span>
         </div>
-        <div style="font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A45; margin-bottom: 1rem; font-weight: 500;">Current Value</div>
-        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 2.8rem; color: #3A352C; font-weight: 400; margin-bottom: 0.5rem;">
+        <div style="font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Current Value</div>
+        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #3A352C; font-weight: 400; margin-bottom: 0.35rem;">
           {% if snapshot and snapshot.value_estimate %}
             ${{ "{:,.0f}".format(snapshot.value_estimate) }}
           {% else %}
-            —
+            <span style="font-size: 0.9rem; color: #6B6A45; opacity: 0.5;">Not set</span>
           {% endif %}
         </div>
         {% if snapshot and snapshot.value_estimate %}
-        <div style="font-size: 0.85rem; color: #6B6A45; font-weight: 500;">
+        <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 500;">
           ↗ +{{ ((snapshot.value_estimate - (snapshot.value_estimate * 0.95)) / (snapshot.value_estimate * 0.95) * 100) | round(1) }}% YTD
         </div>
         {% endif %}
+        {% if snapshot and snapshot.last_value_refresh %}
+        <div style="font-size: 0.6rem; color: #6B6A45; opacity: 0.6; margin-top: 0.35rem;">
+          Updated {{ snapshot.last_value_refresh }}
+        </div>
+        {% endif %}
       </div>
-      <div style="padding: 2rem 1.5rem;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 0 0 0.75rem; color: #3A352C; font-weight: 400;">Home Value</h3>
-        <p style="font-size: 0.85rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.6;">Real-time market estimate</p>
-        <a href="{{ cloud_cma_url }}" target="_blank" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Home Value</h3>
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">Real-time market estimate</p>
+        <a href="{{ cloud_cma_url }}" target="_blank" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
           Get detailed report →
         </a>
       </div>
     </div>
     
     <!-- Card 2: Equity with progress visualization -->
-    <div class="stat-spotlight" onclick="this.querySelector('.stat-value-display').style.color='#5A6D47'">
-      <div style="aspect-ratio: 1; background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 3rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;">
+    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; flex: 1;">
         {% if snapshot and snapshot.equity_estimate and snapshot.value_estimate %}
           {% set equity_percent = (snapshot.equity_estimate / snapshot.value_estimate * 100) | round(0) %}
           <!-- Circular progress indicator -->
-          <svg style="position: absolute; top: 1rem; right: 1rem; width: 50px; height: 50px; transform: rotate(-90deg);">
-            <circle cx="25" cy="25" r="20" stroke="#EFE9DC" stroke-width="3" fill="none"/>
-            <circle cx="25" cy="25" r="20" stroke="#6B6A45" stroke-width="3" fill="none"
-                    stroke-dasharray="{{ 125.6 }}" 
-                    stroke-dashoffset="{{ 125.6 - (125.6 * equity_percent / 100) }}"
-                    style="transition: stroke-dashoffset 2s ease;"/>
+          <svg style="position: absolute; top: 0.5rem; right: 0.5rem; width: 35px; height: 35px; transform: rotate(-90deg);">
+            <circle cx="17.5" cy="17.5" r="14" stroke="#EFE9DC" stroke-width="2.5" fill="none"/>
+            <circle class="progress-ring" cx="17.5" cy="17.5" r="14" stroke="#6B6A45" stroke-width="2.5" fill="none"
+                    stroke-dasharray="87.96" 
+                    stroke-dashoffset="87.96"
+                    data-target-offset="{{ 87.96 - (87.96 * equity_percent / 100) }}"
+                    style="transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);"/>
           </svg>
-          <div style="position: absolute; top: 1.75rem; right: 1.65rem; font-size: 0.65rem; color: #6B6A45; font-weight: 600;">{{ equity_percent }}%</div>
+          <div style="position: absolute; top: 1.1rem; right: 0.95rem; font-size: 0.55rem; color: #6B6A45; font-weight: 600;">{{ equity_percent }}%</div>
         {% endif %}
-        <div style="font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A45; margin-bottom: 1rem; font-weight: 500;">Your Equity</div>
-        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 2.8rem; color: #3A352C; font-weight: 400; margin-bottom: 0.5rem;">
+        <div style="font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Your Equity</div>
+        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #3A352C; font-weight: 400; margin-bottom: 0.35rem;">
           {% if snapshot and snapshot.equity_estimate %}
             ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
           {% else %}
-            —
+            <span style="font-size: 0.9rem; color: #6B6A45; opacity: 0.5;">Not set</span>
           {% endif %}
         </div>
         {% if snapshot and snapshot.equity_estimate and snapshot.value_estimate %}
-        <div style="font-size: 0.85rem; color: #6B6A45; font-weight: 500;">
+        <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 500;">
           {{ equity_percent }}% of home value
         </div>
         {% endif %}
       </div>
-      <div style="padding: 2rem 1.5rem;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 0 0 0.75rem; color: #3A352C; font-weight: 400;">Equity Position</h3>
-        <p style="font-size: 0.85rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.6;">What you truly own</p>
-        <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; margin-top: 1rem; font-size: 0.8rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Equity Position</h3>
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">What you truly own</p>
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
           View equity dashboard →
         </a>
       </div>
     </div>
     
     <!-- Card 3: Loan Details -->
-    <div class="stat-spotlight" onclick="this.querySelector('.stat-value-display').style.color='#5A6D47'" style="display: flex; flex-direction: column;">
-      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 2rem 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
         <div style="width: 100%; text-align: center;">
-          <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(107,106,69,0.2);">
-            <div style="font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.5rem;">Rate</div>
-            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.8rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_rate %}{{ "{:.2f}".format(snapshot.loan_rate) }}%{% else %}—{% endif %}
+          <div style="margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(107,106,69,0.2);">
+            <div style="font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.25rem;">Rate</div>
+            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.2rem; color: #3A352C; font-weight: 400;">
+              {% if snapshot and snapshot.loan_rate %}{{ "{:.2f}".format(snapshot.loan_rate) }}%{% else %}<span style="font-size: 0.8rem; color: #6B6A45; opacity: 0.5;">Not set</span>{% endif %}
             </div>
           </div>
-          <div style="margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(107,106,69,0.2);">
-            <div style="font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.5rem;">Monthly</div>
-            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.5rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_payment %}${{ "{:,.0f}".format(snapshot.loan_payment) }}{% else %}—{% endif %}
+          <div style="margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(107,106,69,0.2);">
+            <div style="font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.25rem;">Monthly</div>
+            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1rem; color: #3A352C; font-weight: 400;">
+              {% if snapshot and snapshot.loan_payment %}${{ "{:,.0f}".format(snapshot.loan_payment) }}{% else %}<span style="font-size: 0.8rem; color: #6B6A45; opacity: 0.5;">Not set</span>{% endif %}
             </div>
           </div>
           <div>
-            <div style="font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.5rem;">Balance</div>
-            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.3rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_balance %}${{ "{:,.0f}".format(snapshot.loan_balance) }}{% else %}—{% endif %}
+            <div style="font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.25rem;">Balance</div>
+            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 0.9rem; color: #3A352C; font-weight: 400;">
+              {% if snapshot and snapshot.loan_balance %}${{ "{:,.0f}".format(snapshot.loan_balance) }}{% else %}<span style="font-size: 0.8rem; color: #6B6A45; opacity: 0.5;">Not set</span>{% endif %}
             </div>
           </div>
         </div>
       </div>
-      <div style="padding: 2rem 1.5rem; flex: 1; display: flex; flex-direction: column;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 0 0 0.75rem; color: #3A352C; font-weight: 400;">Loan Overview</h3>
-        <p style="font-size: 0.85rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.6;">Current mortgage terms</p>
-        <a href="{{ url_for('homeowner_next_loan_paths') }}" style="display: inline-block; margin-top: auto; padding-top: 1rem; font-size: 0.8rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Loan Overview</h3>
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">Current mortgage terms</p>
+        <a href="{{ url_for('homeowner_next_loan_paths') }}" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
           Explore loan options →
         </a>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Update Loan Information Section -->
+<div style="margin-bottom: 6rem; max-width: 1200px; margin-left: auto; margin-right: auto;">
+  <div style="background: white; border: 1px solid rgba(200, 180, 151, 0.3); border-radius: 0; padding: 2.5rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08);">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h2 style="margin: 0; display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-heading); font-size: 1.8rem; color: #3A352C; font-weight: 400;">
+          <span style="font-size: 1.5rem;">⚙️</span>
+          <span>Update Loan Information</span>
+        </h2>
+        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; color: #6B6A45; font-weight: 400;">Keep your data current for accurate projections and insights</p>
+      </div>
+      <button onclick="toggleLoanFormExpanded()" id="loan-form-toggle-btn" style="background: #6B6A45; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0; font-weight: 500; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.85rem;">
+        ✏️ Quick Update
+      </button>
+    </div>
+    
+    <div id="overview-loan-form-container" style="display: none;">
+      <form method="post" action="{{ url_for('homeowner_value_equity_overview') }}" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+        <div>
+          <label for="value_estimate" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">💰 Home Value</label>
+          <input type="text" id="value_estimate" name="value_estimate" placeholder="e.g., 480,000" value="{% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
+        </div>
+        
+        <div>
+          <label for="loan_balance" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">🏦 Loan Balance</label>
+          <input type="text" id="loan_balance" name="loan_balance" placeholder="e.g., 275,000" value="{% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
+        </div>
+        
+        <div>
+          <label for="loan_rate" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">📊 Interest Rate (%)</label>
+          <input type="text" id="loan_rate" name="loan_rate" placeholder="e.g., 3.38" value="{% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
+        </div>
+        
+        <div>
+          <label for="loan_payment" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">💳 Monthly Payment</label>
+          <input type="text" id="loan_payment" name="loan_payment" placeholder="e.g., 2,450" value="{% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
+        </div>
+        
+        <div style="grid-column: 1 / -1; display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" style="flex: 1; padding: 1rem 2rem; background: #6B6A45; color: white; border: none; border-radius: 0; font-weight: 500; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);" onmouseover="this.style.background='#5A6D47'" onmouseout="this.style.background='#6B6A45'">💾 Save & Update</button>
+          <button type="button" onclick="toggleLoanFormExpanded()" style="padding: 1rem 2rem; background: transparent; color: #6B6A45; border: 1px solid #6B6A45; border-radius: 0; font-weight: 500; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem;" onmouseover="this.style.background='#F6F2E8'" onmouseout="this.style.background='transparent'">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="overview-current-info-display" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+      {% if snapshot and (snapshot.value_estimate or snapshot.loan_balance) %}
+        {% if snapshot.value_estimate %}
+        <div style="padding: 1.25rem; background: #F6F2E8; border-radius: 0; border-left: 3px solid #6B6A45;">
+          <div style="font-size: 0.7rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Home Value</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #3A352C;">${{ "{:,.0f}".format(snapshot.value_estimate) }}</div>
+        </div>
+        {% endif %}
+        
+        {% if snapshot.loan_balance %}
+        <div style="padding: 1.25rem; background: #F6F2E8; border-radius: 0; border-left: 3px solid #C8B497;">
+          <div style="font-size: 0.7rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Loan Balance</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #3A352C;">${{ "{:,.0f}".format(snapshot.loan_balance) }}</div>
+        </div>
+        {% endif %}
+        
+        {% if snapshot.loan_rate %}
+        <div style="padding: 1.25rem; background: #F6F2E8; border-radius: 0; border-left: 3px solid #C8B497;">
+          <div style="font-size: 0.7rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Interest Rate</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #3A352C;">{{ "{:.2f}".format(snapshot.loan_rate) }}%</div>
+        </div>
+        {% endif %}
+        
+        {% if snapshot.loan_payment %}
+        <div style="padding: 1.25rem; background: #F6F2E8; border-radius: 0; border-left: 3px solid #C8B497;">
+          <div style="font-size: 0.7rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.35rem;">Monthly Payment</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #3A352C;">${{ "{:,.0f}".format(snapshot.loan_payment) }}</div>
+        </div>
+        {% endif %}
+      {% else %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #6B6A45; opacity: 0.6;">
+          <div style="font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.4;">📝</div>
+          <p style="margin: 0; font-size: 0.95rem;">Click "Quick Update" to add your loan information</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleLoanFormExpanded() {
+  const form = document.getElementById('overview-loan-form-container');
+  const display = document.getElementById('overview-current-info-display');
+  const btn = document.getElementById('loan-form-toggle-btn');
+  
+  if (!form || !display || !btn) return;
+  
+  if (form.style.display === 'none') {
+    form.style.display = 'block';
+    display.style.display = 'none';
+    btn.textContent = '✖️ Close';
+    btn.style.background = '#C8B497';
+  } else {
+    form.style.display = 'none';
+    display.style.display = 'grid';
+    btn.textContent = '✏️ Quick Update';
+    btn.style.background = '#6B6A45';
+  }
+}
+</script>
 
 <!-- Wealth Builder Section: Stacked Layout -->
 <div style="background: #F6F2E8; margin: 35rem -4rem 6rem; padding: 6rem 4rem;" class="parallax-section">
@@ -472,43 +622,40 @@
         {% endif %}
         Every decision shapes your future.
       </p>
-      <p style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 3rem;">
+      <p style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">
         We're here to help you see the full picture and make choices that feel right for your life.
       </p>
-      <a href="{{ url_for('homeowner_next_pathways') }}" class="outline-btn">
-        Explore Your Next Steps →
-      </a>
     </div>
-  </div>
-</div>
-
-<!-- Interactive Action Cards -->
-<div style="margin-bottom: 6rem;" class="animate-in" style="animation-delay: 0.4s;">
-  <div style="text-align: center; margin-bottom: 4rem;">
-    <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
-      Recommended Next Steps
-    </h2>
-    <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300;">Click to explore • Each step takes less than 5 minutes</p>
-  </div>
-  
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem;">
-    <a href="{{ url_for('homeowner_value_equity_overview') }}" class="step-card" style="text-decoration: none; color: inherit;">
-      <div class="step-icon">📊</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Update Your Numbers</h3>
-      <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">Refresh loan details for accurate equity tracking</p>
-    </a>
     
-    <a href="{{ url_for('homeowner_reno_planner') }}" class="step-card" style="text-decoration: none; color: inherit;">
-      <div class="step-icon">🔨</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Plan Renovations</h3>
-      <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">Track ideas, costs, and ROI for home improvements</p>
-    </a>
-    
-    <a href="{{ url_for('homeowner_next_plan_move') }}" class="step-card" style="text-decoration: none; color: inherit;">
-      <div class="step-icon">🏡</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Explore Moving</h3>
-      <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">See timing, affordability, and next home options</p>
-    </a>
+    <!-- Recommended Next Steps - Integrated -->
+    <div style="margin-top: 3rem;">
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
+          Recommended Next Steps
+        </h2>
+        <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300;">Click to explore • Each step takes less than 5 minutes</p>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem;">
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" class="step-card" style="text-decoration: none; color: inherit;">
+          <div class="step-icon">📊</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Update Your Numbers</h3>
+          <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">Refresh loan details for accurate equity tracking</p>
+        </a>
+        
+        <a href="{{ url_for('homeowner_reno_planner') }}" class="step-card" style="text-decoration: none; color: inherit;">
+          <div class="step-icon">🔨</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Plan Renovations</h3>
+          <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">Track ideas, costs, and ROI for home improvements</p>
+        </a>
+        
+        <a href="{{ url_for('homeowner_next_plan_move') }}" class="step-card" style="text-decoration: none; color: inherit;">
+          <div class="step-icon">🏡</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Explore Moving</h3>
+          <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">See timing, affordability, and next home options</p>
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -535,45 +682,80 @@
 </div>
 
 <script>
-// Count-up animation for stat values
+// Advanced count-up animation for all stat values
 document.addEventListener('DOMContentLoaded', function() {
+  // Animate all stat values on page load
   const statValues = document.querySelectorAll('.stat-value-display');
   
   statValues.forEach(stat => {
     const text = stat.textContent.trim();
-    if (text.includes('$') && !text.includes('—')) {
-      const value = parseInt(text.replace(/[$,]/g, ''));
-      if (!isNaN(value)) {
-        animateValue(stat, 0, value, 2000);
+    
+    // Skip empty values and placeholder text
+    if (text === '—' || text === '' || text.includes('Not set')) return;
+    
+    // Handle currency values
+    if (text.includes('$')) {
+      const value = parseFloat(text.replace(/[$,]/g, ''));
+      if (!isNaN(value) && value > 0) {
+        stat.setAttribute('data-target', value);
+        animateValue(stat, 0, value, 2000, 'currency');
+      }
+    }
+    // Handle percentages
+    else if (text.includes('%')) {
+      const value = parseFloat(text.replace(/%/g, ''));
+      if (!isNaN(value) && value > 0) {
+        stat.setAttribute('data-target', value);
+        animateValue(stat, 0, value, 1800, 'percent');
       }
     }
   });
   
-  function animateValue(element, start, end, duration) {
+  function animateValue(element, start, end, duration, type) {
     const startTime = performance.now();
-    const isPercent = element.textContent.includes('%');
     
     function update(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const current = Math.floor(start + (end - start) * easeOut);
       
-      if (isPercent) {
+      // Smooth easing function
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      const current = start + (end - start) * easeOutCubic;
+      
+      if (type === 'currency') {
+        element.textContent = '$' + Math.floor(current).toLocaleString();
+      } else if (type === 'percent') {
         element.textContent = current.toFixed(2) + '%';
-      } else {
-        element.textContent = '$' + current.toLocaleString();
       }
       
       if (progress < 1) {
         requestAnimationFrame(update);
+      } else {
+        // Ensure final value is exact
+        if (type === 'currency') {
+          element.textContent = '$' + Math.floor(end).toLocaleString();
+        } else if (type === 'percent') {
+          element.textContent = end.toFixed(2) + '%';
+        }
       }
     }
     
     requestAnimationFrame(update);
   }
   
-  // Parallax effect on scroll
+  // Animate progress rings
+  const progressRings = document.querySelectorAll('.progress-ring');
+  progressRings.forEach(ring => {
+    // Trigger animation after a short delay
+    setTimeout(() => {
+      const targetOffset = ring.getAttribute('data-target-offset');
+      if (targetOffset) {
+        ring.style.strokeDashoffset = targetOffset;
+      }
+    }, 300);
+  });
+  
+  // Parallax effect on scroll (optimized)
   let ticking = false;
   
   window.addEventListener('scroll', function() {
@@ -595,204 +777,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
   
-  // Ripple effect on stat cards
+  // Enhanced ripple effect on stat cards (removed - cards are not clickable)
   const statCards = document.querySelectorAll('.stat-spotlight');
   
   statCards.forEach(card => {
-    card.addEventListener('click', function(e) {
-      const ripple = document.createElement('span');
-      ripple.classList.add('ripple');
+    // Add subtle hover feedback
+    card.addEventListener('mouseenter', function() {
+      this.style.borderColor = 'rgba(107, 106, 69, 0.3)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.borderColor = 'transparent';
+    });
+  });
+  
+  // Smooth scroll for internal links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href !== '#') {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }
+    });
+  });
+  
+  // Add intersection observer for fade-in animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+  
+  // Observe all sections
+  document.querySelectorAll('.stat-spotlight, .step-card').forEach(el => {
+    observer.observe(el);
+  });
+  
+  // Add click handler for info tooltips (for mobile/tablet)
+  document.querySelectorAll('.info-tooltip').forEach(tooltip => {
+    tooltip.addEventListener('click', function(e) {
+      e.stopPropagation();
       
-      const rect = card.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      const x = e.clientX - rect.left - size / 2;
-      const y = e.clientY - rect.top - size / 2;
+      // Close other tooltips
+      document.querySelectorAll('.info-tooltip.active').forEach(other => {
+        if (other !== this) {
+          other.classList.remove('active');
+        }
+      });
       
-      ripple.style.width = ripple.style.height = size + 'px';
-      ripple.style.left = x + 'px';
-      ripple.style.top = y + 'px';
-      
-      card.appendChild(ripple);
-      
-      setTimeout(() => ripple.remove(), 600);
+      // Toggle this tooltip
+      this.classList.toggle('active');
+    });
+  });
+  
+  // Close tooltip when clicking outside
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.info-tooltip.active').forEach(tooltip => {
+      tooltip.classList.remove('active');
     });
   });
 });
 </script>
 
-<!-- Hero Section: Split Layout (60% visual / 40% content) -->
-<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 4rem; margin-bottom: 5rem; min-height: 60vh; align-items: center;">
-  <!-- Left: Lifestyle Visual with Decorative Overlay -->
-  <div style="position: relative; height: 100%; min-height: 400px; background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); border-radius: 0; overflow: hidden;">
-    <!-- Placeholder for lifestyle photo - Replace with actual image -->
-    <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(107,106,69,0.15) 0%, rgba(200,180,151,0.15) 100%); display: flex; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 1.2rem; text-align: center; padding: 2rem;">
-      Your Home<br/>Your Sanctuary
-    </div>
-    <!-- Decorative plant leaf graphic overlay -->
-    <div style="position: absolute; top: -20px; right: -20px; width: 150px; height: 150px; opacity: 0.1;">
-      <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
-        <path d="M50 10 Q70 30 50 50 Q30 30 50 10" fill="#6B6A45"/>
-        <path d="M50 50 Q70 70 50 90 Q30 70 50 50" fill="#6B6A45"/>
-      </svg>
-    </div>
-  </div>
-  
-  <!-- Right: Welcome Message Block -->
-  <div style="padding: 2rem 0;">
-    <!-- Small logo stamp -->
-    <div style="display: inline-block; padding: 0.5rem 1.5rem; border: 1px solid #6B6A45; margin-bottom: 2rem; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #6B6A45; font-weight: 500;">
-      Your Life • Your Home
-    </div>
-    
-    <h1 style="font-family: var(--font-heading); font-size: 3.5rem; line-height: 1.2; margin: 0 0 1.5rem; color: #3A352C; font-weight: 400; letter-spacing: -0.01em;">
-      Welcome Home,<br/>
-      <span style="color: #6B6A45;">{{ snapshot.name.split()[0] if snapshot and snapshot.name else "Friend" }}</span>
-    </h1>
-    
-    <p style="font-size: 1.05rem; line-height: 1.9; color: #3A352C; opacity: 0.8; margin-bottom: 2.5rem; font-weight: 300;">
-      Your calm snapshot—value, equity, loan details, and gentle next steps all in one simple view. Everything you need to feel confident about your home's journey.
-    </p>
-    
-    <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; padding: 1rem 2.5rem; background: #6B6A45; color: white; text-decoration: none; font-size: 0.9rem; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.3s ease; font-weight: 500; border-radius: 0;">
-      View Your Equity →
-    </a>
-  </div>
-</div>
-
-<!-- In The Spotlight: Three Product Cards -->
-<div style="margin-bottom: 5rem;">
-  <h2 style="font-family: var(--font-heading); font-size: 2.5rem; text-align: center; margin-bottom: 3rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
-    In The Spotlight
-  </h2>
-  
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3rem;">
-    <!-- Card 1: Home Value -->
-    <div style="background: white; text-align: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'">
-      <div style="aspect-ratio: 1; background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center;">
-        <div style="text-align: center;">
-          <div style="font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Estimated Value</div>
-          <div style="font-family: var(--font-heading); font-size: 2.5rem; color: #3A352C; font-weight: 400;">
-            {% if snapshot and snapshot.value_estimate %}
-              ${{ "{:,.0f}".format(snapshot.value_estimate) }}
-            {% else %}
-              —
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0 0 0.5rem; color: #3A352C; font-weight: 400;">Home Value</h3>
-      <p style="font-size: 0.85rem; color: #6B6A45; font-weight: 400;">Current estimate</p>
-    </div>
-    
-    <!-- Card 2: Equity -->
-    <div style="background: white; text-align: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'">
-      <div style="aspect-ratio: 1; background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center;">
-        <div style="text-align: center;">
-          <div style="font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Your Equity</div>
-          <div style="font-family: var(--font-heading); font-size: 2.5rem; color: #3A352C; font-weight: 400;">
-            {% if snapshot and snapshot.equity_estimate %}
-              ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
-            {% else %}
-              —
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0 0 0.5rem; color: #3A352C; font-weight: 400;">Equity Position</h3>
-      <p style="font-size: 0.85rem; color: #6B6A45; font-weight: 400;">What you own</p>
-    </div>
-    
-    <!-- Card 3: Loan -->
-    <div style="background: white; text-align: center; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-8px)'" onmouseout="this.style.transform='translateY(0)'">
-      <div style="aspect-ratio: 1; background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center;">
-        <div style="text-align: center; padding: 1.5rem;">
-          <div style="margin-bottom: 1rem;">
-            <div style="font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500;">Rate</div>
-            <div style="font-family: var(--font-heading); font-size: 1.5rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_rate %}{{ "{:.2f}".format(snapshot.loan_rate) }}%{% else %}—{% endif %}
-            </div>
-          </div>
-          <div>
-            <div style="font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500;">Payment</div>
-            <div style="font-family: var(--font-heading); font-size: 1.3rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_payment %}${{ "{:,.0f}".format(snapshot.loan_payment) }}{% else %}—{% endif %}
-            </div>
-          </div>
-        </div>
-      </div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0 0 0.5rem; color: #3A352C; font-weight: 400;">Loan Snapshot</h3>
-      <p style="font-size: 0.85rem; color: #6B6A45; font-weight: 400;">Current terms</p>
-    </div>
-  </div>
-</div>
-
-<!-- Eco Credentials Section: Two Column -->
-<div style="background: #F6F2E8; margin: 0 -4rem 5rem; padding: 5rem 4rem;">
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; max-width: 1400px; margin: 0 auto;">
-    <!-- Left: Text -->
-    <div>
-      <h2 style="font-family: var(--font-heading); font-size: 3rem; line-height: 1.3; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">
-        Your Home,<br/>
-        Your Wealth Builder
-      </h2>
-      <p style="font-size: 1.1rem; line-height: 2; color: #3A352C; opacity: 0.75; font-weight: 300; margin-bottom: 2rem;">
-        Every month, your equity grows. Every improvement adds value. Every decision shapes your future. We're here to help you see the full picture and make choices that feel right for your life.
-      </p>
-      <a href="{{ url_for('homeowner_next_pathways') }}" style="display: inline-block; padding: 1rem 2.5rem; border: 1px solid #6B6A45; color: #6B6A45; text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.3s ease; font-weight: 500;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6B6A45'">
-        Explore Next Steps →
-      </a>
-    </div>
-    
-    <!-- Right: Image Placeholder -->
-    <div style="aspect-ratio: 4/3; background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); display: flex; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 1.2rem;">
-      Lifestyle Interior
-    </div>
-  </div>
-</div>
-
-<!-- Suggested Next Steps -->
-<div style="margin-bottom: 5rem;">
-  <h2 style="font-family: var(--font-heading); font-size: 2.5rem; text-align: center; margin-bottom: 3rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
-    Suggested Next Steps
-  </h2>
-  
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-    <div style="background: white; padding: 2.5rem 2rem; text-align: center; border: 1px solid rgba(200, 180, 151, 0.3);">
-      <div style="font-size: 2.5rem; margin-bottom: 1rem;">📊</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0 0 1rem; color: #3A352C; font-weight: 400;">Add Loan Details</h3>
-      <p style="font-size: 0.95rem; line-height: 1.8; color: #3A352C; opacity: 0.7; font-weight: 300;">Complete your financial picture</p>
-    </div>
-    
-    <div style="background: white; padding: 2.5rem 2rem; text-align: center; border: 1px solid rgba(200, 180, 151, 0.3);">
-      <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔨</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0 0 1rem; color: #3A352C; font-weight: 400;">Plan Renovations</h3>
-      <p style="font-size: 0.95rem; line-height: 1.8; color: #3A352C; opacity: 0.7; font-weight: 300;">Organize your home improvement ideas</p>
-    </div>
-    
-    <div style="background: white; padding: 2.5rem 2rem; text-align: center; border: 1px solid rgba(200, 180, 151, 0.3);">
-      <div style="font-size: 2.5rem; margin-bottom: 1rem;">🏡</div>
-      <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin: 0 0 1rem; color: #3A352C; font-weight: 400;">Plan Your Move</h3>
-      <p style="font-size: 0.95rem; line-height: 1.8; color: #3A352C; opacity: 0.7; font-weight: 300;">Explore timing and options</p>
-    </div>
-  </div>
-</div>
-
-<!-- Quick Actions / Social Follow Section -->
-<div style="background: #EFE9DC; margin: 0 -4rem; padding: 4rem 4rem; text-align: center;">
-  <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 2.5rem; color: #3A352C; font-weight: 400;">
-    Quick Actions
-  </h2>
-  
-  <div style="display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;">
-    <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" style="padding: 1rem 2rem; border: 1px solid #6B6A45; color: #6B6A45; text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.3s ease; font-weight: 500;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6B6A45'">
-      Pull Home Worth
-    </a>
-    <a href="{{ url_for('homeowner_reno_planner') }}" style="padding: 1rem 2rem; border: 1px solid #6B6A45; color: #6B6A45; text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.3s ease; font-weight: 500;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6B6A45'">
-      Start Renovation
-    </a>
-    <a href="{{ url_for('homeowner_next_plan_move') }}" style="padding: 1rem 2rem; border: 1px solid #6B6A45; color: #6B6A45; text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; transition: all 0.3s ease; font-weight: 500;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#6B6A45'">
-      Plan My Move
-    </a>
-  </div>
-</div>
 {% endblock %}

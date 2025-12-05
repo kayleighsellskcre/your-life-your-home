@@ -161,53 +161,53 @@
 
 <div class="dashboard-section">
   <!-- Hero Stats with Visual Progress Bars -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+  <div style="display: grid !important; grid-template-columns: 1fr 1fr 1fr !important; gap: 0.75rem !important; margin-bottom: 2rem; grid-auto-flow: column !important;">
     <!-- Home Value Card -->
-    <div class="card" style="background: linear-gradient(135deg, #3A352C 0%, #4a3f35 100%); color: white; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
-      <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">🏡</div>
+    <div class="card" style="min-width: 0 !important; width: 100% !important; background: linear-gradient(135deg, #3A352C 0%, #2D2822 100%); color: white; position: relative; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.2); border: 1px solid rgba(200, 180, 151, 0.2);">
+      <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.08;">🏡</div>
       <div style="position: relative; z-index: 1;">
         <h2 style="font-size: 0.85rem; font-weight: 500; color: #C8B497; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 1rem;">Home Value</h2>
-        <div style="font-size: 2.5rem; font-weight: 400; color: #3A352C; margin-bottom: 0.5rem; font-family: var(--font-heading);">
+        <div style="font-size: 2.5rem; font-weight: 400; color: #F6F2E8; margin-bottom: 0.5rem; font-family: var(--font-heading);">
           {% if current_value > 0 %}
             ${{ "{:,.0f}".format(current_value) }}
           {% else %}
-            <span style="font-size: 2rem; color: var(--taupe-beige);">—</span>
+            <span style="font-size: 2rem; color: #C8B497; opacity: 0.6;">—</span>
           {% endif %}
         </div>
         {% if monthly_appreciation > 0 %}
-        <div style="background: rgba(186,140,97,0.2); padding: 0.5rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-          <span style="font-size: 0.75rem; color: var(--olive-green);">📈 +${{ "{:,.0f}".format(monthly_appreciation) }}/mo</span>
+        <div style="background: rgba(200,180,151,0.15); padding: 0.5rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; border: 1px solid rgba(200,180,151,0.2);">
+          <span style="font-size: 0.75rem; color: #C8B497; font-weight: 500;">📈 +${{ "{:,.0f}".format(monthly_appreciation) }}/mo</span>
         </div>
         {% endif %}
       </div>
     </div>
 
     <!-- Loan Balance Card -->
-    <div class="card" style="background: #C8B497; color: white; position: relative; overflow: hidden; border: 1px solid rgba(200, 180, 151, 0.5);">
-      <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">💳</div>
+    <div class="card" style="min-width: 0 !important; width: 100% !important; background: linear-gradient(135deg, #9A8B7A 0%, #8A7C6D 100%); color: white; position: relative; overflow: hidden; border: 1px solid rgba(107, 106, 69, 0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.15);">
+      <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.08;">💳</div>
       <div style="position: relative; z-index: 1;">
-        <h2 style="font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 1rem;">Loan Balance</h2>
-        <div style="font-size: 2.5rem; font-weight: 400; margin-bottom: 0.5rem; font-family: var(--font-heading);">
+        <h2 style="font-size: 0.85rem; font-weight: 500; color: #F6F2E8; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 1rem;">Loan Balance</h2>
+        <div style="font-size: 2.5rem; font-weight: 400; color: white; margin-bottom: 0.5rem; font-family: var(--font-heading);">
           {% if loan_balance > 0 %}
             ${{ "{:,.0f}".format(loan_balance) }}
           {% else %}
-            <span style="font-size: 2rem; opacity: 0.7;">—</span>
+            <span style="font-size: 2rem; opacity: 0.6;">—</span>
           {% endif %}
         </div>
         {% if loan_rate > 0 %}
-        <div style="background: rgba(255,255,255,0.15); padding: 0.5rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem;">
-          <span style="font-size: 0.75rem;">{{ "{:.2f}".format(loan_rate) }}% APR</span>
+        <div style="background: rgba(255,255,255,0.12); padding: 0.5rem 0.75rem; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; border: 1px solid rgba(255,255,255,0.15);">
+          <span style="font-size: 0.75rem; color: #F6F2E8; font-weight: 500;">{{ "{:.2f}".format(loan_rate) }}% APR</span>
         </div>
         {% endif %}
       </div>
     </div>
 
     <!-- Equity Card with Progress Bar -->
-    <div class="card" style="background: #6B6A45; color: white; position: relative; overflow: hidden; border: 1px solid rgba(107, 106, 69, 0.5);">
+    <div class="card" style="min-width: 0 !important; width: 100% !important; background: linear-gradient(135deg, #6B6A45 0%, #5A5938 100%); color: white; position: relative; overflow: hidden; border: 1px solid rgba(107, 106, 69, 0.4); box-shadow: 0 8px 24px rgba(0,0,0,0.18);">
       <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">💎</div>
       <div style="position: relative; z-index: 1;">
-        <h2 style="font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.95); text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 1rem;">Your Equity</h2>
-        <div style="font-size: 2.5rem; font-weight: 400; margin-bottom: 1rem; font-family: var(--font-heading);">
+        <h2 style="font-size: 0.85rem; font-weight: 500; color: #F6F2E8; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 1rem;">Your Equity</h2>
+        <div style="font-size: 2.5rem; font-weight: 400; color: white; margin-bottom: 1rem; font-family: var(--font-heading);">
           {% if equity_estimate > 0 %}
             ${{ "{:,.0f}".format(equity_estimate) }}
           {% else %}
@@ -216,12 +216,12 @@
         </div>
         {% if ltv > 0 %}
         <div style="margin-top: 1rem;">
-          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem; opacity: 0.9;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem; color: #F6F2E8; opacity: 0.95;">
             <span>{{ "{:.1f}".format(100 - ltv) }}% owned</span>
             <span>{{ "{:.1f}".format(ltv) }}% financed</span>
           </div>
-          <div style="background: rgba(255,255,255,0.2); height: 8px; border-radius: 10px; overflow: hidden;">
-            <div style="background: white; height: 100%; width: {{ "{:.1f}".format(100 - ltv) }}%; transition: width 1s ease;"></div>
+          <div style="background: rgba(246,242,232,0.2); height: 8px; border-radius: 10px; overflow: hidden; border: 1px solid rgba(246,242,232,0.15);">
+            <div style="background: #F6F2E8; height: 100%; width: {{ "{:.1f}".format(100 - ltv) }}%; transition: width 1s ease; box-shadow: 0 0 8px rgba(246,242,232,0.3);"></div>
           </div>
         </div>
         {% endif %}

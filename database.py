@@ -62,12 +62,30 @@ def init_db() -> None:
             loan_balance REAL,
             loan_term_years REAL,
             loan_start_date TEXT,
+            last_value_refresh TEXT,
+            value_refresh_source TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
             UNIQUE(user_id, property_id)
         )
         """
     )
+    
+    # Add refresh tracking columns if they don't exist (migration)
+    try:
+        cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN last_value_refresh TEXT")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN value_refresh_source TEXT")
+    except:
+        pass
+    
+    # Add initial purchase value for appreciation calculation
+    try:
+        cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN initial_purchase_value REAL")
+    except:
+        pass
 
     # ------------- HOMEOWNER NOTES (DESIGN BOARDS) -------------
     cur.execute(
@@ -413,7 +431,9 @@ def get_homeowner_snapshot_for_user(user_id: int) -> Optional[Dict[str, Any]]:
                loan_payment,
                loan_balance,
                loan_term_years,
-               loan_start_date
+               loan_start_date,
+               last_value_refresh,
+               value_refresh_source
         FROM homeowner_snapshots
         WHERE user_id = ?
         """,

@@ -244,15 +244,50 @@ def _row_get(row, key, default=None):
 # -------------------------------------------------
 # HOMEOWNER SNAPSHOT + CRM METRICS
 # -------------------------------------------------
+def calculate_appreciated_value(initial_value: float, purchase_date: str, annual_rate: float = 0.035) -> float:
+    """
+    Calculate home value with automatic appreciation over time.
+    
+    Args:
+        initial_value: The original purchase price or last set value
+        purchase_date: Date in format 'YYYY-MM-DD' or similar
+        annual_rate: Annual appreciation rate (default 3.5% = 0.035)
+    
+    Returns:
+        Appreciated home value
+    """
+    if not initial_value or not purchase_date:
+        return initial_value
+    
+    try:
+        # Parse the purchase date
+        if isinstance(purchase_date, str):
+            purchase_dt = datetime.strptime(purchase_date.split()[0], '%Y-%m-%d')
+        else:
+            purchase_dt = purchase_date
+        
+        # Calculate years elapsed
+        today = datetime.now()
+        years_elapsed = (today - purchase_dt).days / 365.25
+        
+        # Apply compound appreciation: Value = Initial * (1 + rate)^years
+        appreciated_value = initial_value * ((1 + annual_rate) ** years_elapsed)
+        
+        return round(appreciated_value, 2)
+    except Exception as e:
+        print(f"Error calculating appreciation: {e}")
+        return initial_value
+
+
 def get_homeowner_snapshot_or_default(user_row: Optional[dict]):
     if not user_row:
         return {
             "name": "Friend",
-            "value_estimate": 425000,
-            "equity_estimate": 110000,
-            "loan_rate": 5.75,
-            "loan_payment": 2450,
-            "loan_balance": 315000,
+            "value_estimate": None,
+            "equity_estimate": None,
+            "loan_rate": None,
+            "loan_payment": None,
+            "loan_balance": None,
             "next_steps": [
                 "Check home value + equity.",
                 "Upload documents to keep things organized.",
@@ -264,13 +299,34 @@ def get_homeowner_snapshot_or_default(user_row: Optional[dict]):
         base = get_homeowner_snapshot_or_default(None)
         base["name"] = user_row.get("name", "Friend")
         return base
+    
+    # Apply automatic appreciation to home value
+    # Use initial_purchase_value if set, otherwise use current value_estimate as baseline
+    initial_value = snap.get("initial_purchase_value") or snap["value_estimate"]
+    value_estimate = snap["value_estimate"]
+    
+    if initial_value and snap.get("loan_start_date"):
+        # Calculate appreciated value based on time elapsed since purchase
+        value_estimate = calculate_appreciated_value(
+            initial_value, 
+            snap["loan_start_date"],
+            annual_rate=0.035  # 3.5% annual appreciation (3-4% range)
+        )
+    
+    # Recalculate equity with appreciated value
+    equity_estimate = snap["equity_estimate"]
+    if value_estimate and snap["loan_balance"]:
+        equity_estimate = value_estimate - snap["loan_balance"]
+    
     return {
         "name": user_row.get("name", "Friend"),
-        "value_estimate": snap["value_estimate"],
-        "equity_estimate": snap["equity_estimate"],
+        "value_estimate": value_estimate,
+        "equity_estimate": equity_estimate,
         "loan_rate": snap["loan_rate"],
         "loan_payment": snap["loan_payment"],
         "loan_balance": snap["loan_balance"],
+        "loan_start_date": snap.get("loan_start_date"),
+        "last_value_refresh": snap.get("last_value_refresh"),
         "next_steps": [
             "Review equity growth.",
             "Consider refinancing or payment changes.",
