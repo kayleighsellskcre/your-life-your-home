@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .ylh-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .ylh-nav-button {
+      background: #6B6A45;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+    }
+    
+    .ylh-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 200px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      display: none;
+      z-index: 9999;
+    }
+    
+    .ylh-dropdown.is-open .ylh-dropdown-menu {
+      display: block;
+    }
+    
+    .ylh-dropdown-item {
+      display: block;
+      padding: 10px 20px;
+      color: black;
+      text-decoration: none;
+    }
+    
+    .ylh-dropdown-item:hover {
+      background: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dropdown Test</h1>
+  
+  <div class="ylh-dropdown">
+    <button class="ylh-nav-button" onclick="toggleDropdown(this, event)">
+      Test Menu ▾
+    </button>
+    <div class="ylh-dropdown-menu">
+      <a href="#" class="ylh-dropdown-item">Item 1</a>
+      <a href="#" class="ylh-dropdown-item">Item 2</a>
+      <a href="#" class="ylh-dropdown-item">Item 3</a>
+    </div>
+  </div>
+  
+  <script>
+    function toggleDropdown(btn, evt) {
+      evt.stopPropagation();
+      evt.preventDefault();
+      
+      var dropdown = btn.parentElement;
+      var isOpen = dropdown.classList.contains('is-open');
+      
+      // Close all dropdowns
+      var allDropdowns = document.querySelectorAll('.ylh-dropdown');
+      for (var i = 0; i < allDropdowns.length; i++) {
+        allDropdowns[i].classList.remove('is-open');
+      }
+      
+      // Toggle this one
+      if (!isOpen) {
+        dropdown.classList.add('is-open');
+      }
+      
+      console.log('Dropdown toggled, is-open:', !isOpen);
+    }
+    
+    // Close when clicking outside
+    document.addEventListener('click', function() {
+      var allDropdowns = document.querySelectorAll('.ylh-dropdown');
+      for (var i = 0; i < allDropdowns.length; i++) {
+        allDropdowns[i].classList.remove('is-open');
+      }
+    });
+  </script>
+</body>
+</html>

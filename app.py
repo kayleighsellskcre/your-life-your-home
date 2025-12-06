@@ -210,6 +210,167 @@ def get_current_user() -> Optional[dict]:
 
 
 # -------------------------------------------------
+# ACCESS CONTROL & SUBSCRIPTION HELPERS
+# -------------------------------------------------
+import secrets
+import string
+
+def generate_referral_code(length=8):
+    """Generate a unique referral code."""
+    chars = string.ascii_uppercase + string.digits
+    return ''.join(secrets.choice(chars) for _ in range(length))
+
+def has_active_subscription(user_id: int) -> bool:
+    """Check if user has an active subscription."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id FROM subscriptions 
+        WHERE user_id = ? 
+        AND status = 'active' 
+        AND (end_date IS NULL OR end_date > datetime('now'))
+    """, (user_id,))
+    result = cur.fetchone()
+    conn.close()
+    return result is not None
+
+def subscription_required(view):
+    """Decorator to require active subscription for agents/lenders."""
+    @wraps(view)
+    def wrapper(*a, **kw):
+        if not session.get("user_id"):
+            flash("Please sign in to access your dashboard.", "error")
+            return redirect(url_for("login"))
+        
+        user = get_current_user()
+        role = user.get("role")
+        
+        # Only agents and lenders need subscriptions
+        if role in ["agent", "lender"]:
+            if not has_active_subscription(session["user_id"]):
+                flash("An active subscription is required to access this feature.", "warning")
+                return redirect(url_for("subscription_required_page"))
+        
+        return view(*a, **kw)
+    return wrapper
+
+def get_or_create_referral_code(user_id: int) -> str:
+    """Get existing referral code or create new one for user."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check if user already has a code
+    cur.execute("SELECT referral_code FROM users WHERE id = ?", (user_id,))
+    row = cur.fetchone()
+    
+    if row and row[0]:
+        conn.close()
+        return row[0]
+    
+    # Generate new unique code
+    while True:
+        code = generate_referral_code()
+        cur.execute("SELECT id FROM users WHERE referral_code = ?", (code,))
+        if not cur.fetchone():
+            break
+    
+    # Save to user
+    cur.execute("UPDATE users SET referral_code = ? WHERE id = ?", (code, user_id))
+    conn.commit()
+    conn.close()
+    
+    return code
+
+def link_client_to_professional(professional_id: int, professional_type: str, client_email: str, referral_code: str = None):
+    """Link a client (homeowner) to an agent or lender."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check if client exists
+    cur.execute("SELECT id FROM users WHERE email = ?", (client_email,))
+    client_row = cur.fetchone()
+    client_id = client_row[0] if client_row else None
+    
+    # Create or update relationship
+    if not referral_code:
+        referral_code = generate_referral_code()
+    
+    cur.execute("""
+        INSERT INTO client_relationships (professional_id, professional_type, client_id, client_email, referral_code, status)
+        VALUES (?, ?, ?, ?, ?, 'active')
+        ON CONFLICT(referral_code) DO UPDATE SET
+            client_id = excluded.client_id,
+            client_email = excluded.client_email,
+            status = 'active'
+    """, (professional_id, professional_type, client_id, client_email, referral_code))
+    
+    conn.commit()
+    conn.close()
+    
+    return referral_code
+
+def get_client_relationships(professional_id: int):
+    """Get all clients for an agent or lender."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT 
+            cr.id,
+            cr.client_id,
+            cr.client_email,
+            cr.referral_code,
+            cr.status,
+            cr.created_at,
+            u.name as client_name,
+            u.email as client_registered_email
+        FROM client_relationships cr
+        LEFT JOIN users u ON cr.client_id = u.id
+        WHERE cr.professional_id = ?
+        ORDER BY cr.created_at DESC
+    """, (professional_id,))
+    
+    rows = cur.fetchall()
+    conn.close()
+    
+    return [dict(row) for row in rows]
+
+def save_guest_session_data(session_id: str, data: dict, referral_code: str = None):
+    """Save guest homeowner session data."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        INSERT INTO guest_sessions (session_id, data, referral_code, last_activity)
+        VALUES (?, ?, ?, datetime('now'))
+        ON CONFLICT(session_id) DO UPDATE SET
+            data = excluded.data,
+            last_activity = datetime('now')
+    """, (session_id, json.dumps(data), referral_code))
+    
+    conn.commit()
+    conn.close()
+
+def get_guest_session_data(session_id: str):
+    """Retrieve guest session data."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT data, referral_code FROM guest_sessions 
+        WHERE session_id = ?
+    """, (session_id,))
+    
+    row = cur.fetchone()
+    conn.close()
+    
+    if row:
+        return {
+            'data': json.loads(row[0]) if row[0] else {},
+            'referral_code': row[1]
+        }
+    return None
+
+
+# -------------------------------------------------
 # SHARED UTILS
 # -------------------------------------------------
 def json_or_list(value):
@@ -378,8 +539,11 @@ def signup():
     """
     Sign up for any role: homeowner | agent | lender
     (role can be preselected via ?role=agent)
+    Converts guest session data to registered account for homeowners.
     """
     role = request.args.get("role", "homeowner")
+    prefilled_email = request.args.get("email", "")
+    
     if role not in ("homeowner", "agent", "lender"):
         role = "homeowner"
 
@@ -407,6 +571,61 @@ def signup():
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
+        
+        # For homeowners: convert guest session data to registered account
+        if role == "homeowner" and session.get('guest_session_id'):
+            guest_data = get_guest_session_data(session['guest_session_id'])
+            if guest_data and guest_data.get('data'):
+                # Save guest data to user's account
+                data = guest_data['data']
+                if data.get('value_estimate') or data.get('loan_balance'):
+                    # Transfer to homeowner_snapshots table
+                    upsert_homeowner_snapshot(
+                        user_id,
+                        value_estimate=data.get('value_estimate'),
+                        equity_estimate=data.get('equity_estimate'),
+                        loan_balance=data.get('loan_balance'),
+                        loan_rate=data.get('loan_rate'),
+                        loan_payment=data.get('loan_payment')
+                    )
+            
+            # Link to professional if they came via referral
+            if session.get('referral_code'):
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute("""
+                    UPDATE client_relationships 
+                    SET client_id = ?, client_email = ?, status = 'active'
+                    WHERE referral_code = ?
+                """, (user_id, email, session['referral_code']))
+                conn.commit()
+                conn.close()
+            
+            # Clear guest session
+            if 'guest_session_id' in session:
+                del session['guest_session_id']
+            if 'referral_code' in session:
+                del session['referral_code']
+        
+        # Create free trial subscription for agents/lenders
+        if role in ["agent", "lender"]:
+            conn = get_connection()
+            cur = conn.cursor()
+            from datetime import timedelta
+            trial_ends = (datetime.now() + timedelta(days=14)).isoformat()
+            cur.execute("""
+                INSERT INTO subscriptions 
+                (user_id, subscription_type, status, start_date, trial_ends_at)
+                VALUES (?, ?, 'trial', datetime('now'), ?)
+            """, (user_id, role, trial_ends))
+            cur.execute("UPDATE users SET has_active_subscription = 1 WHERE id = ?", (user_id,))
+            conn.commit()
+            conn.close()
+            flash(f"Welcome! You have a 14-day free trial.", "success")
+
+        # Process pending invitation if exists
+        if session.get('pending_invite'):
+            return redirect(url_for("process_invitation"))
 
         if role == "agent":
             return redirect(url_for("agent_dashboard"))
@@ -415,7 +634,8 @@ def signup():
         else:
             return redirect(url_for("homeowner_overview"))
 
-    return render_template("auth/signup.html", role=role, brand_name=FRONT_BRAND_NAME)
+    return render_template("auth/signup.html", role=role, brand_name=FRONT_BRAND_NAME, 
+                         prefilled_email=prefilled_email)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -455,21 +675,266 @@ def logout():
 
 
 # -------------------------------------------------
+# SUBSCRIPTION & ACCESS CONTROL ROUTES
+# -------------------------------------------------
+@app.route("/subscription-required")
+def subscription_required_page():
+    """Landing page for users who need a subscription."""
+    user = get_current_user()
+    return render_template(
+        "subscription_required.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user
+    )
+
+@app.route("/invite", methods=["GET", "POST"])
+@login_required
+def send_invitation():
+    """Send invitation to participate in transaction or become a client."""
+    user = get_current_user()
+    user_id = user["id"]
+    
+    if request.method == "POST":
+        invited_email = request.form.get("invited_email", "").strip()
+        invited_role = request.form.get("invited_role", "homeowner")
+        custom_role_name = request.form.get("custom_role_name", "").strip()
+        transaction_id = request.form.get("transaction_id", "").strip()
+        message = request.form.get("message", "").strip()
+        
+        if not invited_email:
+            flash("Please provide an email address.", "error")
+            return redirect(request.url)
+        
+        # Generate unique invite code
+        invite_code = generate_referral_code(12)
+        
+        # Calculate expiration (30 days from now)
+        from datetime import timedelta
+        expires_at = (datetime.now() + timedelta(days=30)).isoformat()
+        
+        # Save invitation
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            INSERT INTO invitations 
+            (transaction_id, invited_by, invited_email, invited_role, custom_role_name, 
+             invite_code, message, expires_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (transaction_id or None, user_id, invited_email, invited_role, 
+              custom_role_name or None, invite_code, message or None, expires_at))
+        conn.commit()
+        conn.close()
+        
+        # Generate invitation link
+        invite_url = f"{request.url_root}accept-invite?code={invite_code}"
+        
+        flash(f"Invitation sent! Share this link: {invite_url}", "success")
+        return redirect(request.referrer or url_for("index"))
+    
+    # GET request - show invitation form
+    transaction_id = request.args.get("transaction_id")
+    return render_template(
+        "send_invitation.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        transaction_id=transaction_id
+    )
+
+@app.route("/accept-invite")
+def accept_invitation():
+    """Accept an invitation and join platform or transaction."""
+    invite_code = request.args.get("code")
+    
+    if not invite_code:
+        flash("Invalid invitation link.", "error")
+        return redirect(url_for("index"))
+    
+    # Look up invitation
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, transaction_id, invited_by, invited_email, invited_role, 
+               custom_role_name, message, status, expires_at
+        FROM invitations
+        WHERE invite_code = ?
+    """, (invite_code,))
+    
+    invite = cur.fetchone()
+    conn.close()
+    
+    if not invite:
+        flash("Invitation not found.", "error")
+        return redirect(url_for("index"))
+    
+    invite_dict = dict(invite)
+    
+    # Check if expired
+    if invite_dict['expires_at']:
+        expires = datetime.fromisoformat(invite_dict['expires_at'])
+        if datetime.now() > expires:
+            flash("This invitation has expired.", "error")
+            return redirect(url_for("index"))
+    
+    # Check if already accepted
+    if invite_dict['status'] == 'accepted':
+        flash("This invitation has already been used.", "info")
+        return redirect(url_for("login"))
+    
+    # Store invite code in session
+    session['pending_invite'] = invite_code
+    
+    # Check if user is logged in
+    user = get_current_user()
+    if user:
+        # User is logged in, process invitation directly
+        return redirect(url_for("process_invitation"))
+    else:
+        # Redirect to signup with email pre-filled
+        flash(f"Please sign up or log in to accept this invitation.", "info")
+        return redirect(url_for("signup", email=invite_dict['invited_email'], 
+                               role=invite_dict['invited_role']))
+
+@app.route("/process-invitation")
+@login_required
+def process_invitation():
+    """Process pending invitation after user logs in/signs up."""
+    invite_code = session.get('pending_invite')
+    if not invite_code:
+        return redirect(url_for("index"))
+    
+    user = get_current_user()
+    user_id = user["id"]
+    
+    # Get invitation details
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, transaction_id, invited_by, invited_role, custom_role_name
+        FROM invitations
+        WHERE invite_code = ? AND status = 'pending'
+    """, (invite_code,))
+    
+    invite = cur.fetchone()
+    if not invite:
+        flash("Invitation has already been processed or is invalid.", "info")
+        del session['pending_invite']
+        return redirect(url_for("index"))
+    
+    invite_dict = dict(invite)
+    
+    # Mark invitation as accepted
+    cur.execute("""
+        UPDATE invitations 
+        SET status = 'accepted', accepted_at = datetime('now')
+        WHERE invite_code = ?
+    """, (invite_code,))
+    
+    # Add to transaction participants if transaction_id exists
+    if invite_dict['transaction_id']:
+        cur.execute("""
+            INSERT INTO transaction_participants 
+            (transaction_id, user_id, email, role, custom_role_name, invited_by, status)
+            VALUES (?, ?, ?, ?, ?, ?, 'active')
+        """, (invite_dict['transaction_id'], user_id, user['email'], 
+              invite_dict['invited_role'], invite_dict['custom_role_name'], 
+              invite_dict['invited_by']))
+    else:
+        # Client relationship invitation
+        cur.execute("""
+            SELECT role FROM users WHERE id = ?
+        """, (invite_dict['invited_by'],))
+        inviter_row = cur.fetchone()
+        if inviter_row:
+            inviter_role = inviter_row[0]
+            if inviter_role in ['agent', 'lender']:
+                # Create client relationship
+                cur.execute("""
+                    INSERT INTO client_relationships 
+                    (professional_id, professional_type, client_id, client_email, status)
+                    VALUES (?, ?, ?, ?, 'active')
+                """, (invite_dict['invited_by'], inviter_role, user_id, user['email']))
+    
+    conn.commit()
+    conn.close()
+    
+    # Clear pending invite
+    del session['pending_invite']
+    
+    flash("Invitation accepted! You now have access.", "success")
+    
+    # Redirect based on role
+    if user['role'] == 'agent':
+        return redirect(url_for("agent_dashboard"))
+    elif user['role'] == 'lender':
+        return redirect(url_for("lender_dashboard"))
+    else:
+        return redirect(url_for("homeowner_overview"))
+
+
+# -------------------------------------------------
 # HOMEOWNER ROUTES
 # -------------------------------------------------
 @app.route("/homeowner")
 def homeowner_overview():
     """
     Overview dashboard (My Home Base).
+    Supports guest mode - homeowners can use without account.
     """
+    # Check for referral code in URL
+    referral_code = request.args.get('ref')
+    if referral_code:
+        session['referral_code'] = referral_code
+    
+    # Get user or prepare guest mode
     user = get_current_user()
+    
+    # If guest mode (no user logged in)
+    if not user:
+        # Create or retrieve guest session
+        if 'guest_session_id' not in session:
+            session['guest_session_id'] = str(uuid4())
+        
+        # Load any saved guest data
+        guest_data = get_guest_session_data(session['guest_session_id'])
+        if guest_data:
+            snapshot = guest_data.get('data', {})
+        else:
+            snapshot = get_homeowner_snapshot_or_default(None)
+        
+        # Add guest mode flag
+        snapshot['is_guest'] = True
+        snapshot['referral_code'] = session.get('referral_code')
+        
+        return render_template(
+            "homeowner/overview.html",
+            brand_name=FRONT_BRAND_NAME,
+            snapshot=snapshot,
+            cloud_cma_url=CLOUD_CMA_URL,
+            is_guest=True,
+        )
+    
+    # Authenticated user
     snapshot = get_homeowner_snapshot_or_default(user)
+    
+    # Link to professional if they came via referral
+    if session.get('referral_code'):
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE client_relationships 
+            SET client_id = ?, client_email = ?, status = 'active'
+            WHERE referral_code = ? AND client_id IS NULL
+        """, (user['id'], user['email'], session['referral_code']))
+        conn.commit()
+        conn.close()
+        del session['referral_code']  # Clear after linking
 
     return render_template(
         "homeowner/overview.html",
         brand_name=FRONT_BRAND_NAME,
         snapshot=snapshot,
         cloud_cma_url=CLOUD_CMA_URL,
+        is_guest=False,
     )
 
 
@@ -1755,14 +2220,29 @@ def homeowner_support_meet_team():
 # AGENT ROUTES
 # -------------------------------------------------
 @app.route("/agent")
+@role_required("agent")
+@subscription_required
 def agent_dashboard():
-    # TEMPORARY: Authentication disabled for development
-    # if session.get("role") != "agent":
-    #     flash("Please sign in as an agent to see that page.", "error")
-    #     return redirect(url_for("login", role="agent"))
-
-    metrics = get_agent_dashboard_metrics(get_current_user_id())
-    return render_template("agent/dashboard.html", metrics=metrics)
+    """
+    Agent dashboard - requires authentication and active subscription.
+    Shows client list and referral link.
+    """
+    user = get_current_user()
+    user_id = user["id"]
+    
+    # Get or create referral code for this agent
+    referral_code = get_or_create_referral_code(user_id)
+    referral_url = f"{request.url_root}homeowner?ref={referral_code}"
+    
+    # Get client relationships
+    clients = get_client_relationships(user_id)
+    
+    metrics = get_agent_dashboard_metrics(user_id)
+    metrics['referral_url'] = referral_url
+    metrics['referral_code'] = referral_code
+    metrics['clients'] = clients
+    
+    return render_template("agent/dashboard.html", metrics=metrics, user=user)
 
 
 @app.route("/agent/settings/profile")
@@ -1952,14 +2432,29 @@ def agent_power_tools():
 # LENDER ROUTES
 # -------------------------------------------------
 @app.route("/lender")
+@role_required("lender")
+@subscription_required
 def lender_dashboard():
-    # TEMPORARY: Authentication disabled for development
-    # if session.get("role") != "lender":
-    #     flash("Please sign in as a lender to see that page.", "error")
-    #     return redirect(url_for("login", role="lender"))
-
-    metrics = get_lender_dashboard_metrics(get_current_user_id())
-    return render_template("lender/dashboard.html", metrics=metrics)
+    """
+    Lender dashboard - requires authentication and active subscription.
+    Shows client list and referral link.
+    """
+    user = get_current_user()
+    user_id = user["id"]
+    
+    # Get or create referral code for this lender
+    referral_code = get_or_create_referral_code(user_id)
+    referral_url = f"{request.url_root}homeowner?ref={referral_code}"
+    
+    # Get client relationships
+    clients = get_client_relationships(user_id)
+    
+    metrics = get_lender_dashboard_metrics(user_id)
+    metrics['referral_url'] = referral_url
+    metrics['referral_code'] = referral_code
+    metrics['clients'] = clients
+    
+    return render_template("lender/dashboard.html", metrics=metrics, user=user)
 
 
 @app.route("/lender/settings/profile")

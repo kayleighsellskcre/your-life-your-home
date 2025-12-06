@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription Required - {{ brand_name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 4rem auto; padding: 3rem; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center;">
+    <div style="font-size: 4rem; color: #8B7355; margin-bottom: 1.5rem;">🔒</div>
+    
+    <h1 style="font-size: 2.5rem; color: #2C3E50; margin-bottom: 1rem;">
+        Subscription Required
+    </h1>
+    
+    <p style="font-size: 1.2rem; color: #555; margin-bottom: 2rem; line-height: 1.6;">
+        Access to the {{ user.role|title }} Dashboard requires an active subscription.
+    </p>
+    
+    <div style="background: #F8F9FA; padding: 2rem; border-radius: 8px; margin-bottom: 2rem;">
+        <h3 style="color: #8B7355; margin-bottom: 1rem;">Premium Features Include:</h3>
+        <ul style="list-style: none; padding: 0; text-align: left; max-width: 400px; margin: 0 auto;">
+            {% if user.role == 'agent' %}
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Full CRM & Client Management</li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Transaction Coordination Tools</li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Unlimited Client Referral Links</li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Marketing & Communication Templates</li>
+            <li style="padding: 0.5rem 0;">✓ Document Management & Storage</li>
+            {% elif user.role == 'lender' %}
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Borrower Management System</li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Loan Pipeline Tracking</li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Unlimited Client Referral Links</li>
+            <li style="padding: 0.5rem 0; border-bottom: 1px solid #ddd;">✓ Agent Collaboration Tools</li>
+            <li style="padding: 0.5rem 0;">✓ Secure Document Exchange</li>
+            {% endif %}
+        </ul>
+    </div>
+    
+    <div style="margin-top: 2rem;">
+        <a href="/signup?role={{ user.role }}" 
+           style="display: inline-block; background: #8B7355; color: white; padding: 1rem 2.5rem; 
+                  border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: 600; margin: 0.5rem;">
+            Start 14-Day Free Trial
+        </a>
+        
+        <a href="/login" 
+           style="display: inline-block; background: transparent; color: #8B7355; padding: 1rem 2.5rem; 
+                  border: 2px solid #8B7355; border-radius: 8px; text-decoration: none; font-size: 1.1rem; 
+                  font-weight: 600; margin: 0.5rem;">
+            Sign In
+        </a>
+    </div>
+    
+    <p style="margin-top: 2rem; font-size: 0.9rem; color: #777;">
+        Questions? <a href="mailto:support@itsyourlifeyourhome.com" style="color: #8B7355; text-decoration: underline;">Contact Support</a>
+    </p>
+</div>
+{% endblock %}
