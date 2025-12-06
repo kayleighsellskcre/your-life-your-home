@@ -1,0 +1,390 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  /* Interactive hover animations */
+  .hero-visual {
+    position: relative;
+    height: 100%;
+    min-height: 500px;
+    background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.6s ease;
+  }
+  
+  .hero-visual:hover {
+    transform: scale(1.02);
+  }
+  
+  .hero-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(107,106,69,0.15) 0%, rgba(200,180,151,0.15) 100%);
+    transition: opacity 0.6s ease;
+  }
+  
+  .hero-visual:hover::after {
+    opacity: 0.5;
+  }
+  
+  /* Animated decorative elements */
+  .leaf-decoration {
+    position: absolute;
+    opacity: 0.08;
+    transition: all 0.8s ease;
+  }
+  
+  .hero-visual:hover .leaf-decoration {
+    opacity: 0.15;
+    transform: rotate(10deg) scale(1.1);
+  }
+  
+  /* Interactive stat cards */
+  .stat-spotlight {
+    background: white;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    padding: 3rem 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  
+  .stat-spotlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(107,106,69,0.1), transparent);
+    transition: left 0.6s ease;
+  }
+  
+  .stat-spotlight:hover::before {
+    left: 100%;
+  }
+  
+  .stat-spotlight:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 20px 40px rgba(58, 53, 44, 0.15);
+    border-color: #6B6A45;
+  }
+  
+  .stat-value-display {
+    transition: all 0.3s ease;
+    font-size: 4rem;
+    font-weight: 700;
+    margin: 1rem 0;
+  }
+  
+  .stat-spotlight:hover .stat-value-display {
+    transform: scale(1.05);
+    color: #6B6A45;
+  }
+  
+  .stat-icon {
+    font-size: 3rem;
+    display: inline-block;
+    transition: all 0.3s ease;
+  }
+  
+  .stat-spotlight:hover .stat-icon {
+    transform: scale(1.2) rotateY(180deg);
+  }
+  
+  /* Smooth CTA button */
+  .cta-button {
+    display: inline-block;
+    padding: 1.1rem 3rem;
+    background: #6B6A45;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+  
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+  }
+  
+  .cta-button:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .cta-button:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3);
+  }
+  
+  /* Interactive quick action cards */
+  .action-card {
+    background: white;
+    padding: 1.5rem;
+    text-align: left;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    transition: all 0.4s ease;
+    cursor: pointer;
+    position: relative;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #3A352C;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  
+  .action-card:hover {
+    border-color: #6B6A45;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(58, 53, 44, 0.12);
+  }
+  
+  .action-icon {
+    font-size: 2.5rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+  
+  .action-card:hover .action-icon {
+    transform: scale(1.2) rotate(360deg);
+  }
+  
+  /* Count-up animation */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-in {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .hero-visual {
+      min-height: 300px;
+    }
+    
+    h1 {
+      font-size: 2rem !important;
+    }
+    
+    .stat-spotlight {
+      padding: 2rem 1rem;
+    }
+    
+    .stat-value-display {
+      font-size: 2.5rem !important;
+    }
+    
+    .cta-button {
+      padding: 1rem 2rem;
+      font-size: 0.8rem;
+    }
+    
+    .action-card {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>
+
+<!-- Hero Section: Stacked Layout -->
+<div style="margin-bottom: 6rem;" class="animate-in">
+  <!-- Top: Interactive Visual -->
+  <div class="hero-visual" onclick="this.style.transform='scale(1.05)'; setTimeout(() => this.style.transform='scale(1)', 200)" style="margin-bottom: 3rem;">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 2.5rem; text-align: center; padding: 1.5rem; z-index: 2;">
+      <div style="font-weight: 400; line-height: 1.2;">Your Command Center</div>
+      <div style="font-size: 1.2rem; margin-top: 1rem; opacity: 0.7; font-weight: 300;">Business Growth • Client Success • Market Leadership</div>
+    </div>
+    
+    <!-- Animated decorative elements -->
+    <div class="leaf-decoration" style="top: 10%; left: 5%; width: 100px; height: 100px;">
+      <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+        <ellipse cx="50" cy="30" rx="25" ry="35" fill="#6B6A45" opacity="0.3"/>
+        <ellipse cx="50" cy="70" rx="20" ry="30" fill="#6B6A45" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="leaf-decoration" style="bottom: 10%; right: 5%; width: 120px; height: 120px;">
+      <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+        <circle cx="50" cy="50" r="40" fill="#C8B497" opacity="0.3"/>
+      </svg>
+    </div>
+  </div>
+  
+  <!-- Bottom: Welcome Message Block -->
+  <div style="text-align: center; max-width: 900px; margin: 0 auto;">
+    <h1 style="font-family: var(--font-heading); font-size: 3.5rem; line-height: 1.2; margin: 0 0 1.5rem; color: #3A352C; font-weight: 400; letter-spacing: -0.01em;">
+      Welcome Back,<br/>
+      <span style="color: #6B6A45; position: relative;">
+        Agent
+        <span style="position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, #6B6A45, transparent);"></span>
+      </span>
+    </h1>
+    
+    <p style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.75; margin-bottom: 3rem; font-weight: 300;">
+      Your professional hub for managing clients, tracking deals, and growing your business. Every lead matters. Every transaction counts.
+    </p>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <a href="{{ url_for('agent_crm') }}" class="cta-button" style="animation: fadeInUp 0.8s ease 0.5s both;">
+        <span style="position: relative; z-index: 1;">Manage Your Clients →</span>
+      </a>
+      
+      <a href="{{ url_for('agent_transactions') }}" class="cta-button" style="animation: fadeInUp 0.8s ease 0.6s both;">
+        <span style="position: relative; z-index: 1;">View All Transactions →</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Live Stats: Interactive Spotlight Cards -->
+<div style="margin-bottom: 6rem;" class="animate-in">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
+      Your Business Snapshot
+    </h2>
+    <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300; animation: fadeInUp 0.8s ease 0.3s both;">Live data • Updated in real-time • Always current</p>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; width: 100%;">
+    <!-- Card 1: New Leads -->
+    <div class="stat-spotlight" style="animation: fadeInUp 0.8s ease 0.2s both;">
+      <div class="stat-icon">🎯</div>
+      <div style="font-size: 1.1rem; color: #6B6A45; font-weight: 600; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">New Leads</div>
+      <div class="stat-value-display" style="color: #3A352C;">{{ metrics.new_leads|default(0) }}</div>
+      <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Waiting for first contact</div>
+    </div>
+    
+    <!-- Card 2: Active Deals -->
+    <div class="stat-spotlight" style="animation: fadeInUp 0.8s ease 0.4s both;">
+      <div class="stat-icon">🏡</div>
+      <div style="font-size: 1.1rem; color: #6B6A45; font-weight: 600; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Active Deals</div>
+      <div class="stat-value-display" style="color: #3A352C;">{{ metrics.active_transactions|default(0) }}</div>
+      <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Transactions in progress</div>
+    </div>
+    
+    <!-- Card 3: Follow-ups -->
+    <div class="stat-spotlight" style="animation: fadeInUp 0.8s ease 0.6s both;">
+      <div class="stat-icon">📞</div>
+      <div style="font-size: 1.1rem; color: #6B6A45; font-weight: 600; margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Follow-ups</div>
+      <div class="stat-value-display" style="color: #3A352C;">{{ metrics.followups_today|default(0) }}</div>
+      <div style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Clients to check in with today</div>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Section -->
+<div style="margin-bottom: 6rem;" class="animate-in">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
+      Quick Actions
+    </h2>
+    <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300;">Fast access to your most-used tools</p>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+    <a href="{{ url_for('agent_crm') }}" class="action-card" style="animation: fadeInUp 0.8s ease 0.2s both;">
+      <div class="action-icon">👤</div>
+      <div>
+        <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #3A352C;">Add New Contact</div>
+        <div style="font-size: 0.9rem; color: #666;">Quickly add a lead to your CRM</div>
+      </div>
+    </a>
+    
+    <a href="{{ url_for('agent_transactions') }}" class="action-card" style="animation: fadeInUp 0.8s ease 0.3s both;">
+      <div class="action-icon">🏠</div>
+      <div>
+        <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #3A352C;">Add Transaction</div>
+        <div style="font-size: 0.9rem; color: #666;">Start tracking a new deal</div>
+      </div>
+    </a>
+    
+    <a href="{{ url_for('agent_communications') }}" class="action-card" style="animation: fadeInUp 0.8s ease 0.4s both;">
+      <div class="action-icon">✉️</div>
+      <div>
+        <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #3A352C;">Send Template</div>
+        <div style="font-size: 0.9rem; color: #666;">Use a saved email or text</div>
+      </div>
+    </a>
+    
+    <a href="{{ url_for('agent_marketing') }}" class="action-card" style="animation: fadeInUp 0.8s ease 0.5s both;">
+      <div class="action-icon">📱</div>
+      <div>
+        <div style="font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; color: #3A352C;">Create Marketing</div>
+        <div style="font-size: 0.9rem; color: #666;">Generate social media posts</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- How to Use Section -->
+<div style="margin-bottom: 6rem; background: white; padding: 3rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);" class="animate-in">
+  <h2 style="font-family: var(--font-heading); font-size: 2.2rem; margin-bottom: 2rem; color: #3A352C; font-weight: 400; text-align: center;">
+    How to Use Your Dashboard
+  </h2>
+  
+  <div style="display: grid; gap: 1.5rem;">
+    <div style="background: #F6F2E8; border-left: 4px solid #6B6A45; padding: 1.5rem; border-radius: 4px;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.8rem;">👥</span>
+        <strong style="color: #6B6A45; font-size: 1.1rem;">CRM & Leads</strong>
+      </div>
+      <p style="font-size: 0.95rem; line-height: 1.6; color: #3A352C; margin: 0;">Manage all your contacts, from new leads to past clients. Track stages and stay organized with a centralized database of everyone you work with.</p>
+    </div>
+    
+    <div style="background: #F6F2E8; border-left: 4px solid #6B6A45; padding: 1.5rem; border-radius: 4px;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.8rem;">📋</span>
+        <strong style="color: #6B6A45; font-size: 1.1rem;">Transactions</strong>
+      </div>
+      <p style="font-size: 0.95rem; line-height: 1.6; color: #3A352C; margin: 0;">Track every deal from contract to close. See stages, deadlines, and key contacts in one place. Never miss an important milestone.</p>
+    </div>
+    
+    <div style="background: #F6F2E8; border-left: 4px solid #6B6A45; padding: 1.5rem; border-radius: 4px;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.8rem;">✉️</span>
+        <strong style="color: #6B6A45; font-size: 1.1rem;">Communications</strong>
+      </div>
+      <p style="font-size: 0.95rem; line-height: 1.6; color: #3A352C; margin: 0;">Save your best emails and texts as templates for quick, on-brand responses to clients. Build your library of proven messages.</p>
+    </div>
+    
+    <div style="background: #F6F2E8; border-left: 4px solid #6B6A45; padding: 1.5rem; border-radius: 4px;">
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.8rem;">📱</span>
+        <strong style="color: #6B6A45; font-size: 1.1rem;">Marketing</strong>
+      </div>
+      <p style="font-size: 0.95rem; line-height: 1.6; color: #3A352C; margin: 0;">Create professional marketing materials for listings, open houses, and social media posts. Stand out in your market with polished content.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
