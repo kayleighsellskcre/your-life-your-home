@@ -2197,7 +2197,7 @@ def homeowner_support_ask_question():
         question = request.form.get("question", "").strip()
         if question:
             add_homeowner_question(user_id, topic, question)
-            flash("Your question has been sent. We’ll follow up with care.", "success")
+            flash("Your question has been sent. We'll follow up with care.", "success")
             return redirect(url_for("homeowner_support_ask_question"))
 
     return render_template(
@@ -2644,7 +2644,7 @@ def lender_marketing():
 @app.route("/lender/power-suite")
 def lender_power_suite():
     """
-    Lender ‘power suite’ overview page.
+    Lender 'power suite' overview page.
     """
     return render_template(
         "lender/power_suite.html",
