@@ -221,14 +221,15 @@ def generate_referral_code(length=8):
     return ''.join(secrets.choice(chars) for _ in range(length))
 
 def has_active_subscription(user_id: int) -> bool:
-    """Check if user has an active subscription."""
+    """Check if user has an active subscription (includes trial)."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
         SELECT id FROM subscriptions 
         WHERE user_id = ? 
-        AND status = 'active' 
+        AND status IN ('active', 'trial')
         AND (end_date IS NULL OR end_date > datetime('now'))
+        AND (trial_ends_at IS NULL OR trial_ends_at > datetime('now'))
     """, (user_id,))
     result = cur.fetchone()
     conn.close()
@@ -248,6 +249,27 @@ def subscription_required(view):
         # Only agents and lenders need subscriptions
         if role in ["agent", "lender"]:
             if not has_active_subscription(session["user_id"]):
+                # Check if user exists but has no subscription - create trial
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute("SELECT id FROM subscriptions WHERE user_id = ?", (session["user_id"],))
+                if not cur.fetchone():
+                    # No subscription exists, create a trial
+                    from datetime import timedelta
+                    trial_ends = (datetime.now() + timedelta(days=14)).isoformat()
+                    cur.execute("""
+                        INSERT INTO subscriptions 
+                        (user_id, subscription_type, status, start_date, trial_ends_at)
+                        VALUES (?, ?, 'trial', datetime('now'), ?)
+                    """, (session["user_id"], role, trial_ends))
+                    cur.execute("UPDATE users SET has_active_subscription = 1 WHERE id = ?", (session["user_id"],))
+                    conn.commit()
+                    conn.close()
+                    flash("Welcome! You have a 14-day free trial.", "success")
+                    return view(*a, **kw)  # Now they have a trial, proceed
+                conn.close()
+                
+                # Still no active subscription
                 flash("An active subscription is required to access this feature.", "warning")
                 return redirect(url_for("subscription_required_page"))
         
