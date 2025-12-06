@@ -1,0 +1,515 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  /* Hero Section */
+  .hero-visual {
+    position: relative;
+    height: 100%;
+    min-height: 400px;
+    background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%);
+    overflow: hidden;
+    margin-bottom: 3rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.6s ease;
+  }
+  
+  .hero-visual:hover {
+    transform: scale(1.01);
+  }
+  
+  /* Pipeline Stages */
+  .pipeline-container {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 1rem 0;
+    margin-bottom: 3rem;
+  }
+  
+  .pipeline-stage {
+    flex: 1;
+    min-width: 280px;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+  }
+  
+  .pipeline-stage:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-4px);
+  }
+  
+  .pipeline-stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #F6F2E8;
+  }
+  
+  .pipeline-stage-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6B6A45;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .pipeline-stage-count {
+    background: #6B6A45;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .transaction-card {
+    background: #F6F2E8;
+    padding: 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+  }
+  
+  .transaction-card:hover {
+    transform: translateX(4px);
+    border-left-color: #6B6A45;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .transaction-card:last-child {
+    margin-bottom: 0;
+  }
+  
+  .transaction-address {
+    font-weight: 600;
+    color: #3A352C;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .transaction-client {
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .transaction-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0,0,0,0.08);
+  }
+  
+  .transaction-badge {
+    background: white;
+    color: #6B6A45;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .transaction-date {
+    color: #888;
+    font-size: 0.8rem;
+  }
+  
+  /* Add Transaction Button */
+  .add-transaction-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: #6B6A45;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .add-transaction-btn:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(107, 106, 69, 0.3);
+  }
+  
+  /* View Toggles */
+  .view-toggle {
+    display: flex;
+    gap: 0.5rem;
+    background: #F6F2E8;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+  }
+  
+  .view-toggle-btn {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    color: #666;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+  
+  .view-toggle-btn.active {
+    background: white;
+    color: #6B6A45;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #888;
+  }
+  
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid #E5E5E5;
+    color: #666;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+  }
+  
+  .filter-btn:hover {
+    border-color: #6B6A45;
+    color: #6B6A45;
+  }
+  
+  .filter-btn.active {
+    background: #6B6A45;
+    color: white;
+    border-color: #6B6A45;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .pipeline-container {
+      flex-direction: column;
+    }
+    
+    .pipeline-stage {
+      min-width: 100%;
+    }
+    
+    .hero-visual {
+      min-height: 250px;
+    }
+  }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-visual" style="margin-bottom: 3rem;">
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); text-align: center; padding: 1.5rem; z-index: 2;">
+    <div style="font-size: 2.5rem; font-weight: 400; line-height: 1.2; margin-bottom: 1rem;">AI Transaction Coordinator</div>
+    <div style="font-size: 1.1rem; opacity: 0.7; font-weight: 300; max-width: 600px;">
+      Smart pipeline • Auto-progression • Real-time collaboration
+    </div>
+  </div>
+  
+  <!-- Decorative elements -->
+  <div style="position: absolute; top: 10%; left: 5%; width: 80px; height: 80px; opacity: 0.08;">
+    <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+      <circle cx="50" cy="50" r="40" fill="#6B6A45"/>
+    </svg>
+  </div>
+  <div style="position: absolute; bottom: 10%; right: 5%; width: 100px; height: 100px; opacity: 0.08;">
+    <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+      <rect x="10" y="10" width="80" height="80" fill="#C8B497"/>
+    </svg>
+  </div>
+</div>
+
+<!-- Action Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <button class="add-transaction-btn" onclick="document.getElementById('add-transaction-modal').style.display='flex'">
+      <span style="font-size: 1.2rem;">+</span>
+      Add Transaction
+    </button>
+  </div>
+  
+  <div class="view-toggle">
+    <button class="view-toggle-btn active" onclick="showPipelineView()">
+      📊 Pipeline
+    </button>
+    <button class="view-toggle-btn" onclick="showListView()">
+      📋 List
+    </button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+  <button class="filter-btn active">All</button>
+  <button class="filter-btn">Buyer Side</button>
+  <button class="filter-btn">Seller Side</button>
+  <button class="filter-btn">Closing Soon</button>
+  <button class="filter-btn">Needs Attention</button>
+</div>
+
+<!-- Pipeline View -->
+<div id="pipeline-view">
+  <div class="pipeline-container">
+    <!-- Stage 1: Pre-Contract -->
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-header">
+        <div class="pipeline-stage-title">🎯 Pre-Contract</div>
+        <div class="pipeline-stage-count">2</div>
+      </div>
+      
+      <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=1) }}'">
+        <div class="transaction-address">123 Main Street</div>
+        <div class="transaction-client">👤 John & Sarah Smith</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Buyer</span>
+          <span class="transaction-date">Close: Jan 15</span>
+        </div>
+      </div>
+      
+      <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=2) }}'">
+        <div class="transaction-address">456 Oak Avenue</div>
+        <div class="transaction-client">👤 Michael Johnson</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Seller</span>
+          <span class="transaction-date">Close: Jan 20</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stage 2: Under Contract -->
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-header">
+        <div class="pipeline-stage-title">📝 Under Contract</div>
+        <div class="pipeline-stage-count">3</div>
+      </div>
+      
+      <div class="transaction-card">
+        <div class="transaction-address">789 Pine Road</div>
+        <div class="transaction-client">👤 Emily Davis</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Buyer</span>
+          <span class="transaction-date">Close: Jan 25</span>
+        </div>
+      </div>
+      
+      <div class="transaction-card">
+        <div class="transaction-address">321 Elm Street</div>
+        <div class="transaction-client">👤 Robert Wilson</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Seller</span>
+          <span class="transaction-date">Close: Feb 1</span>
+        </div>
+      </div>
+      
+      <div class="transaction-card">
+        <div class="transaction-address">555 Maple Drive</div>
+        <div class="transaction-client">👤 Lisa Anderson</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Buyer</span>
+          <span class="transaction-date">Close: Feb 5</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stage 3: In Escrow -->
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-header">
+        <div class="pipeline-stage-title">🏦 In Escrow</div>
+        <div class="pipeline-stage-count">1</div>
+      </div>
+      
+      <div class="transaction-card">
+        <div class="transaction-address">888 Cherry Lane</div>
+        <div class="transaction-client">👤 David Martinez</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Buyer</span>
+          <span class="transaction-date">Close: Feb 10</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stage 4: Clear to Close -->
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-header">
+        <div class="pipeline-stage-title">✅ Clear to Close</div>
+        <div class="pipeline-stage-count">1</div>
+      </div>
+      
+      <div class="transaction-card">
+        <div class="transaction-address">999 Birch Court</div>
+        <div class="transaction-client">👤 Jennifer Lee</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Seller</span>
+          <span class="transaction-date">Close: Tomorrow</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Stage 5: Closed -->
+    <div class="pipeline-stage">
+      <div class="pipeline-stage-header">
+        <div class="pipeline-stage-title">🎉 Closed</div>
+        <div class="pipeline-stage-count">5</div>
+      </div>
+      
+      <div class="transaction-card" style="opacity: 0.7;">
+        <div class="transaction-address">111 Cedar Place</div>
+        <div class="transaction-client">👤 Thomas Brown</div>
+        <div class="transaction-meta">
+          <span class="transaction-badge">Buyer</span>
+          <span class="transaction-date">Closed: Dec 1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- List View (Hidden by default) -->
+<div id="list-view" style="display: none;">
+  <div style="background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr style="border-bottom: 2px solid #F6F2E8;">
+          <th style="text-align: left; padding: 1rem; color: #6B6A45; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Property</th>
+          <th style="text-align: left; padding: 1rem; color: #6B6A45; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Client</th>
+          <th style="text-align: left; padding: 1rem; color: #6B6A45; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Side</th>
+          <th style="text-align: left; padding: 1rem; color: #6B6A45; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Stage</th>
+          <th style="text-align: left; padding: 1rem; color: #6B6A45; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Close Date</th>
+          <th style="text-align: left; padding: 1rem; color: #6B6A45; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom: 1px solid #F6F2E8; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='#F6F2E8'" onmouseout="this.style.background='white'">
+          <td style="padding: 1rem; font-weight: 600;">123 Main Street</td>
+          <td style="padding: 1rem;">John & Sarah Smith</td>
+          <td style="padding: 1rem;"><span style="background: #F6F2E8; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">Buyer</span></td>
+          <td style="padding: 1rem; color: #666;">Pre-Contract</td>
+          <td style="padding: 1rem; color: #666;">Jan 15, 2025</td>
+          <td style="padding: 1rem;">
+            <div style="background: #E5E5E5; height: 8px; border-radius: 4px; overflow: hidden;">
+              <div style="background: #6B6A45; height: 100%; width: 25%;"></div>
+            </div>
+          </td>
+        </tr>
+        <!-- More rows would be dynamically generated -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Transaction Modal -->
+<div id="add-transaction-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; padding: 2rem;">
+  <div style="background: white; border-radius: 12px; padding: 3rem; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 2rem; color: #3A352C; margin: 0;">Add New Transaction</h2>
+      <button onclick="document.getElementById('add-transaction-modal').style.display='none'" style="background: transparent; border: none; font-size: 2rem; cursor: pointer; color: #888;">&times;</button>
+    </div>
+    
+    <form method="post" style="display: grid; gap: 1.5rem;">
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Property Address *</label>
+        <input type="text" name="property_address" required style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;" placeholder="123 Main Street, City, State ZIP">
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Client Name *</label>
+        <input type="text" name="client_name" required style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;" placeholder="John & Jane Doe">
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Side *</label>
+          <select name="side" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;">
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Stage *</label>
+          <select name="stage" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;">
+            <option value="pre_contract">Pre-Contract</option>
+            <option value="under_contract">Under Contract</option>
+            <option value="in_escrow">In Escrow</option>
+            <option value="clear_to_close">Clear to Close</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Target Close Date</label>
+        <input type="date" name="close_date" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;">
+      </div>
+      
+      <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+        <button type="submit" class="add-transaction-btn" style="flex: 1; justify-content: center;">
+          Create Transaction
+        </button>
+        <button type="button" onclick="document.getElementById('add-transaction-modal').style.display='none'" style="flex: 1; padding: 1rem 2rem; background: transparent; border: 2px solid #E5E5E5; color: #666; font-weight: 600; border-radius: 8px; cursor: pointer;">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function showPipelineView() {
+    document.getElementById('pipeline-view').style.display = 'block';
+    document.getElementById('list-view').style.display = 'none';
+    document.querySelectorAll('.view-toggle-btn')[0].classList.add('active');
+    document.querySelectorAll('.view-toggle-btn')[1].classList.remove('active');
+  }
+  
+  function showListView() {
+    document.getElementById('pipeline-view').style.display = 'none';
+    document.getElementById('list-view').style.display = 'block';
+    document.querySelectorAll('.view-toggle-btn')[0].classList.remove('active');
+    document.querySelectorAll('.view-toggle-btn')[1].classList.add('active');
+  }
+</script>
+
+{% endblock %}
