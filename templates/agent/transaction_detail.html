@@ -1,29 +1,842 @@
 {% extends "agent/layout.html" %}
 
 {% block agent_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Transaction details</p>
-  <h1>{{ tx.property_address }}</h1>
-  <p>{{ tx.client_name }} on the {{ tx.side|capitalize }} side — Target close: {{ tx.close_date or "To be determined" }}</p>
-</div>
+<style>
+  /* Transaction Header */
+  .transaction-header {
+    background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%);
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .transaction-header::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(107,106,69,0.1) 0%, rgba(200,180,151,0.1) 100%);
+  }
+  
+  .transaction-header-content {
+    position: relative;
+    z-index: 2;
+  }
+  
+  .property-address {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: #3A352C;
+    margin-bottom: 1rem;
+    font-weight: 400;
+  }
+  
+  .transaction-meta {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.95rem;
+  }
+  
+  .stage-badge {
+    background: #6B6A45;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  /* Progress Bar */
+  .progress-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  .progress-bar-container {
+    height: 12px;
+    background: #E5E5E5;
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 1rem 0;
+  }
+  
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6B6A45 0%, #8A9A5B 100%);
+    transition: width 0.6s ease;
+  }
+  
+  .progress-text {
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 1rem;
+    border-bottom: 2px solid #E5E5E5;
+    margin-bottom: 2rem;
+  }
+  
+  .tab {
+    padding: 1rem 2rem;
+    background: transparent;
+    border: none;
+    color: #666;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+  }
+  
+  .tab.active {
+    color: #6B6A45;
+    border-bottom-color: #6B6A45;
+  }
+  
+  .tab:hover {
+    color: #6B6A45;
+  }
+  
+  /* Document Checklist */
+  .checklist-item {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 2px solid #E5E5E5;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .checklist-item.completed {
+    background: #F6F2E8;
+    border-color: #6B6A45;
+  }
+  
+  .checklist-item:hover {
+    border-color: #6B6A45;
+    transform: translateX(4px);
+  }
+  
+  .checklist-item-info {
+    flex: 1;
+  }
+  
+  .checklist-item-title {
+    font-weight: 600;
+    color: #3A352C;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+  }
+  
+  .checklist-item-desc {
+    color: #666;
+    font-size: 0.85rem;
+  }
+  
+  .checklist-item-status {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .status-icon {
+    font-size: 1.5rem;
+  }
+  
+  .upload-btn {
+    padding: 0.5rem 1rem;
+    background: #6B6A45;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .upload-btn:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+  }
+  
+  /* Participants */
+  .participant-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #E5E5E5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .participant-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .participant-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #6B6A45;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2rem;
+  }
+  
+  .participant-details h4 {
+    margin: 0 0 0.25rem 0;
+    color: #3A352C;
+  }
+  
+  .participant-details p {
+    margin: 0;
+    color: #666;
+    font-size: 0.85rem;
+  }
+  
+  .participant-badge {
+    background: #F6F2E8;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6B6A45;
+  }
+  
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+  
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #E5E5E5;
+  }
+  
+  .timeline-item {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+  
+  .timeline-dot {
+    position: absolute;
+    left: -2rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #6B6A45;
+  }
+  
+  .timeline-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #E5E5E5;
+  }
+  
+  .timeline-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  
+  .timeline-title {
+    font-weight: 600;
+    color: #3A352C;
+  }
+  
+  .timeline-time {
+    color: #888;
+    font-size: 0.85rem;
+  }
+  
+  .timeline-description {
+    color: #666;
+    font-size: 0.9rem;
+  }
+  
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .primary-btn {
+    padding: 1rem 2rem;
+    background: #6B6A45;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .primary-btn:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+  
+  .secondary-btn {
+    padding: 1rem 2rem;
+    background: white;
+    color: #6B6A45;
+    border: 2px solid #6B6A45;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .secondary-btn:hover {
+    background: #6B6A45;
+    color: white;
+  }
+  
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 3rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .modal-close {
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    cursor: pointer;
+    color: #888;
+  }
+  
+  /* Drag & Drop Zone */
+  .drop-zone {
+    border: 3px dashed #E5E5E5;
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #F9F9F9;
+  }
+  
+  .drop-zone:hover {
+    border-color: #6B6A45;
+    background: #F6F2E8;
+  }
+  
+  .drop-zone.dragover {
+    border-color: #6B6A45;
+    background: #F6F2E8;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .property-address {
+      font-size: 1.8rem;
+    }
+    
+    .transaction-meta {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .tabs {
+      overflow-x: auto;
+    }
+    
+    .action-buttons {
+      flex-direction: column;
+    }
+  }
+</style>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Transaction Stages</h2>
-    <ol class="steps-list" style="font-size:0.95rem;margin:1.5rem 0 0 1.5rem;padding:0;line-height:1.8;">
-      {% for stage in stages %}
-        <li style="margin-bottom:0.5rem;">
-          {% if tx.stage == stage.key %}
-            <strong style="color:var(--olive-green);">{{ stage.label }} (current)</strong>
-          {% else %}
-            {{ stage.label }}
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ol>
-    <p class="card-subtext" style="margin-top:1.5rem;">
-      As the automation tools grow, document uploads and confirmations will move this file along and notify the right people.
-    </p>
+<!-- Transaction Header -->
+<div class="transaction-header">
+  <div class="transaction-header-content">
+    <h1 class="property-address">123 Main Street</h1>
+    <div class="transaction-meta">
+      <div class="meta-item">
+        <span>👤</span>
+        <span><strong>Client:</strong> John & Sarah Smith</span>
+      </div>
+      <div class="meta-item">
+        <span>💰</span>
+        <span><strong>Price:</strong> $450,000</span>
+      </div>
+      <div class="meta-item">
+        <span>📅</span>
+        <span><strong>Close Date:</strong> January 15, 2025</span>
+      </div>
+      <div class="stage-badge">Under Contract</div>
+    </div>
   </div>
 </div>
+
+<!-- Progress Section -->
+<div class="progress-section">
+  <h3 style="margin: 0 0 1rem 0; color: #3A352C;">Transaction Progress</h3>
+  <div class="progress-bar-container">
+    <div class="progress-bar-fill" style="width: 65%;"></div>
+  </div>
+  <div class="progress-text">
+    <strong>65% Complete</strong> • 13 of 20 documents uploaded
+  </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="action-buttons">
+  <button class="primary-btn" onclick="document.getElementById('share-modal').style.display='flex'">
+    <span>👥</span> Share with Client
+  </button>
+  <button class="primary-btn" onclick="document.getElementById('add-participant-modal').style.display='flex'">
+    <span>➕</span> Add Participant
+  </button>
+  <button class="secondary-btn" onclick="document.getElementById('change-stage-modal').style.display='flex'">
+    Change Stage
+  </button>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('documents')">📄 Documents</button>
+  <button class="tab" onclick="showTab('participants')">👥 Participants</button>
+  <button class="tab" onclick="showTab('timeline')">⏱️ Timeline</button>
+  <button class="tab" onclick="showTab('details')">ℹ️ Details</button>
+</div>
+
+<!-- Documents Tab -->
+<div id="documents-tab" class="tab-content">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h2 style="margin: 0; color: #3A352C;">Document Checklist</h2>
+    <button class="primary-btn" onclick="document.getElementById('upload-modal').style.display='flex'">
+      <span>📤</span> Upload Document
+    </button>
+  </div>
+  
+  <!-- Required Documents -->
+  <div class="checklist-item completed">
+    <div class="checklist-item-info">
+      <div class="checklist-item-title">✅ Purchase Agreement</div>
+      <div class="checklist-item-desc">Fully executed purchase contract • Uploaded 3 days ago</div>
+    </div>
+    <div class="checklist-item-status">
+      <span class="status-icon">✅</span>
+      <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View</button>
+    </div>
+  </div>
+  
+  <div class="checklist-item completed">
+    <div class="checklist-item-info">
+      <div class="checklist-item-title">✅ Earnest Money Receipt</div>
+      <div class="checklist-item-desc">Proof of deposit • Uploaded 2 days ago</div>
+    </div>
+    <div class="checklist-item-status">
+      <span class="status-icon">✅</span>
+      <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">View</button>
+    </div>
+  </div>
+  
+  <div class="checklist-item">
+    <div class="checklist-item-info">
+      <div class="checklist-item-title">📋 Seller Disclosures</div>
+      <div class="checklist-item-desc">Property condition disclosures • <strong>Required</strong></div>
+    </div>
+    <div class="checklist-item-status">
+      <span class="status-icon">⏳</span>
+      <button class="upload-btn" onclick="document.getElementById('upload-modal').style.display='flex'">Upload</button>
+    </div>
+  </div>
+  
+  <div class="checklist-item">
+    <div class="checklist-item-info">
+      <div class="checklist-item-title">📋 Home Inspection Report</div>
+      <div class="checklist-item-desc">Professional inspection findings • <strong>Required</strong></div>
+    </div>
+    <div class="checklist-item-status">
+      <span class="status-icon">⏳</span>
+      <button class="upload-btn" onclick="document.getElementById('upload-modal').style.display='flex'">Upload</button>
+    </div>
+  </div>
+  
+  <div class="checklist-item">
+    <div class="checklist-item-info">
+      <div class="checklist-item-title">📋 Appraisal Report</div>
+      <div class="checklist-item-desc">Property valuation • <strong>Auto-advances to Clear to Close!</strong> 🤖</div>
+    </div>
+    <div class="checklist-item-status">
+      <span class="status-icon">⏳</span>
+      <button class="upload-btn" onclick="document.getElementById('upload-modal').style.display='flex'">Upload</button>
+    </div>
+  </div>
+</div>
+
+<!-- Participants Tab -->
+<div id="participants-tab" class="tab-content" style="display: none;">
+  <h2 style="margin: 0 0 2rem 0; color: #3A352C;">Transaction Participants</h2>
+  
+  <div class="participant-card">
+    <div class="participant-info">
+      <div class="participant-avatar">JS</div>
+      <div class="participant-details">
+        <h4>John & Sarah Smith</h4>
+        <p>john.smith@email.com • (555) 123-4567</p>
+      </div>
+    </div>
+    <span class="participant-badge">CLIENT - BUYER</span>
+  </div>
+  
+  <div class="participant-card">
+    <div class="participant-info">
+      <div class="participant-avatar" style="background: #3A77B5;">ML</div>
+      <div class="participant-details">
+        <h4>Mike Johnson - ABC Mortgage</h4>
+        <p>mike@abcmortgage.com • (555) 987-6543</p>
+      </div>
+    </div>
+    <span class="participant-badge">LENDER</span>
+  </div>
+  
+  <div class="participant-card">
+    <div class="participant-info">
+      <div class="participant-avatar" style="background: #C66B3D;">TC</div>
+      <div class="participant-details">
+        <h4>Sarah Williams - Premier Title</h4>
+        <p>sarah@premiertitle.com • (555) 456-7890</p>
+      </div>
+    </div>
+    <span class="participant-badge">TITLE COMPANY</span>
+  </div>
+</div>
+
+<!-- Timeline Tab -->
+<div id="timeline-tab" class="tab-content" style="display: none;">
+  <h2 style="margin: 0 0 2rem 0; color: #3A352C;">Activity Timeline</h2>
+  
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <div class="timeline-title">📄 Purchase Agreement Uploaded</div>
+          <div class="timeline-time">3 days ago</div>
+        </div>
+        <div class="timeline-description">
+          🤖 <strong>Auto-progression:</strong> Transaction moved to "Under Contract"
+        </div>
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <div class="timeline-title">💰 Earnest Money Receipt Uploaded</div>
+          <div class="timeline-time">2 days ago</div>
+        </div>
+        <div class="timeline-description">
+          Proof of $5,000 earnest money deposit
+        </div>
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <div class="timeline-title">👥 Lender Added</div>
+          <div class="timeline-time">1 day ago</div>
+        </div>
+        <div class="timeline-description">
+          Mike Johnson (ABC Mortgage) added as participant
+        </div>
+      </div>
+    </div>
+    
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <div class="timeline-title">🏠 Transaction Created</div>
+          <div class="timeline-time">5 days ago</div>
+        </div>
+        <div class="timeline-description">
+          Transaction created for 123 Main Street
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Details Tab -->
+<div id="details-tab" class="tab-content" style="display: none;">
+  <h2 style="margin: 0 0 2rem 0; color: #3A352C;">Transaction Details</h2>
+  
+  <div style="background: white; padding: 2rem; border-radius: 12px; border: 1px solid #E5E5E5;">
+    <div style="display: grid; gap: 1.5rem;">
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Property Address</label>
+        <input type="text" value="123 Main Street" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div>
+          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Purchase Price</label>
+          <input type="text" value="$450,000" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+        </div>
+        <div>
+          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Side</label>
+          <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+            <option>Buyer</option>
+            <option>Seller</option>
+            <option>Both</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Target Close Date</label>
+        <input type="date" value="2025-01-15" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Notes</label>
+        <textarea rows="4" placeholder="Add any notes about this transaction..." style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;"></textarea>
+      </div>
+      
+      <button class="primary-btn">
+        Save Changes
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Document Modal -->
+<div id="upload-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Upload Document</h2>
+      <button class="modal-close" onclick="document.getElementById('upload-modal').style.display='none'">&times;</button>
+    </div>
+    
+    <form style="display: grid; gap: 1.5rem;">
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Document Type</label>
+        <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          <option>Purchase Agreement</option>
+          <option>Earnest Money Receipt</option>
+          <option>Seller Disclosures</option>
+          <option>Home Inspection Report</option>
+          <option>Appraisal Report</option>
+          <option>Title Report</option>
+          <option>Other</option>
+        </select>
+      </div>
+      
+      <div class="drop-zone" onclick="document.getElementById('file-input').click()">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
+        <h3 style="margin: 0 0 0.5rem 0; color: #3A352C;">Drag & Drop or Click to Upload</h3>
+        <p style="margin: 0; color: #666;">Supports PDF, DOC, DOCX, JPG, PNG</p>
+        <input type="file" id="file-input" style="display: none;">
+      </div>
+      
+      <button type="submit" class="primary-btn" style="width: 100%; justify-content: center;">
+        Upload Document
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Share with Client Modal -->
+<div id="share-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Share with Client</h2>
+      <button class="modal-close" onclick="document.getElementById('share-modal').style.display='none'">&times;</button>
+    </div>
+    
+    <div style="background: #F6F2E8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+      <p style="margin: 0 0 1rem 0; color: #666;">Your client will receive a secure link to view this transaction. They can see documents, timeline, and progress without needing an account.</p>
+      <div style="display: flex; gap: 1rem;">
+        <input type="email" placeholder="client@email.com" value="john.smith@email.com" style="flex: 1; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+        <button class="primary-btn">
+          Send Invite
+        </button>
+      </div>
+    </div>
+    
+    <p style="margin: 1rem 0; color: #666; text-align: center;">OR</p>
+    
+    <div style="background: white; padding: 1rem; border: 1px solid #E5E5E5; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+      <code style="color: #6B6A45; font-size: 0.85rem;">https://itsyourlifeyourhome.com/transaction/abc123xyz</code>
+      <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Copy Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Participant Modal -->
+<div id="add-participant-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Add Participant</h2>
+      <button class="modal-close" onclick="document.getElementById('add-participant-modal').style.display='none'">&times;</button>
+    </div>
+    
+    <form style="display: grid; gap: 1.5rem;">
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Participant Type</label>
+        <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          <option>Lender</option>
+          <option>Title Company</option>
+          <option>Inspector</option>
+          <option>Appraiser</option>
+          <option>Attorney</option>
+          <option>Other</option>
+        </select>
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Name</label>
+        <input type="text" placeholder="Full Name" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Email</label>
+        <input type="email" placeholder="email@company.com" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Permissions</label>
+        <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          <option>View Only</option>
+          <option>Upload Documents</option>
+          <option>Full Access</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="primary-btn" style="width: 100%; justify-content: center;">
+        Add Participant
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+      tab.style.display = 'none';
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').style.display = 'block';
+    
+    // Add active class to clicked button
+    event.target.classList.add('active');
+  }
+  
+  // Drag and drop functionality
+  const dropZone = document.querySelector('.drop-zone');
+  
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, preventDefaults, false);
+  });
+  
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => {
+      dropZone.classList.add('dragover');
+    }, false);
+  });
+  
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropZone.addEventListener(eventName, () => {
+      dropZone.classList.remove('dragover');
+    }, false);
+  });
+  
+  dropZone.addEventListener('drop', handleDrop, false);
+  
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    
+    if (files.length > 0) {
+      alert('File ready to upload: ' + files[0].name);
+    }
+  }
+</script>
+
 {% endblock %}
