@@ -300,23 +300,9 @@ def get_homeowner_snapshot_or_default(user_row: Optional[dict]):
         base["name"] = user_row.get("name", "Friend")
         return base
     
-    # Apply automatic appreciation to home value
-    # Use initial_purchase_value if set, otherwise use current value_estimate as baseline
-    initial_value = snap.get("initial_purchase_value") or snap["value_estimate"]
+    # Use the exact value from the database without automatic appreciation
     value_estimate = snap["value_estimate"]
-    
-    if initial_value and snap.get("loan_start_date"):
-        # Calculate appreciated value based on time elapsed since purchase
-        value_estimate = calculate_appreciated_value(
-            initial_value, 
-            snap["loan_start_date"],
-            annual_rate=0.035  # 3.5% annual appreciation (3-4% range)
-        )
-    
-    # Recalculate equity with appreciated value
     equity_estimate = snap["equity_estimate"]
-    if value_estimate and snap["loan_balance"]:
-        equity_estimate = value_estimate - snap["loan_balance"]
     
     return {
         "name": user_row.get("name", "Friend"),
