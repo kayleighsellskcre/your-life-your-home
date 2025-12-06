@@ -76,7 +76,11 @@
         <nav class="main-nav">
           <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
-            <li><a href="{{ url_for('homeowner_overview') }}">Dashboard</a></li>
+            <li>
+              <a href="{% if session.get('role') == 'agent' %}{{ url_for('agent_dashboard') }}{% elif session.get('role') == 'lender' %}{{ url_for('lender_dashboard') }}{% else %}{{ url_for('homeowner_overview') }}{% endif %}">
+                Dashboard
+              </a>
+            </li>
             {% if session.get('user_id') %}
               <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
             {% endif %}

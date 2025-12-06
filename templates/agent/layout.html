@@ -1,7 +1,255 @@
 {% extends "base.html" %}
 
+{% block page_title %}Agent Dashboard • Your Life Your Home{% endblock %}
+
 {% block content %}
-{% set path = request.path %}
+<style>
+  /* Integrated Header + Dashboard Navigation */
+  .ylh-horizontal-nav {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-bottom: 3px solid rgba(107, 106, 69, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 5rem;
+    z-index: 999;
+  }
+  
+  .ylh-nav-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 60px;
+  }
+  
+  .ylh-nav-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    color: #6B6A45;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin: 0 0 0 5rem;
+    white-space: nowrap;
+  }
+  
+  .ylh-nav-items {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex: 1;
+    justify-content: flex-end;
+    margin-right: 1rem;
+    overflow: visible;
+    position: relative;
+  }
+  
+  .ylh-nav-button {
+    background: transparent;
+    border: none;
+    color: #6B6A45;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    position: relative;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .ylh-nav-button:hover {
+    background: rgba(107, 106, 69, 0.1);
+    color: #3A352C;
+    border-bottom-color: rgba(107, 106, 69, 0.5);
+  }
+  
+  .ylh-nav-button.active {
+    background: rgba(107, 106, 69, 0.15);
+    color: #3A352C;
+    border-bottom-color: #6B6A45;
+    font-weight: 600;
+  }
+  
+  .ylh-nav-link {
+    color: #6B6A45;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    display: inline-block;
+  }
+  
+  .ylh-nav-link:hover {
+    background: rgba(107, 106, 69, 0.1);
+    color: #3A352C;
+    border-bottom-color: rgba(107, 106, 69, 0.5);
+  }
+  
+  .ylh-nav-link.active {
+    background: rgba(107, 106, 69, 0.15);
+    color: #3A352C;
+    border-bottom-color: #6B6A45;
+    font-weight: 600;
+  }
+  
+  /* Dropdown styles */
+  .ylh-dropdown {
+    position: relative;
+  }
+  
+  .ylh-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    min-width: 220px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-radius: 0 0 8px 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    overflow: visible;
+  }
+  
+  .ylh-dropdown:hover .ylh-dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .ylh-dropdown-item {
+    display: block;
+    padding: 1rem 1.5rem;
+    color: #3A352C;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+  }
+  
+  .ylh-dropdown-item:hover {
+    background: #F6F2E8;
+    border-left-color: #6B6A45;
+    padding-left: 1.75rem;
+  }
+  
+  .ylh-dropdown-item.active {
+    background: rgba(107, 106, 69, 0.1);
+    border-left-color: #6B6A45;
+    font-weight: 600;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .ylh-nav-container {
+      padding: 0.5rem 1rem;
+      flex-direction: column;
+      height: auto;
+      gap: 0.25rem;
+    }
+    
+    .ylh-nav-title {
+      font-size: 1.05rem;
+      margin: 0.25rem 0 0.15rem 0;
+    }
+    
+    .ylh-nav-items {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+    }
+    
+    .ylh-nav-button,
+    .ylh-nav-link {
+      padding: 0.55rem 0.8rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.05em;
+      min-height: 38px;
+    }
+  }
+</style>
+
+<nav class="ylh-horizontal-nav">
+  <div class="ylh-nav-container">
+    <h2 class="ylh-nav-title">Agent Dashboard</h2>
+    
+    <div class="ylh-nav-items">
+      <a href="{{ url_for('agent_dashboard') }}" 
+         class="ylh-nav-link {% if request.path == url_for('agent_dashboard') %}active{% endif %}">
+        Dashboard
+      </a>
+      
+      <div class="ylh-dropdown">
+        <button class="ylh-nav-button {% if request.path.startswith('/agent/crm') or request.path.startswith('/agent/transactions') %}active{% endif %}">
+          Clients & Pipeline ▾
+        </button>
+        <div class="ylh-dropdown-menu">
+          <a href="{{ url_for('agent_crm') }}" 
+             class="ylh-dropdown-item {% if request.path == url_for('agent_crm') %}active{% endif %}">
+            CRM
+          </a>
+          <a href="{{ url_for('agent_transactions') }}" 
+             class="ylh-dropdown-item {% if request.path == url_for('agent_transactions') %}active{% endif %}">
+            Transactions
+          </a>
+          <a href="{{ url_for('agent_documents') }}" 
+             class="ylh-dropdown-item {% if request.path == url_for('agent_documents') %}active{% endif %}">
+            Documents
+          </a>
+        </div>
+      </div>
+      
+      <div class="ylh-dropdown">
+        <button class="ylh-nav-button {% if request.path.startswith('/agent/communications') or request.path.startswith('/agent/marketing') %}active{% endif %}">
+          Communication & Marketing ▾
+        </button>
+        <div class="ylh-dropdown-menu">
+          <a href="{{ url_for('agent_communications') }}" 
+             class="ylh-dropdown-item {% if request.path == url_for('agent_communications') %}active{% endif %}">
+            Communications
+          </a>
+          <a href="{{ url_for('agent_marketing') }}" 
+             class="ylh-dropdown-item {% if request.path == url_for('agent_marketing') %}active{% endif %}">
+            Marketing
+          </a>
+          <a href="{{ url_for('agent_power_tools') }}" 
+             class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
+            Power Tools
+          </a>
+        </div>
+      </div>
+      
+      <a href="{{ url_for('agent_settings_profile') }}" 
+         class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">
+        Settings
+      </a>
+    </div>
+  </div>
+</nav>
+
+<div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;">
+  {% block agent_content %}
+  {% endblock %}
+</div>
+
+{% endblock %}
 
 {% set open_overview = path == url_for('agent_dashboard')
   or path.startswith('/agent/settings/profile')
