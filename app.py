@@ -1444,13 +1444,13 @@ def homeowner_switch_property():
             new_total_paid = new_monthly_payment * num_payments
             new_interest = new_total_paid - loan_balance
             
-            interest_saved = current_interest - new_interest
+            interest_saved = current_interest - new_interest;
             
             # Closing costs estimate (2-5% of loan amount, average 3%)
-            closing_costs = loan_balance * 0.03
+            closing_costs = loan_balance * 0.03;
             
             # Break-even months
-            break_even_months = closing_costs / monthly_savings if monthly_savings > 0 else 0
+            break_even_months = closing_costs / monthly_savings if monthly_savings > 0 else 0;
             
             scenarios.append({
                 "tier": credit_tier.title(),
