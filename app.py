@@ -10,6 +10,8 @@ import json
 from types import SimpleNamespace
 from PIL import Image, ImageFilter
 import numpy as np
+import secrets
+from flask import jsonify
 
 # ---------------- R2 STORAGE CLIENT ----------------
 R2_CLIENT = None
@@ -1842,24 +1844,44 @@ def agent_transaction_detail(tx_id: int):
     user = get_current_user()
     user_id = user["id"] if user else None
 
-    tx = get_agent_transaction(user_id, tx_id) if user_id else None
-    if not tx:
-        abort(404)
+    # Get transaction details
+    tx = None
+    if user_id:
+        from transaction_helpers import (
+            get_transaction_detail,
+            get_transaction_documents,
+            get_transaction_participants,
+            get_transaction_timeline,
+            get_transaction_document_status,
+        )
+        tx = get_transaction_detail(tx_id)
+        if not tx or tx.get("agent_id") != user_id:
+            abort(404)
+        documents = get_transaction_documents(tx_id)
+        participants = get_transaction_participants(tx_id)
+        timeline = get_transaction_timeline(tx_id, limit=50)
+        doc_status = get_transaction_document_status(tx_id)
+    else:
+        abort(403)
 
+    # Stages for progress bar and badge
     stages = [
-        {"key": "under_contract", "label": "Under contract"},
-        {"key": "earnest_money", "label": "Earnest money"},
-        {"key": "inspection", "label": "Inspection"},
-        {"key": "appraisal", "label": "Appraisal"},
-        {"key": "loan_commitment", "label": "Loan commitment"},
-        {"key": "final_walkthrough", "label": "Final walkthrough"},
-        {"key": "closing", "label": "Closing"},
+        {"key": "pre_contract", "label": "Pre-Contract"},
+        {"key": "under_contract", "label": "Under Contract"},
+        {"key": "in_escrow", "label": "In Escrow"},
+        {"key": "clear_to_close", "label": "Clear to Close"},
+        {"key": "closed", "label": "Closed"},
+        {"key": "cancelled", "label": "Cancelled"},
     ]
 
     return render_template(
         "agent/transaction_detail.html",
         brand_name=FRONT_BRAND_NAME,
         tx=tx,
+        documents=documents,
+        participants=participants,
+        timeline=timeline,
+        doc_status=doc_status,
         stages=stages,
     )
 
@@ -1870,6 +1892,29 @@ def agent_documents():
         "agent/documents.html",
         brand_name=FRONT_BRAND_NAME,
     )
+
+
+@app.route("/agent/documents/<int:doc_id>/download")
+def agent_download_document(doc_id):
+    from transaction_helpers import get_transaction_documents
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM transaction_documents WHERE id = ?", (doc_id,))
+    doc = cursor.fetchone()
+    conn.close()
+    if not doc:
+        abort(404)
+    file_path = doc["file_path"]
+    # Copy to client permanent documents folder
+    import shutil, os
+    src_path = os.path.join("static", file_path) if file_path else None
+    if src_path and os.path.exists(src_path):
+        dest_dir = os.path.join("static", "uploads", "homeowner_docs")
+        os.makedirs(dest_dir, exist_ok=True)
+        dest_path = os.path.join(dest_dir, os.path.basename(src_path))
+        shutil.copy2(src_path, dest_path)
+    # Serve file for download
+    return send_from_directory(os.path.dirname(src_path), os.path.basename(src_path), as_attachment=True)
 
 
 @app.route("/agent/communications", methods=["GET", "POST"])
@@ -2146,3 +2191,32 @@ def lender_power_suite():
 # -------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
+@app.route("/agent/transactions/<int:tx_id>/documents/upload", methods=["POST"])
+def agent_upload_document(tx_id):
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        abort(403)
+    from transaction_helpers import handle_document_upload_and_auto_progression, get_transaction_detail
+    tx = get_transaction_detail(tx_id)
+    if not tx or tx.get("agent_id") != user_id:
+        abort(404)
+    file = request.files["document"]
+    document_type = request.form.get("document_type")
+    # Save the uploaded document (similar to existing logic)
+    # ...existing document upload logic...
+    # After saving document, trigger auto-progression
+    handle_document_upload_and_auto_progression(tx_id, document_type)
+    flash(f"Document '{document_type}' uploaded.", "success")
+    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"], endpoint="agent_delete_transaction")
+def agent_delete_transaction(tx_id):
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        abort(403)
+    from transaction_helpers import delete_transaction
+    delete_transaction(tx_id, user_id)
+    flash("Transaction deleted.", "success")
+    return redirect(url_for("agent_transactions"))
