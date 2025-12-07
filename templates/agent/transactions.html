@@ -60,6 +60,7 @@
               <th>Side</th>
               <th>Stage</th>
               <th>Close Date</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -74,6 +75,11 @@
                 <td><span class="badge" style="background:var(--light-cream);color:var(--charcoal-brown);padding:0.25rem 0.75rem;border-radius:12px;font-size:0.8rem;font-weight:600;">{{ tx.side|capitalize }}</span></td>
                 <td><span style="color:#888;">{{ tx.stage|replace('_',' ')|title }}</span></td>
                 <td style="color:#888;">{{ tx.close_date or '—' }}</td>
+                <td style="white-space:nowrap;">
+                  <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
+                  </form>
+                </td>
               </tr>
             {% endfor %}
           </tbody>

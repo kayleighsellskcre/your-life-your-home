@@ -2210,8 +2210,8 @@ def agent_upload_document(tx_id):
     flash(f"Document '{document_type}' uploaded.", "success")
     return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
-@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"], endpoint="agent_delete_transaction")
-def agent_delete_transaction(tx_id):
+@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"])
+def agent_transaction_delete(tx_id):
     user = get_current_user()
     user_id = user["id"] if user else None
     if not user_id:
