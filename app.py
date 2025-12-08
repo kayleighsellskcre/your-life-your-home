@@ -2053,9 +2053,14 @@ def lender_dashboard():
 @app.route("/agent/crm", methods=["GET", "POST"])
 def agent_crm():
     """Agent CRM - comprehensive contact management with automated emails."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
+    try:
+        user = get_current_user()
+        if not user or user.get("role") != "agent":
+            return redirect(url_for("login", role="agent"))
+    except Exception as e:
+        import traceback
+        print(f"Error in agent_crm (user check): {traceback.format_exc()}")
+        return f"Error: {e}", 500
 
     if request.method == "POST":
         action = request.form.get("action", "add")
@@ -2092,7 +2097,8 @@ def agent_crm():
                 updates = {}
                 for field in ['name', 'email', 'phone', 'stage', 'birthday', 
                             'home_anniversary', 'address', 'notes', 'tags',
-                            'property_address', 'auto_birthday', 'auto_anniversary',
+                            'property_address', 'property_value', 'equity_estimate',
+                            'auto_birthday', 'auto_anniversary',
                             'auto_seasonal', 'auto_equity', 'auto_holidays',
                             'equity_frequency']:
                     val = request.form.get(field, "").strip()
@@ -2114,6 +2120,8 @@ def agent_crm():
                     flash("Contact updated successfully!", "success")
                 except Exception as e:
                     flash(f"Error updating contact: {e}", "error")
+                    import traceback
+                    print(f"Error updating contact: {traceback.format_exc()}")
         
         elif action == "add_interaction":
             contact_id = request.form.get("contact_id")
@@ -2133,16 +2141,51 @@ def agent_crm():
                     flash(f"Error logging interaction: {e}", "error")
 
     stage_filter = request.args.get("stage")
-    contacts = list_agent_contacts(user["id"], stage_filter)
-    # Convert contacts to dicts for JSON serialization in template
-    contacts_list = [dict(contact) for contact in contacts]
-    return render_template(
-        "agent/crm.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-        contacts=contacts_list,
-        stage_filter=stage_filter,
-    )
+    try:
+        contacts = list_agent_contacts(user["id"], stage_filter)
+        # Convert contacts to dicts for JSON serialization in template
+        # Handle None values and ensure all fields exist
+        contacts_list = []
+        for contact in contacts:
+            try:
+                # Convert sqlite3.Row to dict, handling missing columns gracefully
+                contact_dict = dict(contact)
+                # Ensure all expected fields exist with defaults
+                expected_fields = {
+                    'id': None, 'created_at': '', 'name': '', 'email': '', 'phone': '',
+                    'stage': 'new', 'best_contact': '', 'last_touch': '', 'birthday': '',
+                    'home_anniversary': '', 'address': '', 'notes': '', 'tags': '',
+                    'property_address': '', 'property_value': None, 'equity_estimate': None,
+                    'auto_birthday': 1, 'auto_anniversary': 1, 'auto_seasonal': 1,
+                    'auto_equity': 1, 'auto_holidays': 1, 'equity_frequency': 'monthly'
+                }
+                for field, default in expected_fields.items():
+                    if field not in contact_dict:
+                        contact_dict[field] = default
+                contacts_list.append(contact_dict)
+            except Exception as e:
+                import traceback
+                print(f"Error converting contact: {traceback.format_exc()}")
+                continue
+    except Exception as e:
+        import traceback
+        print(f"Error loading contacts: {traceback.format_exc()}")
+        flash(f"Error loading contacts: {e}", "error")
+        contacts_list = []
+    
+    try:
+        return render_template(
+            "agent/crm.html",
+            brand_name=FRONT_BRAND_NAME,
+            user=user,
+            contacts=contacts_list,
+            stage_filter=stage_filter,
+        )
+    except Exception as e:
+        import traceback
+        error_msg = traceback.format_exc()
+        print(f"Error rendering template: {error_msg}")
+        return f"Template Error: {e}<br><pre>{error_msg}</pre>", 500
 
 
 @app.route("/agent/transactions", methods=["GET", "POST"])
