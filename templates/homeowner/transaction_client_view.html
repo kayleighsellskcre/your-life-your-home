@@ -1,0 +1,80 @@
+{% extends "homeowner/layout.html" %}
+{% block homeowner_content %}
+<style>
+  .transaction-header { background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); padding: 2rem; border-radius: 12px; margin-bottom: 2rem; }
+  .property-address { font-family: var(--font-heading); font-size: 2rem; color: #3A352C; margin-bottom: 0.5rem; }
+  .stage-badge { background: #6B6A45; color: white; padding: 0.5rem 1.5rem; border-radius: 20px; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; }
+  .progress-bar-container { height: 12px; background: #E5E5E5; border-radius: 6px; overflow: hidden; margin: 1rem 0; }
+  .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #6B6A45 0%, #8A9A5B 100%); transition: width 0.6s ease; }
+  .progress-text { text-align: center; color: #666; font-size: 0.9rem; margin-top: 0.5rem; }
+  .checklist-item { background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 2px solid #E5E5E5; display: flex; justify-content: space-between; align-items: center; }
+  .checklist-item.completed { background: #F6F2E8; border-color: #6B6A45; }
+  .checklist-item-title { font-weight: 600; color: #3A352C; margin-bottom: 0.25rem; font-size: 1rem; }
+  .checklist-item-desc { color: #666; font-size: 0.85rem; }
+  .status-icon { font-size: 1.5rem; }
+  .participant-card { background: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #E5E5E5; display: flex; justify-content: space-between; align-items: center; }
+  .participant-avatar { width: 40px; height: 40px; border-radius: 50%; background: #6B6A45; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 1rem; }
+  .participant-details h4 { margin: 0 0 0.25rem 0; color: #3A352C; }
+  .participant-details p { margin: 0; color: #666; font-size: 0.85rem; }
+  .participant-badge { background: #F6F2E8; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: #6B6A45; }
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: #E5E5E5; }
+  .timeline-item { position: relative; padding-bottom: 2rem; }
+  .timeline-dot { position: absolute; left: -2rem; width: 18px; height: 18px; border-radius: 50%; background: white; border: 3px solid #6B6A45; }
+  .timeline-content { background: white; padding: 1rem; border-radius: 8px; border: 1px solid #E5E5E5; }
+  .timeline-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+  .timeline-title { font-weight: 600; color: #3A352C; }
+  .timeline-time { color: #888; font-size: 0.85rem; }
+  .timeline-description { color: #666; font-size: 0.9rem; }
+</style>
+<div class="transaction-header">
+  <h1 class="property-address">{{ tx.property_address }}</h1>
+  <div style="display: flex; gap: 2rem; align-items: center; flex-wrap: wrap;">
+    <div class="stage-badge">{{ tx.current_stage|replace('_', ' ')|title }}</div>
+  </div>
+</div>
+<div class="progress-bar-container">
+  <div class="progress-bar-fill" style="width: {{ doc_status.progress_percentage|round(0) }}%;"></div>
+</div>
+<div class="progress-text">
+  <strong>{{ doc_status.progress_percentage|round(0) }}% Complete</strong> • {{ doc_status.completed }} of {{ doc_status.total }} documents uploaded
+</div>
+<h2 style="margin: 2rem 0 1rem 0; color: #3A352C;">Document Checklist</h2>
+{% for item in doc_status.checklist %}
+  <div class="checklist-item{% if item.completed %} completed{% endif %}">
+    <div>
+      <div class="checklist-item-title">{% if item.completed %}✅ {% else %}📋 {% endif %}{{ item.document_name }}</div>
+      <div class="checklist-item-desc">{{ item.description }}{% if item.required %} • <strong>Required</strong>{% endif %}{% if item.triggers_stage_change %} • <strong>Auto-advances stage! 🤖</strong>{% endif %}</div>
+    </div>
+    <span class="status-icon">{% if item.completed %}✅{% else %}⏳{% endif %}</span>
+  </div>
+{% endfor %}
+<h2 style="margin: 2rem 0 1rem 0; color: #3A352C;">Participants</h2>
+{% for p in participants %}
+  <div class="participant-card">
+    <div class="participant-info">
+      <div class="participant-avatar">{{ p.name[:2]|upper }}</div>
+      <div class="participant-details">
+        <h4>{{ p.name }}</h4>
+        <p>{{ p.email or p.user_email }}{% if p.phone %} • {{ p.phone }}{% endif %}</p>
+      </div>
+    </div>
+    <span class="participant-badge">{{ p.participant_type|replace('_', ' ')|title }}</span>
+  </div>
+{% endfor %}
+<h2 style="margin: 2rem 0 1rem 0; color: #3A352C;">Activity Timeline</h2>
+<div class="timeline">
+  {% for event in timeline %}
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-content">
+        <div class="timeline-header">
+          <div class="timeline-title">{{ event.event_type|title }}</div>
+          <div class="timeline-time">{{ event.created_at }}</div>
+        </div>
+        <div class="timeline-description">{{ event.description }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -10,7 +10,7 @@ from typing import Optional, List, Dict, Any
 
 def get_db():
     """Get database connection"""
-    conn = sqlite3.connect('ylh.db')
+    conn = sqlite3.connect('ylh.db', check_same_thread=False, timeout=5)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -22,40 +22,36 @@ def create_transaction(agent_id: int, property_address: str, client_name: str,
                       side: str, current_stage: str = 'pre_contract',
                       target_close_date: str = None, **kwargs) -> int:
     """Create a new transaction and log timeline event"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        INSERT INTO transactions 
-        (agent_id, property_address, client_name, client_email, client_phone,
-         side, current_stage, purchase_price, target_close_date, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        agent_id, property_address, client_name,
-        kwargs.get('client_email'), kwargs.get('client_phone'),
-        side, current_stage,
-        kwargs.get('purchase_price'), target_close_date,
-        kwargs.get('notes')
-    ))
-    
-    transaction_id = cursor.lastrowid
-    
-    # Log creation event
+    transaction_id = None
+    print(f"[DEBUG] Creating transaction for agent_id={agent_id}, property_address={property_address}, client_name={client_name}, side={side}, current_stage={current_stage}, target_close_date={target_close_date}")
+    with get_db() as conn:
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO transactions 
+                (agent_id, property_address, client_name, client_email, client_phone,
+                 side, current_stage, purchase_price, target_close_date, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                agent_id, property_address, client_name,
+                kwargs.get('client_email', ''), kwargs.get('client_phone', ''),
+                side, current_stage,
+                kwargs.get('purchase_price', None), target_close_date,
+                kwargs.get('notes', '')
+            ))
+            transaction_id = cursor.lastrowid
+    # Log creation event (outside the with block to avoid nested DB writes)
     log_timeline_event(
         transaction_id, 'created',
         f"Transaction created for {property_address}",
         agent_id
     )
-    
-    conn.commit()
-    conn.close()
-    
     return transaction_id
 
 def get_agent_transactions(agent_id: int, status: str = 'active') -> List[Dict]:
     """Get all transactions for an agent"""
-    conn = get_db()
-    cursor = conn.cursor()
+    with get_db() as conn:
+        cursor = conn.cursor()
     
     cursor.execute("""
         SELECT t.*,
@@ -70,84 +66,76 @@ def get_agent_transactions(agent_id: int, status: str = 'active') -> List[Dict]:
     """, (agent_id, status))
     
     transactions = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    
+    print(f"[DEBUG] get_agent_transactions(agent_id={agent_id}, status={status}) found {len(transactions)} transactions")
     return transactions
 
 def get_transactions_by_stage(agent_id: int, stage: str) -> List[Dict]:
     """Get transactions in a specific stage"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        SELECT * FROM transactions
-        WHERE agent_id = ? AND current_stage = ? AND status = 'active'
-        ORDER BY target_close_date ASC
-    """, (agent_id, stage))
-    
-    transactions = [dict(row) for row in cursor.fetchall()]
-    conn.close()
-    
-    return transactions
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM transactions
+            WHERE agent_id = ? AND current_stage = ? AND status = 'active'
+            ORDER BY target_close_date ASC
+        """, (agent_id, stage))
+        transactions = [dict(row) for row in cursor.fetchall()]
+        return transactions
 
 def get_transaction_detail(transaction_id: int) -> Optional[Dict]:
     """Get full transaction details"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT * FROM transactions WHERE id = ?", (transaction_id,))
-    transaction = cursor.fetchone()
-    
-    if not transaction:
-        conn.close()
-        return None
-    
-    result = dict(transaction)
-    conn.close()
-    
-    return result
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM transactions WHERE id = ?", (transaction_id,))
+        transaction = cursor.fetchone()
+        if not transaction:
+            return None
+        result = dict(transaction)
+        # Get documents
+        cursor.execute("SELECT * FROM transaction_documents WHERE transaction_id = ?", (transaction_id,))
+        docs = cursor.fetchall()
+        result["documents"] = [dict(d) for d in docs]
+        # Get participants
+        cursor.execute("SELECT * FROM transaction_participants WHERE transaction_id = ?", (transaction_id,))
+        participants = cursor.fetchall()
+        result["participants"] = [dict(p) for p in participants]
+        # Get timeline
+        cursor.execute("SELECT * FROM transaction_timeline WHERE transaction_id = ? ORDER BY created_at ASC", (transaction_id,))
+        timeline = cursor.fetchall()
+        result["timeline"] = [dict(t) for t in timeline]
+        return result
 
 def update_transaction_stage(transaction_id: int, new_stage: str,
                             changed_by: int, auto_changed: bool = False,
                             trigger_document_id: int = None) -> bool:
     """Update transaction stage and log the change"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    # Get current stage
-    cursor.execute("SELECT current_stage FROM transactions WHERE id = ?", (transaction_id,))
-    row = cursor.fetchone()
-    if not row:
-        conn.close()
-        return False
-    
-    old_stage = row[0]
-    
-    # Update stage
-    cursor.execute("""
-        UPDATE transactions
-        SET current_stage = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    """, (new_stage, transaction_id))
-    
-    # Log stage history
-    cursor.execute("""
-        INSERT INTO transaction_stage_history
-        (transaction_id, from_stage, to_stage, changed_by, auto_changed, trigger_document_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (transaction_id, old_stage, new_stage, changed_by, auto_changed, trigger_document_id))
-    
-    # Log timeline event
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # Get current stage
+        cursor.execute("SELECT current_stage FROM transactions WHERE id = ?", (transaction_id,))
+        row = cursor.fetchone()
+        if not row:
+            return False
+        old_stage = row[0]
+        # Update stage
+        cursor.execute("""
+            UPDATE transactions
+            SET current_stage = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        """, (new_stage, transaction_id))
+        # Log stage history
+        cursor.execute("""
+            INSERT INTO transaction_stage_history
+            (transaction_id, from_stage, to_stage, changed_by, auto_changed, trigger_document_id)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (transaction_id, old_stage, new_stage, changed_by, auto_changed, trigger_document_id))
+        conn.commit()
+    # Log timeline event (outside the with block to avoid nested DB writes)
     prefix = "🤖 Auto-moved" if auto_changed else "Stage changed"
     log_timeline_event(
         transaction_id, 'stage_changed',
         f"{prefix} from {old_stage.replace('_', ' ').title()} to {new_stage.replace('_', ' ').title()}",
         changed_by
     )
-    
-    conn.commit()
-    conn.close()
-    
     return True
 
 # ============================================================================
@@ -237,32 +225,24 @@ def get_document_checklist(stage: str) -> List[Dict]:
 
 def get_transaction_document_status(transaction_id: int) -> Dict:
     """Get checklist with completion status"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    # Get current stage
-    cursor.execute("SELECT current_stage FROM transactions WHERE id = ?", (transaction_id,))
-    stage = cursor.fetchone()[0]
-    
-    # Get checklist for stage
-    checklist = get_document_checklist(stage)
-    
-    # Get uploaded documents
-    cursor.execute("""
-        SELECT document_type FROM transaction_documents
-        WHERE transaction_id = ?
-    """, (transaction_id,))
-    
-    uploaded_types = {row[0] for row in cursor.fetchall()}
-    conn.close()
-    
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # Get current stage
+        cursor.execute("SELECT current_stage FROM transactions WHERE id = ?", (transaction_id,))
+        stage = cursor.fetchone()[0]
+        # Get checklist for stage
+        checklist = get_document_checklist(stage)
+        # Get uploaded documents
+        cursor.execute("""
+            SELECT document_type FROM transaction_documents
+            WHERE transaction_id = ?
+        """, (transaction_id,))
+        uploaded_types = {row[0] for row in cursor.fetchall()}
     # Mark completed items
     for item in checklist:
         item['completed'] = item['document_type'] in uploaded_types
-    
     completed_count = sum(1 for item in checklist if item['completed'])
     total_count = len(checklist)
-    
     return {
         'checklist': checklist,
         'completed': completed_count,
@@ -279,32 +259,25 @@ def add_transaction_participant(transaction_id: int, participant_type: str,
                                 permissions: str = 'view_only', user_id: int = None,
                                 added_by: int = None) -> int:
     """Add a participant to a transaction"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
     # Generate invitation token
     invitation_token = secrets.token_urlsafe(32)
-    
-    cursor.execute("""
-        INSERT INTO transaction_participants
-        (transaction_id, participant_type, user_id, name, email, phone,
-         permissions, invitation_token, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-    """, (transaction_id, participant_type, user_id, name, email, phone,
-          permissions, invitation_token))
-    
-    participant_id = cursor.lastrowid
-    
-    # Log timeline event
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO transaction_participants
+            (transaction_id, participant_type, user_id, name, email, phone,
+             permissions, invitation_token, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+        """, (transaction_id, participant_type, user_id, name, email, phone,
+              permissions, invitation_token))
+        participant_id = cursor.lastrowid
+        conn.commit()
+    # Log timeline event (outside the with block to avoid nested DB writes)
     log_timeline_event(
         transaction_id, 'participant_added',
         f"👥 {name} added as {participant_type.replace('_', ' ').title()}",
         added_by
     )
-    
-    conn.commit()
-    conn.close()
-    
     return participant_id
 
 def get_transaction_participants(transaction_id: int) -> List[Dict]:
@@ -327,29 +300,22 @@ def get_transaction_participants(transaction_id: int) -> List[Dict]:
 
 def accept_transaction_invitation(invitation_token: str, user_id: int) -> Optional[int]:
     """Accept an invitation to join a transaction"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        UPDATE transaction_participants
-        SET user_id = ?, status = 'active', invitation_accepted_at = CURRENT_TIMESTAMP
-        WHERE invitation_token = ?
-    """, (user_id, invitation_token))
-    
-    if cursor.rowcount == 0:
-        conn.close()
-        return None
-    
-    cursor.execute("""
-        SELECT transaction_id FROM transaction_participants
-        WHERE invitation_token = ?
-    """, (invitation_token,))
-    
-    transaction_id = cursor.fetchone()[0]
-    conn.commit()
-    conn.close()
-    
-    return transaction_id
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE transaction_participants
+            SET user_id = ?, status = 'active', invitation_accepted_at = CURRENT_TIMESTAMP
+            WHERE invitation_token = ?
+        """, (user_id, invitation_token))
+        if cursor.rowcount == 0:
+            return None
+        cursor.execute("""
+            SELECT transaction_id FROM transaction_participants
+            WHERE invitation_token = ?
+        """, (invitation_token,))
+        transaction_id = cursor.fetchone()[0]
+        conn.commit()
+        return transaction_id
 
 # ============================================================================
 # TIMELINE & ACTIVITY
@@ -359,31 +325,27 @@ def log_timeline_event(transaction_id: int, event_type: str,
                        description: str, created_by: int = None,
                        metadata: str = None):
     """Log an event to transaction timeline"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        INSERT INTO transaction_timeline
-        (transaction_id, event_type, description, created_by, metadata)
-        VALUES (?, ?, ?, ?, ?)
-    """, (transaction_id, event_type, description, created_by, metadata))
-    
-    conn.commit()
-    conn.close()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO transaction_timeline
+            (transaction_id, event_type, description, created_by, metadata)
+            VALUES (?, ?, ?, ?, ?)
+        """, (transaction_id, event_type, description, created_by, metadata))
+        conn.commit()
 
 def get_transaction_timeline(transaction_id: int, limit: int = 50) -> List[Dict]:
     """Get timeline events for a transaction"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        SELECT tt.*, u.name as created_by_name
-        FROM transaction_timeline tt
-        LEFT JOIN users u ON tt.created_by = u.id
-        WHERE tt.transaction_id = ?
-        ORDER BY tt.created_at DESC
-        LIMIT ?
-    """, (transaction_id, limit))
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT tt.*, u.name as created_by_name
+            FROM transaction_timeline tt
+            LEFT JOIN users u ON tt.created_by = u.id
+            WHERE tt.transaction_id = ?
+            ORDER BY tt.created_at DESC
+            LIMIT ?
+        """, (transaction_id, limit))
     
     timeline = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -396,43 +358,71 @@ def get_transaction_timeline(transaction_id: int, limit: int = 50) -> List[Dict]
 
 def get_agent_transaction_metrics(agent_id: int) -> Dict:
     """Get transaction metrics for agent dashboard"""
-    conn = get_db()
-    cursor = conn.cursor()
-    
-    # Total active transactions
-    cursor.execute("""
-        SELECT COUNT(*) FROM transactions
-        WHERE agent_id = ? AND status = 'active'
-    """, (agent_id,))
-    active_count = cursor.fetchone()[0]
-    
-    # By stage
-    cursor.execute("""
-        SELECT current_stage, COUNT(*) as count
-        FROM transactions
-        WHERE agent_id = ? AND status = 'active'
-        GROUP BY current_stage
-    """, (agent_id,))
-    
-    by_stage = {row[0]: row[1] for row in cursor.fetchall()}
-    
-    # Closing soon (within 30 days)
-    cursor.execute("""
-        SELECT COUNT(*) FROM transactions
-        WHERE agent_id = ? AND status = 'active'
-        AND target_close_date <= date('now', '+30 days')
-    """, (agent_id,))
-    closing_soon = cursor.fetchone()[0]
-    
-    conn.close()
-    
-    return {
-        'active_transactions': active_count,
-        'by_stage': by_stage,
-        'closing_soon': closing_soon,
-        'pre_contract': by_stage.get('pre_contract', 0),
-        'under_contract': by_stage.get('under_contract', 0),
-        'in_escrow': by_stage.get('in_escrow', 0),
-        'clear_to_close': by_stage.get('clear_to_close', 0),
-        'closed_this_month': by_stage.get('closed', 0)
-    }
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # Total active transactions
+        cursor.execute("""
+            SELECT COUNT(*) FROM transactions
+            WHERE agent_id = ? AND status = 'active'
+        """, (agent_id,))
+        active_count = cursor.fetchone()[0]
+        # By stage
+        cursor.execute("""
+            SELECT current_stage, COUNT(*) as count
+            FROM transactions
+            WHERE agent_id = ? AND status = 'active'
+            GROUP BY current_stage
+        """, (agent_id,))
+        by_stage = {row[0]: row[1] for row in cursor.fetchall()}
+        # Closing soon (within 30 days)
+        cursor.execute("""
+            SELECT COUNT(*) FROM transactions
+            WHERE agent_id = ? AND status = 'active'
+            AND target_close_date <= date('now', '+30 days')
+        """, (agent_id,))
+        closing_soon = cursor.fetchone()[0]
+        return {
+            'active_transactions': active_count,
+            'by_stage': by_stage,
+            'closing_soon': closing_soon,
+            'pre_contract': by_stage.get('pre_contract', 0),
+            'under_contract': by_stage.get('under_contract', 0),
+            'in_escrow': by_stage.get('in_escrow', 0),
+            'clear_to_close': by_stage.get('clear_to_close', 0),
+            'closed_this_month': by_stage.get('closed', 0)
+        }
+
+def handle_document_upload_and_auto_progression(transaction_id, document_type):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM transaction_participants
+            WHERE transaction_id = ?
+            ORDER BY participant_type, name
+        """, (transaction_id,))
+        participants = [dict(row) for row in cursor.fetchall()]
+        return participants
+    if document_type in progression_map:
+        next_stage = progression_map[document_type]
+        db.execute("UPDATE transactions SET stage = ? WHERE id = ?", (next_stage, transaction_id))
+        db.commit()
+        # Optionally, add to timeline
+        db.execute(
+            "INSERT INTO transaction_timeline (transaction_id, event, timestamp) VALUES (?, ?, datetime('now'))",
+            (transaction_id, f"Stage auto-progressed to {next_stage} via {document_type}")
+        )
+        db.commit()
+
+def delete_transaction(transaction_id, agent_id):
+    db = get_db()
+    # Ensure agent owns the transaction
+    tx = db.execute("SELECT * FROM transactions WHERE id = ? AND agent_id = ?", (transaction_id, agent_id)).fetchone()
+    if not tx:
+        return False
+    # Delete related documents, participants, timeline, then transaction
+    db.execute("DELETE FROM transaction_documents WHERE transaction_id = ?", (transaction_id,))
+    db.execute("DELETE FROM transaction_participants WHERE transaction_id = ?", (transaction_id,))
+    db.execute("DELETE FROM transaction_timeline WHERE transaction_id = ?", (transaction_id,))
+    db.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
+    db.commit()
+    return True

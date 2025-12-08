@@ -171,32 +171,5 @@ def migrate_transaction_system():
         (stage, document_type, document_name, description, required, triggers_stage_change, display_order)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     """, checklist_data)
-    
-    print(f"✅ Inserted {len(checklist_data)} document checklist items")
-    
-    # Create indexes for performance
-    print("\n⚡ Creating indexes...")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_agent ON transactions(agent_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_stage ON transactions(current_stage)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_documents_transaction ON transaction_documents(transaction_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_participants_transaction ON transaction_participants(transaction_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_timeline_transaction ON transaction_timeline(transaction_id)")
-    print("✅ Created indexes")
-    
-    conn.commit()
-    conn.close()
-    
-    print("\n🎉 Transaction Coordinator database schema created successfully!")
-    print("\n📊 Schema Summary:")
-    print("   • transactions - Core transaction data")
-    print("   • transaction_documents - File uploads with auto-progression")
-    print("   • transaction_participants - Multi-party collaboration")
-    print("   • transaction_timeline - Activity history")
-    print("   • document_checklists - Required docs per stage")
-    print("   • transaction_stage_history - Stage change tracking")
-    print("\n✨ Auto-progression rules configured:")
-    print("   • Upload Purchase Agreement → Moves to 'Under Contract'")
-    print("   • Upload Appraisal Report → Moves to 'Clear to Close'")
-
 if __name__ == "__main__":
     migrate_transaction_system()

@@ -36,7 +36,7 @@ from flask import (
     send_from_directory,
 )
 from flask import Response
-from werkzeug.security import generate_password_hash, check_password_hash  # noqa
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
 # ---------------- SIMPLE IMAGE PROCESSING (NO BACKGROUND REMOVAL) ----------------
@@ -81,10 +81,7 @@ from database import (
     add_homeowner_question,
     add_agent_contact,
     list_agent_contacts,
-    add_lender_borrower,
-    list_lender_borrowers,
     add_agent_transaction,
-    list_agent_transactions,
     get_agent_transaction,
     add_lender_loan,
     list_lender_loans,
@@ -130,8 +127,6 @@ from r2_storage import (
 )
 
 # ---------------- FLASK APP INIT ----------------
-
-from flask import Flask
 app = Flask(__name__)
 app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -139,16 +134,19 @@ app.config['TEMPLATES_AUTO_RELOAD'] = True
 # Initialize DBs so platform loads with no manual trigger
 init_db()
 
-# ---------------- JINJA FILTERS ----------------
-def _load_json_filter(value):
-    try:
-        if value is None or value == "":
-            return []
-        return json.loads(value)
-    except Exception:
-        return []
-
-app.jinja_env.filters["load_json"] = _load_json_filter
+# ---------------- TRANSACTION HELPERS IMPORT (AFTER APP CREATION) ----------------
+from transaction_helpers import (
+    get_db,
+    add_transaction_participant,
+    create_transaction,
+    get_agent_transactions,
+    delete_transaction,
+    get_transaction_detail,
+    get_transaction_documents,
+    get_transaction_participants,
+    get_transaction_timeline,
+    get_transaction_document_status,
+)
 
 # ---------------- GLOBAL BRAND CONFIG ----------------
 FRONT_BRAND_NAME = "Your Life, Your Home"
@@ -156,7 +154,6 @@ CLOUD_CMA_URL = os.environ.get(
     "CLOUD_CMA_URL",
     "https://app.cloudcma.com/api_widget/0183b47b7401642c6ec736103095ebbb/show?post_url=https://app.cloudcma.com&source_url=ua",
 )
-
 BASE_DIR = Path(__file__).resolve().parent
 
 # Homeowner document storage
@@ -167,40 +164,27 @@ HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_TIMELINE = BASE_DIR / "uploads" / "timeline"
 UPLOAD_TIMELINE.mkdir(parents=True, exist_ok=True)
 
-
-# -------------------------------------------------
-# AUTH HELPERS
-# -------------------------------------------------
+# Helper to get current user id
 def get_current_user_id() -> int:
     """Fallback to demo user for now."""
     return session.get("user_id") or 1
 
-
-def login_required(view):
-    @wraps(view)
-    def wrapper(*a, **kw):
-        if not session.get("user_id"):
-            flash("Please sign in to access your dashboard.", "error")
-            return redirect(url_for("login"))
-        return view(*a, **kw)
-
-    return wrapper
-
-
-def role_required(*roles):
-    def decorator(view):
-        @wraps(view)
-        def wrapper(*a, **kw):
-            if not session.get("user_id"):
-                flash("Please sign in first.", "error")
-                return redirect(url_for("login"))
-            if roles and session.get("role") not in roles:
-                abort(403)
-            return view(*a, **kw)
-
-        return wrapper
-
-    return decorator
+# ---------------- AGENT TRANSACTION ROUTES ----------------
+@app.route("/agent/transactions/<int:tx_id>/participants/add", methods=["POST"])
+def agent_add_participant(tx_id):
+    """Add a participant to an agent transaction."""
+    name = request.form.get("participant_name", "").strip()
+    email = request.form.get("participant_email", "").strip()
+    role = request.form.get("participant_role", "").strip()
+    if not name or not email or not role:
+        flash("All participant fields are required.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+    try:
+        add_transaction_participant(tx_id, name, email, role)
+        flash("Participant added successfully!", "success")
+    except Exception as e:
+        flash(f"Error adding participant: {e}", "error")
+    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
 
 def get_current_user() -> Optional[dict]:
@@ -212,6 +196,56 @@ def get_current_user() -> Optional[dict]:
 
 
 # -------------------------------------------------
+# EMAIL REMINDER AUTOMATION (GMAIL SMTP + APScheduler)
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from apscheduler.schedulers.background import BackgroundScheduler
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
+EMAIL_USER = os.environ.get("EMAIL_USER")
+EMAIL_PASS = os.environ.get("EMAIL_PASS")
+
+def send_reminder_email(to_email, subject, body):
+    msg = MIMEMultipart()
+    msg["From"] = EMAIL_USER
+    msg["To"] = to_email
+    msg["Subject"] = subject
+    msg.attach(MIMEText(body, "plain"))
+    try:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+            server.starttls()
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.sendmail(EMAIL_USER, to_email, msg.as_string())
+        print(f"✓ Email sent to {to_email}")
+        return True
+    except Exception as e:
+        print(f"✗ Failed to send email to {to_email}: {e}")
+        return False
+
+# Example reminder query (replace with your actual DB logic)
+def get_due_reminders():
+    # This should query your database for reminders due today
+    # Example: return [{"email": "client@email.com", "subject": "Happy Birthday!", "body": "Wishing you a wonderful day!"}]
+    # TODO: Replace with real logic
+    return []
+
+def send_due_reminders():
+    reminders = get_due_reminders()
+    for r in reminders:
+        if r.get("email"):
+            send_reminder_email(r["email"], r["subject"], r["body"])
+
+# Scheduler setup (runs every day at 8am)
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(send_due_reminders, 'cron', hour=12, minute=0)
+    scheduler.start()
+    print("✓ Reminder scheduler started.")
+
+# Start scheduler when app starts
+start_scheduler()
 # SHARED UTILS
 # -------------------------------------------------
 def json_or_list(value):
@@ -238,10 +272,6 @@ def _row_get(row, key, default=None):
         pass
     return getattr(row, key, default)
 
-
-# -------------------------------------------------
-# DESIGN BOARD LOAD
-# -------------------------------------------------
 
 # -------------------------------------------------
 # HOMEOWNER SNAPSHOT + CRM METRICS
@@ -331,10 +361,9 @@ def get_agent_dashboard_metrics(user_id):
             "followups_today": 0,
         }
     contacts = list_agent_contacts(user_id)
-    transactions = list_agent_transactions(user_id)
     return {
         "new_leads": sum((c1["stage"] or "") == "new" for c1 in contacts),
-        "active_transactions": len(transactions),
+        "active_transactions": 0,
         "followups_today": max(len(contacts) // 2, 0),
     }
 
@@ -355,6 +384,10 @@ def get_lender_dashboard_metrics(user_id):
         "loans_in_process": len(loans),
         "nurture_contacts": max(len(borrowers) // 2, 0),
     }
+
+
+# Import lender borrowers function
+from database import add_lender_borrower, list_lender_borrowers
 
 
 # -------------------------------------------------
@@ -422,7 +455,7 @@ def signup():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    role = request.args.get("role")  # optional query param for convenience
+    role = request.args.get("role")
     if request.method == "POST":
         email = request.form["email"].strip().lower()
         password = request.form["password"]
@@ -547,7 +580,7 @@ def homeowner_saved_notes():
 
             # Process color palette
             colors = request.form.getlist("colors[]")
-            color_palette = [c for c in colors if c]  # Remove empty values
+            color_palette = [c for c in colors if c]
 
             # Persist board with premium features
             try:
@@ -678,11 +711,10 @@ def homeowner_saved_notes():
 
             return redirect(url_for("homeowner_saved_notes", view=board_name))
 
-        # Delete an entire board (all notes/files)
+        # Delete an entire board
         if action == "delete_board":
             board_name = (request.form.get("board_name") or "").strip()
             if board_name:
-                # remove files from disk (best-effort)
                 try:
                     details = get_design_board_details(user_id, board_name)
                     if details and details.get("photos"):
@@ -709,7 +741,7 @@ def homeowner_saved_notes():
             board_details[b] = details or {"project_name": b, "photos": [], "notes": [], "files": []}
         except Exception:
             board_details[b] = {"project_name": b, "photos": [], "notes": [], "files": []}
-    # If a specific board should be shown in the side panel (e.g., after creation)
+    
     selected_board = request.args.get("view")
     selected_details = board_details.get(selected_board) if selected_board else None
 
@@ -748,11 +780,7 @@ def homeowner_design_board_view(board_name):
 
 @app.route("/homeowner/design-boards/<path:board_name>/download")
 def homeowner_design_board_download(board_name):
-    """Render a print-optimized view of a single board and try to return a PDF.
-
-    If `weasyprint` is installed this will return a generated PDF. If not, the
-    HTML view is rendered and a message prompts installing `weasyprint`.
-    """
+    """Render a print-optimized view of a single board."""
     user_id = get_current_user_id()
     details = get_design_board_details(user_id, board_name)
     if not details:
@@ -767,15 +795,12 @@ def homeowner_design_board_download(board_name):
     )
 
     try:
-        # Lazy import to keep optional dependency
         from weasyprint import HTML
-
         pdf = HTML(string=html, base_url=str(BASE_DIR / "static")).write_pdf()
         return Response(pdf, mimetype="application/pdf", headers={
             "Content-Disposition": f'attachment; filename="{board_name}.pdf"'
         })
     except Exception:
-        # Fallback: render the HTML and suggest installing WeasyPrint for direct PDFs
         flash("WeasyPrint not available: rendering HTML. Install WeasyPrint to enable PDF downloads.", "info")
         return html
 
@@ -801,10 +826,8 @@ def homeowner_design_board_privacy(board_name):
     user_id = get_current_user_id()
     is_private = int(request.form.get("is_private", 0))
     
-    # Generate shareable link if making public
     shareable_link = None
     if not is_private:
-        import secrets
         shareable_link = secrets.token_urlsafe(16)
     
     try:
@@ -833,7 +856,6 @@ def homeowner_design_board_template(board_name):
         flash("Could not update template.", "error")
     
     return redirect(url_for("homeowner_design_board_view", board_name=board_name))
-
 
 @app.route("/homeowner/crop-photo", methods=["POST"])
 def homeowner_crop_photo():
@@ -1814,23 +1836,42 @@ def agent_clients():
 
 @app.route("/agent/transactions", methods=["GET", "POST"])
 def agent_transactions():
-    user = get_current_user()
-    user_id = user["id"] if user else None
+    # No login required for setup/testing
+    user_id = 1  # Always use demo agent
+    print(f"[DEBUG] Using user_id: {user_id}")
 
     if request.method == "POST" and user_id:
+        print("[DEBUG] POST received for /agent/transactions")
         property_address = request.form.get("property_address", "").strip()
         client_name = request.form.get("client_name", "").strip()
         side = request.form.get("side", "buyer").strip()
         stage = request.form.get("stage", "under_contract").strip()
         close_date = request.form.get("close_date", "").strip()
+        print(f"[DEBUG] Form values: property_address={property_address}, client_name={client_name}, side={side}, stage={stage}, close_date={close_date}")
+        if not close_date:
+            close_date = None
 
         if property_address and client_name:
-            add_agent_transaction(
-                user_id, property_address, client_name, side, stage, close_date
-            )
-            flash("Transaction added to your coordinator view.", "success")
+            from transaction_helpers import create_transaction
+            try:
+                print("[DEBUG] Calling create_transaction...")
+                create_transaction(
+                    user_id, property_address, client_name, side, stage, close_date,
+                    client_email="", client_phone="", purchase_price=None, notes=""
+                )
+                print("[DEBUG] Transaction creation succeeded!")
+                flash("Transaction added to your coordinator view.", "success")
+            except Exception as e:
+                print(f"[CRITICAL ERROR] Exception in create_transaction: {e}")
+                import traceback
+                traceback.print_exc()
+                flash("Error saving transaction. Please contact support.", "error")
+        else:
+            print("[DEBUG] Missing property_address or client_name, not creating transaction.")
 
-    transactions = list_agent_transactions(user_id) if user_id else []
+    # Always show current transactions (no status filter)
+    from transaction_helpers import get_agent_transactions
+    transactions = get_agent_transactions(user_id) if user_id else []
 
     return render_template(
         "agent/transactions.html",
@@ -1839,32 +1880,34 @@ def agent_transactions():
     )
 
 
+@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"])
+def agent_transaction_delete(tx_id):
+    # No login required for setup/testing
+    user_id = 1
+    from transaction_helpers import delete_transaction
+    delete_transaction(tx_id, user_id)
+    flash("Transaction deleted.", "success")
+    return redirect(url_for("agent_transactions"))
 @app.route("/agent/transactions/<int:tx_id>")
 def agent_transaction_detail(tx_id: int):
-    user = get_current_user()
-    user_id = user["id"] if user else None
+    # No login required for setup/testing
+    user_id = 1
+    from transaction_helpers import (
+        get_transaction_detail,
+        get_transaction_documents,
+        get_transaction_participants,
+        get_transaction_timeline,
+        get_transaction_document_status,
+    )
+    tx = get_transaction_detail(tx_id)
+    if not tx or tx.get("agent_id") != user_id:
+        flash("Transaction not found or you do not have access.", "error")
+        return redirect(url_for("agent_transactions"))
+    documents = get_transaction_documents(tx_id)
+    participants = get_transaction_participants(tx_id)
+    timeline = get_transaction_timeline(tx_id, limit=50)
+    doc_status = get_transaction_document_status(tx_id)
 
-    # Get transaction details
-    tx = None
-    if user_id:
-        from transaction_helpers import (
-            get_transaction_detail,
-            get_transaction_documents,
-            get_transaction_participants,
-            get_transaction_timeline,
-            get_transaction_document_status,
-        )
-        tx = get_transaction_detail(tx_id)
-        if not tx or tx.get("agent_id") != user_id:
-            abort(404)
-        documents = get_transaction_documents(tx_id)
-        participants = get_transaction_participants(tx_id)
-        timeline = get_transaction_timeline(tx_id, limit=50)
-        doc_status = get_transaction_document_status(tx_id)
-    else:
-        abort(403)
-
-    # Stages for progress bar and badge
     stages = [
         {"key": "pre_contract", "label": "Pre-Contract"},
         {"key": "under_contract", "label": "Under Contract"},
@@ -2190,33 +2233,9 @@ def lender_power_suite():
 # DEV ENTRYPOINT
 # -------------------------------------------------
 if __name__ == "__main__":
-    app.run(debug=True)
-@app.route("/agent/transactions/<int:tx_id>/documents/upload", methods=["POST"])
-def agent_upload_document(tx_id):
-    user = get_current_user()
-    user_id = user["id"] if user else None
-    if not user_id:
-        abort(403)
-    from transaction_helpers import handle_document_upload_and_auto_progression, get_transaction_detail
-    tx = get_transaction_detail(tx_id)
-    if not tx or tx.get("agent_id") != user_id:
-        abort(404)
-    file = request.files["document"]
-    document_type = request.form.get("document_type")
-    # Save the uploaded document (similar to existing logic)
-    # ...existing document upload logic...
-    # After saving document, trigger auto-progression
-    handle_document_upload_and_auto_progression(tx_id, document_type)
-    flash(f"Document '{document_type}' uploaded.", "success")
-    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
-
-@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"])
-def agent_transaction_delete(tx_id):
-    user = get_current_user()
-    user_id = user["id"] if user else None
-    if not user_id:
-        abort(403)
-    from transaction_helpers import delete_transaction
-    delete_transaction(tx_id, user_id)
-    flash("Transaction deleted.", "success")
-    return redirect(url_for("agent_transactions"))
+    try:
+        app.run(debug=True, threaded=False)
+    except Exception as e:
+        import traceback
+        print("\n[CRITICAL ERROR] Application crashed:")
+        traceback.print_exc()
