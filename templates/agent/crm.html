@@ -254,12 +254,109 @@
     font-family: var(--font-heading);
     color: var(--charcoal-brown);
   }
+  @media (max-width: 1024px) {
+    .crm-container {
+      grid-template-columns: 1fr;
+    }
+    .crm-sidebar {
+      position: static;
+    }
+  }
+  @media (max-width: 768px) {
+    .dashboard-cards {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .card {
+      padding: 1rem !important;
+    }
+    .card-value {
+      font-size: 1.5rem !important;
+    }
+  }
 </style>
 
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Nurture relationships</p>
   <h1>CRM & Lead Management</h1>
   <p>Your complete contact management system with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="dashboard-cards" style="margin-bottom: 2rem;">
+  <div class="card animate-in-delay-1" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <h3>📊 Total Contacts</h3>
+    <div class="card-value">{{ stats.total }}</div>
+    <p class="card-subtext">All contacts in your CRM</p>
+  </div>
+  <div class="card animate-in-delay-2" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <h3>🎯 Active Pipeline</h3>
+    <div class="card-value">{{ stats.active }}</div>
+    <p class="card-subtext">Active buyers & sellers</p>
+  </div>
+  <div class="card animate-in-delay-3" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <h3>⭐ New Leads</h3>
+    <div class="card-value">{{ stats.new }}</div>
+    <p class="card-subtext">Waiting for first contact</p>
+  </div>
+  <div class="card animate-in-delay-4" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <h3>🤖 Automation</h3>
+    <div class="card-value">{{ stats.with_automation }}</div>
+    <p class="card-subtext">Contacts with auto-emails</p>
+  </div>
+  {% if stats.total_equity > 0 %}
+  <div class="card animate-in-delay-5" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <h3>💰 Total Equity</h3>
+    <div class="card-value">${{ "{:,.0f}".format(stats.total_equity) }}</div>
+    <p class="card-subtext">Tracked across all contacts</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Search and Filters Bar -->
+<div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border: var(--border-light);">
+  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">🔍 Search Contacts</label>
+      <form method="get" style="display: flex; gap: 0.5rem;">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, address..." style="flex: 1; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white);">
+        {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+        {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+        {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem;">Search</button>
+        {% if search_query %}
+        <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.6rem 1rem;">Clear</a>
+        {% endif %}
+      </form>
+    </div>
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Sort By</label>
+      <form method="get" id="sortForm" style="display: flex;">
+        <select name="sort" onchange="document.getElementById('sortForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white);">
+          <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
+          <option value="stage" {% if sort_by == 'stage' %}selected{% endif %}>Stage</option>
+          <option value="last_touch" {% if sort_by == 'last_touch' %}selected{% endif %}>Last Touch</option>
+          <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Newest First</option>
+        </select>
+        {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+        {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+      </form>
+    </div>
+    <div>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Filter by Tag</label>
+      <form method="get" id="tagForm" style="display: flex;">
+        <select name="tag" onchange="document.getElementById('tagForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white);">
+          <option value="">All Tags</option>
+          {% for tag in all_tags %}
+          <option value="{{ tag }}" {% if tag_filter == tag %}selected{% endif %}>{{ tag }}</option>
+          {% endfor %}
+        </select>
+        {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+        {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+      </form>
+    </div>
+  </div>
 </div>
 
 <div class="crm-container">
@@ -296,14 +393,32 @@
     </form>
 
     <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
+      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Quick Stats</h3>
+      <div style="display: grid; gap: 0.75rem; margin-bottom: 1.5rem;">
+        <div style="padding: 0.75rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+          <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Total Contacts</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green);">{{ stats.total }}</div>
+        </div>
+        <div style="padding: 0.75rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+          <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Active Pipeline</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green);">{{ stats.active }}</div>
+        </div>
+        <div style="padding: 0.75rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+          <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">New Leads</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green);">{{ stats.new }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
       <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Stage</h3>
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <a href="?stage=" class="filter-btn {% if not stage_filter %}active{% endif %}">All Contacts</a>
-        <a href="?stage=new" class="filter-btn {% if stage_filter == 'new' %}active{% endif %}">New Leads</a>
-        <a href="?stage=nurture" class="filter-btn {% if stage_filter == 'nurture' %}active{% endif %}">Nurture</a>
-        <a href="?stage=active" class="filter-btn {% if stage_filter == 'active' %}active{% endif %}">Active</a>
-        <a href="?stage=past" class="filter-btn {% if stage_filter == 'past' %}active{% endif %}">Past Clients</a>
-        <a href="?stage=sphere" class="filter-btn {% if stage_filter == 'sphere' %}active{% endif %}">Sphere</a>
+        <a href="?stage={% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if not stage_filter %}active{% endif %}">All Contacts</a>
+        <a href="?stage=new{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'new' %}active{% endif %}">New Leads</a>
+        <a href="?stage=nurture{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'nurture' %}active{% endif %}">Nurture</a>
+        <a href="?stage=active{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'active' %}active{% endif %}">Active</a>
+        <a href="?stage=past{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'past' %}active{% endif %}">Past Clients</a>
+        <a href="?stage=sphere{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'sphere' %}active{% endif %}">Sphere</a>
       </div>
     </div>
   </div>
@@ -382,7 +497,46 @@
           {% if contact.tags %}
             <div style="margin: 0.5rem 0;">
               <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
-              <span style="color: var(--charcoal-brown); opacity: 0.8;">{{ contact.tags }}</span>
+              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                {% for tag in contact.tags.split(',') if tag.strip() %}
+                <a href="?tag={{ tag.strip() }}{% if stage_filter %}&stage={{ stage_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
+                   style="padding: 0.2rem 0.6rem; background: rgba(107, 106, 69, 0.1); color: var(--charcoal-brown); border-radius: var(--border-radius); text-decoration: none; font-size: 0.75rem; font-weight: 500;">
+                  {{ tag.strip() }}
+                </a>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if contact.recent_interactions %}
+            <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
+              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
+                📋 Recent Activity ({{ contact.interaction_count }} total)
+              </strong>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% for interaction in contact.recent_interactions %}
+                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius); border-left: 3px solid var(--olive-green);">
+                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;">
+                    <span style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">
+                      {{ interaction.interaction_type|replace('_', ' ')|title }}
+                    </span>
+                    <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">
+                      {{ interaction.interaction_date or interaction.created_at[:10] }}
+                    </span>
+                  </div>
+                  {% if interaction.subject %}
+                  <div style="font-size: 0.8rem; color: var(--charcoal-brown); opacity: 0.9; margin-bottom: 0.25rem;">
+                    <strong>{{ interaction.subject }}</strong>
+                  </div>
+                  {% endif %}
+                  {% if interaction.notes %}
+                  <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.8;">
+                    {{ interaction.notes[:100] }}{% if interaction.notes|length > 100 %}...{% endif %}
+                  </div>
+                  {% endif %}
+                </div>
+                {% endfor %}
+              </div>
             </div>
           {% endif %}
 
@@ -405,10 +559,15 @@
           </div>
 
           <div class="contact-actions">
-            <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Log Interaction</button>
-            <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">Email</a>
+            <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">📝 Log Interaction</button>
+            {% if contact.email %}
+            <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">✉️ Email</a>
+            {% endif %}
             {% if contact.phone %}
-              <a href="tel:{{ contact.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">Call</a>
+              <a href="tel:{{ contact.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">📞 Call</a>
+            {% endif %}
+            {% if contact.interaction_count > 0 %}
+            <button onclick="openHistoryModal({{ contact.id }})" class="btn btn-small" style="background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none;">📋 History ({{ contact.interaction_count }})</button>
             {% endif %}
           </div>
         </div>
@@ -416,9 +575,26 @@
     {% else %}
       <div class="empty-state">
         <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
-        <h3>No Contacts Yet</h3>
-        <p style="color: var(--charcoal-brown); opacity: 0.8;">Start building your network by adding your first contact!</p>
+        <h3>{% if search_query or tag_filter %}No Contacts Found{% else %}No Contacts Yet{% endif %}</h3>
+        <p style="color: var(--charcoal-brown); opacity: 0.8;">
+          {% if search_query or tag_filter %}
+            Try adjusting your search or filters to find contacts.
+          {% else %}
+            Start building your network by adding your first contact!
+          {% endif %}
+        </p>
+        {% if search_query or tag_filter %}
+        <a href="{{ url_for('agent_crm') }}" class="btn btn-primary" style="margin-top: 1rem;">View All Contacts</a>
+        {% endif %}
       </div>
+    {% endif %}
+    
+    {% if contacts %}
+    <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
+      <button onclick="exportContacts()" class="btn" style="background: var(--olive-green); color: var(--white);">
+        📥 Export Contacts to CSV
+      </button>
+    </div>
     {% endif %}
   </div>
 </div>
@@ -540,11 +716,11 @@
         <div>
           <label>Interaction Type *</label>
           <select name="interaction_type" required>
-            <option value="email">Email</option>
-            <option value="call">Phone Call</option>
-            <option value="meeting">Meeting</option>
-            <option value="text">Text Message</option>
-            <option value="note">Note</option>
+            <option value="email">📧 Email</option>
+            <option value="call">📞 Phone Call</option>
+            <option value="meeting">🤝 Meeting</option>
+            <option value="text">💬 Text Message</option>
+            <option value="note">📝 Note</option>
           </select>
         </div>
         <div>
@@ -558,11 +734,11 @@
         </div>
         <div>
           <label>Subject</label>
-          <input type="text" name="subject">
+          <input type="text" name="subject" placeholder="Brief subject line...">
         </div>
         <div>
           <label>Notes *</label>
-          <textarea name="notes" rows="4" required></textarea>
+          <textarea name="notes" rows="4" required placeholder="Details about this interaction..."></textarea>
         </div>
         <div style="display: flex; gap: 1rem; margin-top: 1rem;">
           <button type="submit" class="btn btn-primary">Log Interaction</button>
@@ -570,6 +746,19 @@
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Interaction History Modal -->
+<div id="historyModal" class="modal">
+  <div class="modal-content" style="max-width: 800px;">
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">Interaction History</h2>
+    <div id="historyContent" style="max-height: 60vh; overflow-y: auto;">
+      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading history...</p>
+    </div>
+    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+      <button type="button" onclick="closeHistoryModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
+    </div>
   </div>
 </div>
 
@@ -616,6 +805,52 @@ function closeInteractionModal() {
   document.getElementById('interactionModal').classList.remove('active');
 }
 
+function openHistoryModal(contactId) {
+  const contact = contacts.find(c => c.id === contactId);
+  if (!contact) return;
+  
+  const historyContent = document.getElementById('historyContent');
+  const interactions = contact.all_interactions || contact.recent_interactions || [];
+  
+  if (interactions.length > 0) {
+    let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+      <strong style="color: var(--charcoal-brown);">Total Interactions: ${contact.interaction_count || interactions.length}</strong>
+    </div>`;
+    html += '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+    interactions.forEach(interaction => {
+      html += `
+        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid var(--olive-green);">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+            <div>
+              <span style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">
+                ${interaction.interaction_type ? interaction.interaction_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Interaction'}
+              </span>
+              <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-left: 0.5rem;">
+                via ${interaction.channel || 'N/A'}
+              </span>
+            </div>
+            <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">
+              ${interaction.interaction_date || (interaction.created_at ? interaction.created_at.substring(0, 10) : '')}
+            </span>
+          </div>
+          ${interaction.subject ? `<div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">${interaction.subject}</div>` : ''}
+          ${interaction.notes ? `<div style="font-size: 0.9rem; color: var(--charcoal-brown); opacity: 0.9; white-space: pre-wrap;">${interaction.notes}</div>` : ''}
+        </div>
+      `;
+    });
+    html += '</div>';
+    historyContent.innerHTML = html;
+  } else {
+    historyContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No interactions recorded yet.</p>';
+  }
+  
+  document.getElementById('historyModal').classList.add('active');
+}
+
+function closeHistoryModal() {
+  document.getElementById('historyModal').classList.remove('active');
+}
+
 // Close modals on outside click
 document.getElementById('editModal').addEventListener('click', function(e) {
   if (e.target === this) closeEditModal();
@@ -623,5 +858,49 @@ document.getElementById('editModal').addEventListener('click', function(e) {
 document.getElementById('interactionModal').addEventListener('click', function(e) {
   if (e.target === this) closeInteractionModal();
 });
+document.getElementById('historyModal').addEventListener('click', function(e) {
+  if (e.target === this) closeHistoryModal();
+});
+
+// Export contacts to CSV
+function exportContacts() {
+  if (!contacts || contacts.length === 0) {
+    alert('No contacts to export');
+    return;
+  }
+  
+  // Create CSV header
+  let csv = 'Name,Email,Phone,Stage,Birthday,Home Anniversary,Property Address,Property Value,Equity,Last Touch,Tags,Notes\n';
+  
+  // Add contact data
+  contacts.forEach(contact => {
+    const row = [
+      `"${(contact.name || '').replace(/"/g, '""')}"`,
+      `"${(contact.email || '').replace(/"/g, '""')}"`,
+      `"${(contact.phone || '').replace(/"/g, '""')}"`,
+      `"${(contact.stage || '').replace(/"/g, '""')}"`,
+      `"${(contact.birthday || '').replace(/"/g, '""')}"`,
+      `"${(contact.home_anniversary || '').replace(/"/g, '""')}"`,
+      `"${(contact.property_address || '').replace(/"/g, '""')}"`,
+      contact.property_value || '',
+      contact.equity_estimate || '',
+      `"${(contact.last_touch || '').replace(/"/g, '""')}"`,
+      `"${(contact.tags || '').replace(/"/g, '""')}"`,
+      `"${(contact.notes || '').replace(/"/g, '""')}"`
+    ];
+    csv += row.join(',') + '\n';
+  });
+  
+  // Create download link
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `crm_contacts_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
 </script>
 {% endblock %}

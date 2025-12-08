@@ -2141,6 +2141,10 @@ def agent_crm():
                     flash(f"Error logging interaction: {e}", "error")
 
     stage_filter = request.args.get("stage")
+    search_query = request.args.get("search", "").strip()
+    tag_filter = request.args.get("tag", "").strip()
+    sort_by = request.args.get("sort", "name")  # name, stage, last_touch, created_at
+    
     try:
         contacts = list_agent_contacts(user["id"], stage_filter)
         # Convert contacts to dicts for JSON serialization in template
@@ -2162,16 +2166,90 @@ def agent_crm():
                 for field, default in expected_fields.items():
                     if field not in contact_dict:
                         contact_dict[field] = default
+                
+                # Apply search filter
+                if search_query:
+                    search_lower = search_query.lower()
+                    matches = (
+                        search_lower in (contact_dict.get('name') or '').lower() or
+                        search_lower in (contact_dict.get('email') or '').lower() or
+                        search_lower in (contact_dict.get('phone') or '').lower() or
+                        search_lower in (contact_dict.get('property_address') or '').lower() or
+                        search_lower in (contact_dict.get('notes') or '').lower() or
+                        search_lower in (contact_dict.get('tags') or '').lower()
+                    )
+                    if not matches:
+                        continue
+                
+                # Apply tag filter
+                if tag_filter:
+                    contact_tags = (contact_dict.get('tags') or '').lower()
+                    if tag_filter.lower() not in contact_tags:
+                        continue
+                
+                # Fetch interaction count and history for this contact
+                try:
+                    interactions = list_crm_interactions(
+                        contact_dict['id'], "agent_contact", user["id"], limit=50
+                    )
+                    contact_dict['interaction_count'] = len(interactions)
+                    contact_dict['recent_interactions'] = [
+                        dict(i) for i in interactions[:3]
+                    ]
+                    contact_dict['all_interactions'] = [
+                        dict(i) for i in interactions
+                    ]
+                except:
+                    contact_dict['interaction_count'] = 0
+                    contact_dict['recent_interactions'] = []
+                    contact_dict['all_interactions'] = []
+                
                 contacts_list.append(contact_dict)
             except Exception as e:
                 import traceback
                 print(f"Error converting contact: {traceback.format_exc()}")
                 continue
+        
+        # Sort contacts
+        if sort_by == "name":
+            contacts_list.sort(key=lambda x: (x.get('name') or '').lower())
+        elif sort_by == "stage":
+            stage_order = {'new': 0, 'nurture': 1, 'active': 2, 'past': 3, 'sphere': 4}
+            contacts_list.sort(key=lambda x: stage_order.get(x.get('stage', 'new'), 5))
+        elif sort_by == "last_touch":
+            contacts_list.sort(key=lambda x: x.get('last_touch') or '', reverse=True)
+        elif sort_by == "created_at":
+            contacts_list.sort(key=lambda x: x.get('created_at') or '', reverse=True)
+        
+        # Calculate stats
+        total_contacts = len(contacts_list)
+        stats = {
+            'total': total_contacts,
+            'new': len([c for c in contacts_list if c.get('stage') == 'new']),
+            'active': len([c for c in contacts_list if c.get('stage') == 'active']),
+            'past': len([c for c in contacts_list if c.get('stage') == 'past']),
+            'with_automation': len([c for c in contacts_list if any([
+                c.get('auto_birthday'), c.get('auto_anniversary'),
+                c.get('auto_seasonal'), c.get('auto_equity'), c.get('auto_holidays')
+            ])]),
+            'total_equity': sum([c.get('equity_estimate') or 0 for c in contacts_list]),
+        }
+        
+        # Get all unique tags
+        all_tags = set()
+        for contact in contacts_list:
+            tags = contact.get('tags', '') or ''
+            if tags:
+                all_tags.update([t.strip() for t in tags.split(',') if t.strip()])
+        all_tags = sorted(list(all_tags))
+        
     except Exception as e:
         import traceback
         print(f"Error loading contacts: {traceback.format_exc()}")
         flash(f"Error loading contacts: {e}", "error")
         contacts_list = []
+        stats = {'total': 0, 'new': 0, 'active': 0, 'past': 0, 'with_automation': 0, 'total_equity': 0}
+        all_tags = []
     
     try:
         return render_template(
@@ -2180,6 +2258,11 @@ def agent_crm():
             user=user,
             contacts=contacts_list,
             stage_filter=stage_filter,
+            search_query=search_query,
+            tag_filter=tag_filter,
+            sort_by=sort_by,
+            stats=stats,
+            all_tags=all_tags,
         )
     except Exception as e:
         import traceback
