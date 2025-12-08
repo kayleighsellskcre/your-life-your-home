@@ -1,6 +1,13 @@
+import os
 import requests
 
-API_KEY = "***REMOVED***R2sqO_vfKzgxlr7Qc6Ogyf3-H1ZiVV-N16IyyH8JllfWHBq0g1VYWERrbjavnooltpwAIXt1m-kB7z0d49Q-kCffegAA"
+# Get API key from environment variable
+API_KEY = os.environ.get("ANTHROPIC_API_KEY")
+if not API_KEY:
+    print("Error: ANTHROPIC_API_KEY environment variable is not set.")
+    print("Please set it using: export ANTHROPIC_API_KEY='your-api-key'")
+    exit(1)
+
 url = "https://api.anthropic.com/v1/messages"
 headers = {
     "x-api-key": API_KEY,
