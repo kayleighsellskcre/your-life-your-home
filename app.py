@@ -1974,17 +1974,16 @@ def homeowner_reno_planner():
             request.form.get("project_budget", "").replace(",", "").strip()
         )
         status = request.form.get("project_status", "Planning").strip()
+        category = request.form.get("project_category", "Other").strip()  # Get category, default to "Other"
         notes = request.form.get("project_notes", "").strip()
 
-        budget = None
-        if budget_raw:
-            try:
-                budget = float(budget_raw)
-            except ValueError:
-                budget = None
+        # Convert budget to string (function expects string, not float)
+        budget_str = budget_raw if budget_raw else ""
 
         if name:
-            add_homeowner_project(user_id, name, budget, status, notes)
+            # Fix: Add category parameter and correct argument order
+            # Function signature: user_id, name, category, status, budget, notes
+            add_homeowner_project(user_id, name, category, status, budget_str, notes)
             flash("Project saved.", "success")
 
     projects = list_homeowner_projects(user_id) if user_id else []
