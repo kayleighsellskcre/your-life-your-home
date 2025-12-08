@@ -1,0 +1,153 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .import-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .import-card {
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-medium);
+    border: var(--border-light);
+    margin-bottom: 2rem;
+  }
+  .upload-area {
+    border: 3px dashed var(--taupe-beige);
+    border-radius: var(--border-radius);
+    padding: 3rem;
+    text-align: center;
+    background: var(--white);
+    transition: var(--transition-base);
+    cursor: pointer;
+  }
+  .upload-area:hover {
+    border-color: var(--olive-green);
+    background: var(--warm-cream);
+  }
+  .upload-area.dragover {
+    border-color: var(--olive-green);
+    background: rgba(107, 106, 69, 0.1);
+  }
+  .file-input {
+    display: none;
+  }
+  .instructions {
+    background: var(--warm-cream);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: var(--border-light);
+    margin-top: 2rem;
+  }
+  .instructions h3 {
+    font-family: var(--font-heading);
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+  }
+  .instructions ul {
+    margin-left: 1.5rem;
+    color: var(--charcoal-brown);
+    opacity: 0.9;
+  }
+  .instructions li {
+    margin-bottom: 0.5rem;
+  }
+</style>
+
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Bulk import</p>
+  <h1>Import Contacts from Excel/CSV</h1>
+  <p>Upload your existing client list and we'll help you map the columns to your CRM fields.</p>
+</div>
+
+<div class="import-container">
+  <div class="import-card">
+    <form method="post" enctype="multipart/form-data" id="uploadForm">
+      <input type="hidden" name="action" value="upload">
+      
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 0.5rem;">
+          Click to Upload or Drag & Drop
+        </h3>
+        <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 1rem;">
+          Supports Excel (.xlsx, .xls) and CSV files
+        </p>
+        <input type="file" name="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv" required>
+        <div id="fileName" style="font-weight: 600; color: var(--olive-green); margin-top: 1rem; display: none;"></div>
+      </div>
+      
+      <div style="margin-top: 1.5rem; text-align: center;">
+        <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
+          Continue to Column Mapping →
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="instructions">
+    <h3>📋 How to Prepare Your File</h3>
+    <ul>
+      <li><strong>Required:</strong> At minimum, include a "Name" column</li>
+      <li><strong>Recommended columns:</strong> Email, Phone, Stage/Status, Address, Notes</li>
+      <li><strong>Supported formats:</strong> Excel (.xlsx, .xls) or CSV (.csv)</li>
+      <li><strong>First row:</strong> Should contain column headers</li>
+      <li><strong>No limit:</strong> Import as many contacts as you need</li>
+    </ul>
+    
+    <h3 style="margin-top: 1.5rem;">💡 Tips for Best Results</h3>
+    <ul>
+      <li>Make sure your column headers are clear (e.g., "Email", "Phone Number", "Address")</li>
+      <li>We'll help you map your columns to CRM fields in the next step</li>
+      <li>You can skip duplicate contacts if they already exist in your CRM</li>
+      <li>All imported contacts will be added to your CRM immediately</li>
+    </ul>
+  </div>
+
+  <div style="margin-top: 2rem; text-align: center;">
+    <a href="{{ url_for('agent_crm') }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">
+      ← Back to CRM
+    </a>
+  </div>
+</div>
+
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const fileName = document.getElementById('fileName');
+
+fileInput.addEventListener('change', function(e) {
+  if (e.target.files.length > 0) {
+    fileName.textContent = `Selected: ${e.target.files[0].name}`;
+    fileName.style.display = 'block';
+    uploadArea.style.borderColor = 'var(--olive-green)';
+  }
+});
+
+// Drag and drop
+uploadArea.addEventListener('dragover', function(e) {
+  e.preventDefault();
+  uploadArea.classList.add('dragover');
+});
+
+uploadArea.addEventListener('dragleave', function(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+});
+
+uploadArea.addEventListener('drop', function(e) {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  
+  if (e.dataTransfer.files.length > 0) {
+    fileInput.files = e.dataTransfer.files;
+    fileName.textContent = `Selected: ${e.dataTransfer.files[0].name}`;
+    fileName.style.display = 'block';
+    uploadArea.style.borderColor = 'var(--olive-green)';
+  }
+});
+</script>
+{% endblock %}
+

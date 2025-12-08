@@ -1,0 +1,290 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .preview-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .preview-card {
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-medium);
+    border: var(--border-light);
+    margin-bottom: 2rem;
+  }
+  .mapping-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .mapping-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .mapping-item label {
+    font-weight: 600;
+    color: var(--olive-green);
+    font-size: 0.9rem;
+  }
+  .mapping-item select {
+    padding: 0.6rem;
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    background: var(--white);
+    color: var(--charcoal-brown);
+  }
+  .preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background: var(--white);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+  }
+  .preview-table th {
+    background: var(--olive-green);
+    color: var(--white);
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+  }
+  .preview-table td {
+    padding: 0.75rem;
+    border-bottom: var(--border-light);
+    color: var(--charcoal-brown);
+  }
+  .preview-table tr:hover {
+    background: var(--warm-cream);
+  }
+  .settings-card {
+    background: var(--warm-cream);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    border: var(--border-light);
+    margin-bottom: 2rem;
+  }
+</style>
+
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Map your columns</p>
+  <h1>Import Preview</h1>
+  <p>Map your Excel/CSV columns to CRM fields. Preview shows first 10 rows of {{ total_rows }} total.</p>
+</div>
+
+<div class="preview-container">
+  <form method="post" id="importForm">
+    <input type="hidden" name="action" value="import">
+    
+    <div class="preview-card">
+      <h2 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 1.5rem;">
+        Column Mapping
+      </h2>
+      
+      <div class="mapping-grid">
+        <div class="mapping-item">
+          <label>Name * (Required)</label>
+          <select name="map_name" required>
+            <option value="">-- Select Column --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'name' in col.lower() or 'contact' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Email</label>
+          <select name="map_email">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'email' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Phone</label>
+          <select name="map_phone">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'phone' in col.lower() or 'tel' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Stage</label>
+          <select name="map_stage">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'stage' in col.lower() or 'status' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Birthday (MM/DD)</label>
+          <select name="map_birthday">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'birthday' in col.lower() or 'birth' in col.lower() or 'dob' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Home Anniversary</label>
+          <select name="map_anniversary">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'anniversary' in col.lower() or 'home' in col.lower() and 'date' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Address</label>
+          <select name="map_address">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'address' in col.lower() and 'property' not in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Property Address</label>
+          <select name="map_property_address">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'property' in col.lower() or 'home' in col.lower() and 'address' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Property Value</label>
+          <select name="map_property_value">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'value' in col.lower() or 'price' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Equity Estimate</label>
+          <select name="map_equity">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'equity' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Notes</label>
+          <select name="map_notes">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'note' in col.lower() or 'comment' in col.lower() or 'remark' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>Tags</label>
+          <select name="map_tags">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'tag' in col.lower() or 'category' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-card">
+      <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 1rem;">
+        Import Settings
+      </h3>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">
+          Default Stage (for contacts without stage)
+        </label>
+        <select name="default_stage" style="padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); width: 100%; max-width: 300px;">
+          <option value="new">New Lead</option>
+          <option value="nurture">Nurture</option>
+          <option value="active">Active Buyer/Seller</option>
+          <option value="past">Past Client</option>
+          <option value="sphere">Sphere</option>
+        </select>
+      </div>
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+          <input type="checkbox" name="skip_duplicates" checked style="width: 20px; height: 20px;">
+          <span style="font-weight: 600; color: var(--charcoal-brown);">Skip duplicate contacts</span>
+        </label>
+        <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8; margin-top: 0.25rem; margin-left: 1.75rem;">
+          Don't import contacts that already exist in your CRM
+        </p>
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">
+          Duplicate Check Method
+        </label>
+        <select name="duplicate_check" style="padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); width: 100%; max-width: 300px;">
+          <option value="email">Match by Email</option>
+          <option value="phone">Match by Phone</option>
+          <option value="name">Match by Name</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="preview-card">
+      <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 1rem;">
+        Data Preview (First 10 rows)
+      </h3>
+      <div style="overflow-x: auto;">
+        <table class="preview-table">
+          <thead>
+            <tr>
+              {% for col in columns %}
+              <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              {% for col in columns %}
+              <td>{{ row.get(col, '') }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top: 1rem; color: var(--charcoal-brown); opacity: 0.8; font-size: 0.9rem;">
+        Total rows to import: <strong>{{ total_rows }}</strong>
+      </p>
+    </div>
+
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+      <a href="{{ url_for('agent_crm_import') }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.75rem 2rem;">
+        ← Back
+      </a>
+      <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
+        ✅ Import {{ total_rows }} Contacts
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
