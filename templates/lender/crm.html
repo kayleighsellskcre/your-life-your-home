@@ -9,13 +9,14 @@
     margin-top: 2rem;
   }
   .crm-sidebar {
-    background: white;
-    border-radius: 12px;
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    border-radius: var(--border-radius);
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-medium);
     height: fit-content;
     position: sticky;
     top: 2rem;
+    border: var(--border-light);
   }
   .crm-main {
     display: flex;
@@ -31,31 +32,33 @@
   .filter-btn {
     padding: 0.5rem 1rem;
     border: 2px solid var(--olive-green);
-    background: white;
+    background: var(--white);
     color: var(--olive-green);
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: var(--transition-base);
     text-decoration: none;
     text-align: center;
     display: block;
+    font-size: 0.85rem;
   }
   .filter-btn:hover, .filter-btn.active {
     background: var(--olive-green);
-    color: white;
+    color: var(--white);
   }
   .borrower-card {
-    background: white;
-    border-radius: 12px;
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    border-radius: var(--border-radius);
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-light);
     margin-bottom: 1rem;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: var(--transition-base);
+    border: var(--border-light);
   }
   .borrower-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-medium);
   }
   .borrower-header {
     display: flex;
@@ -64,21 +67,22 @@
     margin-bottom: 1rem;
   }
   .borrower-name {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 500;
     color: var(--charcoal-brown);
     margin: 0;
   }
   .borrower-badge {
     padding: 0.25rem 0.75rem;
-    border-radius: 12px;
+    border-radius: var(--border-radius);
     font-size: 0.8rem;
     font-weight: 600;
   }
-  .badge-preapproval { background: #fff3cd; color: #856404; }
-  .badge-in_process { background: #d4edda; color: #155724; }
-  .badge-closed { background: #cce5ff; color: #004085; }
-  .badge-prospect { background: #e2e3e5; color: #383d41; }
+  .badge-preapproval { background: rgba(200, 180, 151, 0.3); color: var(--charcoal-brown); }
+  .badge-in_process { background: rgba(107, 106, 69, 0.3); color: var(--charcoal-brown); }
+  .badge-closed { background: rgba(200, 180, 151, 0.25); color: var(--charcoal-brown); }
+  .badge-prospect { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
   .borrower-info {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -89,12 +93,21 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #666;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
     font-size: 0.9rem;
   }
   .info-item strong {
     color: var(--charcoal-brown);
     min-width: 120px;
+    font-weight: 600;
+  }
+  .info-item a {
+    color: var(--olive-green);
+    text-decoration: none;
+  }
+  .info-item a:hover {
+    text-decoration: underline;
   }
   .auto-email-badges {
     display: flex;
@@ -103,18 +116,19 @@
     margin-top: 0.5rem;
   }
   .auto-badge {
-    padding: 0.2rem 0.6rem;
-    border-radius: 8px;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--border-radius);
     font-size: 0.75rem;
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: rgba(107, 106, 69, 0.15);
+    color: var(--charcoal-brown);
+    font-weight: 500;
   }
   .borrower-actions {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #eee;
+    border-top: var(--border-light);
   }
   .btn-small {
     padding: 0.4rem 0.8rem;
@@ -127,7 +141,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(58, 53, 44, 0.6);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -136,13 +150,23 @@
     display: flex;
   }
   .modal-content {
-    background: white;
-    border-radius: 12px;
+    background: var(--white);
+    border-radius: var(--border-radius);
     padding: 2rem;
     max-width: 600px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: var(--shadow-premium);
+    border: var(--border-light);
+  }
+  .modal-content h2 {
+    font-family: var(--font-heading);
+    color: var(--charcoal-brown);
+  }
+  .modal-content h3 {
+    font-family: var(--font-heading);
+    color: var(--charcoal-brown);
   }
   .form-grid {
     display: grid;
@@ -152,20 +176,54 @@
   .form-full {
     grid-column: 1 / -1;
   }
+  .form-grid label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    margin-bottom: 0.5rem;
+  }
+  .form-grid input[type="text"],
+  .form-grid input[type="email"],
+  .form-grid input[type="tel"],
+  .form-grid input[type="number"],
+  .form-grid select,
+  .form-grid textarea {
+    width: 100%;
+    padding: 0.6rem;
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    background: var(--white);
+    color: var(--charcoal-brown);
+    font-size: 0.9rem;
+    transition: var(--transition-base);
+  }
+  .form-grid input:focus,
+  .form-grid select:focus,
+  .form-grid textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
+  }
   .toggle-switch {
     display: flex;
     align-items: center;
     gap: 0.5rem;
   }
+  .toggle-switch label {
+    color: var(--charcoal-brown);
+    font-weight: 400;
+    margin: 0;
+  }
   .toggle-switch input[type="checkbox"] {
     width: 40px;
     height: 20px;
     appearance: none;
-    background: #ccc;
+    background: var(--taupe-beige);
     border-radius: 10px;
     position: relative;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: var(--transition-base);
   }
   .toggle-switch input[type="checkbox"]:checked {
     background: var(--olive-green);
@@ -176,13 +234,24 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: white;
+    background: var(--white);
     top: 2px;
     left: 2px;
-    transition: left 0.3s;
+    transition: var(--transition-base);
   }
   .toggle-switch input[type="checkbox"]:checked::before {
     left: 22px;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    border-radius: var(--border-radius);
+    border: var(--border-light);
+  }
+  .empty-state h3 {
+    font-family: var(--font-heading);
+    color: var(--charcoal-brown);
   }
 </style>
 
@@ -195,25 +264,25 @@
 <div class="crm-container">
   <!-- Sidebar: Add Borrower & Filters -->
   <div class="crm-sidebar">
-    <h2 style="margin-top: 0; color: var(--charcoal-brown);">Quick Add</h2>
+    <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
     <form method="post" id="addBorrowerForm">
       <input type="hidden" name="action" value="add">
       <div style="display: grid; gap: 1rem;">
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+          <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
-          <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+          <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
-          <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+          <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Status</label>
-          <select name="status" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+          <select name="status" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
             <option value="prospect">Prospect</option>
             <option value="preapproval">Pre-Approval</option>
             <option value="in_process">In Process</option>
@@ -222,14 +291,14 @@
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Loan Type</label>
-          <input type="text" name="loan_type" placeholder="Conventional, FHA, VA..." style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+          <input type="text" name="loan_type" placeholder="Conventional, FHA, VA..." style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Add Borrower</button>
       </div>
     </form>
 
-    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #eee;">
-      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Filter by Status</h3>
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
+      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Status</h3>
       <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         <a href="?status=" class="filter-btn {% if not status_filter %}active{% endif %}">All Borrowers</a>
         <a href="?status=prospect" class="filter-btn {% if status_filter == 'prospect' %}active{% endif %}">Prospects</a>
@@ -250,7 +319,7 @@
               <h3 class="borrower-name">{{ borrower.name }}</h3>
               <span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span>
             </div>
-            <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: white; border: none;">Edit</button>
+            <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Edit</button>
           </div>
 
           <div class="borrower-info">
@@ -317,16 +386,16 @@
           </div>
 
           {% if borrower.notes %}
-            <div style="margin: 1rem 0; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
+            <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
               <strong style="color: var(--charcoal-brown);">Notes:</strong>
-              <p style="margin: 0.5rem 0 0 0; color: #666; white-space: pre-wrap;">{{ borrower.notes }}</p>
+              <p style="margin: 0.5rem 0 0 0; color: var(--charcoal-brown); opacity: 0.8; white-space: pre-wrap;">{{ borrower.notes }}</p>
             </div>
           {% endif %}
 
           {% if borrower.tags %}
             <div style="margin: 0.5rem 0;">
               <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
-              <span style="color: #666;">{{ borrower.tags }}</span>
+              <span style="color: var(--charcoal-brown); opacity: 0.8;">{{ borrower.tags }}</span>
             </div>
           {% endif %}
 
@@ -349,21 +418,21 @@
           </div>
 
           <div class="borrower-actions">
-            <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small" style="background: #2196F3; color: white; border: none;">Log Interaction</button>
+            <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Log Interaction</button>
             {% if borrower.email %}
-              <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: #4CAF50; color: white; text-decoration: none; border: none;">Email</a>
+              <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">Email</a>
             {% endif %}
             {% if borrower.phone %}
-              <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: #FF9800; color: white; text-decoration: none; border: none;">Call</a>
+              <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">Call</a>
             {% endif %}
           </div>
         </div>
       {% endfor %}
     {% else %}
-      <div class="empty-state" style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px;">
+      <div class="empty-state">
         <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
         <h3>No Borrowers Yet</h3>
-        <p>Start building your network by adding your first borrower!</p>
+        <p style="color: var(--charcoal-brown); opacity: 0.8;">Start building your network by adding your first borrower!</p>
       </div>
     {% endif %}
   </div>
@@ -372,7 +441,7 @@
 <!-- Edit Borrower Modal -->
 <div id="editModal" class="modal">
   <div class="modal-content">
-    <h2 style="margin-top: 0;">Edit Borrower</h2>
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">Edit Borrower</h2>
     <form method="post" id="editBorrowerForm">
       <input type="hidden" name="action" value="update">
       <input type="hidden" name="borrower_id" id="edit_borrower_id">
@@ -475,7 +544,7 @@
 
       <div style="display: flex; gap: 1rem; margin-top: 2rem;">
         <button type="submit" class="btn btn-primary">Save Changes</button>
-        <button type="button" onclick="closeEditModal()" class="btn" style="background: #ccc; color: #333;">Cancel</button>
+        <button type="button" onclick="closeEditModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
       </div>
     </form>
   </div>
@@ -484,7 +553,7 @@
 <!-- Log Interaction Modal -->
 <div id="interactionModal" class="modal">
   <div class="modal-content">
-    <h2 style="margin-top: 0;">Log Interaction</h2>
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">Log Interaction</h2>
     <form method="post">
       <input type="hidden" name="action" value="add_interaction">
       <input type="hidden" name="borrower_id" id="interaction_borrower_id">
@@ -519,7 +588,7 @@
         </div>
         <div style="display: flex; gap: 1rem; margin-top: 1rem;">
           <button type="submit" class="btn btn-primary">Log Interaction</button>
-          <button type="button" onclick="closeInteractionModal()" class="btn" style="background: #ccc; color: #333;">Cancel</button>
+          <button type="button" onclick="closeInteractionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
         </div>
       </div>
     </form>
