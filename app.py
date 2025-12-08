@@ -1,3 +1,5 @@
+print('>>> THIS IS THE REAL app.py BEING RUN <<<')
+
 import os
 import boto3
 from functools import wraps
@@ -11,19 +13,7 @@ from types import SimpleNamespace
 from PIL import Image, ImageFilter
 import numpy as np
 import secrets
-from flask import jsonify
 
-# ---------------- R2 STORAGE CLIENT ----------------
-R2_CLIENT = None
-if all(key in os.environ for key in ["R2_ENDPOINT", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"]):
-    R2_CLIENT = boto3.client(
-        "s3",
-        endpoint_url=os.environ["R2_ENDPOINT"],
-        aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
-        aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"],
-    )
-
-# ---------------- FLASK + SECURITY ----------------
 from flask import (
     Flask,
     render_template,
@@ -34,31 +24,46 @@ from flask import (
     flash,
     abort,
     send_from_directory,
+    jsonify,
+    Response,
 )
-from flask import Response
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+
+# ---------------- R2 STORAGE CLIENT ----------------
+R2_CLIENT = None
+if all(
+    key in os.environ
+    for key in ["R2_ENDPOINT", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY"]
+):
+    R2_CLIENT = boto3.client(
+        "s3",
+        endpoint_url=os.environ["R2_ENDPOINT"],
+        aws_access_key_id=os.environ["R2_ACCESS_KEY_ID"],
+        aws_secret_access_key=os.environ["R2_SECRET_ACCESS_KEY"],
+    )
+
 
 # ---------------- SIMPLE IMAGE PROCESSING (NO BACKGROUND REMOVAL) ----------------
 def remove_white_background(image_path):
     """Just convert to PNG format - no background removal."""
     try:
         img = Image.open(image_path)
-        
+
         # Convert to RGB if needed (keep as-is)
-        if img.mode not in ('RGB', 'RGBA'):
-            img = img.convert('RGB')
-        
+        if img.mode not in ("RGB", "RGBA"):
+            img = img.convert("RGB")
+
         # Save as PNG
-        img.save(image_path, 'PNG', optimize=True)
-        
+        img.save(image_path, "PNG", optimize=True)
+
         print(f"✓ Processed fixture: {Path(image_path).name}")
-        
         return True
-        
+
     except Exception as e:
         print(f"✗ Failed: {Path(image_path).name} - {e}")
         return False
+
 
 # ---------------- YOUR PLATFORM DATABASES ----------------
 from database import (
@@ -116,6 +121,8 @@ from database import (
     delete_property,
     get_homeowner_snapshot_for_property,
     upsert_homeowner_snapshot_for_property,
+    add_lender_borrower,
+    list_lender_borrowers,
 )
 
 # ---------------- R2 STORAGE HELPERS ----------------
@@ -127,14 +134,50 @@ from r2_storage import (
 )
 
 # ---------------- FLASK APP INIT ----------------
-app = Flask(__name__)
-app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
-app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 # Initialize DBs so platform loads with no manual trigger
 init_db()
 
-# ---------------- TRANSACTION HELPERS IMPORT (AFTER APP CREATION) ----------------
+app = Flask(__name__)
+app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+# ---------------- AJAX PLANNER ROUTE ----------------
+@app.route("/homeowner/reno/planner/ajax-add", methods=["POST"])
+def homeowner_reno_planner_ajax_add():
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+
+    data = request.get_json() or {}
+    name = data.get("project_name", "").strip()
+    budget = data.get("project_budget")
+    status = data.get("project_status", "Planning").strip()
+    board_name = data.get("board_name", "").strip()
+    summary = data.get("project_summary", "").strip()
+
+    if not name:
+        return jsonify({"success": False, "error": "Project name required"}), 400
+
+    try:
+        budget_val = float(budget) if budget else None
+    except Exception:
+        budget_val = None
+
+    # If a board_name is provided, save as a design board note as well
+    if board_name:
+        note_title = name
+        notes = request.form.get("project_notes", "").strip()
+        note_details = summary or notes
+        add_design_board_note(user_id, board_name, note_title, note_details)
+
+    notes = request.form.get("project_notes", "").strip()
+    add_homeowner_project(user_id, name, budget_val, status, notes)
+    return jsonify({"success": True})
+
+
+# ---------------- TRANSACTION HELPERS IMPORT ----------------
 from transaction_helpers import (
     get_db,
     add_transaction_participant,
@@ -164,27 +207,11 @@ HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_TIMELINE = BASE_DIR / "uploads" / "timeline"
 UPLOAD_TIMELINE.mkdir(parents=True, exist_ok=True)
 
+
 # Helper to get current user id
 def get_current_user_id() -> int:
     """Fallback to demo user for now."""
     return session.get("user_id") or 1
-
-# ---------------- AGENT TRANSACTION ROUTES ----------------
-@app.route("/agent/transactions/<int:tx_id>/participants/add", methods=["POST"])
-def agent_add_participant(tx_id):
-    """Add a participant to an agent transaction."""
-    name = request.form.get("participant_name", "").strip()
-    email = request.form.get("participant_email", "").strip()
-    role = request.form.get("participant_role", "").strip()
-    if not name or not email or not role:
-        flash("All participant fields are required.", "error")
-        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
-    try:
-        add_transaction_participant(tx_id, name, email, role)
-        flash("Participant added successfully!", "success")
-    except Exception as e:
-        flash(f"Error adding participant: {e}", "error")
-    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
 
 def get_current_user() -> Optional[dict]:
@@ -195,8 +222,30 @@ def get_current_user() -> Optional[dict]:
     return dict(row) if row else None
 
 
+# ---------------- AGENT TRANSACTION ROUTES ----------------
+@app.route("/agent/transactions/<int:tx_id>/participants/add", methods=["POST"])
+def agent_add_participant(tx_id):
+    """Add a participant to an agent transaction."""
+    name = request.form.get("participant_name", "").strip()
+    email = request.form.get("participant_email", "").strip()
+    role = request.form.get("participant_role", "").strip()
+
+    if not name or not email or not role:
+        flash("All participant fields are required.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+    try:
+        add_transaction_participant(tx_id, name, email, role)
+        flash("Participant added successfully!", "success")
+    except Exception as e:
+        flash(f"Error adding participant: {e}", "error")
+
+    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+
 # -------------------------------------------------
 # EMAIL REMINDER AUTOMATION (GMAIL SMTP + APScheduler)
+# -------------------------------------------------
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -206,6 +255,7 @@ EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
 EMAIL_USER = os.environ.get("EMAIL_USER")
 EMAIL_PASS = os.environ.get("EMAIL_PASS")
+
 
 def send_reminder_email(to_email, subject, body):
     msg = MIMEMultipart()
@@ -224,12 +274,11 @@ def send_reminder_email(to_email, subject, body):
         print(f"✗ Failed to send email to {to_email}: {e}")
         return False
 
-# Example reminder query (replace with your actual DB logic)
+
 def get_due_reminders():
-    # This should query your database for reminders due today
-    # Example: return [{"email": "client@email.com", "subject": "Happy Birthday!", "body": "Wishing you a wonderful day!"}]
-    # TODO: Replace with real logic
+    """TODO: Replace with real DB logic to fetch due reminders."""
     return []
+
 
 def send_due_reminders():
     reminders = get_due_reminders()
@@ -237,15 +286,19 @@ def send_due_reminders():
         if r.get("email"):
             send_reminder_email(r["email"], r["subject"], r["body"])
 
-# Scheduler setup (runs every day at 8am)
+
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(send_due_reminders, 'cron', hour=12, minute=0)
+    scheduler.add_job(send_due_reminders, "cron", hour=12, minute=0)
     scheduler.start()
     print("✓ Reminder scheduler started.")
 
+
 # Start scheduler when app starts
 start_scheduler()
+
+
+# -------------------------------------------------
 # SHARED UTILS
 # -------------------------------------------------
 def json_or_list(value):
@@ -276,35 +329,24 @@ def _row_get(row, key, default=None):
 # -------------------------------------------------
 # HOMEOWNER SNAPSHOT + CRM METRICS
 # -------------------------------------------------
-def calculate_appreciated_value(initial_value: float, purchase_date: str, annual_rate: float = 0.035) -> float:
+def calculate_appreciated_value(
+    initial_value: float, purchase_date: str, annual_rate: float = 0.035
+) -> float:
     """
     Calculate home value with automatic appreciation over time.
-    
-    Args:
-        initial_value: The original purchase price or last set value
-        purchase_date: Date in format 'YYYY-MM-DD' or similar
-        annual_rate: Annual appreciation rate (default 3.5% = 0.035)
-    
-    Returns:
-        Appreciated home value
     """
     if not initial_value or not purchase_date:
         return initial_value
-    
+
     try:
-        # Parse the purchase date
         if isinstance(purchase_date, str):
-            purchase_dt = datetime.strptime(purchase_date.split()[0], '%Y-%m-%d')
+            purchase_dt = datetime.strptime(purchase_date.split()[0], "%Y-%m-%d")
         else:
             purchase_dt = purchase_date
-        
-        # Calculate years elapsed
+
         today = datetime.now()
         years_elapsed = (today - purchase_dt).days / 365.25
-        
-        # Apply compound appreciation: Value = Initial * (1 + rate)^years
         appreciated_value = initial_value * ((1 + annual_rate) ** years_elapsed)
-        
         return round(appreciated_value, 2)
     except Exception as e:
         print(f"Error calculating appreciation: {e}")
@@ -326,16 +368,16 @@ def get_homeowner_snapshot_or_default(user_row: Optional[dict]):
                 "Plan your Next-Home move anytime.",
             ],
         }
+
     snap = get_homeowner_snapshot_for_user(user_row["id"])
     if not snap:
         base = get_homeowner_snapshot_or_default(None)
         base["name"] = user_row.get("name", "Friend")
         return base
-    
-    # Use the exact value from the database without automatic appreciation
+
     value_estimate = snap["value_estimate"]
     equity_estimate = snap["equity_estimate"]
-    
+
     return {
         "name": user_row.get("name", "Friend"),
         "value_estimate": value_estimate,
@@ -386,10 +428,6 @@ def get_lender_dashboard_metrics(user_id):
     }
 
 
-# Import lender borrowers function
-from database import add_lender_borrower, list_lender_borrowers
-
-
 # -------------------------------------------------
 # MAIN / AUTH
 # -------------------------------------------------
@@ -420,7 +458,7 @@ def signup():
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip()
+        email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         role_from_form = request.form.get("role", role)
 
@@ -450,7 +488,9 @@ def signup():
         else:
             return redirect(url_for("homeowner_overview"))
 
-    return render_template("auth/signup.html", role=role, brand_name=FRONT_BRAND_NAME)
+    return render_template(
+        "auth/signup.html", role=role, brand_name=FRONT_BRAND_NAME
+    )
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -469,7 +509,6 @@ def login():
         session["name"] = user["name"]
         session["role"] = user["role"]
 
-        # Redirect by role
         if user["role"] == "homeowner":
             return redirect(url_for("homeowner_overview"))
         elif user["role"] == "agent":
@@ -516,20 +555,27 @@ def homeowner_recent_activity():
     )
 
 
+# ----- SAVED NOTES / DESIGN BOARDS -----
 @app.route("/homeowner/saved-notes", methods=["GET", "POST"])
 def homeowner_saved_notes():
-    """Manage premium mood boards for homeowners with advanced features like
-    color palettes, vision statements, templates, and drag-and-drop uploads."""
+    """
+    Manage premium mood boards for homeowners with advanced features like
+    color palettes, vision statements, templates, and drag-and-drop uploads.
+    """
     user_id = get_current_user_id()
+    print(f"[DEBUG][SAVED NOTES] user_id: {user_id}")
+    raw_boards = get_design_boards_for_user(user_id)
+    print(
+        f"[DEBUG][SAVED NOTES] get_design_boards_for_user({user_id}) returned: {raw_boards}"
+    )
 
-    # Directory for saving design board uploads
     design_dir = BASE_DIR / "static" / "uploads" / "design_boards"
     design_dir.mkdir(parents=True, exist_ok=True)
 
     if request.method == "POST":
         action = request.form.get("action") or "create_board"
 
-        # Create a new design board note with premium features
+        # ---------- CREATE BOARD ----------
         if action == "create_board":
             board_name = (request.form.get("board_name") or "").strip()
             vision_statement = (request.form.get("vision_statement") or "").strip()
@@ -541,7 +587,7 @@ def homeowner_saved_notes():
                 flash("Please provide a board name.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
 
-            # Process uploaded photos
+            # Photos
             saved_photos = []
             files = request.files.getlist("board_photos")
             for f in files:
@@ -552,43 +598,44 @@ def homeowner_saved_notes():
                 save_path = design_dir / unique_name
                 try:
                     f.save(save_path)
-                    rel_path = str(Path("uploads") / "design_boards" / unique_name).replace("\\", "/")
+                    rel_path = str(
+                        Path("uploads") / "design_boards" / unique_name
+                    ).replace("\\", "/")
                     saved_photos.append(rel_path)
                 except Exception:
                     flash(f"Could not save file: {safe_name}", "error")
-            
-            # Process uploaded fixtures with background removal
+
+            # Fixtures
             saved_fixtures = []
             fixture_files = request.files.getlist("board_fixtures")
             for f in fixture_files:
                 if not f or not getattr(f, "filename", None):
                     continue
                 safe_name = secure_filename(f.filename)
-                # Force PNG format for transparency
                 base_name = Path(safe_name).stem
                 unique_name = f"{uuid4().hex}_fixture_{base_name}.png"
                 save_path = design_dir / unique_name
                 try:
-                    # Save original first
                     f.save(save_path)
-                    # Remove white background
                     remove_white_background(save_path)
-                    rel_path = str(Path("uploads") / "design_boards" / unique_name).replace("\\", "/")
+                    rel_path = str(
+                        Path("uploads") / "design_boards" / unique_name
+                    ).replace("\\", "/")
                     saved_fixtures.append(rel_path)
-                except Exception as e:
+                except Exception:
                     flash(f"Could not save fixture: {safe_name}", "error")
 
-            # Process color palette
             colors = request.form.getlist("colors[]")
             color_palette = [c for c in colors if c]
 
-            # Persist board with premium features
             try:
                 add_design_board_note(
                     user_id=user_id,
                     project_name=board_name,
                     title=board_title,
-                    details=f"{board_notes}\n\nLinks:\n{board_links}" if board_links else board_notes,
+                    details=f"{board_notes}\n\nLinks:\n{board_links}"
+                    if board_links
+                    else board_notes,
                     photos=saved_photos,
                     files=[],
                     vision_statement=vision_statement,
@@ -599,24 +646,24 @@ def homeowner_saved_notes():
                     fixtures=saved_fixtures,
                 )
                 flash("✨ Beautiful board created!", "success")
-            except Exception as e:
+            except Exception:
                 flash("Could not create the board. Please try again.", "error")
 
             return redirect(url_for("homeowner_saved_notes", view=board_name))
 
-        # Edit an existing board
+        # ---------- EDIT BOARD ----------
         if action == "edit_board":
             board_name = (request.form.get("board_name") or "").strip()
             if not board_name:
                 flash("Missing board name.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
 
-            # Remove selected photos
-            remove_photos = request.form.getlist("remove_photos")
-            if remove_photos:
+            # Remove photos
+            remove_photos_list = request.form.getlist("remove_photos")
+            if remove_photos_list:
                 try:
-                    remove_photos_from_board(user_id, board_name, remove_photos)
-                    for p in remove_photos:
+                    remove_photos_from_board(user_id, board_name, remove_photos_list)
+                    for p in remove_photos_list:
                         try:
                             ppath = BASE_DIR / "static" / p
                             if ppath.exists():
@@ -626,13 +673,16 @@ def homeowner_saved_notes():
                 except Exception:
                     flash("Could not remove some photos.", "error")
 
-            # Remove selected fixtures
-            remove_fixtures = request.form.getlist("remove_fixtures")
-            if remove_fixtures:
+            # Remove fixtures
+            remove_fixtures_list = request.form.getlist("remove_fixtures")
+            if remove_fixtures_list:
                 try:
                     from database import remove_fixtures_from_board
-                    remove_fixtures_from_board(user_id, board_name, remove_fixtures)
-                    for f in remove_fixtures:
+
+                    remove_fixtures_from_board(
+                        user_id, board_name, remove_fixtures_list
+                    )
+                    for f in remove_fixtures_list:
                         try:
                             fpath = BASE_DIR / "static" / f
                             if fpath.exists():
@@ -642,7 +692,7 @@ def homeowner_saved_notes():
                 except Exception:
                     flash("Could not remove some fixtures.", "error")
 
-            # Save newly uploaded photos
+            # New photos
             new_photos = []
             files = request.files.getlist("new_photos")
             for f in files:
@@ -650,46 +700,50 @@ def homeowner_saved_notes():
                     continue
                 safe_name = secure_filename(f.filename)
                 unique_name = f"{uuid4().hex}_{safe_name}"
-                save_path = BASE_DIR / "static" / "uploads" / "design_boards" / unique_name
+                save_path = (
+                    BASE_DIR / "static" / "uploads" / "design_boards" / unique_name
+                )
                 try:
                     save_path.parent.mkdir(parents=True, exist_ok=True)
                     f.save(save_path)
-                    rel_path = str(Path("uploads") / "design_boards" / unique_name).replace("\\", "/")
+                    rel_path = str(
+                        Path("uploads") / "design_boards" / unique_name
+                    ).replace("\\", "/")
                     new_photos.append(rel_path)
                 except Exception:
                     flash(f"Could not save file: {safe_name}", "error")
-            
-            # Save newly uploaded fixtures with background removal
+
+            # New fixtures
             new_fixtures = []
             fixture_files = request.files.getlist("new_fixtures")
             for f in fixture_files:
                 if not f or not getattr(f, "filename", None):
                     continue
                 safe_name = secure_filename(f.filename)
-                # Force PNG format for transparency
                 base_name = Path(safe_name).stem
                 unique_name = f"{uuid4().hex}_fixture_{base_name}.png"
-                save_path = BASE_DIR / "static" / "uploads" / "design_boards" / unique_name
+                save_path = (
+                    BASE_DIR / "static" / "uploads" / "design_boards" / unique_name
+                )
                 try:
                     save_path.parent.mkdir(parents=True, exist_ok=True)
-                    # Save original first
                     f.save(save_path)
-                    # Remove white background
                     remove_white_background(save_path)
-                    rel_path = str(Path("uploads") / "design_boards" / unique_name).replace("\\", "/")
+                    rel_path = str(
+                        Path("uploads") / "design_boards" / unique_name
+                    ).replace("\\", "/")
                     new_fixtures.append(rel_path)
-                except Exception as e:
+                except Exception:
                     flash(f"Could not save fixture: {safe_name}", "error")
 
             edit_title = (request.form.get("edit_title") or "").strip()
             edit_notes = (request.form.get("edit_notes") or "").strip()
-            
-            # Process new colors if provided
+
+            # New colors
             new_colors = request.form.getlist("new_colors[]")
             if new_colors:
                 color_palette = [c for c in new_colors if c]
                 try:
-                    from database import update_board_colors
                     update_board_colors(user_id, board_name, color_palette)
                 except Exception:
                     pass
@@ -711,7 +765,7 @@ def homeowner_saved_notes():
 
             return redirect(url_for("homeowner_saved_notes", view=board_name))
 
-        # Delete an entire board
+        # ---------- DELETE BOARD ----------
         if action == "delete_board":
             board_name = (request.form.get("board_name") or "").strip()
             if board_name:
@@ -732,16 +786,26 @@ def homeowner_saved_notes():
 
             return redirect(url_for("homeowner_saved_notes"))
 
-    # GET: list boards and aggregate details for display
+    # ---------- GET: LIST & VIEW BOARDS ----------
     boards = get_design_boards_for_user(user_id) or []
     board_details = {}
     for b in boards:
         try:
             details = get_design_board_details(user_id, b)
-            board_details[b] = details or {"project_name": b, "photos": [], "notes": [], "files": []}
+            board_details[b] = details or {
+                "project_name": b,
+                "photos": [],
+                "notes": [],
+                "files": [],
+            }
         except Exception:
-            board_details[b] = {"project_name": b, "photos": [], "notes": [], "files": []}
-    
+            board_details[b] = {
+                "project_name": b,
+                "photos": [],
+                "notes": [],
+                "files": [],
+            }
+
     selected_board = request.args.get("view")
     selected_details = board_details.get(selected_board) if selected_board else None
 
@@ -755,17 +819,22 @@ def homeowner_saved_notes():
     )
 
 
-@app.route("/homeowner/design-boards")
+@app.route("/homeowner/design-boards", methods=["GET"])
 def homeowner_design_boards():
-    """Redirect to saved notes (boards now integrated there)."""
+    """
+    Legacy route for Design Boards.
+    All design boards are now managed inside homeowner_saved_notes,
+    so this simply redirects users to the correct page.
+    """
     return redirect(url_for("homeowner_saved_notes"))
 
 
-@app.route("/homeowner/design-boards/<path:board_name>")
+@app.route("/homeowner/design-boards/<path:board_name>", methods=["GET"])
 def homeowner_design_board_view(board_name):
     """Display a dedicated detail page for a single design board."""
     user_id = get_current_user_id()
     details = get_design_board_details(user_id, board_name)
+
     if not details:
         flash("That board could not be found.", "error")
         return redirect(url_for("homeowner_saved_notes"))
@@ -796,12 +865,20 @@ def homeowner_design_board_download(board_name):
 
     try:
         from weasyprint import HTML
+
         pdf = HTML(string=html, base_url=str(BASE_DIR / "static")).write_pdf()
-        return Response(pdf, mimetype="application/pdf", headers={
-            "Content-Disposition": f'attachment; filename="{board_name}.pdf"'
-        })
+        return Response(
+            pdf,
+            mimetype="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{board_name}.pdf"'
+            },
+        )
     except Exception:
-        flash("WeasyPrint not available: rendering HTML. Install WeasyPrint to enable PDF downloads.", "info")
+        flash(
+            "WeasyPrint not available: rendering HTML. Install WeasyPrint to enable PDF downloads.",
+            "info",
+        )
         return html
 
 
@@ -810,12 +887,16 @@ def homeowner_design_board_duplicate(board_name):
     """Duplicate an existing board with a new name."""
     user_id = get_current_user_id()
     new_name = request.form.get("new_name", f"{board_name} (Copy)").strip()
-    
+
+    if not new_name:
+        flash("New board name is required.", "error")
+        return redirect(url_for("homeowner_design_board_view", board_name=board_name))
+
     try:
         duplicate_design_board(user_id, board_name, new_name)
         flash(f"✨ Board duplicated as '{new_name}'!", "success")
         return redirect(url_for("homeowner_design_board_view", board_name=new_name))
-    except Exception as e:
+    except Exception:
         flash("Could not duplicate board.", "error")
         return redirect(url_for("homeowner_design_board_view", board_name=board_name))
 
@@ -825,18 +906,18 @@ def homeowner_design_board_privacy(board_name):
     """Toggle privacy settings for a board."""
     user_id = get_current_user_id()
     is_private = int(request.form.get("is_private", 0))
-    
+
     shareable_link = None
     if not is_private:
         shareable_link = secrets.token_urlsafe(16)
-    
+
     try:
         update_board_privacy(user_id, board_name, is_private, shareable_link)
         status = "private" if is_private else "shareable"
         flash(f"Board is now {status}.", "success")
     except Exception:
         flash("Could not update privacy settings.", "error")
-    
+
     return redirect(url_for("homeowner_design_board_view", board_name=board_name))
 
 
@@ -845,176 +926,47 @@ def homeowner_design_board_template(board_name):
     """Change the board template style."""
     user_id = get_current_user_id()
     template = request.form.get("template", "collage")
-    
+
     if template not in ["collage", "grid", "editorial"]:
         template = "collage"
-    
+
     try:
         update_board_template(user_id, board_name, template)
         flash(f"Board template changed to {template}.", "success")
     except Exception:
         flash("Could not update template.", "error")
-    
+
     return redirect(url_for("homeowner_design_board_view", board_name=board_name))
+
 
 @app.route("/homeowner/crop-photo", methods=["POST"])
 def homeowner_crop_photo():
     """Crop a photo and replace the original."""
-    from flask import jsonify
-    
     try:
         user_id = get_current_user_id()
         board_name = request.form.get("board_name")
         original_path = request.form.get("original_path")
         cropped_file = request.files.get("cropped_image")
-        
+
         if not all([board_name, original_path, cropped_file]):
             return jsonify({"success": False, "error": "Missing data"})
-        
+
         # Verify user owns this board
         details = get_design_board_details(user_id, board_name)
         if not details or original_path not in details.get("photos", []):
             return jsonify({"success": False, "error": "Photo not found"})
-        
+
         # Save cropped image over original
         file_path = BASE_DIR / "static" / original_path
         cropped_file.save(file_path)
-        
+
         return jsonify({"success": True})
     except Exception as e:
         print(f"Crop error: {e}")
         return jsonify({"success": False, "error": str(e)})
 
 
-@app.route("/homeowner/upload-documents", methods=["GET", "POST"])
-def homeowner_upload_documents():
-    user_id = get_current_user_id()
-    docs = list_homeowner_documents(user_id)
-    events = list_timeline_events(user_id)  # Add timeline events
-
-    # -------- DELETE FILE ----------
-    if request.method == "POST" and request.form.get("delete_id"):
-        delete_id = request.form["delete_id"]
-        delete_homeowner_document(delete_id)
-        flash("Document removed.", "success")
-        return redirect(url_for("homeowner_upload_documents"))
-
-    # -------- REATTACH / REUPLOAD ----------
-    if (
-        request.method == "POST"
-        and request.form.get("reattach_id")
-        and request.files.get("file")
-    ):
-        doc_id = request.form["reattach_id"]
-        new_file = request.files["file"]
-        save_name = secure_filename(new_file.filename)
-        new_file.save(HOMEOWNER_DOCS_DIR / save_name)
-        update_homeowner_document_file(doc_id, save_name)
-        flash("File updated.", "success")
-        return redirect(url_for("homeowner_upload_documents"))
-
-    # -------- NORMAL UPLOAD ----------
-    if request.method == "POST" and request.files.get("file"):
-        file = request.files["file"]
-        category = request.form.get("category", "Other")
-        save_name = secure_filename(file.filename)
-        
-        # Upload to R2 if configured, otherwise save locally
-        if is_r2_enabled():
-            try:
-                # Upload to R2
-                result = upload_file_to_r2(file, save_name, folder="documents")
-                add_homeowner_document(
-                    user_id, 
-                    save_name, 
-                    category,
-                    r2_key=result["key"],
-                    r2_url=result["url"]
-                )
-                flash("Document uploaded to cloud storage.", "success")
-            except Exception as e:
-                flash(f"Upload failed: {str(e)}", "error")
-                return redirect(url_for("homeowner_upload_documents"))
-        else:
-            # Fallback to local storage
-            file.save(HOMEOWNER_DOCS_DIR / save_name)
-            add_homeowner_document(user_id, save_name, category)
-            flash("Document uploaded.", "success")
-        
-        return redirect(url_for("homeowner_upload_documents"))
-
-    return render_template("homeowner/upload_documents.html", docs=docs, events=events)
-
-
-@app.route("/homeowner/documents/<int:doc_id>/view")
-def homeowner_document_view(doc_id):
-    user_id = get_current_user_id()
-    row = get_homeowner_document_for_user(doc_id, user_id)
-    if not row:
-        flash("That document could not be found.", "error")
-        return redirect(url_for("homeowner_upload_documents"))
-
-    # If file is in R2, redirect to R2 URL
-    if row.get("r2_key"):
-        try:
-            file_url = get_file_url_from_r2(row["r2_key"])
-            return redirect(file_url)
-        except Exception as e:
-            flash(f"Could not retrieve file: {str(e)}", "error")
-            return redirect(url_for("homeowner_upload_documents"))
-    
-    # Fallback to local file
-    filename = row["file_name"]
-    return send_from_directory(HOMEOWNER_DOCS_DIR, filename, as_attachment=False)
-
-
-@app.route("/homeowner/documents/<int:doc_id>/replace", methods=["GET", "POST"])
-def homeowner_document_replace(doc_id):
-    user_id = get_current_user_id()
-    row = get_homeowner_document_for_user(doc_id, user_id)
-    if not row:
-        flash("That document could not be found.", "error")
-        return redirect(url_for("homeowner_upload_documents"))
-
-    if request.method == "POST":
-        file = request.files.get("file")
-        if not file or file.filename == "":
-            flash("Please choose a file to upload.", "error")
-            return redirect(request.url)
-
-        safe_name = secure_filename(file.filename)
-        save_path = HOMEOWNER_DOCS_DIR / safe_name
-        HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-        file.save(save_path)
-
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            """
-            UPDATE homeowner_documents
-            SET file_name = ?, uploaded_at = ?
-            WHERE id = ? AND user_id = ?
-            """,
-            (
-                safe_name,
-                datetime.utcnow().isoformat(sep=" ", timespec="seconds"),
-                doc_id,
-                user_id,
-            ),
-        )
-        conn.commit()
-        conn.close()
-
-        flash("Document updated.", "success")
-        return redirect(url_for("homeowner_upload_documents"))
-
-    # GET: tiny page to pick replacement file
-    return render_template(
-        "homeowner/document_replace.html",
-        document=row,
-    )
-
-
+# ----- HOME TIMELINE & DOCUMENTS -----
 @app.route("/homeowner/home-timeline", methods=["GET", "POST"])
 def homeowner_home_timeline():
     user_id = get_current_user_id()
@@ -1062,6 +1014,145 @@ def homeowner_timeline_print():
     )
 
 
+@app.route("/homeowner/documents/<int:doc_id>/view")
+def homeowner_document_view(doc_id):
+    user_id = get_current_user_id()
+    row = get_homeowner_document_for_user(doc_id, user_id)
+    if not row:
+        flash("That document could not be found.", "error")
+        return redirect(url_for("homeowner_upload_documents"))
+
+    # If file is in R2, redirect to R2 URL
+    if row.get("r2_key"):
+        try:
+            file_url = get_file_url_from_r2(row["r2_key"])
+            return redirect(file_url)
+        except Exception as e:
+            flash(f"Could not retrieve file: {str(e)}", "error")
+            return redirect(url_for("homeowner_upload_documents"))
+
+    # Fallback to local file
+    return send_from_directory(
+        HOMEOWNER_DOCS_DIR, row["file_name"], as_attachment=False
+    )
+
+
+@app.route("/homeowner/documents/<int:doc_id>/replace", methods=["GET", "POST"])
+def homeowner_document_replace(doc_id):
+    user_id = get_current_user_id()
+    row = get_homeowner_document_for_user(doc_id, user_id)
+    if not row:
+        flash("That document could not be found.", "error")
+        return redirect(url_for("homeowner_upload_documents"))
+
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or file.filename == "":
+            flash("Please choose a file to upload.", "error")
+            return redirect(request.url)
+
+        safe_name = secure_filename(file.filename)
+        save_path = HOMEOWNER_DOCS_DIR / safe_name
+        HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        file.save(save_path)
+
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            UPDATE homeowner_documents
+            SET file_name = ?, uploaded_at = ?
+            WHERE id = ? AND user_id = ?
+            """,
+            (
+                safe_name,
+                datetime.utcnow().isoformat(sep=" ", timespec="seconds"),
+                doc_id,
+                user_id,
+            ),
+        )
+        conn.commit()
+        conn.close()
+
+        flash("Document updated.", "success")
+        return redirect(url_for("homeowner_upload_documents"))
+
+    return render_template(
+        "homeowner/document_replace.html",
+        document=row,
+    )
+
+
+@app.route("/homeowner/upload-documents", methods=["GET", "POST"])
+def homeowner_upload_documents():
+    user_id = get_current_user_id()
+    docs = list_homeowner_documents(user_id)
+    events = list_timeline_events(user_id)
+
+    # DELETE FILE
+    if request.method == "POST" and request.form.get("delete_id"):
+        delete_id = request.form["delete_id"]
+        delete_homeowner_document(delete_id)
+        flash("Document removed.", "success")
+        return redirect(url_for("homeowner_upload_documents"))
+
+    # REATTACH / REUPLOAD
+    if (
+        request.method == "POST"
+        and request.form.get("reattach_id")
+        and request.files.get("file")
+    ):
+        doc_id = request.form["reattach_id"]
+        new_file = request.files["file"]
+        save_name = secure_filename(new_file.filename)
+        HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        new_file.save(HOMEOWNER_DOCS_DIR / save_name)
+        update_homeowner_document_file(doc_id, save_name)
+        flash("File updated.", "success")
+        return redirect(url_for("homeowner_upload_documents"))
+
+    # NORMAL UPLOAD
+    if request.method == "POST" and request.files.get("file"):
+        file = request.files["file"]
+        category = request.form.get("category", "Other")
+        title = request.form.get("title", "").strip() or file.filename
+
+        if not file or file.filename == "":
+            flash("Please choose a file to upload.", "error")
+            return redirect(url_for("homeowner_upload_documents"))
+
+        filename = secure_filename(file.filename)
+
+        # If using R2, upload there; else save locally
+        if is_r2_enabled() and R2_CLIENT:
+            r2_key = f"homeowner_docs/{user_id}/{uuid4().hex}_{filename}"
+            upload_file_to_r2(file, r2_key)
+            stored_name = filename  # For DB reference, still keep original name
+        else:
+            HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+            save_path = HOMEOWNER_DOCS_DIR / filename
+            file.save(save_path)
+            r2_key = None
+            stored_name = filename
+
+        add_homeowner_document(
+            user_id=user_id,
+            title=title,
+            category=category,
+            file_name=stored_name,
+            r2_key=r2_key,
+        )
+        flash("Document uploaded.", "success")
+        return redirect(url_for("homeowner_upload_documents"))
+
+    return render_template(
+        "homeowner/upload_documents.html",
+        brand_name=FRONT_BRAND_NAME,
+        documents=docs,
+        events=events,
+    )
+
+
 # ----- VALUE & EQUITY -----
 @app.route("/homeowner/value/my-home")
 def homeowner_value_my_home():
@@ -1084,31 +1175,28 @@ def homeowner_value_equity_overview():
     if not user:
         flash("Please log in to access this page.", "warning")
         return redirect(url_for("login"))
-    
-    # Get all properties for the user
+
     properties = get_user_properties(user["id"])
-    
+
     # Determine which property to display
     property_id_param = request.args.get("property_id")
     if property_id_param:
         try:
             current_property_id = int(property_id_param)
             current_property = get_property_by_id(current_property_id)
-            # Verify ownership
             if not current_property or current_property["user_id"] != user["id"]:
                 current_property = None
                 current_property_id = None
-        except:
+        except Exception:
             current_property = None
             current_property_id = None
     else:
         current_property = get_primary_property(user["id"])
         current_property_id = current_property["id"] if current_property else None
-    
+
     # If no property exists, create a default one
     if not current_property:
         if not properties:
-            # Create a default property for first-time users
             default_address = "My Home"
             property_id = add_property(user["id"], default_address, None, "primary")
             current_property = get_property_by_id(property_id)
@@ -1117,26 +1205,23 @@ def homeowner_value_equity_overview():
         else:
             current_property = properties[0]
             current_property_id = current_property["id"]
-    
+
     if request.method == "POST":
-        # Helper to safely parse float values
         def safe_float(val):
             if not val or val.strip() == "":
                 return None
             try:
                 return float(val.replace(",", ""))
-            except:
+            except Exception:
                 return None
-        
-        # Parse form data
+
         value_estimate = safe_float(request.form.get("value_estimate", ""))
         loan_balance = safe_float(request.form.get("loan_balance", ""))
         loan_rate = safe_float(request.form.get("loan_rate", ""))
         loan_payment = safe_float(request.form.get("loan_payment", ""))
         loan_term_years = safe_float(request.form.get("loan_term_years", ""))
         loan_start_date = request.form.get("loan_start_date", "").strip() or None
-        
-        # Update database for current property
+
         upsert_homeowner_snapshot_for_property(
             user_id=user["id"],
             property_id=current_property_id,
@@ -1147,30 +1232,31 @@ def homeowner_value_equity_overview():
             loan_term_years=loan_term_years,
             loan_start_date=loan_start_date,
         )
-        
-        # Update property estimated value if provided
+
         if value_estimate is not None:
             conn = get_connection()
             cur = conn.cursor()
             cur.execute(
                 "UPDATE properties SET estimated_value = ? WHERE id = ?",
-                (value_estimate, current_property_id)
+                (value_estimate, current_property_id),
             )
             conn.commit()
             conn.close()
-        
+
         flash("Loan details updated successfully!", "success")
-        return redirect(url_for("homeowner_value_equity_overview", property_id=current_property_id))
-    
+        return redirect(
+            url_for(
+                "homeowner_value_equity_overview",
+                property_id=current_property_id,
+            )
+        )
+
     # GET: Display current data with calculations
     snapshot = get_homeowner_snapshot_for_property(user["id"], current_property_id)
-    
-    # Use property estimated value if snapshot doesn't have one
+
     if not snapshot.get("value_estimate") and current_property.get("estimated_value"):
         snapshot["value_estimate"] = current_property["estimated_value"]
-    
-    # Calculate derived metrics
-    # Helper to safely convert to float
+
     def safe_float_convert(val, default=0):
         if val is None or val == "":
             return default
@@ -1178,7 +1264,7 @@ def homeowner_value_equity_overview():
             return float(val)
         except (ValueError, TypeError):
             return default
-    
+
     current_value = safe_float_convert(snapshot.get("value_estimate"))
     loan_balance = safe_float_convert(snapshot.get("loan_balance"))
     equity_estimate = safe_float_convert(snapshot.get("equity_estimate"))
@@ -1186,97 +1272,114 @@ def homeowner_value_equity_overview():
     loan_payment = safe_float_convert(snapshot.get("loan_payment"))
     loan_term_years = safe_float_convert(snapshot.get("loan_term_years"))
     loan_start_date = snapshot.get("loan_start_date") or ""
-    
-    # Calculate LTV (Loan-to-Value ratio)
+
+    # LTV
     ltv = 0
     if current_value > 0 and loan_balance > 0:
         ltv = (loan_balance / current_value) * 100
-    
-    # Calculate years remaining and payoff date
+
+    # Years remaining and payoff date
     years_remaining = 0
     payoff_date = ""
     if loan_start_date and loan_term_years > 0:
-        from datetime import datetime, timedelta
+        from datetime import timedelta
+
         try:
             start = datetime.fromisoformat(loan_start_date)
             end = start + timedelta(days=365.25 * loan_term_years)
             payoff_date = end.strftime("%b %Y")
-            
+
             now = datetime.now()
             years_remaining = (end - now).days / 365.25
             if years_remaining < 0:
                 years_remaining = 0
-        except:
+        except Exception:
             pass
-    
-    # Calculate appreciation metrics
-    # Assume 3-5% annual appreciation (can be made dynamic later)
-    annual_appreciation_rate = 0.04  # 4% default
-    monthly_appreciation = (current_value * annual_appreciation_rate) / 12 if current_value > 0 else 0
-    one_year_value = current_value * (1 + annual_appreciation_rate) if current_value > 0 else 0
-    five_year_value = current_value * ((1 + annual_appreciation_rate) ** 5) if current_value > 0 else 0
-    
-    # Calculate net worth built (equity accumulated)
-    # Estimate original purchase price (rough estimate: current equity built over time)
+
+    # Appreciation
+    annual_appreciation_rate = 0.04  # 4%
+    monthly_appreciation = (
+        (current_value * annual_appreciation_rate) / 12 if current_value > 0 else 0
+    )
+    one_year_value = (
+        current_value * (1 + annual_appreciation_rate) if current_value > 0 else 0
+    )
+    five_year_value = (
+        current_value * ((1 + annual_appreciation_rate) ** 5)
+        if current_value > 0
+        else 0
+    )
+
     estimated_down_payment = equity_estimate * 0.2 if equity_estimate > 0 else 0
     wealth_built = equity_estimate if equity_estimate > 0 else 0
-    
-    # Refinance scenario calculations
-    current_rate_market = 6.0  # Can be pulled from market data API later
+
+    # Refi scenario
+    current_rate_market = 6.0
     refinance_savings = 0
     new_monthly_payment = 0
     if loan_rate > 0 and loan_balance > 0 and loan_rate > current_rate_market:
-        # Simplified calculation: difference in rate * balance / 12
         rate_diff = loan_rate - current_rate_market
-        annual_savings = (loan_balance * (rate_diff / 100))
+        annual_savings = loan_balance * (rate_diff / 100)
         refinance_savings = annual_savings / 12
-        # Rough estimate of new payment
         if loan_payment > 0:
             new_monthly_payment = loan_payment - refinance_savings
-    
-    # Cash-out refinance potential (80% LTV threshold)
+
+    # Cash-out
     max_cash_out = 0
     if current_value > 0:
         max_loan_80_ltv = current_value * 0.80
-        max_cash_out = max_loan_80_ltv - loan_balance if max_loan_80_ltv > loan_balance else 0
-    
-    # Rental income potential (estimate 0.8-1% of home value per month)
-    monthly_rental_estimate = current_value * 0.009 if current_value > 0 else 0  # 0.9% of value
+        max_cash_out = (
+            max_loan_80_ltv - loan_balance if max_loan_80_ltv > loan_balance else 0
+        )
+
+    # Rental income estimate
+    monthly_rental_estimate = current_value * 0.009 if current_value > 0 else 0
     annual_rental_income = monthly_rental_estimate * 12
-    
-    # Extra payment scenario (pay $200 extra per month)
+
+    # Extra payment scenario
     extra_payment_amount = 200
     interest_saved_extra = 0
     time_saved_months = 0
     if loan_balance > 0 and loan_rate > 0 and years_remaining > 0:
-        # Simplified: extra payments reduce principal faster
-        # Rough estimate: $200/month extra could save 3-5 years on a 30-year mortgage
-        time_saved_months = min(years_remaining * 12 * 0.15, 60)  # Up to 5 years
-        interest_saved_extra = extra_payment_amount * time_saved_months * 0.5  # Rough interest savings
-    
-    # Generate tips based on current situation
+        time_saved_months = min(years_remaining * 12 * 0.15, 60)
+        interest_saved_extra = extra_payment_amount * time_saved_months * 0.5
+
     tips = []
     if loan_rate > 6.5:
-        tips.append("🎯 Your interest rate is above 6.5%. Consider exploring refinance options to lower your monthly payment.")
-    
+        tips.append(
+            "🎯 Your interest rate is above 6.5%. Consider exploring refinance options to lower your monthly payment."
+        )
+
     if years_remaining > 20 and equity_estimate > 50000:
-        tips.append("💡 With significant equity and many years remaining, making extra principal payments could save thousands in interest.")
-    
+        tips.append(
+            "💡 With significant equity and many years remaining, making extra principal payments could save thousands in interest."
+        )
+
     if ltv < 80 and loan_balance > 0:
-        tips.append("✨ Your loan-to-value ratio is below 80%. You may qualify to remove PMI if you're paying it.")
-    
+        tips.append(
+            "✨ Your loan-to-value ratio is below 80%. You may qualify to remove PMI if you're paying it."
+        )
+
     if equity_estimate > 100000:
-        tips.append("🏡 You've built substantial equity! This could support renovations, debt consolidation, or future investment opportunities.")
-    
+        tips.append(
+            "🏡 You've built substantial equity! This could support renovations, debt consolidation, or future investment opportunities."
+        )
+
     if refinance_savings > 50:
-        tips.append(f"💰 Refinancing at current market rates could save you approximately ${refinance_savings:,.0f}/month.")
-    
+        tips.append(
+            f"💰 Refinancing at current market rates could save you approximately ${refinance_savings:,.0f}/month."
+        )
+
     if max_cash_out > 50000:
-        tips.append(f"🏦 You could access up to ${max_cash_out:,.0f} through a cash-out refinance while staying at 80% LTV.")
-    
+        tips.append(
+            f"🏦 You could access up to ${max_cash_out:,.0f} through a cash-out refinance while staying at 80% LTV."
+        )
+
     if not tips:
-        tips.append("📊 Enter your complete loan details above to receive personalized savings tips and strategies.")
-    
+        tips.append(
+            "📊 Enter your complete loan details above to receive personalized savings tips and strategies."
+        )
+
     return render_template(
         "homeowner/value_equity_overview.html",
         brand_name=FRONT_BRAND_NAME,
@@ -1318,31 +1421,29 @@ def homeowner_add_property():
     if not user:
         flash("Please log in to add a property.", "warning")
         return redirect(url_for("login"))
-    
+
     address = request.form.get("property_address", "").strip()
     if not address:
         flash("Property address is required.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
-    
-    # Parse estimated value (optional)
+
     estimated_value = None
     value_str = request.form.get("estimated_value", "").strip()
     if value_str:
         try:
             estimated_value = float(value_str.replace(",", ""))
-        except:
+        except Exception:
             pass
-    
+
     property_type = request.form.get("property_type", "primary").strip()
-    
-    # Add property to database
+
     property_id = add_property(user["id"], address, estimated_value, property_type)
-    
-    # Set as primary and redirect to view it
     set_primary_property(user["id"], property_id)
-    
+
     flash(f"Property '{address}' added successfully!", "success")
-    return redirect(url_for("homeowner_value_equity_overview", property_id=property_id))
+    return redirect(
+        url_for("homeowner_value_equity_overview", property_id=property_id)
+    )
 
 
 @app.route("/homeowner/switch-property", methods=["POST"])
@@ -1351,155 +1452,28 @@ def homeowner_switch_property():
     user = get_current_user()
     if not user:
         return redirect(url_for("login"))
-    
+
     property_id = request.form.get("property_id")
     if not property_id:
         flash("No property selected.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
-    
+
     try:
         property_id = int(property_id)
-    except:
+    except Exception:
         flash("Invalid property ID.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
-    
-    # Verify property belongs to user
+
     prop = get_property_by_id(property_id)
     if not prop or prop["user_id"] != user["id"]:
         flash("Property not found.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
-    
-    # Set as primary
+
     set_primary_property(user["id"], property_id)
-    
+
     flash(f"Switched to {prop['address']}", "success")
-    return redirect(url_for("homeowner_value_equity_overview", property_id=property_id))
-
-
-    # Get current property
-    property_id_param = request.args.get("property_id")
-    if property_id_param:
-        try:
-            current_property_id = int(property_id_param)
-            current_property = get_property_by_id(current_property_id)
-            if not current_property or current_property["user_id"] != user["id"]:
-                current_property = get_primary_property(user["id"])
-                current_property_id = current_property["id"] if current_property else None
-        except:
-            current_property = get_primary_property(user["id"])
-            current_property_id = current_property["id"] if current_property else None
-    else:
-        current_property = get_primary_property(user["id"])
-        current_property_id = current_property["id"] if current_property else None
-    
-    if not current_property:
-        flash("No property found. Please add a property first.", "warning")
-        return redirect(url_for("homeowner_value_equity_overview"))
-    
-    # Get snapshot data
-    snapshot = get_homeowner_snapshot_for_property(user["id"], current_property_id)
-    
-    # Helper to safely convert to float
-    def safe_float_convert(val, default=0):
-        if val is None or val == "":
-            return default
-        try:
-            return float(val)
-        except (ValueError, TypeError):
-            return default
-    
-    current_value = safe_float_convert(snapshot.get("value_estimate"))
-    loan_balance = safe_float_convert(snapshot.get("loan_balance"))
-    loan_rate = safe_float_convert(snapshot.get("loan_rate"))
-    loan_payment = safe_float_convert(snapshot.get("loan_payment"))
-    loan_term_years = safe_float_convert(snapshot.get("loan_term_years"))
-    loan_start_date = snapshot.get("loan_start_date") or ""
-    
-    # Calculate years remaining
-    years_remaining = loan_term_years
-    if loan_start_date and loan_term_years > 0:
-        from datetime import datetime, timedelta
-        try:
-            start = datetime.fromisoformat(loan_start_date)
-            end = start + timedelta(days=365.25 * loan_term_years)
-            now = datetime.now()
-            years_remaining = max(0, (end - now).days / 365.25)
-        except:
-            pass
-    
-    # Market rates for different scenarios
-    market_rates = {
-        "excellent": 5.5,
-        "good": 6.0,
-        "average": 6.5,
-        "fair": 7.0,
-    }
-    
-    # Calculate refinance scenarios for each rate
-    scenarios = []
-    for credit_tier, new_rate in market_rates.items():
-        if loan_balance > 0 and years_remaining > 0:
-            # Calculate new monthly payment using mortgage formula
-            # M = P [ i(1 + i)^n ] / [ (1 + i)^n – 1]
-            monthly_rate = (new_rate / 100) / 12
-            num_payments = years_remaining * 12
-            
-            if monthly_rate > 0:
-                new_monthly_payment = loan_balance * (monthly_rate * (1 + monthly_rate)**num_payments) / ((1 + monthly_rate)**num_payments - 1)
-            else:
-                new_monthly_payment = loan_balance / num_payments
-            
-            # Calculate current payment if not provided
-            if loan_payment <= 0 and loan_rate > 0:
-                current_monthly_rate = (loan_rate / 100) / 12
-                if current_monthly_rate > 0:
-                    loan_payment = loan_balance * (current_monthly_rate * (1 + current_monthly_rate)**num_payments) / ((1 + current_monthly_rate)**num_payments - 1)
-            
-            monthly_savings = loan_payment - new_monthly_payment
-            annual_savings = monthly_savings * 12
-            lifetime_savings = monthly_savings * num_payments
-            
-            # Calculate total interest paid (current vs new)
-            current_total_paid = loan_payment * num_payments if loan_payment > 0 else 0
-            current_interest = current_total_paid - loan_balance
-            
-            new_total_paid = new_monthly_payment * num_payments
-            new_interest = new_total_paid - loan_balance
-            
-            interest_saved = current_interest - new_interest;
-            
-            # Closing costs estimate (2-5% of loan amount, average 3%)
-            closing_costs = loan_balance * 0.03;
-            
-            # Break-even months
-            break_even_months = closing_costs / monthly_savings if monthly_savings > 0 else 0;
-            
-            scenarios.append({
-                "tier": credit_tier.title(),
-                "rate": new_rate,
-                "new_payment": new_monthly_payment,
-                "monthly_savings": monthly_savings,
-                "monthly_savings_abs": abs(monthly_savings),
-                "annual_savings": annual_savings,
-                "annual_savings_abs": abs(annual_savings),
-                "lifetime_savings": lifetime_savings,
-                "interest_saved": interest_saved,
-                "interest_saved_abs": abs(interest_saved),
-                "closing_costs": closing_costs,
-                "break_even_months": break_even_months,
-                "is_better": monthly_savings > 0,
-            })
-    
-    return render_template(
-        "homeowner/value_refinance_calculator.html",
-        brand_name=FRONT_BRAND_NAME,
-        current_property=current_property,
-        current_value=current_value,
-        loan_balance=loan_balance,
-        loan_rate=loan_rate,
-        loan_payment=loan_payment,
-        years_remaining=years_remaining,
-        scenarios=scenarios,
+    return redirect(
+        url_for("homeowner_value_equity_overview", property_id=property_id)
     )
 
 
@@ -1511,7 +1485,9 @@ def homeowner_reno_planner():
 
     if request.method == "POST" and user_id:
         name = request.form.get("project_name", "").strip()
-        budget_raw = request.form.get("project_budget", "").replace(",", "").strip()
+        budget_raw = (
+            request.form.get("project_budget", "").replace(",", "").strip()
+        )
         status = request.form.get("project_status", "Planning").strip()
         notes = request.form.get("project_notes", "").strip()
 
@@ -1543,699 +1519,9 @@ def homeowner_reno_design_ideas():
     )
 
 
-@app.route("/homeowner/reno/material-cost")
+@app.route("/homeowner/reno/material-cost", methods=["GET"])
 def homeowner_reno_material_cost():
     return render_template(
         "homeowner/reno_material_cost.html",
         brand_name=FRONT_BRAND_NAME,
     )
-
-
-@app.route("/homeowner/reno/roi-guide")
-def homeowner_reno_roi_guide():
-    return render_template(
-        "homeowner/reno_roi_guide.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/reno/before-after")
-def homeowner_reno_before_after():
-    return render_template(
-        "homeowner/reno_before_after.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-# ----- NEXT HOME STRATEGY -----
-@app.route("/homeowner/next/plan-my-move", methods=["GET", "POST"])
-def homeowner_next_plan_move():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    existing_plan = get_next_move_plan(user_id) if user_id else None
-
-    if request.method == "POST" and user_id:
-        timeline = request.form.get("timeline", "")
-        budget = request.form.get("budget", "")
-        preapproved = request.form.get("preapproved", "")
-        areas = request.form.get("areas", "")
-        home_type = request.form.get("home_type", "")
-        beds_baths = request.form.get("beds_baths", "")
-        must_haves = request.form.get("must_haves", "")
-        dealbreakers = request.form.get("dealbreakers", "")
-        condition = request.form.get("condition", "")
-        feeling = request.form.get("feeling", "")
-
-        upsert_next_move_plan(
-            user_id,
-            timeline,
-            budget,
-            preapproved,
-            areas,
-            home_type,
-            beds_baths,
-            must_haves,
-            dealbreakers,
-            condition,
-            feeling,
-        )
-        flash("Your next-home plan has been saved.", "success")
-        existing_plan = get_next_move_plan(user_id)
-
-    return render_template(
-        "homeowner/next_plan_move.html",
-        brand_name=FRONT_BRAND_NAME,
-        plan=existing_plan,
-    )
-
-
-@app.route("/homeowner/next/buy-sell-guidance")
-def homeowner_next_buy_sell_guidance():
-    return render_template(
-        "homeowner/next_buy_sell_guidance.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathways")
-def homeowner_next_pathways():
-    return render_template(
-        "homeowner/next_pathways.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathway/first-time-buyer")
-def homeowner_pathway_first_time_buyer():
-    return render_template(
-        "homeowner/pathway_first_time_buyer.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathway/selling-buying")
-def homeowner_pathway_selling_buying():
-    return render_template(
-        "homeowner/pathway_selling_buying.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathway/building-new")
-def homeowner_pathway_building_new():
-    return render_template(
-        "homeowner/pathway_building_new.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathway/investing")
-def homeowner_pathway_investing():
-    return render_template(
-        "homeowner/pathway_investing.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathway/relocating")
-def homeowner_pathway_relocating():
-    return render_template(
-        "homeowner/pathway_relocating.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/loan-paths")
-def homeowner_next_loan_paths():
-    return render_template(
-        "homeowner/next_loan_paths.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/affordability")
-def homeowner_next_affordability():
-    return render_template(
-        "homeowner/next_affordability.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-# ----- OWNERSHIP CARE -----
-@app.route("/homeowner/care/maintenance-guide")
-def homeowner_care_maintenance_guide():
-    return render_template(
-        "homeowner/care_maintenance_guide.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/care/seasonal-checklists")
-def homeowner_care_seasonal_checklists():
-    return render_template(
-        "homeowner/care_seasonal_checklists.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/care/home-protection")
-def homeowner_care_home_protection():
-    return render_template(
-        "homeowner/care_home_protection.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/care/warranty-log")
-def homeowner_care_warranty_log():
-    return render_template(
-        "homeowner/care_warranty_log.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/care/energy-savings")
-def homeowner_care_energy_savings():
-    return render_template(
-        "homeowner/care_energy_savings.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-# ----- SUPPORT & CONVERSATIONS -----
-@app.route("/homeowner/support/ask-question", methods=["GET", "POST"])
-def homeowner_support_ask_question():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST":
-        topic = request.form.get("topic", "").strip()
-        question = request.form.get("question", "").strip()
-        if question:
-            add_homeowner_question(user_id, topic, question)
-            flash("Your question has been sent. We’ll follow up with care.", "success")
-            return redirect(url_for("homeowner_support_ask_question"))
-
-    return render_template(
-        "homeowner/support_ask_question.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/support/chat-human")
-def homeowner_support_chat_human():
-    return render_template(
-        "homeowner/support_chat_human.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/support/schedule-chat")
-def homeowner_support_schedule_chat():
-    return render_template(
-        "homeowner/support_schedule_chat.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/support/resources")
-def homeowner_support_resources():
-    return render_template(
-        "homeowner/support_resources.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/support/meet-team")
-def homeowner_support_meet_team():
-    return render_template(
-        "homeowner/support_meet_team.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-# -------------------------------------------------
-# AGENT ROUTES
-# -------------------------------------------------
-@app.route("/agent")
-def agent_dashboard():
-    # TEMPORARY: Authentication disabled for development
-    # if session.get("role") != "agent":
-    #     flash("Please sign in as an agent to see that page.", "error")
-    #     return redirect(url_for("login", role="agent"))
-
-    metrics = get_agent_dashboard_metrics(get_current_user_id())
-    return render_template("agent/dashboard.html", metrics=metrics)
-
-
-@app.route("/agent/settings/profile")
-def agent_settings_profile():
-    user = get_current_user()
-    return render_template(
-        "agent/settings_profile.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-    )
-
-
-@app.route("/agent/crm", methods=["GET", "POST"])
-def agent_crm():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip()
-        phone = request.form.get("phone", "").strip()
-        stage = request.form.get("stage", "new").strip()
-        best_contact = email or phone
-        last_touch = "Today"
-        if name:
-            add_agent_contact(
-                user_id, name, email, phone, stage, best_contact, last_touch
-            )
-            flash("Contact added to your CRM.", "success")
-
-    contacts = list_agent_contacts(user_id) if user_id else []
-
-    return render_template(
-        "agent/crm.html",
-        brand_name=FRONT_BRAND_NAME,
-        contacts=contacts,
-    )
-
-
-@app.route("/agent/clients")
-def agent_clients():
-    return render_template(
-        "agent/clients.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/agent/transactions", methods=["GET", "POST"])
-def agent_transactions():
-    # No login required for setup/testing
-    user_id = 1  # Always use demo agent
-    print(f"[DEBUG] Using user_id: {user_id}")
-
-    if request.method == "POST" and user_id:
-        print("[DEBUG] POST received for /agent/transactions")
-        property_address = request.form.get("property_address", "").strip()
-        client_name = request.form.get("client_name", "").strip()
-        side = request.form.get("side", "buyer").strip()
-        stage = request.form.get("stage", "under_contract").strip()
-        close_date = request.form.get("close_date", "").strip()
-        print(f"[DEBUG] Form values: property_address={property_address}, client_name={client_name}, side={side}, stage={stage}, close_date={close_date}")
-        if not close_date:
-            close_date = None
-
-        if property_address and client_name:
-            from transaction_helpers import create_transaction
-            try:
-                print("[DEBUG] Calling create_transaction...")
-                create_transaction(
-                    user_id, property_address, client_name, side, stage, close_date,
-                    client_email="", client_phone="", purchase_price=None, notes=""
-                )
-                print("[DEBUG] Transaction creation succeeded!")
-                flash("Transaction added to your coordinator view.", "success")
-            except Exception as e:
-                print(f"[CRITICAL ERROR] Exception in create_transaction: {e}")
-                import traceback
-                traceback.print_exc()
-                flash("Error saving transaction. Please contact support.", "error")
-        else:
-            print("[DEBUG] Missing property_address or client_name, not creating transaction.")
-
-    # Always show current transactions (no status filter)
-    from transaction_helpers import get_agent_transactions
-    transactions = get_agent_transactions(user_id) if user_id else []
-
-    return render_template(
-        "agent/transactions.html",
-        brand_name=FRONT_BRAND_NAME,
-        transactions=transactions,
-    )
-
-
-@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"])
-def agent_transaction_delete(tx_id):
-    # No login required for setup/testing
-    user_id = 1
-    from transaction_helpers import delete_transaction
-    delete_transaction(tx_id, user_id)
-    flash("Transaction deleted.", "success")
-    return redirect(url_for("agent_transactions"))
-@app.route("/agent/transactions/<int:tx_id>")
-def agent_transaction_detail(tx_id: int):
-    # No login required for setup/testing
-    user_id = 1
-    from transaction_helpers import (
-        get_transaction_detail,
-        get_transaction_documents,
-        get_transaction_participants,
-        get_transaction_timeline,
-        get_transaction_document_status,
-    )
-    tx = get_transaction_detail(tx_id)
-    if not tx or tx.get("agent_id") != user_id:
-        flash("Transaction not found or you do not have access.", "error")
-        return redirect(url_for("agent_transactions"))
-    documents = get_transaction_documents(tx_id)
-    participants = get_transaction_participants(tx_id)
-    timeline = get_transaction_timeline(tx_id, limit=50)
-    doc_status = get_transaction_document_status(tx_id)
-
-    stages = [
-        {"key": "pre_contract", "label": "Pre-Contract"},
-        {"key": "under_contract", "label": "Under Contract"},
-        {"key": "in_escrow", "label": "In Escrow"},
-        {"key": "clear_to_close", "label": "Clear to Close"},
-        {"key": "closed", "label": "Closed"},
-        {"key": "cancelled", "label": "Cancelled"},
-    ]
-
-    return render_template(
-        "agent/transaction_detail.html",
-        brand_name=FRONT_BRAND_NAME,
-        tx=tx,
-        documents=documents,
-        participants=participants,
-        timeline=timeline,
-        doc_status=doc_status,
-        stages=stages,
-    )
-
-
-@app.route("/agent/documents")
-def agent_documents():
-    return render_template(
-        "agent/documents.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/agent/documents/<int:doc_id>/download")
-def agent_download_document(doc_id):
-    from transaction_helpers import get_transaction_documents
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM transaction_documents WHERE id = ?", (doc_id,))
-    doc = cursor.fetchone()
-    conn.close()
-    if not doc:
-        abort(404)
-    file_path = doc["file_path"]
-    # Copy to client permanent documents folder
-    import shutil, os
-    src_path = os.path.join("static", file_path) if file_path else None
-    if src_path and os.path.exists(src_path):
-        dest_dir = os.path.join("static", "uploads", "homeowner_docs")
-        os.makedirs(dest_dir, exist_ok=True)
-        dest_path = os.path.join(dest_dir, os.path.basename(src_path))
-        shutil.copy2(src_path, dest_path)
-    # Serve file for download
-    return send_from_directory(os.path.dirname(src_path), os.path.basename(src_path), as_attachment=True)
-
-
-@app.route("/agent/communications", methods=["GET", "POST"])
-def agent_communications():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        label = request.form.get("label", "").strip()
-        category = request.form.get("category", "general").strip()
-        channel = request.form.get("channel", "email").strip()
-        subject = request.form.get("subject", "").strip()
-        body = request.form.get("body", "").strip()
-
-        if label and body:
-            add_message_template(
-                owner_user_id=user_id,
-                role="agent",
-                label=label,
-                category=category,
-                channel=channel,
-                subject=subject,
-                body=body,
-            )
-            flash("Template saved.", "success")
-
-    templates = (
-        list_message_templates("agent", owner_user_id=user_id) if user_id else []
-    )
-
-    return render_template(
-        "agent/communications.html",
-        brand_name=FRONT_BRAND_NAME,
-        templates=templates,
-    )
-
-
-@app.route("/agent/marketing", methods=["GET", "POST"])
-def agent_marketing():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        template_type = request.form.get("template_type", "just_listed").strip()
-        name = request.form.get("name", "").strip()
-        description = request.form.get("description", "").strip()
-        content = request.form.get("content", "").strip()
-
-        if name and content:
-            add_marketing_template(
-                owner_user_id=user_id,
-                role="agent",
-                template_type=template_type,
-                name=name,
-                description=description,
-                content=content,
-            )
-            flash("Marketing template saved.", "success")
-
-    templates = (
-        list_marketing_templates("agent", owner_user_id=user_id) if user_id else []
-    )
-
-    return render_template(
-        "agent/marketing.html",
-        brand_name=FRONT_BRAND_NAME,
-        templates=templates,
-    )
-
-
-@app.route("/agent/power-tools")
-def agent_power_tools():
-    return render_template(
-        "agent/power_tools.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-# -------------------------------------------------
-# LENDER ROUTES
-# -------------------------------------------------
-@app.route("/lender")
-def lender_dashboard():
-    # TEMPORARY: Authentication disabled for development
-    # if session.get("role") != "lender":
-    #     flash("Please sign in as a lender to see that page.", "error")
-    #     return redirect(url_for("login", role="lender"))
-
-    metrics = get_lender_dashboard_metrics(get_current_user_id())
-    return render_template("lender/dashboard.html", metrics=metrics)
-
-
-@app.route("/lender/settings/profile")
-def lender_settings_profile():
-    user = get_current_user()
-    return render_template(
-        "lender/settings_profile.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-    )
-
-
-@app.route("/lender/crm", methods=["GET", "POST"])
-def lender_crm():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        name = request.form.get("name", "").strip()
-        status = request.form.get("status", "preapproval").strip()
-        loan_type = request.form.get("loan_type", "").strip()
-        target_payment = request.form.get("target_payment", "").strip()
-        last_touch = "Today"
-
-        if name:
-            add_lender_borrower(
-                user_id, name, status, loan_type, target_payment, last_touch
-            )
-            flash("Borrower added to your CRM.", "success")
-
-    borrowers = list_lender_borrowers(user_id) if user_id else []
-
-    return render_template(
-        "lender/crm.html",
-        brand_name=FRONT_BRAND_NAME,
-        borrowers=borrowers,
-    )
-
-
-@app.route("/lender/loans", methods=["GET", "POST"])
-def lender_loans():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        borrower_name = request.form.get("borrower_name", "").strip()
-        status = request.form.get("status", "preapproval").strip()
-        loan_type = request.form.get("loan_type", "Conventional").strip()
-        target_payment = request.form.get("target_payment", "").strip()
-        stage = request.form.get("stage", "preapproval_started").strip()
-        close_date = request.form.get("close_date", "").strip()
-
-        if borrower_name:
-            add_lender_loan(
-                user_id,
-                borrower_name,
-                status,
-                loan_type,
-                target_payment,
-                stage,
-                close_date,
-            )
-            flash("Loan added to your pipeline.", "success")
-
-    loans = list_lender_loans(user_id) if user_id else []
-
-    return render_template(
-        "lender/loans.html",
-        brand_name=FRONT_BRAND_NAME,
-        loans=loans,
-    )
-
-
-@app.route("/lender/roles")
-def lender_roles():
-    return render_template(
-        "lender/roles.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/lender/documents")
-def lender_documents():
-    return render_template(
-        "lender/documents.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/lender/messages", methods=["GET", "POST"])
-def lender_messages():
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        label = request.form.get("label", "").strip()
-        category = request.form.get("category", "general").strip()
-        channel = request.form.get("channel", "email").strip()
-        subject = request.form.get("subject", "").strip()
-        body = request.form.get("body", "").strip()
-
-        if label and body:
-            add_message_template(
-                owner_user_id=user_id,
-                role="lender",
-                label=label,
-                category=category,
-                channel=channel,
-                subject=subject,
-                body=body,
-            )
-            flash("Template saved.", "success")
-
-    templates = (
-        list_message_templates("lender", owner_user_id=user_id) if user_id else []
-    )
-
-    return render_template(
-        "lender/messages.html",
-        brand_name=FRONT_BRAND_NAME,
-        templates=templates,
-    )
-
-
-@app.route("/lender/marketing", methods=["GET", "POST"])
-def lender_marketing():
-    """
-    Lender marketing hub.
-
-    - GET: show all saved lender marketing templates for the logged-in user
-    - POST: create/save a new marketing template
-    """
-    user = get_current_user()
-    user_id = user["id"] if user else None
-
-    if request.method == "POST" and user_id:
-        template_type = (request.form.get("template_type") or "loan_flyer").strip()
-        name = (request.form.get("name") or "").strip()
-        description = (request.form.get("description") or "").strip()
-        content = (request.form.get("content") or "").strip()
-
-        if name and content:
-            add_marketing_template(
-                owner_user_id=user_id,
-                role="lender",
-                template_type=template_type,
-                name=name,
-                description=description,
-                content=content,
-            )
-            flash("Marketing template saved.", "success")
-
-    templates = (
-        list_marketing_templates("lender", owner_user_id=user_id) if user_id else []
-    )
-
-    return render_template(
-        "lender/marketing.html",
-        brand_name=FRONT_BRAND_NAME,
-        templates=templates,
-    )
-
-
-@app.route("/lender/power-suite")
-def lender_power_suite():
-    """
-    Lender ‘power suite’ overview page.
-    """
-    return render_template(
-        "lender/power_suite.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-# -------------------------------------------------
-# BOARD VIEW + DEBUG
-# -------------------------------------------------
-
-
-
-
-# -------------------------------------------------
-# DEV ENTRYPOINT
-# -------------------------------------------------
-if __name__ == "__main__":
-    try:
-        app.run(debug=True, threaded=False)
-    except Exception as e:
-        import traceback
-        print("\n[CRITICAL ERROR] Application crashed:")
-        traceback.print_exc()

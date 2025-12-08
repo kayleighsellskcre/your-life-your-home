@@ -1,24 +1,320 @@
+
+
 {% extends "homeowner/layout.html" %}
 {% block title %}Material & Cost Estimator{% endblock %}
 
 {% block homeowner_content %}
+<!-- DEBUG: Show board_names for troubleshooting -->
+<div style="background: #fff3cd; color: #856404; padding: 8px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 1.1em;">
+  <strong>DEBUG:</strong> board_names = {{ board_names|safe }}
+</div>
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Budget with confidence</p>
   <h1>Material & Cost Estimator</h1>
-  <p>A simple place to sanity check what common projects usually cost before you start calling vendors.</p>
+  <p>Plan your next project with clarity. Instantly estimate costs for painting, flooring, kitchen/bath refresh, and outdoor upgrades—then save to your Mood Board & Planner.</p>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Planned Features</h2>
-    <p class="card-subtext">The estimator is being built with everyday planning in mind. It will help you get a feel for:</p>
-    <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>Painting single rooms and full interiors</li>
-      <li>Flooring changes such as carpet to LVP</li>
-      <li>Bathroom and kitchen refresh levels</li>
-      <li>Outdoor projects like decks and patios</li>
-    </ul>
-    <p class="card-subtext" style="margin-top: 1rem;">Once live you'll be able to tie these rough numbers directly into your Renovation planner projects and your equity overview.</p>
+<div class="dashboard-section" style="max-width: 900px; margin: 0 auto;">
+  <form id="cost-estimator-form" class="card" style="box-shadow: var(--shadow-premium); background: var(--warm-cream); border-radius: 16px; border: none;">
+    <div class="form-group">
+      <label for="board-name" class="form-label">Save to Mood Board</label>
+      <select id="board-name" name="board-name" class="form-control">
+        <option value="">Select a Mood Board...</option>
+        {% for board in board_names %}
+          <option value="{{ board }}">{{ board }}</option>
+        {% endfor %}
+        <option value="__new__">➕ Start New Board...</option>
+      </select>
+      <input type="text" id="new-board-name" class="form-control" placeholder="Enter new board name..." style="display:none; margin-top:0.5rem;" />
+    // Mood Board dropdown: show input for new board
+    const boardNameSelect = document.getElementById('board-name');
+    const newBoardInput = document.getElementById('new-board-name');
+    boardNameSelect.addEventListener('change', function() {
+      if (this.value === '__new__') {
+        newBoardInput.style.display = 'block';
+        newBoardInput.focus();
+      } else {
+        newBoardInput.style.display = 'none';
+      }
+    });
+    </div>
+    <h2 style="margin-bottom: 1.2rem;">Estimate Your Project</h2>
+    <div class="dashboard-grid" style="gap: 1.5rem;">
+      <!-- Category Cards -->
+      <div class="category-card" data-category="painting">
+        <div class="category-icon" style="background: var(--gradient-olive);"><span>🎨</span></div>
+        <div class="category-title">Painting</div>
+      </div>
+      <div class="category-card" data-category="flooring">
+        <div class="category-icon" style="background: var(--gradient-taupe);"><span>🪵</span></div>
+        <div class="category-title">Flooring</div>
+      </div>
+      <div class="category-card" data-category="kitchen">
+        <div class="category-icon" style="background: var(--gradient-warm);"><span>🍽️</span></div>
+        <div class="category-title">Kitchen</div>
+      </div>
+      <div class="category-card" data-category="bathroom">
+        <div class="category-icon" style="background: var(--gradient-premium);"><span>🛁</span></div>
+        <div class="category-title">Bathroom</div>
+      </div>
+      <div class="category-card" data-category="outdoor">
+        <div class="category-icon" style="background: var(--gradient-taupe);"><span>🌳</span></div>
+        <div class="category-title">Outdoor</div>
+      </div>
+    </div>
+    <div id="project-details" style="margin-top: 2rem;"></div>
+    <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem; width: 100%;">Estimate Cost</button>
+  </form>
+
+  <div id="estimate-summary" class="card" style="display:none; max-width: 700px; margin: 2rem auto 0 auto; box-shadow: var(--shadow-premium-hover); background: var(--white); border-radius: 16px;">
+    <h3 style="font-family: var(--font-heading); font-size: 2rem;">Project Summary</h3>
+    <div id="summary-details"></div>
+    <div id="summary-card" style="margin-top: 1.5rem;"></div>
+    <button id="save-to-planner" class="btn btn-secondary" style="margin-top: 1.5rem; width: 100%;">Save to Mood Board & Planner</button>
+    <div id="save-success" style="display:none; color: #4a7c4a; text-align:center; margin-top:0.5rem; font-weight:600;">Saved!</div>
+    <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="btn-link" style="display:block; margin-top:0.5rem; text-align:center;">See ROI Guide</a>
   </div>
 </div>
+
+<style>
+.category-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  padding: 1.5rem 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  border: 2px solid transparent;
+  min-width: 120px;
+}
+.category-card.selected, .category-card:hover {
+  box-shadow: var(--shadow-premium-hover);
+  border: 2px solid var(--olive-green);
+  transform: translateY(-2px) scale(1.03);
+}
+.category-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+.category-title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--charcoal-brown);
+  font-weight: 500;
+}
+</style>
+
+<script>
+const detailsTemplates = {
+  painting: `
+    <div class="form-group">
+      <label for="area" class="form-label">Area to Paint (sq ft)</label>
+      <input type="number" id="area" name="area" min="1" required class="form-control" placeholder="e.g. 500">
+    </div>
+    <div class="form-group">
+      <label for="finish" class="form-label">Paint Finish</label>
+      <select id="finish" name="finish" class="form-control">
+        <option value="standard">Standard</option>
+        <option value="premium">Premium</option>
+      </select>
+    </div>
+  `,
+  flooring: `
+    <div class="form-group">
+      <label for="area" class="form-label">Flooring Area (sq ft)</label>
+      <input type="number" id="area" name="area" min="1" required class="form-control" placeholder="e.g. 300">
+    </div>
+    <div class="form-group">
+      <label for="material" class="form-label">Material</label>
+      <select id="material" name="material" class="form-control">
+        <option value="lvp">LVP</option>
+        <option value="carpet">Carpet</option>
+        <option value="hardwood">Hardwood</option>
+      </select>
+    </div>
+  `,
+  bathroom: `
+    <div class="form-group">
+      <label for="level" class="form-label">Refresh Level</label>
+      <select id="level" name="level" class="form-control">
+        <option value="basic">Basic</option>
+        <option value="mid">Mid-Range</option>
+        <option value="premium">Premium</option>
+      </select>
+    </div>
+  `,
+  kitchen: `
+    <div class="form-group">
+      <label for="level" class="form-label">Refresh Level</label>
+      <select id="level" name="level" class="form-control">
+        <option value="basic">Basic</option>
+        <option value="mid">Mid-Range</option>
+        <option value="premium">Premium</option>
+      </select>
+    </div>
+  `,
+  outdoor: `
+    <div class="form-group">
+      <label for="type" class="form-label">Project Type</label>
+      <select id="type" name="type" class="form-control">
+        <option value="deck">Deck</option>
+        <option value="patio">Patio</option>
+        <option value="fence">Fence</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="area" class="form-label">Area (sq ft)</label>
+      <input type="number" id="area" name="area" min="1" required class="form-control" placeholder="e.g. 200">
+    </div>
+  `
+};
+
+// Category card click logic
+document.querySelectorAll('.category-card').forEach(card => {
+  card.addEventListener('click', function() {
+    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+    const cat = this.getAttribute('data-category');
+    document.getElementById('project-details').innerHTML = detailsTemplates[cat] || '';
+    document.getElementById('project-details').setAttribute('data-category', cat);
+  });
+});
+
+let lastEstimate = null;
+document.getElementById('cost-estimator-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  // Determine selected category
+  const selectedCard = document.querySelector('.category-card.selected');
+  if (!selectedCard) {
+    alert('Please select a renovation category.');
+    return;
+  }
+  const type = selectedCard.getAttribute('data-category');
+  let summary = '';
+  let cost = 0;
+  let projectName = '';
+  let notes = '';
+  let materialBreakdown = '';
+  let laborBreakdown = '';
+  let timeline = '';
+  let difficulty = '';
+  let roi = '';
+  // Luxury estimator logic
+  if (type === 'painting') {
+    const area = +document.getElementById('area').value;
+    const finish = document.getElementById('finish').value;
+    cost = area * (finish === 'premium' ? 2.5 : 1.5);
+    summary = `Painting ${area} sq ft with ${finish} finish.`;
+    projectName = 'Painting Project';
+    notes = `Area: ${area} sq ft, Finish: ${finish}`;
+    materialBreakdown = `$${(cost * 0.4).toLocaleString()} (materials)`;
+    laborBreakdown = `$${(cost * 0.6).toLocaleString()} (labor)`;
+    timeline = area < 400 ? '1-2 days' : '3-5 days';
+    difficulty = finish === 'premium' ? 'Medium' : 'Easy';
+    roi = '60-80%';
+  } else if (type === 'flooring') {
+    const area = +document.getElementById('area').value;
+    const material = document.getElementById('material').value;
+    const rates = { lvp: 4, carpet: 3, hardwood: 7 };
+    cost = area * (rates[material] || 4);
+    summary = `Flooring ${area} sq ft with ${material}.`;
+    projectName = 'Flooring Project';
+    notes = `Area: ${area} sq ft, Material: ${material}`;
+    materialBreakdown = `$${(cost * 0.5).toLocaleString()} (materials)`;
+    laborBreakdown = `$${(cost * 0.5).toLocaleString()} (labor)`;
+    timeline = area < 300 ? '1-2 days' : '3-6 days';
+    difficulty = material === 'hardwood' ? 'Hard' : 'Medium';
+    roi = '70-90%';
+  } else if (type === 'bathroom' || type === 'kitchen') {
+    const level = document.getElementById('level').value;
+    const rates = { basic: 3500, mid: 7000, premium: 12000 };
+    cost = rates[level] || 3500;
+    summary = `${type.charAt(0).toUpperCase() + type.slice(1)} Refresh: ${level}.`;
+    projectName = (type === 'bathroom' ? 'Bathroom' : 'Kitchen') + ' Refresh';
+    notes = `Level: ${level}`;
+    materialBreakdown = `$${(cost * 0.45).toLocaleString()} (materials)`;
+    laborBreakdown = `$${(cost * 0.55).toLocaleString()} (labor)`;
+    timeline = level === 'basic' ? '2-4 days' : (level === 'mid' ? '5-8 days' : '10-14 days');
+    difficulty = level === 'premium' ? 'Hard' : (level === 'mid' ? 'Medium' : 'Easy');
+    roi = type === 'kitchen' ? '75-100%' : '60-80%';
+  } else if (type === 'outdoor') {
+    const area = +document.getElementById('area').value;
+    const projType = document.getElementById('type').value;
+    const rates = { deck: 25, patio: 18, fence: 12 };
+    cost = area * (rates[projType] || 20);
+    summary = `Outdoor ${projType} of ${area} sq ft.`;
+    projectName = `Outdoor ${projType.charAt(0).toUpperCase() + projType.slice(1)}`;
+    notes = `Area: ${area} sq ft, Type: ${projType}`;
+    materialBreakdown = `$${(cost * 0.5).toLocaleString()} (materials)`;
+    laborBreakdown = `$${(cost * 0.5).toLocaleString()} (labor)`;
+    timeline = area < 200 ? '2-4 days' : '5-10 days';
+    difficulty = projType === 'deck' ? 'Hard' : 'Medium';
+    roi = '60-85%';
+  }
+  // At-a-glance summary card
+  document.getElementById('summary-details').innerHTML = summary + `<br><br><b>Estimated Cost:</b> $${cost.toLocaleString()}`;
+  document.getElementById('summary-card').innerHTML = `
+    <div style="background: var(--light-cream); border-radius: 12px; padding: 1.5rem; box-shadow: var(--shadow-light); margin-top: 1rem;">
+      <ul style="list-style:none; padding:0; margin:0; font-size:1.1rem;">
+        <li><b>Material:</b> ${materialBreakdown}</li>
+        <li><b>Labor:</b> ${laborBreakdown}</li>
+        <li><b>Timeline:</b> ${timeline}</li>
+        <li><b>Difficulty:</b> ${difficulty}</li>
+        <li><b>ROI Estimate:</b> ${roi}</li>
+      </ul>
+    </div>
+  `;
+  document.getElementById('estimate-summary').style.display = 'block';
+  lastEstimate = {
+    project_name: projectName,
+    project_budget: cost,
+    project_status: 'Planning',
+    project_notes: notes,
+    project_summary: summary + ` Estimated Cost: $${cost.toLocaleString()}`
+  };
+});
+
+document.getElementById('save-to-planner').addEventListener('click', function() {
+  if (!lastEstimate) return;
+  let boardName = boardNameSelect.value;
+  if (boardName === '__new__') {
+    boardName = newBoardInput.value.trim();
+    if (!boardName) {
+      alert('Please enter a name for your new Mood Board.');
+      newBoardInput.focus();
+      return;
+    }
+  }
+  if (!boardName) {
+    alert('Please select or enter a Mood Board to save.');
+    return;
+  }
+  const payload = { ...lastEstimate, board_name: boardName };
+  fetch('/homeowner/reno/planner/ajax-add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('save-success').style.display = 'block';
+      setTimeout(() => { document.getElementById('save-success').style.display = 'none'; }, 2000);
+    } else {
+      alert('Could not save: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(() => alert('Could not save project.'));
+});
+</script>
 {% endblock %}
