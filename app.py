@@ -1525,3 +1525,42 @@ def homeowner_reno_material_cost():
         "homeowner/reno_material_cost.html",
         brand_name=FRONT_BRAND_NAME,
     )
+
+@app.route("/agent", methods=["GET"])
+def agent_dashboard():
+    """Agent dashboard view."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    metrics = get_agent_dashboard_metrics(user["id"])
+    transactions = get_agent_transactions(user["id"])
+
+    return render_template(
+        "agent/dashboard.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        metrics=metrics,
+        transactions=transactions,
+    )
+
+@app.route("/lender", methods=["GET"])
+def lender_dashboard():
+    """Lender dashboard view."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    metrics = get_lender_dashboard_metrics(user["id"])
+    loans = list_lender_loans(user["id"])
+    borrowers = list_lender_borrowers(user["id"])
+
+    return render_template(
+        "lender/dashboard.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        metrics=metrics,
+        loans=loans,
+        borrowers=borrowers,
+    )
+
