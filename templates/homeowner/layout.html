@@ -423,20 +423,9 @@
       <h1 class="ylh-nav-title">Dashboard</h1>
       
       <div class="ylh-nav-items">
-        <!-- Home Base Dropdown -->
-        <div class="ylh-dropdown">
-          <button type="button" class="ylh-nav-button {% if is_home_base %}active{% endif %}" onclick="toggleDropdown(this, event)">
-            Home Base ▾
-          </button>
-          <div class="ylh-dropdown-menu">
-            <a href="{{ url_for('homeowner_overview') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/overview') %}active{% endif %}">
-              Dashboard Overview
-            </a>
-            <a href="{{ url_for('homeowner_upload_documents') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/upload-documents') %}active{% endif %}">
-              Upload Documents
-            </a>
-          </div>
-        </div>
+        <a href="{{ url_for('homeowner_overview') }}" class="ylh-nav-button {% if is_home_base %}active{% endif %}">
+          Home Base
+        </a>
         
         <!-- Value & Equity Dropdown -->
         <div class="ylh-dropdown">
