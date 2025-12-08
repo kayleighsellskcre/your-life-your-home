@@ -1,14 +1,7 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>Agent Dashboard</h1>
-<p>Your agent tools will appear here.</p>
-{% endblock %}
-
-
 {% extends "agent/layout.html" %}
 
 {% block agent_content %}
-<div class="dashboard-main__header">
+<div class="dashboard-main__header animate-in">
   <p class="dashboard-tagline">Your command center</p>
   <h1>Agent Dashboard</h1>
   <p>A clear view of your leads, transactions, and follow-ups at a glance.</p>
@@ -17,30 +10,53 @@
 <div class="dashboard-section">
   <!-- Metrics Cards -->
   <div class="dashboard-cards">
-    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <div class="card animate-in-delay-1" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
       <h3>🎯 New Leads</h3>
       <div class="card-value">{{ metrics.new_leads|default(0) }}</div>
       <p class="card-subtext">Waiting for first contact</p>
     </div>
 
-    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <div class="card animate-in-delay-2" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
       <h3>📋 Active Transactions</h3>
-      <div class="card-value">{{ metrics.active_transactions|default(0) }}</div>
+      <div class="card-value">{{ transactions|length if transactions else 0 }}</div>
       <p class="card-subtext">Files in progress</p>
     </div>
 
-    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
+    <div class="card animate-in-delay-3" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
       <h3>📞 Follow-ups Today</h3>
       <div class="card-value">{{ metrics.followups_today|default(0) }}</div>
       <p class="card-subtext">Clients to check in with</p>
     </div>
   </div>
 
+  <!-- Recent Transactions Pipeline -->
+  {% if transactions %}
+  <div class="card" style="margin-top: 2rem;">
+    <h2>Recent Transactions</h2>
+    <div style="margin-top: 1rem;">
+      {% for tx in transactions[:5] %}
+      <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="display: block; padding: 1rem; margin-bottom: 0.5rem; background: var(--warm-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--light-cream)'; this.style.transform='translateX(4px)';" onmouseout="this.style.background='var(--warm-cream)'; this.style.transform='';">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 600;">{{ tx.property_address or 'Property' }}</div>
+            <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">{{ tx.client_name }} • {{ tx.current_stage|replace('_', ' ')|title if tx.current_stage else 'New' }}</div>
+          </div>
+          <span style="color: var(--olive-green);">→</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div style="margin-top: 1rem;">
+      <a href="{{ url_for('agent_transactions') }}" class="btn-outline">View All Transactions</a>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Quick Actions -->
   <div class="card" style="margin-top: 2rem;">
     <h2>Quick Actions</h2>
     <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 1.5rem;">
-      <a href="{{ url_for('agent_crm') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+      <a href="{{ url_for('agent_crm') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
         <span style="font-size: 2rem;">👤</span>
         <div>
           <div style="font-weight: 600; margin-bottom: 0.25rem;">Add New Contact</div>
@@ -48,7 +64,7 @@
         </div>
       </a>
 
-      <a href="{{ url_for('agent_transactions') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+      <a href="{{ url_for('agent_transactions') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
         <span style="font-size: 2rem;">🏠</span>
         <div>
           <div style="font-weight: 600; margin-bottom: 0.25rem;">Add Transaction</div>
@@ -56,7 +72,7 @@
         </div>
       </a>
 
-      <a href="{{ url_for('agent_communications') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+      <a href="{{ url_for('agent_communications') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
         <span style="font-size: 2rem;">✉️</span>
         <div>
           <div style="font-weight: 600; margin-bottom: 0.25rem;">Send Template</div>
@@ -64,7 +80,7 @@
         </div>
       </a>
 
-      <a href="{{ url_for('agent_marketing') }}" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown); transition: all 0.2s;" onmouseover="this.style.background='var(--soft-tan)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.background='var(--light-cream)'; this.style.transform='';">
+      <a href="{{ url_for('agent_marketing') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
         <span style="font-size: 2rem;">📱</span>
         <div>
           <div style="font-weight: 600; margin-bottom: 0.25rem;">Create Marketing</div>

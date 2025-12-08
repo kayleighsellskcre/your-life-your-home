@@ -1,14 +1,7 @@
-{% extends "base.html" %}
-{% block content %}
-<h1>Lender Dashboard</h1>
-<p>Your lender tools will appear here.</p>
-{% endblock %}
-
-
 {% extends "lender/layout.html" %}
 
 {% block lender_content %}
-<div class="dashboard-main__header">
+<div class="dashboard-main__header animate-in">
   <p class="dashboard-tagline">At a glance</p>
   <h1>Lender Overview</h1>
   <p>A quick read on your applications, loans in motion, and nurture opportunities.</p>
@@ -16,7 +9,7 @@
 
 <div class="dashboard-section">
   <div class="dashboard-cards">
-    <div class="card">
+    <div class="card animate-in-delay-1">
       <h2>New Applications</h2>
       <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
         {{ metrics.new_applications }}
@@ -26,7 +19,7 @@
       </p>
     </div>
 
-    <div class="card">
+    <div class="card animate-in-delay-2">
       <h2>Loans in Process</h2>
       <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
         {{ metrics.loans_in_process }}
@@ -36,7 +29,7 @@
       </p>
     </div>
 
-    <div class="card">
+    <div class="card animate-in-delay-3">
       <h2>Nurture Contacts</h2>
       <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
         {{ metrics.nurture_contacts }}
@@ -44,6 +37,62 @@
       <p class="card-subtext">
         Past clients and warm leads who may benefit from check-ins, rate reviews, or simple equity updates.
       </p>
+    </div>
+  </div>
+
+  <!-- Loan Pipeline -->
+  {% if loans %}
+  <div class="card" style="margin-top: 2rem;">
+    <h2>Active Loans</h2>
+    <div style="margin-top: 1rem;">
+      {% for loan in loans[:5] %}
+      <div style="padding: 1rem; margin-bottom: 0.5rem; background: var(--warm-cream); border-radius: var(--border-radius);">
+        <div style="font-weight: 600;">{{ loan.borrower_name or 'Borrower' }}</div>
+        <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">{{ loan.loan_type|title if loan.loan_type else 'Loan' }} • {{ loan.status|title if loan.status else 'Active' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top: 1rem;">
+      <a href="{{ url_for('lender_loans') }}" class="btn-outline">View All Loans</a>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Quick Actions -->
+  <div class="card" style="margin-top: 2rem;">
+    <h2>Quick Actions</h2>
+    <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 1.5rem;">
+      <a href="{{ url_for('lender_crm') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
+        <span style="font-size: 2rem;">👥</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Manage Borrowers</div>
+          <div style="font-size: 0.85rem; color: #666;">View and manage your borrower list</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('lender_loans') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
+        <span style="font-size: 2rem;">📋</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Add New Loan</div>
+          <div style="font-size: 0.85rem; color: #666;">Start tracking a new loan file</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('lender_messages') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
+        <span style="font-size: 2rem;">✉️</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Messages</div>
+          <div style="font-size: 0.85rem; color: #666;">Communicate with borrowers</div>
+        </div>
+      </a>
+
+      <a href="{{ url_for('lender_marketing') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
+        <span style="font-size: 2rem;">📱</span>
+        <div>
+          <div style="font-weight: 600; margin-bottom: 0.25rem;">Marketing Tools</div>
+          <div style="font-size: 0.85rem; color: #666;">Create marketing materials</div>
+        </div>
+      </a>
     </div>
   </div>
 </div>

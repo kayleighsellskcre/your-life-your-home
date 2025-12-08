@@ -165,14 +165,22 @@ def homeowner_reno_planner_ajax_add():
     except Exception:
         budget_val = None
 
+    # Get notes from JSON data
+    notes = data.get("project_notes", "").strip()
+    
     # If a board_name is provided, save as a design board note as well
     if board_name:
         note_title = name
-        notes = request.form.get("project_notes", "").strip()
-        note_details = summary or notes
-        add_design_board_note(user_id, board_name, note_title, note_details)
+        note_details = summary or notes or f"Project: {name}"
+        add_design_board_note(
+            user_id, 
+            board_name, 
+            note_title, 
+            note_details,
+            photos=[],
+            files=[]
+        )
 
-    notes = request.form.get("project_notes", "").strip()
     add_homeowner_project(user_id, name, budget_val, status, notes)
     return jsonify({"success": True})
 
@@ -288,14 +296,21 @@ def send_due_reminders():
 
 
 def start_scheduler():
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(send_due_reminders, "cron", hour=12, minute=0)
-    scheduler.start()
-    print("✓ Reminder scheduler started.")
+    """Start background scheduler safely without blocking app startup."""
+    try:
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(send_due_reminders, "cron", hour=12, minute=0)
+        scheduler.start()
+        print("✓ Reminder scheduler started.")
+    except Exception as e:
+        print(f"⚠ Scheduler could not start (non-critical): {e}")
 
 
-# Start scheduler when app starts
-start_scheduler()
+# Start scheduler when app starts (non-blocking)
+try:
+    start_scheduler()
+except Exception as e:
+    print(f"⚠ Scheduler initialization failed (non-critical): {e}")
 
 
 # -------------------------------------------------
@@ -403,9 +418,10 @@ def get_agent_dashboard_metrics(user_id):
             "followups_today": 0,
         }
     contacts = list_agent_contacts(user_id)
+    transactions = get_agent_transactions(user_id)
     return {
         "new_leads": sum((c1["stage"] or "") == "new" for c1 in contacts),
-        "active_transactions": 0,
+        "active_transactions": len(transactions) if transactions else 0,
         "followups_today": max(len(contacts) // 2, 0),
     }
 
@@ -819,14 +835,6 @@ def homeowner_saved_notes():
     )
 
 
-@app.route("/homeowner/design-boards", methods=["GET"])
-def homeowner_design_boards():
-    """
-    Legacy route for Design Boards.
-    All design boards are now managed inside homeowner_saved_notes,
-    so this simply redirects users to the correct page.
-    """
-    return redirect(url_for("homeowner_saved_notes"))
 
 
 @app.route("/homeowner/design-boards/<path:board_name>", methods=["GET"])
@@ -1562,5 +1570,504 @@ def lender_dashboard():
         metrics=metrics,
         loans=loans,
         borrowers=borrowers,
+    )
+
+
+# -------------------------------------------------
+# AGENT ROUTES
+# -------------------------------------------------
+@app.route("/agent/crm", methods=["GET", "POST"])
+def agent_crm():
+    """Agent CRM - manage contacts and leads."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        phone = request.form.get("phone", "").strip()
+        stage = request.form.get("stage", "new").strip()
+        notes = request.form.get("notes", "").strip()
+
+        if name and email:
+            try:
+                add_agent_contact(user["id"], name, email, phone, stage, notes)
+                flash("Contact added successfully!", "success")
+            except Exception as e:
+                flash(f"Error adding contact: {e}", "error")
+
+    contacts = list_agent_contacts(user["id"])
+    return render_template(
+        "agent/crm.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        contacts=contacts,
+    )
+
+
+@app.route("/agent/transactions", methods=["GET", "POST"])
+def agent_transactions():
+    """Agent transactions - list and create transactions."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    if request.method == "POST":
+        property_address = request.form.get("property_address", "").strip()
+        client_name = request.form.get("client_name", "").strip()
+        side = request.form.get("side", "buyer").strip()
+        stage = request.form.get("stage", "pre_contract").strip()
+        close_date = request.form.get("close_date", "").strip() or None
+
+        if property_address and client_name:
+            try:
+                create_transaction(
+                    agent_id=user["id"],
+                    property_address=property_address,
+                    client_name=client_name,
+                    side=side,
+                    current_stage=stage,
+                    target_close_date=close_date,
+                    client_email=request.form.get("client_email", "").strip(),
+                    client_phone=request.form.get("client_phone", "").strip(),
+                    purchase_price=request.form.get("purchase_price", "").strip() or None,
+                    notes=request.form.get("notes", "").strip(),
+                )
+                flash("Transaction created successfully!", "success")
+            except Exception as e:
+                flash(f"Error creating transaction: {e}", "error")
+
+    transactions = get_agent_transactions(user["id"])
+    return render_template(
+        "agent/transactions.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        transactions=transactions,
+    )
+
+
+@app.route("/agent/transactions/<int:tx_id>", methods=["GET"])
+def agent_transaction_detail(tx_id):
+    """View transaction details."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+
+    documents = get_transaction_documents(tx_id)
+    participants = get_transaction_participants(tx_id)
+    timeline = get_transaction_timeline(tx_id)
+    doc_status = get_transaction_document_status(tx_id)
+
+    return render_template(
+        "agent/transaction_detail.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        transaction=transaction,
+        documents=documents,
+        participants=participants,
+        timeline=timeline,
+        doc_status=doc_status,
+    )
+
+
+@app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"])
+def agent_transaction_delete(tx_id):
+    """Delete a transaction."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    if delete_transaction(tx_id, user["id"]):
+        flash("Transaction deleted.", "success")
+    else:
+        flash("Could not delete transaction.", "error")
+
+    return redirect(url_for("agent_transactions"))
+
+
+@app.route("/agent/communications", methods=["GET", "POST"])
+def agent_communications():
+    """Agent communications - message templates."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    if request.method == "POST":
+        template_name = request.form.get("template_name", "").strip()
+        template_content = request.form.get("template_content", "").strip()
+        template_type = request.form.get("template_type", "email").strip()
+
+        if template_name and template_content:
+            try:
+                add_message_template(user["id"], template_name, template_content, template_type)
+                flash("Template saved!", "success")
+            except Exception as e:
+                flash(f"Error saving template: {e}", "error")
+
+    templates = list_message_templates(user["id"])
+    return render_template(
+        "agent/communications.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        templates=templates,
+    )
+
+
+@app.route("/agent/marketing", methods=["GET", "POST"])
+def agent_marketing():
+    """Agent marketing - marketing templates and campaigns."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    if request.method == "POST":
+        template_name = request.form.get("template_name", "").strip()
+        template_content = request.form.get("template_content", "").strip()
+        template_type = request.form.get("template_type", "social").strip()
+
+        if template_name and template_content:
+            try:
+                add_marketing_template(user["id"], template_name, template_content, template_type)
+                flash("Marketing template saved!", "success")
+            except Exception as e:
+                flash(f"Error saving template: {e}", "error")
+
+    templates = list_marketing_templates(user["id"])
+    return render_template(
+        "agent/marketing.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        templates=templates,
+    )
+
+
+@app.route("/agent/power-tools", methods=["GET"])
+def agent_power_tools():
+    """Agent power tools - advanced agent features."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    return render_template(
+        "agent/power_tools.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+@app.route("/agent/settings/profile", methods=["GET", "POST"])
+def agent_settings_profile():
+    """Agent settings and profile."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    return render_template(
+        "agent/settings_profile.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+# -------------------------------------------------
+# LENDER ROUTES
+# -------------------------------------------------
+@app.route("/lender/crm", methods=["GET"])
+def lender_crm():
+    """Lender CRM."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    borrowers = list_lender_borrowers(user["id"])
+    return render_template(
+        "lender/crm.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        borrowers=borrowers,
+    )
+
+
+@app.route("/lender/loans", methods=["GET", "POST"])
+def lender_loans():
+    """Lender loans management."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    if request.method == "POST":
+        borrower_name = request.form.get("borrower_name", "").strip()
+        loan_amount = request.form.get("loan_amount", "").strip()
+        loan_type = request.form.get("loan_type", "conventional").strip()
+        status = request.form.get("status", "preapproval").strip()
+
+        if borrower_name and loan_amount:
+            try:
+                add_lender_loan(user["id"], borrower_name, loan_amount, loan_type, status)
+                flash("Loan added successfully!", "success")
+            except Exception as e:
+                flash(f"Error adding loan: {e}", "error")
+
+    loans = list_lender_loans(user["id"])
+    return render_template(
+        "lender/loans.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        loans=loans,
+    )
+
+
+@app.route("/lender/marketing", methods=["GET"])
+def lender_marketing():
+    """Lender marketing tools."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    return render_template(
+        "lender/marketing.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+@app.route("/lender/messages", methods=["GET"])
+def lender_messages():
+    """Lender messages."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    return render_template(
+        "lender/messages.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+@app.route("/lender/documents", methods=["GET"])
+def lender_documents():
+    """Lender documents."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    return render_template(
+        "lender/documents.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+@app.route("/lender/power-suite", methods=["GET"])
+def lender_power_suite():
+    """Lender power suite."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    return render_template(
+        "lender/power_suite.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+@app.route("/lender/settings/profile", methods=["GET"])
+def lender_settings_profile():
+    """Lender settings."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    return render_template(
+        "lender/settings_profile.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
+# -------------------------------------------------
+# HOMEOWNER ROUTES (Missing)
+# -------------------------------------------------
+@app.route("/homeowner/reno/roi-guide", methods=["GET"])
+def homeowner_reno_roi_guide():
+    """Renovation ROI guide."""
+    return render_template(
+        "homeowner/reno_roi_guide.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/reno/before-after", methods=["GET"])
+def homeowner_reno_before_after():
+    """Before and after renovation gallery."""
+    return render_template(
+        "homeowner/reno_before_after.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/next/plan-my-move", methods=["GET", "POST"])
+def homeowner_next_plan_move():
+    """Plan my move - next home planning."""
+    user = get_current_user()
+    if request.method == "POST":
+        plan_data = {
+            "target_date": request.form.get("target_date", "").strip(),
+            "target_location": request.form.get("target_location", "").strip(),
+            "budget": request.form.get("budget", "").strip(),
+            "notes": request.form.get("notes", "").strip(),
+        }
+        if user:
+            upsert_next_move_plan(user["id"], plan_data)
+            flash("Plan saved!", "success")
+
+    plan = get_next_move_plan(user["id"]) if user else None
+    return render_template(
+        "homeowner/next_plan_move.html",
+        brand_name=FRONT_BRAND_NAME,
+        plan=plan,
+    )
+
+
+@app.route("/homeowner/next/buy-sell-guidance", methods=["GET"])
+def homeowner_next_buy_sell_guidance():
+    """Buy and sell guidance."""
+    return render_template(
+        "homeowner/next_buy_sell_guidance.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/next/pathways", methods=["GET"])
+def homeowner_next_pathways():
+    """Next home pathways."""
+    return render_template(
+        "homeowner/next_pathways.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/next/loan-paths", methods=["GET"])
+def homeowner_next_loan_paths():
+    """Loan paths guidance."""
+    return render_template(
+        "homeowner/next_loan_paths.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/next/affordability", methods=["GET"])
+def homeowner_next_affordability():
+    """Affordability calculator."""
+    return render_template(
+        "homeowner/next_affordability.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/care/maintenance-guide", methods=["GET"])
+def homeowner_care_maintenance_guide():
+    """Home maintenance guide."""
+    return render_template(
+        "homeowner/care_maintenance_guide.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/care/seasonal-checklists", methods=["GET"])
+def homeowner_care_seasonal_checklists():
+    """Seasonal maintenance checklists."""
+    return render_template(
+        "homeowner/care_seasonal_checklists.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/care/home-protection", methods=["GET"])
+def homeowner_care_home_protection():
+    """Home protection guide."""
+    return render_template(
+        "homeowner/care_home_protection.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/care/warranty-log", methods=["GET"])
+def homeowner_care_warranty_log():
+    """Warranty log."""
+    return render_template(
+        "homeowner/care_warranty_log.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/care/energy-savings", methods=["GET"])
+def homeowner_care_energy_savings():
+    """Energy savings guide."""
+    return render_template(
+        "homeowner/care_energy_savings.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/support/ask-question", methods=["GET", "POST"])
+def homeowner_support_ask_question():
+    """Ask a question."""
+    user = get_current_user()
+    if request.method == "POST":
+        topic = request.form.get("topic", "").strip()
+        question = request.form.get("question", "").strip()
+        if topic and question and user:
+            add_homeowner_question(user["id"], topic, question)
+            flash("Question submitted! We'll get back to you soon.", "success")
+            return redirect(url_for("homeowner_support_ask_question"))
+
+    return render_template(
+        "homeowner/support_ask_question.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/support/chat-human", methods=["GET"])
+def homeowner_support_chat_human():
+    """Chat with human support."""
+    return render_template(
+        "homeowner/support_chat_human.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/support/schedule-chat", methods=["GET"])
+def homeowner_support_schedule_chat():
+    """Schedule a chat."""
+    return render_template(
+        "homeowner/support_schedule_chat.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/support/resources", methods=["GET"])
+def homeowner_support_resources():
+    """Support resources."""
+    return render_template(
+        "homeowner/support_resources.html",
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/support/meet-team", methods=["GET"])
+def homeowner_support_meet_team():
+    """Meet the team."""
+    return render_template(
+        "homeowner/support_meet_team.html",
+        brand_name=FRONT_BRAND_NAME,
     )
 

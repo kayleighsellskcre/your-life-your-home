@@ -1513,3 +1513,301 @@ tr:hover {
 html {
   scroll-behavior: smooth;
 }
+
+/* ===========================
+   ENHANCED ANIMATIONS & TRANSITIONS
+   =========================== */
+
+/* Page Fade In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Smooth Page Transitions */
+body {
+  animation: fadeIn 0.4s ease-in;
+}
+
+/* Card Hover Effects */
+.card, .dashboard-card, .action-card {
+  transition: all var(--transition-base);
+}
+
+.card:hover, .dashboard-card:hover, .action-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-premium-hover);
+}
+
+/* Button Hover Animations */
+.btn, .btn-primary, .btn-secondary, .btn-outline {
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover, .btn-primary:hover, .btn-secondary:hover, .btn-outline:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(58, 53, 44, 0.15);
+}
+
+.btn:active, .btn-primary:active, .btn-secondary:active, .btn-outline:active {
+  transform: translateY(0);
+}
+
+/* Dropdown Animations */
+.ylh-dropdown-menu {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all var(--transition-fast);
+  pointer-events: none;
+}
+
+.ylh-dropdown.active .ylh-dropdown-menu,
+.ylh-dropdown:hover .ylh-dropdown-menu {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.ylh-dropdown-item {
+  transition: all var(--transition-fast);
+}
+
+.ylh-dropdown-item:hover {
+  background: var(--light-cream);
+  transform: translateX(4px);
+  padding-left: 1.5rem;
+}
+
+/* Progress Bar Animation */
+.progress-bar-premium {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar-premium::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Table Row Hover */
+.data-table tbody tr {
+  transition: all var(--transition-fast);
+}
+
+.data-table tbody tr:hover {
+  background: var(--light-cream);
+  transform: scale(1.01);
+}
+
+/* Form Input Focus */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+  transition: all var(--transition-fast);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 106, 69, 0.15);
+  border-color: var(--olive-green);
+}
+
+/* Staggered Animation for Lists */
+.animate-in {
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.animate-in-delay-1 {
+  animation: fadeInUp 0.6s ease 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-in-delay-2 {
+  animation: fadeInUp 0.6s ease 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-in-delay-3 {
+  animation: fadeInUp 0.6s ease 0.3s forwards;
+  opacity: 0;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-spinner {
+  border: 3px solid var(--light-cream);
+  border-top: 3px solid var(--olive-green);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+}
+
+/* Slide In Panels */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-panel {
+  animation: slideInFromRight 0.4s ease-out;
+}
+
+/* Smooth Navbar Transitions */
+.ylh-nav-link, .ylh-nav-button {
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.ylh-nav-link::after, .ylh-nav-button::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--olive-green);
+  transition: all var(--transition-base);
+  transform: translateX(-50%);
+}
+
+.ylh-nav-link:hover::after, .ylh-nav-button:hover::after,
+.ylh-nav-link.active::after, .ylh-nav-button.active::after {
+  width: 80%;
+}
+
+/* Badge Pulse Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.badge-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Image Hover Effects */
+img {
+  transition: transform var(--transition-base);
+}
+
+img:hover {
+  transform: scale(1.05);
+}
+
+/* Smooth Modal Transitions */
+.modal {
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  animation: scaleIn 0.3s ease;
+}
+
+/* Notification Animations */
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.flash-message {
+  animation: slideDown 0.4s ease-out;
+}
+
+/* Smooth Accordion */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.accordion.active .accordion-content {
+  max-height: 1000px;
+  transition: max-height 0.5s ease-in;
+}
