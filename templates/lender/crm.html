@@ -1,84 +1,582 @@
 {% extends "lender/layout.html" %}
 
 {% block lender_content %}
+<style>
+  .crm-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  .crm-sidebar {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+  }
+  .crm-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--olive-green);
+    background: white;
+    color: var(--olive-green);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-decoration: none;
+    text-align: center;
+    display: block;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--olive-green);
+    color: white;
+  }
+  .borrower-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .borrower-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .borrower-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+  .borrower-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--charcoal-brown);
+    margin: 0;
+  }
+  .borrower-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-preapproval { background: #fff3cd; color: #856404; }
+  .badge-in_process { background: #d4edda; color: #155724; }
+  .badge-closed { background: #cce5ff; color: #004085; }
+  .badge-prospect { background: #e2e3e5; color: #383d41; }
+  .borrower-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+  .info-item strong {
+    color: var(--charcoal-brown);
+    min-width: 120px;
+  }
+  .auto-email-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .auto-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  .borrower-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  .btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal.active {
+    display: flex;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .form-full {
+    grid-column: 1 / -1;
+  }
+  .toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .toggle-switch input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    appearance: none;
+    background: #ccc;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .toggle-switch input[type="checkbox"]:checked {
+    background: var(--olive-green);
+  }
+  .toggle-switch input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+  }
+  .toggle-switch input[type="checkbox"]:checked::before {
+    left: 22px;
+  }
+</style>
+
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Track relationships</p>
   <h1>Borrower CRM</h1>
-  <p>Track pre-approvals, active loans, and past clients with clear stages and gentle follow-up.</p>
+  <p>Complete borrower management with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Quick Add Borrower</h2>
-    <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
-      <div>
-        <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Name</label>
-        <input id="name" name="name" required />
+<div class="crm-container">
+  <!-- Sidebar: Add Borrower & Filters -->
+  <div class="crm-sidebar">
+    <h2 style="margin-top: 0; color: var(--charcoal-brown);">Quick Add</h2>
+    <form method="post" id="addBorrowerForm">
+      <input type="hidden" name="action" value="add">
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
+          <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
+          <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
+          <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Status</label>
+          <select name="status" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+            <option value="prospect">Prospect</option>
+            <option value="preapproval">Pre-Approval</option>
+            <option value="in_process">In Process</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Loan Type</label>
+          <input type="text" name="loan_type" placeholder="Conventional, FHA, VA..." style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Borrower</button>
       </div>
-      <div>
-        <label for="status" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Status</label>
-        <select id="status" name="status">
-          <option value="preapproval">Pre-Approval</option>
-          <option value="in_process">In Process</option>
-          <option value="closed">Closed</option>
-          <option value="prospect">Prospect</option>
-        </select>
-      </div>
-      <div>
-        <label for="loan_type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Loan Type</label>
-        <input id="loan_type" name="loan_type" placeholder="Conventional, FHA, VA, etc." />
-      </div>
-      <div>
-        <label for="target_payment" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Target Payment</label>
-        <input id="target_payment" name="target_payment" placeholder="Example: $2,000/mo" />
-      </div>
-      <button class="btn btn-primary" type="submit">Add Borrower</button>
     </form>
+
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #eee;">
+      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Filter by Status</h3>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="?status=" class="filter-btn {% if not status_filter %}active{% endif %}">All Borrowers</a>
+        <a href="?status=prospect" class="filter-btn {% if status_filter == 'prospect' %}active{% endif %}">Prospects</a>
+        <a href="?status=preapproval" class="filter-btn {% if status_filter == 'preapproval' %}active{% endif %}">Pre-Approval</a>
+        <a href="?status=in_process" class="filter-btn {% if status_filter == 'in_process' %}active{% endif %}">In Process</a>
+        <a href="?status=closed" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
+      </div>
+    </div>
   </div>
 
-  <div class="card" style="margin-top:2rem;">
-    <h2>Borrowers</h2>
-
+  <!-- Main: Borrower List -->
+  <div class="crm-main">
     {% if borrowers %}
-      <table class="data-table" style="margin-top:1.5rem;">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Loan Type</th>
-            <th>Target Payment</th>
-            <th>Last Touch</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for b in borrowers %}
-            <tr>
-              <td style="font-weight:600;">{{ b.name }}</td>
-              <td>
-                {% if b.status == 'preapproval' %}
-                  <span class="badge" style="background-color:var(--soft-tan);color:var(--charcoal-brown);">Pre-Approval</span>
-                {% elif b.status == 'in_process' %}
-                  <span class="badge" style="background-color:#d4edda;color:#155724;">In Process</span>
-                {% elif b.status == 'closed' %}
-                  <span class="badge" style="background-color:#cce5ff;color:#004085;">Closed</span>
-                {% else %}
-                  <span class="badge" style="background-color:var(--light-cream);color:var(--charcoal-brown);">{{ b.status|capitalize }}</span>
-                {% endif %}
-              </td>
-              <td>{{ b.loan_type }}</td>
-              <td>{{ b.target_payment }}</td>
-              <td>{{ b.last_touch }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      {% for borrower in borrowers %}
+        <div class="borrower-card">
+          <div class="borrower-header">
+            <div>
+              <h3 class="borrower-name">{{ borrower.name }}</h3>
+              <span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span>
+            </div>
+            <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: white; border: none;">Edit</button>
+          </div>
+
+          <div class="borrower-info">
+            {% if borrower.email %}
+              <div class="info-item">
+                <strong>Email:</strong>
+                <a href="mailto:{{ borrower.email }}">{{ borrower.email }}</a>
+              </div>
+            {% endif %}
+            {% if borrower.phone %}
+              <div class="info-item">
+                <strong>Phone:</strong>
+                <a href="tel:{{ borrower.phone }}">{{ borrower.phone }}</a>
+              </div>
+            {% endif %}
+            {% if borrower.loan_type %}
+              <div class="info-item">
+                <strong>Loan Type:</strong>
+                <span>{{ borrower.loan_type }}</span>
+              </div>
+            {% endif %}
+            {% if borrower.target_payment %}
+              <div class="info-item">
+                <strong>Target Payment:</strong>
+                <span>{{ borrower.target_payment }}</span>
+              </div>
+            {% endif %}
+            {% if borrower.loan_amount %}
+              <div class="info-item">
+                <strong>Loan Amount:</strong>
+                <span>${{ "{:,.0f}".format(borrower.loan_amount) }}</span>
+              </div>
+            {% endif %}
+            {% if borrower.loan_rate %}
+              <div class="info-item">
+                <strong>Loan Rate:</strong>
+                <span>{{ borrower.loan_rate }}%</span>
+              </div>
+            {% endif %}
+            {% if borrower.birthday %}
+              <div class="info-item">
+                <strong>Birthday:</strong>
+                <span>{{ borrower.birthday }}</span>
+              </div>
+            {% endif %}
+            {% if borrower.home_anniversary %}
+              <div class="info-item">
+                <strong>Home Anniversary:</strong>
+                <span>{{ borrower.home_anniversary }}</span>
+              </div>
+            {% endif %}
+            {% if borrower.property_address %}
+              <div class="info-item">
+                <strong>Property:</strong>
+                <span>{{ borrower.property_address }}</span>
+              </div>
+            {% endif %}
+            {% if borrower.last_touch %}
+              <div class="info-item">
+                <strong>Last Touch:</strong>
+                <span>{{ borrower.last_touch }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if borrower.notes %}
+            <div style="margin: 1rem 0; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
+              <strong style="color: var(--charcoal-brown);">Notes:</strong>
+              <p style="margin: 0.5rem 0 0 0; color: #666; white-space: pre-wrap;">{{ borrower.notes }}</p>
+            </div>
+          {% endif %}
+
+          {% if borrower.tags %}
+            <div style="margin: 0.5rem 0;">
+              <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
+              <span style="color: #666;">{{ borrower.tags }}</span>
+            </div>
+          {% endif %}
+
+          <div class="auto-email-badges">
+            {% if borrower.auto_birthday %}
+              <span class="auto-badge">🎂 Birthday Emails</span>
+            {% endif %}
+            {% if borrower.auto_anniversary %}
+              <span class="auto-badge">🏠 Home Anniversary</span>
+            {% endif %}
+            {% if borrower.auto_seasonal %}
+              <span class="auto-badge">🍂 Seasonal Checklists</span>
+            {% endif %}
+            {% if borrower.auto_equity %}
+              <span class="auto-badge">💰 Equity Updates ({{ borrower.equity_frequency }})</span>
+            {% endif %}
+            {% if borrower.auto_holidays %}
+              <span class="auto-badge">🎄 Holiday Greetings</span>
+            {% endif %}
+          </div>
+
+          <div class="borrower-actions">
+            <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small" style="background: #2196F3; color: white; border: none;">Log Interaction</button>
+            {% if borrower.email %}
+              <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: #4CAF50; color: white; text-decoration: none; border: none;">Email</a>
+            {% endif %}
+            {% if borrower.phone %}
+              <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: #FF9800; color: white; text-decoration: none; border: none;">Call</a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
     {% else %}
-      <div class="empty-state">
-        <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+      <div class="empty-state" style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
         <h3>No Borrowers Yet</h3>
-        <p>Add one current client or a warm prospect to begin.</p>
+        <p>Start building your network by adding your first borrower!</p>
       </div>
     {% endif %}
   </div>
 </div>
+
+<!-- Edit Borrower Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0;">Edit Borrower</h2>
+    <form method="post" id="editBorrowerForm">
+      <input type="hidden" name="action" value="update">
+      <input type="hidden" name="borrower_id" id="edit_borrower_id">
+      
+      <div class="form-grid">
+        <div>
+          <label>Name *</label>
+          <input type="text" name="name" id="edit_name" required>
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" name="email" id="edit_email">
+        </div>
+        <div>
+          <label>Phone</label>
+          <input type="tel" name="phone" id="edit_phone">
+        </div>
+        <div>
+          <label>Status</label>
+          <select name="status" id="edit_status">
+            <option value="prospect">Prospect</option>
+            <option value="preapproval">Pre-Approval</option>
+            <option value="in_process">In Process</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div>
+          <label>Loan Type</label>
+          <input type="text" name="loan_type" id="edit_loan_type">
+        </div>
+        <div>
+          <label>Target Payment</label>
+          <input type="text" name="target_payment" id="edit_target_payment">
+        </div>
+        <div>
+          <label>Loan Amount</label>
+          <input type="number" name="loan_amount" id="edit_loan_amount" step="1000">
+        </div>
+        <div>
+          <label>Loan Rate (%)</label>
+          <input type="number" name="loan_rate" id="edit_loan_rate" step="0.01">
+        </div>
+        <div>
+          <label>Birthday (MM/DD)</label>
+          <input type="text" name="birthday" id="edit_birthday" placeholder="12/25">
+        </div>
+        <div>
+          <label>Home Anniversary (MM/DD/YYYY)</label>
+          <input type="text" name="home_anniversary" id="edit_home_anniversary" placeholder="01/15/2020">
+        </div>
+        <div class="form-full">
+          <label>Address</label>
+          <input type="text" name="address" id="edit_address">
+        </div>
+        <div class="form-full">
+          <label>Property Address</label>
+          <input type="text" name="property_address" id="edit_property_address">
+        </div>
+        <div>
+          <label>Equity Update Frequency</label>
+          <select name="equity_frequency" id="edit_equity_frequency">
+            <option value="monthly">Monthly</option>
+            <option value="bimonthly">Every 2 Months</option>
+            <option value="quarterly">Quarterly</option>
+          </select>
+        </div>
+        <div class="form-full">
+          <label>Tags (comma-separated)</label>
+          <input type="text" name="tags" id="edit_tags" placeholder="VIP, Referral, Investor">
+        </div>
+        <div class="form-full">
+          <label>Notes</label>
+          <textarea name="notes" id="edit_notes" rows="4"></textarea>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Automated Emails</h3>
+      <div class="form-grid">
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_birthday" id="edit_auto_birthday" value="1">
+          <label for="edit_auto_birthday">Send Birthday Emails</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_anniversary" id="edit_auto_anniversary" value="1">
+          <label for="edit_auto_anniversary">Send Home Anniversary Emails</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_seasonal" id="edit_auto_seasonal" value="1">
+          <label for="edit_auto_seasonal">Send Seasonal Checklists</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_equity" id="edit_auto_equity" value="1">
+          <label for="edit_auto_equity">Send Equity Updates</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_holidays" id="edit_auto_holidays" value="1">
+          <label for="edit_auto_holidays">Send Holiday Greetings</label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" onclick="closeEditModal()" class="btn" style="background: #ccc; color: #333;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Log Interaction Modal -->
+<div id="interactionModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0;">Log Interaction</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="add_interaction">
+      <input type="hidden" name="borrower_id" id="interaction_borrower_id">
+      
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label>Interaction Type *</label>
+          <select name="interaction_type" required>
+            <option value="email">Email</option>
+            <option value="call">Phone Call</option>
+            <option value="meeting">Meeting</option>
+            <option value="text">Text Message</option>
+            <option value="note">Note</option>
+          </select>
+        </div>
+        <div>
+          <label>Channel</label>
+          <select name="channel">
+            <option value="email">Email</option>
+            <option value="phone">Phone</option>
+            <option value="in-person">In Person</option>
+            <option value="text">Text</option>
+          </select>
+        </div>
+        <div>
+          <label>Subject</label>
+          <input type="text" name="subject">
+        </div>
+        <div>
+          <label>Notes *</label>
+          <textarea name="notes" rows="4" required></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Log Interaction</button>
+          <button type="button" onclick="closeInteractionModal()" class="btn" style="background: #ccc; color: #333;">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const borrowers = {{ borrowers|tojson }};
+
+function openEditModal(borrowerId) {
+  const borrower = borrowers.find(b => b.id === borrowerId);
+  if (!borrower) return;
+  
+  document.getElementById('edit_borrower_id').value = borrower.id;
+  document.getElementById('edit_name').value = borrower.name || '';
+  document.getElementById('edit_email').value = borrower.email || '';
+  document.getElementById('edit_phone').value = borrower.phone || '';
+  document.getElementById('edit_status').value = borrower.status || 'prospect';
+  document.getElementById('edit_loan_type').value = borrower.loan_type || '';
+  document.getElementById('edit_target_payment').value = borrower.target_payment || '';
+  document.getElementById('edit_loan_amount').value = borrower.loan_amount || '';
+  document.getElementById('edit_loan_rate').value = borrower.loan_rate || '';
+  document.getElementById('edit_birthday').value = borrower.birthday || '';
+  document.getElementById('edit_home_anniversary').value = borrower.home_anniversary || '';
+  document.getElementById('edit_address').value = borrower.address || '';
+  document.getElementById('edit_property_address').value = borrower.property_address || '';
+  document.getElementById('edit_equity_frequency').value = borrower.equity_frequency || 'monthly';
+  document.getElementById('edit_tags').value = borrower.tags || '';
+  document.getElementById('edit_notes').value = borrower.notes || '';
+  document.getElementById('edit_auto_birthday').checked = borrower.auto_birthday == 1;
+  document.getElementById('edit_auto_anniversary').checked = borrower.auto_anniversary == 1;
+  document.getElementById('edit_auto_seasonal').checked = borrower.auto_seasonal == 1;
+  document.getElementById('edit_auto_equity').checked = borrower.auto_equity == 1;
+  document.getElementById('edit_auto_holidays').checked = borrower.auto_holidays == 1;
+  
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('active');
+}
+
+function openInteractionModal(borrowerId) {
+  document.getElementById('interaction_borrower_id').value = borrowerId;
+  document.getElementById('interactionModal').classList.add('active');
+}
+
+function closeInteractionModal() {
+  document.getElementById('interactionModal').classList.remove('active');
+}
+
+// Close modals on outside click
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+document.getElementById('interactionModal').addEventListener('click', function(e) {
+  if (e.target === this) closeInteractionModal();
+});
+</script>
 {% endblock %}

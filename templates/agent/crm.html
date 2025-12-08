@@ -1,75 +1,555 @@
 {% extends "agent/layout.html" %}
 
 {% block agent_content %}
+<style>
+  .crm-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  .crm-sidebar {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    height: fit-content;
+    position: sticky;
+    top: 2rem;
+  }
+  .crm-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .filter-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--olive-green);
+    background: white;
+    color: var(--olive-green);
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--olive-green);
+    color: white;
+  }
+  .contact-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .contact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+  .contact-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--charcoal-brown);
+    margin: 0;
+  }
+  .contact-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge-new { background: #fee; color: #c00; }
+  .badge-nurture { background: #eef; color: #006; }
+  .badge-active { background: #efe; color: #060; }
+  .badge-past { background: #ddd; color: #333; }
+  .badge-sphere { background: #ffe; color: #660; }
+  .contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+  }
+  .info-item strong {
+    color: var(--charcoal-brown);
+    min-width: 100px;
+  }
+  .auto-email-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .auto-badge {
+    padding: 0.2rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  .contact-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+  .btn-small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal.active {
+    display: flex;
+  }
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  .form-full {
+    grid-column: 1 / -1;
+  }
+  .toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .toggle-switch input[type="checkbox"] {
+    width: 40px;
+    height: 20px;
+    appearance: none;
+    background: #ccc;
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  .toggle-switch input[type="checkbox"]:checked {
+    background: var(--olive-green);
+  }
+  .toggle-switch input[type="checkbox"]::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+  }
+  .toggle-switch input[type="checkbox"]:checked::before {
+    left: 22px;
+  }
+</style>
+
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Nurture relationships</p>
   <h1>CRM & Lead Management</h1>
-  <p>All your people in one place: leads, active clients, past clients, and sphere. Filter by stage and reach out with ease.</p>
+  <p>Your complete contact management system with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Quick Add Contact</h2>
-    <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
-      <div>
-        <label for="name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Name</label>
-        <input id="name" name="name" required />
+<div class="crm-container">
+  <!-- Sidebar: Add Contact & Filters -->
+  <div class="crm-sidebar">
+    <h2 style="margin-top: 0; color: var(--charcoal-brown);">Quick Add</h2>
+    <form method="post" id="addContactForm">
+      <input type="hidden" name="action" value="add">
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
+          <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
+          <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
+          <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Stage</label>
+          <select name="stage" style="width: 100%; padding: 0.6rem; border: 2px solid #ddd; border-radius: 8px;">
+            <option value="new">New Lead</option>
+            <option value="nurture">Nurture</option>
+            <option value="active">Active Buyer/Seller</option>
+            <option value="past">Past Client</option>
+            <option value="sphere">Sphere</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Contact</button>
       </div>
-      <div>
-        <label for="email" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Email</label>
-        <input id="email" name="email" type="email" />
-      </div>
-      <div>
-        <label for="phone" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Phone</label>
-        <input id="phone" name="phone" type="tel" />
-      </div>
-      <div>
-        <label for="stage" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Stage</label>
-        <select id="stage" name="stage">
-          <option value="new">New Lead</option>
-          <option value="nurture">Nurture</option>
-          <option value="active">Active Buyer/Seller</option>
-          <option value="past">Past Client</option>
-          <option value="sphere">Sphere</option>
-        </select>
-      </div>
-      <button class="btn btn-primary" type="submit">Add to CRM</button>
     </form>
+
+    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #eee;">
+      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Filter by Stage</h3>
+      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        <a href="?stage=" class="filter-btn {% if not stage_filter %}active{% endif %}" style="text-decoration: none; text-align: center;">All Contacts</a>
+        <a href="?stage=new" class="filter-btn {% if stage_filter == 'new' %}active{% endif %}" style="text-decoration: none; text-align: center;">New Leads</a>
+        <a href="?stage=nurture" class="filter-btn {% if stage_filter == 'nurture' %}active{% endif %}" style="text-decoration: none; text-align: center;">Nurture</a>
+        <a href="?stage=active" class="filter-btn {% if stage_filter == 'active' %}active{% endif %}" style="text-decoration: none; text-align: center;">Active</a>
+        <a href="?stage=past" class="filter-btn {% if stage_filter == 'past' %}active{% endif %}" style="text-decoration: none; text-align: center;">Past Clients</a>
+        <a href="?stage=sphere" class="filter-btn {% if stage_filter == 'sphere' %}active{% endif %}" style="text-decoration: none; text-align: center;">Sphere</a>
+      </div>
+    </div>
   </div>
 
-  <div class="card" style="margin-top:2rem;">
-    <h2>Your Contacts</h2>
-
+  <!-- Main: Contact List -->
+  <div class="crm-main">
     {% if contacts %}
-      <div style="overflow-x:auto;margin-top:1.5rem;">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Stage</th>
-              <th>Best Contact</th>
-              <th>Last Touch</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for contact in contacts %}
-              <tr>
-                <td><strong>{{ contact.name }}</strong></td>
-                <td><span class="badge" style="background: {% if contact.stage == 'new' %}#fee; color: #c00{% elif contact.stage == 'active' %}#efe; color: #060{% else %}#eef; color: #006{% endif %}; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">{{ contact.stage|capitalize }}</span></td>
-                <td>{{ contact.best_contact }}</td>
-                <td style="color: #888;">{{ contact.last_touch }}</td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {% for contact in contacts %}
+        <div class="contact-card">
+          <div class="contact-header">
+            <div>
+              <h3 class="contact-name">{{ contact.name }}</h3>
+              <span class="contact-badge badge-{{ contact.stage }}">{{ contact.stage|capitalize }}</span>
+            </div>
+            <button onclick="openEditModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: white; border: none;">Edit</button>
+          </div>
+
+          <div class="contact-info">
+            {% if contact.email %}
+              <div class="info-item">
+                <strong>Email:</strong>
+                <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+              </div>
+            {% endif %}
+            {% if contact.phone %}
+              <div class="info-item">
+                <strong>Phone:</strong>
+                <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>
+              </div>
+            {% endif %}
+            {% if contact.birthday %}
+              <div class="info-item">
+                <strong>Birthday:</strong>
+                <span>{{ contact.birthday }}</span>
+              </div>
+            {% endif %}
+            {% if contact.home_anniversary %}
+              <div class="info-item">
+                <strong>Home Anniversary:</strong>
+                <span>{{ contact.home_anniversary }}</span>
+              </div>
+            {% endif %}
+            {% if contact.property_address %}
+              <div class="info-item">
+                <strong>Property:</strong>
+                <span>{{ contact.property_address }}</span>
+              </div>
+            {% endif %}
+            {% if contact.property_value %}
+              <div class="info-item">
+                <strong>Property Value:</strong>
+                <span>${{ "{:,.0f}".format(contact.property_value) }}</span>
+              </div>
+            {% endif %}
+            {% if contact.equity_estimate %}
+              <div class="info-item">
+                <strong>Equity:</strong>
+                <span style="color: #2e7d32; font-weight: 600;">${{ "{:,.0f}".format(contact.equity_estimate) }}</span>
+              </div>
+            {% endif %}
+            {% if contact.last_touch %}
+              <div class="info-item">
+                <strong>Last Touch:</strong>
+                <span>{{ contact.last_touch }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          {% if contact.notes %}
+            <div style="margin: 1rem 0; padding: 1rem; background: #f9f9f9; border-radius: 8px;">
+              <strong style="color: var(--charcoal-brown);">Notes:</strong>
+              <p style="margin: 0.5rem 0 0 0; color: #666; white-space: pre-wrap;">{{ contact.notes }}</p>
+            </div>
+          {% endif %}
+
+          {% if contact.tags %}
+            <div style="margin: 0.5rem 0;">
+              <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
+              <span style="color: #666;">{{ contact.tags }}</span>
+            </div>
+          {% endif %}
+
+          <div class="auto-email-badges">
+            {% if contact.auto_birthday %}
+              <span class="auto-badge">🎂 Birthday Emails</span>
+            {% endif %}
+            {% if contact.auto_anniversary %}
+              <span class="auto-badge">🏠 Home Anniversary</span>
+            {% endif %}
+            {% if contact.auto_seasonal %}
+              <span class="auto-badge">🍂 Seasonal Checklists</span>
+            {% endif %}
+            {% if contact.auto_equity %}
+              <span class="auto-badge">💰 Equity Updates ({{ contact.equity_frequency }})</span>
+            {% endif %}
+            {% if contact.auto_holidays %}
+              <span class="auto-badge">🎄 Holiday Greetings</span>
+            {% endif %}
+          </div>
+
+          <div class="contact-actions">
+            <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: #2196F3; color: white; border: none;">Log Interaction</button>
+            <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: #4CAF50; color: white; text-decoration: none; border: none;">Email</a>
+            {% if contact.phone %}
+              <a href="tel:{{ contact.phone }}" class="btn btn-small" style="background: #FF9800; color: white; text-decoration: none; border: none;">Call</a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
     {% else %}
-      <div class="empty-state">
-        <div style="font-size:3rem;margin-bottom:1rem;">👥</div>
+      <div class="empty-state" style="text-align: center; padding: 4rem 2rem; background: white; border-radius: 12px;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
         <h3>No Contacts Yet</h3>
-        <p>Start by adding one new lead or past client you want to care for well.</p>
+        <p>Start building your network by adding your first contact!</p>
       </div>
     {% endif %}
   </div>
 </div>
+
+<!-- Edit Contact Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0;">Edit Contact</h2>
+    <form method="post" id="editContactForm">
+      <input type="hidden" name="action" value="update">
+      <input type="hidden" name="contact_id" id="edit_contact_id">
+      
+      <div class="form-grid">
+        <div>
+          <label>Name *</label>
+          <input type="text" name="name" id="edit_name" required>
+        </div>
+        <div>
+          <label>Email</label>
+          <input type="email" name="email" id="edit_email">
+        </div>
+        <div>
+          <label>Phone</label>
+          <input type="tel" name="phone" id="edit_phone">
+        </div>
+        <div>
+          <label>Stage</label>
+          <select name="stage" id="edit_stage">
+            <option value="new">New Lead</option>
+            <option value="nurture">Nurture</option>
+            <option value="active">Active Buyer/Seller</option>
+            <option value="past">Past Client</option>
+            <option value="sphere">Sphere</option>
+          </select>
+        </div>
+        <div>
+          <label>Birthday (MM/DD)</label>
+          <input type="text" name="birthday" id="edit_birthday" placeholder="12/25">
+        </div>
+        <div>
+          <label>Home Anniversary (MM/DD/YYYY)</label>
+          <input type="text" name="home_anniversary" id="edit_home_anniversary" placeholder="01/15/2020">
+        </div>
+        <div class="form-full">
+          <label>Address</label>
+          <input type="text" name="address" id="edit_address">
+        </div>
+        <div class="form-full">
+          <label>Property Address</label>
+          <input type="text" name="property_address" id="edit_property_address">
+        </div>
+        <div>
+          <label>Property Value</label>
+          <input type="number" name="property_value" id="edit_property_value" step="1000">
+        </div>
+        <div>
+          <label>Equity Estimate</label>
+          <input type="number" name="equity_estimate" id="edit_equity_estimate" step="1000">
+        </div>
+        <div>
+          <label>Equity Update Frequency</label>
+          <select name="equity_frequency" id="edit_equity_frequency">
+            <option value="monthly">Monthly</option>
+            <option value="bimonthly">Every 2 Months</option>
+            <option value="quarterly">Quarterly</option>
+          </select>
+        </div>
+        <div class="form-full">
+          <label>Tags (comma-separated)</label>
+          <input type="text" name="tags" id="edit_tags" placeholder="VIP, Referral, Investor">
+        </div>
+        <div class="form-full">
+          <label>Notes</label>
+          <textarea name="notes" id="edit_notes" rows="4"></textarea>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Automated Emails</h3>
+      <div class="form-grid">
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_birthday" id="edit_auto_birthday" value="1">
+          <label for="edit_auto_birthday">Send Birthday Emails</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_anniversary" id="edit_auto_anniversary" value="1">
+          <label for="edit_auto_anniversary">Send Home Anniversary Emails</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_seasonal" id="edit_auto_seasonal" value="1">
+          <label for="edit_auto_seasonal">Send Seasonal Checklists</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_equity" id="edit_auto_equity" value="1">
+          <label for="edit_auto_equity">Send Equity Updates</label>
+        </div>
+        <div class="toggle-switch">
+          <input type="checkbox" name="auto_holidays" id="edit_auto_holidays" value="1">
+          <label for="edit_auto_holidays">Send Holiday Greetings</label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <button type="button" onclick="closeEditModal()" class="btn" style="background: #ccc; color: #333;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Log Interaction Modal -->
+<div id="interactionModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0;">Log Interaction</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="add_interaction">
+      <input type="hidden" name="contact_id" id="interaction_contact_id">
+      
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label>Interaction Type *</label>
+          <select name="interaction_type" required>
+            <option value="email">Email</option>
+            <option value="call">Phone Call</option>
+            <option value="meeting">Meeting</option>
+            <option value="text">Text Message</option>
+            <option value="note">Note</option>
+          </select>
+        </div>
+        <div>
+          <label>Channel</label>
+          <select name="channel">
+            <option value="email">Email</option>
+            <option value="phone">Phone</option>
+            <option value="in-person">In Person</option>
+            <option value="text">Text</option>
+          </select>
+        </div>
+        <div>
+          <label>Subject</label>
+          <input type="text" name="subject">
+        </div>
+        <div>
+          <label>Notes *</label>
+          <textarea name="notes" rows="4" required></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Log Interaction</button>
+          <button type="button" onclick="closeInteractionModal()" class="btn" style="background: #ccc; color: #333;">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+const contacts = {{ contacts|tojson }};
+
+function openEditModal(contactId) {
+  const contact = contacts.find(c => c.id === contactId);
+  if (!contact) return;
+  
+  document.getElementById('edit_contact_id').value = contact.id;
+  document.getElementById('edit_name').value = contact.name || '';
+  document.getElementById('edit_email').value = contact.email || '';
+  document.getElementById('edit_phone').value = contact.phone || '';
+  document.getElementById('edit_stage').value = contact.stage || 'new';
+  document.getElementById('edit_birthday').value = contact.birthday || '';
+  document.getElementById('edit_home_anniversary').value = contact.home_anniversary || '';
+  document.getElementById('edit_address').value = contact.address || '';
+  document.getElementById('edit_property_address').value = contact.property_address || '';
+  document.getElementById('edit_property_value').value = contact.property_value || '';
+  document.getElementById('edit_equity_estimate').value = contact.equity_estimate || '';
+  document.getElementById('edit_equity_frequency').value = contact.equity_frequency || 'monthly';
+  document.getElementById('edit_tags').value = contact.tags || '';
+  document.getElementById('edit_notes').value = contact.notes || '';
+  document.getElementById('edit_auto_birthday').checked = contact.auto_birthday == 1;
+  document.getElementById('edit_auto_anniversary').checked = contact.auto_anniversary == 1;
+  document.getElementById('edit_auto_seasonal').checked = contact.auto_seasonal == 1;
+  document.getElementById('edit_auto_equity').checked = contact.auto_equity == 1;
+  document.getElementById('edit_auto_holidays').checked = contact.auto_holidays == 1;
+  
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('active');
+}
+
+function openInteractionModal(contactId) {
+  document.getElementById('interaction_contact_id').value = contactId;
+  document.getElementById('interactionModal').classList.add('active');
+}
+
+function closeInteractionModal() {
+  document.getElementById('interactionModal').classList.remove('active');
+}
+
+// Close modals on outside click
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+document.getElementById('interactionModal').addEventListener('click', function(e) {
+  if (e.target === this) closeInteractionModal();
+});
+</script>
 {% endblock %}

@@ -123,6 +123,14 @@ from database import (
     upsert_homeowner_snapshot_for_property,
     add_lender_borrower,
     list_lender_borrowers,
+    get_agent_contact,
+    update_agent_contact,
+    get_lender_borrower,
+    update_lender_borrower,
+    add_crm_interaction,
+    list_crm_interactions,
+    log_automated_email,
+    get_contacts_for_automated_email,
 )
 
 # ---------------- R2 STORAGE HELPERS ----------------
@@ -295,13 +303,479 @@ def send_due_reminders():
             send_reminder_email(r["email"], r["subject"], r["body"])
 
 
+# ====================== CRM AUTOMATED EMAIL FUNCTIONS ======================
+
+def get_birthday_contacts():
+    """Get contacts with birthdays today."""
+    from datetime import datetime
+    from database import get_connection
+    today = datetime.now()
+    today_str = f"{today.month:02d}/{today.day:02d}"
+    
+    contacts = []
+    # Get agent contacts
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, agent_user_id, name, email, birthday
+        FROM agent_contacts
+        WHERE email IS NOT NULL AND email != '' 
+          AND auto_birthday = 1
+          AND birthday LIKE ?
+        """,
+        (f"%{today_str}%",)
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'agent_contact',
+            'professional_id': row['agent_user_id'],
+            'name': row['name'],
+            'email': row['email']
+        })
+    
+    # Get lender borrowers
+    cur.execute(
+        """
+        SELECT id, lender_user_id, name, email, birthday
+        FROM lender_borrowers
+        WHERE email IS NOT NULL AND email != '' 
+          AND auto_birthday = 1
+          AND birthday LIKE ?
+        """,
+        (f"%{today_str}%",)
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'lender_borrower',
+            'professional_id': row['lender_user_id'],
+            'name': row['name'],
+            'email': row['email']
+        })
+    
+    conn.close()
+    return contacts
+
+
+def get_anniversary_contacts():
+    """Get contacts with home anniversaries today."""
+    from datetime import datetime
+    from database import get_connection
+    today = datetime.now()
+    today_str = f"{today.month:02d}/{today.day:02d}"
+    
+    contacts = []
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Agent contacts
+    cur.execute(
+        """
+        SELECT id, agent_user_id, name, email, home_anniversary, property_address
+        FROM agent_contacts
+        WHERE email IS NOT NULL AND email != '' 
+          AND auto_anniversary = 1
+          AND home_anniversary LIKE ?
+        """,
+        (f"%{today_str}%",)
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'agent_contact',
+            'professional_id': row['agent_user_id'],
+            'name': row['name'],
+            'email': row['email'],
+            'property_address': row['property_address']
+        })
+    
+    # Lender borrowers
+    cur.execute(
+        """
+        SELECT id, lender_user_id, name, email, home_anniversary, property_address
+        FROM lender_borrowers
+        WHERE email IS NOT NULL AND email != '' 
+          AND auto_anniversary = 1
+          AND home_anniversary LIKE ?
+        """,
+        (f"%{today_str}%",)
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'lender_borrower',
+            'professional_id': row['lender_user_id'],
+            'name': row['name'],
+            'email': row['email'],
+            'property_address': row['property_address']
+        })
+    
+    conn.close()
+    return contacts
+
+
+def send_birthday_emails():
+    """Send birthday emails to contacts."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        return
+    
+    contacts = get_birthday_contacts()
+    for contact in contacts:
+        subject = f"🎂 Happy Birthday, {contact['name']}!"
+        body = f"""Hi {contact['name']},
+
+Wishing you a wonderful birthday filled with joy and happiness!
+
+Thank you for being part of our community.
+
+Best regards,
+Your Life, Your Home Team
+"""
+        if send_reminder_email(contact['email'], subject, body):
+            log_automated_email(
+                contact['id'], contact['type'], contact['professional_id'],
+                'birthday', contact['email'], subject, 'sent'
+            )
+
+
+def send_anniversary_emails():
+    """Send home anniversary emails."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        return
+    
+    contacts = get_anniversary_contacts()
+    for contact in contacts:
+        property_info = f" at {contact.get('property_address', 'your home')}" if contact.get('property_address') else ""
+        subject = f"🏠 Happy Home Anniversary, {contact['name']}!"
+        body = f"""Hi {contact['name']},
+
+Congratulations on your home anniversary{property_info}!
+
+We hope you're enjoying your home and creating wonderful memories.
+
+Best regards,
+Your Life, Your Home Team
+"""
+        if send_reminder_email(contact['email'], subject, body):
+            log_automated_email(
+                contact['id'], contact['type'], contact['professional_id'],
+                'anniversary', contact['email'], subject, 'sent'
+            )
+
+
+def send_seasonal_checklists():
+    """Send seasonal home maintenance checklists."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        return
+    
+    from datetime import datetime
+    from database import get_connection
+    month = datetime.now().month
+    
+    # Determine season
+    if month in [12, 1, 2]:
+        season = "Winter"
+        checklist = """Winter Home Maintenance Checklist:
+• Check heating system and change filters
+• Inspect roof for ice dams
+• Seal windows and doors
+• Test smoke and carbon monoxide detectors
+• Clean gutters and downspouts
+• Insulate pipes to prevent freezing
+• Check weatherstripping
+• Service snow removal equipment"""
+    elif month in [3, 4, 5]:
+        season = "Spring"
+        checklist = """Spring Home Maintenance Checklist:
+• Clean gutters and downspouts
+• Inspect roof for winter damage
+• Service air conditioning system
+• Check exterior paint and siding
+• Clean windows and screens
+• Inspect deck and patio
+• Fertilize lawn and garden
+• Check irrigation system"""
+    elif month in [6, 7, 8]:
+        season = "Summer"
+        checklist = """Summer Home Maintenance Checklist:
+• Service air conditioning
+• Check and clean outdoor spaces
+• Inspect and clean pool/spa if applicable
+• Check for pest issues
+• Maintain landscaping
+• Inspect exterior for damage
+• Check outdoor lighting
+• Prepare for storm season"""
+    else:  # 9, 10, 11
+        season = "Fall"
+        checklist = """Fall Home Maintenance Checklist:
+• Clean gutters and downspouts
+• Inspect roof and chimney
+• Service heating system
+• Seal windows and doors
+• Check insulation
+• Winterize outdoor plumbing
+• Rake leaves and maintain yard
+• Test smoke detectors"""
+    
+    # Get contacts with seasonal emails enabled
+    contacts = []
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    cur.execute(
+        """
+        SELECT id, agent_user_id, name, email
+        FROM agent_contacts
+        WHERE email IS NOT NULL AND email != '' AND auto_seasonal = 1
+        """
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'agent_contact',
+            'professional_id': row['agent_user_id'],
+            'name': row['name'],
+            'email': row['email']
+        })
+    
+    cur.execute(
+        """
+        SELECT id, lender_user_id, name, email
+        FROM lender_borrowers
+        WHERE email IS NOT NULL AND email != '' AND auto_seasonal = 1
+        """
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'lender_borrower',
+            'professional_id': row['lender_user_id'],
+            'name': row['name'],
+            'email': row['email']
+        })
+    
+    conn.close()
+    
+    # Send to all contacts (only once per season - you may want to track this)
+    for contact in contacts:
+        subject = f"🍂 {season} Home Maintenance Checklist"
+        body = f"""Hi {contact['name']},
+
+Here's your {season.lower()} home maintenance checklist to keep your home in great shape:
+
+{checklist}
+
+Stay safe and enjoy the season!
+
+Best regards,
+Your Life, Your Home Team
+"""
+        if send_reminder_email(contact['email'], subject, body):
+            log_automated_email(
+                contact['id'], contact['type'], contact['professional_id'],
+                'seasonal', contact['email'], subject, 'sent'
+            )
+
+
+def send_equity_updates():
+    """Send equity update emails based on frequency."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        return
+    
+    from datetime import datetime
+    from database import get_connection
+    today = datetime.now()
+    
+    # Only send on 1st of month for monthly, 1st of odd months for bimonthly, etc.
+    if today.day != 1:
+        return
+    
+    contacts = []
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Monthly contacts
+    if today.month % 1 == 0:  # Every month
+        cur.execute(
+            """
+            SELECT id, agent_user_id, name, email, property_address, 
+                   property_value, equity_estimate
+            FROM agent_contacts
+            WHERE email IS NOT NULL AND email != '' 
+              AND auto_equity = 1 
+              AND equity_frequency = 'monthly'
+              AND equity_estimate IS NOT NULL
+            """
+        )
+        for row in cur.fetchall():
+            contacts.append(dict(row) | {'type': 'agent_contact', 'professional_id': row['agent_user_id']})
+    
+    # Bimonthly contacts (odd months)
+    if today.month % 2 == 1:
+        cur.execute(
+            """
+            SELECT id, agent_user_id, name, email, property_address,
+                   property_value, equity_estimate
+            FROM agent_contacts
+            WHERE email IS NOT NULL AND email != '' 
+              AND auto_equity = 1 
+              AND equity_frequency = 'bimonthly'
+              AND equity_estimate IS NOT NULL
+            """
+        )
+        for row in cur.fetchall():
+            contacts.append(dict(row) | {'type': 'agent_contact', 'professional_id': row['agent_user_id']})
+    
+    # Quarterly contacts (Jan, Apr, Jul, Oct)
+    if today.month in [1, 4, 7, 10]:
+        cur.execute(
+            """
+            SELECT id, agent_user_id, name, email, property_address,
+                   property_value, equity_estimate
+            FROM agent_contacts
+            WHERE email IS NOT NULL AND email != '' 
+              AND auto_equity = 1 
+              AND equity_frequency = 'quarterly'
+              AND equity_estimate IS NOT NULL
+            """
+        )
+        for row in cur.fetchall():
+            contacts.append(dict(row) | {'type': 'agent_contact', 'professional_id': row['agent_user_id']})
+    
+    # Same for lender borrowers
+    if today.month % 1 == 0:
+        cur.execute(
+            """
+            SELECT id, lender_user_id, name, email, property_address,
+                   loan_amount, loan_rate
+            FROM lender_borrowers
+            WHERE email IS NOT NULL AND email != '' 
+              AND auto_equity = 1 
+              AND equity_frequency = 'monthly'
+            """
+        )
+        for row in cur.fetchall():
+            contacts.append(dict(row) | {'type': 'lender_borrower', 'professional_id': row['lender_user_id']})
+    
+    conn.close()
+    
+    for contact in contacts:
+        equity = contact.get('equity_estimate', 0)
+        property_val = contact.get('property_value', 0)
+        subject = f"💰 Your Home Equity Update - {today.strftime('%B %Y')}"
+        body = f"""Hi {contact['name']},
+
+Here's your monthly equity update:
+
+Property: {contact.get('property_address', 'Your Home')}
+Estimated Value: ${property_val:,.0f}
+Estimated Equity: ${equity:,.0f}
+
+Your home equity continues to grow! This represents significant wealth you've built.
+
+Best regards,
+Your Life, Your Home Team
+"""
+        if send_reminder_email(contact['email'], subject, body):
+            log_automated_email(
+                contact['id'], contact['type'], contact['professional_id'],
+                'equity', contact['email'], subject, 'sent'
+            )
+
+
+def send_holiday_greetings():
+    """Send holiday greeting emails."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        return
+    
+    from datetime import datetime
+    from database import get_connection
+    today = datetime.now()
+    
+    # Only send on specific holidays
+    holidays = {
+        (12, 25): "Merry Christmas",
+        (12, 31): "Happy New Year",
+        (7, 4): "Happy 4th of July",
+        (11, 25): "Happy Thanksgiving",  # Approximate
+    }
+    
+    holiday = holidays.get((today.month, today.day))
+    if not holiday:
+        return
+    
+    contacts = []
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    cur.execute(
+        """
+        SELECT id, agent_user_id, name, email
+        FROM agent_contacts
+        WHERE email IS NOT NULL AND email != '' AND auto_holidays = 1
+        """
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'agent_contact',
+            'professional_id': row['agent_user_id'],
+            'name': row['name'],
+            'email': row['email']
+        })
+    
+    cur.execute(
+        """
+        SELECT id, lender_user_id, name, email
+        FROM lender_borrowers
+        WHERE email IS NOT NULL AND email != '' AND auto_holidays = 1
+        """
+    )
+    for row in cur.fetchall():
+        contacts.append({
+            'id': row['id'],
+            'type': 'lender_borrower',
+            'professional_id': row['lender_user_id'],
+            'name': row['name'],
+            'email': row['email']
+        })
+    
+    conn.close()
+    
+    for contact in contacts:
+        subject = f"🎄 {holiday}, {contact['name']}!"
+        body = f"""Hi {contact['name']},
+
+{holiday}! We hope you have a wonderful celebration with family and friends.
+
+Thank you for being part of our community.
+
+Best regards,
+Your Life, Your Home Team
+"""
+        if send_reminder_email(contact['email'], subject, body):
+            log_automated_email(
+                contact['id'], contact['type'], contact['professional_id'],
+                'holiday', contact['email'], subject, 'sent'
+            )
+
+
 def start_scheduler():
     """Start background scheduler safely without blocking app startup."""
     try:
         scheduler = BackgroundScheduler()
         scheduler.add_job(send_due_reminders, "cron", hour=12, minute=0)
+        # CRM automated emails
+        scheduler.add_job(send_birthday_emails, "cron", hour=9, minute=0)  # 9 AM daily
+        scheduler.add_job(send_anniversary_emails, "cron", hour=9, minute=5)  # 9:05 AM daily
+        scheduler.add_job(send_seasonal_checklists, "cron", day=1, hour=10, minute=0)  # 1st of month, 10 AM
+        scheduler.add_job(send_equity_updates, "cron", day=1, hour=10, minute=5)  # 1st of month, 10:05 AM
+        scheduler.add_job(send_holiday_greetings, "cron", hour=9, minute=10)  # 9:10 AM daily
         scheduler.start()
-        print("✓ Reminder scheduler started.")
+        print("✓ Reminder scheduler started with CRM automation.")
     except Exception as e:
         print(f"⚠ Scheduler could not start (non-critical): {e}")
 
@@ -1578,31 +2052,96 @@ def lender_dashboard():
 # -------------------------------------------------
 @app.route("/agent/crm", methods=["GET", "POST"])
 def agent_crm():
-    """Agent CRM - manage contacts and leads."""
+    """Agent CRM - comprehensive contact management with automated emails."""
     user = get_current_user()
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
 
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip()
-        phone = request.form.get("phone", "").strip()
-        stage = request.form.get("stage", "new").strip()
-        notes = request.form.get("notes", "").strip()
-
-        if name and email:
+        action = request.form.get("action", "add")
+        
+        if action == "add":
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            phone = request.form.get("phone", "").strip()
+            stage = request.form.get("stage", "new").strip()
+            birthday = request.form.get("birthday", "").strip()
+            home_anniversary = request.form.get("home_anniversary", "").strip()
+            address = request.form.get("address", "").strip()
+            notes = request.form.get("notes", "").strip()
+            tags = request.form.get("tags", "").strip()
+            property_address = request.form.get("property_address", "").strip()
+            property_value = request.form.get("property_value", "").strip()
+            equity_estimate = request.form.get("equity_estimate", "").strip()
+            
             try:
-                add_agent_contact(user["id"], name, email, phone, stage, notes)
+                prop_val = float(property_value) if property_value else None
+                equity_val = float(equity_estimate) if equity_estimate else None
+                add_agent_contact(
+                    user["id"], name, email, phone, stage, email or phone, "",
+                    birthday, home_anniversary, address, notes, tags,
+                    property_address, prop_val, equity_val
+                )
                 flash("Contact added successfully!", "success")
             except Exception as e:
                 flash(f"Error adding contact: {e}", "error")
+        
+        elif action == "update":
+            contact_id = request.form.get("contact_id")
+            if contact_id:
+                updates = {}
+                for field in ['name', 'email', 'phone', 'stage', 'birthday', 
+                            'home_anniversary', 'address', 'notes', 'tags',
+                            'property_address', 'auto_birthday', 'auto_anniversary',
+                            'auto_seasonal', 'auto_equity', 'auto_holidays',
+                            'equity_frequency']:
+                    val = request.form.get(field, "").strip()
+                    if val or field in ['auto_birthday', 'auto_anniversary', 
+                                       'auto_seasonal', 'auto_equity', 'auto_holidays']:
+                        if field in ['auto_birthday', 'auto_anniversary', 
+                                    'auto_seasonal', 'auto_equity', 'auto_holidays']:
+                            updates[field] = 1 if request.form.get(field) else 0
+                        elif field in ['property_value', 'equity_estimate']:
+                            try:
+                                updates[field] = float(val) if val else None
+                            except:
+                                pass
+                        else:
+                            updates[field] = val if val else None
+                
+                try:
+                    update_agent_contact(int(contact_id), user["id"], **updates)
+                    flash("Contact updated successfully!", "success")
+                except Exception as e:
+                    flash(f"Error updating contact: {e}", "error")
+        
+        elif action == "add_interaction":
+            contact_id = request.form.get("contact_id")
+            interaction_type = request.form.get("interaction_type", "").strip()
+            subject = request.form.get("subject", "").strip()
+            notes = request.form.get("notes", "").strip()
+            channel = request.form.get("channel", "email").strip()
+            
+            if contact_id and interaction_type:
+                try:
+                    add_crm_interaction(
+                        int(contact_id), "agent_contact", user["id"],
+                        interaction_type, subject, notes, channel
+                    )
+                    flash("Interaction logged successfully!", "success")
+                except Exception as e:
+                    flash(f"Error logging interaction: {e}", "error")
 
-    contacts = list_agent_contacts(user["id"])
+    stage_filter = request.args.get("stage")
+    contacts = list_agent_contacts(user["id"], stage_filter)
+    # Convert contacts to dicts for JSON serialization in template
+    contacts_list = [dict(contact) for contact in contacts]
     return render_template(
         "agent/crm.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
-        contacts=contacts,
+        contacts=contacts_list,
+        stage_filter=stage_filter,
     )
 
 
@@ -1778,19 +2317,100 @@ def agent_settings_profile():
 # -------------------------------------------------
 # LENDER ROUTES
 # -------------------------------------------------
-@app.route("/lender/crm", methods=["GET"])
+@app.route("/lender/crm", methods=["GET", "POST"])
 def lender_crm():
-    """Lender CRM."""
+    """Lender CRM - comprehensive borrower management with automated emails."""
     user = get_current_user()
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
 
-    borrowers = list_lender_borrowers(user["id"])
+    if request.method == "POST":
+        action = request.form.get("action", "add")
+        
+        if action == "add":
+            name = request.form.get("name", "").strip()
+            email = request.form.get("email", "").strip()
+            phone = request.form.get("phone", "").strip()
+            status = request.form.get("status", "prospect").strip()
+            loan_type = request.form.get("loan_type", "").strip()
+            target_payment = request.form.get("target_payment", "").strip()
+            birthday = request.form.get("birthday", "").strip()
+            home_anniversary = request.form.get("home_anniversary", "").strip()
+            address = request.form.get("address", "").strip()
+            notes = request.form.get("notes", "").strip()
+            tags = request.form.get("tags", "").strip()
+            property_address = request.form.get("property_address", "").strip()
+            loan_amount = request.form.get("loan_amount", "").strip()
+            loan_rate = request.form.get("loan_rate", "").strip()
+            
+            try:
+                loan_amt = float(loan_amount) if loan_amount else None
+                rate = float(loan_rate) if loan_rate else None
+                add_lender_borrower(
+                    user["id"], name, status, loan_type, target_payment, "",
+                    email, phone, birthday, home_anniversary, address, notes, tags,
+                    property_address, loan_amt, rate
+                )
+                flash("Borrower added successfully!", "success")
+            except Exception as e:
+                flash(f"Error adding borrower: {e}", "error")
+        
+        elif action == "update":
+            borrower_id = request.form.get("borrower_id")
+            if borrower_id:
+                updates = {}
+                for field in ['name', 'email', 'phone', 'status', 'loan_type', 
+                            'target_payment', 'birthday', 'home_anniversary', 
+                            'address', 'notes', 'tags', 'property_address',
+                            'loan_amount', 'loan_rate', 'auto_birthday', 
+                            'auto_anniversary', 'auto_seasonal', 'auto_equity',
+                            'auto_holidays', 'equity_frequency']:
+                    val = request.form.get(field, "").strip()
+                    if val or field in ['auto_birthday', 'auto_anniversary', 
+                                       'auto_seasonal', 'auto_equity', 'auto_holidays']:
+                        if field in ['auto_birthday', 'auto_anniversary', 
+                                    'auto_seasonal', 'auto_equity', 'auto_holidays']:
+                            updates[field] = 1 if request.form.get(field) else 0
+                        elif field in ['loan_amount', 'loan_rate']:
+                            try:
+                                updates[field] = float(val) if val else None
+                            except:
+                                pass
+                        else:
+                            updates[field] = val if val else None
+                
+                try:
+                    update_lender_borrower(int(borrower_id), user["id"], **updates)
+                    flash("Borrower updated successfully!", "success")
+                except Exception as e:
+                    flash(f"Error updating borrower: {e}", "error")
+        
+        elif action == "add_interaction":
+            borrower_id = request.form.get("borrower_id")
+            interaction_type = request.form.get("interaction_type", "").strip()
+            subject = request.form.get("subject", "").strip()
+            notes = request.form.get("notes", "").strip()
+            channel = request.form.get("channel", "email").strip()
+            
+            if borrower_id and interaction_type:
+                try:
+                    add_crm_interaction(
+                        int(borrower_id), "lender_borrower", user["id"],
+                        interaction_type, subject, notes, channel
+                    )
+                    flash("Interaction logged successfully!", "success")
+                except Exception as e:
+                    flash(f"Error logging interaction: {e}", "error")
+
+    status_filter = request.args.get("status")
+    borrowers = list_lender_borrowers(user["id"], status_filter)
+    borrowers_list = [dict(borrower) for borrower in borrowers]
     return render_template(
         "lender/crm.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
-        borrowers=borrowers,
+        borrowers=borrowers_list,
+        status_filter=status_filter,
     )
 
 
@@ -2069,5 +2689,16 @@ def homeowner_support_meet_team():
     return render_template(
         "homeowner/support_meet_team.html",
         brand_name=FRONT_BRAND_NAME,
+    )
+
+
+# ---------------- DEVELOPMENT SERVER ----------------
+if __name__ == "__main__":
+    # Only runs when executing directly with Python (not with gunicorn)
+    # Gunicorn will import the app and won't execute this block
+    app.run(
+        host="127.0.0.1",
+        port=5000,
+        debug=True,  # Enable debug mode for development
     )
 

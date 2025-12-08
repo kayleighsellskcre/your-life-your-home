@@ -2,6 +2,7 @@ import sqlite3
 import json
 from pathlib import Path
 from typing import Optional, Dict, Any, List
+from datetime import datetime
 
 DB_PATH = Path(__file__).parent / "ylh.db"
 
@@ -99,9 +100,17 @@ def init_db() -> None:
             tags TEXT,
             details TEXT,
             links TEXT,
-            photos TEXT,                -- stored JSON list
-            files TEXT,                 -- stored JSON list
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            photos TEXT,                -- JSON list of photo filenames
+            files TEXT,                 -- JSON list of file filenames
+            vision_statement TEXT,
+            color_palette TEXT,         -- JSON list of hex colors
+            board_template TEXT,        -- 'minimal', 'modern', 'cozy', 'bold'
+            label_style TEXT,          -- 'none', 'subtle', 'bold'
+            is_private INTEGER DEFAULT 0,
+            shareable_link TEXT,
+            product_sources TEXT,
+            show_notes_panel INTEGER DEFAULT 1,
+            fixtures TEXT               -- JSON list of fixture image filenames
         )
         """
     )
@@ -113,25 +122,15 @@ def init_db() -> None:
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            file_name TEXT,
+            name TEXT,
             category TEXT,
-            project_name TEXT,          -- allows board linking later
-            r2_key TEXT,                -- Cloudflare R2 object key
-            r2_url TEXT,                -- Public URL if available
+            file_path TEXT,
+            r2_key TEXT,
+            r2_url TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
     )
-    
-    # Add r2_key and r2_url columns if they don't exist (migration)
-    try:
-        cur.execute("ALTER TABLE homeowner_documents ADD COLUMN r2_key TEXT")
-    except:
-        pass  # Column already exists
-    try:
-        cur.execute("ALTER TABLE homeowner_documents ADD COLUMN r2_url TEXT")
-    except:
-        pass  # Column already exists
 
     # ------------- HOMEOWNER PROJECTS -------------
     cur.execute(
@@ -141,8 +140,9 @@ def init_db() -> None:
             user_id INTEGER,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             name TEXT,
-            budget REAL,
+            category TEXT,
             status TEXT,
+            budget TEXT,
             notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
@@ -152,21 +152,19 @@ def init_db() -> None:
     # ------------- NEXT MOVE PLAN -------------
     cur.execute(
         """
-        CREATE TABLE IF NOT EXISTS homeowner_next_move_plans (
+        CREATE TABLE IF NOT EXISTS next_move_plans (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
             timeline TEXT,
-            budget TEXT,
-            preapproved TEXT,
-            areas TEXT,
-            home_type TEXT,
-            beds_baths TEXT,
+            budget_range TEXT,
+            location_preferences TEXT,
+            property_type_preferences TEXT,
             must_haves TEXT,
-            dealbreakers TEXT,
-            condition TEXT,
-            feeling TEXT,
+            nice_to_haves TEXT,
+            concerns TEXT,
+            notes TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
@@ -181,7 +179,6 @@ def init_db() -> None:
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             topic TEXT,
             question TEXT,
-            status TEXT DEFAULT 'open',
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
@@ -200,10 +197,42 @@ def init_db() -> None:
             stage TEXT,
             best_contact TEXT,
             last_touch TEXT,
+            birthday TEXT,
+            home_anniversary TEXT,
+            address TEXT,
+            notes TEXT,
+            tags TEXT,
+            property_address TEXT,
+            property_value REAL,
+            equity_estimate REAL,
+            auto_birthday INTEGER DEFAULT 1,
+            auto_anniversary INTEGER DEFAULT 1,
+            auto_seasonal INTEGER DEFAULT 1,
+            auto_equity INTEGER DEFAULT 1,
+            auto_holidays INTEGER DEFAULT 1,
+            equity_frequency TEXT DEFAULT 'monthly',
             FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
     )
+    
+    # Add new columns to existing table (migration)
+    for col in ['birthday', 'home_anniversary', 'address', 'notes', 'tags', 
+                'property_address', 'property_value', 'equity_estimate',
+                'auto_birthday', 'auto_anniversary', 'auto_seasonal', 
+                'auto_equity', 'auto_holidays', 'equity_frequency']:
+        try:
+            if col in ['auto_birthday', 'auto_anniversary', 'auto_seasonal', 
+                      'auto_equity', 'auto_holidays']:
+                cur.execute(f"ALTER TABLE agent_contacts ADD COLUMN {col} INTEGER DEFAULT 1")
+            elif col == 'equity_frequency':
+                cur.execute(f"ALTER TABLE agent_contacts ADD COLUMN {col} TEXT DEFAULT 'monthly'")
+            elif col in ['property_value', 'equity_estimate']:
+                cur.execute(f"ALTER TABLE agent_contacts ADD COLUMN {col} REAL")
+            else:
+                cur.execute(f"ALTER TABLE agent_contacts ADD COLUMN {col} TEXT")
+        except:
+            pass
 
     # ------------- LENDER BORROWERS -------------
     cur.execute(
@@ -217,10 +246,44 @@ def init_db() -> None:
             loan_type TEXT,
             target_payment TEXT,
             last_touch TEXT,
+            email TEXT,
+            phone TEXT,
+            birthday TEXT,
+            home_anniversary TEXT,
+            address TEXT,
+            notes TEXT,
+            tags TEXT,
+            property_address TEXT,
+            loan_amount REAL,
+            loan_rate REAL,
+            auto_birthday INTEGER DEFAULT 1,
+            auto_anniversary INTEGER DEFAULT 1,
+            auto_seasonal INTEGER DEFAULT 1,
+            auto_equity INTEGER DEFAULT 1,
+            auto_holidays INTEGER DEFAULT 1,
+            equity_frequency TEXT DEFAULT 'monthly',
             FOREIGN KEY (lender_user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
     )
+    
+    # Add new columns to existing table (migration)
+    for col in ['email', 'phone', 'birthday', 'home_anniversary', 'address', 
+                'notes', 'tags', 'property_address', 'loan_amount', 'loan_rate',
+                'auto_birthday', 'auto_anniversary', 'auto_seasonal', 
+                'auto_equity', 'auto_holidays', 'equity_frequency']:
+        try:
+            if col in ['auto_birthday', 'auto_anniversary', 'auto_seasonal', 
+                      'auto_equity', 'auto_holidays']:
+                cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {col} INTEGER DEFAULT 1")
+            elif col == 'equity_frequency':
+                cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {col} TEXT DEFAULT 'monthly'")
+            elif col in ['loan_amount', 'loan_rate']:
+                cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {col} REAL")
+            else:
+                cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {col} TEXT")
+        except:
+            pass
 
     # ------------- AGENT TRANSACTIONS -------------
     cur.execute(
@@ -291,6 +354,44 @@ def init_db() -> None:
         )
         """
     )
+    
+    # ------------- CRM INTERACTION HISTORY -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS crm_interactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            contact_id INTEGER,
+            contact_type TEXT CHECK(contact_type IN ('agent_contact', 'lender_borrower')),
+            professional_user_id INTEGER,
+            interaction_type TEXT,
+            interaction_date TEXT DEFAULT CURRENT_TIMESTAMP,
+            subject TEXT,
+            notes TEXT,
+            channel TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # ------------- AUTOMATED EMAIL LOGS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS automated_email_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            contact_id INTEGER,
+            contact_type TEXT CHECK(contact_type IN ('agent_contact', 'lender_borrower')),
+            professional_user_id INTEGER,
+            email_type TEXT,
+            sent_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            recipient_email TEXT,
+            subject TEXT,
+            status TEXT DEFAULT 'sent',
+            error_message TEXT,
+            FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
 
     # ------------- HOMEOWNER TIMELINE EVENTS -------------
     cur.execute(
@@ -310,71 +411,25 @@ def init_db() -> None:
         """
     )
 
-    # ------------- SIMPLE SAVED NOTES (brain dump) -------------
+    # ------------- SIMPLE NOTES -------------
     cur.execute(
         """
-        CREATE TABLE IF NOT EXISTS homeowner_simple_notes (
+        CREATE TABLE IF NOT EXISTS simple_notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            title TEXT,
-            body TEXT,
+            content TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
     )
-
-    # ------------------ MIGRATIONS FOR EXISTING DBs ------------------
-    # Older DBs may not include the `project_name`, `photos`, or `files`
-    # columns on the `homeowner_notes` table; ensure they exist so code
-    # relying on those columns does not fail with "no such column".
-    try:
-        cur.execute("PRAGMA table_info(homeowner_notes)")
-        existing = [row[1] for row in cur.fetchall()]
-        # add missing columns safely
-        if "project_name" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN project_name TEXT")
-        if "photos" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN photos TEXT")
-        if "files" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN files TEXT")
-        # Some older DBs used `body` instead of `details` for note text.
-        if "details" not in existing and "body" in existing:
-            # add a `details` column and copy `body` contents into it
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN details TEXT")
-            cur.execute("UPDATE homeowner_notes SET details = body WHERE details IS NULL OR details = ''")
-        elif "details" not in existing:
-            # ensure details exists even if body wasn't present
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN details TEXT")
-        # Premium mood board features
-        if "color_palette" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN color_palette TEXT")  # JSON list of hex codes
-        if "board_template" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN board_template TEXT")  # 'collage', 'grid', 'editorial'
-        if "label_style" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN label_style TEXT")  # 'handwritten', 'sans-serif'
-        if "is_private" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN is_private INTEGER DEFAULT 0")
-        if "shareable_link" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN shareable_link TEXT")
-        if "vision_statement" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN vision_statement TEXT")
-        if "product_sources" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN product_sources TEXT")  # JSON list
-        if "show_notes_panel" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN show_notes_panel INTEGER DEFAULT 1")
-        if "fixtures" not in existing:
-            cur.execute("ALTER TABLE homeowner_notes ADD COLUMN fixtures TEXT")  # JSON list of fixture images with positioning
-    except Exception:
-        # If the table doesn't exist yet or PRAGMA fails, ignore and proceed.
-        pass
 
     conn.commit()
     conn.close()
 
 
 # =========================
-# USERS
+# USER MANAGEMENT
 # =========================
 
 
@@ -382,14 +437,11 @@ def create_user(name: str, email: str, password_hash: str, role: str) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        """
-        INSERT INTO users (name, email, password_hash, role)
-        VALUES (?, ?, ?, ?)
-        """,
+        "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
         (name, email.lower().strip(), password_hash, role),
     )
-    conn.commit()
     user_id = cur.lastrowid
+    conn.commit()
     conn.close()
     return user_id
 
@@ -497,20 +549,26 @@ def upsert_homeowner_snapshot_full(
     if existing:
         existing = dict(existing)
         # Merge: use new value if provided, else keep existing
-        value_estimate = value_estimate if value_estimate is not None else existing.get('value_estimate')
-        loan_balance = loan_balance if loan_balance is not None else existing.get('loan_balance')
-        loan_rate = loan_rate if loan_rate is not None else existing.get('loan_rate')
-        loan_payment = loan_payment if loan_payment is not None else existing.get('loan_payment')
-        loan_term_years = loan_term_years if loan_term_years is not None else existing.get('loan_term_years')
-        loan_start_date = loan_start_date if loan_start_date is not None else existing.get('loan_start_date')
+        merged_value = value_estimate if value_estimate is not None else existing.get("value_estimate")
+        merged_loan_balance = loan_balance if loan_balance is not None else existing.get("loan_balance")
+        merged_loan_rate = loan_rate if loan_rate is not None else existing.get("loan_rate")
+        merged_loan_payment = loan_payment if loan_payment is not None else existing.get("loan_payment")
+        merged_loan_term_years = loan_term_years if loan_term_years is not None else existing.get("loan_term_years")
+        merged_loan_start_date = loan_start_date if loan_start_date is not None else existing.get("loan_start_date")
+    else:
+        merged_value = value_estimate
+        merged_loan_balance = loan_balance
+        merged_loan_rate = loan_rate
+        merged_loan_payment = loan_payment
+        merged_loan_term_years = loan_term_years
+        merged_loan_start_date = loan_start_date
     
-    # Calculate equity if both value and balance are available
-    equity_estimate = None
-    if value_estimate and loan_balance:
-        equity_estimate = value_estimate - loan_balance
-    elif existing:
-        equity_estimate = existing.get('equity_estimate')
+    # Calculate equity
+    equity = None
+    if merged_value is not None and merged_loan_balance is not None:
+        equity = merged_value - merged_loan_balance
     
+    # Upsert
     cur.execute(
         """
         INSERT INTO homeowner_snapshots (
@@ -529,40 +587,48 @@ def upsert_homeowner_snapshot_full(
             loan_start_date = excluded.loan_start_date,
             updated_at = CURRENT_TIMESTAMP
         """,
-        (user_id, value_estimate, equity_estimate, loan_rate, loan_payment, 
-         loan_balance, loan_term_years, loan_start_date),
+        (user_id, merged_value, equity, merged_loan_rate, merged_loan_payment,
+         merged_loan_balance, merged_loan_term_years, merged_loan_start_date),
     )
     conn.commit()
     conn.close()
 
 
 # =========================
-# HOMEOWNER NOTES / DOCS / PROJECTS / PLANS
+# HOMEOWNER NOTES / DESIGN BOARDS
 # =========================
 
 
 def add_homeowner_note(
     user_id: int,
-    project_name: str,
-    title: str,
-    tags: str,
-    details: str,
-    links: str = "",
-    photos_json: str = "[]",
-    files_json: str = "[]",
-) -> None:
-    """
-    Insert a new design-board style note.
-    photos_json and files_json should be JSON strings (lists).
-    """
+    project_name: str = None,
+    title: str = None,
+    tags: str = None,
+    details: str = None,
+    links: str = None,
+    photos: List[str] = None,
+    files: List[str] = None,
+    vision_statement: str = None,
+    color_palette: List[str] = None,
+    board_template: str = "minimal",
+    label_style: str = "subtle",
+    is_private: int = 0,
+    shareable_link: str = None,
+    product_sources: str = None,
+    show_notes_panel: int = 1,
+    fixtures: List[str] = None,
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO homeowner_notes (
-            user_id, project_name, title, tags, details, links, photos, files
+            user_id, project_name, title, tags, details, links,
+            photos, files, vision_statement, color_palette,
+            board_template, label_style, is_private, shareable_link,
+            product_sources, show_notes_panel, fixtures
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             user_id,
@@ -571,12 +637,23 @@ def add_homeowner_note(
             tags,
             details,
             links,
-            photos_json,
-            files_json,
+            json.dumps(photos or []),
+            json.dumps(files or []),
+            vision_statement,
+            json.dumps(color_palette or []),
+            board_template,
+            label_style,
+            is_private,
+            shareable_link,
+            product_sources,
+            show_notes_panel,
+            json.dumps(fixtures or []),
         ),
     )
+    note_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return note_id
 
 
 def list_homeowner_notes(user_id: int) -> List[sqlite3.Row]:
@@ -584,16 +661,10 @@ def list_homeowner_notes(user_id: int) -> List[sqlite3.Row]:
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT
-            id,
-            created_at,
-            project_name,
-            title,
-            tags,
-            details,
-            links,
-            photos,
-            files
+        SELECT id, created_at, project_name, title, tags, details, links,
+               photos, files, vision_statement, color_palette,
+               board_template, label_style, is_private, shareable_link,
+               product_sources, show_notes_panel, fixtures
         FROM homeowner_notes
         WHERE user_id = ?
         ORDER BY created_at DESC
@@ -607,27 +678,25 @@ def list_homeowner_notes(user_id: int) -> List[sqlite3.Row]:
 
 def add_homeowner_document(
     user_id: int,
-    filename: str,
+    name: str,
     category: str,
-    project_name: str = "",
+    file_path: str = None,
     r2_key: str = None,
     r2_url: str = None,
-) -> None:
-    """
-    Store a document record. filename is saved into the filename column.
-    r2_key and r2_url store Cloudflare R2 information if available.
-    """
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO homeowner_documents (user_id, filename, category, r2_key, r2_url)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO homeowner_documents (user_id, name, category, file_path, r2_key, r2_url)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (user_id, filename, category, r2_key, r2_url),
+        (user_id, name, category, file_path, r2_key, r2_url),
     )
+    doc_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return doc_id
 
 
 def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
@@ -635,13 +704,7 @@ def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT
-            id,
-            created_at,
-            filename,
-            category,
-            r2_key,
-            r2_url
+        SELECT id, created_at, name, category, file_path, r2_key, r2_url
         FROM homeowner_documents
         WHERE user_id = ?
         ORDER BY created_at DESC
@@ -656,21 +719,24 @@ def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
 def add_homeowner_project(
     user_id: int,
     name: str,
-    budget: Optional[float],
+    category: str,
     status: str,
+    budget: str,
     notes: str,
-) -> None:
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO homeowner_projects (user_id, name, budget, status, notes)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO homeowner_projects (user_id, name, category, status, budget, notes)
+        VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (user_id, name, budget, status, notes),
+        (user_id, name, category, status, budget, notes),
     )
+    project_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return project_id
 
 
 def list_homeowner_projects(user_id: int) -> List[sqlite3.Row]:
@@ -678,7 +744,7 @@ def list_homeowner_projects(user_id: int) -> List[sqlite3.Row]:
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, created_at, name, budget, status, notes
+        SELECT id, created_at, name, category, status, budget, notes
         FROM homeowner_projects
         WHERE user_id = ?
         ORDER BY created_at DESC
@@ -692,51 +758,45 @@ def list_homeowner_projects(user_id: int) -> List[sqlite3.Row]:
 
 def upsert_next_move_plan(
     user_id: int,
-    timeline: str,
-    budget: str,
-    preapproved: str,
-    areas: str,
-    home_type: str,
-    beds_baths: str,
-    must_haves: str,
-    dealbreakers: str,
-    condition: str,
-    feeling: str,
+    timeline: str = None,
+    budget_range: str = None,
+    location_preferences: str = None,
+    property_type_preferences: str = None,
+    must_haves: str = None,
+    nice_to_haves: str = None,
+    concerns: str = None,
+    notes: str = None,
 ) -> None:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO homeowner_next_move_plans (
-            user_id, timeline, budget, preapproved, areas, home_type,
-            beds_baths, must_haves, dealbreakers, condition, feeling
+        INSERT INTO next_move_plans (
+            user_id, timeline, budget_range, location_preferences,
+            property_type_preferences, must_haves, nice_to_haves, concerns, notes
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(user_id) DO UPDATE SET
-            timeline     = excluded.timeline,
-            budget       = excluded.budget,
-            preapproved  = excluded.preapproved,
-            areas        = excluded.areas,
-            home_type    = excluded.home_type,
-            beds_baths   = excluded.beds_baths,
-            must_haves   = excluded.must_haves,
-            dealbreakers = excluded.dealbreakers,
-            condition    = excluded.condition,
-            feeling      = excluded.feeling,
-            updated_at   = CURRENT_TIMESTAMP
+            timeline = excluded.timeline,
+            budget_range = excluded.budget_range,
+            location_preferences = excluded.location_preferences,
+            property_type_preferences = excluded.property_type_preferences,
+            must_haves = excluded.must_haves,
+            nice_to_haves = excluded.nice_to_haves,
+            concerns = excluded.concerns,
+            notes = excluded.notes,
+            updated_at = CURRENT_TIMESTAMP
         """,
         (
             user_id,
             timeline,
-            budget,
-            preapproved,
-            areas,
-            home_type,
-            beds_baths,
+            budget_range,
+            location_preferences,
+            property_type_preferences,
             must_haves,
-            dealbreakers,
-            condition,
-            feeling,
+            nice_to_haves,
+            concerns,
+            notes,
         ),
     )
     conn.commit()
@@ -746,10 +806,7 @@ def upsert_next_move_plan(
 def get_next_move_plan(user_id: int) -> Optional[sqlite3.Row]:
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM homeowner_next_move_plans WHERE user_id = ?",
-        (user_id,),
-    )
+    cur.execute("SELECT * FROM next_move_plans WHERE user_id = ?", (user_id,))
     row = cur.fetchone()
     conn.close()
     return row
@@ -774,49 +831,123 @@ def add_homeowner_question(
 
 
 # =========================
-# AGENT CRM / TRANSACTIONS
+# AGENT CRM / CONTACTS
 # =========================
 
 
 def add_agent_contact(
     agent_user_id: int,
     name: str,
-    email: str,
-    phone: str,
-    stage: str,
-    best_contact: str,
-    last_touch: str,
-) -> None:
+    email: str = "",
+    phone: str = "",
+    stage: str = "new",
+    best_contact: str = "",
+    last_touch: str = "",
+    birthday: str = "",
+    home_anniversary: str = "",
+    address: str = "",
+    notes: str = "",
+    tags: str = "",
+    property_address: str = "",
+    property_value: float = None,
+    equity_estimate: float = None,
+    auto_birthday: int = 1,
+    auto_anniversary: int = 1,
+    auto_seasonal: int = 1,
+    auto_equity: int = 1,
+    auto_holidays: int = 1,
+    equity_frequency: str = "monthly",
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO agent_contacts (
-            agent_user_id, name, email, phone, stage, best_contact, last_touch
+            agent_user_id, name, email, phone, stage, best_contact, last_touch,
+            birthday, home_anniversary, address, notes, tags, property_address,
+            property_value, equity_estimate, auto_birthday, auto_anniversary,
+            auto_seasonal, auto_equity, auto_holidays, equity_frequency
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (agent_user_id, name, email, phone, stage, best_contact, last_touch),
+        (agent_user_id, name, email, phone, stage, best_contact, last_touch,
+         birthday, home_anniversary, address, notes, tags, property_address,
+         property_value, equity_estimate, auto_birthday, auto_anniversary,
+         auto_seasonal, auto_equity, auto_holidays, equity_frequency),
     )
+    contact_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return contact_id
 
 
-def list_agent_contacts(agent_user_id: int) -> List[sqlite3.Row]:
+def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[sqlite3.Row]:
+    conn = get_connection()
+    cur = conn.cursor()
+    query = """
+        SELECT id, created_at, name, email, phone, stage, best_contact, last_touch,
+               birthday, home_anniversary, address, notes, tags, property_address,
+               property_value, equity_estimate, auto_birthday, auto_anniversary,
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency
+        FROM agent_contacts
+        WHERE agent_user_id = ?
+    """
+    params = [agent_user_id]
+    if stage_filter:
+        query += " AND stage = ?"
+        params.append(stage_filter)
+    query += " ORDER BY created_at DESC"
+    cur.execute(query, tuple(params))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_agent_contact(contact_id: int, agent_user_id: int) -> Optional[sqlite3.Row]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, created_at, name, email, phone, stage, best_contact, last_touch
+        SELECT id, created_at, name, email, phone, stage, best_contact, last_touch,
+               birthday, home_anniversary, address, notes, tags, property_address,
+               property_value, equity_estimate, auto_birthday, auto_anniversary,
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency
         FROM agent_contacts
-        WHERE agent_user_id = ?
-        ORDER BY created_at DESC
+        WHERE id = ? AND agent_user_id = ?
         """,
-        (agent_user_id,),
+        (contact_id, agent_user_id),
     )
-    rows = cur.fetchall()
+    row = cur.fetchone()
     conn.close()
-    return rows
+    return row
+
+
+def update_agent_contact(
+    contact_id: int,
+    agent_user_id: int,
+    **kwargs
+) -> None:
+    """Update agent contact fields. Pass any fields to update as kwargs."""
+    if not kwargs:
+        return
+    conn = get_connection()
+    cur = conn.cursor()
+    updates = []
+    values = []
+    for key, value in kwargs.items():
+        updates.append(f"{key} = ?")
+        values.append(value)
+    values.extend([contact_id, agent_user_id])
+    cur.execute(
+        f"""
+        UPDATE agent_contacts
+        SET {', '.join(updates)}, last_touch = CURRENT_TIMESTAMP
+        WHERE id = ? AND agent_user_id = ?
+        """,
+        tuple(values),
+    )
+    conn.commit()
+    conn.close()
 
 
 def add_agent_transaction(
@@ -886,41 +1017,117 @@ def get_agent_transaction(
 def add_lender_borrower(
     lender_user_id: int,
     name: str,
-    status: str,
-    loan_type: str,
-    target_payment: str,
-    last_touch: str,
-) -> None:
+    status: str = "prospect",
+    loan_type: str = "",
+    target_payment: str = "",
+    last_touch: str = "",
+    email: str = "",
+    phone: str = "",
+    birthday: str = "",
+    home_anniversary: str = "",
+    address: str = "",
+    notes: str = "",
+    tags: str = "",
+    property_address: str = "",
+    loan_amount: float = None,
+    loan_rate: float = None,
+    auto_birthday: int = 1,
+    auto_anniversary: int = 1,
+    auto_seasonal: int = 1,
+    auto_equity: int = 1,
+    auto_holidays: int = 1,
+    equity_frequency: str = "monthly",
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO lender_borrowers (
-            lender_user_id, name, status, loan_type, target_payment, last_touch
+            lender_user_id, name, status, loan_type, target_payment, last_touch,
+            email, phone, birthday, home_anniversary, address, notes, tags,
+            property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
+            auto_seasonal, auto_equity, auto_holidays, equity_frequency
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (lender_user_id, name, status, loan_type, target_payment, last_touch),
+        (lender_user_id, name, status, loan_type, target_payment, last_touch,
+         email, phone, birthday, home_anniversary, address, notes, tags,
+         property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
+         auto_seasonal, auto_equity, auto_holidays, equity_frequency),
     )
+    borrower_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return borrower_id
 
 
-def list_lender_borrowers(lender_user_id: int) -> List[sqlite3.Row]:
+def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> List[sqlite3.Row]:
+    conn = get_connection()
+    cur = conn.cursor()
+    query = """
+        SELECT id, created_at, name, status, loan_type, target_payment, last_touch,
+               email, phone, birthday, home_anniversary, address, notes, tags,
+               property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency
+        FROM lender_borrowers
+        WHERE lender_user_id = ?
+    """
+    params = [lender_user_id]
+    if status_filter:
+        query += " AND status = ?"
+        params.append(status_filter)
+    query += " ORDER BY created_at DESC"
+    cur.execute(query, tuple(params))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_lender_borrower(borrower_id: int, lender_user_id: int) -> Optional[sqlite3.Row]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, created_at, name, status, loan_type, target_payment, last_touch
+        SELECT id, created_at, name, status, loan_type, target_payment, last_touch,
+               email, phone, birthday, home_anniversary, address, notes, tags,
+               property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency
         FROM lender_borrowers
-        WHERE lender_user_id = ?
-        ORDER BY created_at DESC
+        WHERE id = ? AND lender_user_id = ?
         """,
-        (lender_user_id,),
+        (borrower_id, lender_user_id),
     )
-    rows = cur.fetchall()
+    row = cur.fetchone()
     conn.close()
-    return rows
+    return row
+
+
+def update_lender_borrower(
+    borrower_id: int,
+    lender_user_id: int,
+    **kwargs
+) -> None:
+    """Update lender borrower fields. Pass any fields to update as kwargs."""
+    if not kwargs:
+        return
+    conn = get_connection()
+    cur = conn.cursor()
+    updates = []
+    values = []
+    for key, value in kwargs.items():
+        updates.append(f"{key} = ?")
+        values.append(value)
+    values.extend([borrower_id, lender_user_id])
+    cur.execute(
+        f"""
+        UPDATE lender_borrowers
+        SET {', '.join(updates)}, last_touch = CURRENT_TIMESTAMP
+        WHERE id = ? AND lender_user_id = ?
+        """,
+        tuple(values),
+    )
+    conn.commit()
+    conn.close()
 
 
 def add_lender_loan(
@@ -937,8 +1144,7 @@ def add_lender_loan(
     cur.execute(
         """
         INSERT INTO lender_loans (
-            lender_user_id, borrower_name, status, loan_type,
-            target_payment, stage, close_date
+            lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
@@ -953,8 +1159,7 @@ def list_lender_loans(lender_user_id: int) -> List[sqlite3.Row]:
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, created_at, borrower_name, status, loan_type,
-               target_payment, stage, close_date
+        SELECT id, created_at, borrower_name, status, loan_type, target_payment, stage, close_date
         FROM lender_loans
         WHERE lender_user_id = ?
         ORDER BY created_at DESC
@@ -1004,10 +1209,9 @@ def list_message_templates(
     if owner_user_id:
         cur.execute(
             """
-            SELECT *
+            SELECT id, created_at, label, category, channel, subject, body
             FROM message_templates
-            WHERE role = ?
-              AND (owner_user_id IS NULL OR owner_user_id = ?)
+            WHERE role = ? AND owner_user_id = ?
             ORDER BY created_at DESC
             """,
             (role, owner_user_id),
@@ -1015,10 +1219,9 @@ def list_message_templates(
     else:
         cur.execute(
             """
-            SELECT *
+            SELECT id, created_at, label, category, channel, subject, body
             FROM message_templates
             WHERE role = ?
-              AND owner_user_id IS NULL
             ORDER BY created_at DESC
             """,
             (role,),
@@ -1060,10 +1263,9 @@ def list_marketing_templates(
     if owner_user_id:
         cur.execute(
             """
-            SELECT *
+            SELECT id, created_at, template_type, name, description, content
             FROM marketing_templates
-            WHERE role = ?
-              AND (owner_user_id IS NULL OR owner_user_id = ?)
+            WHERE role = ? AND owner_user_id = ?
             ORDER BY created_at DESC
             """,
             (role, owner_user_id),
@@ -1071,10 +1273,9 @@ def list_marketing_templates(
     else:
         cur.execute(
             """
-            SELECT *
+            SELECT id, created_at, template_type, name, description, content
             FROM marketing_templates
             WHERE role = ?
-              AND owner_user_id IS NULL
             ORDER BY created_at DESC
             """,
             (role,),
@@ -1085,7 +1286,7 @@ def list_marketing_templates(
 
 
 # =========================
-# DOCUMENT HELPERS
+# DOCUMENT MANAGEMENT
 # =========================
 
 
@@ -1097,33 +1298,40 @@ def delete_homeowner_document(doc_id: int) -> None:
     conn.close()
 
 
-def update_homeowner_document_file(doc_id: int, new_filename: str) -> None:
+def update_homeowner_document_file(
+    doc_id: int,
+    file_path: str = None,
+    r2_key: str = None,
+    r2_url: str = None,
+) -> None:
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        """
-        UPDATE homeowner_documents
-        SET file_name = ?, created_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-        """,
-        (new_filename, doc_id),
-    )
-    conn.commit()
+    updates = []
+    values = []
+    if file_path is not None:
+        updates.append("file_path = ?")
+        values.append(file_path)
+    if r2_key is not None:
+        updates.append("r2_key = ?")
+        values.append(r2_key)
+    if r2_url is not None:
+        updates.append("r2_url = ?")
+        values.append(r2_url)
+    if updates:
+        values.append(doc_id)
+        cur.execute(
+            f"UPDATE homeowner_documents SET {', '.join(updates)} WHERE id = ?",
+            tuple(values),
+        )
+        conn.commit()
     conn.close()
 
 
-def get_homeowner_document_for_user(
-    doc_id: int,
-    user_id: int,
-) -> Optional[sqlite3.Row]:
+def get_homeowner_document_for_user(doc_id: int, user_id: int) -> Optional[sqlite3.Row]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        """
-        SELECT *
-        FROM homeowner_documents
-        WHERE id = ? AND user_id = ?
-        """,
+        "SELECT * FROM homeowner_documents WHERE id = ? AND user_id = ?",
         (doc_id, user_id),
     )
     row = cur.fetchone()
@@ -1132,7 +1340,7 @@ def get_homeowner_document_for_user(
 
 
 # =========================
-# HOMEOWNER TIMELINE EVENTS
+# TIMELINE EVENTS
 # =========================
 
 
@@ -1141,22 +1349,25 @@ def add_timeline_event(
     event_date: str,
     title: str,
     category: str,
-    cost: str,
-    notes: str,
-    files: List[str],
-) -> None:
+    cost: str = None,
+    notes: str = None,
+    files: List[str] = None,
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        INSERT INTO homeowner_timeline_events
-        (user_id, event_date, title, category, cost, notes, files)
+        INSERT INTO homeowner_timeline_events (
+            user_id, event_date, title, category, cost, notes, files
+        )
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """,
-        (user_id, event_date, title, category, cost, notes, json.dumps(files)),
+        (user_id, event_date, title, category, cost, notes, json.dumps(files or [])),
     )
+    event_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return event_id
 
 
 def list_timeline_events(user_id: int) -> List[sqlite3.Row]:
@@ -1164,10 +1375,10 @@ def list_timeline_events(user_id: int) -> List[sqlite3.Row]:
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT *
+        SELECT id, created_at, event_date, title, category, cost, notes, files
         FROM homeowner_timeline_events
         WHERE user_id = ?
-        ORDER BY event_date DESC
+        ORDER BY event_date DESC, created_at DESC
         """,
         (user_id,),
     )
@@ -1188,40 +1399,25 @@ def delete_timeline_event(event_id: int, user_id: int) -> None:
 
 
 # =========================
-# SIMPLE SAVED NOTES
+# SIMPLE NOTES
 # =========================
 
 
-def add_simple_note(
-    user_id: int,
-    title: str,
-    body: str,
-) -> None:
-    """Add a new simple note for a homeowner."""
+def add_simple_note(user_id: int, content: str) -> int:
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO homeowner_simple_notes (user_id, title, body)
-        VALUES (?, ?, ?)
-        """,
-        (user_id, title, body),
-    )
+    cur.execute("INSERT INTO simple_notes (user_id, content) VALUES (?, ?)", (user_id, content))
+    note_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return note_id
 
 
 def list_simple_notes(user_id: int) -> List[sqlite3.Row]:
-    """Get all simple notes for a user, sorted by most recent first."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        """
-        SELECT id, created_at, title, body
-        FROM homeowner_simple_notes
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        """,
+        "SELECT id, created_at, content FROM simple_notes WHERE user_id = ? ORDER BY created_at DESC",
         (user_id,),
     )
     rows = cur.fetchall()
@@ -1230,242 +1426,121 @@ def list_simple_notes(user_id: int) -> List[sqlite3.Row]:
 
 
 def delete_simple_note(note_id: int, user_id: int) -> None:
-    """Delete a simple note (security: verify user_id)."""
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        "DELETE FROM homeowner_simple_notes WHERE id = ? AND user_id = ?",
-        (note_id, user_id),
-    )
+    cur.execute("DELETE FROM simple_notes WHERE id = ? AND user_id = ?", (note_id, user_id))
     conn.commit()
     conn.close()
 
 
 # =========================
-# DESIGN BOARDS (MOOD BOARDS)
+# DESIGN BOARD NOTES
 # =========================
 
 
 def add_design_board_note(
     user_id: int,
     project_name: str,
-    title: str,
-    details: str,
-    photos: List[str],
-    files: List[str],
-    tags: str = "",
-    vision_statement: str = "",
-    color_palette: List[str] = None,
-    board_template: str = "collage",
-    label_style: str = "sans-serif",
-    is_private: int = 0,
-    product_sources: List[str] = None,
-    fixtures: List[str] = None,
-) -> None:
-    """Add a note to a design board project with premium features."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO homeowner_notes
-        (user_id, project_name, title, tags, details, photos, files, 
-         vision_statement, color_palette, board_template, label_style, 
-         is_private, product_sources, fixtures)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            user_id,
-            project_name,
-            title,
-            tags,
-            details,
-            json.dumps(photos or []),
-            json.dumps(files or []),
-            vision_statement,
-            json.dumps(color_palette or []),
-            board_template,
-            label_style,
-            is_private,
-            json.dumps(product_sources or []),
-            json.dumps(fixtures or []),
-        ),
+    title: str = None,
+    tags: str = None,
+    details: str = None,
+    links: str = None,
+    photos: List[str] = None,
+    files: List[str] = None,
+) -> int:
+    return add_homeowner_note(
+        user_id=user_id,
+        project_name=project_name,
+        title=title,
+        tags=tags,
+        details=details,
+        links=links,
+        photos=photos,
+        files=files,
     )
-    conn.commit()
-    conn.close()
 
 
-def get_design_boards_for_user(user_id: int) -> List[str]:
-    """Get all unique project names (board titles) for a user."""
+def get_design_boards_for_user(user_id: int) -> Dict[str, Any]:
+    """Get all unique design boards (project_name) for a user."""
     conn = get_connection()
     cur = conn.cursor()
-    # Support legacy rows where the board name may have been stored in `title`.
     cur.execute(
         """
-        SELECT DISTINCT COALESCE(NULLIF(project_name, ''), NULLIF(title, '')) AS project_name
+        SELECT DISTINCT project_name, 
+               MIN(created_at) as first_created,
+               COUNT(*) as note_count
         FROM homeowner_notes
-        WHERE user_id = ? AND (project_name IS NOT NULL OR title IS NOT NULL)
-        ORDER BY project_name ASC
+        WHERE user_id = ? AND project_name IS NOT NULL AND project_name != ''
+        GROUP BY project_name
+        ORDER BY first_created DESC
         """,
         (user_id,),
     )
     rows = cur.fetchall()
     conn.close()
-    return [row[0] for row in rows if row[0]]
+    boards = {}
+    for row in rows:
+        boards[row["project_name"]] = {
+            "first_created": row["first_created"],
+            "note_count": row["note_count"],
+        }
+    return boards
 
 
-def get_design_board_details(user_id: int, project_name: str) -> Dict[str, Any]:
-    """Get all notes, photos, and files for a design board with premium features."""
+def get_design_board_details(user_id: int, project_name: str) -> List[sqlite3.Row]:
+    """Get all notes for a specific design board."""
     conn = get_connection()
     cur = conn.cursor()
-    # Match rows where the board name is stored in `project_name`, or legacy rows
-    # where it was stored in `title`.
     cur.execute(
         """
-        SELECT id, created_at, title, details, photos, files, tags, project_name,
-               vision_statement, color_palette, board_template, label_style,
-               is_private, shareable_link, product_sources, show_notes_panel, fixtures
+        SELECT id, created_at, project_name, title, tags, details, links,
+               photos, files, vision_statement, color_palette,
+               board_template, label_style, is_private, shareable_link,
+               product_sources, show_notes_panel, fixtures
         FROM homeowner_notes
-        WHERE user_id = ? AND (project_name = ? OR title = ?)
+        WHERE user_id = ? AND project_name = ?
         ORDER BY created_at ASC
         """,
-        (user_id, project_name, project_name),
+        (user_id, project_name),
     )
     rows = cur.fetchall()
     conn.close()
-
-    if not rows:
-        return None
-
-    # Aggregate all photos, files, notes, colors, product sources, fixtures
-    all_photos = []
-    all_files = []
-    all_notes = []
-    all_colors = []
-    all_product_sources = []
-    all_fixtures = []
-    first_row = rows[0]
-
-    for row in rows:
-        # Parse photos JSON
-        photos_json = row["photos"] or "[]"
-        try:
-            photos = json.loads(photos_json)
-            all_photos.extend(photos)
-        except Exception:
-            pass
-
-        # Parse files JSON
-        files_json = row["files"] or "[]"
-        try:
-            files = json.loads(files_json)
-            all_files.extend(files)
-        except Exception:
-            pass
-        
-        # Parse color palette JSON
-        color_json = row["color_palette"] if "color_palette" in row.keys() else None
-        if color_json:
-            try:
-                colors = json.loads(color_json)
-                all_colors.extend(colors)
-            except Exception:
-                pass
-        
-        # Parse product sources JSON
-        products_json = row["product_sources"] if "product_sources" in row.keys() else None
-        if products_json:
-            try:
-                products = json.loads(products_json)
-                all_product_sources.extend(products)
-            except Exception:
-                pass
-        
-        # Parse fixtures JSON
-        fixtures_json = row["fixtures"] if "fixtures" in row.keys() else None
-        if fixtures_json:
-            try:
-                fixtures = json.loads(fixtures_json)
-                all_fixtures.extend(fixtures)
-            except Exception:
-                pass
-
-        # Collect note info
-        all_notes.append(
-            {
-                "id": row["id"],
-                "title": row["title"],
-                "details": row["details"],
-                "created_at": row["created_at"],
-            }
-        )
-
-    # Remove duplicate colors
-    all_colors = list(dict.fromkeys(all_colors))  # Preserves order
-
-    return {
-        "project_name": project_name,
-        "tags": first_row["tags"] or "",
-        "vision_statement": first_row["vision_statement"] if "vision_statement" in first_row.keys() else "",
-        "board_template": first_row["board_template"] if "board_template" in first_row.keys() else "collage",
-        "label_style": first_row["label_style"] if "label_style" in first_row.keys() else "sans-serif",
-        "is_private": first_row["is_private"] if "is_private" in first_row.keys() else 0,
-        "shareable_link": first_row["shareable_link"] if "shareable_link" in first_row.keys() else "",
-        "show_notes_panel": first_row["show_notes_panel"] if "show_notes_panel" in first_row.keys() else 1,
-        "photos": all_photos,
-        "files": all_files,
-        "notes": all_notes,
-        "color_palette": all_colors,
-        "product_sources": all_product_sources,
-        "fixtures": all_fixtures,
-    }
+    return rows
 
 
 def delete_design_board(user_id: int, project_name: str) -> None:
-    """Delete entire design board (all notes for a project).
-    
-    Handles both new format (project_name) and legacy format (title) where board
-    names might be stored.
-    """
     conn = get_connection()
     cur = conn.cursor()
-    # Delete rows matching either project_name or title (for backward compatibility)
     cur.execute(
-        """DELETE FROM homeowner_notes 
-           WHERE user_id = ? AND (project_name = ? OR title = ?)""",
-        (user_id, project_name, project_name),
+        "DELETE FROM homeowner_notes WHERE user_id = ? AND project_name = ?",
+        (user_id, project_name),
     )
     conn.commit()
     conn.close()
 
 
-def update_homeowner_note_photos(note_id: int, photos: List[str]) -> None:
-    """Update the photos JSON for a specific homeowner_notes row."""
+def update_homeowner_note_photos(user_id: int, project_name: str, photos: List[str]) -> None:
+    """Update photos for all notes in a design board."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        "UPDATE homeowner_notes SET photos = ? WHERE id = ?",
-        (json.dumps(photos or []), note_id),
+        "UPDATE homeowner_notes SET photos = ? WHERE user_id = ? AND project_name = ?",
+        (json.dumps(photos), user_id, project_name),
     )
     conn.commit()
     conn.close()
 
 
 def remove_photos_from_board(user_id: int, project_name: str, photos_to_remove: List[str]) -> None:
-    """Remove matching photo paths from all notes in a board (best-effort).
-
-    photos_to_remove should be a list of relative paths (matching what's stored in DB).
-    Handles both new format (project_name) and legacy format (title).
-    """
+    """Remove specific photos from all notes in a design board."""
     if not photos_to_remove:
         return
 
     conn = get_connection()
     cur = conn.cursor()
-    # Fetch rows matching either project_name or title (for backward compatibility)
     cur.execute(
-        """SELECT id, photos FROM homeowner_notes 
-           WHERE user_id = ? AND (project_name = ? OR title = ?)""",
-        (user_id, project_name, project_name),
+        "SELECT id, photos FROM homeowner_notes WHERE user_id = ? AND project_name = ?",
+        (user_id, project_name),
     )
     rows = cur.fetchall()
 
@@ -1479,48 +1554,8 @@ def remove_photos_from_board(user_id: int, project_name: str, photos_to_remove: 
 
         filtered = [p for p in photos if p not in photos_to_remove]
         if len(filtered) != len(photos):
-            # Update only when something changed
             cur.execute(
                 "UPDATE homeowner_notes SET photos = ? WHERE id = ?",
-                (json.dumps(filtered), note_id),
-            )
-
-    conn.commit()
-    conn.close()
-
-
-def remove_fixtures_from_board(user_id: int, project_name: str, fixtures_to_remove: List[str]) -> None:
-    """Remove matching fixture paths from all notes in a board (best-effort).
-
-    fixtures_to_remove should be a list of relative paths (matching what's stored in DB).
-    Handles both new format (project_name) and legacy format (title).
-    """
-    if not fixtures_to_remove:
-        return
-
-    conn = get_connection()
-    cur = conn.cursor()
-    # Fetch rows matching either project_name or title (for backward compatibility)
-    cur.execute(
-        """SELECT id, fixtures FROM homeowner_notes 
-           WHERE user_id = ? AND (project_name = ? OR title = ?)""",
-        (user_id, project_name, project_name),
-    )
-    rows = cur.fetchall()
-
-    for row in rows:
-        note_id = row["id"]
-        fixtures_json = row["fixtures"] or "[]"
-        try:
-            fixtures = json.loads(fixtures_json)
-        except Exception:
-            fixtures = []
-
-        filtered = [f for f in fixtures if f not in fixtures_to_remove]
-        if len(filtered) != len(fixtures):
-            # Update only when something changed
-            cur.execute(
-                "UPDATE homeowner_notes SET fixtures = ? WHERE id = ?",
                 (json.dumps(filtered), note_id),
             )
 
@@ -1798,3 +1833,145 @@ def upsert_homeowner_snapshot_for_property(
     conn.commit()
     conn.close()
 
+
+# ====================== CRM INTERACTIONS & AUTOMATED EMAILS ======================
+
+def add_crm_interaction(
+    contact_id: int,
+    contact_type: str,
+    professional_user_id: int,
+    interaction_type: str,
+    subject: str = "",
+    notes: str = "",
+    channel: str = "email",
+    interaction_date: str = None,
+) -> int:
+    """Add an interaction record for a CRM contact."""
+    conn = get_connection()
+    cur = conn.cursor()
+    if not interaction_date:
+        interaction_date = datetime.now().isoformat()
+    cur.execute(
+        """
+        INSERT INTO crm_interactions (
+            contact_id, contact_type, professional_user_id, interaction_type,
+            interaction_date, subject, notes, channel
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (contact_id, contact_type, professional_user_id, interaction_type,
+         interaction_date, subject, notes, channel),
+    )
+    interaction_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return interaction_id
+
+
+def list_crm_interactions(
+    contact_id: int,
+    contact_type: str,
+    professional_user_id: int,
+    limit: int = 50,
+) -> List[sqlite3.Row]:
+    """List interactions for a contact."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, interaction_type, interaction_date, subject, notes, channel, created_at
+        FROM crm_interactions
+        WHERE contact_id = ? AND contact_type = ? AND professional_user_id = ?
+        ORDER BY interaction_date DESC, created_at DESC
+        LIMIT ?
+        """,
+        (contact_id, contact_type, professional_user_id, limit),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def log_automated_email(
+    contact_id: int,
+    contact_type: str,
+    professional_user_id: int,
+    email_type: str,
+    recipient_email: str,
+    subject: str,
+    status: str = "sent",
+    error_message: str = None,
+) -> int:
+    """Log an automated email send."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO automated_email_logs (
+            contact_id, contact_type, professional_user_id, email_type,
+            recipient_email, subject, status, error_message
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (contact_id, contact_type, professional_user_id, email_type,
+         recipient_email, subject, status, error_message),
+    )
+    log_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return log_id
+
+
+def get_contacts_for_automated_email(
+    professional_user_id: int,
+    email_type: str,
+    contact_type: str = "agent_contact",
+) -> List[sqlite3.Row]:
+    """Get contacts that should receive automated emails of a specific type."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    if contact_type == "agent_contact":
+        table = "agent_contacts"
+        user_id_col = "agent_user_id"
+        email_col = "email"
+        if email_type == "birthday":
+            enabled_col = "auto_birthday"
+        elif email_type == "anniversary":
+            enabled_col = "auto_anniversary"
+        elif email_type == "seasonal":
+            enabled_col = "auto_seasonal"
+        elif email_type == "equity":
+            enabled_col = "auto_equity"
+        elif email_type == "holiday":
+            enabled_col = "auto_holidays"
+        else:
+            return []
+    else:  # lender_borrower
+        table = "lender_borrowers"
+        user_id_col = "lender_user_id"
+        email_col = "email"
+        if email_type == "birthday":
+            enabled_col = "auto_birthday"
+        elif email_type == "anniversary":
+            enabled_col = "auto_anniversary"
+        elif email_type == "seasonal":
+            enabled_col = "auto_seasonal"
+        elif email_type == "equity":
+            enabled_col = "auto_equity"
+        elif email_type == "holiday":
+            enabled_col = "auto_holidays"
+        else:
+            return []
+    
+    query = f"""
+        SELECT id, name, {email_col} as email, birthday, home_anniversary,
+               property_address, property_value, equity_estimate, equity_frequency
+        FROM {table}
+        WHERE {user_id_col} = ? AND {email_col} IS NOT NULL AND {email_col} != ''
+              AND {enabled_col} = 1
+    """
+    cur.execute(query, (professional_user_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
