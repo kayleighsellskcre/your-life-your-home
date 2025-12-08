@@ -314,7 +314,7 @@
 
 <!-- Search and Filters Bar -->
 <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border: var(--border-light);">
-  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto auto; gap: 1rem; align-items: end;">
     <div>
       <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">🔍 Search Contacts</label>
       <form method="get" style="display: flex; gap: 0.5rem;">
@@ -362,6 +362,11 @@
 <div class="crm-container">
   <!-- Sidebar: Add Contact & Filters -->
   <div class="crm-sidebar">
+    <div style="margin-bottom: 1.5rem;">
+      <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none; margin-bottom: 1rem;">
+        📥 Import from Excel/CSV
+      </a>
+    </div>
     <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
     <form method="post" id="addContactForm">
       <input type="hidden" name="action" value="add">
@@ -590,10 +595,19 @@
     {% endif %}
     
     {% if contacts %}
-    <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
+    <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center; display: flex; gap: 1rem; justify-content: center;">
+      <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="text-decoration: none;">
+        📥 Import from Excel/CSV
+      </a>
       <button onclick="exportContacts()" class="btn" style="background: var(--olive-green); color: var(--white);">
-        📥 Export Contacts to CSV
+        📤 Export to CSV
       </button>
+    </div>
+    {% else %}
+    <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
+      <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
+        📥 Import Your Contacts from Excel/CSV
+      </a>
     </div>
     {% endif %}
   </div>

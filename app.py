@@ -3,7 +3,7 @@ print('>>> THIS IS THE REAL app.py BEING RUN <<<')
 import os
 import boto3
 from functools import wraps
-from typing import Optional
+from typing import Optional, List, Dict
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime
@@ -13,6 +13,8 @@ from types import SimpleNamespace
 from PIL import Image, ImageFilter
 import numpy as np
 import secrets
+import pandas as pd
+import io
 
 from flask import (
     Flask,
@@ -162,16 +164,15 @@ def homeowner_reno_planner_ajax_add():
     name = data.get("project_name", "").strip()
     budget = data.get("project_budget")
     status = data.get("project_status", "Planning").strip()
+    category = data.get("project_category", "Other").strip()  # Get category, default to "Other"
     board_name = data.get("board_name", "").strip()
     summary = data.get("project_summary", "").strip()
 
     if not name:
         return jsonify({"success": False, "error": "Project name required"}), 400
 
-    try:
-        budget_val = float(budget) if budget else None
-    except Exception:
-        budget_val = None
+    # Convert budget to string (function expects string, not float)
+    budget_str = str(budget) if budget else ""
 
     # Get notes from JSON data
     notes = data.get("project_notes", "").strip()
@@ -189,7 +190,9 @@ def homeowner_reno_planner_ajax_add():
             files=[]
         )
 
-    add_homeowner_project(user_id, name, budget_val, status, notes)
+    # Fix: Add category parameter and correct argument order
+    # Function signature: user_id, name, category, status, budget, notes
+    add_homeowner_project(user_id, name, category, status, budget_str, notes)
     return jsonify({"success": True})
 
 
@@ -2271,6 +2274,189 @@ def agent_crm():
         return f"Template Error: {e}<br><pre>{error_msg}</pre>", 500
 
 
+@app.route("/agent/crm/import", methods=["GET", "POST"])
+def agent_crm_import():
+    """Agent CRM bulk import from Excel/CSV."""
+    try:
+        user = get_current_user()
+        if not user or user.get("role") != "agent":
+            return redirect(url_for("login", role="agent"))
+    except Exception as e:
+        return f"Error: {e}", 500
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        
+        if action == "upload":
+            # Handle file upload
+            if 'file' not in request.files:
+                flash("Please select a file to upload.", "error")
+                return redirect(url_for("agent_crm_import"))
+            
+            file = request.files['file']
+            if file.filename == '':
+                flash("Please select a file to upload.", "error")
+                return redirect(url_for("agent_crm_import"))
+            
+            # Check file extension
+            filename = file.filename.lower()
+            if not (filename.endswith('.xlsx') or filename.endswith('.xls') or filename.endswith('.csv')):
+                flash("Please upload an Excel (.xlsx, .xls) or CSV file.", "error")
+                return redirect(url_for("agent_crm_import"))
+            
+            try:
+                # Read file into pandas
+                if filename.endswith('.csv'):
+                    df = pd.read_csv(file)
+                else:
+                    df = pd.read_excel(file)
+                
+                # Convert to list of dicts for preview
+                data = df.to_dict('records')
+                
+                # Get column names for mapping
+                columns = list(df.columns)
+                
+                # Store in session for import step
+                session['crm_import_data'] = json.dumps(data, default=str)
+                session['crm_import_columns'] = columns
+                
+                return render_template(
+                    "agent/crm_import_preview.html",
+                    brand_name=FRONT_BRAND_NAME,
+                    user=user,
+                    data=data[:10],  # Preview first 10 rows
+                    total_rows=len(data),
+                    columns=columns,
+                    sample_data=data[0] if data else {},
+                )
+            except Exception as e:
+                import traceback
+                flash(f"Error reading file: {str(e)}", "error")
+                print(f"Import error: {traceback.format_exc()}")
+                return redirect(url_for("agent_crm_import"))
+        
+        elif action == "import":
+            # Actually import the data
+            import_data_json = session.get('crm_import_data')
+            if not import_data_json:
+                flash("No import data found. Please upload a file again.", "error")
+                return redirect(url_for("agent_crm_import"))
+            
+            try:
+                data = json.loads(import_data_json)
+                
+                # Get column mappings from form
+                mappings = {
+                    'name': request.form.get('map_name', '').strip(),
+                    'email': request.form.get('map_email', '').strip(),
+                    'phone': request.form.get('map_phone', '').strip(),
+                    'stage': request.form.get('map_stage', '').strip(),
+                    'birthday': request.form.get('map_birthday', '').strip(),
+                    'home_anniversary': request.form.get('map_anniversary', '').strip(),
+                    'address': request.form.get('map_address', '').strip(),
+                    'property_address': request.form.get('map_property_address', '').strip(),
+                    'property_value': request.form.get('map_property_value', '').strip(),
+                    'equity_estimate': request.form.get('map_equity', '').strip(),
+                    'notes': request.form.get('map_notes', '').strip(),
+                    'tags': request.form.get('map_tags', '').strip(),
+                }
+                
+                # Default stage if not mapped
+                default_stage = request.form.get('default_stage', 'new').strip()
+                
+                # Import settings
+                skip_duplicates = request.form.get('skip_duplicates') == 'on'
+                duplicate_check = request.form.get('duplicate_check', 'email').strip()
+                
+                imported = 0
+                skipped = 0
+                errors = []
+                
+                for idx, row in enumerate(data):
+                    try:
+                        # Map columns to fields
+                        name = str(row.get(mappings['name'], '')).strip() if mappings['name'] else ''
+                        email = str(row.get(mappings['email'], '')).strip() if mappings['email'] else ''
+                        phone = str(row.get(mappings['phone'], '')).strip() if mappings['phone'] else ''
+                        stage = str(row.get(mappings['stage'], default_stage)).strip() if mappings['stage'] else default_stage
+                        birthday = str(row.get(mappings['birthday'], '')).strip() if mappings['birthday'] else ''
+                        home_anniversary = str(row.get(mappings['home_anniversary'], '')).strip() if mappings['home_anniversary'] else ''
+                        address = str(row.get(mappings['address'], '')).strip() if mappings['address'] else ''
+                        property_address = str(row.get(mappings['property_address'], '')).strip() if mappings['property_address'] else ''
+                        notes = str(row.get(mappings['notes'], '')).strip() if mappings['notes'] else ''
+                        tags = str(row.get(mappings['tags'], '')).strip() if mappings['tags'] else ''
+                        
+                        # Parse numeric values
+                        try:
+                            property_value = float(row.get(mappings['property_value'], 0)) if mappings['property_value'] and str(row.get(mappings['property_value'], '')).strip() else None
+                        except:
+                            property_value = None
+                        
+                        try:
+                            equity_estimate = float(row.get(mappings['equity_estimate'], 0)) if mappings['equity_estimate'] and str(row.get(mappings['equity_estimate'], '')).strip() else None
+                        except:
+                            equity_estimate = None
+                        
+                        if not name:
+                            errors.append(f"Row {idx + 1}: Missing name")
+                            continue
+                        
+                        # Check for duplicates if enabled
+                        if skip_duplicates:
+                            existing_contacts = list_agent_contacts(user["id"])
+                            is_duplicate = False
+                            for existing in existing_contacts:
+                                if duplicate_check == 'email' and email:
+                                    if existing.get('email') and existing['email'].lower() == email.lower():
+                                        is_duplicate = True
+                                        break
+                                elif duplicate_check == 'phone' and phone:
+                                    if existing.get('phone') and existing['phone'] == phone:
+                                        is_duplicate = True
+                                        break
+                                elif duplicate_check == 'name' and name:
+                                    if existing.get('name') and existing['name'].lower() == name.lower():
+                                        is_duplicate = True
+                                        break
+                            
+                            if is_duplicate:
+                                skipped += 1
+                                continue
+                        
+                        # Add contact
+                        add_agent_contact(
+                            user["id"], name, email, phone, stage, email or phone, "",
+                            birthday, home_anniversary, address, notes, tags,
+                            property_address, property_value, equity_estimate
+                        )
+                        imported += 1
+                    except Exception as e:
+                        errors.append(f"Row {idx + 1}: {str(e)}")
+                
+                # Clear session
+                session.pop('crm_import_data', None)
+                session.pop('crm_import_columns', None)
+                
+                flash(f"Import complete! {imported} contacts imported, {skipped} skipped, {len(errors)} errors.", "success")
+                if errors:
+                    flash(f"Errors: {', '.join(errors[:5])}{'...' if len(errors) > 5 else ''}", "error")
+                
+                return redirect(url_for("agent_crm"))
+            except Exception as e:
+                import traceback
+                flash(f"Error during import: {str(e)}", "error")
+                print(f"Import error: {traceback.format_exc()}")
+                return redirect(url_for("agent_crm_import"))
+    
+    # GET request - show upload form
+    return render_template(
+        "agent/crm_import.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
 @app.route("/agent/transactions", methods=["GET", "POST"])
 def agent_transactions():
     """Agent transactions - list and create transactions."""
@@ -2537,6 +2723,193 @@ def lender_crm():
         user=user,
         borrowers=borrowers_list,
         status_filter=status_filter,
+    )
+
+
+@app.route("/lender/crm/import", methods=["GET", "POST"])
+def lender_crm_import():
+    """Lender CRM bulk import from Excel/CSV."""
+    try:
+        user = get_current_user()
+        if not user or user.get("role") != "lender":
+            return redirect(url_for("login", role="lender"))
+    except Exception as e:
+        return f"Error: {e}", 500
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        
+        if action == "upload":
+            # Handle file upload
+            if 'file' not in request.files:
+                flash("Please select a file to upload.", "error")
+                return redirect(url_for("lender_crm_import"))
+            
+            file = request.files['file']
+            if file.filename == '':
+                flash("Please select a file to upload.", "error")
+                return redirect(url_for("lender_crm_import"))
+            
+            # Check file extension
+            filename = file.filename.lower()
+            if not (filename.endswith('.xlsx') or filename.endswith('.xls') or filename.endswith('.csv')):
+                flash("Please upload an Excel (.xlsx, .xls) or CSV file.", "error")
+                return redirect(url_for("lender_crm_import"))
+            
+            try:
+                # Read file into pandas
+                if filename.endswith('.csv'):
+                    df = pd.read_csv(file)
+                else:
+                    df = pd.read_excel(file)
+                
+                # Convert to list of dicts for preview
+                data = df.to_dict('records')
+                
+                # Get column names for mapping
+                columns = list(df.columns)
+                
+                # Store in session for import step
+                session['crm_import_data'] = json.dumps(data, default=str)
+                session['crm_import_columns'] = columns
+                
+                return render_template(
+                    "lender/crm_import_preview.html",
+                    brand_name=FRONT_BRAND_NAME,
+                    user=user,
+                    data=data[:10],  # Preview first 10 rows
+                    total_rows=len(data),
+                    columns=columns,
+                    sample_data=data[0] if data else {},
+                )
+            except Exception as e:
+                import traceback
+                flash(f"Error reading file: {str(e)}", "error")
+                print(f"Import error: {traceback.format_exc()}")
+                return redirect(url_for("lender_crm_import"))
+        
+        elif action == "import":
+            # Actually import the data
+            import_data_json = session.get('crm_import_data')
+            if not import_data_json:
+                flash("No import data found. Please upload a file again.", "error")
+                return redirect(url_for("lender_crm_import"))
+            
+            try:
+                data = json.loads(import_data_json)
+                
+                # Get column mappings from form
+                mappings = {
+                    'name': request.form.get('map_name', '').strip(),
+                    'email': request.form.get('map_email', '').strip(),
+                    'phone': request.form.get('map_phone', '').strip(),
+                    'status': request.form.get('map_status', '').strip(),
+                    'loan_type': request.form.get('map_loan_type', '').strip(),
+                    'target_payment': request.form.get('map_target_payment', '').strip(),
+                    'birthday': request.form.get('map_birthday', '').strip(),
+                    'home_anniversary': request.form.get('map_anniversary', '').strip(),
+                    'address': request.form.get('map_address', '').strip(),
+                    'property_address': request.form.get('map_property_address', '').strip(),
+                    'loan_amount': request.form.get('map_loan_amount', '').strip(),
+                    'loan_rate': request.form.get('map_loan_rate', '').strip(),
+                    'notes': request.form.get('map_notes', '').strip(),
+                    'tags': request.form.get('map_tags', '').strip(),
+                }
+                
+                # Default status if not mapped
+                default_status = request.form.get('default_status', 'prospect').strip()
+                
+                # Import settings
+                skip_duplicates = request.form.get('skip_duplicates') == 'on'
+                duplicate_check = request.form.get('duplicate_check', 'email').strip()
+                
+                imported = 0
+                skipped = 0
+                errors = []
+                
+                for idx, row in enumerate(data):
+                    try:
+                        # Map columns to fields
+                        name = str(row.get(mappings['name'], '')).strip() if mappings['name'] else ''
+                        email = str(row.get(mappings['email'], '')).strip() if mappings['email'] else ''
+                        phone = str(row.get(mappings['phone'], '')).strip() if mappings['phone'] else ''
+                        status = str(row.get(mappings['status'], default_status)).strip() if mappings['status'] else default_status
+                        loan_type = str(row.get(mappings['loan_type'], '')).strip() if mappings['loan_type'] else ''
+                        target_payment = str(row.get(mappings['target_payment'], '')).strip() if mappings['target_payment'] else ''
+                        birthday = str(row.get(mappings['birthday'], '')).strip() if mappings['birthday'] else ''
+                        home_anniversary = str(row.get(mappings['home_anniversary'], '')).strip() if mappings['home_anniversary'] else ''
+                        address = str(row.get(mappings['address'], '')).strip() if mappings['address'] else ''
+                        property_address = str(row.get(mappings['property_address'], '')).strip() if mappings['property_address'] else ''
+                        notes = str(row.get(mappings['notes'], '')).strip() if mappings['notes'] else ''
+                        tags = str(row.get(mappings['tags'], '')).strip() if mappings['tags'] else ''
+                        
+                        # Parse numeric values
+                        try:
+                            loan_amount = float(row.get(mappings['loan_amount'], 0)) if mappings['loan_amount'] and str(row.get(mappings['loan_amount'], '')).strip() else None
+                        except:
+                            loan_amount = None
+                        
+                        try:
+                            loan_rate = float(row.get(mappings['loan_rate'], 0)) if mappings['loan_rate'] and str(row.get(mappings['loan_rate'], '')).strip() else None
+                        except:
+                            loan_rate = None
+                        
+                        if not name:
+                            errors.append(f"Row {idx + 1}: Missing name")
+                            continue
+                        
+                        # Check for duplicates if enabled
+                        if skip_duplicates:
+                            existing_borrowers = list_lender_borrowers(user["id"])
+                            is_duplicate = False
+                            for existing in existing_borrowers:
+                                if duplicate_check == 'email' and email:
+                                    if existing.get('email') and existing['email'].lower() == email.lower():
+                                        is_duplicate = True
+                                        break
+                                elif duplicate_check == 'phone' and phone:
+                                    if existing.get('phone') and existing['phone'] == phone:
+                                        is_duplicate = True
+                                        break
+                                elif duplicate_check == 'name' and name:
+                                    if existing.get('name') and existing['name'].lower() == name.lower():
+                                        is_duplicate = True
+                                        break
+                            
+                            if is_duplicate:
+                                skipped += 1
+                                continue
+                        
+                        # Add borrower
+                        add_lender_borrower(
+                            user["id"], name, status, loan_type, target_payment, "",
+                            email, phone, birthday, home_anniversary, address, notes, tags,
+                            property_address, loan_amount, loan_rate
+                        )
+                        imported += 1
+                    except Exception as e:
+                        errors.append(f"Row {idx + 1}: {str(e)}")
+                
+                # Clear session
+                session.pop('crm_import_data', None)
+                session.pop('crm_import_columns', None)
+                
+                flash(f"Import complete! {imported} borrowers imported, {skipped} skipped, {len(errors)} errors.", "success")
+                if errors:
+                    flash(f"Errors: {', '.join(errors[:5])}{'...' if len(errors) > 5 else ''}", "error")
+                
+                return redirect(url_for("lender_crm"))
+            except Exception as e:
+                import traceback
+                flash(f"Error during import: {str(e)}", "error")
+                print(f"Import error: {traceback.format_exc()}")
+                return redirect(url_for("lender_crm_import"))
+    
+    # GET request - show upload form
+    return render_template(
+        "lender/crm_import.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
     )
 
 

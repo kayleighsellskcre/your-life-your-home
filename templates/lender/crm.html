@@ -264,6 +264,11 @@
 <div class="crm-container">
   <!-- Sidebar: Add Borrower & Filters -->
   <div class="crm-sidebar">
+    <div style="margin-bottom: 1.5rem;">
+      <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none; margin-bottom: 1rem;">
+        📥 Import from Excel/CSV
+      </a>
+    </div>
     <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
     <form method="post" id="addBorrowerForm">
       <input type="hidden" name="action" value="add">
@@ -433,10 +438,23 @@
         <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
         <h3>No Borrowers Yet</h3>
         <p style="color: var(--charcoal-brown); opacity: 0.8;">Start building your network by adding your first borrower!</p>
+        <div style="margin-top: 1.5rem;">
+          <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
+            📥 Import Your Borrowers from Excel/CSV
+          </a>
+        </div>
       </div>
     {% endif %}
   </div>
 </div>
+
+{% if borrowers %}
+<div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
+  <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
+    📥 Import More Borrowers from Excel/CSV
+  </a>
+</div>
+{% endif %}
 
 <!-- Edit Borrower Modal -->
 <div id="editModal" class="modal">
