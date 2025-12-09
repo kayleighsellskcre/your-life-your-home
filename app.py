@@ -910,10 +910,19 @@ def get_agent_dashboard_metrics(user_id):
         }
     contacts = list_agent_contacts(user_id)
     transactions = get_agent_transactions(user_id)
+    
+    # Convert Row objects to dicts if needed
+    contacts_list = []
+    for c in contacts:
+        if hasattr(c, 'keys'):
+            contacts_list.append(dict(c))
+        else:
+            contacts_list.append(c)
+    
     return {
-        "new_leads": sum((c1["stage"] or "") == "new" for c1 in contacts),
+        "new_leads": sum((c1.get("stage") or "") == "new" for c1 in contacts_list),
         "active_transactions": len(transactions) if transactions else 0,
-        "followups_today": max(len(contacts) // 2, 0),
+        "followups_today": max(len(contacts_list) // 2, 0),
     }
 
 
@@ -926,12 +935,21 @@ def get_lender_dashboard_metrics(user_id):
         }
     borrowers = list_lender_borrowers(user_id)
     loans = list_lender_loans(user_id)
+    
+    # Convert Row objects to dicts if needed
+    borrowers_list = []
+    for b in borrowers:
+        if hasattr(b, 'keys'):
+            borrowers_list.append(dict(b))
+        else:
+            borrowers_list.append(b)
+    
     return {
         "new_applications": sum(
-            (b1["status"] or "") == "preapproval" for b1 in borrowers
+            (b1.get("status") or "") == "preapproval" for b1 in borrowers_list
         ),
-        "loans_in_process": len(loans),
-        "nurture_contacts": max(len(borrowers) // 2, 0),
+        "loans_in_process": len(loans) if loans else 0,
+        "nurture_contacts": max(len(borrowers_list) // 2, 0),
     }
 
 
@@ -2100,8 +2118,25 @@ def agent_dashboard():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
 
-    metrics = get_agent_dashboard_metrics(user["id"])
-    transactions = get_agent_transactions(user["id"])
+    try:
+        metrics = get_agent_dashboard_metrics(user["id"])
+        transactions = get_agent_transactions(user["id"])
+        
+        # Ensure transactions are dicts (get_agent_transactions should already return dicts)
+        if transactions:
+            transactions_list = []
+            for tx in transactions:
+                if hasattr(tx, 'keys') and not isinstance(tx, dict):
+                    transactions_list.append(dict(tx))
+                else:
+                    transactions_list.append(tx)
+            transactions = transactions_list
+    except Exception as e:
+        import traceback
+        print(f"Error in agent_dashboard: {traceback.format_exc()}")
+        flash(f"Error loading dashboard: {str(e)}", "error")
+        metrics = {"new_leads": 0, "active_transactions": 0, "followups_today": 0}
+        transactions = []
 
     return render_template(
         "agent/dashboard.html",
@@ -2119,8 +2154,23 @@ def lender_dashboard():
         return redirect(url_for("login", role="lender"))
 
     metrics = get_lender_dashboard_metrics(user["id"])
-    loans = list_lender_loans(user["id"])
-    borrowers = list_lender_borrowers(user["id"])
+    
+    # Convert Row objects to dicts if needed
+    loans_raw = list_lender_loans(user["id"])
+    loans = []
+    for loan in loans_raw:
+        if hasattr(loan, 'keys'):
+            loans.append(dict(loan))
+        else:
+            loans.append(loan)
+    
+    borrowers_raw = list_lender_borrowers(user["id"])
+    borrowers = []
+    for borrower in borrowers_raw:
+        if hasattr(borrower, 'keys'):
+            borrowers.append(dict(borrower))
+        else:
+            borrowers.append(borrower)
 
     return render_template(
         "lender/dashboard.html",
