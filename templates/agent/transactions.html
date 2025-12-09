@@ -49,37 +49,41 @@
     </form>
   </div>
 
-  <div class="card animated fadeIn" style="margin-top:2rem;box-shadow:0 4px 24px rgba(0,0,0,0.07);">
-    <h2 style="margin-bottom:1rem;">Your Files</h2>
+  <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border: var(--border-light); margin-top: 2rem;">
+    <h2 style="margin-bottom: 1rem; font-family: var(--font-heading); color: var(--charcoal-brown);">Your Transactions</h2>
 
     {% if transactions %}
-      <div style="overflow-x:auto;margin-top:1.5rem;">
-        <table class="data-table" style="animation:fadeIn 0.7s;">
+      <div style="overflow-x: auto; margin-top: 1.5rem;">
+        <table class="data-table" style="width: 100%; border-collapse: collapse;">
           <thead>
-            <tr>
-              <th>🏠 Property</th>
-              <th>👤 Client</th>
-              <th>🤝 Side</th>
-              <th>📈 Stage</th>
-              <th>📅 Close Date</th>
-              <th>⚡ Actions</th>
+            <tr style="background: var(--warm-cream); border-bottom: 2px solid var(--olive-green);">
+              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">🏠 Property</th>
+              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">👤 Client</th>
+              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">🤝 Side</th>
+              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">📈 Stage</th>
+              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">📅 Close Date</th>
+              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">⚡ Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for tx in transactions %}
-              <tr class="transaction-row clickable-row" data-href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="transition:background 0.2s; cursor:pointer;">
-                <td>
-                  <span class="property-link" style="color:var(--olive-green);font-weight:600;text-decoration:none;transition:color 0.2s;">
+              <tr class="transaction-row clickable-row" data-href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="transition: background 0.2s; cursor: pointer; border-bottom: 1px solid var(--border-light);">
+                <td style="padding: 1rem;">
+                  <span class="property-link" style="color: var(--olive-green); font-weight: 600; text-decoration: none;">
                     {{ tx.property_address }}
                   </span>
                 </td>
-                <td>{{ tx.client_name }}</td>
-                <td><span class="badge" style="background:var(--light-cream);color:var(--charcoal-brown);padding:0.25rem 0.75rem;border-radius:12px;font-size:0.8rem;font-weight:600;">{{ tx.side|capitalize }}</span></td>
-                <td><span style="color:#888;">{{ tx.stage|replace('_',' ')|title }}</span></td>
-                <td style="color:#888;">{{ tx.close_date or '—' }}</td>
-                <td style="white-space:nowrap;">
-                  <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;" onclick="event.stopPropagation();">
-                    <button type="submit" class="btn btn-danger btn-sm" style="transition:box-shadow 0.2s;" onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
+                <td style="padding: 1rem; color: var(--charcoal-brown);">{{ tx.client_name }}</td>
+                <td style="padding: 1rem;">
+                  <span class="badge" style="background: var(--light-cream); color: var(--charcoal-brown); padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.8rem; font-weight: 600;">{{ tx.side|capitalize }}</span>
+                </td>
+                <td style="padding: 1rem;">
+                  <span style="color: var(--charcoal-brown); font-weight: 500;">{{ tx.current_stage|replace('_',' ')|title }}</span>
+                </td>
+                <td style="padding: 1rem; color: var(--charcoal-brown);">{{ tx.target_close_date or '—' }}</td>
+                <td style="padding: 1rem; white-space: nowrap;">
+                  <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display: inline;" onclick="event.stopPropagation();">
+                    <button type="submit" class="btn btn-small" style="background: rgba(192, 57, 43, 0.1); color: #c0392b; border: 1px solid #c0392b; padding: 0.4rem 0.8rem; border-radius: var(--border-radius); font-size: 0.85rem; cursor: pointer;" onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
                   </form>
                 </td>
               </tr>
@@ -88,10 +92,10 @@
         </table>
       </div>
     {% else %}
-      <div class="empty-state animated fadeInUp">
-        <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
-        <h3>No Transactions Yet</h3>
-        <p>Once you add a file, you will be able to track stages here.</p>
+      <div class="empty-state" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
+        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown);">No Transactions Yet</h3>
+        <p style="color: var(--charcoal-brown); opacity: 0.8;">Once you add a transaction, you will be able to track stages here.</p>
       </div>
     {% endif %}
   </div>
@@ -104,29 +108,31 @@ document.addEventListener('DOMContentLoaded', function() {
     row.addEventListener('click', function() {
       window.location = this.dataset.href;
     });
+    row.addEventListener('mouseenter', function() {
+      this.style.background = 'var(--warm-cream)';
+    });
+    row.addEventListener('mouseleave', function() {
+      this.style.background = 'transparent';
+    });
   });
 });
 </script>
 <style>
-.animated { animation-duration: 0.7s; animation-fill-mode: both; }
-.fadeIn { animation-name: fadeIn; }
-.fadeInUp { animation-name: fadeInUp; }
-.fadeInDown { animation-name: fadeInDown; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
-@keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: none; } }
-.form-card { border-radius: 16px; padding: 2rem 2.5rem; background: #fff; }
-.transaction-form .form-row { display: flex; flex-direction: column; margin-bottom: 1rem; }
-.transaction-form label { font-size: 1rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; }
-.transaction-form input, .transaction-form select { padding: 0.7rem 1rem; border-radius: 8px; border: 1px solid #d3d3c3; font-size: 1rem; transition: border 0.2s; }
-.transaction-form input:focus, .transaction-form select:focus { border-color: var(--olive-green); outline: none; }
-.property-link:hover { color: #b2a97b; text-decoration:underline; }
-.transaction-row:hover { background: #f7f7e9; }
-.btn-primary { background: var(--olive-green); color: #fff; font-weight: 700; border: none; border-radius: 8px; padding: 1rem; font-size: 1.1rem; cursor: pointer; }
-.btn-primary:hover { box-shadow: 0 4px 16px rgba(178,169,123,0.15); }
-.btn-danger { background: #c0392b; color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.95rem; cursor: pointer; }
-.btn-danger:hover { box-shadow: 0 2px 8px rgba(192,57,43,0.15); }
-.badge { font-size: 0.9rem; }
+.transaction-form .form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+.transaction-form input:focus,
+.transaction-form select:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
+}
+.property-link:hover {
+  color: var(--olive-green);
+  text-decoration: underline;
+}
 </style>
 
 {% endblock %}

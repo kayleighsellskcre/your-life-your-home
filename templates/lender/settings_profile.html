@@ -1,27 +1,483 @@
 {% extends "lender/layout.html" %}
 
 {% block lender_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Your digital presence</p>
-  <h1>Lender Profile & Branding</h1>
-  <p>This is the public page borrowers and partner agents will see when they click your link. It is your digital front door.</p>
+<style>
+  .settings-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .settings-header {
+    margin-bottom: 2rem;
+  }
+  
+  .settings-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .settings-header p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    font-size: 1rem;
+  }
+  
+  .settings-section {
+    background: var(--white);
+    border: var(--border-light);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .settings-section h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--olive-green);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="url"],
+  .form-group input[type="tel"],
+  .form-group input[type="number"],
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    background: var(--white);
+    color: var(--charcoal-brown);
+    font-size: 0.95rem;
+    font-family: var(--font-body);
+    transition: border-color var(--transition-base);
+  }
+  
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .form-group small {
+    display: block;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+  
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .file-upload-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  
+  .file-upload-preview {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--warm-cream);
+    border-radius: var(--border-radius);
+    border: var(--border-light);
+  }
+  
+  .file-upload-preview img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    border: 2px solid var(--taupe-beige);
+  }
+  
+  .file-upload-label {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: var(--olive-green);
+    color: var(--white);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background var(--transition-base);
+    text-align: center;
+  }
+  
+  .file-upload-label:hover {
+    background: #5A6D47;
+  }
+  
+  .file-upload-label input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+  
+  .checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+  
+  .checkbox-group label {
+    margin: 0;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .btn-save {
+    background: var(--olive-green);
+    color: var(--white);
+    padding: 1rem 2.5rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-light);
+  }
+  
+  .btn-save:hover {
+    background: #5A6D47;
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px);
+  }
+  
+  .btn-save:active {
+    transform: translateY(0);
+  }
+  
+  .social-links-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  @media (max-width: 768px) {
+    .social-links-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="settings-container">
+  <div class="settings-header">
+    <h1>Lender Profile & Branding</h1>
+    <p>This is the public page borrowers and partner agents will see when they click your link. It is your digital front door.</p>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="profileForm">
+    <!-- Professional Photo & Logo -->
+    <div class="settings-section">
+      <h2>📸 Photos & Branding</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Professional Photo</label>
+          <div class="file-upload-wrapper">
+            <label class="file-upload-label">
+              <input type="file" name="professional_photo" accept="image/*" onchange="previewImage(this, 'photo-preview')">
+              Choose Photo
+            </label>
+          </div>
+          {% if profile and profile.get('professional_photo') %}
+          <div class="file-upload-preview" id="photo-preview-wrapper">
+            <img src="{{ url_for('static', filename=profile.professional_photo) }}" alt="Professional Photo" id="photo-preview">
+            <div>
+              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Photo</p>
+              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Upload a new photo to replace</p>
+            </div>
+          </div>
+          {% else %}
+          <div class="file-upload-preview" id="photo-preview-wrapper" style="display: none;">
+            <img src="" alt="Preview" id="photo-preview">
+            <div>
+              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Preview</p>
+              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Your new photo will appear here</p>
+            </div>
+          </div>
+          {% endif %}
+          <small>Recommended: Square image, at least 400x400px. JPG or PNG format.</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Company Logo</label>
+          <div class="file-upload-wrapper">
+            <label class="file-upload-label">
+              <input type="file" name="brokerage_logo" accept="image/*" onchange="previewImage(this, 'logo-preview')">
+              Choose Logo
+            </label>
+          </div>
+          {% if profile and profile.get('brokerage_logo') %}
+          <div class="file-upload-preview" id="logo-preview-wrapper">
+            <img src="{{ url_for('static', filename=profile.brokerage_logo) }}" alt="Company Logo" id="logo-preview">
+            <div>
+              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Logo</p>
+              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Upload a new logo to replace</p>
+            </div>
+          </div>
+          {% else %}
+          <div class="file-upload-preview" id="logo-preview-wrapper" style="display: none;">
+            <img src="" alt="Preview" id="logo-preview">
+            <div>
+              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Preview</p>
+              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Your new logo will appear here</p>
+            </div>
+          </div>
+          {% endif %}
+          <small>Recommended: Horizontal logo, transparent background preferred. PNG format.</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Basic Information -->
+    <div class="settings-section">
+      <h2>👤 Basic Information</h2>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Team Name</label>
+          <input type="text" name="team_name" value="{{ profile.team_name if profile else '' }}" placeholder="e.g., The Smith Lending Team">
+          <small>Your team or group name (optional)</small>
+        </div>
+        
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" name="brokerage_name" value="{{ profile.brokerage_name if profile else '' }}" placeholder="e.g., ABC Mortgage">
+          <small>Your lending company or institution name</small>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" name="phone" value="{{ profile.phone if profile else '' }}" placeholder="(555) 123-4567">
+        <small>This will be used for the call button on your public profile</small>
+      </div>
+      
+      <div class="form-group">
+        <label>Bio / About Me</label>
+        <textarea name="bio" placeholder="Tell borrowers and agents about yourself, your experience, and how you help clients achieve their homeownership goals...">{{ profile.bio if profile else '' }}</textarea>
+        <small>A brief, friendly description that will appear on your public profile</small>
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>Years of Experience</label>
+          <input type="number" name="years_experience" value="{{ profile.years_experience if profile else '' }}" min="0" placeholder="10">
+        </div>
+        
+        <div class="form-group">
+          <label>NMLS Number</label>
+          <input type="text" name="nmls_number" value="{{ profile.nmls_number if profile else '' }}" placeholder="123456">
+          <small>Your Nationwide Multistate Licensing System number</small>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>License Number</label>
+        <input type="text" name="license_number" value="{{ profile.license_number if profile else '' }}" placeholder="State license number (if applicable)">
+        <small>Your state-specific license number (optional)</small>
+      </div>
+    </div>
+
+    <!-- Social Media & Links -->
+    <div class="settings-section">
+      <h2>🔗 Social Media & Links</h2>
+      
+      <div class="form-group">
+        <label>Website URL</label>
+        <input type="url" name="website_url" value="{{ profile.website_url if profile else '' }}" placeholder="https://yourwebsite.com">
+      </div>
+      
+      <div class="social-links-grid">
+        <div class="form-group">
+          <label>Facebook</label>
+          <input type="url" name="facebook_url" value="{{ profile.facebook_url if profile else '' }}" placeholder="https://facebook.com/yourpage">
+        </div>
+        
+        <div class="form-group">
+          <label>Instagram</label>
+          <input type="url" name="instagram_url" value="{{ profile.instagram_url if profile else '' }}" placeholder="https://instagram.com/yourhandle">
+        </div>
+        
+        <div class="form-group">
+          <label>LinkedIn</label>
+          <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile else '' }}" placeholder="https://linkedin.com/in/yourprofile">
+        </div>
+        
+        <div class="form-group">
+          <label>Twitter/X</label>
+          <input type="url" name="twitter_url" value="{{ profile.twitter_url if profile else '' }}" placeholder="https://twitter.com/yourhandle">
+        </div>
+        
+        <div class="form-group">
+          <label>YouTube</label>
+          <input type="url" name="youtube_url" value="{{ profile.youtube_url if profile else '' }}" placeholder="https://youtube.com/@yourchannel">
+        </div>
+      </div>
+    </div>
+
+    <!-- Call & Schedule Buttons -->
+    <div class="settings-section">
+      <h2>📞 Call & Schedule Buttons</h2>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" name="call_button_enabled" id="call_button_enabled" {% if not profile or profile.get('call_button_enabled', 1) %}checked{% endif %}>
+          <label for="call_button_enabled">Enable Call Button</label>
+        </div>
+        <small>The call button will use the phone number you entered above</small>
+      </div>
+      
+      <div class="form-group">
+        <div class="checkbox-group">
+          <input type="checkbox" name="schedule_button_enabled" id="schedule_button_enabled" {% if not profile or profile.get('schedule_button_enabled', 1) %}checked{% endif %}>
+          <label for="schedule_button_enabled">Enable Schedule Button</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Schedule/Calendar URL</label>
+        <input type="url" name="schedule_url" value="{{ profile.schedule_url if profile else '' }}" placeholder="https://calendly.com/yourname or https://yourcalendar.com">
+        <small>Link to your scheduling system (Calendly, Acuity, etc.)</small>
+      </div>
+      
+      <div class="form-group">
+        <label>Application/Pre-Approval Link</label>
+        <input type="url" name="application_url" value="{{ profile.website_url if profile else '' }}" placeholder="https://yourcompany.com/apply">
+        <small>Link to your loan application or pre-approval form (optional - you can also use your main website URL above)</small>
+      </div>
+    </div>
+
+    <!-- Professional Details -->
+    <div class="settings-section">
+      <h2>🏆 Professional Details</h2>
+      
+      <div class="form-group">
+        <label>Specialties</label>
+        <input type="text" name="specialties" value="{{ profile.specialties if profile else '' }}" placeholder="e.g., First-Time Buyers, Refinancing, VA Loans, FHA Loans">
+        <small>Comma-separated list of your loan specialties</small>
+      </div>
+      
+      <div class="form-group">
+        <label>Service Areas</label>
+        <input type="text" name="service_areas" value="{{ profile.service_areas if profile else '' }}" placeholder="e.g., Downtown, Suburbs, Metro Area">
+        <small>Areas you serve (comma-separated)</small>
+      </div>
+      
+      <div class="form-group">
+        <label>Languages Spoken</label>
+        <input type="text" name="languages" value="{{ profile.languages if profile else '' }}" placeholder="e.g., English, Spanish, French">
+        <small>Languages you can communicate in (comma-separated)</small>
+      </div>
+    </div>
+
+    <!-- Company Address -->
+    <div class="settings-section">
+      <h2>📍 Company Address</h2>
+      
+      <div class="form-group">
+        <label>Street Address</label>
+        <input type="text" name="company_address" value="{{ profile.company_address if profile else '' }}" placeholder="123 Main Street">
+      </div>
+      
+      <div class="form-row">
+        <div class="form-group">
+          <label>City</label>
+          <input type="text" name="company_city" value="{{ profile.company_city if profile else '' }}" placeholder="City">
+        </div>
+        
+        <div class="form-group">
+          <label>State</label>
+          <input type="text" name="company_state" value="{{ profile.company_state if profile else '' }}" placeholder="State" maxlength="2" style="text-transform: uppercase;">
+        </div>
+        
+        <div class="form-group">
+          <label>ZIP Code</label>
+          <input type="text" name="company_zip" value="{{ profile.company_zip if profile else '' }}" placeholder="12345">
+        </div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <div style="text-align: center; margin-top: 2rem; margin-bottom: 3rem;">
+      <button type="submit" class="btn-save">💾 Save Profile</button>
+    </div>
+  </form>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Profile Elements</h2>
-    <p class="card-subtext" style="margin-top:1rem;">
-      In the full version of this page you will be able to add:
-    </p>
-    <ul style="font-size:0.95rem;margin:1rem 0 0 1.5rem;padding:0;line-height:1.8;">
-      <li>Your photo and company logo</li>
-      <li>Contact information and application link</li>
-      <li>Pre-approval request form and portal links</li>
-      <li>Short, friendly description of how you serve clients</li>
-    </ul>
-    <p class="card-subtext" style="margin-top:1rem;">
-      While this builder is in progress you can still use the <a href="{{ url_for('lender_crm') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">CRM</a>, <a href="{{ url_for('lender_loans') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">loan tracker</a>, and <a href="{{ url_for('lender_messages') }}" style="color:var(--olive-green);font-weight:600;text-decoration:none;">messaging tools</a> to support your borrowers.
-    </p>
-  </div>
-</div>
+<script>
+function previewImage(input, previewId) {
+  const preview = document.getElementById(previewId);
+  const wrapper = document.getElementById(previewId + '-wrapper');
+  
+  if (input.files && input.files[0]) {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      if (wrapper) wrapper.style.display = 'flex';
+    };
+    
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+  const submitBtn = this.querySelector('.btn-save');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = '💾 Saving...';
+  }
+});
+</script>
 {% endblock %}

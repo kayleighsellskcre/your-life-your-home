@@ -4,19 +4,21 @@
 <style>
   /* Transaction Header */
   .transaction-header {
-    background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%);
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
     position: relative;
     overflow: hidden;
+    border: var(--border-light);
+    box-shadow: var(--shadow-light);
   }
   
   .transaction-header::after {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(107,106,69,0.1) 0%, rgba(200,180,151,0.1) 100%);
+    background: linear-gradient(135deg, rgba(107,106,69,0.05) 0%, rgba(200,180,151,0.05) 100%);
   }
   
   .transaction-header-content {
@@ -29,16 +31,16 @@
   
   .property-address {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: #3A352C;
-    margin-bottom: 0.25rem;
-    font-weight: 400;
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
     text-align: center;
   }
   
   .transaction-meta {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
     align-items: center;
     flex-wrap: wrap;
     justify-content: center;
@@ -48,56 +50,59 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #666;
-    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    font-size: 0.9rem;
+    opacity: 0.8;
   }
   
   .stage-badge {
-    background: #6B6A45;
-    color: white;
+    background: var(--olive-green);
+    color: var(--white);
     padding: 0.5rem 1.5rem;
-    border-radius: 20px;
+    border-radius: var(--border-radius);
     font-weight: 600;
     font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
   }
   
   /* Progress Bar */
   .progress-section {
-    background: white;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    border: var(--border-light);
+    box-shadow: var(--shadow-light);
   }
   
   .progress-bar-container {
-    height: 8px;
-    background: #E5E5E5;
-    border-radius: 6px;
+    height: 10px;
+    background: var(--warm-cream);
+    border-radius: var(--border-radius);
     overflow: hidden;
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
   }
   
   .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, #6B6A45 0%, #8A9A5B 100%);
+    background: linear-gradient(90deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.8) 100%);
     transition: width 0.6s ease;
   }
   
   .progress-text {
     text-align: center;
-    color: #666;
-    font-size: 0.85rem;
-    margin-top: 0.2rem;
+    color: var(--charcoal-brown);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
   }
   
   /* Tabs */
   .tabs {
     display: flex;
     gap: 1rem;
-    border-bottom: 2px solid #E5E5E5;
+    border-bottom: 2px solid var(--border-light);
     margin-bottom: 2rem;
   }
   
@@ -105,30 +110,33 @@
     padding: 1rem 2rem;
     background: transparent;
     border: none;
-    color: #666;
+    color: var(--charcoal-brown);
     font-weight: 500;
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: all 0.3s ease;
     font-size: 0.9rem;
+    opacity: 0.7;
   }
   
   .tab.active {
-    color: #6B6A45;
-    border-bottom-color: #6B6A45;
+    color: var(--olive-green);
+    border-bottom-color: var(--olive-green);
+    opacity: 1;
   }
   
   .tab:hover {
-    color: #6B6A45;
+    color: var(--olive-green);
+    opacity: 1;
   }
   
   /* Document Checklist */
   .checklist-item {
-    background: white;
-    padding: 0.7rem 1rem;
-    border-radius: 6px;
+    background: var(--white);
+    padding: 1rem;
+    border-radius: var(--border-radius);
     margin-bottom: 0.5rem;
-    border: 1px solid #E5E5E5;
+    border: var(--border-light);
     transition: all 0.3s ease;
     display: flex;
     justify-content: space-between;
@@ -137,19 +145,19 @@
   }
   
   .checklist-item.completed {
-    background: #E6F6E8;
+    background: rgba(76, 175, 80, 0.1);
     border-color: #4CAF50;
   }
 
   .checklist-item.pending {
-    background: #FDEAEA;
-    border-color: #E57373;
-    opacity: 0.85;
+    background: rgba(255, 193, 7, 0.1);
+    border-color: #ffc107;
+    opacity: 0.9;
   }
 
   .checklist-item.active {
-    background: #FFF9E5;
-    border-color: #FFD600;
+    background: rgba(255, 193, 7, 0.15);
+    border-color: #ffc107;
   }
   
   .checklist-item:hover {
@@ -186,29 +194,30 @@
   }
   
   .upload-btn {
-    padding: 0.35rem 0.8rem;
-    background: #6B6A45;
-    color: white;
+    padding: 0.6rem 1.2rem;
+    background: var(--olive-green);
+    color: var(--white);
     border: none;
-    border-radius: 5px;
+    border-radius: var(--border-radius);
     cursor: pointer;
-    font-weight: 500;
-    font-size: 0.92rem;
+    font-weight: 600;
+    font-size: 0.9rem;
     transition: all 0.3s ease;
   }
   
   .upload-btn:hover {
-    background: #5A6D47;
+    background: rgba(107, 106, 69, 0.9);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
   }
   
   /* Participants */
   .participant-card {
-    background: white;
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
     padding: 1.5rem;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     margin-bottom: 1rem;
-    border: 1px solid #E5E5E5;
+    border: var(--border-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -245,12 +254,12 @@
   }
   
   .participant-badge {
-    background: #F6F2E8;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
+    background: var(--warm-cream);
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--border-radius);
     font-size: 0.75rem;
     font-weight: 600;
-    color: #6B6A45;
+    color: var(--olive-green);
   }
   
   /* Timeline */
@@ -266,7 +275,7 @@
     top: 0;
     bottom: 0;
     width: 2px;
-    background: #E5E5E5;
+    background: var(--border-light);
   }
   
   .timeline-item {
@@ -280,15 +289,15 @@
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: white;
-    border: 3px solid #6B6A45;
+    background: var(--white);
+    border: 3px solid var(--olive-green);
   }
   
   .timeline-content {
-    background: white;
+    background: var(--white);
     padding: 1.5rem;
-    border-radius: 8px;
-    border: 1px solid #E5E5E5;
+    border-radius: var(--border-radius);
+    border: var(--border-light);
   }
   
   .timeline-header {
@@ -479,35 +488,35 @@
 <!-- Transaction Header -->
 <div class="transaction-header">
   <div class="transaction-header-content">
-    <h1 class="property-address">{{ tx.property_address }}</h1>
+    <h1 class="property-address">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</h1>
     <div class="transaction-meta">
       <div class="meta-item">
         <span>👤</span>
-        <span><strong>Client:</strong> {{ tx.client_name }}</span>
+        <span><strong>Client:</strong> {{ transaction.client_name or transaction.get('client_name', 'N/A') }}</span>
       </div>
       <div class="meta-item">
         <span>📧</span>
-        <span><strong>Email:</strong> {{ tx.client_email }}</span>
+        <span><strong>Email:</strong> {{ transaction.client_email or transaction.get('client_email', 'N/A') }}</span>
       </div>
       <div class="meta-item">
         <span>📞</span>
-        <span><strong>Phone:</strong> {{ tx.client_phone }}</span>
+        <span><strong>Phone:</strong> {{ transaction.client_phone or transaction.get('client_phone', 'N/A') }}</span>
       </div>
       <div class="meta-item">
         <span>💰</span>
-        <span><strong>Price:</strong> ${{ tx.purchase_price or 'N/A' }}</span>
+        <span><strong>Price:</strong> ${{ transaction.purchase_price or transaction.get('purchase_price', 'N/A') }}</span>
       </div>
       <div class="meta-item">
         <span>📅</span>
-        <span><strong>Close Date:</strong> {{ tx.target_close_date or 'N/A' }}</span>
+        <span><strong>Close Date:</strong> {{ transaction.target_close_date or transaction.get('target_close_date', 'N/A') }}</span>
       </div>
     </div>
-    <div class="stage-badge" style="position:absolute;top:0.75rem;left:1rem;margin:0;z-index:10;">{{ tx.current_stage|replace('_', ' ')|title }}</div>
+    <div class="stage-badge" style="position:absolute;top:0.75rem;left:1rem;margin:0;z-index:10;">{{ (transaction.current_stage or transaction.get('current_stage', 'unknown'))|replace('_', ' ')|title }}</div>
     <div style="position: absolute; top: 0.05rem; right: 1rem; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; width: 120px;">
-      <form method="POST" action="/agent/transactions/{{ tx.id }}/delete" onsubmit="return confirm('Are you sure you want to delete this transaction? This cannot be undone.')" style="margin: 0;">
+      <form method="POST" action="/agent/transactions/{{ transaction.id or transaction.get('id') }}/delete" onsubmit="return confirm('Are you sure you want to delete this transaction? This cannot be undone.')" style="margin: 0;">
         <button type="submit" class="secondary-btn" style="background:#C66B3D;color:white;padding:0.15rem 0.7rem;font-size:0.85rem;border-radius:6px;min-width:unset;line-height:1;font-family:'Segoe UI',Arial,sans-serif;font-weight:400;letter-spacing:0.03em;box-shadow:none;opacity:0.85;">Delete</button>
       </form>
-      <a href="/agent/transactions/{{ tx.id }}/edit" style="display:block;margin-top:0.1rem;text-align:center;background:#8A9A5B;color:white;padding:0.15rem 0.7rem;font-size:0.85rem;border-radius:8px;min-width:unset;line-height:1;font-family:'Segoe UI',Arial,sans-serif;font-weight:400;letter-spacing:0.03em;box-shadow:0 2px 8px rgba(107,106,69,0.15);border:2px solid #6B6A45;text-decoration:none;">Edit</a>
+      <a href="/agent/transactions/{{ transaction.id or transaction.get('id') }}/edit" style="display:block;margin-top:0.1rem;text-align:center;background:#8A9A5B;color:white;padding:0.15rem 0.7rem;font-size:0.85rem;border-radius:8px;min-width:unset;line-height:1;font-family:'Segoe UI',Arial,sans-serif;font-weight:400;letter-spacing:0.03em;box-shadow:0 2px 8px rgba(107,106,69,0.15);border:2px solid #6B6A45;text-decoration:none;">Edit</a>
     </div>
   </div>
 </div>

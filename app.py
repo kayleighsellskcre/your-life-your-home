@@ -133,6 +133,20 @@ from database import (
     list_crm_interactions,
     log_automated_email,
     get_contacts_for_automated_email,
+    add_crm_task,
+    list_crm_tasks,
+    update_crm_task,
+    delete_crm_task,
+    add_crm_deal,
+    list_crm_deals,
+    update_crm_deal,
+    delete_crm_deal,
+    add_crm_relationship,
+    list_crm_relationships,
+    delete_crm_relationship,
+    add_crm_saved_view,
+    list_crm_saved_views,
+    delete_crm_saved_view,
 )
 
 # ---------------- R2 STORAGE HELPERS ----------------
@@ -924,6 +938,37 @@ def get_lender_dashboard_metrics(user_id):
 # -------------------------------------------------
 # MAIN / AUTH
 # -------------------------------------------------
+@app.route("/r/<referral_code>")
+def referral_landing(referral_code):
+    """
+    Public landing page for agent/lender referral links.
+    Shows professional info and home equity signup form.
+    """
+    from database import get_professional_by_referral_code
+    
+    professional = get_professional_by_referral_code(referral_code)
+    
+    if not professional:
+        flash("Invalid referral link.", "error")
+        return redirect(url_for("index"))
+    
+    # Store referral code in session for signup
+    session["referral_code"] = referral_code
+    
+    # Convert to dict if needed
+    if hasattr(professional, 'keys'):
+        prof_dict = dict(professional)
+    else:
+        prof_dict = professional if professional else {}
+    
+    return render_template(
+        "public/referral_landing.html",
+        brand_name=FRONT_BRAND_NAME,
+        professional=prof_dict,
+        referral_code=referral_code
+    )
+
+
 @app.route("/")
 def index():
     """
@@ -944,23 +989,28 @@ def signup():
     """
     Sign up for any role: homeowner | agent | lender
     (role can be preselected via ?role=agent)
+    Tracks referral codes from ?ref=CODE parameter
     """
     role = request.args.get("role", "homeowner")
     if role not in ("homeowner", "agent", "lender"):
         role = "homeowner"
+    
+    # Get referral code from query parameter or session
+    referral_code = request.args.get("ref") or session.get("referral_code")
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         role_from_form = request.form.get("role", role)
+        referral_code_from_form = request.form.get("referral_code") or referral_code
 
         if role_from_form in ("homeowner", "agent", "lender"):
             role = role_from_form
 
         if not email or not password:
             flash("Please fill in email and password.", "error")
-            return redirect(url_for("signup", role=role))
+            return redirect(url_for("signup", role=role, ref=referral_code_from_form))
 
         password_hash = generate_password_hash(password)
 
@@ -970,9 +1020,25 @@ def signup():
             flash("That email is already in use. Please sign in instead.", "error")
             return redirect(url_for("login"))
 
+        # If homeowner signed up with a referral code, create relationship
+        if role == "homeowner" and referral_code_from_form:
+            from database import (
+                get_professional_by_referral_code,
+                create_client_relationship
+            )
+            professional = get_professional_by_referral_code(referral_code_from_form)
+            if professional:
+                create_client_relationship(
+                    homeowner_id=user_id,
+                    professional_id=professional["user_id"],
+                    professional_role=professional["role"],
+                    referral_code=referral_code_from_form
+                )
+
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
+        session.pop("referral_code", None)  # Clear referral code from session
 
         if role == "agent":
             return redirect(url_for("agent_dashboard"))
@@ -982,7 +1048,10 @@ def signup():
             return redirect(url_for("homeowner_overview"))
 
     return render_template(
-        "auth/signup.html", role=role, brand_name=FRONT_BRAND_NAME
+        "auth/signup.html", 
+        role=role, 
+        brand_name=FRONT_BRAND_NAME,
+        referral_code=referral_code
     )
 
 
@@ -1028,15 +1097,29 @@ def logout():
 def homeowner_overview():
     """
     Overview dashboard (My Home Base).
+    Shows agent/lender info if homeowner was referred.
     """
+    from database import get_homeowner_professionals
+    
     user = get_current_user()
     snapshot = get_homeowner_snapshot_or_default(user)
+    
+    # Get associated professionals
+    professionals = []
+    if user and user.get("id"):
+        profs_raw = get_homeowner_professionals(user["id"])
+        for prof in profs_raw:
+            if hasattr(prof, 'keys'):
+                professionals.append(dict(prof))
+            else:
+                professionals.append(prof)
 
     return render_template(
         "homeowner/overview.html",
         brand_name=FRONT_BRAND_NAME,
         snapshot=snapshot,
         cloud_cma_url=CLOUD_CMA_URL,
+        professionals=professionals,
     )
 
 
@@ -2065,7 +2148,11 @@ def agent_crm():
         return f"Error: {e}", 500
 
     if request.method == "POST":
-        action = request.form.get("action", "add")
+        action = request.form.get("action", "").strip()
+        print(f"\n=== POST REQUEST RECEIVED ===")
+        print(f"Action: '{action}'")
+        print(f"Form data keys: {list(request.form.keys())}")
+        print(f"User ID: {user.get('id')}")
         
         if action == "add":
             name = request.form.get("name", "").strip()
@@ -2081,17 +2168,34 @@ def agent_crm():
             property_value = request.form.get("property_value", "").strip()
             equity_estimate = request.form.get("equity_estimate", "").strip()
             
-            try:
-                prop_val = float(property_value) if property_value else None
-                equity_val = float(equity_estimate) if equity_estimate else None
-                add_agent_contact(
-                    user["id"], name, email, phone, stage, email or phone, "",
-                    birthday, home_anniversary, address, notes, tags,
-                    property_address, prop_val, equity_val
-                )
-                flash("Contact added successfully!", "success")
-            except Exception as e:
-                flash(f"Error adding contact: {e}", "error")
+            print(f"Name: '{name}'")
+            print(f"Email: '{email}'")
+            print(f"Phone: '{phone}'")
+            print(f"Stage: '{stage}'")
+            
+            if not name:
+                print("ERROR: Name is required but empty")
+                flash("Name is required!", "error")
+                return redirect(url_for("agent_crm"))
+            else:
+                try:
+                    prop_val = float(property_value) if property_value else None
+                    equity_val = float(equity_estimate) if equity_estimate else None
+                    print(f"Calling add_agent_contact with user_id={user['id']}, name='{name}'")
+                    contact_id = add_agent_contact(
+                        user["id"], name, email, phone, stage, email or phone, "",
+                        birthday, home_anniversary, address, notes, tags,
+                        property_address, prop_val, equity_val
+                    )
+                    print(f"SUCCESS: Contact added with ID {contact_id}")
+                    flash("Contact added successfully!", "success")
+                    return redirect(url_for("agent_crm"))
+                except Exception as e:
+                    import traceback
+                    error_trace = traceback.format_exc()
+                    print(f"ERROR adding contact: {error_trace}")
+                    flash(f"Error adding contact: {str(e)}", "error")
+                    return redirect(url_for("agent_crm"))
         
         elif action == "update":
             contact_id = request.form.get("contact_id")
@@ -2141,6 +2245,150 @@ def agent_crm():
                     flash("Interaction logged successfully!", "success")
                 except Exception as e:
                     flash(f"Error logging interaction: {e}", "error")
+        
+        elif action == "add_task":
+            contact_id = request.form.get("contact_id")
+            title = request.form.get("title", "").strip()
+            description = request.form.get("description", "").strip()
+            due_date = request.form.get("due_date", "").strip()
+            priority = request.form.get("priority", "medium").strip()
+            reminder_date = request.form.get("reminder_date", "").strip() or None
+            
+            if contact_id and title:
+                try:
+                    add_crm_task(
+                        int(contact_id), "agent_contact", user["id"],
+                        title, description, due_date or None, priority, reminder_date
+                    )
+                    flash("Task added successfully!", "success")
+                except Exception as e:
+                    flash(f"Error adding task: {e}", "error")
+        
+        elif action == "update_task":
+            task_id = request.form.get("task_id")
+            status = request.form.get("status", "").strip()
+            if task_id and status:
+                try:
+                    updates = {"status": status}
+                    if status == "completed":
+                        updates["completed_at"] = datetime.now().isoformat()
+                    update_crm_task(int(task_id), user["id"], **updates)
+                    flash("Task updated successfully!", "success")
+                except Exception as e:
+                    flash(f"Error updating task: {e}", "error")
+        
+        elif action == "delete_task":
+            task_id = request.form.get("task_id")
+            if task_id:
+                try:
+                    delete_crm_task(int(task_id), user["id"])
+                    flash("Task deleted successfully!", "success")
+                except Exception as e:
+                    flash(f"Error deleting task: {e}", "error")
+        
+        elif action == "add_deal":
+            contact_id = request.form.get("contact_id")
+            deal_name = request.form.get("deal_name", "").strip()
+            deal_type = request.form.get("deal_type", "other").strip()
+            property_address = request.form.get("property_address", "").strip()
+            deal_value = request.form.get("deal_value", "").strip()
+            commission_rate = request.form.get("commission_rate", "").strip()
+            stage = request.form.get("stage", "prospect").strip()
+            probability = request.form.get("probability", "0").strip()
+            expected_close_date = request.form.get("expected_close_date", "").strip()
+            notes = request.form.get("notes", "").strip()
+            
+            if contact_id and deal_name:
+                try:
+                    deal_val = float(deal_value) if deal_value else None
+                    comm_rate = float(commission_rate) if commission_rate else None
+                    prob = int(probability) if probability else 0
+                    add_crm_deal(
+                        int(contact_id), "agent_contact", user["id"],
+                        deal_name, deal_type, property_address, deal_val, comm_rate,
+                        stage, prob, expected_close_date or None, notes
+                    )
+                    flash("Deal added successfully!", "success")
+                except Exception as e:
+                    flash(f"Error adding deal: {e}", "error")
+        
+        elif action == "update_deal":
+            deal_id = request.form.get("deal_id")
+            if deal_id:
+                try:
+                    updates = {}
+                    for field in ['deal_name', 'deal_type', 'property_address', 'stage',
+                                'expected_close_date', 'actual_close_date', 'notes']:
+                        val = request.form.get(field, "").strip()
+                        if val:
+                            updates[field] = val if val else None
+                    
+                    for field in ['deal_value', 'commission_rate', 'probability']:
+                        val = request.form.get(field, "").strip()
+                        if val:
+                            try:
+                                updates[field] = float(val) if field != 'probability' else int(val)
+                            except:
+                                pass
+                    
+                    if updates:
+                        update_crm_deal(int(deal_id), user["id"], **updates)
+                        flash("Deal updated successfully!", "success")
+                except Exception as e:
+                    flash(f"Error updating deal: {e}", "error")
+        
+        elif action == "delete_deal":
+            deal_id = request.form.get("deal_id")
+            if deal_id:
+                try:
+                    delete_crm_deal(int(deal_id), user["id"])
+                    flash("Deal deleted successfully!", "success")
+                except Exception as e:
+                    flash(f"Error deleting deal: {e}", "error")
+        
+        elif action == "add_relationship":
+            contact_id_1 = request.form.get("contact_id_1")
+            contact_id_2 = request.form.get("contact_id_2")
+            relationship_type = request.form.get("relationship_type", "other").strip()
+            notes = request.form.get("notes", "").strip()
+            
+            if contact_id_1 and contact_id_2:
+                try:
+                    result = add_crm_relationship(
+                        int(contact_id_1), int(contact_id_2), "agent_contact",
+                        user["id"], relationship_type, notes
+                    )
+                    if result:
+                        flash("Relationship added successfully!", "success")
+                    else:
+                        flash("Relationship already exists!", "error")
+                except Exception as e:
+                    flash(f"Error adding relationship: {e}", "error")
+        
+        elif action == "bulk_action":
+            contact_ids = request.form.getlist("contact_ids")
+            bulk_action_type = request.form.get("bulk_action_type", "").strip()
+            
+            if contact_ids and bulk_action_type:
+                try:
+                    for contact_id in contact_ids:
+                        if bulk_action_type == "add_tag":
+                            tag = request.form.get("bulk_tag", "").strip()
+                            contact = get_agent_contact(int(contact_id), user["id"])
+                            if contact:
+                                contact_dict = dict(contact) if hasattr(contact, 'keys') else contact
+                                existing_tags = (contact_dict.get("tags") or "").split(",")
+                                existing_tags = [t.strip() for t in existing_tags if t.strip()]
+                                if tag and tag not in existing_tags:
+                                    existing_tags.append(tag)
+                                    update_agent_contact(int(contact_id), user["id"], tags=", ".join(existing_tags))
+                        elif bulk_action_type == "change_stage":
+                            stage = request.form.get("bulk_stage", "").strip()
+                            if stage:
+                                update_agent_contact(int(contact_id), user["id"], stage=stage)
+                    flash(f"Bulk action completed for {len(contact_ids)} contact(s)!", "success")
+                except Exception as e:
+                    flash(f"Error performing bulk action: {e}", "error")
 
     stage_filter = request.args.get("stage")
     search_query = request.args.get("search", "").strip()
@@ -2155,7 +2403,22 @@ def agent_crm():
         for contact in contacts:
             try:
                 # Convert sqlite3.Row to dict, handling missing columns gracefully
-                contact_dict = dict(contact)
+                # sqlite3.Row objects need to be converted to dict explicitly
+                import sqlite3
+                if isinstance(contact, sqlite3.Row):
+                    contact_dict = {key: contact[key] for key in contact.keys()}
+                elif hasattr(contact, 'keys') and not isinstance(contact, dict):
+                    # It's a Row-like object
+                    contact_dict = {key: contact[key] for key in contact.keys()}
+                elif isinstance(contact, dict):
+                    contact_dict = contact.copy()
+                else:
+                    # Fallback: try to convert
+                    try:
+                        contact_dict = dict(contact)
+                    except:
+                        contact_dict = {key: getattr(contact, key, None) for key in dir(contact) if not key.startswith('_')}
+                
                 # Ensure all expected fields exist with defaults
                 expected_fields = {
                     'id': None, 'created_at': '', 'name': '', 'email': '', 'phone': '',
@@ -2196,15 +2459,67 @@ def agent_crm():
                     )
                     contact_dict['interaction_count'] = len(interactions)
                     contact_dict['recent_interactions'] = [
-                        dict(i) for i in interactions[:3]
+                        dict(i) if hasattr(i, 'keys') else i for i in interactions[:3]
                     ]
                     contact_dict['all_interactions'] = [
-                        dict(i) for i in interactions
+                        dict(i) if hasattr(i, 'keys') else i for i in interactions
                     ]
-                except:
+                except Exception as e:
+                    print(f"Error fetching interactions: {e}")
                     contact_dict['interaction_count'] = 0
                     contact_dict['recent_interactions'] = []
                     contact_dict['all_interactions'] = []
+                
+                # Fetch tasks for this contact
+                try:
+                    tasks = list_crm_tasks(user["id"], contact_dict['id'], "agent_contact", status="pending")
+                    tasks_list = []
+                    for t in tasks:
+                        if hasattr(t, 'keys'):
+                            tasks_list.append(dict(t))
+                        else:
+                            tasks_list.append(t)
+                    contact_dict['pending_tasks'] = tasks_list
+                    contact_dict['task_count'] = len(tasks_list)
+                except Exception as e:
+                    print(f"Error fetching tasks: {e}")
+                    contact_dict['pending_tasks'] = []
+                    contact_dict['task_count'] = 0
+                
+                # Fetch deals for this contact
+                try:
+                    deals = list_crm_deals(user["id"], contact_dict['id'], "agent_contact")
+                    deals_list = []
+                    for d in deals:
+                        if hasattr(d, 'keys'):
+                            deals_list.append(dict(d))
+                        else:
+                            deals_list.append(d)
+                    contact_dict['deals'] = deals_list
+                    contact_dict['deal_count'] = len(deals_list)
+                    contact_dict['total_pipeline_value'] = sum([
+                        (d.get('deal_value') if isinstance(d, dict) else (d['deal_value'] if 'deal_value' in d else 0)) or 0 
+                        for d in deals_list
+                    ])
+                except Exception as e:
+                    print(f"Error fetching deals for contact {contact_dict.get('id')}: {e}")
+                    contact_dict['deals'] = []
+                    contact_dict['deal_count'] = 0
+                    contact_dict['total_pipeline_value'] = 0
+                
+                # Fetch relationships for this contact
+                try:
+                    relationships = list_crm_relationships(contact_dict['id'], "agent_contact", user["id"])
+                    relationships_list = []
+                    for r in relationships:
+                        if hasattr(r, 'keys'):
+                            relationships_list.append(dict(r))
+                        else:
+                            relationships_list.append(r)
+                    contact_dict['relationships'] = relationships_list
+                except Exception as e:
+                    print(f"Error fetching relationships for contact {contact_dict.get('id')}: {e}")
+                    contact_dict['relationships'] = []
                 
                 contacts_list.append(contact_dict)
             except Exception as e:
@@ -2212,59 +2527,134 @@ def agent_crm():
                 print(f"Error converting contact: {traceback.format_exc()}")
                 continue
         
+        # Ensure all contacts are dicts before sorting/stats
+        contacts_list_dicts = []
+        for c in contacts_list:
+            if isinstance(c, dict):
+                contacts_list_dicts.append(c)
+            elif hasattr(c, 'keys'):
+                try:
+                    import sqlite3
+                    if isinstance(c, sqlite3.Row):
+                        contacts_list_dicts.append({key: c[key] for key in c.keys()})
+                    else:
+                        contacts_list_dicts.append(dict(c))
+                except Exception as e:
+                    print(f"Error converting contact to dict: {e}")
+                    continue
+            else:
+                print(f"Skipping invalid contact: {type(c)}")
+                continue
+        
         # Sort contacts
         if sort_by == "name":
-            contacts_list.sort(key=lambda x: (x.get('name') or '').lower())
+            contacts_list_dicts.sort(key=lambda x: (x.get('name') or '').lower() if isinstance(x, dict) else '')
         elif sort_by == "stage":
             stage_order = {'new': 0, 'nurture': 1, 'active': 2, 'past': 3, 'sphere': 4}
-            contacts_list.sort(key=lambda x: stage_order.get(x.get('stage', 'new'), 5))
+            contacts_list_dicts.sort(key=lambda x: stage_order.get(x.get('stage', 'new') if isinstance(x, dict) else 'new', 5))
         elif sort_by == "last_touch":
-            contacts_list.sort(key=lambda x: x.get('last_touch') or '', reverse=True)
+            contacts_list_dicts.sort(key=lambda x: (x.get('last_touch') or '') if isinstance(x, dict) else '', reverse=True)
         elif sort_by == "created_at":
-            contacts_list.sort(key=lambda x: x.get('created_at') or '', reverse=True)
+            contacts_list_dicts.sort(key=lambda x: (x.get('created_at') or '') if isinstance(x, dict) else '', reverse=True)
         
         # Calculate stats
-        total_contacts = len(contacts_list)
+        total_contacts = len(contacts_list_dicts)
+        all_tasks = list_crm_tasks(user["id"], status="pending")
+        all_deals_raw = list_crm_deals(user["id"])
+        
+        # Convert all_deals to dicts
+        all_deals = []
+        for d in all_deals_raw:
+            if hasattr(d, 'keys'):
+                all_deals.append(dict(d))
+            else:
+                all_deals.append(d)
+        
+        # Get follow-up threshold from user settings
+        from database import get_user_by_id
+        user_details = get_user_by_id(user["id"])
+        if user_details and hasattr(user_details, 'keys'):
+            user_details = dict(user_details)
+        follow_up_days = user_details.get('follow_up_days', 30) if user_details and isinstance(user_details, dict) else 30
+        
+        # Get contacts needing follow-up
+        try:
+            from database import get_contacts_needing_followup
+            contacts_needing_followup = get_contacts_needing_followup(user["id"], follow_up_days)
+            needs_followup_count = len(contacts_needing_followup)
+        except Exception as e:
+            print(f"Error getting contacts needing followup: {e}")
+            needs_followup_count = 0
+        
         stats = {
             'total': total_contacts,
-            'new': len([c for c in contacts_list if c.get('stage') == 'new']),
-            'active': len([c for c in contacts_list if c.get('stage') == 'active']),
-            'past': len([c for c in contacts_list if c.get('stage') == 'past']),
-            'with_automation': len([c for c in contacts_list if any([
+            'new': len([c for c in contacts_list_dicts if c.get('stage') == 'new']),
+            'active': len([c for c in contacts_list_dicts if c.get('stage') == 'active']),
+            'past': len([c for c in contacts_list_dicts if c.get('stage') == 'past']),
+            'with_automation': len([c for c in contacts_list_dicts if any([
                 c.get('auto_birthday'), c.get('auto_anniversary'),
                 c.get('auto_seasonal'), c.get('auto_equity'), c.get('auto_holidays')
             ])]),
-            'total_equity': sum([c.get('equity_estimate') or 0 for c in contacts_list]),
+            'total_equity': sum([c.get('equity_estimate') or 0 for c in contacts_list_dicts]),
+            'pending_tasks': len(all_tasks),
+            'total_deals': len(all_deals),
+            'pipeline_value': sum([(d.get('deal_value') if isinstance(d, dict) else 0) or 0 for d in all_deals]),
+            'expected_commission': sum([(d.get('expected_commission') if isinstance(d, dict) else 0) or 0 for d in all_deals]),
+            'needs_followup': needs_followup_count,
+            'follow_up_days': follow_up_days,
         }
         
         # Get all unique tags
         all_tags = set()
-        for contact in contacts_list:
-            tags = contact.get('tags', '') or ''
+        for contact in contacts_list_dicts:
+            tags = contact.get('tags', '') or '' if isinstance(contact, dict) else ''
             if tags:
                 all_tags.update([t.strip() for t in tags.split(',') if t.strip()])
         all_tags = sorted(list(all_tags))
         
     except Exception as e:
         import traceback
-        print(f"Error loading contacts: {traceback.format_exc()}")
+        error_trace = traceback.format_exc()
+        print(f"Error loading contacts: {error_trace}")
         flash(f"Error loading contacts: {e}", "error")
         contacts_list = []
-        stats = {'total': 0, 'new': 0, 'active': 0, 'past': 0, 'with_automation': 0, 'total_equity': 0}
+        contacts_list_dicts = []  # Ensure this is defined even on error
+        stats = {'total': 0, 'new': 0, 'active': 0, 'past': 0, 'with_automation': 0, 'total_equity': 0, 'pending_tasks': 0, 'total_deals': 0, 'pipeline_value': 0, 'expected_commission': 0, 'needs_followup': 0, 'follow_up_days': 30}
         all_tags = []
+    
+    # Get all pending tasks for dashboard
+    try:
+        all_pending_tasks = list_crm_tasks(user["id"], status="pending")
+        upcoming_tasks = []
+        for t in all_pending_tasks[:10]:
+            if hasattr(t, 'keys'):
+                upcoming_tasks.append(dict(t))
+            else:
+                upcoming_tasks.append(t)
+    except Exception as e:
+        print(f"Error fetching upcoming tasks: {e}")
+        upcoming_tasks = []
+    
+    # Get email templates for quick actions
+    try:
+        email_templates = list_message_templates(user["id"], "agent", "email")
+    except:
+        email_templates = []
     
     try:
         return render_template(
             "agent/crm.html",
             brand_name=FRONT_BRAND_NAME,
             user=user,
-            contacts=contacts_list,
+            contacts=contacts_list_dicts,  # Use the converted dicts list
             stage_filter=stage_filter,
             search_query=search_query,
             tag_filter=tag_filter,
             sort_by=sort_by,
             stats=stats,
             all_tags=all_tags,
+            upcoming_tasks=upcoming_tasks,
+            email_templates=email_templates,
         )
     except Exception as e:
         import traceback
@@ -2488,12 +2878,30 @@ def agent_transactions():
             except Exception as e:
                 flash(f"Error creating transaction: {e}", "error")
 
+    # Get contact info if coming from CRM
+    contact_id = request.args.get("contact_id")
+    contact_info = None
+    if contact_id:
+        try:
+            contact = get_agent_contact(int(contact_id), user["id"])
+            if contact:
+                contact_dict = dict(contact) if hasattr(contact, 'keys') else contact
+                contact_info = {
+                    'name': contact_dict.get('name', '') if isinstance(contact_dict, dict) else (contact_dict['name'] if 'name' in contact_dict else ''),
+                    'email': contact_dict.get('email', '') if isinstance(contact_dict, dict) else (contact_dict['email'] if 'email' in contact_dict else ''),
+                    'phone': contact_dict.get('phone', '') if isinstance(contact_dict, dict) else (contact_dict['phone'] if 'phone' in contact_dict else ''),
+                    'property_address': contact_dict.get('property_address', '') if isinstance(contact_dict, dict) else (contact_dict['property_address'] if 'property_address' in contact_dict else ''),
+                }
+        except:
+            pass
+    
     transactions = get_agent_transactions(user["id"])
     return render_template(
         "agent/transactions.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         transactions=transactions,
+        contact_info=contact_info,
     )
 
 
@@ -2519,6 +2927,7 @@ def agent_transaction_detail(tx_id):
         brand_name=FRONT_BRAND_NAME,
         user=user,
         transaction=transaction,
+        tx=transaction,  # Also provide as 'tx' for backward compatibility
         documents=documents,
         participants=participants,
         timeline=timeline,
@@ -2611,6 +3020,35 @@ def agent_power_tools():
     )
 
 
+@app.route("/agent/referrals", methods=["GET"])
+def agent_referrals():
+    """Agent referral link management."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    from database import get_referral_stats, get_or_create_referral_code
+    
+    # Ensure referral code exists
+    referral_code = get_or_create_referral_code(user["id"], "agent")
+    
+    # Get stats
+    stats = get_referral_stats(user["id"])
+    
+    # Build referral URL
+    base_url = request.url_root.rstrip('/')
+    referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
+    
+    return render_template(
+        "agent/referrals.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        referral_code=referral_code,
+        referral_url=referral_url,
+        stats=stats,
+    )
+
+
 @app.route("/agent/settings/profile", methods=["GET", "POST"])
 def agent_settings_profile():
     """Agent settings and profile."""
@@ -2618,10 +3056,90 @@ def agent_settings_profile():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
 
+    from database import get_user_profile, create_or_update_user_profile
+
+    # Handle POST - update profile
+    if request.method == "POST":
+        try:
+            # Handle file uploads
+            professional_photo = None
+            brokerage_logo = None
+            
+            # Upload professional photo
+            if "professional_photo" in request.files:
+                photo_file = request.files["professional_photo"]
+                if photo_file and photo_file.filename:
+                    safe_name = secure_filename(photo_file.filename)
+                    unique_name = f"{uuid4().hex}_{safe_name}"
+                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                    save_path.parent.mkdir(parents=True, exist_ok=True)
+                    photo_file.save(save_path)
+                    professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+            
+            # Upload brokerage logo
+            if "brokerage_logo" in request.files:
+                logo_file = request.files["brokerage_logo"]
+                if logo_file and logo_file.filename:
+                    safe_name = secure_filename(logo_file.filename)
+                    unique_name = f"{uuid4().hex}_{safe_name}"
+                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                    save_path.parent.mkdir(parents=True, exist_ok=True)
+                    logo_file.save(save_path)
+                    brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+            
+            # Get existing profile to preserve existing photos/logos if not uploading new ones
+            existing_profile = get_user_profile(user["id"])
+            if existing_profile:
+                if not professional_photo:
+                    professional_photo = existing_profile.get("professional_photo")
+                if not brokerage_logo:
+                    brokerage_logo = existing_profile.get("brokerage_logo")
+            
+            # Get form data
+            profile_id = create_or_update_user_profile(
+                user_id=user["id"],
+                role="agent",
+                professional_photo=professional_photo,
+                brokerage_logo=brokerage_logo,
+                team_name=request.form.get("team_name", "").strip() or None,
+                brokerage_name=request.form.get("brokerage_name", "").strip() or None,
+                website_url=request.form.get("website_url", "").strip() or None,
+                facebook_url=request.form.get("facebook_url", "").strip() or None,
+                instagram_url=request.form.get("instagram_url", "").strip() or None,
+                linkedin_url=request.form.get("linkedin_url", "").strip() or None,
+                twitter_url=request.form.get("twitter_url", "").strip() or None,
+                youtube_url=request.form.get("youtube_url", "").strip() or None,
+                phone=request.form.get("phone", "").strip() or None,
+                call_button_enabled=1 if request.form.get("call_button_enabled") == "on" else 0,
+                schedule_button_enabled=1 if request.form.get("schedule_button_enabled") == "on" else 0,
+                schedule_url=request.form.get("schedule_url", "").strip() or None,
+                bio=request.form.get("bio", "").strip() or None,
+                specialties=request.form.get("specialties", "").strip() or None,
+                years_experience=int(request.form.get("years_experience")) if request.form.get("years_experience") else None,
+                languages=request.form.get("languages", "").strip() or None,
+                service_areas=request.form.get("service_areas", "").strip() or None,
+                license_number=request.form.get("license_number", "").strip() or None,
+                company_address=request.form.get("company_address", "").strip() or None,
+                company_city=request.form.get("company_city", "").strip() or None,
+                company_state=request.form.get("company_state", "").strip() or None,
+                company_zip=request.form.get("company_zip", "").strip() or None,
+            )
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("agent_settings_profile"))
+        except Exception as e:
+            import traceback
+            print(f"Error updating profile: {traceback.format_exc()}")
+            flash(f"Error updating profile: {str(e)}", "error")
+    
+    # GET - load profile
+    profile = get_user_profile(user["id"])
+    profile_dict = dict(profile) if profile and hasattr(profile, 'keys') else (profile if profile else {})
+    
     return render_template(
         "agent/settings_profile.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
+        profile=profile_dict,
     )
 
 
@@ -2712,16 +3230,243 @@ def lender_crm():
                     flash("Interaction logged successfully!", "success")
                 except Exception as e:
                     flash(f"Error logging interaction: {e}", "error")
+        
+        elif action == "add_task":
+            borrower_id = request.form.get("borrower_id")
+            title = request.form.get("title", "").strip()
+            description = request.form.get("description", "").strip()
+            due_date = request.form.get("due_date", "").strip()
+            priority = request.form.get("priority", "medium").strip()
+            reminder_date = request.form.get("reminder_date", "").strip() or None
+            
+            if borrower_id and title:
+                try:
+                    add_crm_task(
+                        int(borrower_id), "lender_borrower", user["id"],
+                        title, description, due_date or None, priority, reminder_date
+                    )
+                    flash("Task added successfully!", "success")
+                except Exception as e:
+                    flash(f"Error adding task: {e}", "error")
+        
+        elif action == "update_task":
+            task_id = request.form.get("task_id")
+            status = request.form.get("status", "").strip()
+            if task_id and status:
+                try:
+                    updates = {"status": status}
+                    if status == "completed":
+                        updates["completed_at"] = datetime.now().isoformat()
+                    update_crm_task(int(task_id), user["id"], **updates)
+                    flash("Task updated successfully!", "success")
+                except Exception as e:
+                    flash(f"Error updating task: {e}", "error")
+        
+        elif action == "add_deal":
+            borrower_id = request.form.get("borrower_id")
+            deal_name = request.form.get("deal_name", "").strip()
+            deal_type = request.form.get("deal_type", "other").strip()
+            property_address = request.form.get("property_address", "").strip()
+            deal_value = request.form.get("deal_value", "").strip()
+            commission_rate = request.form.get("commission_rate", "").strip()
+            stage = request.form.get("stage", "prospect").strip()
+            probability = request.form.get("probability", "0").strip()
+            expected_close_date = request.form.get("expected_close_date", "").strip()
+            notes = request.form.get("notes", "").strip()
+            
+            if borrower_id and deal_name:
+                try:
+                    deal_val = float(deal_value) if deal_value else None
+                    comm_rate = float(commission_rate) if commission_rate else None
+                    prob = int(probability) if probability else 0
+                    add_crm_deal(
+                        int(borrower_id), "lender_borrower", user["id"],
+                        deal_name, deal_type, property_address, deal_val, comm_rate,
+                        stage, prob, expected_close_date or None, notes
+                    )
+                    flash("Deal added successfully!", "success")
+                except Exception as e:
+                    flash(f"Error adding deal: {e}", "error")
+        
+        elif action == "bulk_action":
+            borrower_ids = request.form.getlist("borrower_ids")
+            bulk_action_type = request.form.get("bulk_action_type", "").strip()
+            
+            if borrower_ids and bulk_action_type:
+                try:
+                    for borrower_id in borrower_ids:
+                        if bulk_action_type == "add_tag":
+                            tag = request.form.get("bulk_tag", "").strip()
+                            borrower = get_lender_borrower(int(borrower_id), user["id"])
+                            if borrower:
+                                existing_tags = (borrower.get("tags") or "").split(",")
+                                existing_tags = [t.strip() for t in existing_tags if t.strip()]
+                                if tag and tag not in existing_tags:
+                                    existing_tags.append(tag)
+                                    update_lender_borrower(int(borrower_id), user["id"], tags=", ".join(existing_tags))
+                        elif bulk_action_type == "change_status":
+                            status = request.form.get("bulk_status", "").strip()
+                            if status:
+                                update_lender_borrower(int(borrower_id), user["id"], status=status)
+                    flash(f"Bulk action completed for {len(borrower_ids)} borrower(s)!", "success")
+                except Exception as e:
+                    flash(f"Error performing bulk action: {e}", "error")
+        
+        elif action == "update_followup_days":
+            follow_up_days = request.form.get("follow_up_days", "30").strip()
+            try:
+                days = int(follow_up_days)
+                if 1 <= days <= 365:
+                    conn = get_connection()
+                    cur = conn.cursor()
+                    cur.execute(
+                        "UPDATE users SET follow_up_days = ? WHERE id = ?",
+                        (days, user["id"])
+                    )
+                    conn.commit()
+                    conn.close()
+                    flash(f"Follow-up reminder set to {days} days!", "success")
+                else:
+                    flash("Please enter a number between 1 and 365.", "error")
+            except ValueError:
+                flash("Invalid number. Please enter a number between 1 and 365.", "error")
 
     status_filter = request.args.get("status")
     borrowers = list_lender_borrowers(user["id"], status_filter)
-    borrowers_list = [dict(borrower) for borrower in borrowers]
+    
+    # Convert borrowers to dicts and enrich with tasks/deals
+    borrowers_list = []
+    for borrower in borrowers:
+        try:
+            borrower_dict = dict(borrower)
+            
+            # Fetch interaction count
+            try:
+                interactions = list_crm_interactions(
+                    borrower_dict['id'], "lender_borrower", user["id"], limit=50
+                )
+                borrower_dict['interaction_count'] = len(interactions)
+                borrower_dict['recent_interactions'] = [dict(i) for i in interactions[:3]]
+            except:
+                borrower_dict['interaction_count'] = 0
+                borrower_dict['recent_interactions'] = []
+            
+            # Fetch tasks
+            try:
+                tasks = list_crm_tasks(user["id"], borrower_dict['id'], "lender_borrower", status="pending")
+                borrower_dict['pending_tasks'] = [dict(t) for t in tasks]
+                borrower_dict['task_count'] = len(tasks)
+            except:
+                borrower_dict['pending_tasks'] = []
+                borrower_dict['task_count'] = 0
+            
+            # Fetch deals
+            try:
+                deals = list_crm_deals(user["id"], borrower_dict['id'], "lender_borrower")
+                borrower_dict['deals'] = [dict(d) for d in deals]
+                borrower_dict['deal_count'] = len(deals)
+                borrower_dict['total_pipeline_value'] = sum([d.get('deal_value') or 0 for d in deals])
+            except:
+                borrower_dict['deals'] = []
+                borrower_dict['deal_count'] = 0
+                borrower_dict['total_pipeline_value'] = 0
+            
+            borrowers_list.append(borrower_dict)
+        except:
+            continue
+    
+    # Calculate stats
+    all_tasks = list_crm_tasks(user["id"], status="pending")
+    all_deals = list_crm_deals(user["id"])
+    
+    # Get follow-up threshold from user settings
+    from database import get_user_by_id
+    user_details = get_user_by_id(user["id"])
+    follow_up_days = user_details.get('follow_up_days', 30) if user_details else 30
+    
+    # Get borrowers needing follow-up
+    try:
+        from database import get_connection
+        conn = get_connection()
+        cur = conn.cursor()
+        from datetime import timedelta
+        cutoff_date = datetime.now() - timedelta(days=follow_up_days)
+        cutoff_iso = cutoff_date.isoformat()
+        
+        cur.execute("""
+            SELECT DISTINCT lb.id
+            FROM lender_borrowers lb
+            LEFT JOIN crm_interactions ci ON ci.contact_id = lb.id 
+                AND ci.contact_type = 'lender_borrower' 
+                AND ci.professional_user_id = lb.lender_user_id
+            WHERE lb.lender_user_id = ?
+            AND (
+                COALESCE(
+                    (SELECT MAX(ci2.interaction_date) 
+                     FROM crm_interactions ci2 
+                     WHERE ci2.contact_id = lb.id 
+                     AND ci2.contact_type = 'lender_borrower' 
+                     AND ci2.professional_user_id = lb.lender_user_id),
+                    lb.last_touch,
+                    lb.created_at
+                ) < ? OR
+                COALESCE(
+                    (SELECT MAX(ci3.interaction_date) 
+                     FROM crm_interactions ci3 
+                     WHERE ci3.contact_id = lb.id 
+                     AND ci3.contact_type = 'lender_borrower' 
+                     AND ci3.professional_user_id = lb.lender_user_id),
+                    lb.last_touch
+                ) IS NULL
+            )
+        """, (user["id"], cutoff_iso))
+        needs_followup_count = len(cur.fetchall())
+        conn.close()
+    except Exception as e:
+        print(f"Error getting borrowers needing followup: {e}")
+        needs_followup_count = 0
+    
+    stats = {
+        'total': len(borrowers_list),
+        'prospect': len([b for b in borrowers_list if b.get('status') == 'prospect']),
+        'preapproval': len([b for b in borrowers_list if b.get('status') == 'preapproval']),
+        'in_process': len([b for b in borrowers_list if b.get('status') == 'in_process']),
+        'closed': len([b for b in borrowers_list if b.get('status') == 'closed']),
+        'pending_tasks': len(all_tasks),
+        'total_deals': len(all_deals),
+        'pipeline_value': sum([d.get('deal_value') or 0 for d in all_deals]),
+        'expected_commission': sum([d.get('expected_commission') or 0 for d in all_deals]),
+        'needs_followup': needs_followup_count,
+        'follow_up_days': follow_up_days,
+        'with_automation': len([b for b in borrowers_list if any([
+            b.get('auto_birthday'), b.get('auto_anniversary'),
+            b.get('auto_seasonal'), b.get('auto_equity'), b.get('auto_holidays')
+        ])]),
+    }
+    
+    # Get all unique tags
+    all_tags = set()
+    for borrower in borrowers_list:
+        tags = borrower.get('tags', '') or ''
+        if tags:
+            all_tags.update([t.strip() for t in tags.split(',') if t.strip()])
+    all_tags = sorted(list(all_tags))
+    
+    # Get upcoming tasks
+    try:
+        upcoming_tasks = [dict(t) for t in all_tasks[:10]]
+    except:
+        upcoming_tasks = []
+    
     return render_template(
         "lender/crm.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         borrowers=borrowers_list,
         status_filter=status_filter,
+        stats=stats,
+        all_tags=all_tags,
+        upcoming_tasks=upcoming_tasks,
     )
 
 
@@ -2997,17 +3742,127 @@ def lender_power_suite():
     )
 
 
-@app.route("/lender/settings/profile", methods=["GET"])
-def lender_settings_profile():
-    """Lender settings."""
+@app.route("/lender/referrals", methods=["GET"])
+def lender_referrals():
+    """Lender referral link management."""
     user = get_current_user()
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
 
+    from database import get_referral_stats, get_or_create_referral_code
+    
+    # Ensure referral code exists
+    referral_code = get_or_create_referral_code(user["id"], "lender")
+    
+    # Get stats
+    stats = get_referral_stats(user["id"])
+    
+    # Build referral URL
+    base_url = request.url_root.rstrip('/')
+    referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
+    
+    return render_template(
+        "lender/referrals.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        referral_code=referral_code,
+        referral_url=referral_url,
+        stats=stats,
+    )
+
+
+@app.route("/lender/settings/profile", methods=["GET", "POST"])
+def lender_settings_profile():
+    """Lender settings and profile."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    from database import get_user_profile, create_or_update_user_profile
+
+    # Handle POST - update profile
+    if request.method == "POST":
+        try:
+            # Handle file uploads
+            professional_photo = None
+            brokerage_logo = None
+            
+            # Upload professional photo
+            if "professional_photo" in request.files:
+                photo_file = request.files["professional_photo"]
+                if photo_file and photo_file.filename:
+                    safe_name = secure_filename(photo_file.filename)
+                    unique_name = f"{uuid4().hex}_{safe_name}"
+                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                    save_path.parent.mkdir(parents=True, exist_ok=True)
+                    photo_file.save(save_path)
+                    professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+            
+            # Upload company logo
+            if "brokerage_logo" in request.files:
+                logo_file = request.files["brokerage_logo"]
+                if logo_file and logo_file.filename:
+                    safe_name = secure_filename(logo_file.filename)
+                    unique_name = f"{uuid4().hex}_{safe_name}"
+                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                    save_path.parent.mkdir(parents=True, exist_ok=True)
+                    logo_file.save(save_path)
+                    brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+            
+            # Get existing profile to preserve existing photos/logos if not uploading new ones
+            existing_profile = get_user_profile(user["id"])
+            if existing_profile:
+                if not professional_photo:
+                    professional_photo = existing_profile.get("professional_photo")
+                if not brokerage_logo:
+                    brokerage_logo = existing_profile.get("brokerage_logo")
+            
+            # Get form data
+            profile_id = create_or_update_user_profile(
+                user_id=user["id"],
+                role="lender",
+                professional_photo=professional_photo,
+                brokerage_logo=brokerage_logo,
+                team_name=request.form.get("team_name", "").strip() or None,
+                brokerage_name=request.form.get("brokerage_name", "").strip() or None,
+                website_url=request.form.get("website_url", "").strip() or None,
+                facebook_url=request.form.get("facebook_url", "").strip() or None,
+                instagram_url=request.form.get("instagram_url", "").strip() or None,
+                linkedin_url=request.form.get("linkedin_url", "").strip() or None,
+                twitter_url=request.form.get("twitter_url", "").strip() or None,
+                youtube_url=request.form.get("youtube_url", "").strip() or None,
+                phone=request.form.get("phone", "").strip() or None,
+                call_button_enabled=1 if request.form.get("call_button_enabled") == "on" else 0,
+                schedule_button_enabled=1 if request.form.get("schedule_button_enabled") == "on" else 0,
+                schedule_url=request.form.get("schedule_url", "").strip() or None,
+                bio=request.form.get("bio", "").strip() or None,
+                specialties=request.form.get("specialties", "").strip() or None,
+                years_experience=int(request.form.get("years_experience")) if request.form.get("years_experience") else None,
+                languages=request.form.get("languages", "").strip() or None,
+                service_areas=request.form.get("service_areas", "").strip() or None,
+                nmls_number=request.form.get("nmls_number", "").strip() or None,
+                license_number=request.form.get("license_number", "").strip() or None,
+                company_address=request.form.get("company_address", "").strip() or None,
+                company_city=request.form.get("company_city", "").strip() or None,
+                company_state=request.form.get("company_state", "").strip() or None,
+                company_zip=request.form.get("company_zip", "").strip() or None,
+            )
+            flash("Profile updated successfully!", "success")
+            return redirect(url_for("lender_settings_profile"))
+        except Exception as e:
+            import traceback
+            print(f"Error updating profile: {traceback.format_exc()}")
+            flash(f"Error updating profile: {str(e)}", "error")
+    
+    # GET - load profile
+    profile = get_user_profile(user["id"])
+    profile_dict = dict(profile) if profile and hasattr(profile, 'keys') else (profile if profile else {})
+    
     return render_template(
         "lender/settings_profile.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
+        profile=profile_dict,
     )
 
 

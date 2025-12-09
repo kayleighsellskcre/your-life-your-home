@@ -14,6 +14,7 @@
     {# open/closed menu states #}
     {% set open_overview = path == url_for('lender_dashboard')
       or path.startswith('/lender/settings/profile')
+      or path.startswith('/lender/referrals')
     %}
     {% set open_borrowers = path.startswith('/lender/crm')
       or path.startswith('/lender/loans')
@@ -54,6 +55,15 @@
             >
               <span class="ylh-submenu-bullet"></span>
               Dashboard
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_referrals') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/referrals') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              Referrals
             </a>
           </li>
           <li class="ylh-submenu-item">

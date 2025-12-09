@@ -2,6 +2,42 @@
 {% block title %}Dashboard Overview{% endblock %}
 
 {% block homeowner_content %}
+{% if professionals and professionals|length > 0 %}
+<!-- Professionals Section - Display at Top -->
+<div style="max-width: 1200px; margin: 0 auto 3rem; padding: 0 2rem;">
+  <div style="background: var(--white); border: var(--border-light); border-radius: var(--border-radius-lg); padding: 2rem; box-shadow: var(--shadow-light);">
+    <h2 style="font-family: var(--font-heading); color: var(--olive-green); margin-bottom: 1.5rem; font-size: 1.5rem;">Your Real Estate Team</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+      {% for prof in professionals %}
+      <div style="background: var(--warm-cream); border: var(--border-light); border-radius: var(--border-radius); padding: 1.5rem; display: flex; gap: 1rem;">
+        {% if prof.get('professional_photo') %}
+        <img src="{{ url_for('static', filename=prof.professional_photo) }}" alt="{{ prof.name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;">
+        {% else %}
+        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 2rem; flex-shrink: 0;">{{ prof.name[0] if prof.name else '?' }}</div>
+        {% endif %}
+        <div style="flex: 1;">
+          <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem; font-size: 1.2rem;">{{ prof.name }}</h3>
+          <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0 0 0.5rem; font-size: 0.9rem; text-transform: capitalize;">{{ prof.professional_role|replace('_', ' ') }}</p>
+          {% if prof.get('brokerage_name') %}
+          <p style="color: var(--charcoal-brown); opacity: 0.7; margin: 0 0 0.75rem; font-size: 0.85rem;">{{ prof.brokerage_name }}</p>
+          {% endif %}
+          {% if prof.get('phone') %}
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.75rem;">
+            {% if prof.get('call_button_enabled', 1) %}
+            <a href="tel:{{ prof.phone }}" style="background: var(--olive-green); color: var(--white); padding: 0.5rem 1rem; border-radius: var(--border-radius); text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">📞 Call</a>
+            {% endif %}
+            {% if prof.get('schedule_url') and prof.get('schedule_button_enabled', 1) %}
+            <a href="{{ prof.schedule_url }}" target="_blank" rel="noopener" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.5rem 1rem; border-radius: var(--border-radius); text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">📅 Schedule</a>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
 <style>
   /* Interactive hover animations */
   .hero-visual {

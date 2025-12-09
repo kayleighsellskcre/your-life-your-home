@@ -1,0 +1,307 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<style>
+  .referrals-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  
+  .referrals-header {
+    margin-bottom: 2rem;
+  }
+  
+  .referrals-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .referrals-header p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    font-size: 1rem;
+  }
+  
+  .referral-section {
+    background: var(--white);
+    border: var(--border-light);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .referral-section h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--olive-green);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+  
+  .referral-link-box {
+    background: var(--gradient-warm);
+    border: 2px solid var(--olive-green);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .referral-link-box h3 {
+    font-family: var(--font-heading);
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+  
+  .referral-link-display {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .referral-link-display input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    background: var(--white);
+    color: var(--charcoal-brown);
+    font-size: 0.95rem;
+    font-family: monospace;
+  }
+  
+  .btn-copy {
+    background: var(--olive-green);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+  
+  .btn-copy:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  
+  .stat-card {
+    background: var(--warm-cream);
+    border: var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    text-align: center;
+  }
+  
+  .stat-card h3 {
+    font-family: var(--font-heading);
+    color: var(--olive-green);
+    font-size: 2rem;
+    margin: 0 0 0.5rem;
+  }
+  
+  .stat-card p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .share-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  
+  .btn-share {
+    background: var(--taupe-beige);
+    color: var(--charcoal-brown);
+    border: var(--border-light);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-share:hover {
+    background: var(--clay-beige);
+    transform: translateY(-2px);
+  }
+  
+  .ad-purchase-section {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    border: 2px dashed var(--olive-green);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .ad-purchase-section h3 {
+    font-family: var(--font-heading);
+    color: var(--olive-green);
+    margin-bottom: 1rem;
+  }
+  
+  .btn-purchase-ad {
+    background: var(--olive-green);
+    color: var(--white);
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    margin-top: 1rem;
+  }
+  
+  .btn-purchase-ad:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+  }
+</style>
+
+<div class="referrals-container">
+  <div class="referrals-header">
+    <h1>Your Referral Link</h1>
+    <p>Share your unique link with potential borrowers. When they sign up, they'll automatically be connected to you.</p>
+  </div>
+
+  <!-- Referral Link Section -->
+  <div class="referral-section">
+    <h2>🔗 Your Unique Link</h2>
+    
+    <div class="referral-link-box">
+      <h3>Share this link with borrowers:</h3>
+      <div class="referral-link-display">
+        <input type="text" id="referralLink" value="{{ referral_url }}" readonly>
+        <button class="btn-copy" onclick="copyReferralLink()">📋 Copy Link</button>
+      </div>
+      <p style="color: var(--charcoal-brown); opacity: 0.7; font-size: 0.85rem; margin: 0;">
+        When someone signs up using this link, they'll automatically see your information on their dashboard.
+      </p>
+      
+      <div class="share-buttons">
+        <a href="mailto:?subject=Check%20out%20Your%20Life%20Your%20Home&body={{ referral_url|urlencode }}" class="btn-share">📧 Email</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ referral_url|urlencode }}" target="_blank" rel="noopener" class="btn-share">📘 Facebook</a>
+        <a href="https://twitter.com/intent/tweet?url={{ referral_url|urlencode }}&text=Get%20your%20free%20home%20equity%20report!" target="_blank" rel="noopener" class="btn-share">🐦 Twitter</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ referral_url|urlencode }}" target="_blank" rel="noopener" class="btn-share">💼 LinkedIn</a>
+        <button class="btn-share" onclick="copyReferralLink()">📋 Copy</button>
+      </div>
+    </div>
+    
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>{{ stats.total_clients }}</h3>
+        <p>Total Borrowers</p>
+      </div>
+      <div class="stat-card">
+        <h3>{{ stats.clients_this_month }}</h3>
+        <p>New This Month</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ad Purchase Section -->
+  <div class="referral-section">
+    <div class="ad-purchase-section">
+      <h3>🚀 Promote Your Link with Ads</h3>
+      <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 1rem;">
+        Drive traffic to your referral link and help potential borrowers discover their home equity instantly. 
+        Your ads will direct people to sign up and get an instant home-equity report.
+      </p>
+      <button class="btn-purchase-ad" onclick="openAdPurchaseModal()">
+        💰 Purchase Ads
+      </button>
+      <p style="color: var(--charcoal-brown); opacity: 0.7; font-size: 0.85rem; margin-top: 1rem;">
+        Coming soon: Targeted ad campaigns to reach homeowners in your area
+      </p>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="referral-section">
+    <h2>📖 How It Works</h2>
+    <div style="display: grid; gap: 1rem;">
+      <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
+        <div style="font-size: 2rem; flex-shrink: 0;">1️⃣</div>
+        <div>
+          <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">Share Your Link</h4>
+          <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">Share your unique referral link via email, social media, or ads.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
+        <div style="font-size: 2rem; flex-shrink: 0;">2️⃣</div>
+        <div>
+          <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">Borrower Signs Up</h4>
+          <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">When they create an account, they're automatically connected to you.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
+        <div style="font-size: 2rem; flex-shrink: 0;">3️⃣</div>
+        <div>
+          <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">They See Your Info</h4>
+          <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">Your photo, contact info, and call/schedule buttons appear at the top of their dashboard.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
+        <div style="font-size: 2rem; flex-shrink: 0;">4️⃣</div>
+        <div>
+          <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">Instant Home Equity Report</h4>
+          <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">They get an instant home-equity report, and you can follow up to help them with their next steps.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function copyReferralLink() {
+  const linkInput = document.getElementById('referralLink');
+  linkInput.select();
+  linkInput.setSelectionRange(0, 99999); // For mobile devices
+  
+  try {
+    document.execCommand('copy');
+    const btn = event.target;
+    const originalText = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.style.background = '#5A6D47';
+    
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '';
+    }, 2000);
+  } catch (err) {
+    alert('Failed to copy. Please copy manually.');
+  }
+}
+
+function openAdPurchaseModal() {
+  alert('Ad purchase feature coming soon! This will allow you to create targeted ad campaigns that drive traffic to your referral link.');
+}
+</script>
+{% endblock %}
+

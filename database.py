@@ -26,10 +26,95 @@ def init_db() -> None:
             name TEXT,
             email TEXT UNIQUE,
             password_hash TEXT,
-            role TEXT CHECK(role IN ('homeowner','agent','lender')) NOT NULL
+            role TEXT CHECK(role IN ('homeowner','agent','lender')) NOT NULL,
+            follow_up_days INTEGER DEFAULT 30
         )
         """
     )
+    
+    # Add follow_up_days column if it doesn't exist
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN follow_up_days INTEGER DEFAULT 30")
+    except:
+        pass
+
+    # ------------- USER PROFILES -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            role TEXT CHECK(role IN ('agent','lender')) NOT NULL,
+            referral_code TEXT UNIQUE,
+            professional_photo TEXT,
+            brokerage_logo TEXT,
+            team_name TEXT,
+            brokerage_name TEXT,
+            website_url TEXT,
+            facebook_url TEXT,
+            instagram_url TEXT,
+            linkedin_url TEXT,
+            twitter_url TEXT,
+            youtube_url TEXT,
+            phone TEXT,
+            call_button_enabled INTEGER DEFAULT 1,
+            schedule_button_enabled INTEGER DEFAULT 1,
+            schedule_url TEXT,
+            bio TEXT,
+            specialties TEXT,
+            years_experience INTEGER,
+            languages TEXT,
+            service_areas TEXT,
+            nmls_number TEXT,
+            license_number TEXT,
+            company_address TEXT,
+            company_city TEXT,
+            company_state TEXT,
+            company_zip TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Add referral_code column if it doesn't exist
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN referral_code TEXT UNIQUE")
+    except:
+        pass
+
+    # ------------- CLIENT RELATIONSHIPS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS client_relationships (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            homeowner_id INTEGER NOT NULL,
+            professional_id INTEGER NOT NULL,
+            professional_role TEXT CHECK(professional_role IN ('agent','lender')) NOT NULL,
+            referral_code TEXT,
+            status TEXT DEFAULT 'active' CHECK(status IN ('active','inactive','removed')),
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (homeowner_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (professional_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(homeowner_id, professional_id, professional_role)
+        )
+        """
+    )
+    
+    # Migration: Ensure homeowner_id column exists (for existing databases)
+    try:
+        cur.execute("ALTER TABLE client_relationships ADD COLUMN homeowner_id INTEGER")
+        # If homeowner_id was missing, we need to handle existing data
+        # For now, we'll just ensure the column exists
+    except:
+        pass  # Column already exists
+    
+    # Migration: Ensure status column exists
+    try:
+        cur.execute("ALTER TABLE client_relationships ADD COLUMN status TEXT DEFAULT 'active'")
+    except:
+        pass  # Column already exists
 
     # ------------- PROPERTIES -------------
     cur.execute(
@@ -388,6 +473,87 @@ def init_db() -> None:
             subject TEXT,
             status TEXT DEFAULT 'sent',
             error_message TEXT,
+            FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # ------------- CRM TASKS / FOLLOW-UPS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS crm_tasks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            contact_id INTEGER,
+            contact_type TEXT CHECK(contact_type IN ('agent_contact', 'lender_borrower')),
+            professional_user_id INTEGER,
+            title TEXT NOT NULL,
+            description TEXT,
+            due_date TEXT,
+            priority TEXT DEFAULT 'medium' CHECK(priority IN ('low', 'medium', 'high', 'urgent')),
+            status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'in_progress', 'completed', 'cancelled')),
+            reminder_date TEXT,
+            completed_at TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # ------------- CRM DEALS / TRANSACTIONS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS crm_deals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            contact_id INTEGER,
+            contact_type TEXT CHECK(contact_type IN ('agent_contact', 'lender_borrower')),
+            professional_user_id INTEGER,
+            deal_name TEXT NOT NULL,
+            deal_type TEXT CHECK(deal_type IN ('sale', 'purchase', 'refinance', 'listing', 'other')),
+            property_address TEXT,
+            deal_value REAL,
+            commission_rate REAL,
+            expected_commission REAL,
+            stage TEXT DEFAULT 'prospect' CHECK(stage IN ('prospect', 'qualified', 'offer', 'under_contract', 'closed', 'lost')),
+            probability INTEGER DEFAULT 0 CHECK(probability >= 0 AND probability <= 100),
+            expected_close_date TEXT,
+            actual_close_date TEXT,
+            notes TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # ------------- CRM CONTACT RELATIONSHIPS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS crm_relationships (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            contact_id_1 INTEGER NOT NULL,
+            contact_id_2 INTEGER NOT NULL,
+            contact_type TEXT CHECK(contact_type IN ('agent_contact', 'lender_borrower')),
+            professional_user_id INTEGER,
+            relationship_type TEXT CHECK(relationship_type IN ('spouse', 'referral_source', 'related_contact', 'business_partner', 'other')),
+            notes TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE(contact_id_1, contact_id_2, contact_type, professional_user_id)
+        )
+        """
+    )
+    
+    # ------------- CRM SAVED VIEWS / FILTERS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS crm_saved_views (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            professional_user_id INTEGER,
+            role TEXT CHECK(role IN ('agent', 'lender')),
+            view_name TEXT NOT NULL,
+            filters_json TEXT,
+            is_default INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (professional_user_id) REFERENCES users(id) ON DELETE CASCADE
         )
         """
@@ -898,6 +1064,58 @@ def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[sq
         params.append(stage_filter)
     query += " ORDER BY created_at DESC"
     cur.execute(query, tuple(params))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_contacts_needing_followup(agent_user_id: int, days_threshold: int = 30) -> List[sqlite3.Row]:
+    """Get contacts that haven't been communicated with in X days"""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Calculate the cutoff date (days_threshold days ago)
+    from datetime import timedelta
+    cutoff_date = datetime.now() - timedelta(days=days_threshold)
+    cutoff_iso = cutoff_date.isoformat()
+    
+    # Get contacts where last interaction or last_touch is older than threshold
+    query = """
+        SELECT DISTINCT ac.id, ac.created_at, ac.name, ac.email, ac.phone, ac.stage, 
+               ac.last_touch, ac.property_address,
+               COALESCE(
+                   (SELECT MAX(ci.interaction_date) 
+                    FROM crm_interactions ci 
+                    WHERE ci.contact_id = ac.id 
+                    AND ci.contact_type = 'agent_contact' 
+                    AND ci.professional_user_id = ac.agent_user_id),
+                   ac.last_touch,
+                   ac.created_at
+               ) as effective_last_contact
+        FROM agent_contacts ac
+        WHERE ac.agent_user_id = ?
+        AND (
+            COALESCE(
+                (SELECT MAX(ci.interaction_date) 
+                 FROM crm_interactions ci 
+                 WHERE ci.contact_id = ac.id 
+                 AND ci.contact_type = 'agent_contact' 
+                 AND ci.professional_user_id = ac.agent_user_id),
+                ac.last_touch,
+                ac.created_at
+            ) < ? OR
+            COALESCE(
+                (SELECT MAX(ci.interaction_date) 
+                 FROM crm_interactions ci 
+                 WHERE ci.contact_id = ac.id 
+                 AND ci.contact_type = 'agent_contact' 
+                 AND ci.professional_user_id = ac.agent_user_id),
+                ac.last_touch
+            ) IS NULL
+        )
+        ORDER BY effective_last_contact ASC
+    """
+    cur.execute(query, (agent_user_id, cutoff_iso))
     rows = cur.fetchall()
     conn.close()
     return rows
@@ -1892,6 +2110,382 @@ def list_crm_interactions(
     return rows
 
 
+# ====================== CRM TASKS ======================
+
+def add_crm_task(
+    contact_id: int,
+    contact_type: str,
+    professional_user_id: int,
+    title: str,
+    description: str = "",
+    due_date: str = None,
+    priority: str = "medium",
+    reminder_date: str = None,
+) -> int:
+    """Add a task/follow-up for a CRM contact."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        INSERT INTO crm_tasks (
+            contact_id, contact_type, professional_user_id, title, description,
+            due_date, priority, reminder_date, status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+        """,
+        (contact_id, contact_type, professional_user_id, title, description,
+         due_date, priority, reminder_date),
+    )
+    task_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return task_id
+
+
+def list_crm_tasks(
+    professional_user_id: int,
+    contact_id: int = None,
+    contact_type: str = None,
+    status: str = None,
+    include_overdue: bool = True,
+) -> List[sqlite3.Row]:
+    """List tasks for contacts."""
+    conn = get_connection()
+    cur = conn.cursor()
+    query = """
+        SELECT id, contact_id, contact_type, title, description, due_date, priority,
+               status, reminder_date, completed_at, created_at
+        FROM crm_tasks
+        WHERE professional_user_id = ?
+    """
+    params = [professional_user_id]
+    
+    if contact_id and contact_type:
+        query += " AND contact_id = ? AND contact_type = ?"
+        params.extend([contact_id, contact_type])
+    
+    if status:
+        query += " AND status = ?"
+        params.append(status)
+    elif not include_overdue:
+        query += " AND (status != 'completed' OR status IS NULL)"
+    
+    query += " ORDER BY due_date ASC, priority DESC, created_at DESC"
+    cur.execute(query, tuple(params))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def update_crm_task(
+    task_id: int,
+    professional_user_id: int,
+    **kwargs
+) -> None:
+    """Update a CRM task."""
+    if not kwargs:
+        return
+    conn = get_connection()
+    cur = conn.cursor()
+    updates = []
+    values = []
+    for key, value in kwargs.items():
+        updates.append(f"{key} = ?")
+        values.append(value)
+    values.extend([task_id, professional_user_id])
+    cur.execute(
+        f"""
+        UPDATE crm_tasks
+        SET {', '.join(updates)}
+        WHERE id = ? AND professional_user_id = ?
+        """,
+        tuple(values),
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_crm_task(task_id: int, professional_user_id: int) -> None:
+    """Delete a CRM task."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM crm_tasks WHERE id = ? AND professional_user_id = ?",
+        (task_id, professional_user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+# ====================== CRM DEALS ======================
+
+def add_crm_deal(
+    contact_id: int,
+    contact_type: str,
+    professional_user_id: int,
+    deal_name: str,
+    deal_type: str = "other",
+    property_address: str = "",
+    deal_value: float = None,
+    commission_rate: float = None,
+    stage: str = "prospect",
+    probability: int = 0,
+    expected_close_date: str = None,
+    notes: str = "",
+) -> int:
+    """Add a deal for a CRM contact."""
+    conn = get_connection()
+    cur = conn.cursor()
+    expected_commission = None
+    if deal_value and commission_rate:
+        expected_commission = deal_value * (commission_rate / 100)
+    
+    cur.execute(
+        """
+        INSERT INTO crm_deals (
+            contact_id, contact_type, professional_user_id, deal_name, deal_type,
+            property_address, deal_value, commission_rate, expected_commission,
+            stage, probability, expected_close_date, notes
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (contact_id, contact_type, professional_user_id, deal_name, deal_type,
+         property_address, deal_value, commission_rate, expected_commission,
+         stage, probability, expected_close_date, notes),
+    )
+    deal_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return deal_id
+
+
+def list_crm_deals(
+    professional_user_id: int,
+    contact_id: int = None,
+    contact_type: str = None,
+    stage: str = None,
+) -> List[sqlite3.Row]:
+    """List deals for contacts."""
+    conn = get_connection()
+    cur = conn.cursor()
+    query = """
+        SELECT id, contact_id, contact_type, deal_name, deal_type, property_address,
+               deal_value, commission_rate, expected_commission, stage, probability,
+               expected_close_date, actual_close_date, notes, created_at, updated_at
+        FROM crm_deals
+        WHERE professional_user_id = ?
+    """
+    params = [professional_user_id]
+    
+    if contact_id and contact_type:
+        query += " AND contact_id = ? AND contact_type = ?"
+        params.extend([contact_id, contact_type])
+    
+    if stage:
+        query += " AND stage = ?"
+        params.append(stage)
+    
+    query += " ORDER BY expected_close_date ASC, created_at DESC"
+    cur.execute(query, tuple(params))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def update_crm_deal(
+    deal_id: int,
+    professional_user_id: int,
+    **kwargs
+) -> None:
+    """Update a CRM deal."""
+    if not kwargs:
+        return
+    conn = get_connection()
+    cur = conn.cursor()
+    updates = []
+    values = []
+    
+    # Recalculate expected_commission if deal_value or commission_rate changes
+    if 'deal_value' in kwargs or 'commission_rate' in kwargs:
+        # Get current values
+        cur.execute(
+            "SELECT deal_value, commission_rate FROM crm_deals WHERE id = ? AND professional_user_id = ?",
+            (deal_id, professional_user_id)
+        )
+        row = cur.fetchone()
+        if row:
+            deal_value = kwargs.get('deal_value', row['deal_value'])
+            commission_rate = kwargs.get('commission_rate', row['commission_rate'])
+            if deal_value and commission_rate:
+                kwargs['expected_commission'] = deal_value * (commission_rate / 100)
+    
+    for key, value in kwargs.items():
+        updates.append(f"{key} = ?")
+        values.append(value)
+    
+    updates.append("updated_at = CURRENT_TIMESTAMP")
+    values.extend([deal_id, professional_user_id])
+    
+    cur.execute(
+        f"""
+        UPDATE crm_deals
+        SET {', '.join(updates)}
+        WHERE id = ? AND professional_user_id = ?
+        """,
+        tuple(values),
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_crm_deal(deal_id: int, professional_user_id: int) -> None:
+    """Delete a CRM deal."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM crm_deals WHERE id = ? AND professional_user_id = ?",
+        (deal_id, professional_user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+# ====================== CRM RELATIONSHIPS ======================
+
+def add_crm_relationship(
+    contact_id_1: int,
+    contact_id_2: int,
+    contact_type: str,
+    professional_user_id: int,
+    relationship_type: str = "other",
+    notes: str = "",
+) -> int:
+    """Add a relationship between two contacts."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            """
+            INSERT INTO crm_relationships (
+                contact_id_1, contact_id_2, contact_type, professional_user_id,
+                relationship_type, notes
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (contact_id_1, contact_id_2, contact_type, professional_user_id,
+             relationship_type, notes),
+        )
+        relationship_id = cur.lastrowid
+        conn.commit()
+        conn.close()
+        return relationship_id
+    except sqlite3.IntegrityError:
+        conn.close()
+        return None  # Relationship already exists
+
+
+def list_crm_relationships(
+    contact_id: int,
+    contact_type: str,
+    professional_user_id: int,
+) -> List[sqlite3.Row]:
+    """List relationships for a contact."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, contact_id_1, contact_id_2, relationship_type, notes, created_at
+        FROM crm_relationships
+        WHERE professional_user_id = ? AND contact_type = ?
+        AND (contact_id_1 = ? OR contact_id_2 = ?)
+        """,
+        (professional_user_id, contact_type, contact_id, contact_id),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def delete_crm_relationship(relationship_id: int, professional_user_id: int) -> None:
+    """Delete a CRM relationship."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM crm_relationships WHERE id = ? AND professional_user_id = ?",
+        (relationship_id, professional_user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
+# ====================== CRM SAVED VIEWS ======================
+
+def add_crm_saved_view(
+    professional_user_id: int,
+    role: str,
+    view_name: str,
+    filters_json: str,
+    is_default: int = 0,
+) -> int:
+    """Add a saved view/filter combination."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # If this is set as default, unset other defaults
+    if is_default:
+        cur.execute(
+            "UPDATE crm_saved_views SET is_default = 0 WHERE professional_user_id = ? AND role = ?",
+            (professional_user_id, role)
+        )
+    
+    cur.execute(
+        """
+        INSERT INTO crm_saved_views (
+            professional_user_id, role, view_name, filters_json, is_default
+        )
+        VALUES (?, ?, ?, ?, ?)
+        """,
+        (professional_user_id, role, view_name, filters_json, is_default),
+    )
+    view_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return view_id
+
+
+def list_crm_saved_views(
+    professional_user_id: int,
+    role: str,
+) -> List[sqlite3.Row]:
+    """List saved views for a user."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, view_name, filters_json, is_default, created_at
+        FROM crm_saved_views
+        WHERE professional_user_id = ? AND role = ?
+        ORDER BY is_default DESC, created_at DESC
+        """,
+        (professional_user_id, role),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def delete_crm_saved_view(view_id: int, professional_user_id: int) -> None:
+    """Delete a saved view."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM crm_saved_views WHERE id = ? AND professional_user_id = ?",
+        (view_id, professional_user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
 def log_automated_email(
     contact_id: int,
     contact_type: str,
@@ -1975,3 +2569,315 @@ def get_contacts_for_automated_email(
     rows = cur.fetchall()
     conn.close()
     return rows
+
+
+# ------------- USER PROFILES -------------
+def get_user_profile(user_id: int) -> Optional[sqlite3.Row]:
+    """Get user profile by user_id."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM user_profiles WHERE user_id = ?", (user_id,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def create_or_update_user_profile(
+    user_id: int,
+    role: str,
+    professional_photo: Optional[str] = None,
+    brokerage_logo: Optional[str] = None,
+    team_name: Optional[str] = None,
+    brokerage_name: Optional[str] = None,
+    website_url: Optional[str] = None,
+    facebook_url: Optional[str] = None,
+    instagram_url: Optional[str] = None,
+    linkedin_url: Optional[str] = None,
+    twitter_url: Optional[str] = None,
+    youtube_url: Optional[str] = None,
+    phone: Optional[str] = None,
+    call_button_enabled: int = 1,
+    schedule_button_enabled: int = 1,
+    schedule_url: Optional[str] = None,
+    bio: Optional[str] = None,
+    specialties: Optional[str] = None,
+    years_experience: Optional[int] = None,
+    languages: Optional[str] = None,
+    service_areas: Optional[str] = None,
+    nmls_number: Optional[str] = None,
+    license_number: Optional[str] = None,
+    company_address: Optional[str] = None,
+    company_city: Optional[str] = None,
+    company_state: Optional[str] = None,
+    company_zip: Optional[str] = None,
+) -> int:
+    """Create or update user profile. Returns profile id."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check if profile exists
+    cur.execute("SELECT id FROM user_profiles WHERE user_id = ?", (user_id,))
+    existing = cur.fetchone()
+    
+    if existing:
+        # Check if referral code exists, generate if not
+        cur.execute("SELECT referral_code FROM user_profiles WHERE user_id = ?", (user_id,))
+        ref_row = cur.fetchone()
+        referral_code = ref_row[0] if ref_row and ref_row[0] else None
+        
+        if not referral_code:
+            from database import generate_referral_code
+            referral_code = generate_referral_code(user_id, role)
+        
+        # Update existing profile
+        query = """
+            UPDATE user_profiles SET
+                role = ?,
+                referral_code = COALESCE(referral_code, ?),
+                professional_photo = COALESCE(?, professional_photo),
+                brokerage_logo = COALESCE(?, brokerage_logo),
+                team_name = ?,
+                brokerage_name = ?,
+                website_url = ?,
+                facebook_url = ?,
+                instagram_url = ?,
+                linkedin_url = ?,
+                twitter_url = ?,
+                youtube_url = ?,
+                phone = ?,
+                call_button_enabled = ?,
+                schedule_button_enabled = ?,
+                schedule_url = ?,
+                bio = ?,
+                specialties = ?,
+                years_experience = ?,
+                languages = ?,
+                service_areas = ?,
+                nmls_number = ?,
+                license_number = ?,
+                company_address = ?,
+                company_city = ?,
+                company_state = ?,
+                company_zip = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+        """
+        cur.execute(query, (
+            role, referral_code, professional_photo, brokerage_logo, team_name, brokerage_name,
+            website_url, facebook_url, instagram_url, linkedin_url, twitter_url,
+            youtube_url, phone, call_button_enabled, schedule_button_enabled,
+            schedule_url, bio, specialties, years_experience, languages,
+            service_areas, nmls_number, license_number, company_address,
+            company_city, company_state, company_zip, user_id
+        ))
+        profile_id = existing[0]
+    else:
+        # Generate referral code for new profile
+        from database import generate_referral_code
+        referral_code = generate_referral_code(user_id, role)
+        
+        # Create new profile
+        query = """
+            INSERT INTO user_profiles (
+                user_id, role, referral_code, professional_photo, brokerage_logo, team_name,
+                brokerage_name, website_url, facebook_url, instagram_url,
+                linkedin_url, twitter_url, youtube_url, phone,
+                call_button_enabled, schedule_button_enabled, schedule_url,
+                bio, specialties, years_experience, languages, service_areas,
+                nmls_number, license_number, company_address, company_city,
+                company_state, company_zip
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """
+        cur.execute(query, (
+            user_id, role, referral_code, professional_photo, brokerage_logo, team_name,
+            brokerage_name, website_url, facebook_url, instagram_url,
+            linkedin_url, twitter_url, youtube_url, phone,
+            call_button_enabled, schedule_button_enabled, schedule_url,
+            bio, specialties, years_experience, languages, service_areas,
+            nmls_number, license_number, company_address, company_city,
+            company_state, company_zip
+        ))
+        profile_id = cur.lastrowid
+    
+    conn.commit()
+    conn.close()
+    return profile_id
+
+
+def generate_referral_code(user_id: int, role: str) -> str:
+    """Generate a unique referral code for an agent or lender."""
+    import secrets
+    import string
+    
+    # Create a code like "AGENT-ABC123" or "LENDER-XYZ789"
+    prefix = "AGENT" if role == "agent" else "LENDER"
+    code_length = 6
+    alphabet = string.ascii_uppercase + string.digits
+    
+    # Try up to 10 times to get a unique code
+    for _ in range(10):
+        random_part = ''.join(secrets.choice(alphabet) for _ in range(code_length))
+        code = f"{prefix}-{random_part}"
+        
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id FROM user_profiles WHERE referral_code = ?", (code,))
+        if not cur.fetchone():
+            conn.close()
+            return code
+        conn.close()
+    
+    # Fallback: use user_id if all random codes are taken (unlikely)
+    return f"{prefix}-{user_id:06d}"
+
+
+def get_or_create_referral_code(user_id: int, role: str) -> str:
+    """Get existing referral code or create a new one."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT referral_code FROM user_profiles WHERE user_id = ?", (user_id,))
+    row = cur.fetchone()
+    conn.close()
+    
+    if row and row[0]:
+        return row[0]
+    
+    # Generate and save new code
+    code = generate_referral_code(user_id, role)
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE user_profiles SET referral_code = ? WHERE user_id = ?", (code, user_id))
+    conn.commit()
+    conn.close()
+    return code
+
+
+def get_professional_by_referral_code(referral_code: str) -> Optional[sqlite3.Row]:
+    """Get professional (agent or lender) by their referral code."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT up.*, u.name, u.email
+        FROM user_profiles up
+        JOIN users u ON up.user_id = u.id
+        WHERE up.referral_code = ?
+    """, (referral_code,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def create_client_relationship(
+    homeowner_id: int,
+    professional_id: int,
+    professional_role: str,
+    referral_code: Optional[str] = None
+) -> int:
+    """Create a relationship between a homeowner and a professional."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check table structure to use correct column names
+    cur.execute("PRAGMA table_info(client_relationships)")
+    columns = [row[1] for row in cur.fetchall()]
+    homeowner_col = 'homeowner_id' if 'homeowner_id' in columns else 'client_id'
+    role_col = 'professional_role' if 'professional_role' in columns else 'professional_type'
+    
+    # Check if relationship already exists
+    cur.execute(f"""
+        SELECT id FROM client_relationships
+        WHERE {homeowner_col} = ? AND professional_id = ? AND {role_col} = ?
+    """, (homeowner_id, professional_id, professional_role))
+    existing = cur.fetchone()
+    
+    if existing:
+        # Update existing relationship to active
+        cur.execute(f"""
+            UPDATE client_relationships
+            SET status = 'active', referral_code = COALESCE(?, referral_code)
+            WHERE id = ?
+        """, (referral_code, existing[0]))
+        relationship_id = existing[0]
+    else:
+        # Create new relationship using the correct column names
+        if homeowner_col == 'homeowner_id':
+            cur.execute("""
+                INSERT INTO client_relationships (homeowner_id, professional_id, professional_role, referral_code)
+                VALUES (?, ?, ?, ?)
+            """, (homeowner_id, professional_id, professional_role, referral_code))
+        else:
+            cur.execute("""
+                INSERT INTO client_relationships (client_id, professional_id, professional_type, referral_code)
+                VALUES (?, ?, ?, ?)
+            """, (homeowner_id, professional_id, professional_role, referral_code))
+        relationship_id = cur.lastrowid
+    
+    conn.commit()
+    conn.close()
+    return relationship_id
+
+
+def get_homeowner_professionals(homeowner_id: int) -> List[sqlite3.Row]:
+    """Get all professionals (agents and lenders) associated with a homeowner."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check if homeowner_id column exists, otherwise use client_id
+    cur.execute("PRAGMA table_info(client_relationships)")
+    columns = [row[1] for row in cur.fetchall()]
+    homeowner_col = 'homeowner_id' if 'homeowner_id' in columns else 'client_id'
+    role_col = 'professional_role' if 'professional_role' in columns else 'professional_type'
+    
+    cur.execute(f"""
+        SELECT cr.*, u.name, u.email, up.*,
+               cr.{role_col} as professional_role
+        FROM client_relationships cr
+        JOIN users u ON cr.professional_id = u.id
+        LEFT JOIN user_profiles up ON cr.professional_id = up.user_id
+        WHERE cr.{homeowner_col} = ? AND cr.status = 'active'
+        ORDER BY cr.created_at DESC
+    """, (homeowner_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_referral_stats(professional_id: int) -> Dict[str, Any]:
+    """Get referral statistics for a professional."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check table structure to use correct column names
+    cur.execute("PRAGMA table_info(client_relationships)")
+    columns = [row[1] for row in cur.fetchall()]
+    homeowner_col = 'homeowner_id' if 'homeowner_id' in columns else 'client_id'
+    
+    # Get total clients
+    cur.execute(f"""
+        SELECT COUNT(*) FROM client_relationships
+        WHERE professional_id = ? AND status = 'active'
+    """, (professional_id,))
+    total_clients = cur.fetchone()[0]
+    
+    # Get clients this month
+    cur.execute(f"""
+        SELECT COUNT(*) FROM client_relationships
+        WHERE professional_id = ? AND status = 'active'
+        AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
+    """, (professional_id,))
+    clients_this_month = cur.fetchone()[0]
+    
+    # Get referral code
+    cur.execute("""
+        SELECT referral_code FROM user_profiles WHERE user_id = ?
+    """, (professional_id,))
+    ref_row = cur.fetchone()
+    referral_code = ref_row[0] if ref_row else None
+    
+    conn.close()
+    
+    return {
+        'total_clients': total_clients,
+        'clients_this_month': clients_this_month,
+        'referral_code': referral_code
+    }

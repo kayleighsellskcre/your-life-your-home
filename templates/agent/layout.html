@@ -232,6 +232,11 @@
         </div>
       </div>
       
+      <a href="{{ url_for('agent_referrals') }}" 
+         class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">
+        Referrals
+      </a>
+      
       <a href="{{ url_for('agent_settings_profile') }}" 
          class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">
         Settings

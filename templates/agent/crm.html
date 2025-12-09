@@ -9,10 +9,10 @@
     margin-top: 2rem;
   }
   .crm-sidebar {
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    border-radius: var(--border-radius);
+    background: var(--gradient-warm);
+    border-radius: var(--border-radius-lg);
     padding: 1.5rem;
-    box-shadow: var(--shadow-medium);
+    box-shadow: var(--shadow-light);
     height: fit-content;
     position: sticky;
     top: 2rem;
@@ -48,8 +48,8 @@
     color: var(--white);
   }
   .contact-card {
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    border-radius: var(--border-radius);
+    background: var(--gradient-warm);
+    border-radius: var(--border-radius-lg);
     padding: 1.5rem;
     box-shadow: var(--shadow-light);
     margin-bottom: 1rem;
@@ -59,6 +59,11 @@
   .contact-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
+  }
+  .stat-card-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+    background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-cream) 100%);
   }
   .contact-header {
     display: flex;
@@ -281,57 +286,97 @@
   <p>Your complete contact management system with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
 </div>
 
-<!-- Stats Cards -->
-<div class="dashboard-cards" style="margin-bottom: 2rem;">
-  <div class="card animate-in-delay-1" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <h3>📊 Total Contacts</h3>
-    <div class="card-value">{{ stats.total }}</div>
-    <p class="card-subtext">All contacts in your CRM</p>
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="margin-bottom: 2rem;">
+      {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}" style="padding: 1rem; margin-bottom: 1rem; border-radius: var(--border-radius-lg); border: var(--border-light); box-shadow: var(--shadow-light); {% if category == 'success' %}background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4caf50; color: #2e7d32;{% elif category == 'error' %}background: rgba(244, 67, 54, 0.1); border-left: 4px solid #f44336; color: #c62828;{% else %}background: var(--light-cream); border-left: 4px solid var(--olive-green); color: var(--charcoal-brown);{% endif %}">
+          <strong>{% if category == 'success' %}✓{% elif category == 'error' %}✗{% else %}ℹ{% endif %}</strong> {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- Stats Cards - 2 Columns, 3 boxes each -->
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+  <!-- Column 1 -->
+  <div class="stat-card-clickable" onclick="openStatModal('total')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">📊 Total Contacts</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">All contacts in your CRM</p>
   </div>
-  <div class="card animate-in-delay-2" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <h3>🎯 Active Pipeline</h3>
-    <div class="card-value">{{ stats.active }}</div>
-    <p class="card-subtext">Active buyers & sellers</p>
+  
+  <div class="stat-card-clickable" onclick="openStatModal('active')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🎯 Active Pipeline</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.active }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Active buyers & sellers</p>
   </div>
-  <div class="card animate-in-delay-3" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <h3>⭐ New Leads</h3>
-    <div class="card-value">{{ stats.new }}</div>
-    <p class="card-subtext">Waiting for first contact</p>
+  
+  <div class="stat-card-clickable" onclick="openStatModal('new')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">⭐ New Leads</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.new }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Waiting for first contact</p>
   </div>
-  <div class="card animate-in-delay-4" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <h3>🤖 Automation</h3>
-    <div class="card-value">{{ stats.with_automation }}</div>
-    <p class="card-subtext">Contacts with auto-emails</p>
+  
+  <!-- Column 2 -->
+  <div class="stat-card-clickable" onclick="openStatModal('tasks')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">✅ Pending Tasks</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.pending_tasks|default(0) }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Follow-ups & reminders</p>
   </div>
+  
+  <div class="stat-card-clickable" onclick="openStatModal('followup')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base); position: relative;">
+    <div style="position: absolute; top: 0.5rem; right: 0.5rem;">
+      <button onclick="event.stopPropagation(); openFollowupSettings();" style="background: transparent; border: none; color: var(--olive-green); cursor: pointer; font-size: 0.8rem; padding: 0.25rem 0.5rem; z-index: 10;" title="Settings">⚙️</button>
+    </div>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">📞 Needs Follow-up</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: {% if stats.needs_followup|default(0) > 0 %}#c0392b{% else %}var(--olive-green){% endif %}; margin-bottom: 0.1rem;">{{ stats.needs_followup|default(0) }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">No contact in {{ stats.follow_up_days|default(30) }}+ days</p>
+  </div>
+  
   {% if stats.total_equity > 0 %}
-  <div class="card animate-in-delay-5" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <h3>💰 Total Equity</h3>
-    <div class="card-value">${{ "{:,.0f}".format(stats.total_equity) }}</div>
-    <p class="card-subtext">Tracked across all contacts</p>
+  <div class="stat-card-clickable" onclick="openStatModal('equity')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🏠 Total Equity</h3>
+    <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">${{ "{:,.0f}".format(stats.total_equity) }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Tracked across all contacts</p>
+  </div>
+  {% elif stats.total_deals|default(0) > 0 %}
+  <div class="stat-card-clickable" onclick="openStatModal('deals')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">💼 Active Deals</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total_deals }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">${{ "{:,.0f}".format(stats.pipeline_value|default(0)) }} pipeline</p>
+  </div>
+  {% else %}
+  <div class="stat-card-clickable" onclick="openStatModal('automation')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🤖 Automation</h3>
+    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.with_automation }}</div>
+    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Contacts with auto-emails</p>
   </div>
   {% endif %}
 </div>
 
 <!-- Search and Filters Bar -->
-<div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border: var(--border-light);">
+<div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light);">
   <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto auto; gap: 1rem; align-items: end;">
     <div>
       <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">🔍 Search Contacts</label>
       <form method="get" style="display: flex; gap: 0.5rem;">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, address..." style="flex: 1; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white);">
+        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, address..." style="flex: 1; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
         {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
         {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
         {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
-        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem;">Search</button>
+        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: var(--olive-green); color: var(--white); border: none; border-radius: var(--border-radius); font-weight: 600; cursor: pointer;">Search</button>
         {% if search_query %}
-        <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.6rem 1rem;">Clear</a>
+        <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.6rem 1rem; text-decoration: none; border-radius: var(--border-radius); font-weight: 600;">Clear</a>
         {% endif %}
       </form>
     </div>
     <div>
       <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Sort By</label>
       <form method="get" id="sortForm" style="display: flex;">
-        <select name="sort" onchange="document.getElementById('sortForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white);">
+        <select name="sort" onchange="document.getElementById('sortForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
           <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
           <option value="stage" {% if sort_by == 'stage' %}selected{% endif %}>Stage</option>
           <option value="last_touch" {% if sort_by == 'last_touch' %}selected{% endif %}>Last Touch</option>
@@ -345,7 +390,7 @@
     <div>
       <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Filter by Tag</label>
       <form method="get" id="tagForm" style="display: flex;">
-        <select name="tag" onchange="document.getElementById('tagForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white);">
+        <select name="tag" onchange="document.getElementById('tagForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
           <option value="">All Tags</option>
           {% for tag in all_tags %}
           <option value="{{ tag }}" {% if tag_filter == tag %}selected{% endif %}>{{ tag }}</option>
@@ -368,24 +413,24 @@
       </a>
     </div>
     <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
-    <form method="post" id="addContactForm">
+    <form method="post" id="addContactForm" action="{{ url_for('agent_crm') }}" onsubmit="return validateAddContactForm(event);">
       <input type="hidden" name="action" value="add">
       <div style="display: grid; gap: 1rem;">
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+          <input type="text" name="name" id="add_contact_name" required style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
-          <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+          <input type="email" name="email" id="add_contact_email" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
-          <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+          <input type="tel" name="phone" id="add_contact_phone" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
         </div>
         <div>
           <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Stage</label>
-          <select name="stage" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+          <select name="stage" id="add_contact_stage" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
             <option value="new">New Lead</option>
             <option value="nurture">Nurture</option>
             <option value="active">Active Buyer/Seller</option>
@@ -393,7 +438,7 @@
             <option value="sphere">Sphere</option>
           </select>
         </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Contact</button>
+        <button type="submit" class="btn btn-primary" id="addContactBtn" style="width: 100%; padding: 0.75rem; cursor: pointer; pointer-events: auto;">Add Contact</button>
       </div>
     </form>
 
@@ -431,8 +476,18 @@
   <!-- Main: Contact List -->
   <div class="crm-main">
     {% if contacts %}
+      <div style="margin-bottom: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <input type="checkbox" id="selectAll" onchange="toggleAllContacts(this.checked)" style="margin-right: 0.5rem; width: 18px; height: 18px; cursor: pointer;">
+          <label for="selectAll" style="font-weight: 600; color: var(--charcoal-brown); cursor: pointer;">Select All</label>
+        </div>
+        <button onclick="openBulkActionModal(getSelectedContactIds())" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;" id="bulkActionBtn" disabled>Bulk Actions</button>
+      </div>
       {% for contact in contacts %}
-        <div class="contact-card">
+        <div class="contact-card" style="position: relative;">
+          <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
+            <input type="checkbox" class="contact-checkbox" value="{{ contact.id }}" onchange="updateBulkActionButton()" style="width: 18px; height: 18px; cursor: pointer;">
+          </div>
           <div class="contact-header">
             <div>
               <h3 class="contact-name">{{ contact.name }}</h3>
@@ -563,8 +618,65 @@
             {% endif %}
           </div>
 
+          {% if contact.pending_tasks|default([])|length > 0 %}
+            <div style="margin: 1rem 0; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
+              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
+                ✅ Pending Tasks ({{ contact.task_count|default(0) }})
+              </strong>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% for task in contact.pending_tasks[:3] %}
+                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
+                  <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ task.title }}</div>
+                      {% if task.due_date %}
+                      <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Due: {{ task.due_date[:10] }}</div>
+                      {% endif %}
+                    </div>
+                    <span style="padding: 0.2rem 0.5rem; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">{{ task.priority }}</span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% if contact.task_count|default(0) > 3 %}
+              <button onclick="openTasksModal({{ contact.id }})" class="btn btn-small" style="margin-top: 0.5rem; width: 100%; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none; font-size: 0.8rem;">View All Tasks</button>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% if contact.deals|default([])|length > 0 %}
+            <div style="margin: 1rem 0; padding: 1rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
+              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
+                💼 Active Deals ({{ contact.deal_count|default(0) }})
+              </strong>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% for deal in contact.deals[:2] %}
+                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
+                  <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ deal.deal_name }}</div>
+                      {% if deal.deal_value %}
+                      <div style="font-size: 0.75rem; color: var(--olive-green); font-weight: 600;">${{ "{:,.0f}".format(deal.deal_value) }}</div>
+                      {% endif %}
+                      {% if deal.expected_close_date %}
+                      <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Close: {{ deal.expected_close_date[:10] }}</div>
+                      {% endif %}
+                    </div>
+                    <span style="padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">{{ deal.stage|replace('_', ' ') }}</span>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% if contact.deal_count|default(0) > 2 %}
+              <button onclick="openDealsModal({{ contact.id }})" class="btn btn-small" style="margin-top: 0.5rem; width: 100%; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border: none; font-size: 0.8rem;">View All Deals</button>
+              {% endif %}
+            </div>
+          {% endif %}
+
           <div class="contact-actions">
             <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">📝 Log Interaction</button>
+            <button onclick="openTaskModal({{ contact.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;">✅ Add Task</button>
+            <a href="{{ url_for('agent_transactions') }}?contact_id={{ contact.id }}" class="btn btn-small" style="background: #4caf50; color: var(--white); text-decoration: none; border: none; display: inline-block;">💼 Add Transaction</a>
             {% if contact.email %}
             <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">✉️ Email</a>
             {% endif %}
@@ -776,8 +888,306 @@
   </div>
 </div>
 
+<!-- Add Task Modal -->
+<div id="taskModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Task / Follow-up</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="add_task">
+      <input type="hidden" name="contact_id" id="task_contact_id">
+      
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label>Task Title *</label>
+          <input type="text" name="title" required placeholder="e.g., Follow up on property viewing">
+        </div>
+        <div>
+          <label>Description</label>
+          <textarea name="description" rows="3" placeholder="Additional details..."></textarea>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Due Date</label>
+            <input type="date" name="due_date">
+          </div>
+          <div>
+            <label>Priority</label>
+            <select name="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label>Reminder Date (optional)</label>
+          <input type="datetime-local" name="reminder_date">
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Add Task</button>
+          <button type="button" onclick="closeTaskModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tasks List Modal -->
+<div id="tasksModal" class="modal">
+  <div class="modal-content" style="max-width: 800px;">
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">All Tasks</h2>
+    <div id="tasksContent" style="max-height: 60vh; overflow-y: auto;">
+      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading tasks...</p>
+    </div>
+    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+      <button type="button" onclick="closeTasksModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Deal Modal -->
+<div id="dealModal" class="modal">
+  <div class="modal-content" style="max-width: 700px;">
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Deal</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="add_deal">
+      <input type="hidden" name="contact_id" id="deal_contact_id">
+      
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label>Deal Name *</label>
+          <input type="text" name="deal_name" required placeholder="e.g., 123 Main St Purchase">
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Deal Type</label>
+            <select name="deal_type">
+              <option value="sale">Sale</option>
+              <option value="purchase">Purchase</option>
+              <option value="listing">Listing</option>
+              <option value="refinance">Refinance</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div>
+            <label>Stage</label>
+            <select name="stage">
+              <option value="prospect">Prospect</option>
+              <option value="qualified">Qualified</option>
+              <option value="offer">Offer</option>
+              <option value="under_contract">Under Contract</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label>Property Address</label>
+          <input type="text" name="property_address" placeholder="123 Main St, City, State">
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Deal Value ($)</label>
+            <input type="number" name="deal_value" step="1000" placeholder="500000">
+          </div>
+          <div>
+            <label>Commission Rate (%)</label>
+            <input type="number" name="commission_rate" step="0.1" placeholder="3.0">
+          </div>
+        </div>
+        <div class="form-grid">
+          <div>
+            <label>Probability (%)</label>
+            <input type="number" name="probability" min="0" max="100" value="50">
+          </div>
+          <div>
+            <label>Expected Close Date</label>
+            <input type="date" name="expected_close_date">
+          </div>
+        </div>
+        <div>
+          <label>Notes</label>
+          <textarea name="notes" rows="3" placeholder="Additional deal details..."></textarea>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Add Deal</button>
+          <button type="button" onclick="closeDealModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Deals List Modal -->
+<div id="dealsModal" class="modal">
+  <div class="modal-content" style="max-width: 800px;">
+    <h2 style="margin-top: 0; font-family: var(--font-heading);">All Deals</h2>
+    <div id="dealsContent" style="max-height: 60vh; overflow-y: auto;">
+      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading deals...</p>
+    </div>
+    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+      <button type="button" onclick="closeDealsModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stat Details Modal -->
+<div id="statModal" class="modal">
+  <div class="modal-content" style="max-width: 800px;">
+    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);" id="statModalTitle">Stat Details</h2>
+    <div id="statModalContent" style="max-height: 60vh; overflow-y: auto;">
+      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading...</p>
+    </div>
+    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+      <button type="button" onclick="closeStatModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Follow-up Settings Modal -->
+<div id="followupSettingsModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Follow-up Reminder Settings</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="update_followup_days">
+      
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Days Without Contact</label>
+          <input type="number" name="follow_up_days" min="1" max="365" value="{{ stats.follow_up_days|default(30) }}" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;" required>
+          <p style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-top: 0.5rem;">Contacts without communication in this many days will appear in "Needs Follow-up"</p>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+          <button type="button" onclick="closeFollowupSettings()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Bulk Actions Modal -->
+<div id="bulkActionModal" class="modal">
+  <div class="modal-content">
+    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Bulk Actions</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="bulk_action">
+      <div id="bulkContactIds"></div>
+      
+      <div style="display: grid; gap: 1rem;">
+        <div>
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Action</label>
+          <select name="bulk_action_type" id="bulkActionType" onchange="updateBulkActionFields()" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+            <option value="">Select an action...</option>
+            <option value="add_tag">Add Tag</option>
+            <option value="change_stage">Change Stage</option>
+          </select>
+        </div>
+        <div id="bulkTagField" style="display: none;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Tag to Add</label>
+          <input type="text" name="bulk_tag" placeholder="e.g., VIP, Referral" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+        </div>
+        <div id="bulkStageField" style="display: none;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">New Stage</label>
+          <select name="bulk_stage" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+            <option value="new">New Lead</option>
+            <option value="nurture">Nurture</option>
+            <option value="active">Active</option>
+            <option value="past">Past Client</option>
+            <option value="sphere">Sphere</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn btn-primary">Apply to Selected</button>
+          <button type="button" onclick="closeBulkActionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
-const contacts = {{ contacts|tojson|default('[]') }};
+var contactsData = {{ contacts|tojson|default('[]') }};
+const contacts = contactsData;
+
+function validateAddContactForm(event) {
+  const nameField = document.getElementById('add_contact_name');
+  if (!nameField || !nameField.value.trim()) {
+    event.preventDefault();
+    alert('Please enter a name for the contact.');
+    if (nameField) nameField.focus();
+    return false;
+  }
+  console.log('Form submitting with name:', nameField.value);
+  return true;
+}
+
+// Ensure form submission works
+document.addEventListener('DOMContentLoaded', function() {
+  const addContactForm = document.getElementById('addContactForm');
+  const addContactBtn = document.getElementById('addContactBtn');
+  
+  console.log('DOM loaded. Checking form...');
+  console.log('Form element:', addContactForm);
+  console.log('Button element:', addContactBtn);
+  
+  if (addContactForm) {
+    console.log('Add contact form found');
+    
+    // Remove onsubmit attribute and use addEventListener instead
+    addContactForm.removeAttribute('onsubmit');
+    
+    addContactForm.addEventListener('submit', function(e) {
+      console.log('Form submit event triggered');
+      const name = document.getElementById('add_contact_name')?.value;
+      console.log('Name value:', name);
+      
+      if (!name || !name.trim()) {
+        e.preventDefault();
+        alert('Please enter a name for the contact.');
+        return false;
+      }
+      
+      console.log('Form is valid. Allowing submission...');
+      console.log('Form action:', addContactForm.action);
+      console.log('Form method:', addContactForm.method);
+      
+      // Show loading state
+      if (addContactBtn) {
+        addContactBtn.disabled = true;
+        addContactBtn.textContent = 'Adding...';
+      }
+      
+      return true;
+    }, false);
+  } else {
+    console.error('ERROR: Add contact form not found!');
+  }
+  
+  if (addContactBtn) {
+    console.log('Add contact button found');
+    addContactBtn.disabled = false;
+    addContactBtn.style.pointerEvents = 'auto';
+    addContactBtn.style.cursor = 'pointer';
+    
+    addContactBtn.addEventListener('click', function(e) {
+      console.log('Button clicked');
+      const form = document.getElementById('addContactForm');
+      if (form) {
+        const name = document.getElementById('add_contact_name')?.value;
+        console.log('Button click - Name:', name);
+        if (!name || !name.trim()) {
+          e.preventDefault();
+          alert('Please enter a name for the contact.');
+          return false;
+        }
+        console.log('Button click - Form will submit');
+      }
+    });
+  } else {
+    console.error('ERROR: Add contact button not found!');
+  }
+});
 
 function openEditModal(contactId) {
   const contact = contacts.find(c => c.id === contactId);
@@ -916,5 +1326,392 @@ function exportContacts() {
   link.click();
   document.body.removeChild(link);
 }
+
+// Task Modal Functions
+function openTaskModal(contactId) {
+  document.getElementById('task_contact_id').value = contactId;
+  document.getElementById('taskModal').classList.add('active');
+}
+
+function closeTaskModal() {
+  document.getElementById('taskModal').classList.remove('active');
+}
+
+function openTasksModal(contactId) {
+  const contact = contacts.find(c => c.id === contactId);
+  if (!contact) return;
+  
+  const tasksContent = document.getElementById('tasksContent');
+  const tasks = contact.pending_tasks || [];
+  
+  if (tasks.length > 0) {
+    let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+    tasks.forEach(task => {
+      html += `
+        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+            <div style="flex: 1;">
+              <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">${task.title || 'Untitled Task'}</div>
+              ${task.description ? `<div style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8; margin-top: 0.25rem;">${task.description}</div>` : ''}
+            </div>
+            <span style="padding: 0.2rem 0.5rem; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">${task.priority || 'medium'}</span>
+          </div>
+          ${task.due_date ? `<div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Due: ${task.due_date.substring(0, 10)}</div>` : ''}
+        </div>
+      `;
+    });
+    html += '</div>';
+    tasksContent.innerHTML = html;
+  } else {
+    tasksContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No tasks found.</p>';
+  }
+  
+  document.getElementById('tasksModal').classList.add('active');
+}
+
+function closeTasksModal() {
+  document.getElementById('tasksModal').classList.remove('active');
+}
+
+// Deal Modal Functions
+function openDealModal(contactId) {
+  document.getElementById('deal_contact_id').value = contactId;
+  document.getElementById('dealModal').classList.add('active');
+}
+
+function closeDealModal() {
+  document.getElementById('dealModal').classList.remove('active');
+}
+
+function openDealsModal(contactId) {
+  const contact = contacts.find(c => c.id === contactId);
+  if (!contact) return;
+  
+  const dealsContent = document.getElementById('dealsContent');
+  const deals = contact.deals || [];
+  
+  if (deals.length > 0) {
+    let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+    deals.forEach(deal => {
+      html += `
+        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+            <div style="flex: 1;">
+              <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">${deal.deal_name || 'Untitled Deal'}</div>
+              ${deal.property_address ? `<div style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8; margin-top: 0.25rem;">${deal.property_address}</div>` : ''}
+              ${deal.deal_value ? `<div style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; margin-top: 0.25rem;">$${deal.deal_value.toLocaleString()}</div>` : ''}
+            </div>
+            <span style="padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">${(deal.stage || 'prospect').replace('_', ' ')}</span>
+          </div>
+          ${deal.expected_close_date ? `<div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Expected Close: ${deal.expected_close_date.substring(0, 10)}</div>` : ''}
+          ${deal.probability ? `<div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Probability: ${deal.probability}%</div>` : ''}
+        </div>
+      `;
+    });
+    html += '</div>';
+    dealsContent.innerHTML = html;
+  } else {
+    dealsContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No deals found.</p>';
+  }
+  
+  document.getElementById('dealsModal').classList.add('active');
+}
+
+function closeDealsModal() {
+  document.getElementById('dealsModal').classList.remove('active');
+}
+
+// Bulk Actions
+function openBulkActionModal(selectedIds) {
+  const bulkContactIds = document.getElementById('bulkContactIds');
+  bulkContactIds.innerHTML = '';
+  selectedIds.forEach(id => {
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'contact_ids';
+    input.value = id;
+    bulkContactIds.appendChild(input);
+  });
+  document.getElementById('bulkActionModal').classList.add('active');
+}
+
+function closeBulkActionModal() {
+  document.getElementById('bulkActionModal').classList.remove('active');
+}
+
+function updateBulkActionFields() {
+  const actionType = document.getElementById('bulkActionType').value;
+  document.getElementById('bulkTagField').style.display = actionType === 'add_tag' ? 'block' : 'none';
+  document.getElementById('bulkStageField').style.display = actionType === 'change_stage' ? 'block' : 'none';
+}
+
+function openFollowupSettings() {
+  document.getElementById('followupSettingsModal').classList.add('active');
+}
+
+function closeFollowupSettings() {
+  document.getElementById('followupSettingsModal').classList.remove('active');
+}
+
+function openStatModal(statType) {
+  const modal = document.getElementById('statModal');
+  const title = document.getElementById('statModalTitle');
+  const content = document.getElementById('statModalContent');
+  
+  let titleText = '';
+  let html = '';
+  
+  switch(statType) {
+    case 'total':
+      titleText = '📊 All Contacts';
+      const allContacts = contacts.filter(c => true);
+      html = generateContactsList(allContacts, 'All contacts in your CRM');
+      break;
+    case 'active':
+      titleText = '🎯 Active Pipeline';
+      const activeContacts = contacts.filter(c => c.stage === 'active');
+      html = generateContactsList(activeContacts, 'Active buyers & sellers');
+      break;
+    case 'new':
+      titleText = '⭐ New Leads';
+      const newContacts = contacts.filter(c => c.stage === 'new');
+      html = generateContactsList(newContacts, 'New leads waiting for first contact');
+      break;
+    case 'tasks':
+      titleText = '✅ Pending Tasks';
+      html = generateTasksList();
+      break;
+    case 'followup':
+      titleText = '📞 Needs Follow-up';
+      html = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading contacts needing follow-up...</p>';
+      // Will be populated via AJAX or filter
+      const followupContacts = contacts.filter(c => {
+        // This is a simplified check - actual logic is in backend
+        return true; // Will be filtered properly
+      });
+      html = generateContactsList(followupContacts, 'Contacts needing follow-up');
+      break;
+    case 'equity':
+      titleText = '🏠 Total Equity';
+      const equityContacts = contacts.filter(c => c.equity_estimate && c.equity_estimate > 0);
+      html = generateEquityList(equityContacts);
+      break;
+    case 'deals':
+      titleText = '💼 Active Deals';
+      html = generateDealsList();
+      break;
+    case 'automation':
+      titleText = '🤖 Automation';
+      const autoContacts = contacts.filter(c => 
+        c.auto_birthday || c.auto_anniversary || c.auto_seasonal || 
+        c.auto_equity || c.auto_holidays
+      );
+      html = generateContactsList(autoContacts, 'Contacts with automated emails enabled');
+      break;
+    default:
+      titleText = 'Stat Details';
+      html = '<p>No information available.</p>';
+  }
+  
+  title.textContent = titleText;
+  content.innerHTML = html;
+  modal.classList.add('active');
+}
+
+function closeStatModal() {
+  document.getElementById('statModal').classList.remove('active');
+}
+
+function generateContactsList(contactsList, description) {
+  if (contactsList.length === 0) {
+    return `<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No contacts found. ${description}</p>`;
+  }
+  
+  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+    <strong style="color: var(--charcoal-brown);">Total: ${contactsList.length}</strong>
+    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${description}</p>
+  </div>`;
+  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+  
+  contactsList.forEach(contact => {
+    html += `
+      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${contact.name || 'Unnamed'}</h4>
+          <span class="badge-${contact.stage || 'new'}" style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600;">
+            ${(contact.stage || 'new').charAt(0).toUpperCase() + (contact.stage || 'new').slice(1)}
+          </span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">
+          ${contact.email ? `<div>📧 ${contact.email}</div>` : ''}
+          ${contact.phone ? `<div>📞 ${contact.phone}</div>` : ''}
+          ${contact.property_address ? `<div>🏠 ${contact.property_address}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function generateTasksList() {
+  // Get all tasks from contacts
+  let allTasks = [];
+  contacts.forEach(contact => {
+    if (contact.pending_tasks && contact.pending_tasks.length > 0) {
+      contact.pending_tasks.forEach(task => {
+        allTasks.push({...task, contact_name: contact.name, contact_id: contact.id});
+      });
+    }
+  });
+  
+  if (allTasks.length === 0) {
+    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No pending tasks found.</p>';
+  }
+  
+  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+    <strong style="color: var(--charcoal-brown);">Total Pending Tasks: ${allTasks.length}</strong>
+  </div>`;
+  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+  
+  allTasks.forEach(task => {
+    const priorityColors = {high: '#c0392b', medium: '#f39c12', low: '#27ae60'};
+    html += `
+      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${task.title || 'Untitled Task'}</h4>
+          <span style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600; background: ${priorityColors[task.priority] || '#95a5a6'}20; color: ${priorityColors[task.priority] || '#95a5a6'};">
+            ${(task.priority || 'medium').charAt(0).toUpperCase() + (task.priority || 'medium').slice(1)}
+          </span>
+        </div>
+        <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Contact: ${task.contact_name || 'Unknown'}</p>
+        ${task.due_date ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Due: ${task.due_date}</p>` : ''}
+        ${task.description ? `<p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${task.description}</p>` : ''}
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function generateEquityList(contactsList) {
+  if (contactsList.length === 0) {
+    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No contacts with equity tracked.</p>';
+  }
+  
+  const totalEquity = contactsList.reduce((sum, c) => sum + (c.equity_estimate || 0), 0);
+  
+  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+    <strong style="color: var(--charcoal-brown);">Total Equity: $${totalEquity.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
+    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Across ${contactsList.length} contact(s)</p>
+  </div>`;
+  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+  
+  contactsList.sort((a, b) => (b.equity_estimate || 0) - (a.equity_estimate || 0));
+  
+  contactsList.forEach(contact => {
+    html += `
+      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${contact.name || 'Unnamed'}</h4>
+          <strong style="color: var(--olive-green); font-size: 1.1rem;">$${(contact.equity_estimate || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
+        </div>
+        ${contact.property_address ? `<p style="margin: 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">🏠 ${contact.property_address}</p>` : ''}
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function generateDealsList() {
+  let allDeals = [];
+  contacts.forEach(contact => {
+    if (contact.deals && contact.deals.length > 0) {
+      contact.deals.forEach(deal => {
+        allDeals.push({...deal, contact_name: contact.name, contact_id: contact.id});
+      });
+    }
+  });
+  
+  if (allDeals.length === 0) {
+    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No active deals found.</p>';
+  }
+  
+  const totalValue = allDeals.reduce((sum, d) => sum + (d.deal_value || 0), 0);
+  
+  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+    <strong style="color: var(--charcoal-brown);">Total Pipeline Value: $${totalValue.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
+    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${allDeals.length} active deal(s)</p>
+  </div>`;
+  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+  
+  allDeals.forEach(deal => {
+    html += `
+      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${deal.deal_name || 'Untitled Deal'}</h4>
+          ${deal.deal_value ? `<strong style="color: var(--olive-green);">$${(deal.deal_value || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>` : ''}
+        </div>
+        <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Contact: ${deal.contact_name || 'Unknown'}</p>
+        ${deal.property_address ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">🏠 ${deal.property_address}</p>` : ''}
+        ${deal.stage ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Stage: ${deal.stage}</p>` : ''}
+      </div>
+    `;
+  });
+  
+  html += '</div>';
+  return html;
+}
+
+function toggleAllContacts(checked) {
+  const checkboxes = document.querySelectorAll('.contact-checkbox');
+  checkboxes.forEach(cb => cb.checked = checked);
+  updateBulkActionButton();
+}
+
+function getSelectedContactIds() {
+  const checkboxes = document.querySelectorAll('.contact-checkbox:checked');
+  return Array.from(checkboxes).map(cb => parseInt(cb.value));
+}
+
+function updateBulkActionButton() {
+  const selected = getSelectedContactIds();
+  const btn = document.getElementById('bulkActionBtn');
+  if (btn) {
+    btn.disabled = selected.length === 0;
+    if (selected.length > 0) {
+      btn.textContent = `Bulk Actions (${selected.length})`;
+    } else {
+      btn.textContent = 'Bulk Actions';
+    }
+  }
+}
+
+// Close modals on outside click
+document.getElementById('taskModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeTaskModal();
+});
+document.getElementById('tasksModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeTasksModal();
+});
+document.getElementById('dealModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeDealModal();
+});
+document.getElementById('dealsModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeDealsModal();
+});
+document.getElementById('bulkActionModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeBulkActionModal();
+});
+document.getElementById('followupSettingsModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeFollowupSettings();
+});
+document.getElementById('statModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeStatModal();
+});
 </script>
 {% endblock %}

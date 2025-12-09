@@ -107,15 +107,23 @@ def get_transaction_detail(transaction_id: int) -> Optional[Dict]:
 def update_transaction_stage(transaction_id: int, new_stage: str,
                             changed_by: int, auto_changed: bool = False,
                             trigger_document_id: int = None) -> bool:
-    """Update transaction stage and log the change"""
+    """Update transaction stage and log the change, then create auto-reminder task"""
     with get_db() as conn:
         cursor = conn.cursor()
-        # Get current stage
-        cursor.execute("SELECT current_stage FROM transactions WHERE id = ?", (transaction_id,))
+        # Get current stage and transaction details
+        cursor.execute("""
+            SELECT current_stage, agent_id, client_name, client_phone 
+            FROM transactions 
+            WHERE id = ?
+        """, (transaction_id,))
         row = cursor.fetchone()
         if not row:
             return False
         old_stage = row[0]
+        agent_id = row[1]
+        client_name = row[2]
+        client_phone = row[3]
+        
         # Update stage
         cursor.execute("""
             UPDATE transactions
@@ -129,6 +137,7 @@ def update_transaction_stage(transaction_id: int, new_stage: str,
             VALUES (?, ?, ?, ?, ?, ?)
         """, (transaction_id, old_stage, new_stage, changed_by, auto_changed, trigger_document_id))
         conn.commit()
+    
     # Log timeline event (outside the with block to avoid nested DB writes)
     prefix = "🤖 Auto-moved" if auto_changed else "Stage changed"
     log_timeline_event(
@@ -136,6 +145,51 @@ def update_transaction_stage(transaction_id: int, new_stage: str,
         f"{prefix} from {old_stage.replace('_', ' ').title()} to {new_stage.replace('_', ' ').title()}",
         changed_by
     )
+    
+    # Create auto-reminder task to text client after stage change
+    try:
+        from database import add_crm_task
+        stage_display = new_stage.replace('_', ' ').title()
+        reminder_title = f"Text {client_name} - {stage_display} Update"
+        reminder_description = f"Transaction moved to {stage_display} stage. Send update text to client."
+        
+        # Find contact ID from client name/phone if possible
+        contact_id = None
+        if client_name or client_phone:
+            with get_db() as conn:
+                cursor = conn.cursor()
+                if client_phone:
+                    cursor.execute("""
+                        SELECT id FROM agent_contacts 
+                        WHERE agent_user_id = ? AND (phone = ? OR name LIKE ?)
+                        LIMIT 1
+                    """, (agent_id, client_phone, f"%{client_name}%"))
+                else:
+                    cursor.execute("""
+                        SELECT id FROM agent_contacts 
+                        WHERE agent_user_id = ? AND name LIKE ?
+                        LIMIT 1
+                    """, (agent_id, f"%{client_name}%"))
+                contact_row = cursor.fetchone()
+                if contact_row:
+                    contact_id = contact_row[0]
+        
+        # Create task if we found a contact, or create a general reminder
+        if contact_id:
+            add_crm_task(
+                contact_id=contact_id,
+                contact_type="agent_contact",
+                professional_user_id=agent_id,
+                title=reminder_title,
+                description=reminder_description,
+                due_date=None,  # Due immediately
+                priority="high",
+                reminder_date=None
+            )
+    except Exception as e:
+        print(f"Error creating auto-reminder task: {e}")
+        # Don't fail the stage update if reminder creation fails
+    
     return True
 
 # ============================================================================
