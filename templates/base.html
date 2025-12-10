@@ -34,7 +34,29 @@
         padding: 0;
       }
       
+      /* Agent Info in Header - Center Positioning */
+      .header-agent-info {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 10;
+      }
+      
       /* Mobile Header Fixes */
+      @media (max-width: 1024px) {
+        .header-agent-info {
+          display: none; /* Hide on tablets and smaller to save space */
+        }
+      }
+      
       @media (max-width: 768px) {
         .site-header {
           padding: 0.75rem 0 !important;
@@ -62,6 +84,10 @@
           font-size: 0.85rem !important;
           padding: 0.5rem 1rem !important;
         }
+        
+        .header-agent-info {
+          display: none !important; /* Always hide on mobile */
+        }
       }
     </style>
   </head>
@@ -69,11 +95,39 @@
   <body>
     <!-- Eco-Inspired Header -->
     <header class="site-header">
-      <div class="header-content">
-        <a href="{{ url_for('index') }}" class="brand-logo">
+      <div class="header-content" style="display: flex; align-items: center; justify-content: space-between; position: relative;">
+        <a href="{{ url_for('index') }}" class="brand-logo" style="flex-shrink: 0;">
           Your Life • Your Home
         </a>
-        <nav class="main-nav">
+        
+        <!-- Agent/Lender Info in Center (for homeowners only) -->
+        {% if session.get('role') == 'homeowner' and professionals and professionals|length > 0 %}
+          {% set primary_prof = professionals[0] %}
+          <div class="header-agent-info">
+            <!-- Professional Photo -->
+            {% if primary_prof.get('professional_photo') %}
+            <img src="{{ url_for('static', filename=primary_prof.professional_photo) }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); flex-shrink: 0;">
+            {% else %}
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] }}</div>
+            {% endif %}
+            
+            <!-- Professional Info -->
+            <div style="display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;">
+              <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 0.9rem; color: white; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.name or 'Professional' }}</div>
+              <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); text-transform: capitalize;">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</div>
+              {% if primary_prof.get('brokerage_name') %}
+              <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.brokerage_name }}</div>
+              {% endif %}
+            </div>
+            
+            <!-- Brokerage Logo (if available) -->
+            {% if primary_prof.get('brokerage_logo') %}
+            <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" style="max-height: 28px; max-width: 80px; object-fit: contain; flex-shrink: 0; margin-left: 0.5rem; filter: brightness(0) invert(1); opacity: 0.9;">
+            {% endif %}
+          </div>
+        {% endif %}
+        
+        <nav class="main-nav" style="flex-shrink: 0;">
           <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
             {% if session.get('user_id') %}

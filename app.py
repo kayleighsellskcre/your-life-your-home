@@ -4379,6 +4379,10 @@ def agent_settings_profile():
     # Handle POST - update profile
     if request.method == "POST":
         try:
+            print(f"\n{'='*60}")
+            print(f"AGENT PROFILE SAVE: Starting profile update for user {user['id']}")
+            print(f"{'='*60}\n")
+            
             # Handle file uploads
             professional_photo = None
             brokerage_logo = None
@@ -4387,33 +4391,62 @@ def agent_settings_profile():
             if "professional_photo" in request.files:
                 photo_file = request.files["professional_photo"]
                 if photo_file and photo_file.filename:
+                    print(f"AGENT PROFILE: Uploading professional photo: {photo_file.filename}")
                     safe_name = secure_filename(photo_file.filename)
                     unique_name = f"{uuid4().hex}_{safe_name}"
                     save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
                     save_path.parent.mkdir(parents=True, exist_ok=True)
                     photo_file.save(save_path)
                     professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                    print(f"AGENT PROFILE: Photo saved to {professional_photo}")
+                else:
+                    print(f"AGENT PROFILE: No photo file provided")
             
             # Upload brokerage logo
             if "brokerage_logo" in request.files:
                 logo_file = request.files["brokerage_logo"]
                 if logo_file and logo_file.filename:
+                    print(f"AGENT PROFILE: Uploading brokerage logo: {logo_file.filename}")
                     safe_name = secure_filename(logo_file.filename)
                     unique_name = f"{uuid4().hex}_{safe_name}"
                     save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
                     save_path.parent.mkdir(parents=True, exist_ok=True)
                     logo_file.save(save_path)
                     brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                    print(f"AGENT PROFILE: Logo saved to {brokerage_logo}")
+                else:
+                    print(f"AGENT PROFILE: No logo file provided")
             
             # Get existing profile to preserve existing photos/logos if not uploading new ones
             existing_profile = get_user_profile(user["id"])
             if existing_profile:
+                # Convert Row to dict if needed
+                if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
+                    existing_profile = dict(existing_profile)
+                elif not isinstance(existing_profile, dict):
+                    existing_profile = {}
+                
+                print(f"AGENT PROFILE: Found existing profile")
                 if not professional_photo:
                     professional_photo = existing_profile.get("professional_photo")
+                    print(f"AGENT PROFILE: Preserving existing photo: {professional_photo}")
                 if not brokerage_logo:
                     brokerage_logo = existing_profile.get("brokerage_logo")
+                    print(f"AGENT PROFILE: Preserving existing logo: {brokerage_logo}")
+            else:
+                print(f"AGENT PROFILE: No existing profile found, creating new one")
             
             # Get form data
+            print(f"AGENT PROFILE: Collecting form data...")
+            form_data = {
+                'team_name': request.form.get("team_name", "").strip() or None,
+                'brokerage_name': request.form.get("brokerage_name", "").strip() or None,
+                'website_url': request.form.get("website_url", "").strip() or None,
+                'phone': request.form.get("phone", "").strip() or None,
+                'bio': request.form.get("bio", "").strip() or None,
+            }
+            print(f"AGENT PROFILE: Form data collected: {form_data}")
+            
             profile_id = create_or_update_user_profile(
                 user_id=user["id"],
                 role="agent",
@@ -4442,12 +4475,20 @@ def agent_settings_profile():
                 company_state=request.form.get("company_state", "").strip() or None,
                 company_zip=request.form.get("company_zip", "").strip() or None,
             )
-            flash("Profile updated successfully!", "success")
+            print(f"AGENT PROFILE: Profile saved successfully with ID {profile_id}")
+            print(f"{'='*60}\n")
+            flash("Profile updated successfully! Your information and photos have been saved.", "success")
             return redirect(url_for("agent_settings_profile"))
         except Exception as e:
             import traceback
-            print(f"Error updating profile: {traceback.format_exc()}")
-            flash(f"Error updating profile: {str(e)}", "error")
+            error_trace = traceback.format_exc()
+            print(f"\n{'='*60}")
+            print(f"AGENT PROFILE ERROR: {str(e)}")
+            print(f"{'='*60}")
+            print(error_trace)
+            print(f"{'='*60}\n")
+            flash(f"Error updating profile: {str(e)}. Please check the console for details and try again.", "error")
+            # Continue to render the form so user can see the error and try again
     
     # GET - load profile
     profile = get_user_profile(user["id"])
