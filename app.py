@@ -1153,29 +1153,96 @@ def signup():
         # Debug: Print signup attempt
         print(f"DEBUG Signup: role={role}, email={email}, name={name}, agent_id={agent_id}, lender_id={lender_id}")
         
-        try:
-            user_id = create_user(name, email, password_hash, role, agent_id=agent_id, lender_id=lender_id)
-            print(f"DEBUG Signup: User created successfully with ID {user_id}")
-        except ValueError as e:
-            print(f"DEBUG Signup: ValueError - {str(e)}")
-            flash(str(e), "error")
-            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
-        except sqlite3.IntegrityError as e:
-            # Check if it's a unique constraint violation (duplicate email)
-            print(f"DEBUG Signup: IntegrityError - {str(e)}")
-            if "UNIQUE constraint failed" in str(e) or "email" in str(e).lower():
-                flash("That email is already in use. Please sign in instead.", "error")
-                return redirect(url_for("login", role=role))
-            else:
-                flash(f"An error occurred while creating your account. Please try again.", "error")
-                import traceback
-                print(f"Database error during signup: {traceback.format_exc()}")
+        # Use retry logic for database operations to handle locking
+        max_retries = 5
+        retry_count = 0
+        user_id = None
+        last_error = None
+        
+        while retry_count < max_retries:
+            try:
+                user_id = create_user(name, email, password_hash, role, agent_id=agent_id, lender_id=lender_id)
+                print(f"DEBUG Signup: User created successfully with ID {user_id}")
+                
+                # Verify the account was actually created by querying the database
+                from database import get_user_by_email
+                verify_user = get_user_by_email(email)
+                if not verify_user:
+                    raise ValueError("Account creation failed - user not found in database after creation")
+                
+                # Verify the password hash matches
+                if not verify_user.get("password_hash"):
+                    raise ValueError("Account creation failed - password hash not set")
+                
+                print(f"DEBUG Signup: Account verified - user exists with ID {verify_user['id']}")
+                break  # Success, exit retry loop
+                
+            except sqlite3.OperationalError as e:
+                last_error = e
+                error_str = str(e).lower()
+                if "locked" in error_str and retry_count < max_retries - 1:
+                    retry_count += 1
+                    import time
+                    wait_time = 0.5 * retry_count  # Exponential backoff: 0.5s, 1s, 1.5s, 2s
+                    print(f"DEBUG Signup: Database locked, retrying in {wait_time}s ({retry_count}/{max_retries})...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    # Re-raise if not a lock issue or max retries reached
+                    print(f"DEBUG Signup: OperationalError - {str(e)}")
+                    if "locked" in error_str:
+                        flash("The database is temporarily busy. Please wait a moment and try again.", "error")
+                    else:
+                        flash(f"Database error: {str(e)}. Please try again.", "error")
+                    import traceback
+                    print(f"Database operational error during signup: {traceback.format_exc()}")
+                    return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+            except ValueError as e:
+                print(f"DEBUG Signup: ValueError - {str(e)}")
+                flash(str(e), "error")
                 return redirect(url_for("signup", role=role, ref=referral_token_from_form))
-        except Exception as e:
-            print(f"DEBUG Signup: Exception - {type(e).__name__}: {str(e)}")
-            flash(f"An unexpected error occurred: {str(e)}. Please try again.", "error")
-            import traceback
-            print(f"Unexpected error during signup: {traceback.format_exc()}")
+            except sqlite3.IntegrityError as e:
+                # Check if it's a unique constraint violation (duplicate email)
+                print(f"DEBUG Signup: IntegrityError - {str(e)}")
+                if "UNIQUE constraint failed" in str(e) or "email" in str(e).lower():
+                    flash("That email is already in use. Please sign in instead.", "error")
+                    return redirect(url_for("login", role=role))
+                else:
+                    flash(f"An error occurred while creating your account. Please try again.", "error")
+                    import traceback
+                    print(f"Database error during signup: {traceback.format_exc()}")
+                    return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+            except Exception as e:
+                last_error = e
+                print(f"DEBUG Signup: Exception - {type(e).__name__}: {str(e)}")
+                # For non-lock errors, don't retry
+                if "locked" not in str(e).lower():
+                    flash(f"An error occurred: {str(e)}. Please try again.", "error")
+                    import traceback
+                    print(f"Unexpected error during signup: {traceback.format_exc()}")
+                    return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+                # If it's a lock error but not OperationalError, retry
+                if retry_count < max_retries - 1:
+                    retry_count += 1
+                    import time
+                    wait_time = 0.5 * retry_count
+                    print(f"DEBUG Signup: Retrying after error ({retry_count}/{max_retries})...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    flash(f"An error occurred: {str(e)}. Please try again.", "error")
+                    import traceback
+                    print(f"Unexpected error during signup: {traceback.format_exc()}")
+                    return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+        
+        if not user_id:
+            # If we get here, all retries failed
+            error_msg = f"Unable to create account. {str(last_error) if last_error else 'Please try again in a moment.'}"
+            if last_error and "locked" in str(last_error).lower():
+                flash("The database is temporarily busy. Please wait a moment and try again.", "error")
+            else:
+                flash(error_msg, "error")
+            print(f"DEBUG Signup: All retries failed. Last error: {last_error}")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         # Create client relationship for tracking (backward compatibility)
@@ -1250,14 +1317,56 @@ def login():
             flash("Please select your role.", "error")
             return redirect(url_for("login"))
         
-        user = get_user_by_email(email)
+        # Get user with retry logic for database locks
+        max_retries = 3
+        retry_count = 0
+        user = None
+        
+        while retry_count < max_retries:
+            try:
+                user = get_user_by_email(email)
+                break
+            except sqlite3.OperationalError as e:
+                if "locked" in str(e).lower() and retry_count < max_retries - 1:
+                    retry_count += 1
+                    import time
+                    time.sleep(0.5 * retry_count)
+                    print(f"DEBUG Login: Database locked, retrying ({retry_count}/{max_retries})...")
+                    continue
+                else:
+                    print(f"DEBUG Login: Database error - {str(e)}")
+                    flash("The database is temporarily busy. Please try again in a moment.", "error")
+                    return redirect(url_for("login", role=selected_role))
+            except Exception as e:
+                print(f"DEBUG Login: Error retrieving user - {str(e)}")
+                flash("An error occurred. Please try again.", "error")
+                return redirect(url_for("login", role=selected_role))
 
-        if not user or not check_password_hash(user["password_hash"], password):
+        if not user:
+            print(f"DEBUG Login: User not found for email: {email}")
+            flash("Email or password did not match. Please try again.", "error")
+            return redirect(url_for("login", role=selected_role))
+        
+        # Convert Row to dict if needed
+        if hasattr(user, 'keys') and not isinstance(user, dict):
+            user = dict(user)
+        
+        print(f"DEBUG Login: User found - ID: {user.get('id')}, Role: {user.get('role')}, Has password_hash: {bool(user.get('password_hash'))}")
+        
+        # Check password hash
+        if not user.get("password_hash"):
+            print(f"DEBUG Login: User {user.get('id')} has no password_hash set")
+            flash("Account error: password not set. Please contact support or reset your password.", "error")
+            return redirect(url_for("login", role=selected_role))
+        
+        if not check_password_hash(user["password_hash"], password):
+            print(f"DEBUG Login: Password mismatch for user {user.get('id')}")
             flash("Email or password did not match. Please try again.", "error")
             return redirect(url_for("login", role=selected_role))
         
         # Validate that the selected role matches the user's actual role
         if user["role"] != selected_role:
+            print(f"DEBUG Login: Role mismatch - user role: {user['role']}, selected role: {selected_role}")
             flash(f"This account is registered as a {user['role']}, not a {selected_role}. Please select the correct role.", "error")
             return redirect(url_for("login", role=user["role"]))
 

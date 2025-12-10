@@ -8,8 +8,17 @@ DB_PATH = Path(__file__).parent / "ylh.db"
 
 
 def get_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
+    """
+    Get a database connection with proper timeout and thread safety.
+    SQLite timeout allows waiting for locks to be released (default 5 seconds).
+    """
+    conn = sqlite3.connect(DB_PATH, timeout=10.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
+    # Enable WAL mode for better concurrency
+    try:
+        conn.execute("PRAGMA journal_mode=WAL")
+    except:
+        pass  # WAL might not be available in all SQLite versions
     return conn
 
 
@@ -696,34 +705,74 @@ def create_user(name: str, email: str, password_hash: str, role: str, agent_id: 
     """
     Create a new user account.
     For homeowners, at least one of agent_id or lender_id must be provided.
+    Uses proper error handling to ensure connections are always closed.
     """
-    conn = get_connection()
-    cur = conn.cursor()
-    
     # Validate homeowner requirements
     if role == 'homeowner' and not agent_id and not lender_id:
         raise ValueError("Homeowners must be linked to at least one agent or lender")
     
-    cur.execute(
-        "INSERT INTO users (name, email, password_hash, role, agent_id, lender_id) VALUES (?, ?, ?, ?, ?, ?)",
-        (name, email.lower().strip(), password_hash, role, agent_id, lender_id),
-    )
-    user_id = cur.lastrowid
-    conn.commit()
-    conn.close()
-    return user_id
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        cur.execute(
+            "INSERT INTO users (name, email, password_hash, role, agent_id, lender_id) VALUES (?, ?, ?, ?, ?, ?)",
+            (name, email.lower().strip(), password_hash, role, agent_id, lender_id),
+        )
+        user_id = cur.lastrowid
+        conn.commit()
+        
+        # Verify the user was actually created
+        if not user_id:
+            raise ValueError("Failed to create user account - no user ID returned")
+        
+        return user_id
+    except sqlite3.OperationalError as e:
+        # Re-raise operational errors (like database locked) so retry logic can handle them
+        raise
+    except Exception as e:
+        # Rollback on any other error
+        if conn:
+            try:
+                conn.rollback()
+            except:
+                pass
+        raise
+    finally:
+        # Always close the connection
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
 
 
 def get_user_by_email(email: str) -> Optional[sqlite3.Row]:
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT * FROM users WHERE email = ?",
-        (email.lower().strip(),),
-    )
-    row = cur.fetchone()
-    conn.close()
-    return row
+    """
+    Get user by email address.
+    Uses proper error handling to ensure connections are always closed.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (email.lower().strip(),),
+        )
+        row = cur.fetchone()
+        return row
+    except Exception as e:
+        # Re-raise exceptions so callers can handle retries
+        raise
+    finally:
+        # Always close the connection
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
 
 
 def get_user_by_id(user_id: int) -> Optional[sqlite3.Row]:
