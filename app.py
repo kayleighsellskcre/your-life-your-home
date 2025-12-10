@@ -1167,13 +1167,20 @@ def signup():
                     referral_token_from_form = "default"
                 else:
                     # Extract agent_id and lender_id from referral link
-                    agent_id = referral_link["agent_id"] if referral_link["agent_id"] else None
-                    lender_id = referral_link["lender_id"] if referral_link["lender_id"] else None
+                    # Convert Row to dict if needed
+                    if hasattr(referral_link, 'keys') and not isinstance(referral_link, dict):
+                        referral_link = dict(referral_link)
+                    
+                    agent_id = referral_link.get("agent_id") if referral_link.get("agent_id") else None
+                    lender_id = referral_link.get("lender_id") if referral_link.get("lender_id") else None
+                    
+                    print(f"SIGNUP: Referral link found - agent_id: {agent_id}, lender_id: {lender_id}")
                     
                     # If referral link has no agent or lender, use default agent
                     if not agent_id and not lender_id:
                         agent_id = get_or_create_default_agent()
                         referral_token_from_form = "default"
+                        print(f"SIGNUP: No agent/lender in referral link, using default agent {agent_id}")
 
         # Debug: Print signup attempt
         print(f"DEBUG Signup: role={role}, email={email}, name={name}, agent_id={agent_id}, lender_id={lender_id}")
@@ -1348,17 +1355,61 @@ def signup():
             print(f"DEBUG Signup: All retries failed. Last error: {last_error}")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
-        # Create client relationship for tracking (backward compatibility)
+        # Create client relationship AND CRM contact for tracking
         if role == "homeowner" and (agent_id or lender_id):
-            from database import create_client_relationship
+            from database import create_client_relationship, add_agent_contact, get_user_by_id
             try:
                 if agent_id:
+                    # Create client relationship
                     create_client_relationship(
                         homeowner_id=user_id,
                         professional_id=agent_id,
                         professional_role="agent",
                         referral_code=referral_token_from_form if referral_token_from_form != "default" else None
                     )
+                    print(f"SIGNUP: Created client relationship - homeowner {user_id} -> agent {agent_id}")
+                    
+                    # ALSO create CRM contact so they show up in agent's CRM
+                    try:
+                        from database import list_agent_contacts
+                        # Check if contact already exists
+                        existing_contacts = list_agent_contacts(agent_id)
+                        contact_exists = False
+                        for existing in existing_contacts:
+                            existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
+                            if existing_dict.get("email") and existing_dict.get("email").lower() == email.lower():
+                                contact_exists = True
+                                print(f"SIGNUP: CRM contact already exists for {email}")
+                                break
+                        
+                        if not contact_exists:
+                            # Create CRM contact with "new" stage
+                            contact_id = add_agent_contact(
+                                agent_user_id=agent_id,
+                                name=name,
+                                email=email,
+                                phone="",  # Will be updated later if provided
+                                stage="new",  # New signup = new lead
+                                best_contact=email if email else "",
+                                last_touch="",
+                                birthday="",
+                                home_anniversary="",
+                                address="",
+                                notes=f"Signed up via referral link on {datetime.now().strftime('%Y-%m-%d')}",
+                                tags="referral",
+                                property_address="",
+                                property_value=None,
+                                equity_estimate=None
+                            )
+                            print(f"SIGNUP: Created CRM contact {contact_id} for agent {agent_id}")
+                        else:
+                            print(f"SIGNUP: CRM contact already exists, skipping creation")
+                    except Exception as crm_error:
+                        print(f"SIGNUP WARNING: Could not create CRM contact - {str(crm_error)}")
+                        import traceback
+                        print(traceback.format_exc())
+                        # Don't fail signup if CRM contact creation fails
+                
                 if lender_id:
                     create_client_relationship(
                         homeowner_id=user_id,
@@ -1366,13 +1417,16 @@ def signup():
                         professional_role="lender",
                         referral_code=referral_token_from_form if referral_token_from_form != "default" else None
                     )
+                    print(f"SIGNUP: Created client relationship - homeowner {user_id} -> lender {lender_id}")
+                
                 if referral_token_from_form == "default":
                     flash("Welcome! You've been connected to Kayleigh Biggs at Worth Clark Realty.", "success")
                 else:
                     flash("Welcome! You've been connected to your professional team.", "success")
             except Exception as e:
                 import traceback
-                print(f"Note: Could not create client relationship (non-critical): {traceback.format_exc()}")
+                print(f"SIGNUP ERROR: Could not create client relationship - {traceback.format_exc()}")
+                # Don't fail signup, but log the error
 
         # Auto-login after signup (permanent session for convenience)
         session.permanent = True
@@ -1508,19 +1562,189 @@ def debug_check_account(email):
         else:
             user = user_row if isinstance(user_row, dict) else {}
         
+        # Check relationships
+        from database import get_homeowner_professionals
+        professionals = []
+        if user.get("role") == "homeowner":
+            try:
+                profs = get_homeowner_professionals(user.get("id"))
+                for prof in profs:
+                    prof_dict = dict(prof) if hasattr(prof, 'keys') and not isinstance(prof, dict) else prof
+                    professionals.append({
+                        "id": prof_dict.get("professional_id"),
+                        "name": prof_dict.get("name"),
+                        "role": prof_dict.get("professional_role"),
+                        "email": prof_dict.get("email")
+                    })
+            except Exception as e:
+                professionals = [{"error": str(e)}]
+        
         return jsonify({
             "found": True,
             "id": user.get("id"),
             "email": user.get("email"),
             "name": user.get("name"),
             "role": user.get("role"),
+            "agent_id": user.get("agent_id"),
+            "lender_id": user.get("lender_id"),
             "has_password_hash": bool(user.get("password_hash")),
             "password_hash_length": len(user.get("password_hash", "")),
             "password_hash_preview": user.get("password_hash", "")[:50] + "..." if user.get("password_hash") else None,
             "password_hash_starts_with": user.get("password_hash", "")[:10] if user.get("password_hash") else None,
+            "professionals": professionals
         })
     except Exception as e:
         return jsonify({"error": str(e), "email": email})
+
+
+@app.route("/debug/sync-homeowner-to-crm/<int:homeowner_id>")
+def debug_sync_homeowner_to_crm(homeowner_id):
+    """Sync an existing homeowner to their agent's CRM - REMOVE IN PRODUCTION"""
+    try:
+        from database import get_user_by_id, list_agent_contacts, add_agent_contact, get_homeowner_professionals
+        
+        homeowner = get_user_by_id(homeowner_id)
+        if not homeowner:
+            return jsonify({"error": "Homeowner not found"}), 404
+        
+        homeowner_dict = dict(homeowner) if hasattr(homeowner, 'keys') and not isinstance(homeowner, dict) else homeowner
+        if homeowner_dict.get("role") != "homeowner":
+            return jsonify({"error": "User is not a homeowner"}), 400
+        
+        # Get agent from relationships (more reliable than agent_id column)
+        professionals = get_homeowner_professionals(homeowner_id)
+        agent_id = None
+        for prof in professionals:
+            prof_dict = dict(prof) if hasattr(prof, 'keys') and not isinstance(prof, dict) else prof
+            if prof_dict.get("professional_role") == "agent":
+                agent_id = prof_dict.get("professional_id") or prof_dict.get("user_id")
+                break
+        
+        # Fallback to agent_id column if no relationship found
+        if not agent_id:
+            agent_id = homeowner_dict.get("agent_id")
+        
+        if not agent_id:
+            return jsonify({"error": "Homeowner has no linked agent"}), 400
+        
+        # Check if contact already exists
+        existing_contacts = list_agent_contacts(agent_id)
+        contact_exists = False
+        for existing in existing_contacts:
+            existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
+            if existing_dict.get("email") and existing_dict.get("email").lower() == homeowner_dict.get("email", "").lower():
+                contact_exists = True
+                break
+        
+        if contact_exists:
+            return jsonify({"message": "Contact already exists in CRM", "homeowner_id": homeowner_id, "agent_id": agent_id})
+        
+        # Create CRM contact
+        contact_id = add_agent_contact(
+            agent_user_id=agent_id,
+            name=homeowner_dict.get("name", ""),
+            email=homeowner_dict.get("email", ""),
+            phone="",
+            stage="new",
+            best_contact=homeowner_dict.get("email", "") if homeowner_dict.get("email") else "",
+            last_touch="",
+            birthday="",
+            home_anniversary="",
+            address="",
+            notes=f"Synced from homeowner account on {datetime.now().strftime('%Y-%m-%d')}",
+            tags="referral",
+            property_address="",
+            property_value=None,
+            equity_estimate=None
+        )
+        
+        return jsonify({
+            "success": True,
+            "message": f"Homeowner {homeowner_id} synced to agent {agent_id}'s CRM",
+            "contact_id": contact_id
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
+@app.route("/debug/sync-all-homeowners-to-crm")
+def debug_sync_all_homeowners_to_crm():
+    """Sync ALL existing homeowners to their agents' CRMs - REMOVE IN PRODUCTION"""
+    try:
+        from database import get_connection, list_agent_contacts, add_agent_contact, get_homeowner_professionals
+        
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, name, email, agent_id FROM users WHERE role = 'homeowner'")
+        homeowners = cur.fetchall()
+        conn.close()
+        
+        results = []
+        for homeowner_row in homeowners:
+            homeowner = dict(homeowner_row) if hasattr(homeowner_row, 'keys') and not isinstance(homeowner_row, dict) else homeowner_row
+            homeowner_id = homeowner.get("id")
+            
+            # Get agent from relationships
+            professionals = get_homeowner_professionals(homeowner_id)
+            agent_id = None
+            for prof in professionals:
+                prof_dict = dict(prof) if hasattr(prof, 'keys') and not isinstance(prof, dict) else prof
+                if prof_dict.get("professional_role") == "agent":
+                    agent_id = prof_dict.get("professional_id") or prof_dict.get("user_id")
+                    break
+            
+            if not agent_id:
+                agent_id = homeowner.get("agent_id")
+            
+            if not agent_id:
+                results.append({"homeowner_id": homeowner_id, "status": "skipped", "reason": "no agent"})
+                continue
+            
+            # Check if contact exists
+            existing_contacts = list_agent_contacts(agent_id)
+            contact_exists = False
+            for existing in existing_contacts:
+                existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
+                if existing_dict.get("email") and existing_dict.get("email").lower() == homeowner.get("email", "").lower():
+                    contact_exists = True
+                    break
+            
+            if contact_exists:
+                results.append({"homeowner_id": homeowner_id, "status": "exists", "agent_id": agent_id})
+                continue
+            
+            # Create contact
+            try:
+                contact_id = add_agent_contact(
+                    agent_user_id=agent_id,
+                    name=homeowner.get("name", ""),
+                    email=homeowner.get("email", ""),
+                    phone="",
+                    stage="new",
+                    best_contact=homeowner.get("email", "") if homeowner.get("email") else "",
+                    last_touch="",
+                    birthday="",
+                    home_anniversary="",
+                    address="",
+                    notes=f"Synced from homeowner account on {datetime.now().strftime('%Y-%m-%d')}",
+                    tags="referral",
+                    property_address="",
+                    property_value=None,
+                    equity_estimate=None
+                )
+                results.append({"homeowner_id": homeowner_id, "status": "created", "contact_id": contact_id, "agent_id": agent_id})
+            except Exception as e:
+                results.append({"homeowner_id": homeowner_id, "status": "error", "error": str(e)})
+        
+        return jsonify({
+            "success": True,
+            "total_homeowners": len(homeowners),
+            "results": results
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
 @app.route("/reset-password", methods=["GET", "POST"])
