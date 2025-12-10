@@ -34,48 +34,45 @@
         padding: 0;
       }
       
-      /* Agent Info in Header - Center Positioning - Professional Styling */
+      /* Agent Info in Header - Hide on desktop, show on mobile */
       .header-agent-info {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        background: rgba(255, 255, 255, 0.18);
-        padding: 0.6rem 1.2rem;
-        border-radius: 10px;
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-        transition: all 0.3s ease;
-        max-width: 90%;
+        display: none; /* Hide by default on desktop */
       }
       
-      .header-agent-info:hover {
-        background: rgba(255, 255, 255, 0.25);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-      
-      .header-agent-info img[style*="border-radius: 50%"] {
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
-      
-      /* Mobile Header Fixes - Show agent info on mobile */
-      @media (max-width: 1024px) {
+      /* Show agent info on mobile only - user loves this version */
+      @media (max-width: 768px) {
         .header-agent-info {
-          padding: 0.5rem 0.9rem;
+          display: flex !important;
+          position: relative !important;
+          left: auto !important;
+          transform: none !important;
+          width: 100%;
+          max-width: 100%;
+          margin: 0.5rem 0 0 0;
+          padding: 0.5rem 0.75rem;
+          order: 3;
+          justify-content: center;
+          align-items: center;
           gap: 0.6rem;
+          background: rgba(255, 255, 255, 0.18);
+          border-radius: 8px;
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
         
         .header-agent-info > div[style*="width: 40px"] {
-          width: 35px !important;
-          height: 35px !important;
+          width: 32px !important;
+          height: 32px !important;
+          font-size: 0.9rem !important;
+        }
+        
+        .header-agent-info > div[style*="flex-direction: column"] {
+          gap: 0.05rem !important;
         }
         
         .header-agent-info > div[style*="font-size: 0.9rem"] {
-          font-size: 0.8rem !important;
+          font-size: 0.75rem !important;
         }
         
         .header-agent-info > div[style*="font-size: 0.7rem"] {
@@ -84,6 +81,11 @@
         
         .header-agent-info > div[style*="font-size: 0.65rem"] {
           font-size: 0.6rem !important;
+        }
+        
+        .header-agent-info img[style*="max-height: 28px"] {
+          max-height: 22px !important;
+          max-width: 60px !important;
         }
       }
       
@@ -124,45 +126,6 @@
           padding: 0.4rem 0.7rem !important;
         }
         
-        /* Show agent info on mobile - make it compact */
-        .header-agent-info {
-          position: relative !important;
-          left: auto !important;
-          transform: none !important;
-          width: 100%;
-          max-width: 100%;
-          margin: 0.5rem 0 0 0;
-          padding: 0.5rem 0.75rem;
-          order: 3;
-          justify-content: center;
-        }
-        
-        .header-agent-info > div[style*="width: 40px"] {
-          width: 32px !important;
-          height: 32px !important;
-          font-size: 0.9rem !important;
-        }
-        
-        .header-agent-info > div[style*="flex-direction: column"] {
-          gap: 0.05rem !important;
-        }
-        
-        .header-agent-info > div[style*="font-size: 0.9rem"] {
-          font-size: 0.75rem !important;
-        }
-        
-        .header-agent-info > div[style*="font-size: 0.7rem"] {
-          font-size: 0.65rem !important;
-        }
-        
-        .header-agent-info > div[style*="font-size: 0.65rem"] {
-          font-size: 0.6rem !important;
-        }
-        
-        .header-agent-info img[style*="max-height: 28px"] {
-          max-height: 22px !important;
-          max-width: 60px !important;
-        }
       }
     </style>
   </head>
