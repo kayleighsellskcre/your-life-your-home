@@ -186,6 +186,16 @@
 
     <form method="post" class="auth-form">
       <div class="auth-form-group">
+        <label for="role">I am a</label>
+        <select id="role" name="role" required>
+          <option value="">Select your role...</option>
+          <option value="homeowner" {% if role == 'homeowner' %}selected{% endif %}>🏡 Homeowner</option>
+          <option value="agent" {% if role == 'agent' %}selected{% endif %}>🏢 Real Estate Agent</option>
+          <option value="lender" {% if role == 'lender' %}selected{% endif %}>💼 Loan Officer</option>
+        </select>
+      </div>
+      
+      <div class="auth-form-group">
         <label for="email">Email</label>
         <input id="email" name="email" type="email" required />
       </div>

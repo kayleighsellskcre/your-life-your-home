@@ -1042,7 +1042,17 @@ def index():
     - Homeowner dashboard
     - Agent dashboard
     - Lender dashboard
+    
+    Tracks default agent assignment for visitors without referral tokens.
     """
+    # Track default agent assignment for anonymous visitors
+    referral_token = request.args.get("ref")
+    if not referral_token and not session.get("user_id"):
+        from database import get_or_create_default_agent
+        default_agent_id = get_or_create_default_agent()
+        session["default_agent_id"] = default_agent_id
+        session["referral_token"] = None  # Mark as default assignment
+    
     return render_template(
         "main/index.html",
         brand_name=FRONT_BRAND_NAME,
@@ -1054,25 +1064,24 @@ def index():
 def signup():
     """
     Sign up for any role: homeowner | agent | lender
-    For homeowners: REQUIRES a referral token via ?ref=TOKEN parameter
+    For homeowners: Uses referral token if provided, otherwise assigns to default agent (Kayleigh Biggs)
     For agents/lenders: No referral token required
     """
     role = request.args.get("role", "homeowner")
     if role not in ("homeowner", "agent", "lender"):
         role = "homeowner"
     
-    # Get referral token from query parameter
-    referral_token = request.args.get("ref") or request.form.get("ref_token")
+    # Get referral token from query parameter or session
+    referral_token = request.args.get("ref") or request.form.get("ref_token") or session.get("referral_token")
     
-    # For homeowners, require a referral token
+    # For homeowners without referral token, use default agent (no error, just assign)
     if role == "homeowner" and not referral_token:
-        flash("Homeowner signup requires a referral link. Please contact your agent or lender for a signup link.", "error")
-        return render_template(
-            "auth/signup_error.html",
-            brand_name=FRONT_BRAND_NAME,
-            message="Homeowner signup requires a referral link",
-            details="Please contact your real estate agent or lender to get a personalized signup link."
-        )
+        from database import get_or_create_default_agent
+        default_agent_id = get_or_create_default_agent()
+        # Store in session for tracking
+        if not session.get("default_agent_id"):
+            session["default_agent_id"] = default_agent_id
+        session["referral_token"] = None  # Mark as default assignment
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
@@ -1095,25 +1104,32 @@ def signup():
         lender_id = None
         
         if role == "homeowner":
-            from database import get_referral_link_by_token
-            referral_link = get_referral_link_by_token(referral_token_from_form)
+            from database import get_referral_link_by_token, get_or_create_default_agent
             
-            if not referral_link:
-                flash("Invalid or expired referral link. Please contact your agent or lender for a new link.", "error")
-                return render_template(
-                    "auth/signup_error.html",
-                    brand_name=FRONT_BRAND_NAME,
-                    message="Invalid referral link",
-                    details="The referral link you used is invalid or has expired. Please contact your agent or lender for a new signup link."
-                )
-            
-            # Extract agent_id and lender_id from referral link
-            agent_id = referral_link["agent_id"] if referral_link["agent_id"] else None
-            lender_id = referral_link["lender_id"] if referral_link["lender_id"] else None
-            
-            if not agent_id and not lender_id:
-                flash("Invalid referral link configuration.", "error")
-                return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+            # If no referral token, use default agent (from session if available, otherwise create/get)
+            if not referral_token_from_form:
+                agent_id = session.get("default_agent_id") or get_or_create_default_agent()
+                if not session.get("default_agent_id"):
+                    session["default_agent_id"] = agent_id
+                referral_token_from_form = "default"  # Mark as default assignment
+            else:
+                referral_link = get_referral_link_by_token(referral_token_from_form)
+                
+                if not referral_link:
+                    # Fallback to default agent if token is invalid
+                    agent_id = session.get("default_agent_id") or get_or_create_default_agent()
+                    if not session.get("default_agent_id"):
+                        session["default_agent_id"] = agent_id
+                    referral_token_from_form = "default"
+                else:
+                    # Extract agent_id and lender_id from referral link
+                    agent_id = referral_link["agent_id"] if referral_link["agent_id"] else None
+                    lender_id = referral_link["lender_id"] if referral_link["lender_id"] else None
+                    
+                    # If referral link has no agent or lender, use default agent
+                    if not agent_id and not lender_id:
+                        agent_id = get_or_create_default_agent()
+                        referral_token_from_form = "default"
 
         try:
             user_id = create_user(name, email, password_hash, role, agent_id=agent_id, lender_id=lender_id)
@@ -1133,16 +1149,19 @@ def signup():
                         homeowner_id=user_id,
                         professional_id=agent_id,
                         professional_role="agent",
-                        referral_code=referral_token_from_form
+                        referral_code=referral_token_from_form if referral_token_from_form != "default" else None
                     )
                 if lender_id:
                     create_client_relationship(
                         homeowner_id=user_id,
                         professional_id=lender_id,
                         professional_role="lender",
-                        referral_code=referral_token_from_form
+                        referral_code=referral_token_from_form if referral_token_from_form != "default" else None
                     )
-                flash("Welcome! You've been connected to your professional team.", "success")
+                if referral_token_from_form == "default":
+                    flash("Welcome! You've been connected to Kayleigh Biggs at Worth Clark Realty.", "success")
+                else:
+                    flash("Welcome! You've been connected to your professional team.", "success")
             except Exception as e:
                 import traceback
                 print(f"Note: Could not create client relationship (non-critical): {traceback.format_exc()}")
@@ -1168,20 +1187,36 @@ def signup():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    role = request.args.get("role")
+    role = request.args.get("role") or request.form.get("role")
     if request.method == "POST":
-        email = request.form["email"].strip().lower()
-        password = request.form["password"]
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        selected_role = request.form.get("role", "").strip()
+        
+        if not email or not password:
+            flash("Please fill in email and password.", "error")
+            return redirect(url_for("login", role=selected_role))
+        
+        if not selected_role:
+            flash("Please select your role.", "error")
+            return redirect(url_for("login"))
+        
         user = get_user_by_email(email)
 
         if not user or not check_password_hash(user["password_hash"], password):
             flash("Email or password did not match. Please try again.", "error")
-            return redirect(url_for("login"))
+            return redirect(url_for("login", role=selected_role))
+        
+        # Validate that the selected role matches the user's actual role
+        if user["role"] != selected_role:
+            flash(f"This account is registered as a {user['role']}, not a {selected_role}. Please select the correct role.", "error")
+            return redirect(url_for("login", role=user["role"]))
 
         session["user_id"] = user["id"]
         session["name"] = user["name"]
         session["role"] = user["role"]
 
+        # Redirect based on role
         if user["role"] == "homeowner":
             return redirect(url_for("homeowner_overview"))
         elif user["role"] == "agent":

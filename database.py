@@ -3193,3 +3193,60 @@ def get_accessible_homeowners(user_id: int, user_role: str) -> List[int]:
     homeowner_ids = [row[0] for row in cur.fetchall()]
     conn.close()
     return homeowner_ids
+
+
+# =========================
+# DEFAULT AGENT MANAGEMENT
+# =========================
+
+def get_or_create_default_agent() -> int:
+    """
+    Get or create the default agent (Kayleigh Biggs).
+    Returns the user_id of the default agent.
+    """
+    DEFAULT_AGENT_EMAIL = "kayleighsellskcre@gmail.com"
+    DEFAULT_AGENT_NAME = "Kayleigh Biggs"
+    DEFAULT_BROKERAGE = "Worth Clark Realty"
+    DEFAULT_TEAM = "KC Hometown Team"
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Try to find existing agent by email
+    cur.execute("SELECT id FROM users WHERE email = ? AND role = 'agent'", (DEFAULT_AGENT_EMAIL,))
+    existing = cur.fetchone()
+    
+    if existing:
+        agent_id = existing[0]
+        conn.close()
+        return agent_id
+    
+    # Create default agent user
+    from werkzeug.security import generate_password_hash
+    import secrets
+    import string
+    
+    # Generate a random password (agent will need to reset it)
+    password = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(16))
+    password_hash = generate_password_hash(password)
+    
+    cur.execute(
+        "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
+        (DEFAULT_AGENT_NAME, DEFAULT_AGENT_EMAIL, password_hash, "agent")
+    )
+    agent_id = cur.lastrowid
+    
+    # Create user profile for the agent
+    try:
+        cur.execute("""
+            INSERT INTO user_profiles (user_id, role, brokerage_name, team_name)
+            VALUES (?, ?, ?, ?)
+        """, (agent_id, "agent", DEFAULT_BROKERAGE, DEFAULT_TEAM))
+    except Exception as e:
+        print(f"Note: Could not create default agent profile: {e}")
+    
+    conn.commit()
+    conn.close()
+    
+    print(f"Created default agent: {DEFAULT_AGENT_NAME} (ID: {agent_id})")
+    return agent_id
