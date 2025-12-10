@@ -565,19 +565,25 @@
               {% endif %}
               
               <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0;">
-                {# Logo or Brokerage Name #}
+                {# Logo or Brokerage Name or Agent Name #}
                 {% if prof.get('brokerage_logo') %}
                 <img src="{{ url_for('static', filename=prof.brokerage_logo) }}" alt="{{ prof.get('brokerage_name', 'Company') }}" style="height: 20px; max-width: 120px; object-fit: contain; margin-bottom: 0.25rem;">
                 {% elif prof.get('brokerage_name') %}
                 <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ prof.brokerage_name }}</div>
                 {% elif prof.get('name') %}
                 <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ prof.name }}</div>
+                {% else %}
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500;">Your Agent</div>
                 {% endif %}
                 
-                {# Phone Number #}
+                {# Phone Number or Email #}
                 {% if prof.get('phone') %}
                 <a href="tel:{{ prof.phone }}" style="font-size: 0.75rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                   📞 {{ prof.phone }}
+                </a>
+                {% elif prof.get('email') %}
+                <a href="mailto:{{ prof.email }}" style="font-size: 0.75rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  ✉️ Contact
                 </a>
                 {% endif %}
               </div>

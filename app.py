@@ -176,19 +176,20 @@ def inject_professionals():
     if user and user.get("role") == "homeowner" and user.get("id"):
         try:
             profs_raw = get_homeowner_professionals(user["id"])
+            print(f"DEBUG Context Processor: Found {len(profs_raw)} professionals for homeowner {user['id']}")
             for prof in profs_raw:
                 if hasattr(prof, 'keys'):
                     prof_dict = dict(prof)
+                    # Ensure professional_role is set correctly
+                    if not prof_dict.get('professional_role'):
+                        prof_dict['professional_role'] = prof_dict.get('professional_type') or prof_dict.get('role')
                     professionals.append(prof_dict)
-                    # Debug: print professional data
-                    print(f"DEBUG: Found professional - role: {prof_dict.get('professional_role')}, type: {prof_dict.get('professional_type')}, name: {prof_dict.get('name')}, phone: {prof_dict.get('phone')}")
+                    print(f"DEBUG Context Processor: Professional - role: {prof_dict.get('professional_role')}, name: {prof_dict.get('name')}, phone: {prof_dict.get('phone')}, has_profile: {bool(prof_dict.get('id'))}")
                 else:
                     professionals.append(prof)
         except Exception as e:
             import traceback
             print(f"Error loading professionals in context processor: {traceback.format_exc()}")
-    else:
-        print(f"DEBUG: Context processor - user: {user}, role: {user.get('role') if user else 'None'}, id: {user.get('id') if user else 'None'}")
     return dict(professionals=professionals)
 
 # ---------------- AJAX PLANNER ROUTE ----------------
@@ -1191,7 +1192,7 @@ def homeowner_overview():
                 if hasattr(prof, 'keys'):
                     prof_dict = dict(prof)
                     professionals.append(prof_dict)
-                    print(f"DEBUG: Professional - role: {prof_dict.get('professional_role')}, type: {prof_dict.get('professional_type')}, name: {prof_dict.get('name')}")
+                    print(f"DEBUG: Professional - role: {prof_dict.get('professional_role')}, type: {prof_dict.get('professional_type')}, name: {prof_dict.get('name')}, phone: {prof_dict.get('phone')}, has_profile: {bool(prof_dict.get('id'))}")
                 else:
                     professionals.append(prof)
         except Exception as e:

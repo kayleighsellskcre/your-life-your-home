@@ -2926,7 +2926,11 @@ def get_homeowner_professionals(homeowner_id: int) -> List[sqlite3.Row]:
     role_col = 'professional_role' if 'professional_role' in columns else 'professional_type'
     
     cur.execute(f"""
-        SELECT cr.*, u.name, u.email, up.*,
+        SELECT cr.*, 
+               u.name, u.email, u.id as user_id,
+               up.professional_photo, up.brokerage_logo, up.brokerage_name,
+               up.phone, up.call_button_enabled, up.schedule_button_enabled, up.schedule_url,
+               up.team_name, up.website_url, up.bio, up.specialties,
                cr.{role_col} as professional_role
         FROM client_relationships cr
         JOIN users u ON cr.professional_id = u.id
