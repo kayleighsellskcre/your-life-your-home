@@ -887,12 +887,27 @@ def delete_incomplete_account(user_id: int) -> bool:
 
 
 def get_user_by_id(user_id: int) -> Optional[sqlite3.Row]:
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-    row = cur.fetchone()
-    conn.close()
-    return row
+    """
+    Get user by ID.
+    Uses proper error handling to ensure connections are always closed.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        row = cur.fetchone()
+        return row
+    except Exception as e:
+        # Re-raise exceptions so callers can handle them
+        raise
+    finally:
+        # Always close the connection
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
 
 
 # =========================

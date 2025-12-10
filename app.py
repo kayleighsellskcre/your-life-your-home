@@ -275,11 +275,36 @@ def get_current_user_id() -> int:
 
 
 def get_current_user() -> Optional[dict]:
+    """Get current logged-in user from session."""
     user_id = session.get("user_id")
     if not user_id:
         return None
-    row = get_user_by_id(user_id)
-    return dict(row) if row else None
+    
+    try:
+        # Ensure user_id is integer
+        user_id = int(user_id)
+        row = get_user_by_id(user_id)
+        
+        if not row:
+            # User not found in database - clear invalid session
+            session.clear()
+            return None
+        
+        # Convert Row to dict
+        if hasattr(row, 'keys') and not isinstance(row, dict):
+            return dict(row)
+        
+        return row if isinstance(row, dict) else None
+    except (ValueError, TypeError) as e:
+        # Invalid user_id in session - clear it
+        print(f"ERROR get_current_user: Invalid user_id '{user_id}' - {str(e)}")
+        session.clear()
+        return None
+    except Exception as e:
+        print(f"ERROR get_current_user: Error getting user {user_id} - {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return None
 
 
 def require_homeowner_access(homeowner_id: int) -> Tuple[Optional[dict], Optional[str]]:
@@ -1170,11 +1195,16 @@ def signup():
                 if not verify_user:
                     raise ValueError("Account creation failed - user not found in database after creation")
                 
+                # Convert Row to dict if needed
+                if hasattr(verify_user, 'keys') and not isinstance(verify_user, dict):
+                    verify_user = dict(verify_user)
+                
                 # Verify the password hash matches
                 if not verify_user.get("password_hash"):
                     raise ValueError("Account creation failed - password hash not set")
                 
-                print(f"DEBUG Signup: Account verified - user exists with ID {verify_user['id']}")
+                print(f"DEBUG Signup: Account verified - user exists with ID {verify_user.get('id')}")
+                user_id = verify_user.get('id')  # Use verified user ID
                 break  # Success, exit retry loop
                 
             except sqlite3.OperationalError as e:
@@ -1237,13 +1267,20 @@ def signup():
                                 
                                 # Verify the update worked
                                 verify_user = get_user_by_email(email)
-                                if verify_user and verify_user.get("password_hash"):
-                                    user_id = existing_user["id"]
-                                    print(f"DEBUG Signup: Incomplete account completed successfully - ID {user_id}")
-                                    # Break out of retry loop and continue with signup flow
-                                    break
+                                if verify_user:
+                                    # Convert Row to dict if needed
+                                    if hasattr(verify_user, 'keys') and not isinstance(verify_user, dict):
+                                        verify_user = dict(verify_user)
+                                    
+                                    if verify_user.get("password_hash"):
+                                        user_id = existing_user["id"]
+                                        print(f"DEBUG Signup: Incomplete account completed successfully - ID {user_id}")
+                                        # Break out of retry loop and continue with signup flow
+                                        break
+                                    else:
+                                        raise ValueError("Account update failed - password hash still not set")
                                 else:
-                                    raise ValueError("Failed to complete incomplete account")
+                                    raise ValueError("Account update failed - user not found after update")
                             except Exception as update_error:
                                 print(f"DEBUG Signup: Error completing incomplete account - {str(update_error)}")
                                 flash("An error occurred while completing your account. Please try again.", "error")
@@ -1354,12 +1391,16 @@ def signup():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Simplified, robust login handler."""
     role = request.args.get("role") or request.form.get("role")
+    
     if request.method == "POST":
+        # Get form data
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         selected_role = request.form.get("role", "").strip()
         
+        # Basic validation
         if not email or not password:
             flash("Please fill in email and password.", "error")
             return redirect(url_for("login", role=selected_role))
@@ -1368,84 +1409,105 @@ def login():
             flash("Please select your role.", "error")
             return redirect(url_for("login"))
         
-        # Get user with retry logic for database locks
-        max_retries = 3
-        retry_count = 0
-        user = None
+        # Get user from database
+        try:
+            user_row = get_user_by_email(email)
+        except Exception as e:
+            print(f"ERROR Login: Database error - {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            flash("Database error. Please try again.", "error")
+            return redirect(url_for("login", role=selected_role))
         
-        while retry_count < max_retries:
-            try:
-                user = get_user_by_email(email)
-                break
-            except sqlite3.OperationalError as e:
-                if "locked" in str(e).lower() and retry_count < max_retries - 1:
-                    retry_count += 1
-                    import time
-                    time.sleep(0.5 * retry_count)
-                    print(f"DEBUG Login: Database locked, retrying ({retry_count}/{max_retries})...")
-                    continue
-                else:
-                    print(f"DEBUG Login: Database error - {str(e)}")
-                    flash("The database is temporarily busy. Please try again in a moment.", "error")
-                    return redirect(url_for("login", role=selected_role))
-            except Exception as e:
-                print(f"DEBUG Login: Error retrieving user - {str(e)}")
-                flash("An error occurred. Please try again.", "error")
+        # Check if user exists
+        if not user_row:
+            flash("Email or password did not match. Please try again.", "error")
+            return redirect(url_for("login", role=selected_role))
+        
+        # Convert Row to dict
+        if hasattr(user_row, 'keys') and not isinstance(user_row, dict):
+            user = dict(user_row)
+        else:
+            user = user_row if isinstance(user_row, dict) else {}
+        
+        # Get user details
+        user_id = user.get("id")
+        user_role = str(user.get("role") or "").strip().lower()
+        password_hash = user.get("password_hash")
+        user_name = user.get("name") or "User"
+        
+        print(f"LOGIN: User found - ID: {user_id}, Role: {user_role}, Email: {email}")
+        
+        # Check if account has password
+        if not password_hash or (isinstance(password_hash, str) and not password_hash.strip()):
+            flash("This account is incomplete. Please sign up again with the same email.", "error")
+            return redirect(url_for("signup", role=selected_role))
+        
+        # Verify password
+        try:
+            if not check_password_hash(password_hash, password):
+                flash("Email or password did not match. Please try again.", "error")
                 return redirect(url_for("login", role=selected_role))
-
-        if not user:
-            print(f"DEBUG Login: User not found for email: {email}")
-            flash("Email or password did not match. Please try again.", "error")
+        except Exception as e:
+            print(f"ERROR Login: Password check failed - {str(e)}")
+            flash("Login error. Please try again.", "error")
             return redirect(url_for("login", role=selected_role))
         
-        # Convert Row to dict if needed
-        if hasattr(user, 'keys') and not isinstance(user, dict):
-            user = dict(user)
+        # Verify role matches
+        selected_role_normalized = str(selected_role).strip().lower()
+        if user_role != selected_role_normalized:
+            role_display = user.get("role", "user").title()
+            flash(f"This account is registered as a {role_display}. Please select the correct role.", "error")
+            return redirect(url_for("login", role=user.get("role", "homeowner")))
         
-        print(f"DEBUG Login: User found - ID: {user.get('id')}, Role: {user.get('role')}, Has password_hash: {bool(user.get('password_hash'))}")
-        
-        # Check password hash
-        if not user.get("password_hash"):
-            print(f"DEBUG Login: User {user.get('id')} has no password_hash set")
-            flash("Account error: password not set. Please contact support or reset your password.", "error")
+        # Set session - CRITICAL: Use integer user_id and exact role from DB
+        try:
+            session.clear()  # Clear any old session data
+            session.permanent = request.form.get("remember") == "on"
+            session["user_id"] = int(user_id)  # Ensure it's an integer
+            session["name"] = str(user_name)
+            session["role"] = str(user.get("role"))  # Use exact role from database
+            
+            # Force session to save
+            session.modified = True
+            
+            print(f"LOGIN SUCCESS: Session set - user_id: {session.get('user_id')}, role: {session.get('role')}, name: {session.get('name')}")
+        except Exception as e:
+            print(f"ERROR Login: Failed to set session - {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            flash("Session error. Please try again.", "error")
             return redirect(url_for("login", role=selected_role))
         
-        if not check_password_hash(user["password_hash"], password):
-            print(f"DEBUG Login: Password mismatch for user {user.get('id')}")
-            flash("Email or password did not match. Please try again.", "error")
-            return redirect(url_for("login", role=selected_role))
+        # Determine redirect URL
+        if user_role == "homeowner":
+            redirect_url = url_for("homeowner_overview")
+        elif user_role == "agent":
+            redirect_url = url_for("agent_dashboard")
+        elif user_role == "lender":
+            redirect_url = url_for("lender_dashboard")
+        else:
+            redirect_url = url_for("index")
         
-        # Validate that the selected role matches the user's actual role
-        if user["role"] != selected_role:
-            print(f"DEBUG Login: Role mismatch - user role: {user['role']}, selected role: {selected_role}")
-            flash(f"This account is registered as a {user['role']}, not a {selected_role}. Please select the correct role.", "error")
-            return redirect(url_for("login", role=user["role"]))
-
-        # Handle "Keep me logged in" checkbox
-        remember = request.form.get("remember") == "on"
-        session.permanent = remember  # Make session permanent if "remember me" is checked
+        print(f"LOGIN: Redirecting to {redirect_url}")
         
-        session["user_id"] = user["id"]
-        session["name"] = user["name"]
-        session["role"] = user["role"]
-        
-        # Save email to localStorage (will be handled by JavaScript)
-        response = redirect(url_for("homeowner_overview") if user["role"] == "homeowner" 
-                           else url_for("agent_dashboard") if user["role"] == "agent"
-                           else url_for("lender_dashboard") if user["role"] == "lender"
-                           else url_for("index"))
-        
-        # Set cookie to trigger JavaScript to save email
-        response.set_cookie("save_email", email, max_age=365*24*60*60 if remember else None)
+        # Create response and set cookie
+        response = redirect(redirect_url)
+        response.set_cookie("save_email", email, max_age=365*24*60*60 if session.permanent else None)
         
         return response
-
+    
+    # GET request - show login form
     return render_template("auth/login.html", role=role)
 
 
 @app.route("/logout")
 def logout():
+    """Logout and clear session."""
+    user_id = session.get("user_id")
     session.clear()
+    session.modified = True  # Ensure session is saved
+    print(f"LOGOUT: User {user_id} logged out")
     flash("You have been signed out.", "success")
     return redirect(url_for("index"))
 
@@ -2512,8 +2574,16 @@ def homeowner_reno_material_cost():
 def agent_dashboard():
     """Agent dashboard view."""
     user = get_current_user()
-    if not user or user.get("role") != "agent":
+    
+    if not user:
+        flash("Please log in to access your dashboard.", "error")
         return redirect(url_for("login", role="agent"))
+    
+    # Check role - normalize for comparison
+    user_role = str(user.get("role") or "").strip().lower()
+    if user_role != "agent":
+        flash("This page is for agents only.", "error")
+        return redirect(url_for("login", role=user.get("role", "homeowner")))
 
     try:
         metrics = get_agent_dashboard_metrics(user["id"])
