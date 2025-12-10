@@ -46,6 +46,16 @@
     position: relative;
   }
   
+  .agent-info-widget {
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 1024px) {
+    .agent-info-widget {
+      display: none !important;
+    }
+  }
+  
   .ylh-nav-items::-webkit-scrollbar {
     display: none;
   }
@@ -540,6 +550,41 @@
             </a>
           </div>
         </div>
+        
+        {# Agent Info Widget - Upper Right Corner #}
+        {% if professionals %}
+          {% for prof in professionals %}
+            {% set is_agent = prof.get('professional_role') == 'agent' or prof.get('professional_type') == 'agent' or (prof.get('role') == 'agent' if prof.get('role') else False) %}
+            {% if is_agent %}
+            <div class="agent-info-widget" style="display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; padding: 0.5rem 1rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+              {# Agent Photo #}
+              {% if prof.get('professional_photo') %}
+              <img src="{{ url_for('static', filename=prof.professional_photo) }}" alt="{{ prof.name or 'Agent' }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;">
+              {% else %}
+              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0;">{{ (prof.name or 'A')[0] }}</div>
+              {% endif %}
+              
+              <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0;">
+                {# Logo or Brokerage Name #}
+                {% if prof.get('brokerage_logo') %}
+                <img src="{{ url_for('static', filename=prof.brokerage_logo) }}" alt="{{ prof.get('brokerage_name', 'Company') }}" style="height: 20px; max-width: 120px; object-fit: contain; margin-bottom: 0.25rem;">
+                {% elif prof.get('brokerage_name') %}
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ prof.brokerage_name }}</div>
+                {% elif prof.get('name') %}
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ prof.name }}</div>
+                {% endif %}
+                
+                {# Phone Number #}
+                {% if prof.get('phone') %}
+                <a href="tel:{{ prof.phone }}" style="font-size: 0.75rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  📞 {{ prof.phone }}
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
       </div>
     </div>
   </nav>

@@ -332,35 +332,36 @@
     <!-- Social Media & Links -->
     <div class="settings-section">
       <h2>🔗 Social Media & Links</h2>
+      <p style="color: var(--charcoal-brown); opacity: 0.7; margin-bottom: 1.5rem; font-size: 0.9rem;">All social media links are optional. Only add the platforms you actively use.</p>
       
       <div class="form-group">
-        <label>Website URL</label>
+        <label>Website URL <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
         <input type="url" name="website_url" value="{{ profile.website_url if profile else '' }}" placeholder="https://yourwebsite.com">
       </div>
       
       <div class="social-links-grid">
         <div class="form-group">
-          <label>Facebook</label>
+          <label>Facebook <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
           <input type="url" name="facebook_url" value="{{ profile.facebook_url if profile else '' }}" placeholder="https://facebook.com/yourpage">
         </div>
         
         <div class="form-group">
-          <label>Instagram</label>
+          <label>Instagram <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
           <input type="url" name="instagram_url" value="{{ profile.instagram_url if profile else '' }}" placeholder="https://instagram.com/yourhandle">
         </div>
         
         <div class="form-group">
-          <label>LinkedIn</label>
+          <label>LinkedIn <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
           <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile else '' }}" placeholder="https://linkedin.com/in/yourprofile">
         </div>
         
         <div class="form-group">
-          <label>Twitter/X</label>
+          <label>Twitter/X <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
           <input type="url" name="twitter_url" value="{{ profile.twitter_url if profile else '' }}" placeholder="https://twitter.com/yourhandle">
         </div>
         
         <div class="form-group">
-          <label>YouTube</label>
+          <label>YouTube <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
           <input type="url" name="youtube_url" value="{{ profile.youtube_url if profile else '' }}" placeholder="https://youtube.com/@yourchannel">
         </div>
       </div>
@@ -392,8 +393,8 @@
       </div>
       
       <div class="form-group">
-        <label>Application/Pre-Approval Link</label>
-        <input type="url" name="application_url" value="{{ profile.website_url if profile else '' }}" placeholder="https://yourcompany.com/apply">
+        <label>Application/Pre-Approval Link <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+        <input type="url" name="application_url" value="{{ profile.application_url if profile else '' }}" placeholder="https://yourcompany.com/apply">
         <small>Link to your loan application or pre-approval form (optional - you can also use your main website URL above)</small>
       </div>
     </div>

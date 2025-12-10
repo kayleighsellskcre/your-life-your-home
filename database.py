@@ -80,7 +80,24 @@ def init_db() -> None:
     
     # Add referral_code column if it doesn't exist
     try:
-        cur.execute("ALTER TABLE user_profiles ADD COLUMN referral_code TEXT UNIQUE")
+        # Check if column exists
+        cur.execute("PRAGMA table_info(user_profiles)")
+        columns = [row[1] for row in cur.fetchall()]
+        if 'referral_code' not in columns:
+            # Add column without UNIQUE constraint (SQLite limitation)
+            cur.execute("ALTER TABLE user_profiles ADD COLUMN referral_code TEXT")
+            # Create unique index for referral_code
+            try:
+                cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_user_profiles_referral_code ON user_profiles(referral_code) WHERE referral_code IS NOT NULL")
+            except:
+                pass  # Index might already exist
+    except Exception as e:
+        print(f"Warning: Could not add referral_code column: {e}")
+        pass
+    
+    # Add application_url column if it doesn't exist (for lenders)
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN application_url TEXT")
     except:
         pass
 
@@ -2599,6 +2616,7 @@ def create_or_update_user_profile(
     call_button_enabled: int = 1,
     schedule_button_enabled: int = 1,
     schedule_url: Optional[str] = None,
+    application_url: Optional[str] = None,
     bio: Optional[str] = None,
     specialties: Optional[str] = None,
     years_experience: Optional[int] = None,
@@ -2648,6 +2666,7 @@ def create_or_update_user_profile(
                 call_button_enabled = ?,
                 schedule_button_enabled = ?,
                 schedule_url = ?,
+                application_url = ?,
                 bio = ?,
                 specialties = ?,
                 years_experience = ?,
@@ -2666,7 +2685,7 @@ def create_or_update_user_profile(
             role, referral_code, professional_photo, brokerage_logo, team_name, brokerage_name,
             website_url, facebook_url, instagram_url, linkedin_url, twitter_url,
             youtube_url, phone, call_button_enabled, schedule_button_enabled,
-            schedule_url, bio, specialties, years_experience, languages,
+            schedule_url, application_url, bio, specialties, years_experience, languages,
             service_areas, nmls_number, license_number, company_address,
             company_city, company_state, company_zip, user_id
         ))
@@ -2682,17 +2701,17 @@ def create_or_update_user_profile(
                 user_id, role, referral_code, professional_photo, brokerage_logo, team_name,
                 brokerage_name, website_url, facebook_url, instagram_url,
                 linkedin_url, twitter_url, youtube_url, phone,
-                call_button_enabled, schedule_button_enabled, schedule_url,
+                call_button_enabled, schedule_button_enabled, schedule_url, application_url,
                 bio, specialties, years_experience, languages, service_areas,
                 nmls_number, license_number, company_address, company_city,
                 company_state, company_zip
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         cur.execute(query, (
             user_id, role, referral_code, professional_photo, brokerage_logo, team_name,
             brokerage_name, website_url, facebook_url, instagram_url,
             linkedin_url, twitter_url, youtube_url, phone,
-            call_button_enabled, schedule_button_enabled, schedule_url,
+            call_button_enabled, schedule_button_enabled, schedule_url, application_url,
             bio, specialties, years_experience, languages, service_areas,
             nmls_number, license_number, company_address, company_city,
             company_state, company_zip
@@ -2714,18 +2733,35 @@ def generate_referral_code(user_id: int, role: str) -> str:
     code_length = 6
     alphabet = string.ascii_uppercase + string.digits
     
+    # Check if referral_code column exists
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("PRAGMA table_info(user_profiles)")
+    columns = [row[1] for row in cur.fetchall()]
+    has_referral_code = 'referral_code' in columns
+    conn.close()
+    
     # Try up to 10 times to get a unique code
     for _ in range(10):
         random_part = ''.join(secrets.choice(alphabet) for _ in range(code_length))
         code = f"{prefix}-{random_part}"
         
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM user_profiles WHERE referral_code = ?", (code,))
-        if not cur.fetchone():
+        if has_referral_code:
+            conn = get_connection()
+            cur = conn.cursor()
+            try:
+                cur.execute("SELECT id FROM user_profiles WHERE referral_code = ?", (code,))
+                if not cur.fetchone():
+                    conn.close()
+                    return code
+            except Exception:
+                # Column might not exist yet, just use this code
+                conn.close()
+                return code
             conn.close()
+        else:
+            # Column doesn't exist, just return the code
             return code
-        conn.close()
     
     # Fallback: use user_id if all random codes are taken (unlikely)
     return f"{prefix}-{user_id:06d}"
@@ -2733,31 +2769,92 @@ def generate_referral_code(user_id: int, role: str) -> str:
 
 def get_or_create_referral_code(user_id: int, role: str) -> str:
     """Get existing referral code or create a new one."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT referral_code FROM user_profiles WHERE user_id = ?", (user_id,))
-    row = cur.fetchone()
-    conn.close()
-    
-    if row and row[0]:
-        return row[0]
-    
-    # Generate and save new code
-    code = generate_referral_code(user_id, role)
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("UPDATE user_profiles SET referral_code = ? WHERE user_id = ?", (code, user_id))
-    conn.commit()
-    conn.close()
-    return code
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Check if referral_code column exists
+        cur.execute("PRAGMA table_info(user_profiles)")
+        columns = [row[1] for row in cur.fetchall()]
+        has_referral_code = 'referral_code' in columns
+        
+        # If column exists, try to get existing code
+        if has_referral_code:
+            cur.execute("SELECT referral_code FROM user_profiles WHERE user_id = ?", (user_id,))
+            row = cur.fetchone()
+            if row and row[0]:
+                conn.close()
+                return row[0]
+        
+        # Check if profile exists
+        cur.execute("SELECT id FROM user_profiles WHERE user_id = ?", (user_id,))
+        profile_exists = cur.fetchone()
+        
+        # Generate new code
+        code = generate_referral_code(user_id, role)
+        
+        # Ensure column exists before proceeding
+        if not has_referral_code:
+            try:
+                cur.execute("ALTER TABLE user_profiles ADD COLUMN referral_code TEXT")
+                cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_user_profiles_referral_code ON user_profiles(referral_code) WHERE referral_code IS NOT NULL")
+                has_referral_code = True
+            except Exception as e:
+                # Column might already exist from concurrent request
+                print(f"Note: Could not add referral_code column (may already exist): {e}")
+                # Check again
+                cur.execute("PRAGMA table_info(user_profiles)")
+                columns = [row[1] for row in cur.fetchall()]
+                has_referral_code = 'referral_code' in columns
+        
+        if profile_exists:
+            # Update existing profile
+            if has_referral_code:
+                cur.execute("UPDATE user_profiles SET referral_code = ? WHERE user_id = ?", (code, user_id))
+            else:
+                raise Exception("Could not add referral_code column to existing profile")
+        else:
+            # Create new profile
+            if has_referral_code:
+                cur.execute("""
+                    INSERT INTO user_profiles (user_id, role, referral_code)
+                    VALUES (?, ?, ?)
+                """, (user_id, role, code))
+            else:
+                # Create without referral_code first, then update
+                cur.execute("""
+                    INSERT INTO user_profiles (user_id, role)
+                    VALUES (?, ?)
+                """, (user_id, role))
+                if has_referral_code:
+                    cur.execute("UPDATE user_profiles SET referral_code = ? WHERE user_id = ?", (code, user_id))
+        
+        conn.commit()
+        conn.close()
+        return code
+    except Exception as e:
+        import traceback
+        print(f"Error in get_or_create_referral_code: {traceback.format_exc()}")
+        # Return a fallback code if everything fails
+        return f"{role[:1].upper()}-{user_id:06d}"
 
 
 def get_professional_by_referral_code(referral_code: str) -> Optional[sqlite3.Row]:
     """Get professional (agent or lender) by their referral code."""
     conn = get_connection()
     cur = conn.cursor()
+    
+    # Check if referral_code column exists
+    cur.execute("PRAGMA table_info(user_profiles)")
+    columns = [row[1] for row in cur.fetchall()]
+    has_referral_code = 'referral_code' in columns
+    
+    if not has_referral_code:
+        conn.close()
+        return None
+    
     cur.execute("""
-        SELECT up.*, u.name, u.email
+        SELECT up.*, u.name, u.email, u.id as user_id
         FROM user_profiles up
         JOIN users u ON up.user_id = u.id
         WHERE up.referral_code = ?
@@ -2857,7 +2954,8 @@ def get_referral_stats(professional_id: int) -> Dict[str, Any]:
         SELECT COUNT(*) FROM client_relationships
         WHERE professional_id = ? AND status = 'active'
     """, (professional_id,))
-    total_clients = cur.fetchone()[0]
+    total_row = cur.fetchone()
+    total_clients = total_row[0] if total_row else 0
     
     # Get clients this month
     cur.execute(f"""
@@ -2865,14 +2963,22 @@ def get_referral_stats(professional_id: int) -> Dict[str, Any]:
         WHERE professional_id = ? AND status = 'active'
         AND strftime('%Y-%m', created_at) = strftime('%Y-%m', 'now')
     """, (professional_id,))
-    clients_this_month = cur.fetchone()[0]
+    month_row = cur.fetchone()
+    clients_this_month = month_row[0] if month_row else 0
     
-    # Get referral code
-    cur.execute("""
-        SELECT referral_code FROM user_profiles WHERE user_id = ?
-    """, (professional_id,))
-    ref_row = cur.fetchone()
-    referral_code = ref_row[0] if ref_row else None
+    # Get referral code - check if column exists first
+    referral_code = None
+    try:
+        cur.execute("PRAGMA table_info(user_profiles)")
+        profile_columns = [row[1] for row in cur.fetchall()]
+        if 'referral_code' in profile_columns:
+            cur.execute("""
+                SELECT referral_code FROM user_profiles WHERE user_id = ?
+            """, (professional_id,))
+            ref_row = cur.fetchone()
+            referral_code = ref_row[0] if ref_row and ref_row[0] else None
+    except Exception as e:
+        print(f"Warning: Could not get referral code: {e}")
     
     conn.close()
     

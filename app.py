@@ -166,6 +166,31 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+# Context processor to make professionals available to all homeowner templates
+@app.context_processor
+def inject_professionals():
+    """Make professionals data available to all templates."""
+    from database import get_homeowner_professionals
+    professionals = []
+    user = get_current_user()
+    if user and user.get("role") == "homeowner" and user.get("id"):
+        try:
+            profs_raw = get_homeowner_professionals(user["id"])
+            for prof in profs_raw:
+                if hasattr(prof, 'keys'):
+                    prof_dict = dict(prof)
+                    professionals.append(prof_dict)
+                    # Debug: print professional data
+                    print(f"DEBUG: Found professional - role: {prof_dict.get('professional_role')}, type: {prof_dict.get('professional_type')}, name: {prof_dict.get('name')}, phone: {prof_dict.get('phone')}")
+                else:
+                    professionals.append(prof)
+        except Exception as e:
+            import traceback
+            print(f"Error loading professionals in context processor: {traceback.format_exc()}")
+    else:
+        print(f"DEBUG: Context processor - user: {user}, role: {user.get('role') if user else 'None'}, id: {user.get('id') if user else 'None'}")
+    return dict(professionals=professionals)
+
 # ---------------- AJAX PLANNER ROUTE ----------------
 @app.route("/homeowner/reno/planner/ajax-add", methods=["POST"])
 def homeowner_reno_planner_ajax_add():
@@ -2238,7 +2263,25 @@ def agent_crm():
                         property_address, prop_val, equity_val
                     )
                     print(f"SUCCESS: Contact added with ID {contact_id}")
-                    flash("Contact added successfully!", "success")
+                    
+                    # If email provided, try to link to existing homeowner account
+                    if email:
+                        from database import get_user_by_email, create_client_relationship, get_or_create_referral_code
+                        homeowner = get_user_by_email(email)
+                        if homeowner and homeowner.get("role") == "homeowner":
+                            # Create relationship
+                            referral_code = get_or_create_referral_code(user["id"], "agent")
+                            create_client_relationship(
+                                homeowner_id=homeowner["id"],
+                                professional_id=user["id"],
+                                professional_role="agent",
+                                referral_code=referral_code
+                            )
+                            flash(f"Contact added and linked to homeowner account ({email})!", "success")
+                        else:
+                            flash("Contact added successfully!", "success")
+                    else:
+                        flash("Contact added successfully!", "success")
                     return redirect(url_for("agent_crm"))
                 except Exception as e:
                     import traceback
@@ -3077,26 +3120,42 @@ def agent_referrals():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
 
-    from database import get_referral_stats, get_or_create_referral_code
-    
-    # Ensure referral code exists
-    referral_code = get_or_create_referral_code(user["id"], "agent")
-    
-    # Get stats
-    stats = get_referral_stats(user["id"])
-    
-    # Build referral URL
-    base_url = request.url_root.rstrip('/')
-    referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
-    
-    return render_template(
-        "agent/referrals.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-        referral_code=referral_code,
-        referral_url=referral_url,
-        stats=stats,
-    )
+    try:
+        from database import get_referral_stats, get_or_create_referral_code
+        
+        # Ensure referral code exists
+        try:
+            referral_code = get_or_create_referral_code(user["id"], "agent")
+        except Exception as e:
+            print(f"Error getting referral code: {e}")
+            # Fallback code
+            referral_code = f"AGENT-{user['id']:06d}"
+        
+        # Get stats with fallback
+        try:
+            stats = get_referral_stats(user["id"])
+        except Exception as e:
+            print(f"Error getting stats: {e}")
+            stats = {'total_clients': 0, 'clients_this_month': 0, 'referral_code': referral_code}
+        
+        # Build referral URL
+        base_url = request.url_root.rstrip('/')
+        referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
+        
+        return render_template(
+            "agent/referrals.html",
+            brand_name=FRONT_BRAND_NAME,
+            user=user,
+            referral_code=referral_code,
+            referral_url=referral_url,
+            stats=stats,
+        )
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Error in agent_referrals: {error_trace}")
+        flash(f"Error loading referral page: {str(e)}", "error")
+        return redirect(url_for("agent_dashboard"))
 
 
 @app.route("/agent/settings/profile", methods=["GET", "POST"])
@@ -3225,12 +3284,30 @@ def lender_crm():
             try:
                 loan_amt = float(loan_amount) if loan_amount else None
                 rate = float(loan_rate) if loan_rate else None
-                add_lender_borrower(
+                borrower_id = add_lender_borrower(
                     user["id"], name, status, loan_type, target_payment, "",
                     email, phone, birthday, home_anniversary, address, notes, tags,
                     property_address, loan_amt, rate
                 )
-                flash("Borrower added successfully!", "success")
+                
+                # If email provided, try to link to existing homeowner account
+                if email:
+                    from database import get_user_by_email, create_client_relationship, get_or_create_referral_code
+                    homeowner = get_user_by_email(email)
+                    if homeowner and homeowner.get("role") == "homeowner":
+                        # Create relationship
+                        referral_code = get_or_create_referral_code(user["id"], "lender")
+                        create_client_relationship(
+                            homeowner_id=homeowner["id"],
+                            professional_id=user["id"],
+                            professional_role="lender",
+                            referral_code=referral_code
+                        )
+                        flash(f"Borrower added and linked to homeowner account ({email})!", "success")
+                    else:
+                        flash("Borrower added successfully!", "success")
+                else:
+                    flash("Borrower added successfully!", "success")
             except Exception as e:
                 flash(f"Error adding borrower: {e}", "error")
         
@@ -3799,26 +3876,42 @@ def lender_referrals():
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
 
-    from database import get_referral_stats, get_or_create_referral_code
-    
-    # Ensure referral code exists
-    referral_code = get_or_create_referral_code(user["id"], "lender")
-    
-    # Get stats
-    stats = get_referral_stats(user["id"])
-    
-    # Build referral URL
-    base_url = request.url_root.rstrip('/')
-    referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
-    
-    return render_template(
-        "lender/referrals.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-        referral_code=referral_code,
-        referral_url=referral_url,
-        stats=stats,
-    )
+    try:
+        from database import get_referral_stats, get_or_create_referral_code
+        
+        # Ensure referral code exists
+        try:
+            referral_code = get_or_create_referral_code(user["id"], "lender")
+        except Exception as e:
+            print(f"Error getting referral code: {e}")
+            # Fallback code
+            referral_code = f"LENDER-{user['id']:06d}"
+        
+        # Get stats with fallback
+        try:
+            stats = get_referral_stats(user["id"])
+        except Exception as e:
+            print(f"Error getting stats: {e}")
+            stats = {'total_clients': 0, 'clients_this_month': 0, 'referral_code': referral_code}
+        
+        # Build referral URL
+        base_url = request.url_root.rstrip('/')
+        referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
+        
+        return render_template(
+            "lender/referrals.html",
+            brand_name=FRONT_BRAND_NAME,
+            user=user,
+            referral_code=referral_code,
+            referral_url=referral_url,
+            stats=stats,
+        )
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"Error in lender_referrals: {error_trace}")
+        flash(f"Error loading referral page: {str(e)}", "error")
+        return redirect(url_for("lender_dashboard"))
 
 
 @app.route("/lender/settings/profile", methods=["GET", "POST"])
@@ -3885,6 +3978,7 @@ def lender_settings_profile():
                 call_button_enabled=1 if request.form.get("call_button_enabled") == "on" else 0,
                 schedule_button_enabled=1 if request.form.get("schedule_button_enabled") == "on" else 0,
                 schedule_url=request.form.get("schedule_url", "").strip() or None,
+                application_url=request.form.get("application_url", "").strip() or None,
                 bio=request.form.get("bio", "").strip() or None,
                 specialties=request.form.get("specialties", "").strip() or None,
                 years_experience=int(request.form.get("years_experience")) if request.form.get("years_experience") else None,
