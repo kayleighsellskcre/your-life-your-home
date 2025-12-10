@@ -1205,8 +1205,59 @@ def signup():
                 # Check if it's a unique constraint violation (duplicate email)
                 print(f"DEBUG Signup: IntegrityError - {str(e)}")
                 if "UNIQUE constraint failed" in str(e) or "email" in str(e).lower():
-                    flash("That email is already in use. Please sign in instead.", "error")
-                    return redirect(url_for("login", role=role))
+                    # Check if the existing account is incomplete (no password_hash)
+                    from database import get_user_by_email, update_user_password
+                    existing_user = get_user_by_email(email)
+                    
+                    if existing_user:
+                        # Convert Row to dict if needed
+                        if hasattr(existing_user, 'keys') and not isinstance(existing_user, dict):
+                            existing_user = dict(existing_user)
+                        
+                        # Check if account is incomplete (missing password_hash)
+                        if not existing_user.get("password_hash"):
+                            print(f"DEBUG Signup: Found incomplete account for {email}, completing it...")
+                            try:
+                                # Check if role matches - if not, we can't complete it
+                                existing_role = existing_user.get("role")
+                                if existing_role and existing_role != role:
+                                    print(f"DEBUG Signup: Role mismatch - existing: {existing_role}, requested: {role}")
+                                    flash(f"This email is registered as a {existing_role}, not a {role}. Please sign in instead.", "error")
+                                    return redirect(url_for("login", role=existing_role))
+                                
+                                # Update the incomplete account with password, name, and role/agent_id/lender_id if needed
+                                update_user_password(
+                                    existing_user["id"],
+                                    password_hash,
+                                    name if name else existing_user.get("name"),
+                                    role if role else existing_role,
+                                    agent_id if role == "homeowner" else None,
+                                    lender_id if role == "homeowner" else None
+                                )
+                                
+                                # Verify the update worked
+                                verify_user = get_user_by_email(email)
+                                if verify_user and verify_user.get("password_hash"):
+                                    user_id = existing_user["id"]
+                                    print(f"DEBUG Signup: Incomplete account completed successfully - ID {user_id}")
+                                    # Break out of retry loop and continue with signup flow
+                                    break
+                                else:
+                                    raise ValueError("Failed to complete incomplete account")
+                            except Exception as update_error:
+                                print(f"DEBUG Signup: Error completing incomplete account - {str(update_error)}")
+                                flash("An error occurred while completing your account. Please try again.", "error")
+                                return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+                        else:
+                            # Account exists and has a password - user should sign in
+                            print(f"DEBUG Signup: Account exists with password for {email}")
+                            flash("That email is already in use. Please sign in instead.", "error")
+                            return redirect(url_for("login", role=role))
+                    else:
+                        # Email constraint failed but user not found - this shouldn't happen
+                        print(f"DEBUG Signup: IntegrityError but user not found - {str(e)}")
+                        flash("That email is already in use. Please sign in instead.", "error")
+                        return redirect(url_for("login", role=role))
                 else:
                     flash(f"An error occurred while creating your account. Please try again.", "error")
                     import traceback
@@ -4692,5 +4743,6 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=5000,
         debug=True,  # Enable debug mode for development
+        use_reloader=False,  # Disable reloader on Windows to avoid import issues
     )
 

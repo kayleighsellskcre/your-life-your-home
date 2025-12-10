@@ -775,6 +775,117 @@ def get_user_by_email(email: str) -> Optional[sqlite3.Row]:
                 pass
 
 
+def update_user_password(user_id: int, password_hash: str, name: str = None, role: str = None, agent_id: Optional[int] = None, lender_id: Optional[int] = None) -> bool:
+    """
+    Update a user's password hash and optionally name, role, agent_id, lender_id.
+    Used to complete incomplete accounts that were created without passwords.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Build update query dynamically based on what's provided
+        updates = ["password_hash = ?"]
+        values = [password_hash]
+        
+        if name:
+            updates.append("name = ?")
+            values.append(name)
+        
+        if role:
+            updates.append("role = ?")
+            values.append(role)
+        
+        if agent_id is not None:
+            updates.append("agent_id = ?")
+            values.append(agent_id)
+        
+        if lender_id is not None:
+            updates.append("lender_id = ?")
+            values.append(lender_id)
+        
+        values.append(user_id)
+        
+        query = f"UPDATE users SET {', '.join(updates)} WHERE id = ?"
+        cur.execute(query, tuple(values))
+        
+        conn.commit()
+        return True
+    except Exception as e:
+        if conn:
+            try:
+                conn.rollback()
+            except:
+                pass
+        raise
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
+
+
+def find_incomplete_accounts() -> List[sqlite3.Row]:
+    """
+    Find all accounts that have an email but no password_hash.
+    These are incomplete accounts that need to be cleaned up or completed.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT * FROM users WHERE email IS NOT NULL AND (password_hash IS NULL OR password_hash = '')"
+        )
+        rows = cur.fetchall()
+        return rows
+    except Exception as e:
+        raise
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
+
+
+def delete_incomplete_account(user_id: int) -> bool:
+    """
+    Delete an incomplete account (one without a password_hash).
+    Use with caution - only for cleaning up truly incomplete accounts.
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Verify it's actually incomplete before deleting
+        cur.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,))
+        user = cur.fetchone()
+        
+        if user and (not user[0] or user[0] == ''):
+            cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
+            conn.commit()
+            return True
+        else:
+            return False  # Account has password, don't delete
+    except Exception as e:
+        if conn:
+            try:
+                conn.rollback()
+            except:
+                pass
+        raise
+    finally:
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
+
+
 def get_user_by_id(user_id: int) -> Optional[sqlite3.Row]:
     conn = get_connection()
     cur = conn.cursor()
