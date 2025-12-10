@@ -1069,14 +1069,48 @@ def signup():
                 get_professional_by_referral_code,
                 create_client_relationship
             )
-            professional = get_professional_by_referral_code(referral_code_from_form)
-            if professional:
-                create_client_relationship(
-                    homeowner_id=user_id,
-                    professional_id=professional["user_id"],
-                    professional_role=professional["role"],
-                    referral_code=referral_code_from_form
-                )
+            try:
+                print(f"DEBUG: Looking up referral code: {referral_code_from_form}")
+                professional = get_professional_by_referral_code(referral_code_from_form)
+                if professional:
+                    # Convert Row to dict if needed
+                    if hasattr(professional, 'keys'):
+                        prof_dict = dict(professional)
+                    else:
+                        prof_dict = professional if professional else {}
+                    
+                    print(f"DEBUG: Professional found: {prof_dict}")
+                    
+                    # Try different ways to get the user_id
+                    professional_id = prof_dict.get("user_id")
+                    if not professional_id:
+                        professional_id = prof_dict.get("id")
+                    
+                    # Get role from user_profiles table
+                    professional_role = prof_dict.get("role")
+                    
+                    print(f"DEBUG: Extracted - professional_id={professional_id}, professional_role={professional_role}")
+                    
+                    if professional_id and professional_role:
+                        relationship_id = create_client_relationship(
+                            homeowner_id=user_id,
+                            professional_id=professional_id,
+                            professional_role=professional_role,
+                            referral_code=referral_code_from_form
+                        )
+                        print(f"SUCCESS: Created relationship ID {relationship_id}: homeowner_id={user_id}, professional_id={professional_id}, role={professional_role}")
+                        flash(f"Welcome! You've been connected to your agent.", "success")
+                    else:
+                        print(f"ERROR: Missing data - professional_id={professional_id}, professional_role={professional_role}")
+                        print(f"Full professional dict: {prof_dict}")
+                else:
+                    print(f"ERROR: No professional found for referral code: {referral_code_from_form}")
+                    flash(f"Note: Referral code not found. You can still use the platform.", "info")
+            except Exception as e:
+                import traceback
+                error_trace = traceback.format_exc()
+                print(f"ERROR creating client relationship: {error_trace}")
+                flash(f"Note: Could not link to agent. You can still use the platform.", "info")
 
         session["user_id"] = user_id
         session["role"] = role
@@ -1150,12 +1184,19 @@ def homeowner_overview():
     # Get associated professionals
     professionals = []
     if user and user.get("id"):
-        profs_raw = get_homeowner_professionals(user["id"])
-        for prof in profs_raw:
-            if hasattr(prof, 'keys'):
-                professionals.append(dict(prof))
-            else:
-                professionals.append(prof)
+        try:
+            profs_raw = get_homeowner_professionals(user["id"])
+            print(f"DEBUG: Found {len(profs_raw)} professionals for homeowner {user['id']}")
+            for prof in profs_raw:
+                if hasattr(prof, 'keys'):
+                    prof_dict = dict(prof)
+                    professionals.append(prof_dict)
+                    print(f"DEBUG: Professional - role: {prof_dict.get('professional_role')}, type: {prof_dict.get('professional_type')}, name: {prof_dict.get('name')}")
+                else:
+                    professionals.append(prof)
+        except Exception as e:
+            import traceback
+            print(f"Error loading professionals: {traceback.format_exc()}")
 
     return render_template(
         "homeowner/overview.html",
