@@ -37,6 +37,16 @@ def init_db() -> None:
         cur.execute("ALTER TABLE users ADD COLUMN follow_up_days INTEGER DEFAULT 30")
     except:
         pass
+    
+    # Add agent_id and lender_id columns for homeowner linking
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN agent_id INTEGER REFERENCES users(id)")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN lender_id INTEGER REFERENCES users(id)")
+    except:
+        pass
 
     # ------------- USER PROFILES -------------
     cur.execute(
@@ -132,6 +142,28 @@ def init_db() -> None:
         cur.execute("ALTER TABLE client_relationships ADD COLUMN status TEXT DEFAULT 'active'")
     except:
         pass  # Column already exists
+
+    # ------------- REFERRAL LINKS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS referral_links (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            token TEXT UNIQUE NOT NULL,
+            agent_id INTEGER REFERENCES users(id),
+            lender_id INTEGER REFERENCES users(id),
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            CHECK(agent_id IS NOT NULL OR lender_id IS NOT NULL)
+        )
+        """
+    )
+    
+    # Create index on token for fast lookups
+    try:
+        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_referral_links_token ON referral_links(token)")
+    except:
+        pass
 
     # ------------- PROPERTIES -------------
     cur.execute(
@@ -616,12 +648,21 @@ def init_db() -> None:
 # =========================
 
 
-def create_user(name: str, email: str, password_hash: str, role: str) -> int:
+def create_user(name: str, email: str, password_hash: str, role: str, agent_id: Optional[int] = None, lender_id: Optional[int] = None) -> int:
+    """
+    Create a new user account.
+    For homeowners, at least one of agent_id or lender_id must be provided.
+    """
     conn = get_connection()
     cur = conn.cursor()
+    
+    # Validate homeowner requirements
+    if role == 'homeowner' and not agent_id and not lender_id:
+        raise ValueError("Homeowners must be linked to at least one agent or lender")
+    
     cur.execute(
-        "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
-        (name, email.lower().strip(), password_hash, role),
+        "INSERT INTO users (name, email, password_hash, role, agent_id, lender_id) VALUES (?, ?, ?, ?, ?, ?)",
+        (name, email.lower().strip(), password_hash, role, agent_id, lender_id),
     )
     user_id = cur.lastrowid
     conn.commit()
@@ -2991,3 +3032,164 @@ def get_referral_stats(professional_id: int) -> Dict[str, Any]:
         'clients_this_month': clients_this_month,
         'referral_code': referral_code
     }
+
+
+# =========================
+# REFERRAL LINKS MANAGEMENT
+# =========================
+
+def create_referral_link(agent_id: Optional[int] = None, lender_id: Optional[int] = None) -> str:
+    """
+    Create a new referral link for an agent, lender, or both.
+    Returns the token that should be used in the URL.
+    """
+    import secrets
+    import string
+    
+    if not agent_id and not lender_id:
+        raise ValueError("At least one of agent_id or lender_id must be provided")
+    
+    # Generate a secure random token
+    alphabet = string.ascii_letters + string.digits
+    token = ''.join(secrets.choice(alphabet) for _ in range(16))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Ensure token is unique
+    while True:
+        cur.execute("SELECT id FROM referral_links WHERE token = ?", (token,))
+        if not cur.fetchone():
+            break
+        token = ''.join(secrets.choice(alphabet) for _ in range(16))
+    
+    cur.execute(
+        """INSERT INTO referral_links (token, agent_id, lender_id, is_active)
+           VALUES (?, ?, ?, 1)""",
+        (token, agent_id, lender_id)
+    )
+    conn.commit()
+    conn.close()
+    return token
+
+
+def get_referral_link_by_token(token: str) -> Optional[sqlite3.Row]:
+    """Get a referral link by its token. Returns None if not found or inactive."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT * FROM referral_links 
+           WHERE token = ? AND is_active = 1""",
+        (token,)
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def get_referral_links_for_agent(agent_id: int) -> List[sqlite3.Row]:
+    """Get all active referral links for an agent."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT * FROM referral_links 
+           WHERE agent_id = ? AND is_active = 1
+           ORDER BY created_at DESC""",
+        (agent_id,)
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_referral_links_for_lender(lender_id: int) -> List[sqlite3.Row]:
+    """Get all active referral links for a lender."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT * FROM referral_links 
+           WHERE lender_id = ? AND is_active = 1
+           ORDER BY created_at DESC""",
+        (lender_id,)
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def deactivate_referral_link(token: str) -> bool:
+    """Deactivate a referral link. Returns True if successful."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """UPDATE referral_links SET is_active = 0, updated_at = CURRENT_TIMESTAMP
+           WHERE token = ?""",
+        (token,)
+    )
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+
+# =========================
+# ACCESS CONTROL
+# =========================
+
+def can_access_homeowner(current_user_id: int, current_user_role: str, homeowner_id: int) -> bool:
+    """
+    Check if a user can access a homeowner's data.
+    - Homeowners can only access their own data
+    - Agents can only access homeowners where homeowner.agent_id = agent.id
+    - Lenders can only access homeowners where homeowner.lender_id = lender.id
+    """
+    if current_user_role == 'homeowner':
+        return current_user_id == homeowner_id
+    
+    if current_user_role == 'agent':
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id FROM users WHERE id = ? AND agent_id = ?",
+            (homeowner_id, current_user_id)
+        )
+        can_access = cur.fetchone() is not None
+        conn.close()
+        return can_access
+    
+    if current_user_role == 'lender':
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id FROM users WHERE id = ? AND lender_id = ?",
+            (homeowner_id, current_user_id)
+        )
+        can_access = cur.fetchone() is not None
+        conn.close()
+        return can_access
+    
+    return False
+
+
+def get_accessible_homeowners(user_id: int, user_role: str) -> List[int]:
+    """
+    Get list of homeowner IDs that a user can access.
+    Returns empty list for homeowners (they only access themselves).
+    """
+    if user_role == 'homeowner':
+        return [user_id]
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    if user_role == 'agent':
+        cur.execute("SELECT id FROM users WHERE role = 'homeowner' AND agent_id = ?", (user_id,))
+    elif user_role == 'lender':
+        cur.execute("SELECT id FROM users WHERE role = 'homeowner' AND lender_id = ?", (user_id,))
+    else:
+        conn.close()
+        return []
+    
+    homeowner_ids = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return homeowner_ids

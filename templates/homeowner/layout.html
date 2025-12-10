@@ -551,45 +551,91 @@
           </div>
         </div>
         
-        {# Agent Info Widget - Upper Right Corner #}
+        {# Professional Branding Widget - Upper Right Corner #}
         {% if professionals %}
+          {% set agent_prof = None %}
+          {% set lender_prof = None %}
           {% for prof in professionals %}
             {% set is_agent = prof.get('professional_role') == 'agent' or prof.get('professional_type') == 'agent' or (prof.get('role') == 'agent' if prof.get('role') else False) %}
-            {% if is_agent %}
-            <div class="agent-info-widget" style="display: flex; align-items: center; gap: 0.75rem; margin-left: 1.5rem; padding: 0.5rem 1rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            {% set is_lender = prof.get('professional_role') == 'lender' or prof.get('professional_type') == 'lender' or (prof.get('role') == 'lender' if prof.get('role') else False) %}
+            {% if is_agent and not agent_prof %}
+              {% set agent_prof = prof %}
+            {% elif is_lender and not lender_prof %}
+              {% set lender_prof = prof %}
+            {% endif %}
+          {% endfor %}
+          
+          <div class="agent-info-widget" style="display: flex; align-items: center; gap: 1rem; margin-left: 1.5rem; flex-wrap: wrap;">
+            {# Agent Branding #}
+            {% if agent_prof %}
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
               {# Agent Photo #}
-              {% if prof.get('professional_photo') %}
-              <img src="{{ url_for('static', filename=prof.professional_photo) }}" alt="{{ prof.name or 'Agent' }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;">
+              {% if agent_prof.get('professional_photo') %}
+              <img src="{{ url_for('static', filename=agent_prof.professional_photo) }}" alt="{{ agent_prof.name or 'Agent' }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;">
               {% else %}
-              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0;">{{ (prof.name or 'A')[0] }}</div>
+              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0;">{{ (agent_prof.name or 'A')[0] }}</div>
               {% endif %}
               
               <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0;">
+                <div style="font-size: 0.65rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Agent</div>
                 {# Logo or Brokerage Name or Agent Name #}
-                {% if prof.get('brokerage_logo') %}
-                <img src="{{ url_for('static', filename=prof.brokerage_logo) }}" alt="{{ prof.get('brokerage_name', 'Company') }}" style="height: 20px; max-width: 120px; object-fit: contain; margin-bottom: 0.25rem;">
-                {% elif prof.get('brokerage_name') %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ prof.brokerage_name }}</div>
-                {% elif prof.get('name') %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ prof.name }}</div>
-                {% else %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.8; font-weight: 500;">Your Agent</div>
+                {% if agent_prof.get('brokerage_logo') %}
+                <img src="{{ url_for('static', filename=agent_prof.brokerage_logo) }}" alt="{{ agent_prof.get('brokerage_name', 'Company') }}" style="height: 18px; max-width: 120px; object-fit: contain;">
+                {% elif agent_prof.get('brokerage_name') %}
+                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.brokerage_name }}</div>
+                {% elif agent_prof.get('name') %}
+                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.name }}</div>
                 {% endif %}
                 
-                {# Phone Number or Email #}
-                {% if prof.get('phone') %}
-                <a href="tel:{{ prof.phone }}" style="font-size: 0.75rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  📞 {{ prof.phone }}
+                {# Phone Number #}
+                {% if agent_prof.get('phone') %}
+                <a href="tel:{{ agent_prof.phone }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  📞 {{ agent_prof.phone }}
                 </a>
-                {% elif prof.get('email') %}
-                <a href="mailto:{{ prof.email }}" style="font-size: 0.75rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                {% elif agent_prof.get('email') %}
+                <a href="mailto:{{ agent_prof.email }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                   ✉️ Contact
                 </a>
                 {% endif %}
               </div>
             </div>
             {% endif %}
-          {% endfor %}
+            
+            {# Lender Branding #}
+            {% if lender_prof %}
+            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+              {# Lender Photo #}
+              {% if lender_prof.get('professional_photo') %}
+              <img src="{{ url_for('static', filename=lender_prof.professional_photo) }}" alt="{{ lender_prof.name or 'Lender' }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;">
+              {% else %}
+              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0;">{{ (lender_prof.name or 'L')[0] }}</div>
+              {% endif %}
+              
+              <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0;">
+                <div style="font-size: 0.65rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Lender</div>
+                {# Logo or Company Name or Lender Name #}
+                {% if lender_prof.get('brokerage_logo') %}
+                <img src="{{ url_for('static', filename=lender_prof.brokerage_logo) }}" alt="{{ lender_prof.get('brokerage_name', 'Company') }}" style="height: 18px; max-width: 120px; object-fit: contain;">
+                {% elif lender_prof.get('brokerage_name') %}
+                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.brokerage_name }}</div>
+                {% elif lender_prof.get('name') %}
+                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.name }}</div>
+                {% endif %}
+                
+                {# Phone Number #}
+                {% if lender_prof.get('phone') %}
+                <a href="tel:{{ lender_prof.phone }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  📞 {{ lender_prof.phone }}
+                </a>
+                {% elif lender_prof.get('email') %}
+                <a href="mailto:{{ lender_prof.email }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  ✉️ Contact
+                </a>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
         {% endif %}
       </div>
     </div>

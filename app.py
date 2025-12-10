@@ -3,7 +3,7 @@ print('>>> THIS IS THE REAL app.py BEING RUN <<<')
 import os
 import boto3
 from functools import wraps
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from pathlib import Path
 from uuid import uuid4
 from datetime import datetime
@@ -279,6 +279,36 @@ def get_current_user() -> Optional[dict]:
         return None
     row = get_user_by_id(user_id)
     return dict(row) if row else None
+
+
+def require_homeowner_access(homeowner_id: int) -> Tuple[Optional[dict], Optional[str]]:
+    """
+    Check if the current user can access a homeowner's data.
+    Returns (user, error_message).
+    If error_message is None, access is granted.
+    """
+    from database import can_access_homeowner
+    
+    user = get_current_user()
+    if not user:
+        return None, "Please log in to access this page."
+    
+    user_role = user.get("role")
+    user_id = user.get("id")
+    
+    # Homeowners can only access their own data
+    if user_role == "homeowner":
+        if user_id != homeowner_id:
+            return None, "You can only access your own dashboard."
+        return user, None
+    
+    # Agents and lenders can access their linked homeowners
+    if user_role in ("agent", "lender"):
+        if can_access_homeowner(user_id, user_role, homeowner_id):
+            return user, None
+        return None, "You don't have access to this homeowner's data."
+    
+    return None, "Invalid user role."
 
 
 # ---------------- AGENT TRANSACTION ROUTES ----------------
@@ -985,19 +1015,11 @@ def get_lender_dashboard_metrics(user_id):
 @app.route("/r/<referral_code>")
 def referral_landing(referral_code):
     """
-    Public landing page for agent/lender referral links.
-    Shows professional info and home equity signup form.
+    Public landing page for agent/lender referral links (legacy support).
+    Redirects to new signup flow with ref token.
     """
-    from database import get_professional_by_referral_code
-    
-    professional = get_professional_by_referral_code(referral_code)
-    
-    if not professional:
-        flash("Invalid referral link.", "error")
-        return redirect(url_for("index"))
-    
-    # Store referral code in session for signup
-    session["referral_code"] = referral_code
+    # For backward compatibility, redirect old referral codes to new signup flow
+    return redirect(url_for("signup", role="homeowner", ref=referral_code))
     
     # Convert to dict if needed
     if hasattr(professional, 'keys'):
@@ -1032,91 +1054,102 @@ def index():
 def signup():
     """
     Sign up for any role: homeowner | agent | lender
-    (role can be preselected via ?role=agent)
-    Tracks referral codes from ?ref=CODE parameter
+    For homeowners: REQUIRES a referral token via ?ref=TOKEN parameter
+    For agents/lenders: No referral token required
     """
     role = request.args.get("role", "homeowner")
     if role not in ("homeowner", "agent", "lender"):
         role = "homeowner"
     
-    # Get referral code from query parameter or session
-    referral_code = request.args.get("ref") or session.get("referral_code")
+    # Get referral token from query parameter
+    referral_token = request.args.get("ref") or request.form.get("ref_token")
+    
+    # For homeowners, require a referral token
+    if role == "homeowner" and not referral_token:
+        flash("Homeowner signup requires a referral link. Please contact your agent or lender for a signup link.", "error")
+        return render_template(
+            "auth/signup_error.html",
+            brand_name=FRONT_BRAND_NAME,
+            message="Homeowner signup requires a referral link",
+            details="Please contact your real estate agent or lender to get a personalized signup link."
+        )
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         role_from_form = request.form.get("role", role)
-        referral_code_from_form = request.form.get("referral_code") or referral_code
+        referral_token_from_form = request.form.get("ref_token") or referral_token
 
         if role_from_form in ("homeowner", "agent", "lender"):
             role = role_from_form
 
         if not email or not password:
             flash("Please fill in email and password.", "error")
-            return redirect(url_for("signup", role=role, ref=referral_code_from_form))
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         password_hash = generate_password_hash(password)
+        
+        # For homeowners, validate referral token and get agent_id/lender_id
+        agent_id = None
+        lender_id = None
+        
+        if role == "homeowner":
+            from database import get_referral_link_by_token
+            referral_link = get_referral_link_by_token(referral_token_from_form)
+            
+            if not referral_link:
+                flash("Invalid or expired referral link. Please contact your agent or lender for a new link.", "error")
+                return render_template(
+                    "auth/signup_error.html",
+                    brand_name=FRONT_BRAND_NAME,
+                    message="Invalid referral link",
+                    details="The referral link you used is invalid or has expired. Please contact your agent or lender for a new signup link."
+                )
+            
+            # Extract agent_id and lender_id from referral link
+            agent_id = referral_link["agent_id"] if referral_link["agent_id"] else None
+            lender_id = referral_link["lender_id"] if referral_link["lender_id"] else None
+            
+            if not agent_id and not lender_id:
+                flash("Invalid referral link configuration.", "error")
+                return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         try:
-            user_id = create_user(name, email, password_hash, role)
+            user_id = create_user(name, email, password_hash, role, agent_id=agent_id, lender_id=lender_id)
+        except ValueError as e:
+            flash(str(e), "error")
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
         except Exception:
             flash("That email is already in use. Please sign in instead.", "error")
             return redirect(url_for("login"))
 
-        # If homeowner signed up with a referral code, create relationship
-        if role == "homeowner" and referral_code_from_form:
-            from database import (
-                get_professional_by_referral_code,
-                create_client_relationship
-            )
+        # Create client relationship for tracking (backward compatibility)
+        if role == "homeowner" and (agent_id or lender_id):
+            from database import create_client_relationship
             try:
-                print(f"DEBUG: Looking up referral code: {referral_code_from_form}")
-                professional = get_professional_by_referral_code(referral_code_from_form)
-                if professional:
-                    # Convert Row to dict if needed
-                    if hasattr(professional, 'keys'):
-                        prof_dict = dict(professional)
-                    else:
-                        prof_dict = professional if professional else {}
-                    
-                    print(f"DEBUG: Professional found: {prof_dict}")
-                    
-                    # Try different ways to get the user_id
-                    professional_id = prof_dict.get("user_id")
-                    if not professional_id:
-                        professional_id = prof_dict.get("id")
-                    
-                    # Get role from user_profiles table
-                    professional_role = prof_dict.get("role")
-                    
-                    print(f"DEBUG: Extracted - professional_id={professional_id}, professional_role={professional_role}")
-                    
-                    if professional_id and professional_role:
-                        relationship_id = create_client_relationship(
-                            homeowner_id=user_id,
-                            professional_id=professional_id,
-                            professional_role=professional_role,
-                            referral_code=referral_code_from_form
-                        )
-                        print(f"SUCCESS: Created relationship ID {relationship_id}: homeowner_id={user_id}, professional_id={professional_id}, role={professional_role}")
-                        flash(f"Welcome! You've been connected to your agent.", "success")
-                    else:
-                        print(f"ERROR: Missing data - professional_id={professional_id}, professional_role={professional_role}")
-                        print(f"Full professional dict: {prof_dict}")
-                else:
-                    print(f"ERROR: No professional found for referral code: {referral_code_from_form}")
-                    flash(f"Note: Referral code not found. You can still use the platform.", "info")
+                if agent_id:
+                    create_client_relationship(
+                        homeowner_id=user_id,
+                        professional_id=agent_id,
+                        professional_role="agent",
+                        referral_code=referral_token_from_form
+                    )
+                if lender_id:
+                    create_client_relationship(
+                        homeowner_id=user_id,
+                        professional_id=lender_id,
+                        professional_role="lender",
+                        referral_code=referral_token_from_form
+                    )
+                flash("Welcome! You've been connected to your professional team.", "success")
             except Exception as e:
                 import traceback
-                error_trace = traceback.format_exc()
-                print(f"ERROR creating client relationship: {error_trace}")
-                flash(f"Note: Could not link to agent. You can still use the platform.", "info")
+                print(f"Note: Could not create client relationship (non-critical): {traceback.format_exc()}")
 
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
-        session.pop("referral_code", None)  # Clear referral code from session
 
         if role == "agent":
             return redirect(url_for("agent_dashboard"))
@@ -1129,7 +1162,7 @@ def signup():
         "auth/signup.html", 
         role=role, 
         brand_name=FRONT_BRAND_NAME,
-        referral_code=referral_code
+        referral_code=referral_token  # Keep for backward compatibility in template
     )
 
 
@@ -1172,27 +1205,71 @@ def logout():
 # HOMEOWNER ROUTES
 # -------------------------------------------------
 @app.route("/homeowner")
-def homeowner_overview():
+@app.route("/homeowner/<int:homeowner_id>")
+def homeowner_overview(homeowner_id: Optional[int] = None):
     """
     Overview dashboard (My Home Base).
     Shows agent/lender info if homeowner was referred.
+    If homeowner_id is provided, it's an agent/lender viewing a homeowner's dashboard.
     """
-    from database import get_homeowner_professionals
+    from database import get_homeowner_professionals, get_user_by_id
     
-    user = get_current_user()
-    snapshot = get_homeowner_snapshot_or_default(user)
+    # Determine which homeowner to show
+    if homeowner_id:
+        # Agent/lender viewing a specific homeowner
+        user, error = require_homeowner_access(homeowner_id)
+        if error:
+            flash(error, "error")
+            return redirect(url_for("agent_dashboard" if user and user.get("role") == "agent" else "lender_dashboard"))
+        homeowner_user = get_user_by_id(homeowner_id)
+        if not homeowner_user or homeowner_user["role"] != "homeowner":
+            flash("Homeowner not found.", "error")
+            return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
+        homeowner_user = dict(homeowner_user)
+        viewing_as_professional = True
+        is_guest = False
+    else:
+        # Homeowner viewing their own dashboard (or guest)
+        user = get_current_user()
+        if not user:
+            # Guest mode - allow viewing but not saving
+            is_guest = True
+            homeowner_user = None
+            homeowner_id = None
+            viewing_as_professional = False
+        elif user.get("role") != "homeowner":
+            flash("This page is for homeowners only.", "error")
+            return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
+        else:
+            # Authenticated homeowner
+            is_guest = False
+            homeowner_user = user
+            homeowner_id = user["id"]
+            viewing_as_professional = False
     
-    # Get associated professionals
+    # Get snapshot (only for authenticated homeowners)
+    snapshot = None
+    if homeowner_user:
+        snapshot = get_homeowner_snapshot_or_default(homeowner_user)
+    else:
+        # Guest mode - create empty snapshot
+        snapshot = {
+            "value_estimate": None,
+            "equity_estimate": None,
+            "loan_rate": None,
+            "loan_payment": None,
+            "loan_balance": None,
+        }
+    
+    # Get associated professionals (only for authenticated homeowners)
     professionals = []
-    if user and user.get("id"):
+    if homeowner_id:
         try:
-            profs_raw = get_homeowner_professionals(user["id"])
-            print(f"DEBUG: Found {len(profs_raw)} professionals for homeowner {user['id']}")
+            profs_raw = get_homeowner_professionals(homeowner_id)
             for prof in profs_raw:
                 if hasattr(prof, 'keys'):
                     prof_dict = dict(prof)
                     professionals.append(prof_dict)
-                    print(f"DEBUG: Professional - role: {prof_dict.get('professional_role')}, type: {prof_dict.get('professional_type')}, name: {prof_dict.get('name')}, phone: {prof_dict.get('phone')}, has_profile: {bool(prof_dict.get('id'))}")
                 else:
                     professionals.append(prof)
         except Exception as e:
@@ -1205,6 +1282,10 @@ def homeowner_overview():
         snapshot=snapshot,
         cloud_cma_url=CLOUD_CMA_URL,
         professionals=professionals,
+        homeowner=homeowner_user,
+        viewing_as_professional=viewing_as_professional,
+        current_user=user,
+        is_guest=is_guest,
     )
 
 
@@ -3155,7 +3236,7 @@ def agent_power_tools():
     )
 
 
-@app.route("/agent/referrals", methods=["GET"])
+@app.route("/agent/referrals", methods=["GET", "POST"])
 def agent_referrals():
     """Agent referral link management."""
     user = get_current_user()
@@ -3163,26 +3244,52 @@ def agent_referrals():
         return redirect(url_for("login", role="agent"))
 
     try:
-        from database import get_referral_stats, get_or_create_referral_code
+        from database import (
+            get_referral_links_for_agent,
+            create_referral_link,
+            get_referral_stats,
+            get_accessible_homeowners
+        )
         
-        # Ensure referral code exists
-        try:
-            referral_code = get_or_create_referral_code(user["id"], "agent")
-        except Exception as e:
-            print(f"Error getting referral code: {e}")
-            # Fallback code
-            referral_code = f"AGENT-{user['id']:06d}"
+        # Handle POST - create new referral link
+        if request.method == "POST":
+            try:
+                token = create_referral_link(agent_id=user["id"])
+                flash("New referral link created!", "success")
+                return redirect(url_for("agent_referrals"))
+            except Exception as e:
+                flash(f"Error creating referral link: {str(e)}", "error")
         
-        # Get stats with fallback
+        # Get all referral links for this agent
+        referral_links = get_referral_links_for_agent(user["id"])
+        
+        # If no links exist, create one automatically
+        if not referral_links:
+            try:
+                token = create_referral_link(agent_id=user["id"])
+                referral_links = get_referral_links_for_agent(user["id"])
+            except Exception as e:
+                print(f"Error auto-creating referral link: {e}")
+        
+        # Get stats
         try:
             stats = get_referral_stats(user["id"])
         except Exception as e:
             print(f"Error getting stats: {e}")
-            stats = {'total_clients': 0, 'clients_this_month': 0, 'referral_code': referral_code}
+            stats = {'total_clients': 0, 'clients_this_month': 0}
         
-        # Build referral URL
+        # Build referral URLs
         base_url = request.url_root.rstrip('/')
-        referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
+        referral_links_with_urls = []
+        for link in referral_links:
+            link_dict = dict(link) if hasattr(link, 'keys') else link
+            link_dict['url'] = f"{base_url}/signup?role=homeowner&ref={link_dict['token']}"
+            referral_links_with_urls.append(link_dict)
+        
+        # Use the first link as primary (for backward compatibility)
+        primary_link = referral_links_with_urls[0] if referral_links_with_urls else None
+        referral_url = primary_link['url'] if primary_link else None
+        referral_code = primary_link['token'] if primary_link else None
         
         return render_template(
             "agent/referrals.html",
@@ -3190,6 +3297,7 @@ def agent_referrals():
             user=user,
             referral_code=referral_code,
             referral_url=referral_url,
+            referral_links=referral_links_with_urls,
             stats=stats,
         )
     except Exception as e:
@@ -3911,7 +4019,7 @@ def lender_power_suite():
     )
 
 
-@app.route("/lender/referrals", methods=["GET"])
+@app.route("/lender/referrals", methods=["GET", "POST"])
 def lender_referrals():
     """Lender referral link management."""
     user = get_current_user()
@@ -3919,26 +4027,52 @@ def lender_referrals():
         return redirect(url_for("login", role="lender"))
 
     try:
-        from database import get_referral_stats, get_or_create_referral_code
+        from database import (
+            get_referral_links_for_lender,
+            create_referral_link,
+            get_referral_stats,
+            get_accessible_homeowners
+        )
         
-        # Ensure referral code exists
-        try:
-            referral_code = get_or_create_referral_code(user["id"], "lender")
-        except Exception as e:
-            print(f"Error getting referral code: {e}")
-            # Fallback code
-            referral_code = f"LENDER-{user['id']:06d}"
+        # Handle POST - create new referral link
+        if request.method == "POST":
+            try:
+                token = create_referral_link(lender_id=user["id"])
+                flash("New referral link created!", "success")
+                return redirect(url_for("lender_referrals"))
+            except Exception as e:
+                flash(f"Error creating referral link: {str(e)}", "error")
         
-        # Get stats with fallback
+        # Get all referral links for this lender
+        referral_links = get_referral_links_for_lender(user["id"])
+        
+        # If no links exist, create one automatically
+        if not referral_links:
+            try:
+                token = create_referral_link(lender_id=user["id"])
+                referral_links = get_referral_links_for_lender(user["id"])
+            except Exception as e:
+                print(f"Error auto-creating referral link: {e}")
+        
+        # Get stats
         try:
             stats = get_referral_stats(user["id"])
         except Exception as e:
             print(f"Error getting stats: {e}")
-            stats = {'total_clients': 0, 'clients_this_month': 0, 'referral_code': referral_code}
+            stats = {'total_clients': 0, 'clients_this_month': 0}
         
-        # Build referral URL
+        # Build referral URLs
         base_url = request.url_root.rstrip('/')
-        referral_url = f"{base_url}/signup?role=homeowner&ref={referral_code}"
+        referral_links_with_urls = []
+        for link in referral_links:
+            link_dict = dict(link) if hasattr(link, 'keys') else link
+            link_dict['url'] = f"{base_url}/signup?role=homeowner&ref={link_dict['token']}"
+            referral_links_with_urls.append(link_dict)
+        
+        # Use the first link as primary (for backward compatibility)
+        primary_link = referral_links_with_urls[0] if referral_links_with_urls else None
+        referral_url = primary_link['url'] if primary_link else None
+        referral_code = primary_link['token'] if primary_link else None
         
         return render_template(
             "lender/referrals.html",
@@ -3946,6 +4080,7 @@ def lender_referrals():
             user=user,
             referral_code=referral_code,
             referral_url=referral_url,
+            referral_links=referral_links_with_urls,
             stats=stats,
         )
     except Exception as e:

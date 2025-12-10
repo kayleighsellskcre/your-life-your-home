@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block page_title %}Signup Error • {{ brand_name }}{% endblock %}
+
+{% block content %}
+<style>
+  .auth-page {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    padding: 3rem 2rem;
+  }
+  
+  .auth-card {
+    background: #FFFFFF;
+    border: 1px solid #C8B497;
+    border-radius: 2px;
+    padding: 3rem;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(58, 53, 44, 0.15);
+    text-align: center;
+  }
+  
+  .error-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .error-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2rem;
+    margin: 0 0 1rem;
+    color: #3A352C;
+    font-weight: 600;
+  }
+  
+  .error-message {
+    color: #6B6A45;
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  
+  .error-details {
+    color: #8B8670;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+  
+  .btn-primary {
+    display: inline-block;
+    background: var(--olive-green, #6B6A45);
+    color: #FFFFFF;
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: 2px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background: #5A5940;
+  }
+</style>
+
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="error-icon">⚠️</div>
+    <h1 class="error-title">{{ message }}</h1>
+    <p class="error-message">{{ details }}</p>
+    <a href="{{ url_for('index') }}" class="btn-primary">Return to Home</a>
+  </div>
+</div>
+{% endblock %}
+
