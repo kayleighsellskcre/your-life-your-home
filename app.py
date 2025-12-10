@@ -1410,8 +1410,10 @@ def login():
             return redirect(url_for("login"))
         
         # Get user from database
+        print(f"LOGIN ATTEMPT: Email='{email}', Role='{selected_role}'")
         try:
             user_row = get_user_by_email(email)
+            print(f"LOGIN: Database query returned: {user_row is not None}")
         except Exception as e:
             print(f"ERROR Login: Database error - {str(e)}")
             import traceback
@@ -1421,6 +1423,7 @@ def login():
         
         # Check if user exists
         if not user_row:
+            print(f"LOGIN FAILED: No user found for email '{email}'")
             flash("Email or password did not match. Please try again.", "error")
             return redirect(url_for("login", role=selected_role))
         
@@ -1435,23 +1438,48 @@ def login():
         user_role = str(user.get("role") or "").strip().lower()
         password_hash = user.get("password_hash")
         user_name = user.get("name") or "User"
+        user_email_from_db = user.get("email", "")
         
-        print(f"LOGIN: User found - ID: {user_id}, Role: {user_role}, Email: {email}")
+        print(f"LOGIN: User found - ID: {user_id}, Role: {user_role}, Email in DB: '{user_email_from_db}'")
+        print(f"LOGIN: Password hash exists: {bool(password_hash)}, Length: {len(password_hash) if password_hash else 0}")
+        print(f"LOGIN: Password hash preview: {password_hash[:50] if password_hash else 'None'}...")
+        print(f"LOGIN: Input password length: {len(password)}")
         
         # Check if account has password
         if not password_hash or (isinstance(password_hash, str) and not password_hash.strip()):
+            print(f"LOGIN FAILED: Account has no password hash")
             flash("This account is incomplete. Please sign up again with the same email.", "error")
             return redirect(url_for("signup", role=selected_role))
         
-        # Verify password
+        # Verify password - with detailed debugging
         try:
-            if not check_password_hash(password_hash, password):
-                flash("Email or password did not match. Please try again.", "error")
-                return redirect(url_for("login", role=selected_role))
+            print(f"LOGIN: Attempting password check...")
+            password_check_result = check_password_hash(password_hash, password)
+            print(f"LOGIN: Password check result: {password_check_result}")
+            
+            if not password_check_result:
+                # Try to see if there's a whitespace issue
+                password_trimmed = password.strip()
+                if password_trimmed != password:
+                    print(f"LOGIN: Password had whitespace, retrying with trimmed version...")
+                    password_check_result = check_password_hash(password_hash, password_trimmed)
+                    print(f"LOGIN: Trimmed password check result: {password_check_result}")
+                    if password_check_result:
+                        password = password_trimmed  # Use trimmed version
+                
+                if not password_check_result:
+                    print(f"LOGIN FAILED: Password does not match hash")
+                    print(f"LOGIN: Hash format check - starts with pbkdf2: {password_hash.startswith('pbkdf2:') if password_hash else False}")
+                    flash("Email or password did not match. Please try again.", "error")
+                    return redirect(url_for("login", role=selected_role))
         except Exception as e:
-            print(f"ERROR Login: Password check failed - {str(e)}")
+            print(f"ERROR Login: Password check exception - {str(e)}")
+            import traceback
+            print(traceback.format_exc())
             flash("Login error. Please try again.", "error")
             return redirect(url_for("login", role=selected_role))
+        
+        print(f"LOGIN: Password verified successfully!")
         
         # Verify role matches
         selected_role_normalized = str(selected_role).strip().lower()
@@ -1499,6 +1527,33 @@ def login():
     
     # GET request - show login form
     return render_template("auth/login.html", role=role)
+
+
+@app.route("/debug/check-account/<email>")
+def debug_check_account(email):
+    """Debug route to check account details - REMOVE IN PRODUCTION"""
+    try:
+        user_row = get_user_by_email(email.lower().strip())
+        if not user_row:
+            return jsonify({"error": "User not found", "email": email})
+        
+        if hasattr(user_row, 'keys') and not isinstance(user_row, dict):
+            user = dict(user_row)
+        else:
+            user = user_row if isinstance(user_row, dict) else {}
+        
+        return jsonify({
+            "found": True,
+            "id": user.get("id"),
+            "email": user.get("email"),
+            "name": user.get("name"),
+            "role": user.get("role"),
+            "has_password_hash": bool(user.get("password_hash")),
+            "password_hash_length": len(user.get("password_hash", "")),
+            "password_hash_preview": user.get("password_hash", "")[:50] + "..." if user.get("password_hash") else None,
+        })
+    except Exception as e:
+        return jsonify({"error": str(e), "email": email})
 
 
 @app.route("/logout")
