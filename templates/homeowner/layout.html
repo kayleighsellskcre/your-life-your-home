@@ -305,15 +305,16 @@
   
   @media (max-width: 768px) {
     .ylh-nav-container {
-      padding: 0.25rem 0.75rem;
-      flex-direction: column;
-      height: auto;
-      gap: 0.15rem;
+      padding: 0.5rem 1rem !important;
+      flex-direction: row !important;
+      height: auto !important;
+      min-height: 40px !important;
+      gap: 0.5rem !important;
     }
     
     .ylh-nav-title {
-      font-size: 1.05rem;
-      margin: 0.25rem 0 0.15rem 0;
+      font-size: 1.1rem !important;
+      margin: 0 !important;
     }
     
     .ylh-nav-items {
@@ -551,41 +552,7 @@
     <div class="ylh-nav-container">
       <h1 class="ylh-nav-title">Dashboard</h1>
       
-      <!-- Agent/Lender Info in Center -->
-      {% if professionals and professionals|length > 0 %}
-        {% set primary_prof = professionals[0] %}
-        <div class="ylh-agent-center">
-          <div class="ylh-agent-branding">
-            <!-- Professional Photo -->
-            {% if primary_prof.get('professional_photo') %}
-            <img src="{{ url_for('static', filename=primary_prof.professional_photo) }}" alt="{{ primary_prof.name or 'Professional' }}" class="ylh-agent-photo">
-            {% else %}
-            <div class="ylh-agent-photo-placeholder">{{ (primary_prof.name or '?')[0] }}</div>
-            {% endif %}
-            
-            <!-- Professional Info -->
-            <div class="ylh-agent-info">
-              <div class="ylh-agent-name">{{ primary_prof.name or 'Professional' }}</div>
-              <div class="ylh-agent-role">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</div>
-              {% if primary_prof.get('brokerage_name') %}
-              <div class="ylh-agent-brokerage">{{ primary_prof.brokerage_name }}</div>
-              {% endif %}
-              {% if primary_prof.get('email') %}
-              <a href="mailto:{{ primary_prof.email }}" class="ylh-agent-contact">📧 {{ primary_prof.email[:20] }}{% if primary_prof.email|length > 20 %}...{% endif %}</a>
-              {% elif primary_prof.get('phone') %}
-              <a href="tel:{{ primary_prof.phone }}" class="ylh-agent-contact">📞 {{ primary_prof.phone }}</a>
-              {% endif %}
-            </div>
-            
-            <!-- Brokerage Logo -->
-            {% if primary_prof.get('brokerage_logo') %}
-            <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" class="ylh-agent-logo">
-            {% endif %}
-          </div>
-        </div>
-      {% else %}
-        <div class="ylh-agent-center"></div>
-      {% endif %}
+      <!-- Agent/Lender Info removed - now in main green header -->
       
       <div class="ylh-nav-items">
         <a href="{{ url_for('homeowner_overview') }}" class="ylh-nav-button {% if is_home_base %}active{% endif %}">

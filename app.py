@@ -1911,6 +1911,55 @@ def debug_sync_homeowner_to_crm(homeowner_id):
         return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
+@app.route("/debug/check-crm-contacts/<int:agent_id>")
+def debug_check_crm_contacts(agent_id):
+    """Debug route to check all contacts for an agent - REMOVE IN PRODUCTION"""
+    try:
+        from database import list_agent_contacts, get_user_by_id, get_connection
+        
+        # Get agent info
+        agent = get_user_by_id(agent_id)
+        if not agent:
+            return jsonify({"error": "Agent not found"}), 404
+        
+        agent_dict = dict(agent) if hasattr(agent, 'keys') and not isinstance(agent, dict) else agent
+        
+        # Get all contacts (no filter)
+        all_contacts = list_agent_contacts(agent_id, stage_filter=None)
+        
+        # Get contacts by stage
+        new_contacts = list_agent_contacts(agent_id, stage_filter="new")
+        active_contacts = list_agent_contacts(agent_id, stage_filter="active")
+        
+        # Convert to dicts
+        contacts_data = []
+        for contact in all_contacts:
+            contact_dict = dict(contact) if hasattr(contact, 'keys') and not isinstance(contact, dict) else contact
+            contacts_data.append({
+                'id': contact_dict.get('id'),
+                'name': contact_dict.get('name'),
+                'email': contact_dict.get('email'),
+                'stage': contact_dict.get('stage'),
+                'created_at': contact_dict.get('created_at'),
+                'tags': contact_dict.get('tags'),
+            })
+        
+        return jsonify({
+            "agent": {
+                "id": agent_id,
+                "name": agent_dict.get('name'),
+                "email": agent_dict.get('email'),
+            },
+            "total_contacts": len(all_contacts),
+            "new_contacts": len(new_contacts),
+            "active_contacts": len(active_contacts),
+            "all_contacts": contacts_data,
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+
+
 @app.route("/debug/sync-all-homeowners-to-crm")
 def debug_sync_all_homeowners_to_crm():
     """Sync ALL existing homeowners to their agents' CRMs - REMOVE IN PRODUCTION"""
@@ -3550,8 +3599,25 @@ def agent_crm():
     tag_filter = request.args.get("tag", "").strip()
     sort_by = request.args.get("sort", "name")  # name, stage, last_touch, created_at
     
+    # DEBUG: Log contact loading
+    print(f"\n{'='*60}")
+    print(f"AGENT CRM: Loading contacts for agent {user['id']}")
+    print(f"  Stage filter: {stage_filter}")
+    print(f"  Search query: {search_query}")
+    print(f"  Tag filter: {tag_filter}")
+    print(f"{'='*60}\n")
+    
     try:
         contacts = list_agent_contacts(user["id"], stage_filter)
+        print(f"AGENT CRM: Found {len(contacts)} contacts from database")
+        
+        # DEBUG: Log all contacts found
+        for idx, contact in enumerate(contacts[:5]):  # Log first 5
+            contact_dict = dict(contact) if hasattr(contact, 'keys') and not isinstance(contact, dict) else contact
+            print(f"  Contact {idx+1}: {contact_dict.get('name')} ({contact_dict.get('email')}) - Stage: {contact_dict.get('stage')}")
+        
+        if len(contacts) > 5:
+            print(f"  ... and {len(contacts) - 5} more contacts")
         # Convert contacts to dicts for JSON serialization in template
         # Handle None values and ensure all fields exist
         contacts_list = []
