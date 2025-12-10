@@ -2,41 +2,87 @@
 {% block title %}Dashboard Overview{% endblock %}
 
 {% block homeowner_content %}
+<!-- FIXED PROFESSIONAL BRANDING HEADER - Always Visible at Top -->
 {% if professionals and professionals|length > 0 %}
-<!-- Professionals Section - Display at Top -->
-<div style="max-width: 1200px; margin: 0 auto 3rem; padding: 0 2rem;">
-  <div style="background: var(--white); border: var(--border-light); border-radius: var(--border-radius-lg); padding: 2rem; box-shadow: var(--shadow-light);">
-    <h2 style="font-family: var(--font-heading); color: var(--olive-green); margin-bottom: 1.5rem; font-size: 1.5rem;">Your Real Estate Team</h2>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
-      {% for prof in professionals %}
-      <div style="background: var(--warm-cream); border: var(--border-light); border-radius: var(--border-radius); padding: 1.5rem; display: flex; gap: 1rem;">
+<style>
+  #fixed-professional-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-bottom: 3px solid rgba(107, 106, 69, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: 1rem 2rem;
+    backdrop-filter: blur(10px);
+  }
+  
+  @media (max-width: 768px) {
+    #fixed-professional-header {
+      padding: 0.75rem 1rem;
+      position: relative;
+    }
+    
+    #fixed-professional-header > div {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    #fixed-professional-header > div > div {
+      min-width: 100%;
+      width: 100%;
+    }
+  }
+</style>
+<div id="fixed-professional-header">
+  <div style="max-width: 1600px; margin: 0 auto; display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+    {% for prof in professionals %}
+    <div style="display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 300px;">
+      <!-- Professional Photo -->
+      <div style="flex-shrink: 0;">
         {% if prof.get('professional_photo') %}
-        <img src="{{ url_for('static', filename=prof.professional_photo) }}" alt="{{ prof.name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;">
+        <img src="{{ url_for('static', filename=prof.professional_photo) }}" alt="{{ prof.name }}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 2px solid #6B6A45;">
         {% else %}
-        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 2rem; flex-shrink: 0;">{{ prof.name[0] if prof.name else '?' }}</div>
+        <div style="width: 60px; height: 60px; border-radius: 50%; background: #6B6A45; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 600; border: 2px solid #6B6A45;">{{ prof.name[0] if prof.name else '?' }}</div>
         {% endif %}
-        <div style="flex: 1;">
-          <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem; font-size: 1.2rem;">{{ prof.name }}</h3>
-          <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0 0 0.5rem; font-size: 0.9rem; text-transform: capitalize;">{{ prof.professional_role|replace('_', ' ') }}</p>
-          {% if prof.get('brokerage_name') %}
-          <p style="color: var(--charcoal-brown); opacity: 0.7; margin: 0 0 0.75rem; font-size: 0.85rem;">{{ prof.brokerage_name }}</p>
+      </div>
+      
+      <!-- Professional Info -->
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+          <h3 style="font-family: var(--font-heading); color: #3A352C; margin: 0; font-size: 1.1rem; font-weight: 600;">{{ prof.name }}</h3>
+          <span style="color: #6B6A45; font-size: 0.85rem; text-transform: capitalize; font-weight: 500;">{{ prof.professional_role|replace('_', ' ') }}</span>
+        </div>
+        {% if prof.get('brokerage_name') %}
+        <p style="color: #3A352C; opacity: 0.7; margin: 0.25rem 0 0; font-size: 0.85rem;">{{ prof.brokerage_name }}</p>
+        {% endif %}
+        <div style="display: flex; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap;">
+          {% if prof.get('email') %}
+          <a href="mailto:{{ prof.email }}" style="color: #6B6A45; text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+            <span>📧</span> <span style="word-break: break-all;">{{ prof.email }}</span>
+          </a>
           {% endif %}
           {% if prof.get('phone') %}
-          <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.75rem;">
-            {% if prof.get('call_button_enabled', 1) %}
-            <a href="tel:{{ prof.phone }}" style="background: var(--olive-green); color: var(--white); padding: 0.5rem 1rem; border-radius: var(--border-radius); text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">📞 Call</a>
-            {% endif %}
-            {% if prof.get('schedule_url') and prof.get('schedule_button_enabled', 1) %}
-            <a href="{{ prof.schedule_url }}" target="_blank" rel="noopener" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.5rem 1rem; border-radius: var(--border-radius); text-decoration: none; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">📅 Schedule</a>
-            {% endif %}
-          </div>
+          <a href="tel:{{ prof.phone }}" style="color: #6B6A45; text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+            <span>📞</span> {{ prof.phone }}
+          </a>
           {% endif %}
         </div>
       </div>
-      {% endfor %}
+      
+      <!-- Brokerage Logo (if available) -->
+      {% if prof.get('brokerage_logo') %}
+      <div style="flex-shrink: 0; margin-left: auto;">
+        <img src="{{ url_for('static', filename=prof.brokerage_logo) }}" alt="{{ prof.brokerage_name }}" style="max-height: 40px; max-width: 120px; object-fit: contain;">
+      </div>
+      {% endif %}
     </div>
+    {% endfor %}
   </div>
 </div>
+<!-- Spacer to prevent content from going under fixed header -->
+<div id="professional-header-spacer" style="height: 120px;"></div>
 {% endif %}
 <style>
   /* Interactive hover animations */

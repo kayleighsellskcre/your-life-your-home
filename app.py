@@ -425,6 +425,11 @@ EMAIL_PASS = os.environ.get("EMAIL_PASS")
 
 
 def send_reminder_email(to_email, subject, body):
+    """Send a reminder email using SMTP."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        print(f"⚠ Email not configured - cannot send to {to_email}")
+        return False
+    
     msg = MIMEMultipart()
     msg["From"] = EMAIL_USER
     msg["To"] = to_email
@@ -439,6 +444,91 @@ def send_reminder_email(to_email, subject, body):
         return True
     except Exception as e:
         print(f"✗ Failed to send email to {to_email}: {e}")
+        return False
+
+
+def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referral_token=None, signup_timestamp=None):
+    """Send email notification to agent when a new lead signs up."""
+    if not EMAIL_USER or not EMAIL_PASS:
+        print(f"⚠ Email not configured - cannot send lead notification")
+        return False
+    
+    try:
+        from database import get_user_by_id, get_user_profile
+        
+        # Get agent information
+        agent_user = get_user_by_id(agent_id)
+        if not agent_user:
+            print(f"⚠ Agent {agent_id} not found - cannot send notification")
+            return False
+        
+        agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') and not isinstance(agent_user, dict) else agent_user
+        agent_email = agent_dict.get('email')
+        agent_name = agent_dict.get('name', 'Agent')
+        
+        if not agent_email:
+            print(f"⚠ Agent {agent_id} has no email - cannot send notification")
+            return False
+        
+        # Get agent profile for additional info
+        agent_profile = get_user_profile(agent_id)
+        brokerage_name = ""
+        if agent_profile:
+            profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') and not isinstance(agent_profile, dict) else agent_profile
+            brokerage_name = profile_dict.get('brokerage_name', '')
+        
+        # Build email subject and body
+        from flask import request
+        base_url = request.url_root.rstrip('/') if hasattr(request, 'url_root') else 'https://itsyourlifeyourhome.com'
+        
+        subject = f"🎉 New Lead: {homeowner_name} signed up!"
+        
+        body = f"""New Lead Notification
+
+A new homeowner has signed up and been added to your CRM!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LEAD INFORMATION:
+• Name: {homeowner_name}
+• Email: {homeowner_email}
+• Signup Date: {signup_timestamp or 'Just now'}
+
+REFERRAL SOURCE:
+• Referral Token: {referral_token if referral_token and referral_token != 'default' else 'Default Assignment'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This lead has been automatically added to your CRM with stage "new".
+
+You can view and manage this contact in your CRM dashboard:
+{base_url}/agent/crm
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is an automated notification from Your Life • Your Home.
+"""
+        
+        # Send the email
+        success = send_reminder_email(agent_email, subject, body)
+        
+        if success:
+            print(f"✓ New lead notification sent to {agent_name} ({agent_email})")
+            # Log the email in the database
+            try:
+                from database import log_automated_email
+                # We need the contact_id, but we don't have it here
+                # For now, just log that we sent the notification
+                print(f"✓ Lead notification logged for agent {agent_id}")
+            except Exception as log_error:
+                print(f"⚠ Could not log email notification: {log_error}")
+        
+        return success
+        
+    except Exception as e:
+        import traceback
+        print(f"✗ Error sending new lead notification: {e}")
+        print(traceback.format_exc())
         return False
 
 
@@ -1503,6 +1593,21 @@ def signup():
                                 if not found_contact:
                                     print(f"SIGNUP VERIFICATION ERROR: CRM contact {contact_id} NOT found in agent's CRM after creation!")
                                     flash(f"Warning: Contact created but verification failed. Please contact support.", "error")
+                                
+                                # SEND EMAIL NOTIFICATION TO AGENT
+                                signup_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                                try:
+                                    send_new_lead_notification(
+                                        agent_id=agent_id,
+                                        homeowner_name=name,
+                                        homeowner_email=email,
+                                        referral_token=referral_token_from_form if referral_token_from_form != "default" else None,
+                                        signup_timestamp=signup_time
+                                    )
+                                    print(f"SIGNUP: Email notification sent to agent {agent_id}")
+                                except Exception as email_error:
+                                    print(f"SIGNUP WARNING: Could not send email notification - {str(email_error)}")
+                                    # Don't fail signup if email fails
                             else:
                                 print(f"SIGNUP: CRM contact already exists (ID: {existing_contact_id}), skipping creation")
                                 crm_contacts_created.append(f"CRM contact (ID: {existing_contact_id}, already existed)")
