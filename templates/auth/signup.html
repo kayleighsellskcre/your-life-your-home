@@ -177,25 +177,23 @@
       
       <div class="auth-form-group">
         <label for="email">Email Address</label>
-        <input id="email" name="email" type="email" required placeholder="you@example.com" />
+        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
       </div>
       
       <div class="auth-form-group">
         <label for="password">Password</label>
         <div class="password-wrapper">
-          <input id="password" name="password" type="password" required placeholder="Create a secure password" />
+          <input id="password" name="password" type="password" autocomplete="new-password" required placeholder="Create a secure password" />
           <button type="button" onclick="togglePasswordSignup()" class="password-toggle">
             Show
           </button>
         </div>
       </div>
       
+      {% if role != 'homeowner' %}
       <div class="auth-form-group">
         <label for="role">I am signing up as</label>
         <select id="role" name="role">
-          <option value="homeowner" {% if role == 'homeowner' %}selected{% endif %}>
-            🏡 Homeowner or Future Homeowner
-          </option>
           <option value="agent" {% if role == 'agent' %}selected{% endif %}>
             🏢 Real Estate Agent
           </option>
@@ -204,10 +202,19 @@
           </option>
         </select>
       </div>
+      {% else %}
+      <input type="hidden" name="role" value="homeowner" />
+      {% endif %}
+      
+      {% if referral_code %}
+      <input type="hidden" name="ref_token" value="{{ referral_code }}" />
+      {% endif %}
       
       <div class="role-hint">
         💡 <strong>Homeowners:</strong> Free forever. 
+        {% if role != 'homeowner' %}
         <strong>Professionals:</strong> Free trial, then subscribe for full access.
+        {% endif %}
       </div>
       
       <button class="btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">

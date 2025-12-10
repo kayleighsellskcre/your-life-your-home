@@ -197,13 +197,13 @@
       
       <div class="auth-form-group">
         <label for="email">Email</label>
-        <input id="email" name="email" type="email" required />
+        <input id="email" name="email" type="email" autocomplete="email" required />
       </div>
       
       <div class="auth-form-group">
         <label for="password">Password</label>
         <div class="password-wrapper">
-          <input id="password" name="password" type="password" required />
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
           <button type="button" onclick="togglePassword()" class="password-toggle">
             Show
           </button>
@@ -212,8 +212,8 @@
       
       <div class="auth-options">
         <label class="remember-label">
-          <input type="checkbox" name="remember" />
-          <span>Remember me</span>
+          <input type="checkbox" name="remember" id="remember" />
+          <span>Keep me logged in</span>
         </label>
         <a href="#" class="forgot-link">Forgot password?</a>
       </div>
@@ -231,6 +231,34 @@
 </div>
 
 <script>
+  // Remember last email
+  (function() {
+    const emailInput = document.getElementById("email");
+    const lastEmail = localStorage.getItem("lastLoginEmail");
+    if (lastEmail) {
+      emailInput.value = lastEmail;
+    }
+    
+    // Save email after successful login (check for cookie set by server)
+    function checkForSavedEmail() {
+      const cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'save_email' && value) {
+          localStorage.setItem("lastLoginEmail", decodeURIComponent(value));
+          // Clear the cookie
+          document.cookie = "save_email=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        }
+      }
+    }
+    
+    // Check on page load
+    checkForSavedEmail();
+    
+    // Also check after a short delay (in case cookie is set after page load)
+    setTimeout(checkForSavedEmail, 100);
+  })();
+
   function togglePassword() {
     const input = document.getElementById("password");
     const btn = event.target;

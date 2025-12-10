@@ -165,6 +165,7 @@ init_db()
 app = Flask(__name__)
 app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
 
 # Context processor to make professionals available to all homeowner templates
 @app.context_processor
@@ -1090,8 +1091,14 @@ def signup():
         role_from_form = request.form.get("role", role)
         referral_token_from_form = request.form.get("ref_token") or referral_token
 
-        if role_from_form in ("homeowner", "agent", "lender"):
+        # For homeowners, always use "homeowner" (no manual selection)
+        if role == "homeowner":
+            role = "homeowner"
+        elif role_from_form in ("agent", "lender"):
             role = role_from_form
+        else:
+            # Default to homeowner if no role specified
+            role = "homeowner"
 
         if not email or not password:
             flash("Please fill in email and password.", "error")
@@ -1166,16 +1173,21 @@ def signup():
                 import traceback
                 print(f"Note: Could not create client relationship (non-critical): {traceback.format_exc()}")
 
+        # Auto-login after signup (permanent session for convenience)
+        session.permanent = True
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
-
-        if role == "agent":
-            return redirect(url_for("agent_dashboard"))
-        elif role == "lender":
-            return redirect(url_for("lender_dashboard"))
-        else:
-            return redirect(url_for("homeowner_overview"))
+        
+        # Save email to localStorage (will be handled by JavaScript)
+        response = redirect(url_for("agent_dashboard") if role == "agent"
+                           else url_for("lender_dashboard") if role == "lender"
+                           else url_for("homeowner_overview"))
+        
+        # Set cookie to trigger JavaScript to save email
+        response.set_cookie("save_email", email, max_age=365*24*60*60)
+        
+        return response
 
     return render_template(
         "auth/signup.html", 
@@ -1212,19 +1224,24 @@ def login():
             flash(f"This account is registered as a {user['role']}, not a {selected_role}. Please select the correct role.", "error")
             return redirect(url_for("login", role=user["role"]))
 
+        # Handle "Keep me logged in" checkbox
+        remember = request.form.get("remember") == "on"
+        session.permanent = remember  # Make session permanent if "remember me" is checked
+        
         session["user_id"] = user["id"]
         session["name"] = user["name"]
         session["role"] = user["role"]
-
-        # Redirect based on role
-        if user["role"] == "homeowner":
-            return redirect(url_for("homeowner_overview"))
-        elif user["role"] == "agent":
-            return redirect(url_for("agent_dashboard"))
-        elif user["role"] == "lender":
-            return redirect(url_for("lender_dashboard"))
-        else:
-            return redirect(url_for("index"))
+        
+        # Save email to localStorage (will be handled by JavaScript)
+        response = redirect(url_for("homeowner_overview") if user["role"] == "homeowner" 
+                           else url_for("agent_dashboard") if user["role"] == "agent"
+                           else url_for("lender_dashboard") if user["role"] == "lender"
+                           else url_for("index"))
+        
+        # Set cookie to trigger JavaScript to save email
+        response.set_cookie("save_email", email, max_age=365*24*60*60 if remember else None)
+        
+        return response
 
     return render_template("auth/login.html", role=role)
 
