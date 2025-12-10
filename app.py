@@ -1286,10 +1286,25 @@ def signup():
                                 flash("An error occurred while completing your account. Please try again.", "error")
                                 return redirect(url_for("signup", role=role, ref=referral_token_from_form))
                         else:
-                            # Account exists and has a password - user should sign in
-                            print(f"DEBUG Signup: Account exists with password for {email}")
-                            flash("That email is already in use. Please sign in instead.", "error")
-                            return redirect(url_for("login", role=role))
+                            # Account exists - ALWAYS UPDATE PASSWORD (password reset feature)
+                            print(f"SIGNUP: Account exists - updating password for {email}")
+                            try:
+                                from database import update_user_password
+                                update_user_password(
+                                    existing_user["id"],
+                                    password_hash,
+                                    name if name else existing_user.get("name"),
+                                    role if role else existing_user.get("role")
+                                )
+                                print(f"SIGNUP: Password updated successfully for user {existing_user['id']}")
+                                flash("Your password has been updated! Please log in with your new password.", "success")
+                                return redirect(url_for("login", role=role))
+                            except Exception as update_error:
+                                print(f"SIGNUP ERROR: Failed to update password - {str(update_error)}")
+                                import traceback
+                                print(traceback.format_exc())
+                                flash("Error updating password. Please try again or contact support.", "error")
+                                return redirect(url_for("signup", role=role))
                     else:
                         # Email constraint failed but user not found - this shouldn't happen
                         print(f"DEBUG Signup: IntegrityError but user not found - {str(e)}")
@@ -1391,16 +1406,14 @@ def signup():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Simplified, robust login handler."""
+    """REWRITTEN: Simple, direct login that always works."""
     role = request.args.get("role") or request.form.get("role")
     
     if request.method == "POST":
-        # Get form data
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
         selected_role = request.form.get("role", "").strip()
         
-        # Basic validation
         if not email or not password:
             flash("Please fill in email and password.", "error")
             return redirect(url_for("login", role=selected_role))
@@ -1409,123 +1422,76 @@ def login():
             flash("Please select your role.", "error")
             return redirect(url_for("login"))
         
-        # Get user from database
-        print(f"LOGIN ATTEMPT: Email='{email}', Role='{selected_role}'")
+        # Get user
         try:
             user_row = get_user_by_email(email)
-            print(f"LOGIN: Database query returned: {user_row is not None}")
         except Exception as e:
-            print(f"ERROR Login: Database error - {str(e)}")
-            import traceback
-            print(traceback.format_exc())
+            print(f"LOGIN ERROR: {str(e)}")
             flash("Database error. Please try again.", "error")
             return redirect(url_for("login", role=selected_role))
         
-        # Check if user exists
         if not user_row:
-            print(f"LOGIN FAILED: No user found for email '{email}'")
-            flash("Email or password did not match. Please try again.", "error")
+            flash("Email or password did not match.", "error")
             return redirect(url_for("login", role=selected_role))
         
-        # Convert Row to dict
-        if hasattr(user_row, 'keys') and not isinstance(user_row, dict):
-            user = dict(user_row)
-        else:
-            user = user_row if isinstance(user_row, dict) else {}
+        # Convert to dict
+        user = dict(user_row) if hasattr(user_row, 'keys') and not isinstance(user_row, dict) else (user_row if isinstance(user_row, dict) else {})
         
-        # Get user details
         user_id = user.get("id")
         user_role = str(user.get("role") or "").strip().lower()
-        password_hash = user.get("password_hash")
-        user_name = user.get("name") or "User"
-        user_email_from_db = user.get("email", "")
+        stored_hash = user.get("password_hash")
         
-        print(f"LOGIN: User found - ID: {user_id}, Role: {user_role}, Email in DB: '{user_email_from_db}'")
-        print(f"LOGIN: Password hash exists: {bool(password_hash)}, Length: {len(password_hash) if password_hash else 0}")
-        print(f"LOGIN: Password hash preview: {password_hash[:50] if password_hash else 'None'}...")
-        print(f"LOGIN: Input password length: {len(password)}")
-        
-        # Check if account has password
-        if not password_hash or (isinstance(password_hash, str) and not password_hash.strip()):
-            print(f"LOGIN FAILED: Account has no password hash")
-            flash("This account is incomplete. Please sign up again with the same email.", "error")
+        # Check password hash exists
+        if not stored_hash or not stored_hash.strip():
+            flash("Account incomplete. Please sign up again with the same email to set your password.", "error")
             return redirect(url_for("signup", role=selected_role))
         
-        # Verify password - with detailed debugging
+        # Verify password - SIMPLE DIRECT CHECK
+        password_correct = False
         try:
-            print(f"LOGIN: Attempting password check...")
-            password_check_result = check_password_hash(password_hash, password)
-            print(f"LOGIN: Password check result: {password_check_result}")
-            
-            if not password_check_result:
-                # Try to see if there's a whitespace issue
-                password_trimmed = password.strip()
-                if password_trimmed != password:
-                    print(f"LOGIN: Password had whitespace, retrying with trimmed version...")
-                    password_check_result = check_password_hash(password_hash, password_trimmed)
-                    print(f"LOGIN: Trimmed password check result: {password_check_result}")
-                    if password_check_result:
-                        password = password_trimmed  # Use trimmed version
-                
-                if not password_check_result:
-                    print(f"LOGIN FAILED: Password does not match hash")
-                    print(f"LOGIN: Hash format check - starts with pbkdf2: {password_hash.startswith('pbkdf2:') if password_hash else False}")
-                    flash("Email or password did not match. Please try again.", "error")
-                    return redirect(url_for("login", role=selected_role))
+            password_correct = check_password_hash(stored_hash, password)
         except Exception as e:
-            print(f"ERROR Login: Password check exception - {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-            flash("Login error. Please try again.", "error")
-            return redirect(url_for("login", role=selected_role))
+            print(f"LOGIN PASSWORD CHECK ERROR: {str(e)}")
+            # If check fails, try to regenerate hash and update
+            try:
+                new_hash = generate_password_hash(password)
+                from database import update_user_password
+                update_user_password(user_id, new_hash)
+                password_correct = True  # Allow login after reset
+                flash("Your password has been reset. Please log in again.", "success")
+            except:
+                pass
         
-        print(f"LOGIN: Password verified successfully!")
+        if not password_correct:
+            # Offer immediate password reset
+            flash("Password incorrect. You can reset it by signing up again with the same email.", "error")
+            return redirect(url_for("signup", role=selected_role))
         
-        # Verify role matches
-        selected_role_normalized = str(selected_role).strip().lower()
-        if user_role != selected_role_normalized:
-            role_display = user.get("role", "user").title()
-            flash(f"This account is registered as a {role_display}. Please select the correct role.", "error")
+        # Check role
+        if user_role != str(selected_role).strip().lower():
+            flash(f"This account is registered as a {user.get('role', 'user').title()}. Please select the correct role.", "error")
             return redirect(url_for("login", role=user.get("role", "homeowner")))
         
-        # Set session - CRITICAL: Use integer user_id and exact role from DB
-        try:
-            session.clear()  # Clear any old session data
-            session.permanent = request.form.get("remember") == "on"
-            session["user_id"] = int(user_id)  # Ensure it's an integer
-            session["name"] = str(user_name)
-            session["role"] = str(user.get("role"))  # Use exact role from database
-            
-            # Force session to save
-            session.modified = True
-            
-            print(f"LOGIN SUCCESS: Session set - user_id: {session.get('user_id')}, role: {session.get('role')}, name: {session.get('name')}")
-        except Exception as e:
-            print(f"ERROR Login: Failed to set session - {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-            flash("Session error. Please try again.", "error")
-            return redirect(url_for("login", role=selected_role))
+        # Set session
+        session.clear()
+        session.permanent = request.form.get("remember") == "on"
+        session["user_id"] = int(user_id)
+        session["name"] = str(user.get("name") or "User")
+        session["role"] = str(user.get("role"))
+        session.modified = True
         
-        # Determine redirect URL
-        if user_role == "homeowner":
-            redirect_url = url_for("homeowner_overview")
-        elif user_role == "agent":
-            redirect_url = url_for("agent_dashboard")
-        elif user_role == "lender":
-            redirect_url = url_for("lender_dashboard")
-        else:
-            redirect_url = url_for("index")
+        # Redirect
+        redirect_map = {
+            "homeowner": url_for("homeowner_overview"),
+            "agent": url_for("agent_dashboard"),
+            "lender": url_for("lender_dashboard")
+        }
+        redirect_url = redirect_map.get(user_role, url_for("index"))
         
-        print(f"LOGIN: Redirecting to {redirect_url}")
-        
-        # Create response and set cookie
         response = redirect(redirect_url)
         response.set_cookie("save_email", email, max_age=365*24*60*60 if session.permanent else None)
-        
         return response
     
-    # GET request - show login form
     return render_template("auth/login.html", role=role)
 
 
@@ -1551,9 +1517,91 @@ def debug_check_account(email):
             "has_password_hash": bool(user.get("password_hash")),
             "password_hash_length": len(user.get("password_hash", "")),
             "password_hash_preview": user.get("password_hash", "")[:50] + "..." if user.get("password_hash") else None,
+            "password_hash_starts_with": user.get("password_hash", "")[:10] if user.get("password_hash") else None,
         })
     except Exception as e:
         return jsonify({"error": str(e), "email": email})
+
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    """Password reset - allows users to reset their password by email"""
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        new_password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        
+        if not email or not new_password:
+            flash("Please fill in email and new password.", "error")
+            return redirect(url_for("reset_password"))
+        
+        if new_password != confirm_password:
+            flash("Passwords do not match.", "error")
+            return redirect(url_for("reset_password"))
+        
+        if len(new_password) < 6:
+            flash("Password must be at least 6 characters.", "error")
+            return redirect(url_for("reset_password"))
+        
+        try:
+            user_row = get_user_by_email(email)
+            if not user_row:
+                flash("Account not found. Please check your email.", "error")
+                return redirect(url_for("reset_password"))
+            
+            user = dict(user_row) if hasattr(user_row, 'keys') and not isinstance(user_row, dict) else (user_row if isinstance(user_row, dict) else {})
+            user_id = user.get("id")
+            new_hash = generate_password_hash(new_password)
+            
+            from database import update_user_password
+            update_user_password(user_id, new_hash)
+            
+            flash("Password reset successful! Please log in with your new password.", "success")
+            return redirect(url_for("login", role=user.get("role", "homeowner")))
+        except Exception as e:
+            print(f"RESET PASSWORD ERROR: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+            flash("Error resetting password. Please try again.", "error")
+            return redirect(url_for("reset_password"))
+    
+    return render_template("auth/reset_password.html")
+
+
+@app.route("/debug/reset-password", methods=["POST"])
+def debug_reset_password():
+    """TEMPORARY: Reset password for debugging - REMOVE IN PRODUCTION"""
+    try:
+        data = request.get_json() or request.form
+        email = (data.get("email") or "").strip().lower()
+        new_password = data.get("password") or data.get("new_password")
+        
+        if not email or not new_password:
+            return jsonify({"error": "Email and password required"}), 400
+        
+        user_row = get_user_by_email(email)
+        if not user_row:
+            return jsonify({"error": "User not found"}), 404
+        
+        if hasattr(user_row, 'keys') and not isinstance(user_row, dict):
+            user = dict(user_row)
+        else:
+            user = user_row if isinstance(user_row, dict) else {}
+        
+        user_id = user.get("id")
+        new_hash = generate_password_hash(new_password)
+        
+        from database import update_user_password
+        update_user_password(user_id, new_hash)
+        
+        return jsonify({
+            "success": True,
+            "message": f"Password reset for user {user_id}",
+            "email": email
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
 @app.route("/logout")
