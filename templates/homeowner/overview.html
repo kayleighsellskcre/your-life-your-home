@@ -567,6 +567,115 @@
   </div>
 </div>
 
+<!-- Premium Agent Information Section - Desktop Only -->
+{% if professionals and professionals|length > 0 %}
+  {% set primary_prof = professionals[0] %}
+  <div class="premium-agent-section" style="max-width: 1400px; margin: 0 auto 6rem; padding: 0 2rem; display: none;">
+    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%); border-radius: 24px; padding: 3.5rem 4rem; box-shadow: 0 20px 60px rgba(58, 53, 44, 0.08), 0 8px 24px rgba(107, 106, 69, 0.06); border: 1px solid rgba(107, 106, 69, 0.1); position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+      <!-- Decorative Background Elements -->
+      <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(107, 106, 69, 0.03) 0%, transparent 70%); border-radius: 50%;"></div>
+      <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(200, 180, 151, 0.04) 0%, transparent 70%); border-radius: 50%;"></div>
+      
+      <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 3rem; align-items: center; position: relative; z-index: 1;">
+        <!-- Agent Photo -->
+        <div style="flex-shrink: 0;">
+          {% if primary_prof.get('professional_photo') %}
+          <div style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 4px solid #F6F2E8; box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15), inset 0 0 0 1px rgba(107, 106, 69, 0.1); position: relative;">
+            <img src="{{ url_for('static', filename=primary_prof.professional_photo) }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, transparent 50%); pointer-events: none;"></div>
+          </div>
+          {% else %}
+          <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3.5rem; font-weight: 600; border: 4px solid #F6F2E8; box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15); font-family: var(--font-heading);">
+            {{ (primary_prof.name or '?')[0] }}
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- Agent Information -->
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: inline-block; padding: 0.4rem 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.06) 100%); border-radius: 20px; margin-bottom: 1rem; border: 1px solid rgba(107, 106, 69, 0.12);">
+            <span style="font-size: 0.7rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.12em;">Your Real Estate Professional</span>
+          </div>
+          
+          <h2 style="font-family: var(--font-heading); font-size: 2.5rem; color: #3A352C; margin: 0 0 0.5rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2;">
+            {{ primary_prof.name or 'Professional' }}
+          </h2>
+          
+          <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 6px; height: 6px; border-radius: 50%; background: #6B6A45; flex-shrink: 0;"></div>
+              <span style="font-size: 1rem; color: #6B6A45; font-weight: 500; text-transform: capitalize;">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</span>
+            </div>
+            {% if primary_prof.get('brokerage_name') %}
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.95rem; color: #3A352C; opacity: 0.7;">at</span>
+              <span style="font-size: 1rem; color: #3A352C; font-weight: 500;">{{ primary_prof.brokerage_name }}</span>
+            </div>
+            {% endif %}
+          </div>
+          
+          {% if primary_prof.get('bio') %}
+          <p style="font-size: 1rem; line-height: 1.7; color: #3A352C; opacity: 0.75; margin-bottom: 1.5rem; font-weight: 300; max-width: 600px;">
+            {{ primary_prof.bio[:200] }}{% if primary_prof.bio|length > 200 %}...{% endif %}
+          </p>
+          {% endif %}
+          
+          <!-- Contact Information -->
+          <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+            {% if primary_prof.get('phone') and primary_prof.get('call_button_enabled', 1) %}
+            <a href="tel:{{ primary_prof.phone }}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.75rem; background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 100%); color: white; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(107, 106, 69, 0.35)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(107, 106, 69, 0.25)'">
+              <span style="font-size: 1.1rem;">📞</span>
+              <span>Call {{ primary_prof.phone }}</span>
+            </a>
+            {% endif %}
+            
+            {% if primary_prof.get('email') %}
+            <a href="mailto:{{ primary_prof.email }}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.75rem; background: white; color: #6B6A45; border: 2px solid rgba(107, 106, 69, 0.2); border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;" onmouseover="this.style.borderColor='#6B6A45'; this.style.background='#F6F2E8'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(107, 106, 69, 0.2)'; this.style.background='white'; this.style.transform='translateY(0)'">
+              <span style="font-size: 1.1rem;">✉️</span>
+              <span>Email</span>
+            </a>
+            {% endif %}
+            
+            {% if primary_prof.get('schedule_url') and primary_prof.get('schedule_button_enabled', 1) %}
+            <a href="{{ primary_prof.schedule_url }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.75rem; background: white; color: #6B6A45; border: 2px solid rgba(107, 106, 69, 0.2); border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;" onmouseover="this.style.borderColor='#6B6A45'; this.style.background='#F6F2E8'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(107, 106, 69, 0.2)'; this.style.background='white'; this.style.transform='translateY(0)'">
+              <span style="font-size: 1.1rem;">📅</span>
+              <span>Schedule Meeting</span>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Brokerage Logo -->
+        {% if primary_prof.get('brokerage_logo') %}
+        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: white; border-radius: 16px; border: 1px solid rgba(107, 106, 69, 0.1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);">
+          <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" style="max-height: 60px; max-width: 180px; object-fit: contain; filter: brightness(0.95);">
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    /* Show premium agent section on desktop only */
+    @media (min-width: 769px) {
+      .premium-agent-section {
+        display: block !important;
+      }
+    }
+    
+    /* Premium agent section hover effect */
+    .premium-agent-section > div:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 72px rgba(58, 53, 44, 0.12), 0 12px 32px rgba(107, 106, 69, 0.08) !important;
+    }
+    
+    /* Smooth entrance animation */
+    .premium-agent-section {
+      animation: fadeInUp 1s ease 0.7s both;
+    }
+  </style>
+{% endif %}
+
 <!-- Live Stats: Interactive Spotlight Cards -->
 <div style="margin-bottom: 6rem;" class="animate-in">
   <div style="text-align: center; margin-bottom: 2rem;">
