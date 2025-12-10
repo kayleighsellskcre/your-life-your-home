@@ -170,27 +170,79 @@ app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent 
 # Context processor to make professionals available to all homeowner templates
 @app.context_processor
 def inject_professionals():
-    """Make professionals data available to all templates."""
+    """Make professionals data available to all templates - CRITICAL FOR DASHBOARD DISPLAY."""
     from database import get_homeowner_professionals
     professionals = []
     user = get_current_user()
     if user and user.get("role") == "homeowner" and user.get("id"):
         try:
-            profs_raw = get_homeowner_professionals(user["id"])
-            print(f"DEBUG Context Processor: Found {len(profs_raw)} professionals for homeowner {user['id']}")
+            homeowner_id = user.get("id")
+            profs_raw = get_homeowner_professionals(homeowner_id)
+            print(f"CONTEXT PROCESSOR: Loading professionals for homeowner {homeowner_id} - found {len(profs_raw)}")
+            
             for prof in profs_raw:
                 if hasattr(prof, 'keys'):
                     prof_dict = dict(prof)
                     # Ensure professional_role is set correctly
                     if not prof_dict.get('professional_role'):
-                        prof_dict['professional_role'] = prof_dict.get('professional_type') or prof_dict.get('role')
+                        prof_dict['professional_role'] = prof_dict.get('professional_type') or prof_dict.get('role') or prof_dict.get('user_id')
+                    
+                    # Ensure we have the professional_id
+                    if not prof_dict.get('professional_id'):
+                        prof_dict['professional_id'] = prof_dict.get('user_id')
+                    
                     professionals.append(prof_dict)
-                    print(f"DEBUG Context Processor: Professional - role: {prof_dict.get('professional_role')}, name: {prof_dict.get('name')}, phone: {prof_dict.get('phone')}, has_profile: {bool(prof_dict.get('id'))}")
+                    print(f"CONTEXT PROCESSOR: Added professional - role: {prof_dict.get('professional_role')}, name: {prof_dict.get('name')}, id: {prof_dict.get('professional_id')}, phone: {prof_dict.get('phone')}")
                 else:
                     professionals.append(prof)
+            
+            if not professionals:
+                print(f"CONTEXT PROCESSOR WARNING: No professionals found for homeowner {homeowner_id}")
+                # Try to get from agent_id column as fallback
+                from database import get_user_by_id
+                homeowner_user = get_user_by_id(homeowner_id)
+                if homeowner_user:
+                    homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') and not isinstance(homeowner_user, dict) else homeowner_user
+                    agent_id = homeowner_dict.get("agent_id")
+                    if agent_id:
+                        print(f"CONTEXT PROCESSOR: Found agent_id {agent_id} in user record, attempting to load...")
+                        try:
+                            from database import get_user_by_id, get_user_profile
+                            agent_user = get_user_by_id(agent_id)
+                            if agent_user:
+                                agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') and not isinstance(agent_user, dict) else agent_user
+                                agent_profile = get_user_profile(agent_id)
+                                prof_data = {
+                                    'professional_id': agent_id,
+                                    'professional_role': 'agent',
+                                    'name': agent_dict.get('name'),
+                                    'email': agent_dict.get('email'),
+                                    'user_id': agent_id
+                                }
+                                if agent_profile:
+                                    profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') and not isinstance(agent_profile, dict) else agent_profile
+                                    prof_data.update({
+                                        'professional_photo': profile_dict.get('professional_photo'),
+                                        'brokerage_logo': profile_dict.get('brokerage_logo'),
+                                        'brokerage_name': profile_dict.get('brokerage_name'),
+                                        'phone': profile_dict.get('phone'),
+                                        'team_name': profile_dict.get('team_name'),
+                                        'website_url': profile_dict.get('website_url'),
+                                        'bio': profile_dict.get('bio'),
+                                    })
+                                professionals.append(prof_data)
+                                print(f"CONTEXT PROCESSOR: Added agent from agent_id column - {prof_data.get('name')}")
+                        except Exception as fallback_error:
+                            print(f"CONTEXT PROCESSOR: Fallback failed - {str(fallback_error)}")
         except Exception as e:
             import traceback
-            print(f"Error loading professionals in context processor: {traceback.format_exc()}")
+            print(f"CONTEXT PROCESSOR ERROR: {traceback.format_exc()}")
+    else:
+        if user:
+            print(f"CONTEXT PROCESSOR: User is not a homeowner - role: {user.get('role')}, id: {user.get('id')}")
+        else:
+            print(f"CONTEXT PROCESSOR: No user logged in")
+    
     return dict(professionals=professionals)
 
 # ---------------- AJAX PLANNER ROUTE ----------------
@@ -1355,78 +1407,164 @@ def signup():
             print(f"DEBUG Signup: All retries failed. Last error: {last_error}")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
-        # Create client relationship AND CRM contact for tracking
-        if role == "homeowner" and (agent_id or lender_id):
-            from database import create_client_relationship, add_agent_contact, get_user_by_id
-            try:
-                if agent_id:
-                    # Create client relationship
-                    create_client_relationship(
-                        homeowner_id=user_id,
-                        professional_id=agent_id,
-                        professional_role="agent",
-                        referral_code=referral_token_from_form if referral_token_from_form != "default" else None
-                    )
-                    print(f"SIGNUP: Created client relationship - homeowner {user_id} -> agent {agent_id}")
-                    
-                    # ALSO create CRM contact so they show up in agent's CRM
-                    try:
-                        from database import list_agent_contacts
-                        # Check if contact already exists
-                        existing_contacts = list_agent_contacts(agent_id)
-                        contact_exists = False
-                        for existing in existing_contacts:
-                            existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
-                            if existing_dict.get("email") and existing_dict.get("email").lower() == email.lower():
-                                contact_exists = True
-                                print(f"SIGNUP: CRM contact already exists for {email}")
-                                break
+        # CRITICAL: Create client relationship AND CRM contact - MUST WORK
+        if role == "homeowner":
+            print(f"\n{'='*60}")
+            print(f"SIGNUP: Setting up homeowner relationships")
+            print(f"  Homeowner ID: {user_id}")
+            print(f"  Agent ID: {agent_id}")
+            print(f"  Lender ID: {lender_id}")
+            print(f"  Referral Token: {referral_token_from_form}")
+            print(f"{'='*60}\n")
+            
+            from database import (
+                create_client_relationship, 
+                add_agent_contact, 
+                list_agent_contacts,
+                get_user_by_id
+            )
+            
+            relationships_created = []
+            crm_contacts_created = []
+            
+            # Handle agent relationship
+            if agent_id:
+                try:
+                    # Verify agent exists
+                    agent_user = get_user_by_id(agent_id)
+                    if not agent_user:
+                        print(f"SIGNUP ERROR: Agent {agent_id} not found!")
+                        flash(f"Error: Agent not found. Please contact support.", "error")
+                    else:
+                        agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') and not isinstance(agent_user, dict) else agent_user
+                        print(f"SIGNUP: Agent verified - {agent_dict.get('name')} (ID: {agent_id})")
                         
-                        if not contact_exists:
-                            # Create CRM contact with "new" stage
-                            contact_id = add_agent_contact(
-                                agent_user_id=agent_id,
-                                name=name,
-                                email=email,
-                                phone="",  # Will be updated later if provided
-                                stage="new",  # New signup = new lead
-                                best_contact=email if email else "",
-                                last_touch="",
-                                birthday="",
-                                home_anniversary="",
-                                address="",
-                                notes=f"Signed up via referral link on {datetime.now().strftime('%Y-%m-%d')}",
-                                tags="referral",
-                                property_address="",
-                                property_value=None,
-                                equity_estimate=None
+                        # Create client relationship - CRITICAL
+                        try:
+                            relationship_id = create_client_relationship(
+                                homeowner_id=user_id,
+                                professional_id=agent_id,
+                                professional_role="agent",
+                                referral_code=referral_token_from_form if referral_token_from_form != "default" else None
                             )
-                            print(f"SIGNUP: Created CRM contact {contact_id} for agent {agent_id}")
-                        else:
-                            print(f"SIGNUP: CRM contact already exists, skipping creation")
-                    except Exception as crm_error:
-                        print(f"SIGNUP WARNING: Could not create CRM contact - {str(crm_error)}")
-                        import traceback
-                        print(traceback.format_exc())
-                        # Don't fail signup if CRM contact creation fails
-                
-                if lender_id:
-                    create_client_relationship(
+                            relationships_created.append(f"agent relationship (ID: {relationship_id})")
+                            print(f"SIGNUP SUCCESS: Created client relationship - homeowner {user_id} -> agent {agent_id} (relationship ID: {relationship_id})")
+                        except Exception as rel_error:
+                            print(f"SIGNUP ERROR: Failed to create client relationship - {str(rel_error)}")
+                            import traceback
+                            print(traceback.format_exc())
+                            flash(f"Warning: Could not link to agent. Please contact support.", "error")
+                        
+                        # Create CRM contact - CRITICAL
+                        try:
+                            # Check if contact already exists
+                            existing_contacts = list_agent_contacts(agent_id)
+                            contact_exists = False
+                            existing_contact_id = None
+                            for existing in existing_contacts:
+                                existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
+                                if existing_dict.get("email") and existing_dict.get("email").lower() == email.lower():
+                                    contact_exists = True
+                                    existing_contact_id = existing_dict.get("id")
+                                    print(f"SIGNUP: CRM contact already exists for {email} (ID: {existing_contact_id})")
+                                    break
+                            
+                            if not contact_exists:
+                                contact_id = add_agent_contact(
+                                    agent_user_id=agent_id,
+                                    name=name,
+                                    email=email,
+                                    phone="",
+                                    stage="new",
+                                    best_contact=email if email else "",
+                                    last_touch="",
+                                    birthday="",
+                                    home_anniversary="",
+                                    address="",
+                                    notes=f"Signed up via referral link on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                                    tags="referral",
+                                    property_address="",
+                                    property_value=None,
+                                    equity_estimate=None
+                                )
+                                crm_contacts_created.append(f"CRM contact (ID: {contact_id})")
+                                print(f"SIGNUP SUCCESS: Created CRM contact {contact_id} for agent {agent_id}")
+                                
+                                # VERIFY: Check that contact was actually created
+                                verify_contacts = list_agent_contacts(agent_id)
+                                found_contact = False
+                                for vc in verify_contacts:
+                                    vc_dict = dict(vc) if hasattr(vc, 'keys') and not isinstance(vc, dict) else vc
+                                    if vc_dict.get("id") == contact_id:
+                                        found_contact = True
+                                        print(f"SIGNUP VERIFICATION: CRM contact {contact_id} confirmed in agent's CRM")
+                                        break
+                                
+                                if not found_contact:
+                                    print(f"SIGNUP VERIFICATION ERROR: CRM contact {contact_id} NOT found in agent's CRM after creation!")
+                                    flash(f"Warning: Contact created but verification failed. Please contact support.", "error")
+                            else:
+                                print(f"SIGNUP: CRM contact already exists (ID: {existing_contact_id}), skipping creation")
+                                crm_contacts_created.append(f"CRM contact (ID: {existing_contact_id}, already existed)")
+                        except Exception as crm_error:
+                            print(f"SIGNUP ERROR: Failed to create CRM contact - {str(crm_error)}")
+                            import traceback
+                            print(traceback.format_exc())
+                            flash(f"Warning: Could not add you to agent's CRM. Please contact support.", "error")
+                except Exception as agent_error:
+                    print(f"SIGNUP ERROR: Agent setup failed - {str(agent_error)}")
+                    import traceback
+                    print(traceback.format_exc())
+                    flash(f"Error linking to agent. Please contact support.", "error")
+            
+            # Handle lender relationship
+            if lender_id:
+                try:
+                    relationship_id = create_client_relationship(
                         homeowner_id=user_id,
                         professional_id=lender_id,
                         professional_role="lender",
                         referral_code=referral_token_from_form if referral_token_from_form != "default" else None
                     )
-                    print(f"SIGNUP: Created client relationship - homeowner {user_id} -> lender {lender_id}")
-                
-                if referral_token_from_form == "default":
-                    flash("Welcome! You've been connected to Kayleigh Biggs at Worth Clark Realty.", "success")
-                else:
+                    relationships_created.append(f"lender relationship (ID: {relationship_id})")
+                    print(f"SIGNUP SUCCESS: Created client relationship - homeowner {user_id} -> lender {lender_id}")
+                except Exception as lender_error:
+                    print(f"SIGNUP ERROR: Failed to create lender relationship - {str(lender_error)}")
+                    import traceback
+                    print(traceback.format_exc())
+            
+            # Final verification - verify relationships were actually created
+            from database import get_homeowner_professionals
+            try:
+                verify_profs = get_homeowner_professionals(user_id)
+                print(f"SIGNUP VERIFICATION: Found {len(verify_profs)} professionals for homeowner {user_id}")
+                for vp in verify_profs:
+                    vp_dict = dict(vp) if hasattr(vp, 'keys') and not isinstance(vp, dict) else vp
+                    print(f"  - {vp_dict.get('professional_role')}: {vp_dict.get('name')} (ID: {vp_dict.get('professional_id')})")
+            except Exception as verify_error:
+                print(f"SIGNUP VERIFICATION ERROR: {str(verify_error)}")
+            
+            # Final summary
+            print(f"\n{'='*60}")
+            print(f"SIGNUP: Relationship Summary")
+            print(f"  Relationships created: {len(relationships_created)}")
+            for rel in relationships_created:
+                print(f"    - {rel}")
+            print(f"  CRM contacts created: {len(crm_contacts_created)}")
+            for crm in crm_contacts_created:
+                print(f"    - {crm}")
+            print(f"{'='*60}\n")
+            
+            # Success message
+            if referral_token_from_form == "default":
+                flash("Welcome! You've been connected to Kayleigh Biggs at Worth Clark Realty.", "success")
+            else:
+                if relationships_created and crm_contacts_created:
+                    flash("Welcome! You've been connected to your professional team and added to their CRM.", "success")
+                elif relationships_created:
                     flash("Welcome! You've been connected to your professional team.", "success")
-            except Exception as e:
-                import traceback
-                print(f"SIGNUP ERROR: Could not create client relationship - {traceback.format_exc()}")
-                # Don't fail signup, but log the error
+                else:
+                    flash("Account created, but there was an issue linking to your agent. Please contact support.", "error")
 
         # Auto-login after signup (permanent session for convenience)
         session.permanent = True
@@ -1885,6 +2023,64 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
             homeowner_id = user["id"]
             viewing_as_professional = False
     
+    # CRITICAL: Explicitly load professionals for this homeowner
+    professionals_list = []
+    if homeowner_id:
+        try:
+            profs_raw = get_homeowner_professionals(homeowner_id)
+            print(f"HOMEOWNER DASHBOARD: Loading professionals for homeowner {homeowner_id} - found {len(profs_raw)}")
+            for prof in profs_raw:
+                if hasattr(prof, 'keys'):
+                    prof_dict = dict(prof)
+                    if not prof_dict.get('professional_role'):
+                        prof_dict['professional_role'] = prof_dict.get('professional_type') or 'agent'
+                    if not prof_dict.get('professional_id'):
+                        prof_dict['professional_id'] = prof_dict.get('user_id')
+                    professionals_list.append(prof_dict)
+                    print(f"HOMEOWNER DASHBOARD: Professional - {prof_dict.get('name')} ({prof_dict.get('professional_role')})")
+                else:
+                    professionals_list.append(prof)
+            
+            if not professionals_list:
+                print(f"HOMEOWNER DASHBOARD WARNING: No professionals found for homeowner {homeowner_id}")
+                # Fallback: check agent_id column
+                if homeowner_user:
+                    homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') and not isinstance(homeowner_user, dict) else homeowner_user
+                    agent_id = homeowner_dict.get("agent_id")
+                    if agent_id:
+                        print(f"HOMEOWNER DASHBOARD: Found agent_id {agent_id} in user record, loading...")
+                        try:
+                            from database import get_user_by_id, get_user_profile
+                            agent_user = get_user_by_id(agent_id)
+                            if agent_user:
+                                agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') and not isinstance(agent_user, dict) else agent_user
+                                agent_profile = get_user_profile(agent_id)
+                                prof_data = {
+                                    'professional_id': agent_id,
+                                    'professional_role': 'agent',
+                                    'name': agent_dict.get('name'),
+                                    'email': agent_dict.get('email'),
+                                    'user_id': agent_id
+                                }
+                                if agent_profile:
+                                    profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') and not isinstance(agent_profile, dict) else agent_profile
+                                    prof_data.update({
+                                        'professional_photo': profile_dict.get('professional_photo'),
+                                        'brokerage_logo': profile_dict.get('brokerage_logo'),
+                                        'brokerage_name': profile_dict.get('brokerage_name'),
+                                        'phone': profile_dict.get('phone'),
+                                        'team_name': profile_dict.get('team_name'),
+                                        'website_url': profile_dict.get('website_url'),
+                                        'bio': profile_dict.get('bio'),
+                                    })
+                                professionals_list.append(prof_data)
+                                print(f"HOMEOWNER DASHBOARD: Added agent from agent_id column - {prof_data.get('name')}")
+                        except Exception as fallback_error:
+                            print(f"HOMEOWNER DASHBOARD: Fallback failed - {str(fallback_error)}")
+        except Exception as prof_error:
+            import traceback
+            print(f"HOMEOWNER DASHBOARD ERROR loading professionals: {traceback.format_exc()}")
+    
     # Get snapshot (only for authenticated homeowners)
     snapshot = None
     if homeowner_user:
@@ -1899,20 +2095,12 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
             "loan_balance": None,
         }
     
-    # Get associated professionals (only for authenticated homeowners)
-    professionals = []
-    if homeowner_id:
-        try:
-            profs_raw = get_homeowner_professionals(homeowner_id)
-            for prof in profs_raw:
-                if hasattr(prof, 'keys'):
-                    prof_dict = dict(prof)
-                    professionals.append(prof_dict)
-                else:
-                    professionals.append(prof)
-        except Exception as e:
-            import traceback
-            print(f"Error loading professionals: {traceback.format_exc()}")
+    # Use the professionals_list we loaded earlier, or fallback to empty list
+    professionals = professionals_list if professionals_list else []
+    
+    # Final verification before rendering
+    if homeowner_id and not professionals:
+        print(f"HOMEOWNER DASHBOARD FINAL WARNING: No professionals found for homeowner {homeowner_id} - dashboard will show empty team section")
 
     return render_template(
         "homeowner/overview.html",
