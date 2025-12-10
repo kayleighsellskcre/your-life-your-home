@@ -1088,20 +1088,32 @@ def signup():
         name = request.form.get("name", "").strip()
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        role_from_form = request.form.get("role", role)
+        role_from_form = request.form.get("role", "").strip()
         referral_token_from_form = request.form.get("ref_token") or referral_token
 
-        # For homeowners, always use "homeowner" (no manual selection)
-        if role == "homeowner":
-            role = "homeowner"
-        elif role_from_form in ("agent", "lender"):
+        # Determine role: prioritize form value, then URL parameter, default to homeowner
+        if role_from_form in ("agent", "lender", "homeowner"):
             role = role_from_form
+        elif role in ("agent", "lender", "homeowner"):
+            role = role  # Use URL parameter
         else:
-            # Default to homeowner if no role specified
-            role = "homeowner"
+            role = "homeowner"  # Default fallback
 
-        if not email or not password:
-            flash("Please fill in email and password.", "error")
+        # Validate required fields
+        if not name:
+            flash("Please enter your full name.", "error")
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+        
+        if not email:
+            flash("Please enter your email address.", "error")
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+        
+        if not password:
+            flash("Please enter a password.", "error")
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+        
+        if len(password) < 6:
+            flash("Password must be at least 6 characters long.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         password_hash = generate_password_hash(password)
@@ -1138,14 +1150,33 @@ def signup():
                         agent_id = get_or_create_default_agent()
                         referral_token_from_form = "default"
 
+        # Debug: Print signup attempt
+        print(f"DEBUG Signup: role={role}, email={email}, name={name}, agent_id={agent_id}, lender_id={lender_id}")
+        
         try:
             user_id = create_user(name, email, password_hash, role, agent_id=agent_id, lender_id=lender_id)
+            print(f"DEBUG Signup: User created successfully with ID {user_id}")
         except ValueError as e:
+            print(f"DEBUG Signup: ValueError - {str(e)}")
             flash(str(e), "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
-        except Exception:
-            flash("That email is already in use. Please sign in instead.", "error")
-            return redirect(url_for("login"))
+        except sqlite3.IntegrityError as e:
+            # Check if it's a unique constraint violation (duplicate email)
+            print(f"DEBUG Signup: IntegrityError - {str(e)}")
+            if "UNIQUE constraint failed" in str(e) or "email" in str(e).lower():
+                flash("That email is already in use. Please sign in instead.", "error")
+                return redirect(url_for("login", role=role))
+            else:
+                flash(f"An error occurred while creating your account. Please try again.", "error")
+                import traceback
+                print(f"Database error during signup: {traceback.format_exc()}")
+                return redirect(url_for("signup", role=role, ref=referral_token_from_form))
+        except Exception as e:
+            print(f"DEBUG Signup: Exception - {type(e).__name__}: {str(e)}")
+            flash(f"An unexpected error occurred: {str(e)}. Please try again.", "error")
+            import traceback
+            print(f"Unexpected error during signup: {traceback.format_exc()}")
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         # Create client relationship for tracking (backward compatibility)
         if role == "homeowner" and (agent_id or lender_id):
@@ -1178,6 +1209,12 @@ def signup():
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
+        
+        # Success message for agents/lenders
+        if role == "agent":
+            flash("Account created successfully! Welcome to Your Life Your Home.", "success")
+        elif role == "lender":
+            flash("Account created successfully! Welcome to Your Life Your Home.", "success")
         
         # Save email to localStorage (will be handled by JavaScript)
         response = redirect(url_for("agent_dashboard") if role == "agent"
@@ -3358,6 +3395,126 @@ def agent_referrals():
         print(f"Error in agent_referrals: {error_trace}")
         flash(f"Error loading referral page: {str(e)}", "error")
         return redirect(url_for("agent_dashboard"))
+
+
+@app.route("/agent/vendors", methods=["GET", "POST"])
+def agent_vendors():
+    """Agent trusted vendors management."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from database import (
+        create_trusted_vendor,
+        get_trusted_vendors,
+        update_trusted_vendor,
+        delete_trusted_vendor
+    )
+    
+    if request.method == "POST":
+        action = request.form.get("action", "").strip()
+        
+        if action == "create":
+            name = request.form.get("name", "").strip()
+            category = request.form.get("category", "").strip()
+            contact_name = request.form.get("contact_name", "").strip() or None
+            phone = request.form.get("phone", "").strip() or None
+            email = request.form.get("email", "").strip().lower() or None
+            website = request.form.get("website", "").strip() or None
+            address = request.form.get("address", "").strip() or None
+            notes = request.form.get("notes", "").strip() or None
+            
+            if not name or not category:
+                flash("Name and category are required.", "error")
+            else:
+                try:
+                    vendor_id = create_trusted_vendor(
+                        agent_id=user["id"],
+                        name=name,
+                        category=category,
+                        contact_name=contact_name,
+                        phone=phone,
+                        email=email,
+                        website=website,
+                        address=address,
+                        notes=notes
+                    )
+                    flash(f"Vendor '{name}' added successfully!", "success")
+                except Exception as e:
+                    flash(f"Error adding vendor: {str(e)}", "error")
+        
+        elif action == "update":
+            vendor_id = request.form.get("vendor_id")
+            if vendor_id:
+                try:
+                    vendor_id = int(vendor_id)
+                    name = request.form.get("name", "").strip()
+                    category = request.form.get("category", "").strip()
+                    contact_name = request.form.get("contact_name", "").strip() or None
+                    phone = request.form.get("phone", "").strip() or None
+                    email = request.form.get("email", "").strip().lower() or None
+                    website = request.form.get("website", "").strip() or None
+                    address = request.form.get("address", "").strip() or None
+                    notes = request.form.get("notes", "").strip() or None
+                    
+                    if update_trusted_vendor(
+                        vendor_id=vendor_id,
+                        name=name,
+                        category=category,
+                        contact_name=contact_name,
+                        phone=phone,
+                        email=email,
+                        website=website,
+                        address=address,
+                        notes=notes
+                    ):
+                        flash("Vendor updated successfully!", "success")
+                    else:
+                        flash("Error updating vendor.", "error")
+                except (ValueError, Exception) as e:
+                    flash(f"Error updating vendor: {str(e)}", "error")
+        
+        elif action == "delete":
+            vendor_id = request.form.get("vendor_id")
+            if vendor_id:
+                try:
+                    vendor_id = int(vendor_id)
+                    if delete_trusted_vendor(vendor_id):
+                        flash("Vendor removed successfully.", "success")
+                    else:
+                        flash("Error removing vendor.", "error")
+                except (ValueError, Exception) as e:
+                    flash(f"Error removing vendor: {str(e)}", "error")
+        
+        return redirect(url_for("agent_vendors"))
+    
+    # Get all vendors
+    vendors_raw = get_trusted_vendors(user["id"])
+    vendors = []
+    for vendor in vendors_raw:
+        if hasattr(vendor, 'keys'):
+            vendors.append(dict(vendor))
+        else:
+            vendors.append(vendor)
+    
+    # Group by category
+    vendors_by_category = {}
+    categories = set()
+    for vendor in vendors:
+        cat = vendor.get("category", "Other")
+        categories.add(cat)
+        if cat not in vendors_by_category:
+            vendors_by_category[cat] = []
+        vendors_by_category[cat].append(vendor)
+    
+    return render_template(
+        "agent/vendors.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        vendors=vendors,
+        vendors_by_category=vendors_by_category,
+        categories=sorted(categories),
+    )
 
 
 @app.route("/agent/settings/profile", methods=["GET", "POST"])

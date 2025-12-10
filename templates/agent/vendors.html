@@ -1,0 +1,601 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .vendors-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .vendors-header {
+    margin-bottom: 2.5rem;
+  }
+  
+  .vendors-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .vendors-header p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .vendors-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .btn-primary {
+    background: var(--olive-green);
+    color: var(--white);
+    padding: 0.875rem 2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-primary:hover {
+    background: #5A5940;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-premium-hover);
+  }
+  
+  .vendors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .vendor-card {
+    background: var(--white);
+    border: var(--border-light);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-premium);
+    position: relative;
+  }
+  
+  .vendor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-premium-hover);
+    border-color: var(--olive-green);
+  }
+  
+  .vendor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--light-cream);
+  }
+  
+  .vendor-name {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+    margin: 0;
+  }
+  
+  .vendor-category {
+    display: inline-block;
+    background: var(--gradient-warm);
+    color: var(--olive-green);
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+  }
+  
+  .vendor-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .btn-icon {
+    background: transparent;
+    border: 1px solid var(--taupe-beige);
+    color: var(--olive-green);
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-icon:hover {
+    background: var(--olive-green);
+    color: var(--white);
+    border-color: var(--olive-green);
+  }
+  
+  .vendor-details {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .vendor-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.9;
+  }
+  
+  .vendor-detail-item strong {
+    color: var(--charcoal-brown);
+    opacity: 1;
+    min-width: 80px;
+  }
+  
+  .vendor-detail-item a {
+    color: var(--olive-green);
+    text-decoration: none;
+  }
+  
+  .vendor-detail-item a:hover {
+    text-decoration: underline;
+  }
+  
+  .vendor-notes {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--light-cream);
+    font-style: italic;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    line-height: 1.6;
+  }
+  
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(58, 53, 44, 0.6);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  
+  .modal.active {
+    display: flex;
+  }
+  
+  .modal-content {
+    background: var(--white);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-premium-hover);
+    position: relative;
+  }
+  
+  .modal-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--light-cream);
+  }
+  
+  .modal-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 500;
+  }
+  
+  .modal-close {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity var(--transition-base);
+  }
+  
+  .modal-close:hover {
+    opacity: 1;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    background: var(--white);
+    transition: all var(--transition-base);
+    font-family: var(--font-body);
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--light-cream);
+  }
+  
+  .btn-secondary {
+    background: var(--white);
+    color: var(--olive-green);
+    padding: 0.875rem 2rem;
+    border: 2px solid var(--olive-green);
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+  
+  .btn-secondary:hover {
+    background: var(--olive-green);
+    color: var(--white);
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--white);
+    border: var(--border-light);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-premium);
+  }
+  
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+  }
+  
+  .empty-state p {
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    margin-bottom: 1.5rem;
+  }
+  
+  .category-section {
+    margin-bottom: 3rem;
+  }
+  
+  .category-header {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--olive-green);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+</style>
+
+<div class="vendors-container">
+  <div class="vendors-header">
+    <h1>Trusted Vendors</h1>
+    <p>Manage your network of trusted professionals. Share recommendations with clients and link vendors to specific transactions.</p>
+  </div>
+  
+  <div class="vendors-actions">
+    <button class="btn-primary" onclick="openVendorModal()">
+      ➕ Add New Vendor
+    </button>
+  </div>
+  
+  {% if vendors %}
+    {% for category in categories %}
+      <div class="category-section">
+        <h2 class="category-header">{{ category }}</h2>
+        <div class="vendors-grid">
+          {% for vendor in vendors_by_category[category] %}
+            <div class="vendor-card">
+              <div class="vendor-header">
+                <div>
+                  <h3 class="vendor-name">{{ vendor.name }}</h3>
+                  <span class="vendor-category">{{ vendor.category }}</span>
+                </div>
+                <div class="vendor-actions">
+                  <button class="btn-icon" onclick="editVendor({{ vendor.id }})" title="Edit">
+                    ✏️
+                  </button>
+                  <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to remove this vendor?');">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="vendor_id" value="{{ vendor.id }}">
+                    <button type="submit" class="btn-icon" title="Remove">
+                      🗑️
+                    </button>
+                  </form>
+                </div>
+              </div>
+              
+              <div class="vendor-details">
+                {% if vendor.contact_name %}
+                <div class="vendor-detail-item">
+                  <strong>Contact:</strong>
+                  <span>{{ vendor.contact_name }}</span>
+                </div>
+                {% endif %}
+                
+                {% if vendor.phone %}
+                <div class="vendor-detail-item">
+                  <strong>Phone:</strong>
+                  <a href="tel:{{ vendor.phone }}">{{ vendor.phone }}</a>
+                </div>
+                {% endif %}
+                
+                {% if vendor.email %}
+                <div class="vendor-detail-item">
+                  <strong>Email:</strong>
+                  <a href="mailto:{{ vendor.email }}">{{ vendor.email }}</a>
+                </div>
+                {% endif %}
+                
+                {% if vendor.website %}
+                <div class="vendor-detail-item">
+                  <strong>Website:</strong>
+                  <a href="{{ vendor.website }}" target="_blank" rel="noopener">{{ vendor.website }}</a>
+                </div>
+                {% endif %}
+                
+                {% if vendor.address %}
+                <div class="vendor-detail-item">
+                  <strong>Address:</strong>
+                  <span>{{ vendor.address }}</span>
+                </div>
+                {% endif %}
+              </div>
+              
+              {% if vendor.notes %}
+              <div class="vendor-notes">
+                <strong>Notes:</strong> {{ vendor.notes }}
+              </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">🏢</div>
+      <h3>No vendors yet</h3>
+      <p>Start building your trusted network by adding your first vendor.</p>
+      <button class="btn-primary" onclick="openVendorModal()">
+        ➕ Add Your First Vendor
+      </button>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Add/Edit Vendor Modal -->
+<div id="vendorModal" class="modal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeVendorModal()">×</button>
+    <div class="modal-header">
+      <h2 id="modalTitle">Add New Vendor</h2>
+    </div>
+    
+    <form method="post" id="vendorForm">
+      <input type="hidden" name="action" id="formAction" value="create">
+      <input type="hidden" name="vendor_id" id="vendorId" value="">
+      
+      <div class="form-group">
+        <label for="name">Vendor Name *</label>
+        <input type="text" id="name" name="name" required placeholder="e.g., ABC Home Inspections">
+      </div>
+      
+      <div class="form-group">
+        <label for="category">Category *</label>
+        <select id="category" name="category" required>
+          <option value="">Select a category...</option>
+          <option value="Inspection">Inspection</option>
+          <option value="Lending">Lending</option>
+          <option value="Repairs">Repairs & Maintenance</option>
+          <option value="Insurance">Insurance</option>
+          <option value="Legal">Legal Services</option>
+          <option value="Title">Title Services</option>
+          <option value="Appraisal">Appraisal</option>
+          <option value="Contractor">Contractor</option>
+          <option value="Design">Design & Staging</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="contact_name">Contact Name</label>
+        <input type="text" id="contact_name" name="contact_name" placeholder="Primary contact person">
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" placeholder="(555) 123-4567">
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="contact@example.com">
+      </div>
+      
+      <div class="form-group">
+        <label for="website">Website</label>
+        <input type="url" id="website" name="website" placeholder="https://example.com">
+      </div>
+      
+      <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text" id="address" name="address" placeholder="Street address, City, State">
+      </div>
+      
+      <div class="form-group">
+        <label for="notes">Notes & Recommendations</label>
+        <textarea id="notes" name="notes" placeholder="Add any notes, recommendations, or special instructions about this vendor..."></textarea>
+      </div>
+      
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" onclick="closeVendorModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Save Vendor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openVendorModal(vendorData = null) {
+    const modal = document.getElementById('vendorModal');
+    const form = document.getElementById('vendorForm');
+    const title = document.getElementById('modalTitle');
+    const actionInput = document.getElementById('formAction');
+    const vendorIdInput = document.getElementById('vendorId');
+    
+    if (vendorData) {
+      // Edit mode
+      title.textContent = 'Edit Vendor';
+      actionInput.value = 'update';
+      vendorIdInput.value = vendorData.id;
+      document.getElementById('name').value = vendorData.name || '';
+      document.getElementById('category').value = vendorData.category || '';
+      document.getElementById('contact_name').value = vendorData.contact_name || '';
+      document.getElementById('phone').value = vendorData.phone || '';
+      document.getElementById('email').value = vendorData.email || '';
+      document.getElementById('website').value = vendorData.website || '';
+      document.getElementById('address').value = vendorData.address || '';
+      document.getElementById('notes').value = vendorData.notes || '';
+    } else {
+      // Create mode
+      title.textContent = 'Add New Vendor';
+      actionInput.value = 'create';
+      vendorIdInput.value = '';
+      form.reset();
+    }
+    
+    modal.classList.add('active');
+  }
+  
+  function closeVendorModal() {
+    document.getElementById('vendorModal').classList.remove('active');
+  }
+  
+  function editVendor(vendorId) {
+    // Get vendor data from the card
+    const vendorCard = event.target.closest('.vendor-card');
+    const vendorData = {
+      id: vendorId,
+      name: vendorCard.querySelector('.vendor-name').textContent.trim(),
+      category: vendorCard.querySelector('.vendor-category').textContent.trim(),
+      contact_name: vendorCard.querySelector('.vendor-detail-item strong')?.nextSibling?.textContent?.trim() || '',
+      phone: '',
+      email: '',
+      website: '',
+      address: '',
+      notes: ''
+    };
+    
+    // Extract details from the card
+    const detailItems = vendorCard.querySelectorAll('.vendor-detail-item');
+    detailItems.forEach(item => {
+      const label = item.querySelector('strong')?.textContent.trim();
+      const value = item.textContent.replace(label, '').trim();
+      if (label === 'Phone:') vendorData.phone = value;
+      if (label === 'Email:') vendorData.email = value;
+      if (label === 'Website:') vendorData.website = value;
+      if (label === 'Address:') vendorData.address = value;
+    });
+    
+    const notesEl = vendorCard.querySelector('.vendor-notes');
+    if (notesEl) {
+      vendorData.notes = notesEl.textContent.replace('Notes:', '').trim();
+    }
+    
+    openVendorModal(vendorData);
+  }
+  
+  // Close modal when clicking outside
+  document.getElementById('vendorModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeVendorModal();
+    }
+  });
+  
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeVendorModal();
+    }
+  });
+</script>
+{% endblock %}
+

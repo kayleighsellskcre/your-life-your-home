@@ -165,6 +165,50 @@ def init_db() -> None:
     except:
         pass
 
+    # ------------- TRUSTED VENDORS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS trusted_vendors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            contact_name TEXT,
+            phone TEXT,
+            email TEXT,
+            website TEXT,
+            address TEXT,
+            notes TEXT,
+            is_active INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create index for faster lookups
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_trusted_vendors_agent_id ON trusted_vendors(agent_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_trusted_vendors_category ON trusted_vendors(category)")
+    except:
+        pass
+
+    # ------------- TRANSACTION VENDOR LINKS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS transaction_vendors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_id INTEGER NOT NULL,
+            vendor_id INTEGER NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (transaction_id) REFERENCES agent_transactions(id) ON DELETE CASCADE,
+            FOREIGN KEY (vendor_id) REFERENCES trusted_vendors(id) ON DELETE CASCADE,
+            UNIQUE(transaction_id, vendor_id)
+        )
+        """
+    )
+
     # ------------- PROPERTIES -------------
     cur.execute(
         """
@@ -3193,6 +3237,191 @@ def get_accessible_homeowners(user_id: int, user_role: str) -> List[int]:
     homeowner_ids = [row[0] for row in cur.fetchall()]
     conn.close()
     return homeowner_ids
+
+
+# =========================
+# TRUSTED VENDORS MANAGEMENT
+# =========================
+
+def create_trusted_vendor(
+    agent_id: int,
+    name: str,
+    category: str,
+    contact_name: Optional[str] = None,
+    phone: Optional[str] = None,
+    email: Optional[str] = None,
+    website: Optional[str] = None,
+    address: Optional[str] = None,
+    notes: Optional[str] = None
+) -> int:
+    """Create a new trusted vendor for an agent."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """INSERT INTO trusted_vendors 
+           (agent_id, name, category, contact_name, phone, email, website, address, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (agent_id, name, category, contact_name, phone, email, website, address, notes)
+    )
+    vendor_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return vendor_id
+
+
+def get_trusted_vendors(agent_id: int, category: Optional[str] = None) -> List[sqlite3.Row]:
+    """Get all trusted vendors for an agent, optionally filtered by category."""
+    conn = get_connection()
+    cur = conn.cursor()
+    if category:
+        cur.execute(
+            """SELECT * FROM trusted_vendors 
+               WHERE agent_id = ? AND category = ? AND is_active = 1
+               ORDER BY name ASC""",
+            (agent_id, category)
+        )
+    else:
+        cur.execute(
+            """SELECT * FROM trusted_vendors 
+               WHERE agent_id = ? AND is_active = 1
+               ORDER BY category ASC, name ASC""",
+            (agent_id,)
+        )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def get_trusted_vendor_by_id(vendor_id: int) -> Optional[sqlite3.Row]:
+    """Get a specific trusted vendor by ID."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM trusted_vendors WHERE id = ?", (vendor_id,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def update_trusted_vendor(
+    vendor_id: int,
+    name: Optional[str] = None,
+    category: Optional[str] = None,
+    contact_name: Optional[str] = None,
+    phone: Optional[str] = None,
+    email: Optional[str] = None,
+    website: Optional[str] = None,
+    address: Optional[str] = None,
+    notes: Optional[str] = None
+) -> bool:
+    """Update a trusted vendor. Returns True if successful."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    updates = []
+    params = []
+    
+    if name is not None:
+        updates.append("name = ?")
+        params.append(name)
+    if category is not None:
+        updates.append("category = ?")
+        params.append(category)
+    if contact_name is not None:
+        updates.append("contact_name = ?")
+        params.append(contact_name)
+    if phone is not None:
+        updates.append("phone = ?")
+        params.append(phone)
+    if email is not None:
+        updates.append("email = ?")
+        params.append(email)
+    if website is not None:
+        updates.append("website = ?")
+        params.append(website)
+    if address is not None:
+        updates.append("address = ?")
+        params.append(address)
+    if notes is not None:
+        updates.append("notes = ?")
+        params.append(notes)
+    
+    if not updates:
+        conn.close()
+        return False
+    
+    updates.append("updated_at = CURRENT_TIMESTAMP")
+    params.append(vendor_id)
+    
+    cur.execute(
+        f"UPDATE trusted_vendors SET {', '.join(updates)} WHERE id = ?",
+        params
+    )
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+
+def delete_trusted_vendor(vendor_id: int) -> bool:
+    """Soft delete a trusted vendor (set is_active = 0). Returns True if successful."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE trusted_vendors SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+        (vendor_id,)
+    )
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+
+def link_vendor_to_transaction(transaction_id: int, vendor_id: int) -> bool:
+    """Link a trusted vendor to a transaction. Returns True if successful."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO transaction_vendors (transaction_id, vendor_id) VALUES (?, ?)",
+            (transaction_id, vendor_id)
+        )
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        # Already linked
+        conn.close()
+        return False
+
+
+def get_transaction_vendors(transaction_id: int) -> List[sqlite3.Row]:
+    """Get all vendors linked to a transaction."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT tv.* FROM trusted_vendors tv
+           JOIN transaction_vendors txv ON tv.id = txv.vendor_id
+           WHERE txv.transaction_id = ? AND tv.is_active = 1
+           ORDER BY tv.name ASC""",
+        (transaction_id,)
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return rows
+
+
+def unlink_vendor_from_transaction(transaction_id: int, vendor_id: int) -> bool:
+    """Unlink a vendor from a transaction. Returns True if successful."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM transaction_vendors WHERE transaction_id = ? AND vendor_id = ?",
+        (transaction_id, vendor_id)
+    )
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
 
 
 # =========================
