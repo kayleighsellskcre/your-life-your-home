@@ -161,11 +161,7 @@
 
 {% if homebot_widget_id %}
 <script>
-  console.log('=== HOMEBOT WIDGET INITIALIZATION ===');
-  console.log('Widget ID:', '{{ homebot_widget_id|e }}');
-  console.log('Container: #homebot_homeowner');
-  
-  // Use Homebot's EXACT embed pattern from their documentation
+  // Homebot's exact embed pattern
   (function (h, b) {
     var w = window, d = document, s = 'script', x, y;
     w['_hb_namespace'] = h;
@@ -176,76 +172,8 @@
     x.parentNode.insertBefore(y, x);
   })('Homebot', 'https://embed.homebotapp.com/lgw/v1/widget.js');
   
-  // Initialize widget - Homebot's queue system handles timing
-  (function() {
-    var widgetId = '{{ homebot_widget_id|e }}'.trim();
-    var containerSelector = '#homebot_homeowner';
-    
-    // Validate inputs
-    if (!widgetId) {
-      console.error('ERROR: Homebot widget ID is empty!');
-      return;
-    }
-    
-    var container = document.querySelector(containerSelector);
-    if (!container) {
-      console.error('ERROR: Container not found:', containerSelector);
-      return;
-    }
-    
-    console.log('Container found:', container);
-    console.log('Widget ID length:', widgetId.length);
-    
-    // Function to initialize
-    function initWidget() {
-      if (typeof window.Homebot === 'function') {
-        console.log('Homebot function available, initializing...');
-        try {
-          // Call Homebot with container selector and widget ID
-          window.Homebot(containerSelector, widgetId);
-          console.log('✓ Homebot widget initialized');
-          
-          // Check for widget content after a delay
-          setTimeout(function() {
-            var iframe = container.querySelector('iframe');
-            var form = container.querySelector('form');
-            if (iframe) {
-              console.log('✓ Homebot iframe detected');
-            } else if (form) {
-              console.log('✓ Homebot form detected');
-            } else {
-              console.warn('⚠ No iframe or form detected - widget may still be loading');
-            }
-          }, 2000);
-        } catch (e) {
-          console.error('ERROR initializing Homebot:', e);
-          console.error('Stack:', e.stack);
-        }
-      } else if (window.Homebot && Array.isArray(window.Homebot.q)) {
-        // Queue exists - script is loading
-        console.log('Homebot script loading, queuing initialization...');
-        window.Homebot(containerSelector, widgetId);
-      } else {
-        // Retry
-        var attempts = initWidget.attempts || 0;
-        initWidget.attempts = attempts + 1;
-        if (attempts < 100) { // Try for up to 10 seconds
-          setTimeout(initWidget, 100);
-        } else {
-          console.error('ERROR: Homebot script failed to load after 10 seconds');
-        }
-      }
-    }
-    
-    // Start initialization
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(initWidget, 500);
-      });
-    } else {
-      setTimeout(initWidget, 500);
-    }
-  })();
+  // Initialize widget - Homebot's queue handles timing automatically
+  Homebot('#homebot_homeowner', '{{ homebot_widget_id|e }}');
 </script>
 {% endif %}
 

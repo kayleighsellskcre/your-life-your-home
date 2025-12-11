@@ -2994,16 +2994,17 @@ def homeowner_value_equity_overview():
         professional_info=professional_info,
     ))
     
-    # Set CSP headers to allow Homebot iframe
-    response.headers['Content-Security-Policy'] = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com; "
-        "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-        "font-src 'self' https://fonts.gstatic.com; "
-        "img-src 'self' data: https:; "
-        "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
-    )
+    # Set CSP headers to allow Homebot iframe (only if widget is present)
+    if homebot_widget_id:
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com; "
+            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
+        )
     
     return response
 
@@ -3169,37 +3170,63 @@ def agent_dashboard():
 @app.route("/lender", methods=["GET"])
 def lender_dashboard():
     """Lender dashboard view."""
-    user = get_current_user()
-    if not user or user.get("role") != "lender":
+    try:
+        user = get_current_user()
+        if not user or user.get("role") != "lender":
+            return redirect(url_for("login", role="lender"))
+
+        try:
+            metrics = get_lender_dashboard_metrics(user["id"])
+        except Exception as e:
+            import traceback
+            print(f"Error getting lender metrics: {traceback.format_exc()}")
+            metrics = {
+                "new_applications": 0,
+                "loans_in_process": 0,
+                "nurture_contacts": 0,
+            }
+        
+        # Convert Row objects to dicts if needed
+        try:
+            loans_raw = list_lender_loans(user["id"])
+            loans = []
+            for loan in loans_raw:
+                if hasattr(loan, 'keys'):
+                    loans.append(dict(loan))
+                else:
+                    loans.append(loan)
+        except Exception as e:
+            import traceback
+            print(f"Error getting lender loans: {traceback.format_exc()}")
+            loans = []
+        
+        try:
+            borrowers_raw = list_lender_borrowers(user["id"])
+            borrowers = []
+            for borrower in borrowers_raw:
+                if hasattr(borrower, 'keys'):
+                    borrowers.append(dict(borrower))
+                else:
+                    borrowers.append(borrower)
+        except Exception as e:
+            import traceback
+            print(f"Error getting lender borrowers: {traceback.format_exc()}")
+            borrowers = []
+
+        return render_template(
+            "lender/dashboard.html",
+            brand_name=FRONT_BRAND_NAME,
+            user=user,
+            metrics=metrics,
+            loans=loans,
+            borrowers=borrowers,
+        )
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERROR in lender_dashboard: {error_trace}")
+        flash(f"Error loading dashboard: {str(e)}", "error")
         return redirect(url_for("login", role="lender"))
-
-    metrics = get_lender_dashboard_metrics(user["id"])
-    
-    # Convert Row objects to dicts if needed
-    loans_raw = list_lender_loans(user["id"])
-    loans = []
-    for loan in loans_raw:
-        if hasattr(loan, 'keys'):
-            loans.append(dict(loan))
-        else:
-            loans.append(loan)
-    
-    borrowers_raw = list_lender_borrowers(user["id"])
-    borrowers = []
-    for borrower in borrowers_raw:
-        if hasattr(borrower, 'keys'):
-            borrowers.append(dict(borrower))
-        else:
-            borrowers.append(borrower)
-
-    return render_template(
-        "lender/dashboard.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-        metrics=metrics,
-        loans=loans,
-        borrowers=borrowers,
-    )
 
 
 # -------------------------------------------------
