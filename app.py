@@ -2885,246 +2885,103 @@ def homeowner_value_my_home():
 
 @app.route("/homeowner/value/equity-overview", methods=["GET", "POST"])
 def homeowner_value_equity_overview():
+    """Homebot-powered equity page - shows Homebot widget if agent/lender has configured it."""
+    from database import get_homeowner_professionals, get_user_profile, get_user_by_id
+    
     user = get_current_user()
     if not user:
         flash("Please log in to access this page.", "warning")
         return redirect(url_for("login"))
+    
+    if user.get("role") != "homeowner":
+        flash("This page is for homeowners only.", "error")
+        return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
+    
+    homeowner_id = user["id"]
+    
+    # Get homeowner's professionals (agents and lenders)
+    professionals = get_homeowner_professionals(homeowner_id)
+    
+    # Find the first professional (agent preferred, then lender) with a Homebot widget ID
+    homebot_widget_id = None
+    professional_info = None
+    
+    # Prefer agent over lender
+    for prof in professionals:
+        prof_dict = dict(prof) if hasattr(prof, 'keys') else prof
+        prof_id = prof_dict.get('professional_id') or prof_dict.get('user_id')
+        if prof_id:
+            profile = get_user_profile(prof_id)
+            if profile:
+                profile_dict = dict(profile) if hasattr(profile, 'keys') else profile
+                widget_id = profile_dict.get('homebot_widget_id')
+                if widget_id:
+                    homebot_widget_id = widget_id
+                    professional_info = {
+                        'name': prof_dict.get('name') or profile_dict.get('name'),
+                        'email': prof_dict.get('email'),
+                        'role': prof_dict.get('professional_role') or 'agent',
+                        'brokerage_name': profile_dict.get('brokerage_name'),
+                        'team_name': profile_dict.get('team_name'),
+                        'professional_photo': profile_dict.get('professional_photo'),
+                    }
+                    # Prefer agent, so if we found an agent, break
+                    if prof_dict.get('professional_role') == 'agent' or prof_dict.get('professional_type') == 'agent':
+                        break
+    
+    # Fallback: check agent_id/lender_id columns if no professionals found
+    if not homebot_widget_id:
+        homeowner_user = get_user_by_id(homeowner_id)
+        if homeowner_user:
+            homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') else homeowner_user
+            # Try agent first
+            agent_id = homeowner_dict.get("agent_id")
+            if agent_id:
+                agent_profile = get_user_profile(agent_id)
+                if agent_profile:
+                    profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') else agent_profile
+                    widget_id = profile_dict.get('homebot_widget_id')
+                    if widget_id:
+                        homebot_widget_id = widget_id
+                        agent_user = get_user_by_id(agent_id)
+                        if agent_user:
+                            agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') else agent_user
+                            professional_info = {
+                                'name': agent_dict.get('name'),
+                                'email': agent_dict.get('email'),
+                                'role': 'agent',
+                                'brokerage_name': profile_dict.get('brokerage_name'),
+                                'team_name': profile_dict.get('team_name'),
+                                'professional_photo': profile_dict.get('professional_photo'),
+                            }
+            # Try lender if no agent
+            if not homebot_widget_id:
+                lender_id = homeowner_dict.get("lender_id")
+                if lender_id:
+                    lender_profile = get_user_profile(lender_id)
+                    if lender_profile:
+                        profile_dict = dict(lender_profile) if hasattr(lender_profile, 'keys') else lender_profile
+                        widget_id = profile_dict.get('homebot_widget_id')
+                        if widget_id:
+                            homebot_widget_id = widget_id
+                            lender_user = get_user_by_id(lender_id)
+                            if lender_user:
+                                lender_dict = dict(lender_user) if hasattr(lender_user, 'keys') else lender_user
+                                professional_info = {
+                                    'name': lender_dict.get('name'),
+                                    'email': lender_dict.get('email'),
+                                    'role': 'lender',
+                                    'brokerage_name': profile_dict.get('brokerage_name'),
+                                    'team_name': profile_dict.get('team_name'),
+                                    'professional_photo': profile_dict.get('professional_photo'),
+                                }
 
-    properties = get_user_properties(user["id"])
-
-    # Determine which property to display
-    property_id_param = request.args.get("property_id")
-    if property_id_param:
-        try:
-            current_property_id = int(property_id_param)
-            current_property = get_property_by_id(current_property_id)
-            if not current_property or current_property["user_id"] != user["id"]:
-                current_property = None
-                current_property_id = None
-        except Exception:
-            current_property = None
-            current_property_id = None
-    else:
-        current_property = get_primary_property(user["id"])
-        current_property_id = current_property["id"] if current_property else None
-
-    # If no property exists, create a default one
-    if not current_property:
-        if not properties:
-            default_address = "My Home"
-            property_id = add_property(user["id"], default_address, None, "primary")
-            current_property = get_property_by_id(property_id)
-            current_property_id = property_id
-            properties = [current_property]
-        else:
-            current_property = properties[0]
-            current_property_id = current_property["id"]
-
-    if request.method == "POST":
-        def safe_float(val):
-            if not val or val.strip() == "":
-                return None
-            try:
-                return float(val.replace(",", ""))
-            except Exception:
-                return None
-
-        value_estimate = safe_float(request.form.get("value_estimate", ""))
-        loan_balance = safe_float(request.form.get("loan_balance", ""))
-        loan_rate = safe_float(request.form.get("loan_rate", ""))
-        loan_payment = safe_float(request.form.get("loan_payment", ""))
-        loan_term_years = safe_float(request.form.get("loan_term_years", ""))
-        loan_start_date = request.form.get("loan_start_date", "").strip() or None
-
-        upsert_homeowner_snapshot_for_property(
-            user_id=user["id"],
-            property_id=current_property_id,
-            value_estimate=value_estimate,
-            loan_balance=loan_balance,
-            loan_rate=loan_rate,
-            loan_payment=loan_payment,
-            loan_term_years=loan_term_years,
-            loan_start_date=loan_start_date,
-        )
-
-        if value_estimate is not None:
-            conn = get_connection()
-            cur = conn.cursor()
-            cur.execute(
-                "UPDATE properties SET estimated_value = ? WHERE id = ?",
-                (value_estimate, current_property_id),
-            )
-            conn.commit()
-            conn.close()
-
-        flash("Loan details updated successfully!", "success")
-        return redirect(
-            url_for(
-                "homeowner_value_equity_overview",
-                property_id=current_property_id,
-            )
-        )
-
-    # GET: Display current data with calculations
-    snapshot = get_homeowner_snapshot_for_property(user["id"], current_property_id)
-
-    if not snapshot.get("value_estimate") and current_property.get("estimated_value"):
-        snapshot["value_estimate"] = current_property["estimated_value"]
-
-    def safe_float_convert(val, default=0):
-        if val is None or val == "":
-            return default
-        try:
-            return float(val)
-        except (ValueError, TypeError):
-            return default
-
-    current_value = safe_float_convert(snapshot.get("value_estimate"))
-    loan_balance = safe_float_convert(snapshot.get("loan_balance"))
-    equity_estimate = safe_float_convert(snapshot.get("equity_estimate"))
-    loan_rate = safe_float_convert(snapshot.get("loan_rate"))
-    loan_payment = safe_float_convert(snapshot.get("loan_payment"))
-    loan_term_years = safe_float_convert(snapshot.get("loan_term_years"))
-    loan_start_date = snapshot.get("loan_start_date") or ""
-
-    # LTV
-    ltv = 0
-    if current_value > 0 and loan_balance > 0:
-        ltv = (loan_balance / current_value) * 100
-
-    # Years remaining and payoff date
-    years_remaining = 0
-    payoff_date = ""
-    if loan_start_date and loan_term_years > 0:
-        from datetime import timedelta
-
-        try:
-            start = datetime.fromisoformat(loan_start_date)
-            end = start + timedelta(days=365.25 * loan_term_years)
-            payoff_date = end.strftime("%b %Y")
-
-            now = datetime.now()
-            years_remaining = (end - now).days / 365.25
-            if years_remaining < 0:
-                years_remaining = 0
-        except Exception:
-            pass
-
-    # Appreciation
-    annual_appreciation_rate = 0.04  # 4%
-    monthly_appreciation = (
-        (current_value * annual_appreciation_rate) / 12 if current_value > 0 else 0
-    )
-    one_year_value = (
-        current_value * (1 + annual_appreciation_rate) if current_value > 0 else 0
-    )
-    five_year_value = (
-        current_value * ((1 + annual_appreciation_rate) ** 5)
-        if current_value > 0
-        else 0
-    )
-
-    estimated_down_payment = equity_estimate * 0.2 if equity_estimate > 0 else 0
-    wealth_built = equity_estimate if equity_estimate > 0 else 0
-
-    # Refi scenario
-    current_rate_market = 6.0
-    refinance_savings = 0
-    new_monthly_payment = 0
-    if loan_rate > 0 and loan_balance > 0 and loan_rate > current_rate_market:
-        rate_diff = loan_rate - current_rate_market
-        annual_savings = loan_balance * (rate_diff / 100)
-        refinance_savings = annual_savings / 12
-        if loan_payment > 0:
-            new_monthly_payment = loan_payment - refinance_savings
-
-    # Cash-out
-    max_cash_out = 0
-    if current_value > 0:
-        max_loan_80_ltv = current_value * 0.80
-        max_cash_out = (
-            max_loan_80_ltv - loan_balance if max_loan_80_ltv > loan_balance else 0
-        )
-
-    # Rental income estimate
-    monthly_rental_estimate = current_value * 0.009 if current_value > 0 else 0
-    annual_rental_income = monthly_rental_estimate * 12
-
-    # Extra payment scenario
-    extra_payment_amount = 200
-    interest_saved_extra = 0
-    time_saved_months = 0
-    if loan_balance > 0 and loan_rate > 0 and years_remaining > 0:
-        time_saved_months = min(years_remaining * 12 * 0.15, 60)
-        interest_saved_extra = extra_payment_amount * time_saved_months * 0.5
-
-    tips = []
-    if loan_rate > 6.5:
-        tips.append(
-            "🎯 Your interest rate is above 6.5%. Consider exploring refinance options to lower your monthly payment."
-        )
-
-    if years_remaining > 20 and equity_estimate > 50000:
-        tips.append(
-            "💡 With significant equity and many years remaining, making extra principal payments could save thousands in interest."
-        )
-
-    if ltv < 80 and loan_balance > 0:
-        tips.append(
-            "✨ Your loan-to-value ratio is below 80%. You may qualify to remove PMI if you're paying it."
-        )
-
-    if equity_estimate > 100000:
-        tips.append(
-            "🏡 You've built substantial equity! This could support renovations, debt consolidation, or future investment opportunities."
-        )
-
-    if refinance_savings > 50:
-        tips.append(
-            f"💰 Refinancing at current market rates could save you approximately ${refinance_savings:,.0f}/month."
-        )
-
-    if max_cash_out > 50000:
-        tips.append(
-            f"🏦 You could access up to ${max_cash_out:,.0f} through a cash-out refinance while staying at 80% LTV."
-        )
-
-    if not tips:
-        tips.append(
-            "📊 Enter your complete loan details above to receive personalized savings tips and strategies."
-        )
-
+    # Render Homebot-powered equity page
     return render_template(
-        "homeowner/value_equity_overview.html",
+        "homeowner/value_equity_homebot.html",
         brand_name=FRONT_BRAND_NAME,
-        snapshot=snapshot,
-        properties=properties,
-        current_property=current_property,
-        current_property_id=current_property_id,
-        current_value=current_value,
-        loan_balance=loan_balance,
-        equity_estimate=equity_estimate,
-        loan_rate=loan_rate,
-        loan_payment=loan_payment,
-        loan_term_years=loan_term_years,
-        loan_start_date=loan_start_date,
-        ltv=ltv,
-        years_remaining=years_remaining,
-        payoff_date=payoff_date,
-        tips=tips,
-        monthly_appreciation=monthly_appreciation,
-        one_year_value=one_year_value,
-        five_year_value=five_year_value,
-        wealth_built=wealth_built,
-        refinance_savings=refinance_savings,
-        new_monthly_payment=new_monthly_payment,
-        current_rate_market=current_rate_market,
-        max_cash_out=max_cash_out,
-        monthly_rental_estimate=monthly_rental_estimate,
-        annual_rental_income=annual_rental_income,
-        extra_payment_amount=extra_payment_amount,
-        interest_saved_extra=interest_saved_extra,
-        time_saved_months=time_saved_months,
+        homebot_widget_id=homebot_widget_id,
+        professional_info=professional_info,
     )
 
 
@@ -4540,6 +4397,7 @@ def agent_settings_profile():
                 company_city=request.form.get("company_city", "").strip() or None,
                 company_state=request.form.get("company_state", "").strip() or None,
                 company_zip=request.form.get("company_zip", "").strip() or None,
+                homebot_widget_id=request.form.get("homebot_widget_id", "").strip() or None,
             )
             print(f"AGENT PROFILE: Profile saved successfully with ID {profile_id}")
             print(f"{'='*60}\n")
@@ -5333,6 +5191,7 @@ def lender_settings_profile():
                 company_city=request.form.get("company_city", "").strip() or None,
                 company_state=request.form.get("company_state", "").strip() or None,
                 company_zip=request.form.get("company_zip", "").strip() or None,
+                homebot_widget_id=request.form.get("homebot_widget_id", "").strip() or None,
             )
             flash("Profile updated successfully!", "success")
             return redirect(url_for("lender_settings_profile"))

@@ -1,0 +1,165 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Track Your Home Wealth{% endblock %}
+
+{% block homeowner_content %}
+<style>
+  .homebot-hero {
+    text-align: center;
+    padding: 3rem 2rem 2rem;
+    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
+    color: white;
+    margin-bottom: 2rem;
+    border-radius: var(--border-radius-lg);
+  }
+  
+  .homebot-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: white;
+  }
+  
+  .homebot-hero p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  
+  .professional-info {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .professional-info img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--olive-green);
+  }
+  
+  .professional-info-content h2 {
+    font-size: 1.3rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .professional-info-content p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    margin: 0.25rem 0;
+  }
+  
+  .widget-section {
+    background: var(--white);
+    border: 1px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    min-height: 600px;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .no-homebot-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--white);
+    border: 2px dashed var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+  }
+  
+  .no-homebot-message h2 {
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+  }
+  
+  .no-homebot-message p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+  }
+</style>
+
+<div class="homebot-hero">
+  <h1>🏠 Track Your Home Wealth</h1>
+  <p>
+    Get automatic monthly updates on your home value, equity, and refinance opportunities – 
+    all connected directly to your real estate professional.
+  </p>
+</div>
+
+{% if professional_info %}
+<div class="professional-info">
+  {% if professional_info.professional_photo %}
+  <img src="{{ url_for('static', filename=professional_info.professional_photo) }}" alt="{{ professional_info.name }}">
+  {% else %}
+  <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+    {{ professional_info.name[0] if professional_info.name else '?' }}
+  </div>
+  {% endif %}
+  <div class="professional-info-content">
+    <h2>Your Real Estate Professional</h2>
+    <p><strong>{{ professional_info.name }}</strong></p>
+    {% if professional_info.brokerage_name %}
+    <p>{{ professional_info.brokerage_name }}{% if professional_info.team_name %} - {{ professional_info.team_name }}{% endif %}</p>
+    {% endif %}
+    {% if professional_info.email %}
+    <p style="margin-top: 0.5rem;">
+      <a href="mailto:{{ professional_info.email }}" style="color: var(--olive-green); text-decoration: none;">
+        {{ professional_info.email }}
+      </a>
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<div class="widget-section">
+  {% if homebot_widget_id %}
+    <!-- Homebot widget container -->
+    <div id="homebot_homeowner"></div>
+  {% else %}
+    <div class="no-homebot-message">
+      <h2>Homebot Not Connected</h2>
+      <p>
+        Your {{ 'agent' if professional_info and professional_info.role == 'agent' else 'lender' }} hasn't connected their Homebot account yet.
+      </p>
+      <p>
+        Please reach out to them directly for equity updates and home value tracking.
+      </p>
+      {% if professional_info and professional_info.email %}
+      <a href="mailto:{{ professional_info.email }}" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; text-decoration: none; border-radius: var(--border-radius); font-weight: 500;">
+        Contact {{ professional_info.name }}
+      </a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+
+{% if homebot_widget_id %}
+<script>
+  (function (h, b) {
+    var w = window, d = document, s = 'script', x, y;
+    w['_hb_namespace'] = h;
+    w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
+    y = d.createElement(s); x = d.getElementsByTagName(s)[0];
+    y.async = 1;
+    y.src = 'https://embed.homebotapp.com/lgw/v1/widget.js';
+    x.parentNode.insertBefore(y, x);
+  })('Homebot');
+
+  Homebot('#homebot_homeowner', '{{ homebot_widget_id|e }}');
+</script>
+{% endif %}
+
+{% endblock %}
+

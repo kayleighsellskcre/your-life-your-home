@@ -449,6 +449,33 @@
       </div>
     </div>
 
+    <!-- Homebot Integration -->
+    <div class="settings-section">
+      <h2>🏠 Homebot Integration</h2>
+      
+      <div class="form-group">
+        <label>Homebot Widget ID</label>
+        <input 
+          type="text" 
+          name="homebot_widget_id" 
+          value="{{ profile.homebot_widget_id if profile and profile.homebot_widget_id else '' }}" 
+          placeholder="609d2ed47cccc8e5fb0fa47e18bbba4af4a393607881765"
+          style="font-family: monospace;"
+        >
+        <small>
+          <strong>How to get your Homebot Widget ID:</strong><br>
+          1. Log into your Homebot account<br>
+          2. Go to <strong>Share → Embed a widget</strong><br>
+          3. Choose <strong>Widget type: Homeowner</strong> and pick your style/theme<br>
+          4. Look at the embed code and copy just the long ID at the end (the string after the comma in <code>Homebot('#homebot_homeowner', 'YOUR_ID_HERE')</code>)<br>
+          5. Paste that ID above (without quotes)
+        </small>
+        <div style="margin-top: 1rem; padding: 1rem; background: #f0f7ff; border-left: 4px solid #6B6A45; border-radius: 4px;">
+          <strong>💡 What this does:</strong> When homeowners visit your equity page, they'll see your Homebot widget. All leads and activity will go directly into your Homebot account, not ours. You own your leads!
+        </div>
+      </div>
+    </div>
+
     <!-- Save Button -->
     <div style="text-align: center; margin-top: 2rem; margin-bottom: 3rem;">
       <button type="submit" class="btn-save">💾 Save Profile</button>

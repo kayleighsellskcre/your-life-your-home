@@ -119,6 +119,12 @@ def init_db() -> None:
         cur.execute("ALTER TABLE user_profiles ADD COLUMN application_url TEXT")
     except:
         pass
+    
+    # Add homebot_widget_id column if it doesn't exist (for agents/lenders)
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN homebot_widget_id TEXT")
+    except:
+        pass
 
     # ------------- CLIENT RELATIONSHIPS -------------
     cur.execute(
@@ -2888,6 +2894,7 @@ def create_or_update_user_profile(
     company_city: Optional[str] = None,
     company_state: Optional[str] = None,
     company_zip: Optional[str] = None,
+    homebot_widget_id: Optional[str] = None,
 ) -> int:
     """Create or update user profile. Returns profile id."""
     conn = get_connection()
@@ -2938,6 +2945,7 @@ def create_or_update_user_profile(
                 company_city = ?,
                 company_state = ?,
                 company_zip = ?,
+                homebot_widget_id = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
         """
@@ -2947,7 +2955,7 @@ def create_or_update_user_profile(
             youtube_url, phone, call_button_enabled, schedule_button_enabled,
             schedule_url, application_url, bio, specialties, years_experience, languages,
             service_areas, nmls_number, license_number, company_address,
-            company_city, company_state, company_zip, user_id
+            company_city, company_state, company_zip, homebot_widget_id, user_id
         ))
         profile_id = existing[0]
     else:
@@ -2964,8 +2972,8 @@ def create_or_update_user_profile(
                 call_button_enabled, schedule_button_enabled, schedule_url, application_url,
                 bio, specialties, years_experience, languages, service_areas,
                 nmls_number, license_number, company_address, company_city,
-                company_state, company_zip
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                company_state, company_zip, homebot_widget_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         cur.execute(query, (
             user_id, role, referral_code, professional_photo, brokerage_logo, team_name,
@@ -2974,13 +2982,48 @@ def create_or_update_user_profile(
             call_button_enabled, schedule_button_enabled, schedule_url, application_url,
             bio, specialties, years_experience, languages, service_areas,
             nmls_number, license_number, company_address, company_city,
-            company_state, company_zip
+            company_state, company_zip, homebot_widget_id
         ))
         profile_id = cur.lastrowid
     
     conn.commit()
     conn.close()
     return profile_id
+
+
+def get_homebot_widget_id(user_id: int) -> Optional[str]:
+    """Get Homebot widget ID for a user (agent or lender)."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT homebot_widget_id FROM user_profiles WHERE user_id = ?", (user_id,))
+    row = cur.fetchone()
+    conn.close()
+    if row and row[0]:
+        return row[0]
+    return None
+
+
+def update_homebot_widget_id(user_id: int, widget_id: Optional[str]) -> None:
+    """Update Homebot widget ID for a user."""
+    conn = get_connection()
+    cur = conn.cursor()
+    # Ensure profile exists
+    cur.execute("SELECT id FROM user_profiles WHERE user_id = ?", (user_id,))
+    if not cur.fetchone():
+        # Create minimal profile if it doesn't exist
+        from database import get_user_by_id
+        user = get_user_by_id(user_id)
+        if user:
+            role = user.get("role", "agent")
+            cur.execute("""
+                INSERT INTO user_profiles (user_id, role) VALUES (?, ?)
+            """, (user_id, role))
+    # Update widget ID
+    cur.execute("""
+        UPDATE user_profiles SET homebot_widget_id = ? WHERE user_id = ?
+    """, (widget_id, user_id))
+    conn.commit()
+    conn.close()
 
 
 def generate_referral_code(user_id: int, role: str) -> str:
