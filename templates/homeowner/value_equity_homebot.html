@@ -62,9 +62,10 @@
     background: var(--white);
     border: 1px solid var(--taupe-beige);
     border-radius: var(--border-radius-lg);
-    padding: 2rem;
+    padding: 0;
     min-height: 600px;
     box-shadow: var(--shadow-light);
+    overflow: hidden;
   }
   
   #homebot_homeowner {
@@ -72,13 +73,16 @@
     min-height: 600px;
     position: relative;
     border: none;
-    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    display: block;
   }
   
   #homebot_homeowner iframe {
-    width: 100%;
-    min-height: 600px;
-    border: none;
+    width: 100% !important;
+    min-height: 600px !important;
+    border: none !important;
+    display: block !important;
   }
   
   .no-homebot-message {
@@ -139,7 +143,7 @@
 
 <div class="widget-section">
   {% if homebot_widget_id %}
-    <div id="homebot_homeowner"></div>
+    <div id="homebot_homeowner" style="width: 100%; min-height: 600px; position: relative;"></div>
   {% else %}
     <div class="no-homebot-message">
       <h2>Homebot Not Connected</h2>
@@ -160,7 +164,7 @@
 
 {% if homebot_widget_id %}
 <script>
-  // Homebot embed code - load script first
+  // Homebot embed code - EXACT format from Homebot's embed instructions
   (function (h, b) {
     var w = window, d = document, s = 'script', x, y;
     w['_hb_namespace'] = h;
@@ -172,74 +176,77 @@
     x.parentNode.insertBefore(y, x);
   })('Homebot', 'https://embed.homebotapp.com/lgw/v1/widget.js');
   
-  // Initialize widget after script loads
+  // Initialize widget - use exact Homebot format (container, widgetId only)
   (function() {
     var widgetId = '{{ homebot_widget_id|e }}';
     var container = '#homebot_homeowner';
-    var maxRetries = 50; // Try for up to 5 seconds (50 * 100ms)
+    var maxRetries = 100; // Try for up to 10 seconds
     var retryCount = 0;
     
-    // Prepare homeowner data to pass to widget
-    var homeownerData = {};
-    {% if homeowner_data %}
-      {% if homeowner_data.email %}
-        homeownerData.email = '{{ homeowner_data.email|e }}';
-      {% endif %}
-      {% if homeowner_data.address %}
-        homeownerData.address = '{{ homeowner_data.address|e }}';
-      {% endif %}
-    {% endif %}
-    
-    console.log('[HOMEBOT] Initializing widget with ID:', widgetId);
-    console.log('[HOMEBOT] Homeowner data:', homeownerData);
+    console.log('[HOMEBOT] Widget ID:', widgetId);
+    console.log('[HOMEBOT] Container:', container);
     
     function init() {
       retryCount++;
       
+      // Check if Homebot is loaded and ready
       if (typeof window.Homebot === 'function') {
-        console.log('[HOMEBOT] Homebot function found, initializing widget...');
+        console.log('[HOMEBOT] Initializing widget...');
         try {
-          // Pass homeowner data if available to help widget identify the homeowner
-          if (Object.keys(homeownerData).length > 0) {
-            console.log('[HOMEBOT] Initializing with homeowner data');
-            window.Homebot(container, widgetId, homeownerData);
-          } else {
-            console.log('[HOMEBOT] Initializing without homeowner data');
-            window.Homebot(container, widgetId);
-          }
+          // Use exact Homebot format: Homebot(container, widgetId)
+          window.Homebot(container, widgetId);
+          console.log('[HOMEBOT] Widget initialized successfully');
+          
+          // Verify iframe was created after a short delay
+          setTimeout(function() {
+            var containerEl = document.querySelector(container);
+            if (containerEl) {
+              var iframe = containerEl.querySelector('iframe');
+              if (iframe) {
+                console.log('[HOMEBOT] ✅ Iframe detected - widget should be working');
+                console.log('[HOMEBOT] Iframe src:', iframe.src);
+                console.log('[HOMEBOT] Iframe dimensions:', iframe.offsetWidth, 'x', iframe.offsetHeight);
+              } else {
+                console.warn('[HOMEBOT] ⚠️ No iframe found in container - widget may not have loaded');
+              }
+            }
+          }, 2000);
         } catch (error) {
           console.error('[HOMEBOT] Error initializing widget:', error);
+          console.error('[HOMEBOT] Error details:', error.message, error.stack);
         }
-      } else if (window.Homebot && window.Homebot.q) {
-        console.log('[HOMEBOT] Homebot queue found, queuing initialization...');
+      } else if (window.Homebot && Array.isArray(window.Homebot.q)) {
+        // Homebot is queuing calls - add ours to the queue
+        console.log('[HOMEBOT] Queuing widget initialization...');
         try {
-          // Queue the call if Homebot isn't ready yet
-          if (Object.keys(homeownerData).length > 0) {
-            window.Homebot(container, widgetId, homeownerData);
-          } else {
-            window.Homebot(container, widgetId);
-          }
+          window.Homebot(container, widgetId);
+          console.log('[HOMEBOT] Widget call queued');
         } catch (error) {
           console.error('[HOMEBOT] Error queuing widget:', error);
         }
       } else if (retryCount < maxRetries) {
-        // Keep trying until Homebot script loads
+        // Keep trying - Homebot script might still be loading
+        if (retryCount % 10 === 0) {
+          console.log('[HOMEBOT] Waiting for Homebot to load... (attempt ' + retryCount + ')');
+        }
         setTimeout(init, 100);
       } else {
-        console.error('[HOMEBOT] Failed to load Homebot widget after', maxRetries, 'retries');
+        console.error('[HOMEBOT] Failed to load after', maxRetries, 'retries');
         var containerEl = document.querySelector(container);
         if (containerEl) {
-          containerEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;"><p>Unable to load Homebot widget. Please refresh the page or contact support.</p></div>';
+          containerEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;"><p style="margin-bottom: 1rem;">⚠️ Unable to load Homebot widget.</p><p style="font-size: 0.9rem;">Please refresh the page. If the problem persists, contact support.</p></div>';
         }
       }
     }
     
+    // Start initialization
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(init, 500);
+        setTimeout(init, 300);
       });
     } else {
-      setTimeout(init, 500);
+      // DOM already loaded
+      setTimeout(init, 300);
     }
   })();
 </script>

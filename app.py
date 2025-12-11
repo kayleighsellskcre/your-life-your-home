@@ -3023,16 +3023,18 @@ def homeowner_value_equity_overview():
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
-    # Use a more permissive CSP for Homebot
+    # Use a more permissive CSP for Homebot to ensure full functionality
     if homebot_widget_id:
         response.headers['Content-Security-Policy'] = (
-            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com; "
-            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            "font-src 'self' https://fonts.gstatic.com; "
-            "img-src 'self' data: https:; "
-            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com;"
+            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
+            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com data:; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.homebotapp.com; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "img-src 'self' data: https: blob:; "
+            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com wss: ws:; "
+            "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
+            "frame-ancestors 'self';"
         )
     
     return response
