@@ -178,21 +178,23 @@
   (function() {
     'use strict';
     
-    // Prevent any document-level click handlers from interfering with widget
+    // Mark widget container so other scripts can identify it
     var widgetContainer = document.getElementById('homebot_homeowner');
+    var widgetSection = document.querySelector('.widget-section');
+    
     if (widgetContainer) {
-      // Stop propagation of clicks inside widget container
-      widgetContainer.addEventListener('click', function(e) {
-        e.stopPropagation();
-      }, true); // Use capture phase to catch early
+      // Add data attribute to identify widget area
+      widgetContainer.setAttribute('data-homebot-widget', 'true');
+      if (widgetSection) {
+        widgetSection.setAttribute('data-homebot-widget', 'true');
+      }
       
-      widgetContainer.addEventListener('mousedown', function(e) {
-        e.stopPropagation();
-      }, true);
-      
-      widgetContainer.addEventListener('mouseup', function(e) {
-        e.stopPropagation();
-      }, true);
+      // Stop event propagation at the container level
+      ['click', 'mousedown', 'mouseup', 'submit', 'focusin', 'focusout'].forEach(function(eventType) {
+        widgetContainer.addEventListener(eventType, function(e) {
+          e.stopPropagation();
+        }, true); // Capture phase
+      });
     }
   })();
 
@@ -239,13 +241,27 @@
                 console.log('[HOMEBOT] Iframe src:', iframe.src);
                 console.log('[HOMEBOT] Iframe dimensions:', iframe.offsetWidth + 'x' + iframe.offsetHeight);
                 
-                // Ensure iframe can receive events
+                // CRITICAL: Ensure iframe can receive ALL events and submit forms
+                // DO NOT use sandbox - it blocks form submissions!
+                // Homebot needs full iframe functionality
                 iframe.style.pointerEvents = 'auto';
-                iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen');
+                iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; geolocation');
+                iframe.setAttribute('allowfullscreen', 'true');
+                
+                // Force pointer events
+                iframe.style.cssText += 'pointer-events: auto !important;';
                 
                 // Monitor for widget interactions
                 iframe.addEventListener('load', function() {
                   console.log('[HOMEBOT] ✅ Iframe content loaded - widget should be fully functional');
+                  console.log('[HOMEBOT] Iframe allow:', iframe.getAttribute('allow'));
+                  console.log('[HOMEBOT] Iframe pointer-events:', window.getComputedStyle(iframe).pointerEvents);
+                  
+                  // Ensure pointer events are still active after load
+                  setTimeout(function() {
+                    iframe.style.pointerEvents = 'auto';
+                    console.log('[HOMEBOT] ✅ Pointer events confirmed: auto');
+                  }, 500);
                 });
               } else {
                 console.warn('[HOMEBOT] ⚠️ Iframe not found after initialization');

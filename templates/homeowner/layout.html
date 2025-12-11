@@ -805,8 +805,25 @@ function toggleDropdown(btn, evt) {
   }
 }
 
-// Close when clicking outside
-document.addEventListener('click', function() {
+// Close when clicking outside (but NOT inside Homebot widget)
+document.addEventListener('click', function(e) {
+  // Don't close dropdowns if clicking inside Homebot widget
+  var widgetContainer = document.getElementById('homebot_homeowner');
+  var widgetSection = document.querySelector('.widget-section');
+  var target = e.target;
+  
+  // Skip if click is inside widget area
+  if (widgetContainer && (widgetContainer.contains(target) || target.closest('#homebot_homeowner'))) {
+    return;
+  }
+  if (widgetSection && widgetSection.contains(target)) {
+    // Check if it's actually the widget, not just the section
+    if (target.closest('#homebot_homeowner') || target.closest('iframe')) {
+      return;
+    }
+  }
+  
+  // Close dropdowns for clicks outside
   var allDropdowns = document.querySelectorAll('.ylh-dropdown');
   for (var i = 0; i < allDropdowns.length; i++) {
     allDropdowns[i].classList.remove('is-open');
