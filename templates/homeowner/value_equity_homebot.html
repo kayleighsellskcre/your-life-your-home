@@ -67,17 +67,18 @@
     box-shadow: var(--shadow-light);
   }
   
-  /* Ensure Homebot widget container is visible and interactive */
   #homebot_homeowner {
     width: 100% !important;
     min-height: 600px !important;
     position: relative;
+    display: block;
   }
   
-  /* Allow iframes from Homebot */
   #homebot_homeowner iframe {
     width: 100% !important;
+    height: 100% !important;
     border: none !important;
+    min-height: 600px !important;
   }
   
   .no-homebot-message {
@@ -100,6 +101,17 @@
     max-width: 600px;
     margin: 0 auto 1.5rem;
   }
+  
+  .debug-info {
+    background: #f0f7ff;
+    border: 1px solid #6B6A45;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #3A352C;
+  }
 </style>
 
 <div class="homebot-hero">
@@ -113,7 +125,7 @@
 {% if professional_info %}
 <div class="professional-info">
   {% if professional_info.professional_photo %}
-  <img src="{{ url_for('static', filename=professional_info.professional_photo) }}" alt="{{ professional_info.name }}">
+  <img src="{{ url_for('static', filename=professional_info.professional_photo) if not professional_info.professional_photo.startswith('http') else professional_info.professional_photo }}" alt="{{ professional_info.name }}">
   {% else %}
   <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
     {{ professional_info.name[0] if professional_info.name else '?' }}
@@ -138,9 +150,16 @@
 
 <div class="widget-section">
   {% if homebot_widget_id %}
+    <!-- Debug Info -->
+    <div class="debug-info" style="display: none;" id="debugInfo">
+      <strong>Debug Info:</strong><br>
+      Widget ID: <span id="debugWidgetId"></span><br>
+      Container Found: <span id="debugContainer"></span><br>
+      Homebot Loaded: <span id="debugHomebot"></span>
+    </div>
+    
     <!-- Homebot widget container -->
-    <div id="homebot_homeowner" style="width: 100%; min-height: 600px;"></div>
-    <!-- Debug info (remove in production): Widget ID = {{ homebot_widget_id }} -->
+    <div id="homebot_homeowner"></div>
   {% else %}
     <div class="no-homebot-message">
       <h2>Homebot Not Connected</h2>
@@ -161,21 +180,78 @@
 
 {% if homebot_widget_id %}
 <script>
-  // Homebot's exact embed pattern
-  (function (h, b) {
-    var w = window, d = document, s = 'script', x, y;
-    w['_hb_namespace'] = h;
-    w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
-    y = d.createElement(s); x = d.getElementsByTagName(s)[0];
-    y.async = 1;
-    y.src = b;
-    x.parentNode.insertBefore(y, x);
-  })('Homebot', 'https://embed.homebotapp.com/lgw/v1/widget.js');
-  
-  // Initialize widget - Homebot's queue handles timing automatically
-  Homebot('#homebot_homeowner', '{{ homebot_widget_id|e }}');
+  (function() {
+    var widgetId = '{{ homebot_widget_id|e }}'.trim();
+    var containerId = 'homebot_homeowner';
+    var container = document.getElementById(containerId);
+    
+    // Debug logging
+    console.log('=== HOMEBOT INITIALIZATION ===');
+    console.log('Widget ID:', widgetId);
+    console.log('Widget ID Length:', widgetId.length);
+    console.log('Container:', container);
+    
+    if (!widgetId) {
+      console.error('ERROR: Widget ID is empty!');
+      return;
+    }
+    
+    if (!container) {
+      console.error('ERROR: Container #' + containerId + ' not found!');
+      return;
+    }
+    
+    // Load Homebot script
+    (function (h, b) {
+      var w = window, d = document, s = 'script', x, y;
+      w['_hb_namespace'] = h;
+      w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
+      y = d.createElement(s); 
+      x = d.getElementsByTagName(s)[0];
+      y.async = 1;
+      y.src = b;
+      x.parentNode.insertBefore(y, x);
+    })('Homebot', 'https://embed.homebotapp.com/lgw/v1/widget.js');
+    
+    // Initialize widget
+    function initWidget() {
+      if (typeof window.Homebot === 'function') {
+        console.log('Homebot function available, initializing...');
+        try {
+          window.Homebot('#' + containerId, widgetId);
+          console.log('Homebot initialized with ID:', widgetId);
+          
+          // Check for widget after 3 seconds
+          setTimeout(function() {
+            var iframe = container.querySelector('iframe');
+            if (iframe) {
+              console.log('✓ Homebot iframe loaded successfully');
+            } else {
+              console.warn('⚠ Homebot iframe not detected yet');
+            }
+          }, 3000);
+        } catch (e) {
+          console.error('ERROR initializing Homebot:', e);
+        }
+      } else if (window.Homebot && window.Homebot.q) {
+        console.log('Homebot queue exists, adding to queue...');
+        window.Homebot('#' + containerId, widgetId);
+      } else {
+        console.log('Homebot not loaded yet, retrying...');
+        setTimeout(initWidget, 200);
+      }
+    }
+    
+    // Start initialization when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initWidget, 500);
+      });
+    } else {
+      setTimeout(initWidget, 500);
+    }
+  })();
 </script>
 {% endif %}
 
 {% endblock %}
-

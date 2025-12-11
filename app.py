@@ -2986,6 +2986,12 @@ def homeowner_value_equity_overview():
                                     'professional_photo': profile_dict.get('professional_photo'),
                                 }
 
+    # Debug logging
+    print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
+    if homebot_widget_id:
+        print(f"[HOMEBOT] Widget ID value: {homebot_widget_id[:20]}... (length: {len(homebot_widget_id)})")
+    print(f"[HOMEBOT] Professional Info: {professional_info}")
+    
     # Render Homebot-powered equity page
     response = make_response(render_template(
         "homeowner/value_equity_homebot.html",
@@ -2995,15 +3001,16 @@ def homeowner_value_equity_overview():
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
+    # Use a more permissive CSP for Homebot
     if homebot_widget_id:
         response.headers['Content-Security-Policy'] = (
-            "default-src 'self'; "
+            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com; "
-            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
+            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
-            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
+            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com;"
         )
     
     return response
