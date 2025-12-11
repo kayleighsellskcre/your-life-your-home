@@ -5400,6 +5400,143 @@ def homeowner_support_meet_team():
     )
 
 
+# ---------------- HOMEBOT WEBHOOK ----------------
+@app.route("/api/homebot/webhook", methods=["POST"])
+def homebot_webhook():
+    """
+    Webhook endpoint for Homebot to send homeowner data updates.
+    When a homeowner links their account in Homebot, this endpoint receives
+    their loan and property information and updates the YLYH database.
+    """
+    from database import (
+        get_user_by_email, 
+        get_primary_property,
+        upsert_homeowner_snapshot_for_property,
+        add_property
+    )
+    
+    try:
+        # Get JSON data from Homebot
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No data received"}), 400
+        
+        # Homebot typically sends: email, address, loan_balance, loan_rate, 
+        # loan_payment, home_value, etc.
+        email = data.get("email") or data.get("homeowner_email")
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+        
+        # Find homeowner by email
+        homeowner = get_user_by_email(email.lower().strip())
+        if not homeowner:
+            # Homeowner doesn't exist in YLYH yet - log for manual review
+            print(f"HOMEBOT WEBHOOK: Homeowner with email {email} not found in YLYH")
+            return jsonify({
+                "error": "Homeowner not found",
+                "message": "Homeowner must have a YLYH account first"
+            }), 404
+        
+        if homeowner.get("role") != "homeowner":
+            return jsonify({"error": "User is not a homeowner"}), 400
+        
+        homeowner_id = homeowner["id"]
+        
+        # Get or create property
+        property_address = data.get("address") or data.get("property_address") or "My Home"
+        properties = get_user_properties(homeowner_id)
+        current_property = get_primary_property(homeowner_id)
+        
+        if not current_property:
+            # Create property if it doesn't exist
+            property_id = add_property(homeowner_id, property_address, None, "primary")
+            current_property = get_property_by_id(property_id)
+        else:
+            property_id = current_property["id"]
+        
+        # Extract loan and property data from Homebot
+        # Homebot field names may vary, so we check multiple possibilities
+        home_value = (
+            data.get("home_value") or 
+            data.get("current_value") or 
+            data.get("property_value") or
+            data.get("estimated_value")
+        )
+        
+        loan_balance = (
+            data.get("loan_balance") or 
+            data.get("mortgage_balance") or
+            data.get("outstanding_balance")
+        )
+        
+        loan_rate = (
+            data.get("loan_rate") or 
+            data.get("interest_rate") or
+            data.get("mortgage_rate")
+        )
+        
+        loan_payment = (
+            data.get("loan_payment") or 
+            data.get("monthly_payment") or
+            data.get("mortgage_payment")
+        )
+        
+        loan_term_years = data.get("loan_term_years") or data.get("term_years")
+        loan_start_date = data.get("loan_start_date") or data.get("origination_date")
+        
+        # Convert string numbers to floats
+        def safe_float(val):
+            if val is None or val == "":
+                return None
+            try:
+                return float(str(val).replace(",", "").replace("$", ""))
+            except (ValueError, TypeError):
+                return None
+        
+        # Update homeowner snapshot with Homebot data
+        upsert_homeowner_snapshot_for_property(
+            user_id=homeowner_id,
+            property_id=property_id,
+            value_estimate=safe_float(home_value),
+            loan_balance=safe_float(loan_balance),
+            loan_rate=safe_float(loan_rate),
+            loan_payment=safe_float(loan_payment),
+            loan_term_years=safe_float(loan_term_years),
+            loan_start_date=loan_start_date,
+        )
+        
+        # Update property estimated value if provided
+        if home_value:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                "UPDATE properties SET estimated_value = ? WHERE id = ?",
+                (safe_float(home_value), property_id),
+            )
+            conn.commit()
+            conn.close()
+        
+        print(f"HOMEBOT WEBHOOK: Successfully updated homeowner {homeowner_id} (email: {email})")
+        
+        return jsonify({
+            "success": True,
+            "message": "Homeowner data updated successfully",
+            "homeowner_id": homeowner_id,
+            "property_id": property_id
+        }), 200
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"HOMEBOT WEBHOOK ERROR: {str(e)}")
+        print(error_trace)
+        return jsonify({
+            "error": "Internal server error",
+            "message": str(e)
+        }), 500
+
+
 # ---------------- DEVELOPMENT SERVER ----------------
 if __name__ == "__main__":
     # Only runs when executing directly with Python (not with gunicorn)
