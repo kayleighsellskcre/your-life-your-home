@@ -3040,6 +3040,95 @@ def homeowner_value_equity_overview():
     return response
 
 
+@app.route("/test-homebot")
+def test_homebot():
+    """Minimal test page for Homebot widget - use this to verify widget works in isolation."""
+    from database import get_homeowner_professionals, get_user_profile, get_user_by_id
+    
+    user = get_current_user()
+    if not user:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("login"))
+    
+    if user.get("role") != "homeowner":
+        flash("This page is for homeowners only.", "error")
+        return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
+    
+    homeowner_id = user["id"]
+    
+    # Get homeowner's professionals (agents and lenders)
+    professionals = get_homeowner_professionals(homeowner_id)
+    
+    # Find the first professional (agent preferred, then lender) with a Homebot widget ID
+    homebot_widget_id = None
+    
+    # Prefer agent over lender
+    for prof in professionals:
+        prof_dict = dict(prof) if hasattr(prof, 'keys') else prof
+        prof_id = prof_dict.get('professional_id') or prof_dict.get('user_id')
+        if prof_id:
+            profile = get_user_profile(prof_id)
+            if profile:
+                profile_dict = dict(profile) if hasattr(profile, 'keys') else profile
+                widget_id = profile_dict.get('homebot_widget_id')
+                if widget_id:
+                    widget_id = str(widget_id).strip()
+                    if widget_id:
+                        homebot_widget_id = widget_id
+                        # Prefer agent, so if we found an agent, break
+                        if prof_dict.get('professional_role') == 'agent' or prof_dict.get('professional_type') == 'agent':
+                            break
+    
+    # Fallback: check agent_id/lender_id columns if no professionals found
+    if not homebot_widget_id:
+        homeowner_user = get_user_by_id(homeowner_id)
+        if homeowner_user:
+            homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') else homeowner_user
+            # Try agent first
+            agent_id = homeowner_dict.get("agent_id")
+            if agent_id:
+                agent_profile = get_user_profile(agent_id)
+                if agent_profile:
+                    profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') else agent_profile
+                    widget_id = profile_dict.get('homebot_widget_id')
+                    if widget_id:
+                        widget_id = str(widget_id).strip()
+                        if widget_id:
+                            homebot_widget_id = widget_id
+            # Try lender if no agent
+            if not homebot_widget_id:
+                lender_id = homeowner_dict.get("lender_id")
+                if lender_id:
+                    lender_profile = get_user_profile(lender_id)
+                    if lender_profile:
+                        profile_dict = dict(lender_profile) if hasattr(lender_profile, 'keys') else lender_profile
+                        widget_id = profile_dict.get('homebot_widget_id')
+                        if widget_id:
+                            widget_id = str(widget_id).strip()
+                            if widget_id:
+                                homebot_widget_id = widget_id
+    
+    # Render test page with minimal CSP
+    response = make_response(render_template(
+        "test_homebot.html",
+        homebot_widget_id=homebot_widget_id or '',
+    ))
+    
+    # Very permissive CSP for testing
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
+        "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com data:; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.homebotapp.com; "
+        "font-src 'self' https://fonts.gstatic.com data:; "
+        "img-src 'self' data: https: blob:; "
+        "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com wss: ws:; "
+        "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
+    )
+    
+    return response
+
+
 @app.route("/homeowner/add-property", methods=["POST"])
 def homeowner_add_property():
     """Add a new property for the homeowner."""

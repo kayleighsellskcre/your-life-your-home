@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Homebot Embed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 2rem;
+    }
+    #homebot_homeowner {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      min-height: 600px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Test Homebot Widget</h1>
+<p>This is a minimal test page to verify the Homebot widget works correctly.</p>
+
+<div id="homebot_homeowner"></div>
+
+<script>
+  (function (h, b) {
+    var w = window, d = document, s = 'script', x, y;
+    w['_hb_namespace'] = h;
+    w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
+    y = d.createElement(s); 
+    x = d.getElementsByTagName(s)[0];
+    y.async = 1;
+    y.src = 'https://embed.homebotapp.com/lgw/v1/widget.js';
+    x.parentNode.insertBefore(y, x);
+  })('Homebot');
+
+  // Get widget ID from the page - you'll need to pass this from Flask
+  var widgetId = '{{ homebot_widget_id|e }}';
+  
+  if (widgetId && widgetId !== '') {
+    console.log('[TEST] Initializing Homebot with widget ID:', widgetId);
+    
+    // Wait for Homebot to load, then initialize
+    function initHomebot() {
+      if (typeof window.Homebot === 'function') {
+        console.log('[TEST] Homebot function found, initializing...');
+        try {
+          Homebot('#homebot_homeowner', widgetId);
+          console.log('[TEST] ✅ Homebot initialized successfully');
+        } catch (error) {
+          console.error('[TEST] ❌ Error initializing Homebot:', error);
+        }
+      } else {
+        console.log('[TEST] Waiting for Homebot to load...');
+        setTimeout(initHomebot, 100);
+      }
+    }
+    
+    // Start initialization after a short delay
+    setTimeout(initHomebot, 500);
+  } else {
+    console.error('[TEST] ❌ No widget ID provided');
+    document.getElementById('homebot_homeowner').innerHTML = '<p style="color: red; padding: 2rem;">⚠️ No Homebot Widget ID found. Please check your agent/lender profile settings.</p>';
+  }
+</script>
+
+</body>
+</html>
+
