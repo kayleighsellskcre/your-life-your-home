@@ -2916,7 +2916,10 @@ def homeowner_value_equity_overview():
                 profile_dict = dict(profile) if hasattr(profile, 'keys') else profile
                 widget_id = profile_dict.get('homebot_widget_id')
                 if widget_id:
-                    homebot_widget_id = widget_id
+                    # Clean the widget ID - remove any whitespace
+                    widget_id = str(widget_id).strip()
+                    if widget_id:
+                        homebot_widget_id = widget_id
                     professional_info = {
                         'name': prof_dict.get('name') or profile_dict.get('name'),
                         'email': prof_dict.get('email'),
@@ -2942,7 +2945,10 @@ def homeowner_value_equity_overview():
                     profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') else agent_profile
                     widget_id = profile_dict.get('homebot_widget_id')
                     if widget_id:
-                        homebot_widget_id = widget_id
+                        # Clean the widget ID - remove any whitespace
+                        widget_id = str(widget_id).strip()
+                        if widget_id:
+                            homebot_widget_id = widget_id
                         agent_user = get_user_by_id(agent_id)
                         if agent_user:
                             agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') else agent_user
@@ -2963,7 +2969,10 @@ def homeowner_value_equity_overview():
                         profile_dict = dict(lender_profile) if hasattr(lender_profile, 'keys') else lender_profile
                         widget_id = profile_dict.get('homebot_widget_id')
                         if widget_id:
-                            homebot_widget_id = widget_id
+                            # Clean the widget ID - remove any whitespace
+                            widget_id = str(widget_id).strip()
+                            if widget_id:
+                                homebot_widget_id = widget_id
                             lender_user = get_user_by_id(lender_id)
                             if lender_user:
                                 lender_dict = dict(lender_user) if hasattr(lender_user, 'keys') else lender_user
