@@ -2919,6 +2919,14 @@ def homeowner_value_equity_overview():
                 if widget_id:
                     # Clean the widget ID - remove any whitespace
                     widget_id = str(widget_id).strip()
+                    # If widget_id contains HTML/embed code, extract just the ID
+                    if '<' in widget_id or 'Homebot(' in widget_id:
+                        # Try to extract the ID from embed code
+                        import re
+                        id_match = re.search(r"['\"]([a-f0-9]{40,})['\"]", widget_id)
+                        if id_match:
+                            widget_id = id_match.group(1)
+                            print(f"[HOMEBOT] Extracted widget ID from embed code: {widget_id[:20]}...")
                     if widget_id:
                         homebot_widget_id = widget_id
                     professional_info = {
@@ -2948,6 +2956,14 @@ def homeowner_value_equity_overview():
                     if widget_id:
                         # Clean the widget ID - remove any whitespace
                         widget_id = str(widget_id).strip()
+                        # If widget_id contains HTML/embed code, extract just the ID
+                        if '<' in widget_id or 'Homebot(' in widget_id:
+                            # Try to extract the ID from embed code
+                            import re
+                            id_match = re.search(r"['\"]([a-f0-9]{40,})['\"]", widget_id)
+                            if id_match:
+                                widget_id = id_match.group(1)
+                                print(f"[HOMEBOT] Extracted widget ID from embed code: {widget_id[:20]}...")
                         if widget_id:
                             homebot_widget_id = widget_id
                         agent_user = get_user_by_id(agent_id)
@@ -2972,6 +2988,14 @@ def homeowner_value_equity_overview():
                         if widget_id:
                             # Clean the widget ID - remove any whitespace
                             widget_id = str(widget_id).strip()
+                            # If widget_id contains HTML/embed code, extract just the ID
+                            if '<' in widget_id or 'Homebot(' in widget_id:
+                                # Try to extract the ID from embed code
+                                import re
+                                id_match = re.search(r"['\"]([a-f0-9]{40,})['\"]", widget_id)
+                                if id_match:
+                                    widget_id = id_match.group(1)
+                                    print(f"[HOMEBOT] Extracted widget ID from embed code: {widget_id[:20]}...")
                             if widget_id:
                                 homebot_widget_id = widget_id
                             lender_user = get_user_by_id(lender_id)
@@ -3026,13 +3050,13 @@ def homeowner_value_equity_overview():
     # VERY permissive CSP to ensure Homebot widget works fully (address autocomplete, form submission, etc.)
     if homebot_widget_id:
         response.headers['Content-Security-Policy'] = (
-            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com https://maps.googleapis.com; "
+            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com https://static.cloudflareinsights.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com https://maps.googleapis.com https://static.cloudflareinsights.com; "
             "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com data: blob:; "
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.homebotapp.com https://*.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com https://*.homebotapp.com data:; "
             "img-src 'self' data: https: blob:; "
-            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com wss: ws:; "
+            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com https://static.cloudflareinsights.com https://mikasa.homebotapp.com wss: ws:; "
             "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.googleapis.com; "
             "frame-ancestors 'self'; "
             "worker-src 'self' blob: https://*.homebotapp.com; "

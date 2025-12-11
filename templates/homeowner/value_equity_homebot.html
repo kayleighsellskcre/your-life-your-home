@@ -212,13 +212,33 @@
 
   // Initialize widget - Clean and simple
   (function() {
+    // Get widget ID - ensure it's a clean string, not HTML
     var widgetId = '{{ homebot_widget_id|e }}';
+    
+    // Clean the widget ID - remove any HTML tags or extra content
+    widgetId = widgetId.trim();
+    
+    // If widget ID contains HTML tags, extract just the ID
+    if (widgetId.indexOf('<') !== -1 || widgetId.indexOf('&lt;') !== -1) {
+      console.error('[HOMEBOT] ❌ Widget ID appears to contain HTML. Expected just the ID string.');
+      // Try to extract ID from common patterns
+      var idMatch = widgetId.match(/['"]([a-f0-9]{40,})['"]/);
+      if (idMatch) {
+        widgetId = idMatch[1];
+        console.log('[HOMEBOT] Extracted widget ID:', widgetId);
+      } else {
+        console.error('[HOMEBOT] ❌ Could not extract valid widget ID');
+        return;
+      }
+    }
+    
     var container = '#homebot_homeowner';
     var maxAttempts = 50;
     var attempts = 0;
     
     console.log('[HOMEBOT] Starting initialization...');
-    console.log('[HOMEBOT] Widget ID:', widgetId);
+    console.log('[HOMEBOT] Widget ID (cleaned):', widgetId);
+    console.log('[HOMEBOT] Widget ID length:', widgetId.length);
     console.log('[HOMEBOT] Container:', container);
     
     function initHomebot() {
