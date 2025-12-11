@@ -2986,11 +2986,32 @@ def homeowner_value_equity_overview():
                                     'professional_photo': profile_dict.get('professional_photo'),
                                 }
 
+    # Get homeowner's email and property address to pass to Homebot widget
+    homeowner_data = {}
+    homeowner_user = get_user_by_id(homeowner_id)
+    if homeowner_user:
+        homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') else homeowner_user
+        homeowner_email = homeowner_dict.get('email')
+        if homeowner_email:
+            homeowner_data['email'] = homeowner_email
+        
+        # Get primary property address, or first property if no primary
+        from database import get_primary_property, get_user_properties
+        primary_property = get_primary_property(homeowner_id)
+        if primary_property and primary_property.get('address'):
+            homeowner_data['address'] = primary_property.get('address')
+        else:
+            # Fallback to first property if no primary
+            all_properties = get_user_properties(homeowner_id)
+            if all_properties and len(all_properties) > 0 and all_properties[0].get('address'):
+                homeowner_data['address'] = all_properties[0].get('address')
+    
     # Debug logging
     print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
     if homebot_widget_id:
         print(f"[HOMEBOT] Widget ID value: {homebot_widget_id[:20]}... (length: {len(homebot_widget_id)})")
     print(f"[HOMEBOT] Professional Info: {professional_info}")
+    print(f"[HOMEBOT] Homeowner Data: {homeowner_data}")
     
     # Render Homebot-powered equity page
     response = make_response(render_template(
@@ -2998,6 +3019,7 @@ def homeowner_value_equity_overview():
         brand_name=FRONT_BRAND_NAME,
         homebot_widget_id=homebot_widget_id,
         professional_info=professional_info,
+        homeowner_data=homeowner_data,
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)

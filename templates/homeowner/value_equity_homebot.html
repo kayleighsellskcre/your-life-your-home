@@ -71,6 +71,14 @@
     width: 100%;
     min-height: 600px;
     position: relative;
+    border: none;
+    overflow: hidden;
+  }
+  
+  #homebot_homeowner iframe {
+    width: 100%;
+    min-height: 600px;
+    border: none;
   }
   
   .no-homebot-message {
@@ -168,19 +176,68 @@
   (function() {
     var widgetId = '{{ homebot_widget_id|e }}';
     var container = '#homebot_homeowner';
+    var maxRetries = 50; // Try for up to 5 seconds (50 * 100ms)
+    var retryCount = 0;
+    
+    // Prepare homeowner data to pass to widget
+    var homeownerData = {};
+    {% if homeowner_data %}
+      {% if homeowner_data.email %}
+        homeownerData.email = '{{ homeowner_data.email|e }}';
+      {% endif %}
+      {% if homeowner_data.address %}
+        homeownerData.address = '{{ homeowner_data.address|e }}';
+      {% endif %}
+    {% endif %}
+    
+    console.log('[HOMEBOT] Initializing widget with ID:', widgetId);
+    console.log('[HOMEBOT] Homeowner data:', homeownerData);
     
     function init() {
+      retryCount++;
+      
       if (typeof window.Homebot === 'function') {
-        window.Homebot(container, widgetId);
+        console.log('[HOMEBOT] Homebot function found, initializing widget...');
+        try {
+          // Pass homeowner data if available to help widget identify the homeowner
+          if (Object.keys(homeownerData).length > 0) {
+            console.log('[HOMEBOT] Initializing with homeowner data');
+            window.Homebot(container, widgetId, homeownerData);
+          } else {
+            console.log('[HOMEBOT] Initializing without homeowner data');
+            window.Homebot(container, widgetId);
+          }
+        } catch (error) {
+          console.error('[HOMEBOT] Error initializing widget:', error);
+        }
       } else if (window.Homebot && window.Homebot.q) {
-        window.Homebot(container, widgetId);
-      } else {
+        console.log('[HOMEBOT] Homebot queue found, queuing initialization...');
+        try {
+          // Queue the call if Homebot isn't ready yet
+          if (Object.keys(homeownerData).length > 0) {
+            window.Homebot(container, widgetId, homeownerData);
+          } else {
+            window.Homebot(container, widgetId);
+          }
+        } catch (error) {
+          console.error('[HOMEBOT] Error queuing widget:', error);
+        }
+      } else if (retryCount < maxRetries) {
+        // Keep trying until Homebot script loads
         setTimeout(init, 100);
+      } else {
+        console.error('[HOMEBOT] Failed to load Homebot widget after', maxRetries, 'retries');
+        var containerEl = document.querySelector(container);
+        if (containerEl) {
+          containerEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;"><p>Unable to load Homebot widget. Please refresh the page or contact support.</p></div>';
+        }
       }
     }
     
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(init, 500);
+      });
     } else {
       setTimeout(init, 500);
     }
