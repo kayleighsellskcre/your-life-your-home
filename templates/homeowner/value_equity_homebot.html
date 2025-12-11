@@ -67,6 +67,19 @@
     box-shadow: var(--shadow-light);
   }
   
+  /* Ensure Homebot widget container is visible and interactive */
+  #homebot_homeowner {
+    width: 100% !important;
+    min-height: 600px !important;
+    position: relative;
+  }
+  
+  /* Allow iframes from Homebot */
+  #homebot_homeowner iframe {
+    width: 100% !important;
+    border: none !important;
+  }
+  
   .no-homebot-message {
     text-align: center;
     padding: 4rem 2rem;
@@ -126,8 +139,8 @@
 <div class="widget-section">
   {% if homebot_widget_id %}
     <!-- Homebot widget container -->
-    <!-- Debug: Widget ID = {{ homebot_widget_id }} -->
     <div id="homebot_homeowner" style="width: 100%; min-height: 600px;"></div>
+    <!-- Debug info (remove in production): Widget ID = {{ homebot_widget_id }} -->
   {% else %}
     <div class="no-homebot-message">
       <h2>Homebot Not Connected</h2>
@@ -148,7 +161,7 @@
 
 {% if homebot_widget_id %}
 <script>
-  // Use Homebot's exact embed pattern
+  // Use Homebot's exact embed pattern - load script first
   (function (h, b) {
     var w = window, d = document, s = 'script', x, y;
     w['_hb_namespace'] = h;
@@ -159,8 +172,77 @@
     x.parentNode.insertBefore(y, x);
   })('Homebot', 'https://embed.homebotapp.com/lgw/v1/widget.js');
   
-  // Initialize widget - Homebot will queue this if script not loaded yet
-  Homebot('#homebot_homeowner', '{{ homebot_widget_id|e }}');
+  // Wait for page to fully load before initializing widget
+  (function() {
+    var widgetId = '{{ homebot_widget_id|e }}';
+    var containerId = '#homebot_homeowner';
+    
+    function initWidget() {
+      // Check if container exists
+      var container = document.querySelector(containerId);
+      if (!container) {
+        console.error('Homebot container not found:', containerId);
+        return;
+      }
+      
+      // Validate widget ID
+      if (!widgetId || widgetId.trim() === '') {
+        console.error('Homebot widget ID is empty!');
+        return;
+      }
+      
+      // Check if Homebot is loaded
+      if (typeof window.Homebot === 'function') {
+        try {
+          console.log('Initializing Homebot with widget ID:', widgetId);
+          console.log('Container:', container);
+          console.log('Container ID:', containerId);
+          
+          // Initialize the widget
+          window.Homebot(containerId, widgetId);
+          
+          console.log('Homebot widget initialized successfully');
+          
+          // Check if widget loaded after a delay
+          setTimeout(function() {
+            var widgetContent = container.querySelector('iframe, form, input');
+            if (widgetContent) {
+              console.log('Homebot widget content detected:', widgetContent);
+            } else {
+              console.warn('Homebot widget container is still empty after 2 seconds');
+            }
+          }, 2000);
+        } catch (e) {
+          console.error('Error initializing Homebot:', e);
+          console.error('Stack trace:', e.stack);
+        }
+      } else if (window.Homebot && typeof window.Homebot === 'object' && window.Homebot.q) {
+        // Homebot queue exists - script is loading, queue the call
+        console.log('Homebot script loading, queuing initialization...');
+        window.Homebot(containerId, widgetId);
+      } else {
+        // Homebot not loaded yet, retry (max 50 attempts = 5 seconds)
+        var attempts = initWidget.attempts || 0;
+        initWidget.attempts = attempts + 1;
+        if (attempts < 50) {
+          console.log('Homebot script not loaded yet, retrying... (attempt ' + attempts + ')');
+          setTimeout(initWidget, 100);
+        } else {
+          console.error('Homebot script failed to load after 5 seconds');
+        }
+      }
+    }
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(initWidget, 500); // Give script time to load
+      });
+    } else {
+      // DOM already loaded
+      setTimeout(initWidget, 500);
+    }
+  })();
 </script>
 {% endif %}
 

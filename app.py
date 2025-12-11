@@ -3090,19 +3090,23 @@ def homeowner_reno_planner():
     )
 
 
-@app.route("/homeowner/reno/design-ideas")
-def homeowner_reno_design_ideas():
-    return render_template(
-        "homeowner/reno_design_ideas.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
 @app.route("/homeowner/reno/material-cost", methods=["GET"])
 def homeowner_reno_material_cost():
+    """Material & Cost Estimator - linked to mood boards."""
+    from database import get_design_boards_for_user
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    
+    # Get list of mood board names for the dropdown
+    board_names = []
+    if user_id:
+        boards = get_design_boards_for_user(user_id) or []
+        board_names = [b for b in boards if b]  # Filter out None values
+    
     return render_template(
         "homeowner/reno_material_cost.html",
         brand_name=FRONT_BRAND_NAME,
+        board_names=board_names,
     )
 
 @app.route("/agent", methods=["GET"])
@@ -5229,15 +5233,6 @@ def homeowner_reno_roi_guide():
     """Renovation ROI guide."""
     return render_template(
         "homeowner/reno_roi_guide.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/reno/before-after", methods=["GET"])
-def homeowner_reno_before_after():
-    """Before and after renovation gallery."""
-    return render_template(
-        "homeowner/reno_before_after.html",
         brand_name=FRONT_BRAND_NAME,
     )
 

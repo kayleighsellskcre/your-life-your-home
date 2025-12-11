@@ -2,23 +2,654 @@
 {% block title %}ROI Project Guide{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Smart investments</p>
-  <h1>ROI Project Guide</h1>
-  <p>Some upgrades are mostly for joy and some tend to give a portion of the cost back. This guide will help you see the difference.</p>
+<style>
+  .roi-hero {
+    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 3rem;
+  }
+  
+  .roi-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .roi-hero p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+  
+  .roi-section {
+    background: white;
+    border: 1px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .roi-section h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--olive-green);
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+  
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  .roi-card {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    transition: all 0.3s ease;
+  }
+  
+  .roi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.2);
+    border-color: var(--olive-green);
+  }
+  
+  .roi-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .roi-card-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+  }
+  
+  .roi-card-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 600;
+  }
+  
+  .roi-percentage {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--olive-green);
+    margin: 1rem 0;
+    line-height: 1;
+  }
+  
+  .roi-percentage-label {
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .roi-card-description {
+    color: var(--charcoal-brown);
+    line-height: 1.7;
+    margin-top: 1rem;
+  }
+  
+  .roi-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .roi-stat {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--taupe-beige);
+  }
+  
+  .roi-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--olive-green);
+    margin-bottom: 0.5rem;
+  }
+  
+  .roi-stat-label {
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+  }
+  
+  .roi-insight {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.15) 100%);
+    border-left: 4px solid var(--olive-green);
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: var(--border-radius);
+  }
+  
+  .roi-insight h3 {
+    font-family: var(--font-heading);
+    color: var(--olive-green);
+    margin-bottom: 0.75rem;
+  }
+  
+  .roi-insight p {
+    color: var(--charcoal-brown);
+    line-height: 1.7;
+    margin: 0;
+  }
+  
+  .roi-category {
+    margin: 3rem 0;
+  }
+  
+  .roi-category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .roi-category-icon {
+    font-size: 2rem;
+  }
+  
+  .roi-tips {
+    background: white;
+    border: 1px solid var(--taupe-beige);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+  }
+  
+  .roi-tips h3 {
+    font-family: var(--font-heading);
+    color: var(--olive-green);
+    margin-bottom: 1rem;
+  }
+  
+  .roi-tips ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .roi-tips li {
+    padding: 0.75rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--charcoal-brown);
+    line-height: 1.6;
+  }
+  
+  .roi-tips li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--olive-green);
+    font-weight: bold;
+  }
+</style>
+
+<div class="roi-hero">
+  <h1>💰 ROI Project Guide</h1>
+  <p>
+    Make informed decisions about your home investments. Discover which upgrades add real value, 
+    which bring pure joy, and how to balance both for maximum return—both financial and personal.
+  </p>
 </div>
 
 <div class="dashboard-section">
-  <div class="card">
-    <h2>How This Will Guide You</h2>
-    <p class="card-subtext">When the full guide is ready you'll be able to look up:</p>
-    <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>Average return on upgrades such as kitchens and baths</li>
-      <li>How curb appeal updates often perform</li>
-      <li>Where energy efficiency upgrades can help resale and bills</li>
-      <li>Which projects are mostly lifestyle choices</li>
+  <!-- Understanding ROI -->
+  <div class="roi-section">
+    <h2>Understanding Return on Investment</h2>
+    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--charcoal-brown); margin-bottom: 2rem;">
+      ROI (Return on Investment) measures how much of your renovation cost you can expect to recoup 
+      when you sell your home. But remember: some upgrades are priceless for your daily life, even if 
+      they don't add dollar-for-dollar value. This guide helps you see both sides.
+    </p>
+    
+    <div class="roi-stats">
+      <div class="roi-stat">
+        <div class="roi-stat-value">70-80%</div>
+        <div class="roi-stat-label">Average ROI Range</div>
+      </div>
+      <div class="roi-stat">
+        <div class="roi-stat-value">$1.50</div>
+        <div class="roi-stat-label">Per $1 Spent (Best Projects)</div>
+      </div>
+      <div class="roi-stat">
+        <div class="roi-stat-value">5-7 Years</div>
+        <div class="roi-stat-label">Typical Payback Period</div>
+      </div>
+    </div>
+    
+    <div class="roi-insight">
+      <h3>💡 Key Insight</h3>
+      <p>
+        The best ROI projects are often the ones that make your home more functional and appealing 
+        to the widest range of buyers. But don't underestimate the value of upgrades that improve 
+        your quality of life—those returns are measured in daily joy, not just dollars.
+      </p>
+    </div>
+  </div>
+
+  <!-- High ROI Projects -->
+  <div class="roi-section">
+    <h2>🏆 Highest ROI Projects</h2>
+    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 2rem;">
+      These upgrades typically return 70-100%+ of their cost and appeal to most buyers.
+    </p>
+    
+    <div class="roi-grid">
+      <!-- Minor Kitchen Remodel -->
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🍽️</div>
+          <h3 class="roi-card-title">Minor Kitchen Remodel</h3>
+        </div>
+        <div class="roi-percentage">85-95%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          <strong>What it includes:</strong> Refacing cabinets, new countertops, updated appliances, 
+          fresh paint, and modern fixtures. Avoid full gut renovations—they rarely pay back.
+          <br><br>
+          <strong>Why it works:</strong> Kitchens sell homes. A refreshed kitchen appeals to buyers 
+          without the premium price tag of a complete renovation.
+          <br><br>
+          <strong>Typical cost:</strong> $15,000 - $30,000
+          <br>
+          <strong>Expected return:</strong> $12,750 - $28,500
+        </div>
+        <div class="roi-tips">
+          <h3>Smart Tips</h3>
+          <ul>
+            <li>Keep existing layout to save costs</li>
+            <li>Choose neutral, timeless finishes</li>
+            <li>Invest in quality appliances</li>
+            <li>Update lighting for modern appeal</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bathroom Remodel -->
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🛁</div>
+          <h3 class="roi-card-title">Bathroom Remodel</h3>
+        </div>
+        <div class="roi-percentage">70-80%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          <strong>What it includes:</strong> New vanity, updated fixtures, modern tile, improved lighting, 
+          and fresh paint. Focus on mid-range finishes, not luxury.
+          <br><br>
+          <strong>Why it works:</strong> Bathrooms are deal-breakers for many buyers. A clean, modern 
+          bathroom signals a well-maintained home.
+          <br><br>
+          <strong>Typical cost:</strong> $10,000 - $20,000
+          <br>
+          <strong>Expected return:</strong> $7,000 - $16,000
+        </div>
+        <div class="roi-tips">
+          <h3>Smart Tips</h3>
+          <ul>
+            <li>Keep plumbing in same location</li>
+            <li>Choose classic white fixtures</li>
+            <li>Add storage solutions</li>
+            <li>Ensure proper ventilation</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Curb Appeal -->
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🌳</div>
+          <h3 class="roi-card-title">Curb Appeal Updates</h3>
+        </div>
+        <div class="roi-percentage">75-100%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          <strong>What it includes:</strong> Fresh exterior paint, updated front door, landscaping, 
+          new house numbers, modern lighting, and clean walkways.
+          <br><br>
+          <strong>Why it works:</strong> First impressions matter. Buyers form opinions in seconds. 
+          Strong curb appeal can increase perceived value by 5-10%.
+          <br><br>
+          <strong>Typical cost:</strong> $5,000 - $15,000
+          <br>
+          <strong>Expected return:</strong> $3,750 - $15,000
+        </div>
+        <div class="roi-tips">
+          <h3>Smart Tips</h3>
+          <ul>
+            <li>Power wash exterior and walkways</li>
+            <li>Paint front door in welcoming color</li>
+            <li>Add seasonal plants and mulch</li>
+            <li>Update outdoor lighting fixtures</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Hardwood Flooring -->
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🪵</div>
+          <h3 class="roi-card-title">Hardwood Flooring</h3>
+        </div>
+        <div class="roi-percentage">70-85%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          <strong>What it includes:</strong> Installing or refinishing hardwood floors in main living 
+          areas. Engineered hardwood offers great value.
+          <br><br>
+          <strong>Why it works:</strong> Hardwood is a top buyer preference. It's durable, timeless, 
+          and adds warmth to any space.
+          <br><br>
+          <strong>Typical cost:</strong> $8,000 - $20,000
+          <br>
+          <strong>Expected return:</strong> $5,600 - $17,000
+        </div>
+        <div class="roi-tips">
+          <h3>Smart Tips</h3>
+          <ul>
+            <li>Choose medium-toned wood (widest appeal)</li>
+            <li>Consider engineered hardwood for value</li>
+            <li>Refinish existing floors when possible</li>
+            <li>Install in main living areas first</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Energy Efficiency -->
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">⚡</div>
+          <h3 class="roi-card-title">Energy Efficiency Upgrades</h3>
+        </div>
+        <div class="roi-percentage">60-90%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          <strong>What it includes:</strong> New windows, insulation, HVAC upgrades, smart thermostats, 
+          LED lighting, and solar panels (in some markets).
+          <br><br>
+          <strong>Why it works:</strong> Lower utility bills appeal to buyers. Energy-efficient homes 
+          often sell faster and for more. Plus, you save money while you live there.
+          <br><br>
+          <strong>Typical cost:</strong> $5,000 - $25,000
+          <br>
+          <strong>Expected return:</strong> $3,000 - $22,500
+        </div>
+        <div class="roi-tips">
+          <h3>Smart Tips</h3>
+          <ul>
+            <li>Start with insulation (best bang for buck)</li>
+            <li>Replace old windows with energy-efficient models</li>
+            <li>Upgrade to smart thermostat</li>
+            <li>Consider solar if you plan to stay 7+ years</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Deck Addition -->
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🏡</div>
+          <h3 class="roi-card-title">Deck Addition</h3>
+        </div>
+        <div class="roi-percentage">65-75%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          <strong>What it includes:</strong> Adding a wood or composite deck for outdoor living space. 
+          Composite materials offer lower maintenance.
+          <br><br>
+          <strong>Why it works:</strong> Outdoor living spaces are highly desirable. Decks extend 
+          usable square footage and create an entertainment area.
+          <br><br>
+          <strong>Typical cost:</strong> $10,000 - $20,000
+          <br>
+          <strong>Expected return:</strong> $6,500 - $15,000
+        </div>
+        <div class="roi-tips">
+          <h3>Smart Tips</h3>
+          <ul>
+            <li>Match deck style to home architecture</li>
+            <li>Consider composite for low maintenance</li>
+            <li>Include built-in seating or planters</li>
+            <li>Ensure proper permits and safety</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Moderate ROI Projects -->
+  <div class="roi-section">
+    <h2>📊 Moderate ROI Projects (50-70%)</h2>
+    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 2rem;">
+      These projects add value but may not fully recoup costs. They're often worth it for lifestyle 
+      improvements and personal enjoyment.
+    </p>
+    
+    <div class="roi-grid">
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🪟</div>
+          <h3 class="roi-card-title">Window Replacement</h3>
+        </div>
+        <div class="roi-percentage">60-70%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          New windows improve energy efficiency and aesthetics, but full replacement is expensive. 
+          Consider replacing only if windows are damaged or extremely outdated.
+        </div>
+      </div>
+
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🏠</div>
+          <h3 class="roi-card-title">Master Suite Addition</h3>
+        </div>
+        <div class="roi-percentage">55-65%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          Adding a master suite is expensive but can significantly improve your quality of life. 
+          Best ROI when it matches neighborhood standards.
+        </div>
+      </div>
+
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🚗</div>
+          <h3 class="roi-card-title">Garage Addition</h3>
+        </div>
+        <div class="roi-percentage">60-70%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          Garages add significant value in most markets, especially in areas with harsh weather. 
+          Consider if your home lacks covered parking.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lifestyle Projects -->
+  <div class="roi-section">
+    <h2>💝 Lifestyle Projects (30-50% ROI)</h2>
+    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 2rem;">
+      These upgrades are primarily for your enjoyment. They may not add significant resale value, 
+      but they can dramatically improve your daily life. Worth it if you plan to stay 5+ years.
+    </p>
+    
+    <div class="roi-grid">
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🏊</div>
+          <h3 class="roi-card-title">Swimming Pool</h3>
+        </div>
+        <div class="roi-percentage">30-50%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          Pools are expensive to install and maintain. In some markets, they can deter buyers. 
+          Only install if you'll use it regularly and plan to stay long-term.
+        </div>
+      </div>
+
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🎨</div>
+          <h3 class="roi-card-title">Custom Paint & Wallpaper</h3>
+        </div>
+        <div class="roi-percentage">40-60%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          Bold colors and patterns reflect personal taste. While they may not appeal to all buyers, 
+          they can make your home feel uniquely yours. Easy to repaint before selling.
+        </div>
+      </div>
+
+      <div class="roi-card">
+        <div class="roi-card-header">
+          <div class="roi-card-icon">🎯</div>
+          <h3 class="roi-card-title">Home Office Conversion</h3>
+        </div>
+        <div class="roi-percentage">45-55%</div>
+        <div class="roi-percentage-label">Average ROI</div>
+        <div class="roi-card-description">
+          Dedicated home offices are valuable for remote workers. ROI depends on whether it reduces 
+          a bedroom count, which can hurt value in some markets.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Regional Considerations -->
+  <div class="roi-section">
+    <h2>📍 Regional Considerations</h2>
+    <p style="color: var(--charcoal-brown); line-height: 1.8; margin-bottom: 2rem;">
+      ROI varies significantly by location. What works in one market may not in another. Always 
+      consult with local real estate professionals before major renovations.
+    </p>
+    
+    <div class="roi-insight">
+      <h3>Market-Specific Factors</h3>
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        <li style="padding: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+          <strong>Urban markets:</strong> Kitchens and bathrooms typically have higher ROI. Space is premium.
+        </li>
+        <li style="padding: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+          <strong>Suburban markets:</strong> Curb appeal and outdoor spaces matter more. Family-friendly features add value.
+        </li>
+        <li style="padding: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+          <strong>Luxury markets:</strong> High-end finishes expected. ROI may be lower percentage-wise, but dollar returns can be significant.
+        </li>
+        <li style="padding: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+          <strong>Hot markets:</strong> Any improvement can help. Focus on what makes your home stand out.
+        </li>
+        <li style="padding: 0.5rem 0; padding-left: 1.5rem; position: relative;">
+          <strong>Cool markets:</strong> Focus on essential repairs and neutral updates. Avoid over-improving.
+        </li>
     </ul>
-    <p class="card-subtext" style="margin-top: 1rem;">This doesn't replace local expert advice. It gives you a healthy starting point so your choices feel thoughtful instead of rushed.</p>
+    </div>
+  </div>
+
+  <!-- Smart Renovation Strategy -->
+  <div class="roi-section">
+    <h2>🎯 Smart Renovation Strategy</h2>
+    
+    <div class="roi-category">
+      <div class="roi-category-header">
+        <div class="roi-category-icon">1️⃣</div>
+        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0;">Know Your Timeline</h3>
+      </div>
+      <p style="color: var(--charcoal-brown); line-height: 1.8;">
+        <strong>Planning to sell within 2 years?</strong> Focus on high-ROI projects that appeal to buyers: 
+        minor kitchen updates, bathroom refreshes, curb appeal, and essential repairs.
+        <br><br>
+        <strong>Staying 5+ years?</strong> Balance ROI with personal enjoyment. Invest in upgrades that 
+        improve your daily life, even if ROI is moderate.
+        <br><br>
+        <strong>Forever home?</strong> Prioritize your happiness. ROI matters less when you're not planning to sell.
+      </p>
+    </div>
+
+    <div class="roi-category">
+      <div class="roi-category-header">
+        <div class="roi-category-icon">2️⃣</div>
+        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0;">Match Your Neighborhood</h3>
+      </div>
+      <p style="color: var(--charcoal-brown); line-height: 1.8;">
+        Don't over-improve for your area. If your neighborhood has $200K homes, don't install $50K 
+        kitchen upgrades. You won't recoup the cost. Instead, aim to be in the top 10-15% of your 
+        neighborhood's price range.
+      </p>
+    </div>
+
+    <div class="roi-category">
+      <div class="roi-category-header">
+        <div class="roi-category-icon">3️⃣</div>
+        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0;">Fix Before You Fancy</h3>
+      </div>
+      <p style="color: var(--charcoal-brown); line-height: 1.8;">
+        Address structural issues, leaks, electrical problems, and safety concerns before cosmetic 
+        upgrades. Buyers will notice problems and may walk away, regardless of how beautiful your 
+        new backsplash is.
+      </p>
+    </div>
+
+    <div class="roi-category">
+      <div class="roi-category-header">
+        <div class="roi-category-icon">4️⃣</div>
+        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0;">Choose Timeless Over Trendy</h3>
+      </div>
+      <p style="color: var(--charcoal-brown); line-height: 1.8;">
+        Trends fade. Classic choices age better. When in doubt, choose neutral colors, quality materials, 
+        and timeless designs. You can always add personality with easily changeable items like paint, 
+        accessories, and decor.
+      </p>
+    </div>
+  </div>
+
+  <!-- Final Thoughts -->
+  <div class="roi-section">
+    <h2>💭 Final Thoughts</h2>
+    <div class="roi-insight">
+      <h3>Remember: ROI Isn't Everything</h3>
+      <p>
+        While this guide focuses on financial returns, don't forget that your home is where you live. 
+        Some of the best "investments" are upgrades that make you happy every day—a cozy reading nook, 
+        a beautiful garden, a kitchen that inspires you to cook. These returns can't be measured in 
+        dollars, but they're real and valuable.
+        <br><br>
+        The smartest approach? Balance high-ROI projects that add resale value with personal touches 
+        that enhance your daily life. When you do sell, you'll have both: a home that appeals to buyers 
+        and memories of years well-lived in a space you loved.
+      </p>
+    </div>
+    
+    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-top: 2rem; font-style: italic;">
+      <strong>Note:</strong> These ROI percentages are national averages. Your local market may vary. 
+      Always consult with a local real estate professional and appraiser before making major renovation 
+      decisions, especially if you're planning to sell within the next few years.
+    </p>
   </div>
 </div>
 {% endblock %}

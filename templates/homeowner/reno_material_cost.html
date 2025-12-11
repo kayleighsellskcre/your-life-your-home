@@ -4,10 +4,6 @@
 {% block title %}Material & Cost Estimator{% endblock %}
 
 {% block homeowner_content %}
-<!-- DEBUG: Show board_names for troubleshooting -->
-<div style="background: #fff3cd; color: #856404; padding: 8px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 1.1em;">
-  <strong>DEBUG:</strong> board_names = {{ board_names|safe }}
-</div>
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Budget with confidence</p>
   <h1>Material & Cost Estimator</h1>
@@ -26,18 +22,22 @@
         <option value="__new__">➕ Start New Board...</option>
       </select>
       <input type="text" id="new-board-name" class="form-control" placeholder="Enter new board name..." style="display:none; margin-top:0.5rem;" />
+    </div>
+    <script>
     // Mood Board dropdown: show input for new board
     const boardNameSelect = document.getElementById('board-name');
     const newBoardInput = document.getElementById('new-board-name');
-    boardNameSelect.addEventListener('change', function() {
-      if (this.value === '__new__') {
-        newBoardInput.style.display = 'block';
-        newBoardInput.focus();
-      } else {
-        newBoardInput.style.display = 'none';
-      }
-    });
-    </div>
+    if (boardNameSelect && newBoardInput) {
+      boardNameSelect.addEventListener('change', function() {
+        if (this.value === '__new__') {
+          newBoardInput.style.display = 'block';
+          newBoardInput.focus();
+        } else {
+          newBoardInput.style.display = 'none';
+        }
+      });
+    }
+    </script>
     <h2 style="margin-bottom: 1.2rem;">Estimate Your Project</h2>
     <div class="dashboard-grid" style="gap: 1.5rem;">
       <!-- Category Cards -->

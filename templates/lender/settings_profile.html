@@ -336,33 +336,33 @@
       
       <div class="form-group">
         <label>Website URL <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-        <input type="url" name="website_url" value="{{ profile.website_url if profile else '' }}" placeholder="https://yourwebsite.com">
+        <input type="url" name="website_url" value="{{ profile.website_url if profile and profile.website_url else '' }}" placeholder="https://yourwebsite.com">
       </div>
       
       <div class="social-links-grid">
         <div class="form-group">
           <label>Facebook <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="facebook_url" value="{{ profile.facebook_url if profile else '' }}" placeholder="https://facebook.com/yourpage">
+          <input type="url" name="facebook_url" value="{{ profile.facebook_url if profile and profile.facebook_url else '' }}" placeholder="https://facebook.com/yourpage">
         </div>
         
         <div class="form-group">
           <label>Instagram <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="instagram_url" value="{{ profile.instagram_url if profile else '' }}" placeholder="https://instagram.com/yourhandle">
+          <input type="url" name="instagram_url" value="{{ profile.instagram_url if profile and profile.instagram_url else '' }}" placeholder="https://instagram.com/yourhandle">
         </div>
         
         <div class="form-group">
           <label>LinkedIn <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile else '' }}" placeholder="https://linkedin.com/in/yourprofile">
+          <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile and profile.linkedin_url else '' }}" placeholder="https://linkedin.com/in/yourprofile">
         </div>
         
         <div class="form-group">
           <label>Twitter/X <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="twitter_url" value="{{ profile.twitter_url if profile else '' }}" placeholder="https://twitter.com/yourhandle">
+          <input type="url" name="twitter_url" value="{{ profile.twitter_url if profile and profile.twitter_url else '' }}" placeholder="https://twitter.com/yourhandle">
         </div>
         
         <div class="form-group">
           <label>YouTube <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="youtube_url" value="{{ profile.youtube_url if profile else '' }}" placeholder="https://youtube.com/@yourchannel">
+          <input type="url" name="youtube_url" value="{{ profile.youtube_url if profile and profile.youtube_url else '' }}" placeholder="https://youtube.com/@yourchannel">
         </div>
       </div>
     </div>
@@ -388,13 +388,13 @@
       
       <div class="form-group">
         <label>Schedule/Calendar URL</label>
-        <input type="url" name="schedule_url" value="{{ profile.schedule_url if profile else '' }}" placeholder="https://calendly.com/yourname or https://yourcalendar.com">
+        <input type="url" name="schedule_url" value="{{ profile.schedule_url if profile and profile.schedule_url else '' }}" placeholder="https://calendly.com/yourname or https://yourcalendar.com">
         <small>Link to your scheduling system (Calendly, Acuity, etc.)</small>
       </div>
       
       <div class="form-group">
         <label>Application/Pre-Approval Link <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-        <input type="url" name="application_url" value="{{ profile.application_url if profile else '' }}" placeholder="https://yourcompany.com/apply">
+        <input type="url" name="application_url" value="{{ profile.application_url if profile and profile.application_url else '' }}" placeholder="https://yourcompany.com/apply">
         <small>Link to your loan application or pre-approval form (optional - you can also use your main website URL above)</small>
       </div>
     </div>
