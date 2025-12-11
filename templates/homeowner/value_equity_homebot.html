@@ -151,6 +151,71 @@
 </div>
 {% endif %}
 
+{% if snapshot and (snapshot.value_estimate or snapshot.loan_balance) %}
+<!-- Homebot Synced Data Display -->
+<div class="dashboard-section" style="margin-bottom: 2rem;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+    {% if snapshot.value_estimate %}
+    <div class="card" style="background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%); color: white; border: none;">
+      <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Home Value</div>
+      <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.value_estimate) }}</div>
+      <div style="font-size: 0.75rem; opacity: 0.8;">Synced from Homebot</div>
+    </div>
+    {% endif %}
+    
+    {% if snapshot.loan_balance %}
+    <div class="card" style="background: linear-gradient(135deg, #8B7A5A 0%, #A69B7A 100%); color: white; border: none;">
+      <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Loan Balance</div>
+      <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.loan_balance) }}</div>
+      <div style="font-size: 0.75rem; opacity: 0.8;">Synced from Homebot</div>
+    </div>
+    {% endif %}
+    
+    {% if snapshot.equity_estimate %}
+    <div class="card" style="background: linear-gradient(135deg, #5A6D47 0%, #6B6A45 100%); color: white; border: none;">
+      <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Your Equity</div>
+      <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.equity_estimate) }}</div>
+      <div style="font-size: 0.75rem; opacity: 0.8;">Synced from Homebot</div>
+    </div>
+    {% endif %}
+    
+    {% if snapshot.loan_rate %}
+    <div class="card" style="background: var(--white); border: 2px solid var(--taupe-beige);">
+      <div style="font-size: 0.85rem; color: var(--olive-green); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Interest Rate</div>
+      <div style="font-size: 1.75rem; font-weight: 700; color: var(--charcoal-brown); margin-bottom: 0.5rem;">{{ "{:.2f}".format(snapshot.loan_rate) }}%</div>
+      <div style="font-size: 0.75rem; color: #999;">Synced from Homebot</div>
+    </div>
+    {% endif %}
+    
+    {% if snapshot.loan_payment %}
+    <div class="card" style="background: var(--white); border: 2px solid var(--taupe-beige);">
+      <div style="font-size: 0.85rem; color: var(--olive-green); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Monthly Payment</div>
+      <div style="font-size: 1.75rem; font-weight: 700; color: var(--charcoal-brown); margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.loan_payment) }}</div>
+      <div style="font-size: 0.75rem; color: #999;">Synced from Homebot</div>
+    </div>
+    {% endif %}
+  </div>
+  
+  {% if snapshot.value_estimate and snapshot.loan_balance %}
+  <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); border-left: 4px solid var(--olive-green);">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+      <span style="font-size: 1.2rem;">📊</span>
+      <strong style="color: var(--charcoal-brown);">Loan-to-Value (LTV):</strong>
+      <span style="color: var(--olive-green); font-weight: 700; font-size: 1.1rem;">
+        {{ "{:.1f}".format((snapshot.loan_balance / snapshot.value_estimate) * 100) }}%
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 0.9rem; color: #666;">
+      This data is automatically synced from Homebot when you link your account. 
+      {% if snapshot.updated_at %}
+      Last updated: {{ snapshot.updated_at[:10] if snapshot.updated_at else 'Recently' }}
+      {% endif %}
+    </p>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
 <div class="widget-section">
   {% if homebot_widget_id %}
     <div id="homebot_homeowner" style="width: 100%; min-height: 600px; position: relative;"></div>

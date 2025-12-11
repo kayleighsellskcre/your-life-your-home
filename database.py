@@ -2255,7 +2255,8 @@ def get_homeowner_snapshot_for_property(user_id: int, property_id: int) -> dict:
     cur = conn.cursor()
     cur.execute(
         """SELECT value_estimate, equity_estimate, loan_rate, loan_payment, 
-                  loan_balance, loan_term_years, loan_start_date
+                  loan_balance, loan_term_years, loan_start_date,
+                  last_value_refresh, value_refresh_source, updated_at
            FROM homeowner_snapshots
            WHERE user_id = ? AND property_id = ?
            LIMIT 1""",

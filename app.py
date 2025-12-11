@@ -3030,12 +3030,24 @@ def homeowner_value_equity_overview():
             if all_properties and len(all_properties) > 0 and all_properties[0].get('address'):
                 homeowner_data['address'] = all_properties[0].get('address')
     
+    # Get homeowner snapshot data (synced from Homebot webhook)
+    from database import get_primary_property, get_homeowner_snapshot_for_property
+    snapshot_data = None
+    primary_property = get_primary_property(homeowner_id)
+    if primary_property:
+        property_id = primary_property.get('id')
+        snapshot_data = get_homeowner_snapshot_for_property(homeowner_id, property_id)
+        # Calculate equity if we have value and loan balance
+        if snapshot_data and snapshot_data.get('value_estimate') and snapshot_data.get('loan_balance'):
+            snapshot_data['equity_estimate'] = snapshot_data.get('value_estimate') - snapshot_data.get('loan_balance')
+    
     # Debug logging
     print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
     if homebot_widget_id:
         print(f"[HOMEBOT] Widget ID value: {homebot_widget_id[:20]}... (length: {len(homebot_widget_id)})")
     print(f"[HOMEBOT] Professional Info: {professional_info}")
     print(f"[HOMEBOT] Homeowner Data: {homeowner_data}")
+    print(f"[HOMEBOT] Snapshot Data: {snapshot_data}")
     
     # Render Homebot-powered equity page
     response = make_response(render_template(
@@ -3044,6 +3056,7 @@ def homeowner_value_equity_overview():
         homebot_widget_id=homebot_widget_id,
         professional_info=professional_info,
         homeowner_data=homeowner_data,
+        snapshot=snapshot_data,
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
@@ -5676,8 +5689,11 @@ def homebot_webhook():
     from database import (
         get_user_by_email, 
         get_primary_property,
+        get_user_properties,
+        get_property_by_id,
         upsert_homeowner_snapshot_for_property,
-        add_property
+        add_property,
+        get_connection
     )
     
     try:
@@ -5760,6 +5776,7 @@ def homebot_webhook():
                 return None
         
         # Update homeowner snapshot with Homebot data
+        from datetime import datetime
         upsert_homeowner_snapshot_for_property(
             user_id=homeowner_id,
             property_id=property_id,
@@ -5770,6 +5787,19 @@ def homebot_webhook():
             loan_term_years=safe_float(loan_term_years),
             loan_start_date=loan_start_date,
         )
+        
+        # Mark data source as Homebot
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """UPDATE homeowner_snapshots 
+               SET value_refresh_source = 'Homebot',
+                   last_value_refresh = ?
+               WHERE user_id = ? AND property_id = ?""",
+            (datetime.now().isoformat(), homeowner_id, property_id)
+        )
+        conn.commit()
+        conn.close()
         
         # Update property estimated value if provided
         if home_value:
