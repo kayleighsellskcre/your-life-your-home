@@ -4323,33 +4323,55 @@ def agent_settings_profile():
             professional_photo = None
             brokerage_logo = None
             
-            # Upload professional photo
+            # Upload professional photo (use R2 if available, else local)
             if "professional_photo" in request.files:
                 photo_file = request.files["professional_photo"]
                 if photo_file and photo_file.filename:
                     print(f"AGENT PROFILE: Uploading professional photo: {photo_file.filename}")
-                    safe_name = secure_filename(photo_file.filename)
-                    unique_name = f"{uuid4().hex}_{safe_name}"
-                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                    save_path.parent.mkdir(parents=True, exist_ok=True)
-                    photo_file.save(save_path)
-                    professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
-                    print(f"AGENT PROFILE: Photo saved to {professional_photo}")
+                    try:
+                        if is_r2_enabled() and R2_CLIENT:
+                            # Upload to R2 cloud storage (persists on Railway)
+                            r2_result = upload_file_to_r2(photo_file, photo_file.filename, folder="profiles")
+                            professional_photo = r2_result.get("url") or r2_result.get("key")
+                            print(f"AGENT PROFILE: Photo uploaded to R2: {professional_photo}")
+                        else:
+                            # Fallback to local storage (development)
+                            safe_name = secure_filename(photo_file.filename)
+                            unique_name = f"{uuid4().hex}_{safe_name}"
+                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                            save_path.parent.mkdir(parents=True, exist_ok=True)
+                            photo_file.save(save_path)
+                            professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                            print(f"AGENT PROFILE: Photo saved locally: {professional_photo}")
+                    except Exception as e:
+                        print(f"AGENT PROFILE: Error uploading photo: {e}")
+                        flash(f"Error uploading photo: {str(e)}", "error")
                 else:
                     print(f"AGENT PROFILE: No photo file provided")
             
-            # Upload brokerage logo
+            # Upload brokerage logo (use R2 if available, else local)
             if "brokerage_logo" in request.files:
                 logo_file = request.files["brokerage_logo"]
                 if logo_file and logo_file.filename:
                     print(f"AGENT PROFILE: Uploading brokerage logo: {logo_file.filename}")
-                    safe_name = secure_filename(logo_file.filename)
-                    unique_name = f"{uuid4().hex}_{safe_name}"
-                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                    save_path.parent.mkdir(parents=True, exist_ok=True)
-                    logo_file.save(save_path)
-                    brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
-                    print(f"AGENT PROFILE: Logo saved to {brokerage_logo}")
+                    try:
+                        if is_r2_enabled() and R2_CLIENT:
+                            # Upload to R2 cloud storage (persists on Railway)
+                            r2_result = upload_file_to_r2(logo_file, logo_file.filename, folder="profiles")
+                            brokerage_logo = r2_result.get("url") or r2_result.get("key")
+                            print(f"AGENT PROFILE: Logo uploaded to R2: {brokerage_logo}")
+                        else:
+                            # Fallback to local storage (development)
+                            safe_name = secure_filename(logo_file.filename)
+                            unique_name = f"{uuid4().hex}_{safe_name}"
+                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                            save_path.parent.mkdir(parents=True, exist_ok=True)
+                            logo_file.save(save_path)
+                            brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                            print(f"AGENT PROFILE: Logo saved locally: {brokerage_logo}")
+                    except Exception as e:
+                        print(f"AGENT PROFILE: Error uploading logo: {e}")
+                        flash(f"Error uploading logo: {str(e)}", "error")
                 else:
                     print(f"AGENT PROFILE: No logo file provided")
             
@@ -5144,27 +5166,51 @@ def lender_settings_profile():
             professional_photo = None
             brokerage_logo = None
             
-            # Upload professional photo
+            # Upload professional photo (use R2 if available, else local)
             if "professional_photo" in request.files:
                 photo_file = request.files["professional_photo"]
                 if photo_file and photo_file.filename:
-                    safe_name = secure_filename(photo_file.filename)
-                    unique_name = f"{uuid4().hex}_{safe_name}"
-                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                    save_path.parent.mkdir(parents=True, exist_ok=True)
-                    photo_file.save(save_path)
-                    professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                    try:
+                        if is_r2_enabled() and R2_CLIENT:
+                            # Upload to R2 cloud storage (persists on Railway)
+                            r2_result = upload_file_to_r2(photo_file, photo_file.filename, folder="profiles")
+                            professional_photo = r2_result.get("url") or r2_result.get("key")
+                            print(f"LENDER PROFILE: Photo uploaded to R2: {professional_photo}")
+                        else:
+                            # Fallback to local storage (development)
+                            safe_name = secure_filename(photo_file.filename)
+                            unique_name = f"{uuid4().hex}_{safe_name}"
+                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                            save_path.parent.mkdir(parents=True, exist_ok=True)
+                            photo_file.save(save_path)
+                            professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                            print(f"LENDER PROFILE: Photo saved locally: {professional_photo}")
+                    except Exception as e:
+                        print(f"LENDER PROFILE: Error uploading photo: {e}")
+                        flash(f"Error uploading photo: {str(e)}", "error")
             
-            # Upload company logo
+            # Upload company logo (use R2 if available, else local)
             if "brokerage_logo" in request.files:
                 logo_file = request.files["brokerage_logo"]
                 if logo_file and logo_file.filename:
-                    safe_name = secure_filename(logo_file.filename)
-                    unique_name = f"{uuid4().hex}_{safe_name}"
-                    save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                    save_path.parent.mkdir(parents=True, exist_ok=True)
-                    logo_file.save(save_path)
-                    brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                    try:
+                        if is_r2_enabled() and R2_CLIENT:
+                            # Upload to R2 cloud storage (persists on Railway)
+                            r2_result = upload_file_to_r2(logo_file, logo_file.filename, folder="profiles")
+                            brokerage_logo = r2_result.get("url") or r2_result.get("key")
+                            print(f"LENDER PROFILE: Logo uploaded to R2: {brokerage_logo}")
+                        else:
+                            # Fallback to local storage (development)
+                            safe_name = secure_filename(logo_file.filename)
+                            unique_name = f"{uuid4().hex}_{safe_name}"
+                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
+                            save_path.parent.mkdir(parents=True, exist_ok=True)
+                            logo_file.save(save_path)
+                            brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
+                            print(f"LENDER PROFILE: Logo saved locally: {brokerage_logo}")
+                    except Exception as e:
+                        print(f"LENDER PROFILE: Error uploading logo: {e}")
+                        flash(f"Error uploading logo: {str(e)}", "error")
             
             # Get existing profile to preserve existing photos/logos if not uploading new ones
             existing_profile = get_user_profile(user["id"])

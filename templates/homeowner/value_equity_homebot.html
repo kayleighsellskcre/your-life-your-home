@@ -161,7 +161,10 @@
 
 {% if homebot_widget_id %}
 <script>
-  // Use Homebot's exact embed pattern - load script first
+  console.log('Homebot Widget ID:', '{{ homebot_widget_id|e }}');
+  console.log('Container selector: #homebot_homeowner');
+  
+  // Use Homebot's EXACT embed pattern from their documentation
   (function (h, b) {
     var w = window, d = document, s = 'script', x, y;
     w['_hb_namespace'] = h;
@@ -172,20 +175,18 @@
     x.parentNode.insertBefore(y, x);
   })('Homebot', 'https://embed.homebotapp.com/lgw/v1/widget.js');
   
-  // Wait for page to fully load before initializing widget
+  // Wait for DOM and script to load, then initialize
   (function() {
     var widgetId = '{{ homebot_widget_id|e }}';
-    var containerId = '#homebot_homeowner';
+    var containerSelector = '#homebot_homeowner';
     
-    function initWidget() {
-      // Check if container exists
-      var container = document.querySelector(containerId);
+    function initHomebot() {
+      var container = document.querySelector(containerSelector);
       if (!container) {
-        console.error('Homebot container not found:', containerId);
+        console.error('Homebot container not found:', containerSelector);
         return;
       }
       
-      // Validate widget ID
       if (!widgetId || widgetId.trim() === '') {
         console.error('Homebot widget ID is empty!');
         return;
@@ -193,54 +194,30 @@
       
       // Check if Homebot is loaded
       if (typeof window.Homebot === 'function') {
+        console.log('Initializing Homebot widget...');
         try {
-          console.log('Initializing Homebot with widget ID:', widgetId);
-          console.log('Container:', container);
-          console.log('Container ID:', containerId);
-          
-          // Initialize the widget
-          window.Homebot(containerId, widgetId);
-          
+          window.Homebot(containerSelector, widgetId.trim());
           console.log('Homebot widget initialized successfully');
-          
-          // Check if widget loaded after a delay
-          setTimeout(function() {
-            var widgetContent = container.querySelector('iframe, form, input');
-            if (widgetContent) {
-              console.log('Homebot widget content detected:', widgetContent);
-            } else {
-              console.warn('Homebot widget container is still empty after 2 seconds');
-            }
-          }, 2000);
         } catch (e) {
           console.error('Error initializing Homebot:', e);
-          console.error('Stack trace:', e.stack);
         }
-      } else if (window.Homebot && typeof window.Homebot === 'object' && window.Homebot.q) {
-        // Homebot queue exists - script is loading, queue the call
+      } else if (window.Homebot && window.Homebot.q) {
+        // Script is loading, queue the call
         console.log('Homebot script loading, queuing initialization...');
-        window.Homebot(containerId, widgetId);
+        window.Homebot(containerSelector, widgetId.trim());
       } else {
-        // Homebot not loaded yet, retry (max 50 attempts = 5 seconds)
-        var attempts = initWidget.attempts || 0;
-        initWidget.attempts = attempts + 1;
-        if (attempts < 50) {
-          console.log('Homebot script not loaded yet, retrying... (attempt ' + attempts + ')');
-          setTimeout(initWidget, 100);
-        } else {
-          console.error('Homebot script failed to load after 5 seconds');
-        }
+        // Retry after a short delay
+        setTimeout(initHomebot, 100);
       }
     }
     
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(initWidget, 500); // Give script time to load
+        setTimeout(initHomebot, 300);
       });
     } else {
-      // DOM already loaded
-      setTimeout(initWidget, 500);
+      setTimeout(initHomebot, 300);
     }
   })();
 </script>
