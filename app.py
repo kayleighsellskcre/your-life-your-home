@@ -3023,18 +3023,20 @@ def homeowner_value_equity_overview():
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
-    # Use a more permissive CSP for Homebot to ensure full functionality
+    # VERY permissive CSP to ensure Homebot widget works fully (address autocomplete, form submission, etc.)
     if homebot_widget_id:
         response.headers['Content-Security-Policy'] = (
-            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
-            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com data:; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.homebotapp.com; "
-            "font-src 'self' https://fonts.gstatic.com data:; "
+            "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com https://maps.googleapis.com; "
+            "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com data: blob:; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.homebotapp.com https://*.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com https://*.homebotapp.com data:; "
             "img-src 'self' data: https: blob:; "
-            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com wss: ws:; "
-            "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
-            "frame-ancestors 'self';"
+            "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com https://*.googleapis.com https://*.gstatic.com wss: ws:; "
+            "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.googleapis.com; "
+            "frame-ancestors 'self'; "
+            "worker-src 'self' blob: https://*.homebotapp.com; "
+            "manifest-src 'self' https://*.homebotapp.com;"
         )
     
     return response
