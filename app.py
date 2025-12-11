@@ -5098,6 +5098,20 @@ def lender_messages():
     )
 
 
+@app.route("/lender/roles", methods=["GET"])
+def lender_roles():
+    """Lender roles and partners."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    return render_template(
+        "lender/roles.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+    )
+
+
 @app.route("/lender/documents", methods=["GET"])
 def lender_documents():
     """Lender documents."""
