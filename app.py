@@ -28,6 +28,7 @@ from flask import (
     send_from_directory,
     jsonify,
     Response,
+    make_response,
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -2986,12 +2987,25 @@ def homeowner_value_equity_overview():
                                 }
 
     # Render Homebot-powered equity page
-    return render_template(
+    response = make_response(render_template(
         "homeowner/value_equity_homebot.html",
         brand_name=FRONT_BRAND_NAME,
         homebot_widget_id=homebot_widget_id,
         professional_info=professional_info,
+    ))
+    
+    # Set CSP headers to allow Homebot iframe
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com; "
+        "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
     )
+    
+    return response
 
 
 @app.route("/homeowner/add-property", methods=["POST"])
