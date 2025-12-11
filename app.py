@@ -4423,7 +4423,7 @@ def agent_settings_profile():
                 else:
                     print(f"AGENT PROFILE: No logo file provided")
             
-            # Get existing profile to preserve existing photos/logos if not uploading new ones
+            # CRITICAL: Always preserve existing photos/logos if not uploading new ones
             existing_profile = get_user_profile(user["id"])
             if existing_profile:
                 # Convert Row to dict if needed
@@ -4433,6 +4433,7 @@ def agent_settings_profile():
                     existing_profile = {}
                 
                 print(f"AGENT PROFILE: Found existing profile")
+                # Preserve existing photos - CRITICAL for Railway deployments
                 if not professional_photo:
                     professional_photo = existing_profile.get("professional_photo")
                     print(f"AGENT PROFILE: Preserving existing photo: {professional_photo}")
@@ -4441,6 +4442,12 @@ def agent_settings_profile():
                     print(f"AGENT PROFILE: Preserving existing logo: {brokerage_logo}")
             else:
                 print(f"AGENT PROFILE: No existing profile found, creating new one")
+            
+            # Final safety check - never set to None if we have existing values
+            if not professional_photo and existing_profile:
+                professional_photo = existing_profile.get("professional_photo")
+            if not brokerage_logo and existing_profile:
+                brokerage_logo = existing_profile.get("brokerage_logo")
             
             # Get form data
             print(f"AGENT PROFILE: Collecting form data...")
@@ -5274,13 +5281,29 @@ def lender_settings_profile():
                         print(f"LENDER PROFILE: Error uploading logo: {e}")
                         flash(f"Error uploading logo: {str(e)}", "error")
             
-            # Get existing profile to preserve existing photos/logos if not uploading new ones
+            # CRITICAL: Always preserve existing photos/logos if not uploading new ones
             existing_profile = get_user_profile(user["id"])
             if existing_profile:
+                # Convert Row to dict if needed
+                if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
+                    existing_profile = dict(existing_profile)
+                elif not isinstance(existing_profile, dict):
+                    existing_profile = {}
+                
+                print(f"LENDER PROFILE: Found existing profile")
+                # Preserve existing photos - CRITICAL for Railway deployments
                 if not professional_photo:
                     professional_photo = existing_profile.get("professional_photo")
+                    print(f"LENDER PROFILE: Preserving existing photo: {professional_photo}")
                 if not brokerage_logo:
                     brokerage_logo = existing_profile.get("brokerage_logo")
+                    print(f"LENDER PROFILE: Preserving existing logo: {brokerage_logo}")
+            
+            # Final safety check - never set to None if we have existing values
+            if not professional_photo and existing_profile:
+                professional_photo = existing_profile.get("professional_photo")
+            if not brokerage_logo and existing_profile:
+                brokerage_logo = existing_profile.get("brokerage_logo")
             
             # Get form data
             profile_id = create_or_update_user_profile(

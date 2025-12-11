@@ -1,96 +1,306 @@
 {% extends "lender/layout.html" %}
+{% block title %}Lender Dashboard{% endblock %}
 
 {% block lender_content %}
-<div class="dashboard-main__header animate-in">
-  <p class="dashboard-tagline">At a glance</p>
-  <h1>Lender Overview</h1>
-  <p>A quick read on your applications, loans in motion, and nurture opportunities.</p>
+<style>
+  /* Beautiful dashboard styling matching platform */
+  .dashboard-hero {
+    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 3rem;
+  }
+  
+  .dashboard-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: white;
+    font-weight: 600;
+  }
+  
+  .dashboard-hero p {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+  
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+  
+  .metric-card {
+    background: white;
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .metric-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(107, 106, 69, 0.2);
+    border-color: var(--olive-green);
+  }
+  
+  .metric-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--olive-green);
+    margin: 1rem 0;
+    line-height: 1;
+  }
+  
+  .metric-label {
+    font-size: 1.1rem;
+    color: var(--charcoal-brown);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+  
+  .metric-description {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    line-height: 1.6;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  .loans-list {
+    background: white;
+    border: 1px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .loan-item {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--olive-green);
+    transition: all 0.3s ease;
+  }
+  
+  .loan-item:hover {
+    transform: translateX(8px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.15);
+  }
+  
+  .loan-item:last-child {
+    margin-bottom: 0;
+  }
+  
+  .loan-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .loan-details {
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+  }
+  
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  
+  .action-card {
+    background: white;
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-decoration: none;
+    color: var(--charcoal-brown);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+  }
+  
+  .action-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(107, 106, 69, 0.2);
+    border-color: var(--olive-green);
+    text-decoration: none;
+    color: var(--charcoal-brown);
+  }
+  
+  .action-icon {
+    font-size: 3rem;
+    line-height: 1;
+  }
+  
+  .action-content h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .action-content p {
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    margin: 0;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border: 2px dashed var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+  }
+  
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+  }
+  
+  .empty-state h3 {
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-state p {
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+  }
+</style>
+
+<div class="dashboard-hero">
+  <h1>Lender Dashboard</h1>
+  <p>A warm, clear view of borrowers, files, and growth tools.</p>
 </div>
 
 <div class="dashboard-section">
-  <div class="dashboard-cards">
-    <div class="card animate-in-delay-1">
-      <h2>New Applications</h2>
-      <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
-        {{ metrics.new_applications }}
-      </p>
-      <p class="card-subtext">
+  <!-- Metrics Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-label">New Applications</div>
+      <div class="metric-value">{{ metrics.new_applications or 0 }}</div>
+      <div class="metric-description">
         Borrowers who have started the process and need clear, kind next steps.
-      </p>
+      </div>
     </div>
 
-    <div class="card animate-in-delay-2">
-      <h2>Loans in Process</h2>
-      <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
-        {{ metrics.loans_in_process }}
-      </p>
-      <p class="card-subtext">
-        Files that are moving through processing and underwriting that you want to keep flowing smoothly.
-      </p>
+    <div class="metric-card">
+      <div class="metric-label">Loans in Process</div>
+      <div class="metric-value">{{ metrics.loans_in_process or 0 }}</div>
+      <div class="metric-description">
+        Files moving through processing and underwriting that you want to keep flowing smoothly.
+      </div>
     </div>
 
-    <div class="card animate-in-delay-3">
-      <h2>Nurture Contacts</h2>
-      <p class="card-subtext" style="font-size:1.5rem;font-weight:600;color:var(--olive-green);margin:0.75rem 0;">
-        {{ metrics.nurture_contacts }}
-      </p>
-      <p class="card-subtext">
-        Past clients and warm leads who may benefit from check-ins, rate reviews, or simple equity updates.
-      </p>
+    <div class="metric-card">
+      <div class="metric-label">Nurture Contacts</div>
+      <div class="metric-value">{{ metrics.nurture_contacts or 0 }}</div>
+      <div class="metric-description">
+        Past clients and warm leads who may benefit from check-ins, rate reviews, or equity updates.
+      </div>
     </div>
   </div>
 
-  <!-- Loan Pipeline -->
-  {% if loans %}
-  <div class="card" style="margin-top: 2rem;">
-    <h2>Active Loans</h2>
-    <div style="margin-top: 1rem;">
+  <!-- Active Loans Section -->
+  {% if loans and loans|length > 0 %}
+  <div class="loans-list">
+    <div class="section-header">
+      <h2 class="section-title">Active Loans</h2>
+      <a href="{{ url_for('lender_loans') }}" class="btn-outline">View All</a>
+    </div>
+    <div>
       {% for loan in loans[:5] %}
-      <div style="padding: 1rem; margin-bottom: 0.5rem; background: var(--warm-cream); border-radius: var(--border-radius);">
-        <div style="font-weight: 600;">{{ loan.borrower_name or 'Borrower' }}</div>
-        <div style="font-size: 0.85rem; color: #666; margin-top: 0.25rem;">{{ loan.loan_type|title if loan.loan_type else 'Loan' }} • {{ loan.status|title if loan.status else 'Active' }}</div>
+      <div class="loan-item">
+        <div class="loan-name">{{ loan.borrower_name or 'Borrower' }}</div>
+        <div class="loan-details">
+          {{ loan.loan_type|title if loan.loan_type else 'Loan' }} • 
+          {{ loan.status|title if loan.status else 'Active' }}
+          {% if loan.loan_amount %}
+          • ${{ "{:,.0f}".format(loan.loan_amount) }}
+          {% endif %}
+        </div>
       </div>
       {% endfor %}
     </div>
-    <div style="margin-top: 1rem;">
-      <a href="{{ url_for('lender_loans') }}" class="btn-outline">View All Loans</a>
+  </div>
+  {% else %}
+  <div class="loans-list">
+    <div class="section-header">
+      <h2 class="section-title">Active Loans</h2>
+    </div>
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h3>No Active Loans</h3>
+      <p>Start tracking loans to see them here</p>
+      <a href="{{ url_for('lender_loans') }}" class="btn-primary" style="margin-top: 1.5rem; display: inline-block;">Add Your First Loan</a>
     </div>
   </div>
   {% endif %}
 
   <!-- Quick Actions -->
-  <div class="card" style="margin-top: 2rem;">
-    <h2>Quick Actions</h2>
-    <div style="display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); margin-top: 1.5rem;">
-      <a href="{{ url_for('lender_crm') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
-        <span style="font-size: 2rem;">👥</span>
-        <div>
-          <div style="font-weight: 600; margin-bottom: 0.25rem;">Manage Borrowers</div>
-          <div style="font-size: 0.85rem; color: #666;">View and manage your borrower list</div>
+  <div style="margin-top: 3rem;">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="actions-grid">
+      <a href="{{ url_for('lender_crm') }}" class="action-card">
+        <div class="action-icon">👥</div>
+        <div class="action-content">
+          <h3>Manage Borrowers</h3>
+          <p>View and manage your borrower list</p>
         </div>
       </a>
 
-      <a href="{{ url_for('lender_loans') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
-        <span style="font-size: 2rem;">📋</span>
-        <div>
-          <div style="font-weight: 600; margin-bottom: 0.25rem;">Add New Loan</div>
-          <div style="font-size: 0.85rem; color: #666;">Start tracking a new loan file</div>
+      <a href="{{ url_for('lender_loans') }}" class="action-card">
+        <div class="action-icon">📋</div>
+        <div class="action-content">
+          <h3>Add New Loan</h3>
+          <p>Start tracking a new loan file</p>
         </div>
       </a>
 
-      <a href="{{ url_for('lender_messages') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
-        <span style="font-size: 2rem;">✉️</span>
-        <div>
-          <div style="font-weight: 600; margin-bottom: 0.25rem;">Messages</div>
-          <div style="font-size: 0.85rem; color: #666;">Communicate with borrowers</div>
+      <a href="{{ url_for('lender_messages') }}" class="action-card">
+        <div class="action-icon">✉️</div>
+        <div class="action-content">
+          <h3>Messages</h3>
+          <p>Communicate with borrowers</p>
         </div>
       </a>
 
-      <a href="{{ url_for('lender_marketing') }}" class="action-card" style="display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); text-decoration: none; color: var(--charcoal-brown);">
-        <span style="font-size: 2rem;">📱</span>
-        <div>
-          <div style="font-weight: 600; margin-bottom: 0.25rem;">Marketing Tools</div>
-          <div style="font-size: 0.85rem; color: #666;">Create marketing materials</div>
+      <a href="{{ url_for('lender_marketing') }}" class="action-card">
+        <div class="action-icon">📱</div>
+        <div class="action-content">
+          <h3>Marketing Tools</h3>
+          <p>Create marketing materials</p>
         </div>
       </a>
     </div>
