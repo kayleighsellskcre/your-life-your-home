@@ -2,40 +2,438 @@
 {% block title %}Loan Paths & Payment Models{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Understand your options</p>
-  <h1>Loan Paths & Payment Models</h1>
-  <p>Different lives need different money tools. This page puts language around common options so conversations with a lender feel less confusing.</p>
-</div>
+<style>
+  .loan-paths-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
 
-<div class="dashboard-section">
-  <div class="dashboard-cards">
-    <div class="card">
-      <h2>Common Loan Types</h2>
-      <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-        <li>Conventional loans for many buyers with solid credit and savings</li>
-        <li>FHA loans that can ease down payment and credit requirements</li>
-        <li>VA loans for eligible veterans and active service members</li>
-        <li>USDA loans for certain rural areas with specific guidelines</li>
-        <li>Renovation and new construction loans for special projects</li>
+  .loan-hero {
+    text-align: center;
+    padding: 3rem 0 4rem;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .loan-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .loan-hero .eyebrow {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .loan-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .loan-hero p {
+    font-size: 1.2rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+
+  .loan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .loan-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(58, 53, 44, 0.08), 0 2px 8px rgba(107, 106, 69, 0.06);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .loan-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+  }
+
+  .loan-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 48px rgba(58, 53, 44, 0.12), 0 4px 16px rgba(107, 106, 69, 0.1);
+  }
+
+  .loan-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .loan-card-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.25);
+    flex-shrink: 0;
+  }
+
+  .loan-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .loan-card-subtext {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.75;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .loan-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .loan-list-item {
+    padding: 1rem 0 1rem 2.5rem;
+    position: relative;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .loan-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .loan-list-item::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--olive-green);
+    font-weight: 600;
+  }
+
+  .loan-list-item:hover {
+    padding-left: 3rem;
+    color: var(--olive-green);
+  }
+
+  .loan-detail {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    line-height: 1.7;
+    margin: 0.5rem 0;
+  }
+
+  .loan-detail strong {
+    color: var(--olive-green);
+    font-weight: 600;
+  }
+
+  .info-box {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-left: 4px solid var(--olive-green);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 3rem;
+    position: relative;
+  }
+
+  .info-box::before {
+    content: '💡';
+    position: absolute;
+    top: -15px;
+    left: 2rem;
+    font-size: 2rem;
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2);
+  }
+
+  .info-box h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0.5rem 0 1rem;
+    font-weight: 400;
+  }
+
+  .info-box p {
+    font-size: 1.05rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  .key-terms {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-top: 3rem;
+    box-shadow: 0 4px 20px rgba(58, 53, 44, 0.06);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .key-terms h3 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .term-item {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .term-item h4 {
+    font-size: 1.1rem;
+    color: var(--olive-green);
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+  }
+
+  .term-item p {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .loan-hero h1 {
+      font-size: 2.5rem;
+    }
+    
+    .loan-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="loan-paths-page">
+  <!-- Hero Section -->
+  <div class="loan-hero">
+    <p class="eyebrow">Your Life Your Home · Financial Education</p>
+    <h1>Loan Paths & Payment Models</h1>
+    <p>Different lives need different money tools. This page puts language around common options so conversations with a lender feel less confusing.</p>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="loan-grid">
+    <!-- Common Loan Types -->
+    <div class="loan-card">
+      <div class="loan-card-header">
+        <div class="loan-card-icon">🏦</div>
+        <h2>Common Loan Types</h2>
+      </div>
+      <ul class="loan-list">
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Conventional Loans:</strong> For buyers with solid credit (typically 620+) and savings. Down payments as low as 3% for first-time buyers, 5-20% standard. No mortgage insurance required with 20%+ down.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>FHA Loans:</strong> Federal Housing Administration loans ease down payment (as low as 3.5%) and credit requirements (580+). Includes mortgage insurance but allows lower credit scores and higher debt-to-income ratios.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>VA Loans:</strong> For eligible veterans, active service members, and surviving spouses. No down payment required, no mortgage insurance, competitive rates. Funding fee may apply.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>USDA Loans:</strong> For certain rural and suburban areas. No down payment required, income limits apply. Designed to help low-to-moderate income buyers in eligible locations.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Renovation & Construction:</strong> FHA 203(k) and conventional renovation loans let you finance purchase + improvements. Construction loans fund building projects with phased disbursements.
+          </div>
+        </li>
       </ul>
     </div>
 
-    <div class="card">
-      <h2>Payment Models to Think Through</h2>
-      <p class="card-subtext">It's not just about the sticker price. Together with your lender you can talk through:</p>
-      <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-        <li>Monthly payment that still lets you breathe</li>
-        <li>How interest rate and term change that payment</li>
-        <li>What happens if taxes or insurance change</li>
-        <li>Where extra payments could shorten the loan</li>
+    <!-- Payment Models -->
+    <div class="loan-card">
+      <div class="loan-card-header">
+        <div class="loan-card-icon">💰</div>
+        <h2>Payment Models to Think Through</h2>
+      </div>
+      <p class="loan-card-subtext">It's not just about the sticker price. Together with your lender you can talk through:</p>
+      <ul class="loan-list">
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Monthly Payment Comfort:</strong> Your payment should leave room for life—emergencies, savings, and breathing room. Many lenders suggest keeping housing costs under 28% of gross income.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Interest Rate Impact:</strong> A 0.5% rate difference on a $300,000 loan can mean $80-100/month difference. Points can buy down rates but require upfront cash.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Term Length Trade-offs:</strong> 15-year loans = higher payments but less interest. 30-year loans = lower payments but more interest over time. Your lender can show exact numbers.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Taxes & Insurance:</strong> Property taxes and homeowners insurance are often escrowed (included in payment). These can change annually, affecting your total monthly cost.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Extra Payment Power:</strong> Even $100-200 extra per month toward principal can shave years off your loan and save thousands in interest. No penalties on conventional loans.
+          </div>
+        </li>
       </ul>
     </div>
 
-    <div class="card">
-      <h2>A Gentle Reminder</h2>
-      <p class="card-subtext">Your lender will always be the one to give you exact numbers and loan advice. This page is education only so you can show up to that conversation feeling ready and steady.</p>
+    <!-- Down Payment Strategies -->
+    <div class="loan-card">
+      <div class="loan-card-header">
+        <div class="loan-card-icon">💎</div>
+        <h2>Down Payment Strategies</h2>
+      </div>
+      <ul class="loan-list">
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>20% Down (Conventional):</strong> Eliminates private mortgage insurance (PMI), lowers monthly payment, shows strong financial position to sellers.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>3-5% Down (First-Time Buyers):</strong> Conventional programs allow lower down payments. PMI required until you reach 20% equity, but gets you into a home sooner.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Gift Funds:</strong> Family can gift down payment funds. Documentation required to show it's a gift, not a loan. Lenders have specific rules.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>Down Payment Assistance:</strong> State and local programs offer grants, low-interest loans, or tax credits for first-time buyers. Income and location restrictions apply.
+          </div>
+        </li>
+        <li class="loan-list-item">
+          <div class="loan-detail">
+            <strong>401(k) Loans:</strong> Some plans allow borrowing against your 401(k) for down payment. Understand repayment terms and potential tax implications.
+          </div>
+        </li>
+      </ul>
     </div>
+  </div>
+
+  <!-- Key Terms Section -->
+  <div class="key-terms">
+    <h3>📚 Key Terms to Know</h3>
+    <div class="terms-grid">
+      <div class="term-item">
+        <h4>APR (Annual Percentage Rate)</h4>
+        <p>The true cost of borrowing, including interest rate plus fees. Always compare APRs, not just rates, when shopping loans.</p>
+      </div>
+      <div class="term-item">
+        <h4>PMI (Private Mortgage Insurance)</h4>
+        <p>Insurance required when down payment is less than 20%. Protects lender, costs you 0.5-1% of loan amount annually. Can be removed at 20% equity.</p>
+      </div>
+      <div class="term-item">
+        <h4>DTI (Debt-to-Income Ratio)</h4>
+        <p>Your monthly debts divided by gross monthly income. Most lenders want housing costs under 28% and total DTI under 36-43%.</p>
+      </div>
+      <div class="term-item">
+        <h4>Pre-approval vs. Pre-qualification</h4>
+        <p>Pre-qualification is a quick estimate. Pre-approval involves credit check and documentation—stronger for making offers.</p>
+      </div>
+      <div class="term-item">
+        <h4>Points</h4>
+        <p>Upfront fees (1 point = 1% of loan) to lower interest rate. Break-even analysis shows if points make sense for your timeline.</p>
+      </div>
+      <div class="term-item">
+        <h4>Escrow</h4>
+        <p>An account where lender holds money for property taxes and insurance, paid monthly with your mortgage payment.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reminder Box -->
+  <div class="info-box">
+    <h3>A Gentle Reminder</h3>
+    <p>Your lender will always be the one to give you exact numbers and loan advice. This page is education only so you can show up to that conversation feeling ready and steady. Every situation is unique—your lender will help you find the path that fits your life, timeline, and goals.</p>
   </div>
 </div>
 {% endblock %}

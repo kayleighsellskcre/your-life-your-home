@@ -2,89 +2,588 @@
 {% block title %}Documents Library{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Everything in one organized place</p>
-  <h1>Documents Library</h1>
-  <p>Store important documents and maintain your home's complete history—all beautifully organized.</p>
-</div>
+<style>
+  .documents-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
 
-<!-- DOCUMENTS SECTION -->
-<div id="documentsTab" class="tab-content">
-  <!-- Upload Section -->
-  <div class="dashboard-section">
-    <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-      <h2>📄 Add New Document</h2>
-      <p class="card-subtext">Upload closing packets, warranties, appraisals, invoices, and inspection reports with optional details</p>
+  .documents-hero {
+    text-align: center;
+    padding: 3rem 0 4rem;
+    margin-bottom: 3rem;
+  }
 
-      <form method="post" enctype="multipart/form-data" style="display: grid; gap: 1.5rem; max-width: 650px; margin-top: 1.5rem;">
-        <div>
-          <label for="doc_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-            Document Date <span style="font-weight: 400; color: #999;">(optional)</span>
-          </label>
-          <input type="date" id="doc_date" name="doc_date" />
-        </div>
+  .documents-hero .eyebrow {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
 
-        <div>
-          <label for="doc_title" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-            Document Title <span style="font-weight: 400; color: #999;">(optional)</span>
-          </label>
-          <input type="text" id="doc_title" name="doc_title" placeholder="Example: Roof warranty, HVAC service contract" />
-        </div>
+  .documents-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
-          <div>
-            <label for="file" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-              Choose File
-            </label>
-            <input type="file" id="file" name="file" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx,.xls" />
-          </div>
+  .documents-hero p {
+    font-size: 1.15rem;
+    color: var(--charcoal-brown);
+    opacity: 0.75;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
 
-          <div>
-            <label for="category" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-              Category
-            </label>
-            <select id="category" name="category" required>
-              <option value="">Select a category...</option>
-              <option value="Closing">🏠 Closing Documents</option>
-              <option value="Inspection">🔍 Inspection Reports</option>
-              <option value="Warranty">✓ Warranties</option>
-              <option value="Receipts">💳 Receipts & Invoices</option>
-              <option value="Renovation">🔨 Renovation Records</option>
-              <option value="Insurance">🛡️ Insurance</option>
-              <option value="Taxes">📊 Taxes</option>
-            </select>
-          </div>
-        </div>
+  /* Upload Form Card */
+  .upload-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border-radius: 20px;
+    padding: 3rem;
+    margin-bottom: 4rem;
+    box-shadow: 0 8px 32px rgba(58, 53, 44, 0.08), 0 2px 8px rgba(107, 106, 69, 0.06);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
 
-        <div>
-          <label for="doc_cost" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-            Cost <span style="font-weight: 400; color: #999;">(optional)</span>
-          </label>
-          <input type="text" id="doc_cost" name="doc_cost" placeholder="$0.00" />
-        </div>
+  .upload-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+  }
 
-        <div>
-          <label for="doc_notes" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-            Details <span style="font-weight: 400; color: #999;">(optional)</span>
-          </label>
-          <textarea id="doc_notes" name="doc_notes" rows="4" placeholder="Contractor info, warranty dates, or other important details..."></textarea>
-        </div>
+  .upload-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
 
-        <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
-          Upload Document
-        </button>
-      </form>
+  .upload-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.25);
+  }
+
+  .upload-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .upload-subtext {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .upload-form {
+    display: grid;
+    gap: 2rem;
+    max-width: 800px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-label .optional {
+    font-weight: 400;
+    color: #999;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.75rem;
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid rgba(200, 180, 151, 0.3);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: white;
+    color: var(--charcoal-brown);
+    transition: all 0.3s ease;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.1);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+  }
+
+  .file-upload-wrapper {
+    position: relative;
+  }
+
+  .file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border: 2px dashed rgba(200, 180, 151, 0.4);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .file-upload-label:hover {
+    border-color: var(--olive-green);
+    background: linear-gradient(135deg, #F6F2E8 0%, #F9F7F4 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.1);
+  }
+
+  .file-upload-label .upload-icon-small {
+    font-size: 1.5rem;
+  }
+
+  .file-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .file-name-display {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(107, 106, 69, 0.05);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+    display: none;
+  }
+
+  .file-name-display.show {
+    display: block;
+  }
+
+  .upload-button {
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    color: white;
+    border: none;
+    padding: 1.25rem 2.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .upload-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.4);
+  }
+
+  .upload-button:active {
+    transform: translateY(0);
+  }
+
+  /* Documents Library */
+  .documents-library {
+    margin-top: 4rem;
+  }
+
+  .library-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+
+  .library-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .document-count-badge {
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    color: white;
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.25);
+  }
+
+  .category-section {
+    margin-bottom: 4rem;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+
+  .category-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .category-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .category-count {
+    background: var(--light-cream);
+    color: var(--charcoal-brown);
+    padding: 0.4rem 0.9rem;
+    border-radius: 1.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .document-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.75rem;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .document-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .document-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(58, 53, 44, 0.12), 0 4px 12px rgba(107, 106, 69, 0.08);
+    border-color: var(--olive-green);
+  }
+
+  .document-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .document-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .document-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    flex-shrink: 0;
+  }
+
+  .document-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .document-name {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    font-size: 1rem;
+    word-break: break-word;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .document-meta {
+    color: #888;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .document-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .action-button {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .action-button.view {
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    color: white;
+    border-color: var(--olive-green);
+  }
+
+  .action-button.view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+
+  .action-button.replace {
+    background: white;
+    color: var(--charcoal-brown);
+    border-color: rgba(200, 180, 151, 0.4);
+  }
+
+  .action-button.replace:hover {
+    border-color: var(--olive-green);
+    background: rgba(107, 106, 69, 0.05);
+  }
+
+  .action-button.delete {
+    background: white;
+    color: #b3574a;
+    border-color: rgba(179, 87, 74, 0.3);
+  }
+
+  .action-button.delete:hover {
+    background: rgba(179, 87, 74, 0.05);
+    border-color: #b3574a;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+    border-radius: 20px;
+    border: 2px dashed rgba(200, 180, 151, 0.3);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  .empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem;
+    font-weight: 400;
+  }
+
+  .empty-state p {
+    font-size: 1.05rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+</style>
+
+<div class="documents-page">
+  <!-- Hero Section -->
+  <div class="documents-hero">
+    <p class="eyebrow">Your Life Your Home · Document Management</p>
+    <h1>Documents Library</h1>
+    <p>Store important documents and maintain your home's complete history—all beautifully organized in one secure place.</p>
+  </div>
+
+  <!-- Upload Form Card -->
+  <div class="upload-card">
+    <div class="upload-header">
+      <div class="upload-icon">📄</div>
+      <h2>Add New Document</h2>
     </div>
+    <p class="upload-subtext">Upload closing packets, warranties, appraisals, invoices, and inspection reports with optional details.</p>
+
+    <form method="post" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="doc_date" class="form-label">
+            Document Date
+            <span class="optional">(optional)</span>
+          </label>
+          <input type="date" id="doc_date" name="doc_date" class="form-input" />
+        </div>
+
+        <div class="form-group">
+          <label for="doc_title" class="form-label">
+            Document Title
+            <span class="optional">(optional)</span>
+          </label>
+          <input type="text" id="doc_title" name="doc_title" class="form-input" placeholder="Example: Roof warranty, HVAC service contract" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="file" class="form-label">Choose File</label>
+          <div class="file-upload-wrapper">
+            <label for="file" class="file-upload-label">
+              <span class="upload-icon-small">📎</span>
+              <span id="file-label-text">Select a file to upload</span>
+            </label>
+            <input type="file" id="file" name="file" class="file-input" required accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xlsx,.xls" onchange="updateFileName(this)" />
+            <div class="file-name-display" id="file-name-display"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="category" class="form-label">Category</label>
+          <select id="category" name="category" class="form-select" required>
+            <option value="">Select a category...</option>
+            <option value="Closing">🏠 Closing Documents</option>
+            <option value="Inspection">🔍 Inspection Reports</option>
+            <option value="Warranty">✓ Warranties</option>
+            <option value="Receipts">💳 Receipts & Invoices</option>
+            <option value="Renovation">🔨 Renovation Records</option>
+            <option value="Insurance">🛡️ Insurance</option>
+            <option value="Taxes">📊 Taxes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="doc_cost" class="form-label">
+          Cost
+          <span class="optional">(optional)</span>
+        </label>
+        <input type="text" id="doc_cost" name="doc_cost" class="form-input" placeholder="$0.00" />
+      </div>
+
+      <div class="form-group">
+        <label for="doc_notes" class="form-label">
+          Details
+          <span class="optional">(optional)</span>
+        </label>
+        <textarea id="doc_notes" name="doc_notes" class="form-textarea" placeholder="Contractor info, warranty dates, or other important details..."></textarea>
+      </div>
+
+      <button type="submit" class="upload-button">
+        <span>✨</span>
+        <span>Upload Document</span>
+      </button>
+    </form>
   </div>
 
   <!-- Documents Library Section -->
-  <div class="dashboard-section">
+  <div class="documents-library">
     {% if docs %}
-      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0;">Your Documents</h2>
-        <span style="background: var(--olive-green); color: white; padding: 0.35rem 0.7rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 600;">
-          {{ docs|length }} file{% if docs|length != 1 %}s{% endif %}
-        </span>
+      <div class="library-header">
+        <h2 class="library-title">
+          Your Documents
+          <span class="document-count-badge">{{ docs|length }} file{% if docs|length != 1 %}s{% endif %}</span>
+        </h2>
       </div>
 
       {% set categories = {
@@ -105,27 +604,38 @@
 
       {% for category_name, category_docs in categories.items() %}
         {% if category_docs|length > 0 %}
-          <div style="margin-bottom: 3rem;">
-            <h3 style="color: var(--olive-green); font-size: 1.1rem; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--taupe-beige); display: flex; align-items: center; gap: 0.5rem;">
-              {% if category_name == 'Closing' %}🏠 Closing Documents
-              {% elif category_name == 'Inspection' %}🔍 Inspection Reports
-              {% elif category_name == 'Warranty' %}✓ Warranties
-              {% elif category_name == 'Receipts' %}💳 Receipts & Invoices
-              {% elif category_name == 'Renovation' %}🔨 Renovation Records
-              {% elif category_name == 'Insurance' %}🛡️ Insurance
-              {% elif category_name == 'Taxes' %}📊 Taxes
-              {% else %}📁 Other Documents
-              {% endif %}
-              <span style="background: var(--light-cream); color: var(--charcoal-brown); padding: 0.2rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 600;">
-                {{ category_docs|length }}
-              </span>
-            </h3>
+          <div class="category-section">
+            <div class="category-header">
+              <div class="category-icon">
+                {% if category_name == 'Closing' %}🏠
+                {% elif category_name == 'Inspection' %}🔍
+                {% elif category_name == 'Warranty' %}✓
+                {% elif category_name == 'Receipts' %}💳
+                {% elif category_name == 'Renovation' %}🔨
+                {% elif category_name == 'Insurance' %}🛡️
+                {% elif category_name == 'Taxes' %}📊
+                {% else %}📁
+                {% endif %}
+              </div>
+              <h3 class="category-title">
+                {% if category_name == 'Closing' %}Closing Documents
+                {% elif category_name == 'Inspection' %}Inspection Reports
+                {% elif category_name == 'Warranty' %}Warranties
+                {% elif category_name == 'Receipts' %}Receipts & Invoices
+                {% elif category_name == 'Renovation' %}Renovation Records
+                {% elif category_name == 'Insurance' %}Insurance
+                {% elif category_name == 'Taxes' %}Taxes
+                {% else %}Other Documents
+                {% endif %}
+              </h3>
+              <span class="category-count">{{ category_docs|length }}</span>
+            </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem;">
+            <div class="documents-grid">
               {% for doc in category_docs %}
-                <div class="card">
-                  <div style="display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem;">
-                    <div style="font-size: 2rem; min-width: 2.5rem; text-align: center;">
+                <div class="document-card">
+                  <div class="document-header">
+                    <div class="document-icon-wrapper">
                       {% if doc.filename.lower().endswith('.pdf') %}
                         📋
                       {% elif doc.filename.lower().endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
@@ -138,27 +648,26 @@
                         📄
                       {% endif %}
                     </div>
-                    <div style="flex: 1; min-width: 0;">
-                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.95rem; word-break: break-word; margin-bottom: 0.5rem;">
-                        {{ doc.filename }}
-                      </div>
-                      <div style="color: #888; font-size: 0.8rem;">
-                        📅 {{ doc.created_at }}
+                    <div class="document-info">
+                      <div class="document-name">{{ doc.filename }}</div>
+                      <div class="document-meta">
+                        <span>📅</span>
+                        <span>{{ doc.created_at }}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div style="display: flex; gap: 0.75rem; padding-top: 1rem; border-top: 1px solid var(--taupe-beige);">
+                  <div class="document-actions">
                     <a href="{{ url_for('static', filename='uploads/homeowner_docs/' + doc.filename) }}"
-                       target="_blank" class="btn btn-outline" style="flex: 1; text-align: center; padding: 0.6rem;">
-                      VIEW
+                       target="_blank" class="action-button view">
+                      View
                     </a>
 
                     <form method="post" action="{{ url_for('homeowner_upload_documents') }}"
                           enctype="multipart/form-data" style="flex: 1; margin: 0;">
                       <input type="hidden" name="reattach_id" value="{{ doc.id }}">
-                      <label class="btn btn-outline" style="width: 100%; text-align: center; padding: 0.6rem; cursor: pointer; margin: 0; display: block;">
-                        REPLACE
+                      <label class="action-button replace" style="display: block; margin: 0;">
+                        Replace
                         <input type="file" name="file" accept="*/*" style="display: none;"
                                onchange="this.form.submit()">
                       </label>
@@ -168,8 +677,8 @@
                           style="flex: 1; margin: 0;"
                           onsubmit="return confirm('Delete this document? This action cannot be undone.');">
                       <input type="hidden" name="delete_id" value="{{ doc.id }}">
-                      <button class="btn btn-outline" type="submit" style="width: 100%; padding: 0.6rem; color: #b3574a; border-color: #b3574a;">
-                        DELETE
+                      <button class="action-button delete" type="submit" style="width: 100%;">
+                        Delete
                       </button>
                     </form>
                   </div>
@@ -181,10 +690,28 @@
       {% endfor %}
     {% else %}
       <div class="empty-state">
-        <h3>📁 No Documents Yet</h3>
+        <div class="empty-state-icon">📁</div>
+        <h3>No Documents Yet</h3>
         <p>Start by uploading your closing packet, warranty documents, appraisals, invoices, or inspection reports.</p>
       </div>
     {% endif %}
   </div>
 </div>
+
+<script>
+  function updateFileName(input) {
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const fileLabelText = document.getElementById('file-label-text');
+    
+    if (input.files && input.files[0]) {
+      const fileName = input.files[0].name;
+      fileNameDisplay.textContent = 'Selected: ' + fileName;
+      fileNameDisplay.classList.add('show');
+      fileLabelText.textContent = 'Change file';
+    } else {
+      fileNameDisplay.classList.remove('show');
+      fileLabelText.textContent = 'Select a file to upload';
+    }
+  }
+</script>
 {% endblock %}

@@ -571,20 +571,10 @@
           Home Base
         </a>
         
-        <!-- Value & Equity Dropdown -->
-        <div class="ylh-dropdown">
-          <button type="button" class="ylh-nav-button {% if is_value %}active{% endif %}" onclick="toggleDropdown(this, event)">
-            Value & Equity ▾
-          </button>
-          <div class="ylh-dropdown-menu">
-            <a href="{{ url_for('homeowner_value_my_home') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/value/my-home') %}active{% endif %}">
-              My Home Value
-            </a>
-            <a href="{{ url_for('homeowner_value_equity_overview') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/value/equity-overview') %}active{% endif %}">
-              Equity Overview
-            </a>
-          </div>
-        </div>
+        <!-- Value & Equity Direct Link -->
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" class="ylh-nav-button {% if is_value or path.startswith('/homeowner/value') %}active{% endif %}">
+          Value & Equity
+        </a>
         
         <!-- Renovation & Improvement Dropdown -->
         <div class="ylh-dropdown">
@@ -811,6 +801,11 @@ document.addEventListener('click', function(e) {
   var widgetContainer = document.getElementById('homebot_homeowner');
   var widgetSection = document.querySelector('.widget-section');
   var target = e.target;
+  
+  // Skip if click is on tab buttons
+  if (target.closest('.equity-tabs') || target.classList.contains('tab') || target.closest('.tab')) {
+    return;
+  }
   
   // Skip if click is inside widget area
   if (widgetContainer && (widgetContainer.contains(target) || target.closest('#homebot_homeowner'))) {

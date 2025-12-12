@@ -2,23 +2,674 @@
 {% block title %}Warranty & Appliance Log{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Track everything</p>
-  <h1>Warranty & Appliance Log</h1>
-  <p>Keeping track of what's covered and when it expires can save real money and stress later.</p>
-</div>
+<style>
+  .warranty-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Planned Features</h2>
-    <p class="card-subtext">This page will eventually let you log:</p>
-    <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>Major systems such as HVAC and roof</li>
-      <li>Appliances and their purchase dates</li>
-      <li>Home warranties and coverage periods</li>
-      <li>Any service visits or repairs</li>
-    </ul>
-    <p class="card-subtext" style="margin-top: 1rem;">Until the full logging tool is live you can store receipts and details in Upload documents.</p>
+  .warranty-hero {
+    text-align: center;
+    padding: 3rem 0 2rem;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .warranty-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .warranty-hero .eyebrow {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .warranty-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .warranty-hero p {
+    font-size: 1.15rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+
+  .warranty-hero .convenience-note {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    font-style: italic;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding: 1rem;
+    background: rgba(246, 242, 232, 0.5);
+    border-radius: 12px;
+    border-left: 3px solid var(--olive-green);
+  }
+
+  .warranty-main {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 2.5rem;
+    margin-bottom: 4rem;
+  }
+
+  .warranty-form-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(58, 53, 44, 0.08), 0 2px 8px rgba(107, 106, 69, 0.06);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 120px;
+  }
+
+  .warranty-form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+    border-radius: 20px 20px 0 0;
+  }
+
+  .warranty-form-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--taupe-beige);
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    background: white;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.2);
+  }
+
+  .form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+  }
+
+  .form-group small {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+
+  .submit-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 106, 69, 0.4);
+  }
+
+  .warranty-list-section {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 20px rgba(58, 53, 44, 0.06);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .warranty-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+
+  .warranty-list-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .filter-tab {
+    padding: 0.5rem 1rem;
+    background: var(--light-cream);
+    border: 1px solid var(--taupe-beige);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .filter-tab:hover {
+    background: rgba(107, 106, 69, 0.05);
+  }
+
+  .filter-tab.active {
+    background: var(--olive-green);
+    color: white;
+    border-color: var(--olive-green);
+  }
+
+  .warranty-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .warranty-item {
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .warranty-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.1);
+    border-color: var(--olive-green);
+  }
+
+  .warranty-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--olive-green);
+    border-radius: 16px 0 0 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .warranty-item:hover::before {
+    opacity: 1;
+  }
+
+  .warranty-item-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .warranty-item-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .warranty-item-category {
+    display: inline-block;
+    padding: 0.35rem 0.85rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    color: var(--olive-green);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.5rem;
+  }
+
+  .warranty-item-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .warranty-detail {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+  }
+
+  .warranty-detail strong {
+    color: var(--olive-green);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .warranty-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .warranty-status.active {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4CAF50;
+  }
+
+  .warranty-status.expiring {
+    background: rgba(255, 152, 0, 0.1);
+    color: #FF9800;
+  }
+
+  .warranty-status.expired {
+    background: rgba(211, 47, 47, 0.1);
+    color: #d32f2f;
+  }
+
+  .warranty-item-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .action-btn-small {
+    padding: 0.5rem 1rem;
+    background: white;
+    border: 1px solid var(--taupe-beige);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--charcoal-brown);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .action-btn-small:hover {
+    background: var(--light-cream);
+    border-color: var(--olive-green);
+    color: var(--olive-green);
+  }
+
+  .action-btn-small.delete {
+    color: #d32f2f;
+    border-color: #d32f2f;
+  }
+
+  .action-btn-small.delete:hover {
+    background: #fef5f4;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-radius: 16px;
+    border: 2px dashed var(--taupe-beige);
+  }
+
+  .empty-state h3 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem;
+    font-weight: 400;
+  }
+
+  .empty-state p {
+    font-size: 1rem;
+    color: #666;
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 1024px) {
+    .warranty-main {
+      grid-template-columns: 1fr;
+    }
+
+    .warranty-form-card {
+      position: static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .warranty-hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .warranty-item-details {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="warranty-page">
+  <!-- Hero Section -->
+  <div class="warranty-hero">
+    <p class="eyebrow">Your Life Your Home · Care & Maintenance</p>
+    <h1>Warranty & Appliance Log</h1>
+    <p>Keeping track of what's covered and when it expires can save real money and stress later. Log major systems, appliances, warranties, and service visits all in one place.</p>
+    <div class="convenience-note">
+      <strong>Note:</strong> We don't expect everyone to use this tool—we know most people keep this info elsewhere. But for those who want everything in one place, it's here for your convenience. All the ins and outs of your home's warranties and appliances, right on the platform.
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="warranty-main">
+    <!-- Add Form -->
+    <div class="warranty-form-card">
+      <h2>➕ Add New Item</h2>
+      <form method="post" action="{{ url_for('homeowner_care_warranty_log') }}">
+        <div class="form-group">
+          <label for="item_name">Item Name *</label>
+          <input type="text" id="item_name" name="item_name" required placeholder="e.g., HVAC System, Refrigerator, Roof" />
+        </div>
+
+        <div class="form-group">
+          <label for="category">Category *</label>
+          <select id="category" name="category" required>
+            <option value="">Select category...</option>
+            <option value="HVAC">HVAC System</option>
+            <option value="Roof">Roof</option>
+            <option value="Plumbing">Plumbing</option>
+            <option value="Electrical">Electrical</option>
+            <option value="Appliance">Appliance</option>
+            <option value="Home Warranty">Home Warranty</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="purchase_date">Purchase/Install Date</label>
+          <input type="date" id="purchase_date" name="purchase_date" />
+          <small>When was this item purchased or installed?</small>
+        </div>
+
+        <div class="form-group">
+          <label for="warranty_start">Warranty Start Date</label>
+          <input type="date" id="warranty_start" name="warranty_start" />
+          <small>When does the warranty coverage begin?</small>
+        </div>
+
+        <div class="form-group">
+          <label for="warranty_expiry">Warranty Expiry Date</label>
+          <input type="date" id="warranty_expiry" name="warranty_expiry" />
+          <small>When does the warranty expire?</small>
+        </div>
+
+        <div class="form-group">
+          <label for="warranty_provider">Warranty Provider</label>
+          <input type="text" id="warranty_provider" name="warranty_provider" placeholder="e.g., Manufacturer, Home Warranty Company" />
+        </div>
+
+        <div class="form-group">
+          <label for="warranty_number">Warranty/Policy Number</label>
+          <input type="text" id="warranty_number" name="warranty_number" placeholder="Policy or serial number" />
+        </div>
+
+        <div class="form-group">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" placeholder="Service visits, repairs, important details..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Add to Log</button>
+      </form>
+    </div>
+
+    <!-- Warranty List -->
+    <div class="warranty-list-section">
+      <div class="warranty-list-header">
+        <h2>📋 Your Warranty & Appliance Log</h2>
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" onclick="filterItems('all')">All</button>
+          <button class="filter-tab" data-filter="active" onclick="filterItems('active')">Active</button>
+          <button class="filter-tab" data-filter="expiring" onclick="filterItems('expiring')">Expiring Soon</button>
+          <button class="filter-tab" data-filter="expired" onclick="filterItems('expired')">Expired</button>
+        </div>
+      </div>
+
+      {% if warranty_items and warranty_items|length > 0 %}
+        <ul class="warranty-list">
+          {% for item in warranty_items %}
+            {% set status = 'active' %}
+            {% set expiry_date_str = '' %}
+            {% if item.warranty_expiry %}
+              {% set expiry_date_str = item.warranty_expiry.split('T')[0] if 'T' in item.warranty_expiry else item.warranty_expiry %}
+            {% endif %}
+
+            <li class="warranty-item" data-category="{{ item.category }}" data-expiry="{{ expiry_date_str }}">
+              <div class="warranty-item-header">
+                <div>
+                  <h3 class="warranty-item-title">{{ item.item_name }}</h3>
+                  <span class="warranty-item-category">{{ item.category }}</span>
+                </div>
+                <span class="warranty-status" data-expiry="{{ expiry_date_str }}">
+                  <span class="status-text">✓ Active</span>
+                </span>
+              </div>
+
+              <div class="warranty-item-details">
+                {% if item.purchase_date %}
+                <div class="warranty-detail">
+                  <strong>Purchase Date</strong>
+                  <span>{{ item.purchase_date.split('T')[0] if 'T' in item.purchase_date else item.purchase_date }}</span>
+                </div>
+                {% endif %}
+
+                {% if item.warranty_start %}
+                <div class="warranty-detail">
+                  <strong>Warranty Start</strong>
+                  <span>{{ item.warranty_start.split('T')[0] if 'T' in item.warranty_start else item.warranty_start }}</span>
+                </div>
+                {% endif %}
+
+                {% if item.warranty_expiry %}
+                <div class="warranty-detail">
+                  <strong>Warranty Expires</strong>
+                  <span>{{ item.warranty_expiry.split('T')[0] if 'T' in item.warranty_expiry else item.warranty_expiry }}</span>
+                </div>
+                {% endif %}
+
+                {% if item.warranty_provider %}
+                <div class="warranty-detail">
+                  <strong>Provider</strong>
+                  <span>{{ item.warranty_provider }}</span>
+                </div>
+                {% endif %}
+
+                {% if item.warranty_number %}
+                <div class="warranty-detail">
+                  <strong>Policy Number</strong>
+                  <span>{{ item.warranty_number }}</span>
+                </div>
+                {% endif %}
+              </div>
+
+              {% if item.notes %}
+              <div class="warranty-detail" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(200, 180, 151, 0.2);">
+                <strong>Notes</strong>
+                <span style="display: block; margin-top: 0.5rem; color: #666; line-height: 1.6;">{{ item.notes }}</span>
+              </div>
+              {% endif %}
+
+              <div class="warranty-item-actions">
+                <form method="post" action="{{ url_for('homeowner_care_warranty_log') }}" style="display: inline;">
+                  <input type="hidden" name="delete_id" value="{{ item.id }}">
+                  <button type="submit" class="action-btn-small delete" onclick="return confirm('Delete this item? This cannot be undone.');">Delete</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="empty-state">
+          <h3>📝 No Items Logged Yet</h3>
+          <p>Start tracking your warranties and appliances by adding your first item. Log major systems like HVAC and roof, appliances, home warranties, and service visits.</p>
+        </div>
+      {% endif %}
+    </div>
   </div>
 </div>
+
+<script>
+  // Calculate warranty status based on expiry date
+  function calculateStatus(expiryDate) {
+    if (!expiryDate) return 'active';
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expiry = new Date(expiryDate);
+    expiry.setHours(0, 0, 0, 0);
+    
+    const daysUntil = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntil < 0) return 'expired';
+    if (daysUntil <= 90) return 'expiring';
+    return 'active';
+  }
+  
+  // Update status badges on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const statusElements = document.querySelectorAll('.warranty-status');
+    statusElements.forEach(el => {
+      const expiryDate = el.dataset.expiry;
+      const status = calculateStatus(expiryDate);
+      const statusText = el.querySelector('.status-text');
+      
+      el.className = 'warranty-status ' + status;
+      if (status === 'active') {
+        statusText.textContent = '✓ Active';
+      } else if (status === 'expiring') {
+        statusText.textContent = '⚠ Expiring Soon';
+      } else {
+        statusText.textContent = '✗ Expired';
+      }
+      
+      // Update data-status on parent item for filtering
+      const item = el.closest('.warranty-item');
+      if (item) {
+        item.dataset.status = status;
+      }
+    });
+  });
+  
+  function filterItems(filter) {
+    const items = document.querySelectorAll('.warranty-item');
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    // Update active tab
+    tabs.forEach(tab => {
+      tab.classList.remove('active');
+      if (tab.dataset.filter === filter) {
+        tab.classList.add('active');
+      }
+    });
+    
+    // Filter items
+    items.forEach(item => {
+      if (filter === 'all') {
+        item.style.display = 'block';
+      } else {
+        const status = item.dataset.status || 'active';
+        if (status === filter) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      }
+    });
+  }
+</script>
 {% endblock %}

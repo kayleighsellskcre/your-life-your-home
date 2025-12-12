@@ -414,79 +414,6 @@
       line-height: 1.4 !important;
     }
     
-    /* Loan Info Section - Completely redesigned for mobile */
-    #overview-loan-display-bar {
-      height: auto !important;
-      padding: 2.5rem 1.5rem !important;
-      flex-direction: column !important;
-      gap: 2.5rem !important;
-      min-height: auto !important;
-    }
-    
-    #overview-loan-display-bar h2 {
-      font-size: 2rem !important;
-      margin-bottom: 1.5rem !important;
-    }
-    
-    #overview-loan-display-bar button {
-      width: 100% !important;
-      padding: 1.5rem 2rem !important;
-      font-size: 1.1rem !important;
-      min-height: 56px !important;
-    }
-    
-    #overview-loan-display-bar > div:first-child {
-      width: 100% !important;
-      text-align: center !important;
-    }
-    
-    #overview-loan-display-bar > div:last-child {
-      width: 100% !important;
-      flex-direction: column !important;
-      gap: 2rem !important;
-    }
-    
-    #overview-loan-display-bar > div:last-child > div {
-      border-left: none !important;
-      border-top: 3px solid #C8B497 !important;
-      padding: 1.5rem 0 0 0 !important;
-      width: 100% !important;
-      text-align: center !important;
-    }
-    
-    #overview-loan-display-bar > div:last-child > div:first-child {
-      border-top-color: #6B6A45 !important;
-    }
-    
-    /* Make stat labels and values bigger */
-    #overview-loan-display-bar div[style*="font-size: 0.65rem"] {
-      font-size: 1rem !important;
-      margin-bottom: 0.75rem !important;
-    }
-    
-    #overview-loan-display-bar div[style*="font-size: 1.4rem"] {
-      font-size: 2.25rem !important;
-    }
-    
-    /* Form Container */
-    #overview-loan-form-container {
-      padding: 2.5rem 1.5rem !important;
-    }
-    
-    #overview-loan-form-container form {
-      gap: 2rem !important;
-    }
-    
-    #overview-loan-form-container input {
-      padding: 1.25rem !important;
-      font-size: 1.1rem !important;
-      min-height: 56px !important;
-    }
-    
-    #overview-loan-form-container label {
-      font-size: 1rem !important;
-      margin-bottom: 0.75rem !important;
-    }
     
     /* Wealth Builder Section */
     div[style*="margin: 35rem"] {
@@ -767,148 +694,15 @@
       </div>
     </div>
     
-    <!-- Card 3: Loan Details -->
-    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important; animation: fadeInUp 0.8s ease 0.4s both;">
-      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
-        <div style="width: 100%; text-align: center;">
-          <div style="margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(107,106,69,0.2);">
-            <div style="font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.25rem;">Rate</div>
-            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.2rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_rate %}{{ "{:.2f}".format(snapshot.loan_rate) }}%{% else %}<span style="font-size: 0.8rem; color: #6B6A45; opacity: 0.5;">Not set</span>{% endif %}
-            </div>
-          </div>
-          <div style="margin-bottom: 0.6rem; padding-bottom: 0.4rem; border-bottom: 1px solid rgba(107,106,69,0.2);">
-            <div style="font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.25rem;">Monthly</div>
-            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_payment %}${{ "{:,.0f}".format(snapshot.loan_payment) }}{% else %}<span style="font-size: 0.8rem; color: #6B6A45; opacity: 0.5;">Not set</span>{% endif %}
-            </div>
-          </div>
-          <div>
-            <div style="font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; font-weight: 500; margin-bottom: 0.25rem;">Balance</div>
-            <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 0.9rem; color: #3A352C; font-weight: 400;">
-              {% if snapshot and snapshot.loan_balance %}${{ "{:,.0f}".format(snapshot.loan_balance) }}{% else %}<span style="font-size: 0.8rem; color: #6B6A45; opacity: 0.5;">Not set</span>{% endif %}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="padding: 1rem 0.875rem;">
-        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Loan Overview</h3>
-        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">Current mortgage terms</p>
-        <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
-          Edit loan details →
-        </a>
-      </div>
-    </div>
   </div>
 </div>
 
-<!-- Update Loan Information Section -->
-<div style="margin-bottom: 6rem; max-width: 1200px; margin-left: auto; margin-right: auto;">
-  <div id="overview-loan-display-bar" style="background: white; border: 1px solid rgba(200, 180, 151, 0.3); border-radius: 0; padding: 1.25rem 2rem; box-shadow: 0 8px 24px rgba(0,0,0,0.08); height: 108px; display: flex; align-items: center; justify-content: space-between; gap: 3rem; animation: fadeInUp 0.8s ease 0.4s both;">
-    <!-- Left: Title with Button Stacked -->
-    <div style="display: flex; flex-direction: column; gap: 0.5rem; flex-shrink: 0; justify-content: center;">
-      <h2 style="margin: 0; font-family: var(--font-heading); font-size: 1.3rem; color: #3A352C; font-weight: 400; white-space: nowrap;">Loan Info</h2>
-      <button onclick="toggleLoanFormExpanded()" id="loan-form-toggle-btn" style="background: #6B6A45; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0; font-weight: 500; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; white-space: nowrap;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(107, 106, 69, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-        ✏️ Quick Update
-      </button>
-    </div>
-    
-    <!-- Center: Data Display -->
-    <div style="flex: 1; display: flex; align-items: center; justify-content: space-evenly; gap: 2rem;">
-      {% if snapshot and (snapshot.value_estimate or snapshot.loan_balance) %}
-        {% if snapshot.value_estimate %}
-        <div style="text-align: center; border-left: 2px solid #6B6A45; padding-left: 1.5rem;">
-          <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;">Home Value</div>
-          <div style="font-size: 1.4rem; font-weight: 600; color: #3A352C; font-family: var(--font-heading);">${{ "{:,.0f}".format(snapshot.value_estimate) }}</div>
-        </div>
-        {% endif %}
-        
-        {% if snapshot.loan_balance %}
-        <div style="text-align: center; border-left: 2px solid #C8B497; padding-left: 1.5rem;">
-          <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;">Loan Balance</div>
-          <div style="font-size: 1.4rem; font-weight: 600; color: #3A352C; font-family: var(--font-heading);">${{ "{:,.0f}".format(snapshot.loan_balance) }}</div>
-        </div>
-        {% endif %}
-        
-        {% if snapshot.loan_rate %}
-        <div style="text-align: center; border-left: 2px solid #C8B497; padding-left: 1.5rem;">
-          <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;">Interest Rate</div>
-          <div style="font-size: 1.4rem; font-weight: 600; color: #3A352C; font-family: var(--font-heading);">{{ "{:.2f}".format(snapshot.loan_rate) }}%</div>
-        </div>
-        {% endif %}
-        
-        {% if snapshot.loan_payment %}
-        <div style="text-align: center; border-left: 2px solid #C8B497; padding-left: 1.5rem;">
-          <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem;">Monthly Payment</div>
-          <div style="font-size: 1.4rem; font-weight: 600; color: #3A352C; font-family: var(--font-heading);">${{ "{:,.0f}".format(snapshot.loan_payment) }}</div>
-        </div>
-        {% endif %}
-      {% else %}
-        <div style="color: #6B6A45; opacity: 0.6; font-size: 0.95rem;">
-          Click "Quick Update" to add your loan information →
-        </div>
-      {% endif %}
-    </div>
-  </div>
-    
-  <div id="overview-loan-form-container" style="display: none; margin-top: 1.5rem; background: white; border: 1px solid rgba(200, 180, 151, 0.3); padding: 2rem; box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
-      <form method="post" action="{{ url_for('homeowner_value_equity_overview') }}" style="display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
-        <div>
-          <label for="value_estimate" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">💰 Home Value</label>
-          <input type="text" id="value_estimate" name="value_estimate" placeholder="e.g., 480,000" value="{% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
-        </div>
-        
-        <div>
-          <label for="loan_balance" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">🏦 Loan Balance</label>
-          <input type="text" id="loan_balance" name="loan_balance" placeholder="e.g., 275,000" value="{% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
-        </div>
-        
-        <div>
-          <label for="loan_rate" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">📊 Interest Rate (%)</label>
-          <input type="text" id="loan_rate" name="loan_rate" placeholder="e.g., 3.38" value="{% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
-        </div>
-        
-        <div>
-          <label for="loan_payment" style="display: block; font-size: 0.75rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">💳 Monthly Payment</label>
-          <input type="text" id="loan_payment" name="loan_payment" placeholder="e.g., 2,450" value="{% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid rgba(200, 180, 151, 0.4); border-radius: 0; font-size: 1rem; transition: border-color 0.3s;" onfocus="this.style.borderColor='#6B6A45'" onblur="this.style.borderColor='rgba(200, 180, 151, 0.4)'" />
-        </div>
-        
-        <div style="grid-column: 1 / -1; display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" style="flex: 1; padding: 1rem 2rem; background: #6B6A45; color: white; border: none; border-radius: 0; font-weight: 500; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);" onmouseover="this.style.background='#5A6D47'" onmouseout="this.style.background='#6B6A45'">💾 Save & Update</button>
-          <button type="button" onclick="toggleLoanFormExpanded()" style="padding: 1rem 2rem; background: transparent; color: #6B6A45; border: 1px solid #6B6A45; border-radius: 0; font-weight: 500; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.9rem;" onmouseover="this.style.background='#F6F2E8'" onmouseout="this.style.background='transparent'">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<script>
-function toggleLoanFormExpanded() {
-  const form = document.getElementById('overview-loan-form-container');
-  const displayBar = document.getElementById('overview-loan-display-bar');
-  const btn = document.getElementById('loan-form-toggle-btn');
-  
-  if (!form || !displayBar || !btn) return;
-  
-  if (form.style.display === 'none') {
-    form.style.display = 'block';
-    displayBar.style.opacity = '0.5';
-    btn.textContent = '✖️ Close';
-    btn.style.background = '#C8B497';
-  } else {
-    form.style.display = 'none';
-    displayBar.style.opacity = '1';
-    btn.textContent = '✏️ Quick Update';
-    btn.style.background = '#6B6A45';
-  }
-}
-</script>
 
 <!-- Wealth Builder Section: Stacked Layout -->
 <div style="background: #F6F2E8; margin: 35rem -4rem 6rem; padding: 6rem 4rem;" class="parallax-section">
   <div style="max-width: 1200px; margin: 0 auto;">
     <!-- Top: Visual -->
-    <div style="margin-bottom: 4rem;">
+    <div style="margin-bottom: 4rem; margin-top: 4.5rem;">
       <div style="position: relative; min-height: 150px; background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); display: flex; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 1.8rem; text-align: center; padding: 1.5rem; overflow: hidden;">
         <div style="position: relative; z-index: 2;">
           Your Home • Your Legacy

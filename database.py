@@ -306,6 +306,20 @@ def init_db() -> None:
         cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN initial_purchase_value REAL")
     except:
         pass
+    
+    # Add property tax, insurance, and PMI columns for accurate payment calculations
+    try:
+        cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN property_tax_monthly REAL")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN homeowners_insurance_monthly REAL")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE homeowner_snapshots ADD COLUMN pmi_monthly REAL")
+    except:
+        pass
 
     # ------------- SNAPSHOT HISTORY (Monthly tracking) -------------
     cur.execute(
@@ -359,6 +373,28 @@ def init_db() -> None:
         )
         """
     )
+    
+    # Migration: Add missing columns to homeowner_notes if they don't exist
+    migration_columns = [
+        ("links", "TEXT"),
+        ("vision_statement", "TEXT"),
+        ("color_palette", "TEXT"),
+        ("board_template", "TEXT"),
+        ("label_style", "TEXT"),
+        ("is_private", "INTEGER DEFAULT 0"),
+        ("shareable_link", "TEXT"),
+        ("product_sources", "TEXT"),
+        ("show_notes_panel", "INTEGER DEFAULT 1"),
+        ("fixtures", "TEXT"),
+    ]
+    
+    for col_name, col_type in migration_columns:
+        try:
+            cur.execute(f"ALTER TABLE homeowner_notes ADD COLUMN {col_name} {col_type}")
+            print(f"[DB MIGRATION] Added column '{col_name}' to homeowner_notes")
+        except Exception as e:
+            # Column already exists, ignore
+            pass
 
     # ------------- HOMEOWNER DOCUMENTS -------------
     cur.execute(
@@ -376,6 +412,51 @@ def init_db() -> None:
         )
         """
     )
+    
+    # Migration: Add name column if it doesn't exist (for existing databases)
+    try:
+        cur.execute("ALTER TABLE homeowner_documents ADD COLUMN name TEXT")
+        print("[DB MIGRATION] Added 'name' column to homeowner_documents")
+    except:
+        pass  # Column already exists
+    
+    # Migration: Ensure all required columns exist
+    try:
+        cur.execute("ALTER TABLE homeowner_documents ADD COLUMN r2_key TEXT")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE homeowner_documents ADD COLUMN r2_url TEXT")
+    except:
+        pass
+
+    # ------------- HOMEOWNER WARRANTY LOG -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS homeowner_warranty_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            item_name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            purchase_date TEXT,
+            warranty_start TEXT,
+            warranty_expiry TEXT,
+            warranty_provider TEXT,
+            warranty_number TEXT,
+            notes TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create index for faster lookups
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_warranty_log_user_id ON homeowner_warranty_log(user_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_warranty_log_category ON homeowner_warranty_log(category)")
+    except:
+        pass
 
     # ------------- HOMEOWNER PROJECTS -------------
     cur.execute(
@@ -1119,42 +1200,123 @@ def add_homeowner_note(
     show_notes_panel: int = 1,
     fixtures: List[str] = None,
 ) -> int:
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
+    """Add a homeowner note (design board). Returns the note ID."""
+    if not user_id:
+        raise ValueError("user_id is required")
+    if not project_name:
+        raise ValueError("project_name is required")
+    
+    conn = None
+    try:
+        conn = get_connection()
+        if not conn:
+            raise ValueError("Failed to get database connection")
+        
+        cur = conn.cursor()
+        if not cur:
+            raise ValueError("Failed to create database cursor")
+        
+        # Prepare JSON fields
+        photos_json = json.dumps(photos or [])
+        files_json = json.dumps(files or [])
+        color_palette_json = json.dumps(color_palette or [])
+        fixtures_json = json.dumps(fixtures or [])
+        
+        print(f"[DB] Inserting note: user_id={user_id}, project_name={project_name}")
+        print(f"[DB] Connection: {conn}, Cursor: {cur}")
+        
+        # Verify table exists
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='homeowner_notes'")
+        table_exists = cur.fetchone()
+        if not table_exists:
+            raise ValueError("homeowner_notes table does not exist! Run init_db() first.")
+        print(f"[DB] Table 'homeowner_notes' exists: {table_exists}")
+        
+        # Build the insert statement
+        insert_sql = """
+            INSERT INTO homeowner_notes (
+                user_id, project_name, title, tags, details, links,
+                photos, files, vision_statement, color_palette,
+                board_template, label_style, is_private, shareable_link,
+                product_sources, show_notes_panel, fixtures
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
-        INSERT INTO homeowner_notes (
-            user_id, project_name, title, tags, details, links,
-            photos, files, vision_statement, color_palette,
-            board_template, label_style, is_private, shareable_link,
-            product_sources, show_notes_panel, fixtures
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
+        
+        insert_values = (
             user_id,
             project_name,
             title,
             tags,
             details,
             links,
-            json.dumps(photos or []),
-            json.dumps(files or []),
+            photos_json,
+            files_json,
             vision_statement,
-            json.dumps(color_palette or []),
+            color_palette_json,
             board_template,
             label_style,
             is_private,
             shareable_link,
             product_sources,
             show_notes_panel,
-            json.dumps(fixtures or []),
-        ),
-    )
-    note_id = cur.lastrowid
-    conn.commit()
-    conn.close()
-    return note_id
+            fixtures_json,
+        )
+        
+        print(f"[DB] Executing INSERT with {len(insert_values)} values")
+        print(f"[DB] Values: user_id={user_id}, project_name='{project_name}', title={title}")
+        
+        try:
+            cur.execute(insert_sql, insert_values)
+            note_id = cur.lastrowid
+            print(f"[DB] Insert executed, lastrowid: {note_id}")
+        except Exception as insert_error:
+            print(f"[DB ERROR] Insert failed: {str(insert_error)}")
+            import traceback
+            print(traceback.format_exc())
+            raise
+        
+        # Commit the transaction
+        try:
+            conn.commit()
+            print(f"[DB] Transaction committed successfully")
+        except Exception as commit_error:
+            print(f"[DB ERROR] Commit failed: {str(commit_error)}")
+            conn.rollback()
+            raise
+        
+        if not note_id or note_id == 0:
+            raise ValueError("INSERT succeeded but no ID was returned (lastrowid is None or 0)")
+        
+        print(f"[DB] Note inserted successfully with ID: {note_id}")
+        
+        # Verify the insert
+        cur.execute("SELECT id, project_name, created_at FROM homeowner_notes WHERE id = ?", (note_id,))
+        verify = cur.fetchone()
+        if verify:
+            print(f"[DB] Verified: Note {note_id} exists in database")
+        else:
+            print(f"[DB] WARNING: Note {note_id} was not found after insert!")
+        
+        return note_id
+    except Exception as e:
+        import traceback
+        print(f"[DB ERROR] Failed to insert homeowner note: {str(e)}")
+        print(traceback.format_exc())
+        if conn:
+            try:
+                conn.rollback()
+                print(f"[DB] Rolled back transaction")
+            except:
+                pass
+        raise
+    finally:
+        if conn:
+            try:
+                conn.close()
+                print(f"[DB] Connection closed")
+            except:
+                pass
 
 
 def list_homeowner_notes(user_id: int) -> List[sqlite3.Row]:
@@ -1200,21 +1362,143 @@ def add_homeowner_document(
     return doc_id
 
 
-def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
+# =========================
+# WARRANTY LOG MANAGEMENT
+# =========================
+
+def add_warranty_log_item(
+    user_id: int,
+    item_name: str,
+    category: str,
+    purchase_date: Optional[str] = None,
+    warranty_start: Optional[str] = None,
+    warranty_expiry: Optional[str] = None,
+    warranty_provider: Optional[str] = None,
+    warranty_number: Optional[str] = None,
+    notes: Optional[str] = None
+) -> int:
+    """Add a new warranty log item."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
-        """
-        SELECT id, created_at, name, category, file_path, r2_key, r2_url
-        FROM homeowner_documents
-        WHERE user_id = ?
-        ORDER BY created_at DESC
-        """,
-        (user_id,),
+        """INSERT INTO homeowner_warranty_log 
+           (user_id, item_name, category, purchase_date, warranty_start, warranty_expiry, 
+            warranty_provider, warranty_number, notes)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, item_name, category, purchase_date, warranty_start, warranty_expiry,
+         warranty_provider, warranty_number, notes)
+    )
+    item_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return item_id
+
+
+def list_warranty_log_items(user_id: int) -> List[sqlite3.Row]:
+    """List all warranty log items for a user."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT * FROM homeowner_warranty_log 
+           WHERE user_id = ? 
+           ORDER BY warranty_expiry ASC NULLS LAST, created_at DESC""",
+        (user_id,)
     )
     rows = cur.fetchall()
     conn.close()
     return rows
+
+
+def delete_warranty_log_item(item_id: int, user_id: int) -> bool:
+    """Delete a warranty log item (only if it belongs to the user)."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """DELETE FROM homeowner_warranty_log 
+           WHERE id = ? AND user_id = ?""",
+        (item_id, user_id)
+    )
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+
+def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
+    """List all documents for a homeowner. Handles schema migration if needed."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Check what columns exist in the table
+    try:
+        cur.execute("PRAGMA table_info(homeowner_documents)")
+        columns = [row[1] for row in cur.fetchall()]
+        
+        # Build SELECT statement based on available columns
+        select_cols = []
+        if 'id' in columns:
+            select_cols.append('id')
+        if 'created_at' in columns:
+            select_cols.append('created_at')
+        if 'name' in columns:
+            select_cols.append('name')
+        elif 'title' in columns:
+            select_cols.append('title AS name')  # Use title as name if name doesn't exist
+        elif 'file_name' in columns:
+            select_cols.append('file_name AS name')  # Use file_name as name
+        if 'category' in columns:
+            select_cols.append('category')
+        if 'file_path' in columns:
+            select_cols.append('file_path')
+        if 'r2_key' in columns:
+            select_cols.append('r2_key')
+        if 'r2_url' in columns:
+            select_cols.append('r2_url')
+        
+        if not select_cols:
+            # Fallback: select all columns
+            cur.execute(
+                """
+                SELECT *
+                FROM homeowner_documents
+                WHERE user_id = ?
+                ORDER BY created_at DESC
+                """,
+                (user_id,),
+            )
+        else:
+            select_sql = f"""
+                SELECT {', '.join(select_cols)}
+                FROM homeowner_documents
+                WHERE user_id = ?
+                ORDER BY created_at DESC
+            """
+            cur.execute(select_sql, (user_id,))
+        
+        rows = cur.fetchall()
+        conn.close()
+        return rows
+    except Exception as e:
+        print(f"[DB ERROR] Error listing homeowner documents: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        # Fallback: try selecting all columns
+        try:
+            cur.execute(
+                """
+                SELECT *
+                FROM homeowner_documents
+                WHERE user_id = ?
+                ORDER BY created_at DESC
+                """,
+                (user_id,),
+            )
+            rows = cur.fetchall()
+            conn.close()
+            return rows
+        except:
+            conn.close()
+            return []
 
 
 def add_homeowner_project(
@@ -2000,6 +2284,12 @@ def add_design_board_note(
     links: str = None,
     photos: List[str] = None,
     files: List[str] = None,
+    vision_statement: str = None,
+    color_palette: List[str] = None,
+    board_template: str = "minimal",
+    label_style: str = "subtle",
+    is_private: int = 0,
+    fixtures: List[str] = None,
 ) -> int:
     return add_homeowner_note(
         user_id=user_id,
@@ -2010,34 +2300,55 @@ def add_design_board_note(
         links=links,
         photos=photos,
         files=files,
+        vision_statement=vision_statement,
+        color_palette=color_palette,
+        board_template=board_template,
+        label_style=label_style,
+        is_private=is_private,
+        fixtures=fixtures,
     )
 
 
 def get_design_boards_for_user(user_id: int) -> Dict[str, Any]:
     """Get all unique design boards (project_name) for a user."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT DISTINCT project_name, 
-               MIN(created_at) as first_created,
-               COUNT(*) as note_count
-        FROM homeowner_notes
-        WHERE user_id = ? AND project_name IS NOT NULL AND project_name != ''
-        GROUP BY project_name
-        ORDER BY first_created DESC
-        """,
-        (user_id,),
-    )
-    rows = cur.fetchall()
-    conn.close()
-    boards = {}
-    for row in rows:
-        boards[row["project_name"]] = {
-            "first_created": row["first_created"],
-            "note_count": row["note_count"],
-        }
-    return boards
+    if not user_id:
+        print(f"[DB WARNING] get_design_boards_for_user called with invalid user_id: {user_id}")
+        return {}
+    
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT DISTINCT project_name, 
+                   MIN(created_at) as first_created,
+                   COUNT(*) as note_count
+            FROM homeowner_notes
+            WHERE user_id = ? AND project_name IS NOT NULL AND project_name != ''
+            GROUP BY project_name
+            ORDER BY first_created DESC
+            """,
+            (user_id,),
+        )
+        rows = cur.fetchall()
+        boards = {}
+        for row in rows:
+            board_name = row["project_name"] if hasattr(row, 'keys') else row[0]
+            boards[board_name] = {
+                "first_created": row["first_created"] if hasattr(row, 'keys') else row[1],
+                "note_count": row["note_count"] if hasattr(row, 'keys') else row[2],
+            }
+        print(f"[DB] Found {len(boards)} boards for user {user_id}: {list(boards.keys())}")
+        return boards
+    except Exception as e:
+        import traceback
+        print(f"[DB ERROR] Error getting boards for user {user_id}: {str(e)}")
+        print(traceback.format_exc())
+        return {}
+    finally:
+        if conn:
+            conn.close()
 
 
 def get_design_board_details(user_id: int, project_name: str) -> List[sqlite3.Row]:
@@ -2308,7 +2619,8 @@ def get_homeowner_snapshot_for_property(user_id: int, property_id: int) -> dict:
     cur.execute(
         """SELECT value_estimate, equity_estimate, loan_rate, loan_payment, 
                   loan_balance, loan_term_years, loan_start_date,
-                  last_value_refresh, value_refresh_source, updated_at
+                  last_value_refresh, value_refresh_source, updated_at,
+                  property_tax_monthly, homeowners_insurance_monthly, pmi_monthly
            FROM homeowner_snapshots
            WHERE user_id = ? AND property_id = ?
            LIMIT 1""",
@@ -2330,6 +2642,9 @@ def upsert_homeowner_snapshot_for_property(
     loan_payment: float = None,
     loan_term_years: float = None,
     loan_start_date: str = None,
+    property_tax_monthly: float = None,
+    homeowners_insurance_monthly: float = None,
+    pmi_monthly: float = None,
 ) -> None:
     """Insert or update homeowner snapshot for a specific property."""
     conn = get_connection()
@@ -2338,7 +2653,8 @@ def upsert_homeowner_snapshot_for_property(
     # Get existing data if it exists
     cur.execute(
         """SELECT value_estimate, loan_balance, loan_rate, loan_payment, 
-                  loan_term_years, loan_start_date
+                  loan_term_years, loan_start_date, property_tax_monthly,
+                  homeowners_insurance_monthly, pmi_monthly
            FROM homeowner_snapshots
            WHERE user_id = ? AND property_id = ?""",
         (user_id, property_id),
@@ -2350,12 +2666,15 @@ def upsert_homeowner_snapshot_for_property(
     if existing:
         # Only update fields that were explicitly provided (not None)
         # If a field is None, it means the form didn't provide it, so keep existing value
-        merged_value = value_estimate if value_estimate is not None else existing["value_estimate"]
-        merged_loan_balance = loan_balance if loan_balance is not None else existing["loan_balance"]
-        merged_loan_rate = loan_rate if loan_rate is not None else existing["loan_rate"]
-        merged_loan_payment = loan_payment if loan_payment is not None else existing["loan_payment"]
-        merged_loan_term_years = loan_term_years if loan_term_years is not None else existing["loan_term_years"]
-        merged_loan_start_date = loan_start_date if loan_start_date is not None else existing["loan_start_date"]
+        merged_value = value_estimate if value_estimate is not None else existing.get("value_estimate")
+        merged_loan_balance = loan_balance if loan_balance is not None else existing.get("loan_balance")
+        merged_loan_rate = loan_rate if loan_rate is not None else existing.get("loan_rate")
+        merged_loan_payment = loan_payment if loan_payment is not None else existing.get("loan_payment")
+        merged_loan_term_years = loan_term_years if loan_term_years is not None else existing.get("loan_term_years")
+        merged_loan_start_date = loan_start_date if loan_start_date is not None else existing.get("loan_start_date")
+        merged_property_tax = property_tax_monthly if property_tax_monthly is not None else existing.get("property_tax_monthly")
+        merged_insurance = homeowners_insurance_monthly if homeowners_insurance_monthly is not None else existing.get("homeowners_insurance_monthly")
+        merged_pmi = pmi_monthly if pmi_monthly is not None else existing.get("pmi_monthly")
     else:
         # No existing data - use provided values (or None if not provided)
         merged_value = value_estimate
@@ -2364,6 +2683,9 @@ def upsert_homeowner_snapshot_for_property(
         merged_loan_payment = loan_payment
         merged_loan_term_years = loan_term_years
         merged_loan_start_date = loan_start_date
+        merged_property_tax = property_tax_monthly
+        merged_insurance = homeowners_insurance_monthly
+        merged_pmi = pmi_monthly
     
     # Debug logging
     print(f"[SNAPSHOT UPDATE] user_id={user_id}, property_id={property_id}")
@@ -2380,8 +2702,9 @@ def upsert_homeowner_snapshot_for_property(
     cur.execute(
         """INSERT INTO homeowner_snapshots 
            (user_id, property_id, value_estimate, equity_estimate, loan_balance, 
-            loan_rate, loan_payment, loan_term_years, loan_start_date, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            loan_rate, loan_payment, loan_term_years, loan_start_date, 
+            property_tax_monthly, homeowners_insurance_monthly, pmi_monthly, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
            ON CONFLICT(user_id, property_id) DO UPDATE SET
                value_estimate = excluded.value_estimate,
                equity_estimate = excluded.equity_estimate,
@@ -2390,9 +2713,13 @@ def upsert_homeowner_snapshot_for_property(
                loan_payment = excluded.loan_payment,
                loan_term_years = excluded.loan_term_years,
                loan_start_date = excluded.loan_start_date,
+               property_tax_monthly = excluded.property_tax_monthly,
+               homeowners_insurance_monthly = excluded.homeowners_insurance_monthly,
+               pmi_monthly = excluded.pmi_monthly,
                updated_at = CURRENT_TIMESTAMP""",
         (user_id, property_id, merged_value, equity, merged_loan_balance, 
-         merged_loan_rate, merged_loan_payment, merged_loan_term_years, merged_loan_start_date),
+         merged_loan_rate, merged_loan_payment, merged_loan_term_years, merged_loan_start_date,
+         merged_property_tax, merged_insurance, merged_pmi),
     )
     conn.commit()
     print(f"[SNAPSHOT UPDATE] Successfully saved to database")

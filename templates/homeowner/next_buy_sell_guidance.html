@@ -2,38 +2,326 @@
 {% block title %}Buy & Sell Guidance{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Navigate with ease</p>
-  <h1>Buy & Sell Guidance</h1>
-  <p>Real estate can feel heavy. This page lays out the main steps in everyday language so you don't have to guess.</p>
-</div>
+<style>
+  .luxury-guidance {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  .guidance-hero {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border-radius: 16px;
+    margin-bottom: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .guidance-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .guidance-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -5%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(200, 180, 151, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  
+  .guidance-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .guidance-hero .tagline {
+    font-size: 1.1rem;
+    color: var(--olive-green);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .guidance-hero p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .guidance-section {
+    margin-bottom: 5rem;
+  }
+  
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+  
+  .section-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2);
+  }
+  
+  .section-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  
+  .steps-container {
+    display: grid;
+    gap: 2rem;
+  }
+  
+  .step-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .step-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    border-color: var(--olive-green);
+  }
+  
+  .step-card:hover::before {
+    transform: scaleY(1);
+  }
+  
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    color: white;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.25);
+  }
+  
+  .step-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem;
+    font-weight: 400;
+  }
+  
+  .step-card p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--charcoal-brown);
+    opacity: 0.75;
+    margin: 0;
+  }
+  
+  .insight-box {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-left: 4px solid var(--olive-green);
+    border-radius: 8px;
+    padding: 2rem;
+    margin-top: 3rem;
+  }
+  
+  .insight-box p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-style: italic;
+  }
+  
+  @media (max-width: 768px) {
+    .guidance-hero h1 {
+      font-size: 2.5rem;
+    }
+    
+    .section-header h2 {
+      font-size: 2rem;
+    }
+    
+    .step-card {
+      padding: 1.25rem 1.5rem;
+    }
+  }
+</style>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>When You're Buying</h2>
-    <ol style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>Clarify your timeline and comfort zone for payments</li>
-      <li>Talk with a lender about pre-approval options</li>
-      <li>Explore areas and home types that fit your life</li>
-      <li>Tour homes with a clear list of needs and dealbreakers</li>
-      <li>Write offers that protect you while staying realistic</li>
-      <li>Move through inspections, appraisal, and final approval</li>
-      <li>Close and settle into your new routines</li>
-    </ol>
+<div class="luxury-guidance">
+  <!-- Hero Section -->
+  <div class="guidance-hero">
+    <p class="tagline">Navigate with confidence</p>
+    <h1>Buy & Sell Guidance</h1>
+    <p>Real estate decisions shape your future. This guide breaks down the journey into clear, manageable steps—so you can move forward with clarity and confidence, not confusion.</p>
   </div>
 
-  <div class="card" style="margin-top: 1.5rem;">
-    <h2>When You're Selling or Doing Both</h2>
-    <ol style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>Look at your equity and payoff so you know your starting point</li>
-      <li>Decide what to fix, clean, or stage and what to leave alone</li>
-      <li>Set a pricing strategy that matches your market reality</li>
-      <li>Prepare for showings and feedback</li>
-      <li>Review offers with calm eyes and clear numbers</li>
-      <li>Handle inspections and repair conversations</li>
-      <li>Coordinate timelines with your next home when needed</li>
-    </ol>
-    <p class="card-subtext" style="margin-top: 1rem;">This page is a high-level overview. Your agent and lender will help you personalize the details so the plan fits your life, not someone else's.</p>
+  <!-- Buying Section -->
+  <div class="guidance-section">
+    <div class="section-header">
+      <div class="section-icon">🏡</div>
+      <h2>When You're Buying</h2>
+    </div>
+    
+    <div class="steps-container">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Clarify Your Timeline & Budget</h3>
+        <p>Start by understanding your timeline and comfort zone for monthly payments. This foundation helps every decision that follows feel grounded, not rushed.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Get Pre-Approved</h3>
+        <p>Talk with a trusted lender about pre-approval options. Knowing your buying power upfront gives you confidence when you find the right home.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Explore Areas & Home Types</h3>
+        <p>Discover neighborhoods and property types that align with your lifestyle. Consider schools, commute, amenities, and the feeling you want your home to give you.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <h3>Tour Homes Strategically</h3>
+        <p>Visit properties with a clear list of needs and dealbreakers. Take notes, ask questions, and trust your instincts about what feels right.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">5</div>
+        <h3>Write Strong Offers</h3>
+        <p>Craft offers that protect your interests while staying realistic about market conditions. Your agent will help balance competitiveness with your comfort level.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">6</div>
+        <h3>Navigate Inspections & Appraisal</h3>
+        <p>Move through inspections, appraisal, and final loan approval with your team. Each step brings you closer to closing with confidence.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">7</div>
+        <h3>Close & Settle In</h3>
+        <p>Complete the closing process and begin settling into your new home. This is where your vision becomes reality.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selling Section -->
+  <div class="guidance-section">
+    <div class="section-header">
+      <div class="section-icon">✨</div>
+      <h2>When You're Selling or Doing Both</h2>
+    </div>
+    
+    <div class="steps-container">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>Understand Your Equity Position</h3>
+        <p>Review your equity and loan payoff so you know your starting point. This clarity helps you make informed decisions about pricing and timing.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>Prepare Your Home</h3>
+        <p>Decide what to fix, clean, or stage—and what to leave alone. Strategic preparation maximizes appeal without over-investing.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>Set Your Pricing Strategy</h3>
+        <p>Establish a pricing approach that matches your market reality. Your agent will help you balance speed, profit, and your personal goals.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <h3>Host Showings & Gather Feedback</h3>
+        <p>Prepare for showings and welcome constructive feedback. Each showing is an opportunity to refine your approach.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">5</div>
+        <h3>Review Offers Thoughtfully</h3>
+        <p>Evaluate offers with calm eyes and clear numbers. Consider not just price, but terms, timeline, and buyer strength.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">6</div>
+        <h3>Handle Inspections & Repairs</h3>
+        <p>Navigate inspection results and repair conversations with transparency. Your agent will help you negotiate fair solutions.</p>
+      </div>
+      
+      <div class="step-card">
+        <div class="step-number">7</div>
+        <h3>Coordinate Your Next Move</h3>
+        <p>When selling and buying simultaneously, coordinate timelines carefully. Your team will help create a seamless transition.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insight Box -->
+  <div class="insight-box">
+    <p><strong>Remember:</strong> This guide provides a high-level overview. Your agent and lender will help you personalize every detail so the plan fits your life, your timeline, and your goals—not someone else's template.</p>
   </div>
 </div>
 {% endblock %}

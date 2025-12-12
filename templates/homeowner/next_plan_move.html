@@ -2,86 +2,320 @@
 {% block title %}Plan My Next Move{% endblock %}
 
 {% block homeowner_content %}
+<style>
+  .questionnaire-section {
+    background: white;
+    border-radius: 8px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  
+  .questionnaire-section h2 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    color: var(--olive-green);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    border-bottom: 2px solid var(--taupe-beige);
+    padding-bottom: 0.75rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.8rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="tel"],
+  .form-group input[type="date"],
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    border: 2px solid var(--taupe-beige);
+    border-radius: 4px;
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    background: white;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+  
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  
+  .radio-group {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-size: 0.95rem;
+    text-transform: none;
+    font-weight: 400;
+    color: var(--charcoal-brown);
+  }
+  
+  .radio-group input[type="radio"] {
+    width: auto;
+    margin: 0;
+  }
+  
+  .submit-button {
+    background: var(--olive-green);
+    color: white;
+    padding: 1.2rem 3rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+  }
+  
+  .submit-button:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+</style>
+
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Make it intentional</p>
-  <h1>Plan My Next Move</h1>
-  <p>Gently walk through timeline, budget, needs, and feelings so your next home choice feels intentional.</p>
+  <h1>Home Buyer Questionnaire</h1>
+  <p>Please take a few minutes to complete this questionnaire to help us understand your preferences and requirements for your home purchase. Your responses will help us provide you with the best possible service.</p>
 </div>
 
 <div class="dashboard-section">
-  <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <form method="post" style="display: grid; gap: 1.5rem; max-width: 700px;">
-      <div>
-        <label for="timeline" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">When Are You Thinking About Moving?</label>
-        <select id="timeline" name="timeline">
-          {% set tl = plan.timeline if plan else '' %}
-          <option value="Now" {% if tl == 'Now' %}selected{% endif %}>Now</option>
-          <option value="1–3 months" {% if tl == '1–3 months' %}selected{% endif %}>In 1 to 3 months</option>
-          <option value="3–6 months" {% if tl == '3–6 months' %}selected{% endif %}>In 3 to 6 months</option>
-          <option value="6+ months" {% if tl == '6+ months' %}selected{% endif %}>In 6 months or later</option>
-          <option value="Just browsing" {% if tl == 'Just browsing' %}selected{% endif %}>Just browsing ideas</option>
-        </select>
+  <form method="post" style="max-width: 1000px; margin: 0 auto;">
+    
+    <!-- Personal Information Section -->
+    <div class="questionnaire-section">
+      <h2>Personal Information</h2>
+      
+      <div class="form-group">
+        <label for="legal_name">Legal Name(s)</label>
+        <input type="text" id="legal_name" name="legal_name" value="{{ plan.legal_name if plan else '' }}" placeholder="Enter full legal name(s)" />
       </div>
-
-      <div>
-        <label for="budget" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Budget Range or Monthly Comfort Zone</label>
-        <input id="budget" name="budget" value="{{ plan.budget if plan else '' }}" placeholder="Example: up to 450,000 or around 2,500 per month" />
+      
+      <div class="form-group">
+        <label for="email">Email(s)</label>
+        <input type="email" id="email" name="email" value="{{ plan.email if plan else '' }}" placeholder="your.email@example.com" />
       </div>
-
-      <div>
-        <label style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Are You Pre-Approved?</label>
-        {% set pa = plan.preapproved if plan else '' %}
-        <div style="display: flex; gap: 1.5rem; font-size: 0.95rem;">
-          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+      
+      <div class="form-group">
+        <label for="phone">Phone Number(s)</label>
+        <input type="tel" id="phone" name="phone" value="{{ plan.phone if plan else '' }}" placeholder="(555) 123-4567" />
+      </div>
+      
+      <div class="form-group">
+        <label for="birthday">Birthday(s) (Month/Day)</label>
+        <input type="text" id="birthday" name="birthday" value="{{ plan.birthday if plan else '' }}" placeholder="MM/DD" />
+      </div>
+    </div>
+    
+    <!-- Home Purchase Basics -->
+    <div class="questionnaire-section">
+      <h2>Home Purchase Basics</h2>
+      
+      <div class="form-group">
+        <label>Have you been pre-approved for a mortgage?</label>
+        <div class="radio-group">
+          {% set pa = plan.preapproved if plan else '' %}
+          <label>
             <input type="radio" name="preapproved" value="Yes" {% if pa == 'Yes' %}checked{% endif %} />
             <span>Yes</span>
           </label>
-          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <input type="radio" name="preapproved" value="No" {% if pa == 'No' %}checked{% endif %} />
-            <span>No, I'd like an introduction</span>
+          <label>
+            <input type="radio" name="preapproved" value="No" {% if pa == 'No' or not pa %}checked{% endif %} />
+            <span>No, I'd like an introduction to trusted lenders</span>
           </label>
         </div>
       </div>
-
-      <div>
-        <label for="areas" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Where Would You Love to Live?</label>
-        <textarea id="areas" name="areas" rows="2" placeholder="Neighborhoods, school districts, sides of town">{{ plan.areas if plan else '' }}</textarea>
+      
+      <div class="form-group">
+        <label for="timeline">Are you looking to move in by a specific date?</label>
+        <select id="timeline" name="timeline">
+          {% set tl = plan.timeline if plan else '' %}
+          <option value="">Select timeline...</option>
+          <option value="Now" {% if tl == 'Now' %}selected{% endif %}>Now</option>
+          <option value="1-3 months" {% if tl == '1-3 months' %}selected{% endif %}>In 1 to 3 months</option>
+          <option value="3-6 months" {% if tl == '3-6 months' %}selected{% endif %}>In 3 to 6 months</option>
+          <option value="6-12 months" {% if tl == '6-12 months' %}selected{% endif %}>In 6 to 12 months</option>
+          <option value="12+ months" {% if tl == '12+ months' %}selected{% endif %}>In 12 months or later</option>
+          <option value="Just browsing" {% if tl == 'Just browsing' %}selected{% endif %}>Just browsing ideas</option>
+        </select>
       </div>
-
-      <div>
-        <label for="home_type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Home Type</label>
-        <input id="home_type" name="home_type" value="{{ plan.home_type if plan else '' }}" placeholder="House, townhome, condo, new build, or mix" />
+      
+      <div class="form-group">
+        <label for="budget">What is your budget range for your home purchase?</label>
+        <input type="text" id="budget" name="budget" value="{{ plan.budget if plan else '' }}" placeholder="Example: up to $450,000 or around $2,500 per month" />
       </div>
-
-      <div>
-        <label for="beds_baths" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Beds & Baths Needed</label>
-        <input id="beds_baths" name="beds_baths" value="{{ plan.beds_baths if plan else '' }}" placeholder="Example: at least 3 beds and 2 baths" />
+      
+      <div class="form-group">
+        <label for="beds_baths">How many bedrooms would you like?</label>
+        <input type="text" id="beds_baths" name="beds_baths" value="{{ plan.beds_baths if plan else '' }}" placeholder="Example: at least 3 bedrooms and 2 bathrooms" />
       </div>
-
-      <div>
-        <label for="must_haves" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Top Must-Haves</label>
-        <textarea id="must_haves" name="must_haves" rows="3" placeholder="Parking, yard, kitchen style, office space, school, and more">{{ plan.must_haves if plan else '' }}</textarea>
+      
+      <div class="form-group">
+        <label for="must_haves">What are you looking for in a home that you do not have right now?</label>
+        <textarea id="must_haves" name="must_haves" rows="3" placeholder="Parking, yard, kitchen style, office space, school district, and more">{{ plan.must_haves if plan else '' }}</textarea>
       </div>
-
-      <div>
-        <label for="dealbreakers" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Dealbreakers</label>
-        <textarea id="dealbreakers" name="dealbreakers" rows="2">{{ plan.dealbreakers if plan else '' }}</textarea>
+      
+      <div class="form-group">
+        <label for="areas">What is your preferred location or neighborhood for your new home? (City, zip codes, county)</label>
+        <textarea id="areas" name="areas" rows="2" placeholder="Neighborhoods, school districts, sides of town, specific cities or zip codes">{{ plan.areas if plan else '' }}</textarea>
       </div>
-
-      <div>
-        <label for="condition" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Move-In Ready or Renovation Friendly?</label>
-        <input id="condition" name="condition" value="{{ plan.condition if plan else '' }}" placeholder="Ready, light updates, or open to a bigger project" />
+    </div>
+    
+    <!-- Property Preferences -->
+    <div class="questionnaire-section">
+      <h2>Property Preferences</h2>
+      
+      <div class="form-group">
+        <label for="floor_plan">Do you have a floor plan you are against? (e.g., ranch, split entry, f/b split, raised ranch...)</label>
+        <input type="text" id="floor_plan" name="floor_plan" value="{{ plan.floor_plan if plan else '' }}" placeholder="List any floor plans you prefer to avoid" />
       </div>
-
-      <div>
-        <label for="feeling" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">What Feeling Do You Want Your Next Home to Give You?</label>
+      
+      <div class="form-group">
+        <label for="important_items">Are there important items you would like? (e.g., fence, garage, pool, finished basement, etc.)</label>
+        <textarea id="important_items" name="important_items" rows="2" placeholder="Fence, garage, pool, finished basement, etc.">{{ plan.important_items if plan else '' }}</textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="garage_specifics">If yes on a garage, are you specific on how many? (1, 2, 3, 3+?)</label>
+        <input type="text" id="garage_specifics" name="garage_specifics" value="{{ plan.garage_specifics if plan else '' }}" placeholder="Number of garage spaces needed" />
+      </div>
+      
+      <div class="form-group">
+        <label for="requirements">Are there any requirements/restrictions for the property? (e.g., pet-friendly, trailer, accessibility, etc.)</label>
+        <textarea id="requirements" name="requirements" rows="2" placeholder="Pet-friendly, trailer parking, accessibility needs, HOA restrictions, etc.">{{ plan.requirements if plan else '' }}</textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="home_type">Home Type</label>
+        <input type="text" id="home_type" name="home_type" value="{{ plan.home_type if plan else '' }}" placeholder="House, townhome, condo, new build, or mix" />
+      </div>
+      
+      <div class="form-group">
+        <label for="construction_type">Are you looking for new construction or pre-owned property?</label>
+        <select id="construction_type" name="construction_type">
+          {% set ct = plan.construction_type if plan else '' %}
+          <option value="">Select preference...</option>
+          <option value="New construction" {% if ct == 'New construction' %}selected{% endif %}>New construction</option>
+          <option value="Pre-owned" {% if ct == 'Pre-owned' %}selected{% endif %}>Pre-owned</option>
+          <option value="Either" {% if ct == 'Either' %}selected{% endif %}>Either</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="condition">Are you looking for a move-in ready property, one that requires renovation, or open to either?</label>
+        <select id="condition" name="condition">
+          {% set cond = plan.condition if plan else '' %}
+          <option value="">Select preference...</option>
+          <option value="Move-in ready" {% if cond == 'Move-in ready' %}selected{% endif %}>Move-in ready</option>
+          <option value="Requires renovation" {% if cond == 'Requires renovation' %}selected{% endif %}>Requires renovation</option>
+          <option value="Open to either" {% if cond == 'Open to either' %}selected{% endif %}>Open to either</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="lot_size">Do you have a preference on lot size? (.15ac-1ac, 2ac, 3ac, 4ac, 5+ac...etc? 43,560sf=1ac)</label>
+        <input type="text" id="lot_size" name="lot_size" value="{{ plan.lot_size if plan else '' }}" placeholder="Lot size preference" />
+      </div>
+      
+      <div class="form-group">
+        <label for="architectural_style">Do you have a preferred architectural style?</label>
+        <input type="text" id="architectural_style" name="architectural_style" value="{{ plan.architectural_style if plan else '' }}" placeholder="Modern, traditional, farmhouse, craftsman, etc." />
+      </div>
+    </div>
+    
+    <!-- Location & Lifestyle -->
+    <div class="questionnaire-section">
+      <h2>Location & Lifestyle</h2>
+      
+      <div class="form-group">
+        <label for="school_districts">Are school districts important to you? If so, is there a specific school district?</label>
+        <textarea id="school_districts" name="school_districts" rows="2" placeholder="School district preferences or requirements">{{ plan.school_districts if plan else '' }}</textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="transportation">How important is proximity to public transportation or major highways for you?</label>
+        <textarea id="transportation" name="transportation" rows="2" placeholder="Transportation needs and preferences">{{ plan.transportation if plan else '' }}</textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="contact_method">What is your preferred method of contact? (Email, Phone call, or Text)</label>
+        <div class="radio-group">
+          {% set cm = plan.contact_method if plan else '' %}
+          <label>
+            <input type="radio" name="contact_method" value="Email" {% if cm == 'Email' %}checked{% endif %} />
+            <span>Email</span>
+          </label>
+          <label>
+            <input type="radio" name="contact_method" value="Phone call" {% if cm == 'Phone call' %}checked{% endif %} />
+            <span>Phone call</span>
+          </label>
+          <label>
+            <input type="radio" name="contact_method" value="Text" {% if cm == 'Text' %}checked{% endif %} />
+            <span>Text</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Additional Information -->
+    <div class="questionnaire-section">
+      <h2>Additional Information</h2>
+      
+      <div class="form-group">
+        <label for="dealbreakers">Dealbreakers</label>
+        <textarea id="dealbreakers" name="dealbreakers" rows="2" placeholder="Any absolute dealbreakers">{{ plan.dealbreakers if plan else '' }}</textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="feeling">What feeling do you want your next home to give you?</label>
         <textarea id="feeling" name="feeling" rows="3" placeholder="Cozy, peaceful, energized, space to host, simple to care for">{{ plan.feeling if plan else '' }}</textarea>
       </div>
-
-      <button class="btn btn-primary" type="submit" style="align-self: flex-start;">
-        Save My Next Home Plan
-      </button>
-    </form>
-  </div>
+      
+      <div class="form-group">
+        <label for="other_info">Any other information that would be important for me to know?</label>
+        <textarea id="other_info" name="other_info" rows="4" placeholder="Additional information, special circumstances, or anything else we should know">{{ plan.other_info if plan else '' }}</textarea>
+      </div>
+    </div>
+    
+    <button type="submit" class="submit-button">
+      Save My Next Home Plan
+    </button>
+  </form>
 </div>
 {% endblock %}

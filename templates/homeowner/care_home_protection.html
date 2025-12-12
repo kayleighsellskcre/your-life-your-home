@@ -2,23 +2,631 @@
 {% block title %}Home Protection & Safety{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Sleep soundly</p>
-  <h1>Home Protection & Safety</h1>
-  <p>Give your home and your people simple layers of protection so you sleep better at night.</p>
-</div>
+<style>
+  .protection-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>What We'll Walk Through</h2>
-    <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>Smoke and carbon monoxide alarms and simple testing habits</li>
-      <li>Locks, lighting, and basic security ideas</li>
-      <li>Insurance coverage check-ins</li>
-      <li>Title and lien awareness</li>
-      <li>Storm and disaster preparation that feels realistic</li>
-    </ul>
-    <p class="card-subtext" style="margin-top: 1rem;">This page will never be about fear. It's about steady, practical care so your home can support you through the unexpected.</p>
+  .protection-hero {
+    text-align: center;
+    padding: 3rem 0 4rem;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .protection-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .protection-hero .eyebrow {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .protection-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+  }
+
+  .protection-hero p {
+    font-size: 1.2rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+
+  .protection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .protection-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border-radius: 20px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 32px rgba(58, 53, 44, 0.08), 0 2px 8px rgba(107, 106, 69, 0.06);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .protection-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+  }
+
+  .protection-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 48px rgba(58, 53, 44, 0.12), 0 4px 16px rgba(107, 106, 69, 0.1);
+  }
+
+  .protection-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .protection-card-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.25);
+    flex-shrink: 0;
+  }
+
+  .protection-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .protection-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .protection-list-item {
+    padding: 1rem 0 1rem 2.5rem;
+    position: relative;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .protection-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .protection-list-item::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 1rem;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--olive-green);
+    font-weight: 600;
+  }
+
+  .protection-list-item:hover {
+    padding-left: 3rem;
+    color: var(--olive-green);
+  }
+
+  .protection-detail {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    line-height: 1.7;
+    margin: 0.5rem 0;
+  }
+
+  .protection-detail strong {
+    color: var(--olive-green);
+    font-weight: 600;
+  }
+
+  .tip-box {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-left: 4px solid var(--olive-green);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .tip-box h4 {
+    font-size: 1rem;
+    color: var(--olive-green);
+    margin: 0 0 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tip-box p {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .checklist-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-top: 3rem;
+    box-shadow: 0 4px 20px rgba(58, 53, 44, 0.06);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .checklist-section h3 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .checklist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .checklist-item {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .checklist-checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--olive-green);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .checklist-checkbox:hover {
+    background: rgba(107, 106, 69, 0.05);
+  }
+
+  .checklist-label {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .info-box {
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-left: 4px solid var(--olive-green);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 3rem;
+    position: relative;
+  }
+
+  .info-box::before {
+    content: '💡';
+    position: absolute;
+    top: -15px;
+    left: 2rem;
+    font-size: 2rem;
+    background: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2);
+  }
+
+  .info-box h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0.5rem 0 1rem;
+    font-weight: 400;
+  }
+
+  .info-box p {
+    font-size: 1.05rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    line-height: 1.8;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .protection-hero h1 {
+      font-size: 2.5rem;
+    }
+    
+    .protection-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="protection-page">
+  <!-- Hero Section -->
+  <div class="protection-hero">
+    <p class="eyebrow">Your Life Your Home · Care & Safety</p>
+    <h1>Home Protection & Safety</h1>
+    <p>Give your home and your people simple layers of protection so you sleep better at night. This page will never be about fear—it's about steady, practical care so your home can support you through the unexpected.</p>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="protection-grid">
+    <!-- Smoke & CO Alarms -->
+    <div class="protection-card">
+      <div class="protection-card-header">
+        <div class="protection-card-icon">🔥</div>
+        <h2>Smoke & Carbon Monoxide Alarms</h2>
+      </div>
+      <ul class="protection-list">
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Placement:</strong> Install smoke alarms in every bedroom, outside each sleeping area, and on every level (including basement). CO alarms on each level, especially near bedrooms.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Testing:</strong> Test monthly by pressing the test button. Replace batteries annually or when low-battery chirp sounds. Replace entire units every 10 years (check manufacturer date).
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Interconnection:</strong> Hardwired interconnected alarms ensure all units sound when one detects smoke. Battery-operated models can be wirelessly interconnected.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>CO Alarm Specifics:</strong> Carbon monoxide is odorless and deadly. CO alarms are required in many states. Place at least 15 feet from fuel-burning appliances but close enough to hear.
+          </div>
+        </li>
+      </ul>
+      <div class="tip-box">
+        <h4>💡 Quick Tip</h4>
+        <p>Set a recurring calendar reminder: "First Saturday of every month = test alarms." Takes 2 minutes and could save lives.</p>
+      </div>
+    </div>
+
+    <!-- Security: Locks & Lighting -->
+    <div class="protection-card">
+      <div class="protection-card-header">
+        <div class="protection-card-icon">🔒</div>
+        <h2>Locks, Lighting & Security</h2>
+      </div>
+      <ul class="protection-list">
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Deadbolts:</strong> Grade 1 deadbolts on all exterior doors. Minimum 1-inch throw bolt. Reinforce strike plates with 3-inch screws into door frame studs.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Exterior Lighting:</strong> Motion-activated lights at all entry points. Well-lit homes are less attractive targets. LED bulbs last longer and use less energy.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Window Security:</strong> Lock all windows when away. Consider window sensors or security film for ground-level windows. Sliding doors need security bars or pin locks.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Smart Security:</strong> Smart doorbells, cameras, and alarm systems provide monitoring and alerts. Many integrate with phones for remote access.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Landscaping:</strong> Trim shrubs near windows and doors. Keep trees trimmed so branches don't provide access to upper floors. Maintain clear sightlines.
+          </div>
+        </li>
+      </ul>
+      <div class="tip-box">
+        <h4>💡 Quick Tip</h4>
+        <p>When away, use timers or smart plugs to turn lights on/off automatically. Make your home look occupied even when it's not.</p>
+      </div>
+    </div>
+
+    <!-- Insurance Coverage -->
+    <div class="protection-card">
+      <div class="protection-card-header">
+        <div class="protection-card-icon">🛡️</div>
+        <h2>Insurance Coverage Check-Ins</h2>
+      </div>
+      <ul class="protection-list">
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Annual Review:</strong> Review your policy annually or after major home improvements. Ensure coverage matches current home value and replacement costs.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Dwelling Coverage:</strong> Should cover full replacement cost, not just market value. Construction costs can exceed market value, especially in disasters.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Personal Property:</strong> Document belongings with photos/videos. Keep receipts for high-value items. Consider scheduled coverage for jewelry, art, electronics.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Liability Coverage:</strong> Protects you if someone is injured on your property. Standard is $100k-$300k, but consider $500k+ for better protection.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Flood & Earthquake:</strong> Standard policies don't cover floods or earthquakes. If you're in a risk area, separate policies are essential.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Deductibles:</strong> Higher deductibles = lower premiums, but ensure you can afford the deductible if disaster strikes. Balance cost vs. risk.
+          </div>
+        </li>
+      </ul>
+      <div class="tip-box">
+        <h4>💡 Quick Tip</h4>
+        <p>Create a home inventory: walk through each room with your phone, video everything, and store the video in cloud storage. Update annually.</p>
+      </div>
+    </div>
+
+    <!-- Title & Lien Awareness -->
+    <div class="protection-card">
+      <div class="protection-card-header">
+        <div class="protection-card-icon">📋</div>
+        <h2>Title & Lien Awareness</h2>
+      </div>
+      <ul class="protection-list">
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Title Insurance:</strong> Protects against title defects, liens, or ownership disputes. Lender's policy protects them; owner's policy protects you. Worth the investment.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Property Liens:</strong> Unpaid contractors, HOA fees, or taxes can place liens on your property. These must be paid before you can sell. Check your title annually.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Mechanic's Liens:</strong> Contractors can file liens if not paid. Always get lien waivers from contractors before final payment. Keep all receipts and contracts.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Property Tax Liens:</strong> Unpaid property taxes can result in tax liens. In extreme cases, properties can be sold at tax auctions. Stay current on all tax obligations.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Title Search:</strong> Before selling, order a title search to identify any issues early. Easier to resolve before listing than during closing.
+          </div>
+        </li>
+      </ul>
+      <div class="tip-box">
+        <h4>💡 Quick Tip</h4>
+        <p>Keep all closing documents, title insurance policies, and property tax records in a fireproof safe or secure digital storage. You'll need them.</p>
+      </div>
+    </div>
+
+    <!-- Storm & Disaster Prep -->
+    <div class="protection-card">
+      <div class="protection-card-header">
+        <div class="protection-card-icon">🌪️</div>
+        <h2>Storm & Disaster Preparation</h2>
+      </div>
+      <ul class="protection-list">
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Emergency Kit:</strong> 3-day supply of water (1 gallon per person per day), non-perishable food, first aid kit, flashlight, batteries, radio, medications, important documents.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Home Hardening:</strong> Secure loose items, trim trees, reinforce garage doors, install storm shutters or impact-resistant windows in hurricane/tornado zones.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Generator Safety:</strong> If using a generator, never run it indoors or in garage. Keep it 20+ feet from home. Install carbon monoxide alarms nearby.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Water Damage Prevention:</strong> Know where your main water shutoff is. Install water leak sensors. Keep sump pump maintained if you have a basement.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Evacuation Plan:</strong> Have a family evacuation plan with meeting points. Keep car gas tank at least half-full during storm season. Know your evacuation routes.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Document Protection:</strong> Keep important documents (deeds, insurance, IDs) in waterproof container or fireproof safe. Digital backups in cloud storage.
+          </div>
+        </li>
+      </ul>
+      <div class="tip-box">
+        <h4>💡 Quick Tip</h4>
+        <p>Create a "grab and go" folder with copies of insurance policies, deeds, IDs, and emergency contacts. Keep it accessible but secure.</p>
+      </div>
+    </div>
+
+    <!-- Financial Protection -->
+    <div class="protection-card">
+      <div class="protection-card-header">
+        <div class="protection-card-icon">💰</div>
+        <h2>Financial Protection</h2>
+      </div>
+      <ul class="protection-list">
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Emergency Fund:</strong> Aim for 3-6 months of expenses in liquid savings. Home repairs and emergencies happen—be prepared without going into debt.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Home Warranty:</strong> Can cover major systems (HVAC, plumbing, electrical) and appliances. Read contracts carefully—coverage varies widely. Not a replacement for insurance.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Maintenance Savings:</strong> Regular maintenance prevents costly emergency repairs. Budget 1-3% of home value annually for maintenance and repairs.
+          </div>
+        </li>
+        <li class="protection-list-item">
+          <div class="protection-detail">
+            <strong>Identity Theft Protection:</strong> Monitor credit reports annually (free at AnnualCreditReport.com). Consider credit monitoring services if you've had issues.
+          </div>
+        </li>
+      </ul>
+      <div class="tip-box">
+        <h4>💡 Quick Tip</h4>
+        <p>Set up automatic transfers to a dedicated "home maintenance" savings account. Even $50-100/month builds a safety net over time.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Safety Checklist -->
+  <div class="checklist-section">
+    <h3>📋 Annual Safety Checklist</h3>
+    <div class="checklist-grid">
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Test all smoke alarms and replace batteries</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Test carbon monoxide alarms</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Check fire extinguisher expiration dates</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Review and update home insurance policy</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Update home inventory with photos/video</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Test all door locks and deadbolts</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Check exterior lighting and replace bulbs</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Review security system (if applicable)</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Check for property liens or title issues</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Update emergency contact information</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Review and refresh emergency kit supplies</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Test generator (if you have one)</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Locate and label main water shutoff valve</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Review evacuation plan with family</div>
+      </div>
+      <div class="checklist-item">
+        <div class="checklist-checkbox"></div>
+        <div class="checklist-label">Check sump pump (if applicable)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reminder Box -->
+  <div class="info-box">
+    <h3>Peace of Mind Through Preparation</h3>
+    <p>This page is designed to empower you with practical knowledge, not create anxiety. Taking small, consistent steps builds layers of protection that let you sleep soundly. Start with one area—maybe testing your alarms this weekend—and build from there. Your home is your sanctuary, and these practices help it stay that way.</p>
   </div>
 </div>
 {% endblock %}

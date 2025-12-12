@@ -334,15 +334,32 @@ def homeowner_reno_planner_ajax_add():
     # If a board_name is provided, save as a design board note as well
     if board_name:
         note_title = name
-        note_details = summary or notes or f"Project: {name}"
-        add_design_board_note(
-            user_id, 
-            board_name, 
-            note_title, 
-            note_details,
-            photos=[],
-            files=[]
-        )
+        # Include budget and status in details
+        note_details_parts = [summary or notes or f"Project: {name}"]
+        if budget:
+            note_details_parts.append(f"\n\nEstimated Cost: ${budget:,.0f}")
+        if status:
+            note_details_parts.append(f"Status: {status}")
+        note_details = "\n".join(note_details_parts)
+        
+        try:
+            add_design_board_note(
+                user_id=user_id, 
+                project_name=board_name, 
+                title=note_title,
+                details=note_details,
+                photos=[],
+                files=[],
+                vision_statement=None,
+                color_palette=None,
+                board_template="collage",
+                label_style="sans-serif",
+                is_private=0,
+                fixtures=[],
+            )
+        except Exception as e:
+            print(f"[COST ESTIMATE SAVE ERROR] Could not save to board {board_name}: {str(e)}")
+            # Don't fail the whole request if board save fails
 
     # Fix: Add category parameter and correct argument order
     # Function signature: user_id, name, category, status, budget, notes
@@ -2418,8 +2435,17 @@ def homeowner_saved_notes():
     Manage premium mood boards for homeowners with advanced features like
     color palettes, vision statements, templates, and drag-and-drop uploads.
     """
-    user_id = get_current_user_id()
-    print(f"[DEBUG][SAVED NOTES] user_id: {user_id}")
+    user = get_current_user()
+    if not user:
+        flash("Please log in to create boards.", "warning")
+        return redirect(url_for("login"))
+    
+    user_id = user.get("id")
+    if not user_id:
+        flash("User ID not found. Please log in again.", "error")
+        return redirect(url_for("login"))
+    
+    print(f"[DEBUG][SAVED NOTES] user_id: {user_id}, user: {user.get('email', 'unknown')}")
     raw_boards = get_design_boards_for_user(user_id)
     print(
         f"[DEBUG][SAVED NOTES] get_design_boards_for_user({user_id}) returned: {raw_boards}"
@@ -2429,7 +2455,19 @@ def homeowner_saved_notes():
     design_dir.mkdir(parents=True, exist_ok=True)
 
     if request.method == "POST":
+        print(f"\n{'='*80}")
+        print(f"[BOARD POST] POST request received!")
+        print(f"[BOARD POST] Form keys: {list(request.form.keys())}")
+        print(f"[BOARD POST] Files keys: {list(request.files.keys())}")
+        for key, value in request.form.items():
+            if len(str(value)) < 100:
+                print(f"[BOARD POST]   {key}: {value}")
+            else:
+                print(f"[BOARD POST]   {key}: {str(value)[:100]}...")
+        print(f"{'='*80}\n")
+        
         action = request.form.get("action") or "create_board"
+        print(f"[BOARD POST] Action: {action}")
 
         # ---------- CREATE BOARD ----------
         if action == "create_board":
@@ -2483,29 +2521,111 @@ def homeowner_saved_notes():
 
             colors = request.form.getlist("colors[]")
             color_palette = [c for c in colors if c]
+            
+            # Get estimated_budget and project_status
+            estimated_budget = (request.form.get("estimated_budget") or "").strip()
+            project_status = (request.form.get("project_status") or "").strip()
+            
+            # Build details with budget and status if provided
+            details_parts = []
+            if board_notes:
+                details_parts.append(board_notes)
+            if estimated_budget:
+                details_parts.append(f"\n\nEstimated Budget: ${estimated_budget}")
+            if project_status:
+                details_parts.append(f"Status: {project_status}")
+            if board_links:
+                details_parts.append(f"\n\nLinks:\n{board_links}")
+            
+            combined_details = "\n".join(details_parts) if details_parts else None
 
+            # Validate required fields before attempting to save
+            if not board_name or not board_name.strip():
+                flash("Board name is required.", "error")
+                return redirect(url_for("homeowner_saved_notes"))
+            
+            print(f"[BOARD CREATE] Attempting to create board:")
+            print(f"  - user_id: {user_id}")
+            print(f"  - board_name: {board_name}")
+            print(f"  - title: {board_title}")
+            print(f"  - details length: {len(combined_details) if combined_details else 0}")
+            print(f"  - photos count: {len(saved_photos)}")
+            print(f"  - fixtures count: {len(saved_fixtures)}")
+            print(f"  - color_palette: {color_palette}")
+            
             try:
-                add_design_board_note(
+                # Ensure we have valid data
+                if not user_id:
+                    raise ValueError("User ID is missing. Please log in again.")
+                if not board_name or not board_name.strip():
+                    raise ValueError("Board name is required.")
+                
+                print(f"[BOARD CREATE] Calling add_design_board_note with:")
+                print(f"  user_id={user_id} (type: {type(user_id)})")
+                print(f"  project_name='{board_name}'")
+                print(f"  title='{board_title}'")
+                print(f"  details='{combined_details[:100] if combined_details else None}...'")
+                print(f"  photos={len(saved_photos)} items")
+                print(f"  fixtures={len(saved_fixtures)} items")
+                print(f"  color_palette={color_palette}")
+                
+                board_id = add_design_board_note(
                     user_id=user_id,
-                    project_name=board_name,
-                    title=board_title,
-                    details=f"{board_notes}\n\nLinks:\n{board_links}"
-                    if board_links
-                    else board_notes,
-                    photos=saved_photos,
+                    project_name=board_name.strip(),
+                    title=board_title.strip() if board_title and board_title.strip() else None,
+                    tags=None,
+                    details=combined_details if combined_details and combined_details.strip() else None,
+                    links=None,
+                    photos=saved_photos if saved_photos else [],
                     files=[],
-                    vision_statement=vision_statement,
-                    color_palette=color_palette,
+                    vision_statement=vision_statement.strip() if vision_statement and vision_statement.strip() else None,
+                    color_palette=color_palette if color_palette else [],
                     board_template="collage",
                     label_style="sans-serif",
                     is_private=0,
-                    fixtures=saved_fixtures,
+                    fixtures=saved_fixtures if saved_fixtures else [],
                 )
+                
+                if not board_id:
+                    raise ValueError("Board was created but no ID was returned from database.")
+                
+                print(f"[BOARD CREATE SUCCESS] Board '{board_name}' created with ID {board_id}")
+                
+                # Verify the board was actually created by querying the database
+                from database import list_homeowner_notes
+                all_notes = list_homeowner_notes(user_id)
+                matching_notes = [n for n in all_notes if n.get('project_name') == board_name or (hasattr(n, 'project_name') and n.project_name == board_name)]
+                print(f"[BOARD CREATE VERIFY] Found {len(matching_notes)} notes with project_name='{board_name}'")
+                
+                verify_boards = get_design_boards_for_user(user_id)
+                print(f"[BOARD CREATE VERIFY] All boards for user: {list(verify_boards.keys())}")
+                
+                if board_name not in verify_boards:
+                    print(f"[BOARD CREATE WARNING] Board '{board_name}' not found in get_design_boards_for_user result!")
+                    print(f"[BOARD CREATE WARNING] This might be a query issue, but the board should still exist.")
+                
+                # Force a small delay to ensure database commit is complete
+                import time
+                time.sleep(0.1)
+                
+                # Re-query boards to ensure they're fresh
+                fresh_boards = get_design_boards_for_user(user_id)
+                print(f"[BOARD CREATE] Fresh boards query after creation: {list(fresh_boards.keys())}")
+                
                 flash("✨ Beautiful board created!", "success")
-            except Exception:
-                flash("Could not create the board. Please try again.", "error")
-
-            return redirect(url_for("homeowner_saved_notes", view=board_name))
+                return redirect(url_for("homeowner_saved_notes", view=board_name))
+            except ValueError as ve:
+                print(f"[BOARD CREATE VALIDATION ERROR] {str(ve)}")
+                flash(f"Validation error: {str(ve)}", "error")
+                return redirect(url_for("homeowner_saved_notes"))
+            except Exception as e:
+                import traceback
+                error_trace = traceback.format_exc()
+                print(f"[BOARD CREATE ERROR] Failed to create board '{board_name}': {str(e)}")
+                print(f"[BOARD CREATE ERROR] Error type: {type(e).__name__}")
+                print(error_trace)
+                flash(f"Could not create the board: {str(e)}", "error")
+                return redirect(url_for("homeowner_saved_notes"))
 
         # ---------- EDIT BOARD ----------
         if action == "edit_board":
@@ -2624,39 +2744,114 @@ def homeowner_saved_notes():
         # ---------- DELETE BOARD ----------
         if action == "delete_board":
             board_name = (request.form.get("board_name") or "").strip()
-            if board_name:
-                try:
-                    details = get_design_board_details(user_id, board_name)
-                    if details and details.get("photos"):
-                        for photo in details.get("photos", []):
-                            try:
-                                file_path = BASE_DIR / "static" / photo
-                                if file_path.exists():
-                                    file_path.unlink()
-                            except Exception:
-                                pass
-                    delete_design_board(user_id, board_name)
-                    flash("Board deleted.", "success")
-                except Exception:
-                    flash("Could not delete that board.", "error")
+            print(f"[BOARD DELETE] Attempting to delete board: '{board_name}' for user {user_id}")
+            if not board_name:
+                flash("Board name is required for deletion.", "error")
+                return redirect(url_for("homeowner_saved_notes"))
+            
+            try:
+                # Get board details to delete associated files
+                details_list = get_design_board_details(user_id, board_name)
+                if details_list and len(details_list) > 0:
+                    details = details_list[0]  # Get first detail record
+                    # Delete photos
+                    photos = details.get("photos")
+                    if photos:
+                        try:
+                            photos_list = json.loads(photos) if isinstance(photos, str) else photos
+                            if isinstance(photos_list, list):
+                                for photo in photos_list:
+                                    try:
+                                        file_path = BASE_DIR / "static" / photo
+                                        if file_path.exists():
+                                            file_path.unlink()
+                                            print(f"[BOARD DELETE] Deleted photo: {photo}")
+                                    except Exception as e:
+                                        print(f"[BOARD DELETE] Error deleting photo {photo}: {e}")
+                        except Exception as e:
+                            print(f"[BOARD DELETE] Error parsing photos: {e}")
+                    
+                    # Delete fixtures
+                    fixtures = details.get("fixtures")
+                    if fixtures:
+                        try:
+                            fixtures_list = json.loads(fixtures) if isinstance(fixtures, str) else fixtures
+                            if isinstance(fixtures_list, list):
+                                for fixture in fixtures_list:
+                                    try:
+                                        file_path = BASE_DIR / "static" / fixture
+                                        if file_path.exists():
+                                            file_path.unlink()
+                                            print(f"[BOARD DELETE] Deleted fixture: {fixture}")
+                                    except Exception as e:
+                                        print(f"[BOARD DELETE] Error deleting fixture {fixture}: {e}")
+                        except Exception as e:
+                            print(f"[BOARD DELETE] Error parsing fixtures: {e}")
+                
+                # Delete from database
+                delete_design_board(user_id, board_name)
+                print(f"[BOARD DELETE] Successfully deleted board '{board_name}' from database")
+                flash("Board deleted successfully.", "success")
+            except Exception as e:
+                import traceback
+                print(f"[BOARD DELETE ERROR] Failed to delete board '{board_name}': {str(e)}")
+                print(traceback.format_exc())
+                flash(f"Could not delete that board: {str(e)}", "error")
 
             return redirect(url_for("homeowner_saved_notes"))
 
     # ---------- GET: LIST & VIEW BOARDS ----------
-    boards = get_design_boards_for_user(user_id) or []
+    raw_boards_dict = get_design_boards_for_user(user_id) or {}
+    # Convert dict to list of board names for template iteration
+    boards = list(raw_boards_dict.keys()) if raw_boards_dict else []
+    print(f"[DEBUG][SAVED NOTES] Raw boards dict: {raw_boards_dict}")
+    print(f"[DEBUG][SAVED NOTES] Boards list: {boards}")
+    
     board_details = {}
-    for b in boards:
+    for board_name in boards:
         try:
-            details = get_design_board_details(user_id, b)
-            board_details[b] = details or {
-                "project_name": b,
-                "photos": [],
-                "notes": [],
-                "files": [],
-            }
-        except Exception:
-            board_details[b] = {
-                "project_name": b,
+            details = get_design_board_details(user_id, board_name)
+            if details:
+                # Convert Row objects to dicts if needed
+                if isinstance(details, list) and len(details) > 0:
+                    first_detail = details[0]
+                    if hasattr(first_detail, 'keys'):
+                        board_details[board_name] = {
+                            "project_name": board_name,
+                            "photos": json.loads(first_detail.get('photos', '[]') or '[]') if first_detail.get('photos') else [],
+                            "notes": [first_detail.get('details', '')] if first_detail.get('details') else [],
+                            "files": json.loads(first_detail.get('files', '[]') or '[]') if first_detail.get('files') else [],
+                            "color_palette": json.loads(first_detail.get('color_palette', '[]') or '[]') if first_detail.get('color_palette') else [],
+                            "vision_statement": first_detail.get('vision_statement', ''),
+                            "title": first_detail.get('title', ''),
+                        }
+                    else:
+                        board_details[board_name] = {
+                            "project_name": board_name,
+                            "photos": [],
+                            "notes": [],
+                            "files": [],
+                        }
+                else:
+                    board_details[board_name] = {
+                        "project_name": board_name,
+                        "photos": [],
+                        "notes": [],
+                        "files": [],
+                    }
+            else:
+                board_details[board_name] = {
+                    "project_name": board_name,
+                    "photos": [],
+                    "notes": [],
+                    "files": [],
+                }
+        except Exception as e:
+            print(f"[DEBUG][SAVED NOTES] Error getting details for board '{board_name}': {e}")
+            import traceback
+            print(traceback.format_exc())
+            board_details[board_name] = {
+                "project_name": board_name,
                 "photos": [],
                 "notes": [],
                 "files": [],
@@ -3002,19 +3197,6 @@ def homeowner_upload_documents():
 
 
 # ----- VALUE & EQUITY -----
-@app.route("/homeowner/value/my-home")
-def homeowner_value_my_home():
-    """
-    Landing for 'My Home Value' – can link out to Cloud CMA.
-    """
-    user = get_current_user()
-    snapshot = get_homeowner_snapshot_or_default(user)
-    return render_template(
-        "homeowner/value_my_home.html",
-        brand_name=FRONT_BRAND_NAME,
-        snapshot=snapshot,
-        cloud_cma_url=CLOUD_CMA_URL,
-    )
 
 
 @app.route("/homeowner/value/equity-overview", methods=["GET", "POST"])
@@ -3072,6 +3254,9 @@ def homeowner_value_equity_overview():
         form_loan_payment = get_form_value("loan_payment")
         form_loan_term_years = get_form_value("loan_term_years")
         form_loan_start_date = get_form_value("loan_start_date")
+        form_property_tax = get_form_value("property_tax_monthly")
+        form_insurance = get_form_value("homeowners_insurance_monthly")
+        form_pmi = get_form_value("pmi_monthly")
         
         # Convert to appropriate types, but only if value was provided
         # If None, the function will preserve existing data
@@ -3081,11 +3266,15 @@ def homeowner_value_equity_overview():
         loan_payment = safe_float(form_loan_payment) if form_loan_payment else None
         loan_term_years = safe_float(form_loan_term_years) if form_loan_term_years else None
         loan_start_date = form_loan_start_date if form_loan_start_date else None
+        property_tax_monthly = safe_float(form_property_tax) if form_property_tax else None
+        homeowners_insurance_monthly = safe_float(form_insurance) if form_insurance else None
+        pmi_monthly = safe_float(form_pmi) if form_pmi else None
         
         # Update snapshot - function will preserve existing data for None values
         try:
             print(f"[LOAN UPDATE] Updating snapshot for user {homeowner_id}, property {property_id}")
             print(f"[LOAN UPDATE] Values: value={value_estimate}, balance={loan_balance}, rate={loan_rate}, payment={loan_payment}, term={loan_term_years}, start_date={loan_start_date}")
+            print(f"[LOAN UPDATE] Additional: tax={property_tax_monthly}, insurance={homeowners_insurance_monthly}, PMI={pmi_monthly}")
             
             upsert_homeowner_snapshot_for_property(
                 user_id=homeowner_id,
@@ -3096,6 +3285,9 @@ def homeowner_value_equity_overview():
                 loan_payment=loan_payment,
                 loan_term_years=loan_term_years,
                 loan_start_date=loan_start_date,
+                property_tax_monthly=property_tax_monthly,
+                homeowners_insurance_monthly=homeowners_insurance_monthly,
+                pmi_monthly=pmi_monthly,
             )
             
             print(f"[LOAN UPDATE] Successfully updated snapshot")
@@ -3366,6 +3558,53 @@ def homeowner_value_equity_overview():
         )
     
     return response
+
+
+@app.route("/test-board-save")
+def test_board_save():
+    """Test route to verify board saving works."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Not logged in"}), 401
+    
+    user_id = user.get("id")
+    from database import add_design_board_note, get_design_boards_for_user
+    
+    try:
+        # Try to create a test board
+        test_board_name = f"TEST_BOARD_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        board_id = add_design_board_note(
+            user_id=user_id,
+            project_name=test_board_name,
+            title="Test Board",
+            details="This is a test board",
+            photos=[],
+            files=[],
+            vision_statement=None,
+            color_palette=[],
+            board_template="collage",
+            label_style="sans-serif",
+            is_private=0,
+            fixtures=[],
+        )
+        
+        # Verify it was created
+        boards = get_design_boards_for_user(user_id)
+        
+        return jsonify({
+            "success": True,
+            "board_id": board_id,
+            "board_name": test_board_name,
+            "boards_found": list(boards.keys()),
+            "test_board_in_list": test_board_name in boards
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "success": False,
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }), 500
 
 
 @app.route("/test-homebot")
@@ -5706,20 +5945,82 @@ def homeowner_reno_roi_guide():
 
 @app.route("/homeowner/next/plan-my-move", methods=["GET", "POST"])
 def homeowner_next_plan_move():
-    """Plan my move - next home planning."""
+    """Plan my move - next home planning questionnaire."""
+    import json
     user = get_current_user()
     if request.method == "POST":
-        plan_data = {
-            "target_date": request.form.get("target_date", "").strip(),
-            "target_location": request.form.get("target_location", "").strip(),
+        # Collect all questionnaire data
+        questionnaire_data = {
+            # Personal Information
+            "legal_name": request.form.get("legal_name", "").strip(),
+            "email": request.form.get("email", "").strip(),
+            "phone": request.form.get("phone", "").strip(),
+            "birthday": request.form.get("birthday", "").strip(),
+            # Home Purchase Basics
+            "preapproved": request.form.get("preapproved", "").strip(),
+            "timeline": request.form.get("timeline", "").strip(),
             "budget": request.form.get("budget", "").strip(),
-            "notes": request.form.get("notes", "").strip(),
+            "beds_baths": request.form.get("beds_baths", "").strip(),
+            "must_haves": request.form.get("must_haves", "").strip(),
+            "areas": request.form.get("areas", "").strip(),
+            # Property Preferences
+            "floor_plan": request.form.get("floor_plan", "").strip(),
+            "important_items": request.form.get("important_items", "").strip(),
+            "garage_specifics": request.form.get("garage_specifics", "").strip(),
+            "requirements": request.form.get("requirements", "").strip(),
+            "home_type": request.form.get("home_type", "").strip(),
+            "construction_type": request.form.get("construction_type", "").strip(),
+            "condition": request.form.get("condition", "").strip(),
+            "lot_size": request.form.get("lot_size", "").strip(),
+            "architectural_style": request.form.get("architectural_style", "").strip(),
+            # Location & Lifestyle
+            "school_districts": request.form.get("school_districts", "").strip(),
+            "transportation": request.form.get("transportation", "").strip(),
+            "contact_method": request.form.get("contact_method", "").strip(),
+            # Additional Information
+            "dealbreakers": request.form.get("dealbreakers", "").strip(),
+            "feeling": request.form.get("feeling", "").strip(),
+            "other_info": request.form.get("other_info", "").strip(),
         }
+        
+        # Map to database fields (existing structure)
+        timeline = questionnaire_data.get("timeline", "")
+        budget_range = questionnaire_data.get("budget", "")
+        location_preferences = questionnaire_data.get("areas", "")
+        property_type_preferences = f"{questionnaire_data.get('home_type', '')} | {questionnaire_data.get('construction_type', '')} | {questionnaire_data.get('condition', '')}".strip(" |")
+        must_haves = questionnaire_data.get("must_haves", "")
+        nice_to_haves = f"{questionnaire_data.get('important_items', '')} | {questionnaire_data.get('architectural_style', '')}".strip(" |")
+        concerns = questionnaire_data.get("dealbreakers", "")
+        # Store all detailed data in notes as JSON
+        notes = json.dumps(questionnaire_data, indent=2)
+        
         if user:
-            upsert_next_move_plan(user["id"], plan_data)
-            flash("Plan saved!", "success")
+            upsert_next_move_plan(
+                user["id"],
+                timeline=timeline,
+                budget_range=budget_range,
+                location_preferences=location_preferences,
+                property_type_preferences=property_type_preferences,
+                must_haves=must_haves,
+                nice_to_haves=nice_to_haves,
+                concerns=concerns,
+                notes=notes,
+            )
+            flash("Your home buyer questionnaire has been saved!", "success")
 
     plan = get_next_move_plan(user["id"]) if user else None
+    # Parse JSON notes if present
+    if plan and hasattr(plan, 'notes') and plan.notes:
+        try:
+            plan_dict = dict(plan) if hasattr(plan, 'keys') else plan
+            parsed_notes = json.loads(plan_dict.get('notes', '{}'))
+            # Merge parsed data back into plan for template access
+            if isinstance(plan_dict, dict):
+                plan_dict.update(parsed_notes)
+                plan = type('obj', (object,), plan_dict)
+        except:
+            pass
+    
     return render_template(
         "homeowner/next_plan_move.html",
         brand_name=FRONT_BRAND_NAME,
@@ -5790,12 +6091,78 @@ def homeowner_care_home_protection():
     )
 
 
-@app.route("/homeowner/care/warranty-log", methods=["GET"])
+@app.route("/homeowner/care/warranty-log", methods=["GET", "POST"])
 def homeowner_care_warranty_log():
-    """Warranty log."""
+    """Warranty log - add, view, and delete warranty items."""
+    from database import get_current_user, add_warranty_log_item, list_warranty_log_items, delete_warranty_log_item
+    from datetime import datetime
+    
+    user = get_current_user()
+    if not user:
+        flash("Please log in to access this page.", "warning")
+        return redirect(url_for("login"))
+    
+    if user.get("role") != "homeowner":
+        flash("This page is for homeowners only.", "error")
+        return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
+    
+    homeowner_id = user["id"]
+    
+    # Handle POST requests
+    if request.method == "POST":
+        # Handle delete
+        if request.form.get("delete_id"):
+            item_id = int(request.form.get("delete_id"))
+            if delete_warranty_log_item(item_id, homeowner_id):
+                flash("Warranty item deleted successfully.", "success")
+            else:
+                flash("Error deleting warranty item.", "error")
+            return redirect(url_for("homeowner_care_warranty_log"))
+        
+        # Handle add new item
+        item_name = request.form.get("item_name", "").strip()
+        category = request.form.get("category", "").strip()
+        
+        if not item_name or not category:
+            flash("Item name and category are required.", "error")
+            return redirect(url_for("homeowner_care_warranty_log"))
+        
+        purchase_date = request.form.get("purchase_date") or None
+        warranty_start = request.form.get("warranty_start") or None
+        warranty_expiry = request.form.get("warranty_expiry") or None
+        warranty_provider = request.form.get("warranty_provider", "").strip() or None
+        warranty_number = request.form.get("warranty_number", "").strip() or None
+        notes = request.form.get("notes", "").strip() or None
+        
+        try:
+            add_warranty_log_item(
+                user_id=homeowner_id,
+                item_name=item_name,
+                category=category,
+                purchase_date=purchase_date,
+                warranty_start=warranty_start,
+                warranty_expiry=warranty_expiry,
+                warranty_provider=warranty_provider,
+                warranty_number=warranty_number,
+                notes=notes
+            )
+            flash("Warranty item added successfully!", "success")
+        except Exception as e:
+            print(f"[WARRANTY LOG] Error adding item: {e}")
+            import traceback
+            traceback.print_exc()
+            flash(f"Error adding warranty item: {str(e)}", "error")
+        
+        return redirect(url_for("homeowner_care_warranty_log"))
+    
+    # GET request - display items
+    warranty_items = list_warranty_log_items(homeowner_id)
+    
     return render_template(
         "homeowner/care_warranty_log.html",
         brand_name=FRONT_BRAND_NAME,
+        warranty_items=warranty_items,
+        now=datetime.now()
     )
 
 
@@ -5813,12 +6180,14 @@ def homeowner_support_ask_question():
     """Ask a question."""
     user = get_current_user()
     if request.method == "POST":
-        topic = request.form.get("topic", "").strip()
+        topic = request.form.get("topic", "").strip() or None
         question = request.form.get("question", "").strip()
-        if topic and question and user:
-            add_homeowner_question(user["id"], topic, question)
+        if question and user:
+            add_homeowner_question(user["id"], topic or "General", question)
             flash("Question submitted! We'll get back to you soon.", "success")
             return redirect(url_for("homeowner_support_ask_question"))
+        elif not question:
+            flash("Please enter your question.", "error")
 
     return render_template(
         "homeowner/support_ask_question.html",

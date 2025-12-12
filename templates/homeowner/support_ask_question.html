@@ -2,35 +2,374 @@
 {% block title %}Ask a Question{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">We're here to help</p>
-  <h1>Ask a Question</h1>
-  <p>There are no silly questions here. Curiosity is how strong homeowners are built.</p>
-</div>
+<style>
+  .ask-question-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
 
-<div class="dashboard-section">
-  <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);">
-    <form method="post" style="display: grid; gap: 1.5rem; max-width: 650px;">
-      <div>
-        <label for="topic" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-          Topic <span style="font-weight: 400; color: #999;">(optional)</span>
-        </label>
-        <input id="topic" name="topic" placeholder="Example: value, renovation, timelines, lending" />
-      </div>
-      <div>
-        <label for="question" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">
-          Your Question
-        </label>
-        <textarea id="question" name="question" rows="4" placeholder="Type what's on your mind. You don't need perfect wording."></textarea>
-      </div>
-      <button class="btn btn-primary" type="submit" style="align-self: flex-start;">
-        Send Question
-      </button>
-    </form>
+  .ask-question-hero {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    margin-bottom: 3rem;
+    position: relative;
+  }
 
-    <p class="card-subtext" style="margin-top: 1.5rem;">
-      A real person will review what you share and respond with care. If a conversation would be better, you can move to Chat with a human or Schedule a chat.
-    </p>
+  .ask-question-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .ask-question-hero .eyebrow {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+    font-style: italic;
+  }
+
+  .ask-question-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+  }
+
+  .ask-question-hero .subtitle {
+    font-size: 1.3rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    max-width: 800px;
+    margin: 0 auto 1rem;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+  }
+
+  .ask-question-hero .personal-note {
+    font-size: 1.1rem;
+    color: var(--olive-green);
+    font-style: italic;
+    max-width: 700px;
+    margin: 1.5rem auto 0;
+    position: relative;
+    z-index: 1;
+    padding: 1.25rem 2rem;
+    background: linear-gradient(135deg, rgba(246, 242, 232, 0.6) 0%, rgba(239, 233, 220, 0.6) 100%);
+    border-radius: 16px;
+    border-left: 4px solid var(--olive-green);
+  }
+
+  .ask-question-form-section {
+    max-width: 800px;
+    margin: 0 auto 4rem;
+  }
+
+  .form-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border-radius: 24px;
+    padding: 3.5rem;
+    box-shadow: 0 12px 48px rgba(58, 53, 44, 0.1), 0 4px 16px rgba(107, 106, 69, 0.08);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .form-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+  }
+
+  .form-card::after {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.03) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .form-group {
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+
+  .form-group label .optional {
+    font-weight: 400;
+    color: #999;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 0.9em;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 1.125rem 1.25rem;
+    border: 2px solid var(--taupe-beige);
+    border-radius: 12px;
+    font-size: 1.05rem;
+    color: var(--charcoal-brown);
+    background: white;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.15), 0 4px 12px rgba(107, 106, 69, 0.1);
+    transform: translateY(-1px);
+  }
+
+  .form-group textarea {
+    min-height: 180px;
+    resize: vertical;
+    line-height: 1.7;
+  }
+
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: #bbb;
+    font-style: italic;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 1.25rem 2rem;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A6D47 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.3);
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .submit-btn:hover {
+    opacity: 0.95;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.4);
+  }
+
+  .submit-btn:active {
+    transform: translateY(0);
+  }
+
+  .form-help-text {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--olive-green);
+    position: relative;
+    z-index: 1;
+  }
+
+  .form-help-text p {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .form-help-text p strong {
+    color: var(--olive-green);
+    font-weight: 600;
+  }
+
+  .alternative-options {
+    max-width: 800px;
+    margin: 4rem auto 0;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, rgba(246, 242, 232, 0.4) 0%, rgba(239, 233, 220, 0.4) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+  }
+
+  .alternative-options h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    text-align: center;
+  }
+
+  .alternative-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .alternative-option {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .alternative-option:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(58, 53, 44, 0.1);
+    border-color: var(--olive-green);
+  }
+
+  .alternative-option a {
+    text-decoration: none;
+    color: var(--charcoal-brown);
+    display: block;
+  }
+
+  .alternative-option h4 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--olive-green);
+    margin: 0 0 0.5rem;
+    font-weight: 500;
+  }
+
+  .alternative-option p {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 768px) {
+    .ask-question-hero h1 {
+      font-size: 2.75rem;
+    }
+
+    .ask-question-hero .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .form-card {
+      padding: 2rem;
+    }
+
+    .alternative-options-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="ask-question-page">
+  <!-- Hero Section -->
+  <div class="ask-question-hero">
+    <p class="eyebrow">We're here to help</p>
+    <h1>Ask a Question</h1>
+    <p class="subtitle">Connect with your local professional. No question is too big or too small—so ask away!</p>
+    <p class="personal-note">I look forward to speaking with you!</p>
+  </div>
+
+  <!-- Form Section -->
+  <div class="ask-question-form-section">
+    <div class="form-card">
+      <form method="post">
+        <div class="form-group">
+          <label for="topic">
+            Topic <span class="optional">(optional)</span>
+          </label>
+          <input 
+            type="text" 
+            id="topic" 
+            name="topic" 
+            placeholder="Example: home value, renovation, timelines, lending, equity..."
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="question">
+            Your Question
+          </label>
+          <textarea 
+            id="question" 
+            name="question" 
+            rows="8" 
+            placeholder="Type what's on your mind. You don't need perfect wording—just share what you're curious about or what you need help with."
+            required
+          ></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">
+          Send Question
+        </button>
+
+        <div class="form-help-text">
+          <p>
+            <strong>A real person will review your question</strong> and respond with care. 
+            If you'd prefer a live conversation, you can also use the options below to chat directly or schedule a time to talk.
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Alternative Options -->
+  <div class="alternative-options">
+    <h3>Prefer a Live Conversation?</h3>
+    <div class="alternative-options-grid">
+      <div class="alternative-option">
+        <a href="{{ url_for('homeowner_support_chat_human') }}">
+          <h4>💬 Chat with Human</h4>
+          <p>Start a real-time conversation with your professional right now</p>
+        </a>
+      </div>
+      <div class="alternative-option">
+        <a href="{{ url_for('homeowner_support_schedule_chat') }}">
+          <h4>📅 Schedule Chat</h4>
+          <p>Pick a time that works for you for a focused conversation</p>
+        </a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

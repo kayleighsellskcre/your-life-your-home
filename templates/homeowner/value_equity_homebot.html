@@ -15,7 +15,7 @@
     grid-template-columns: 1.5fr 1fr;
     gap: 3rem;
     margin-bottom: 3rem;
-    padding: 2.5rem;
+    padding: 1.25rem 2.5rem;
     background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
     border-radius: var(--border-radius-lg);
     color: white;
@@ -38,23 +38,23 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     opacity: 0.9;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     font-weight: 500;
   }
 
   .equity-hero h1 {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     font-weight: 400;
-    margin: 0 0 1rem;
+    margin: 0 0 0.75rem;
     color: white;
     font-family: 'Playfair Display', Georgia, serif;
   }
   
   .equity-hero .sub {
-    font-size: 1.1rem;
+    font-size: 1rem;
     opacity: 0.95;
-    line-height: 1.7;
-    margin-bottom: 2rem;
+    line-height: 1.6;
+    margin-bottom: 1.25rem;
   }
 
   .equity-status-row {
@@ -405,6 +405,11 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: inherit;
+    position: relative;
+    z-index: 100;
+    pointer-events: auto !important;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .equity-tabs .tab:hover {
@@ -1104,7 +1109,7 @@
   <!-- SNAPSHOT: BIG NUMBERS -->
   <section class="equity-snapshot">
     <div class="snapshot-grid">
-      <article class="snapshot-card snapshot-primary clickable" data-snap="value" onclick="window.location.href='{{ url_for('homeowner_value_my_home') }}'">
+      <article class="snapshot-card snapshot-primary clickable" data-snap="value" onclick="window.location.href='{{ url_for('homeowner_value_equity_overview') }}'">
         <h3>Estimated Home Value</h3>
         <p class="big-number">
           {% if snapshot and snapshot.value_estimate %}
@@ -1214,9 +1219,9 @@
     <div class="equity-main-left">
       <!-- TABS -->
       <div class="equity-tabs">
-        <button class="tab active" data-tab="overview">Overview</button>
-        <button class="tab" data-tab="scenarios">Scenarios</button>
-        <button class="tab" data-tab="history">History</button>
+        <button type="button" class="tab active" data-tab="overview">Overview</button>
+        <button type="button" class="tab" data-tab="scenarios">Scenarios</button>
+        <button type="button" class="tab" data-tab="history">History</button>
       </div>
 
       <!-- TAB PANELS -->
@@ -1268,6 +1273,21 @@
               <div>
                 <label for="loan_start_date" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Start Date</label>
                 <input type="date" id="loan_start_date" name="loan_start_date" value="{% if snapshot and snapshot.loan_start_date %}{{ snapshot.loan_start_date }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+              </div>
+              <div>
+                <label for="property_tax_monthly" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Property Tax (Monthly)</label>
+                <input type="text" id="property_tax_monthly" name="property_tax_monthly" placeholder="e.g., 400" value="{% if snapshot and snapshot.property_tax_monthly %}{{ snapshot.property_tax_monthly|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+                <small style="color: #666; font-size: 0.8rem;">Monthly property tax amount</small>
+              </div>
+              <div>
+                <label for="homeowners_insurance_monthly" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Insurance (Monthly)</label>
+                <input type="text" id="homeowners_insurance_monthly" name="homeowners_insurance_monthly" placeholder="e.g., 150" value="{% if snapshot and snapshot.homeowners_insurance_monthly %}{{ snapshot.homeowners_insurance_monthly|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+                <small style="color: #666; font-size: 0.8rem;">Monthly homeowners insurance</small>
+              </div>
+              <div>
+                <label for="pmi_monthly" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">PMI (Monthly)</label>
+                <input type="text" id="pmi_monthly" name="pmi_monthly" placeholder="e.g., 0 or 200" value="{% if snapshot and snapshot.pmi_monthly %}{{ snapshot.pmi_monthly|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+                <small style="color: #666; font-size: 0.8rem;">PMI if LTV > 80% (usually 0.5-1% of loan/year)</small>
               </div>
               <div style="grid-column: 1 / -1; margin-top: 0.5rem;">
                 <button type="submit" class="action-btn" style="width: auto; padding: 1rem 2rem;">
@@ -1338,6 +1358,23 @@
             These tools use your latest value and loan data as a starting point.
           </p>
 
+          <!-- Current Rate Notice -->
+          <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); border: 2px solid var(--olive-green); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+              <span style="font-size: 2rem;">📊</span>
+              <div>
+                <h3 style="margin: 0; color: var(--olive-green); font-size: 1.25rem; font-weight: 600;">Current Market Rates</h3>
+                <p style="margin: 0.25rem 0 0; color: var(--charcoal-brown); font-size: 0.95rem;">
+                  As of today, current home loan rates are approximately <strong style="color: var(--olive-green); font-size: 1.1rem;">6.1%</strong>
+                </p>
+              </div>
+            </div>
+            <p style="margin: 0.5rem 0 0; color: #666; font-size: 0.9rem; line-height: 1.6;">
+              <strong>Important:</strong> This rate applies to new mortgages, cash-out refinancing, HELOCs (Home Equity Lines of Credit), and other future home financing. 
+              Your existing loan rate remains unchanged. When exploring scenarios below, we'll use current market rates (6.1%) for any new financing calculations.
+            </p>
+          </div>
+
           <div class="scenario-grid">
             <div class="scenario-card">
               <h3>Payoff Faster</h3>
@@ -1355,6 +1392,9 @@
             <div class="scenario-card">
               <h3>Cash-Out Equity</h3>
               <p>See how much cash you could access while keeping a comfortable payment. Cash-out refinancing lets you borrow against your equity.</p>
+              <p style="font-size: 0.85rem; color: #666; margin: 0.5rem 0; font-style: italic;">
+                💡 Calculations use current market rate of <strong>6.1%</strong> for new financing
+              </p>
               <label>Target cash-out amount: <span id="cashout-amount-display">$0</span></label>
               <input type="range" min="0" max="200000" step="10000" value="0"
                      class="scenario-slider" data-scenario="cashout" id="cashout-slider">
@@ -1577,6 +1617,16 @@
       </button>
       {% endif %}
 
+      <div class="info-card" style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); border: 2px solid var(--olive-green); margin-bottom: 1.5rem;">
+        <h4 style="color: var(--olive-green); margin-bottom: 0.75rem;">📊 Current Market Rates</h4>
+        <p style="margin: 0.5rem 0; font-size: 1rem;">
+          <strong style="color: var(--olive-green); font-size: 1.2rem;">6.1%</strong> — Current average rate
+        </p>
+        <p style="margin: 0.5rem 0 0; font-size: 0.9rem; color: #666; line-height: 1.5;">
+          Applies to new mortgages, cash-out refinancing, HELOC, and refinancing. Your existing loan rate stays the same.
+        </p>
+      </div>
+
       <div class="edu-card">
         <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
           <h4>
@@ -1650,6 +1700,45 @@
     </aside>
   </section>
 </section>
+
+<script>
+  // Tab switching function - MUST be defined before any onclick handlers
+  // This function is called directly from the tab buttons' onclick attributes
+  window.switchTab = function(tabName, clickedButton) {
+    console.log('[TABS] switchTab called:', tabName, clickedButton);
+    
+    // Remove active from all tabs
+    document.querySelectorAll(".equity-tabs .tab").forEach((t) => {
+      t.classList.remove("active");
+    });
+    
+    // Hide all panels
+    document.querySelectorAll(".tab-panel").forEach((p) => {
+      p.classList.remove("active");
+      p.style.display = 'none';
+    });
+    
+    // Add active to clicked tab
+    if (clickedButton) {
+      clickedButton.classList.add("active");
+    } else {
+      const tab = document.querySelector(`.equity-tabs .tab[data-tab="${tabName}"]`);
+      if (tab) tab.classList.add("active");
+    }
+    
+    // Show corresponding panel
+    const targetPanel = document.getElementById("tab-" + tabName);
+    if (targetPanel) {
+      targetPanel.classList.add("active");
+      targetPanel.style.display = 'block';
+      console.log('[TABS] Activated panel:', targetPanel.id);
+    } else {
+      console.error('[TABS] Panel not found: tab-' + tabName);
+    }
+    
+    return false;
+  };
+</script>
 
 {% if homebot_widget_id %}
 <script>
@@ -1752,19 +1841,97 @@
       setTimeout(initHomebot, 800);
     }
   })();
+</script>
+{% endif %}
 
-  // Tab switching
-  document.querySelectorAll(".equity-tabs .tab").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.tab;
-
-      document.querySelectorAll(".equity-tabs .tab").forEach((t) => t.classList.remove("active"));
-      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-
-      tab.classList.add("active");
-      document.getElementById("tab-" + target).classList.add("active");
-    });
-  });
+<script>
+  // Tab switching - backup event listeners (in case onclick doesn't work)
+  (function() {
+    function initTabs() {
+      const tabs = document.querySelectorAll(".equity-tabs .tab");
+      const panels = document.querySelectorAll(".tab-panel");
+      
+      if (tabs.length === 0 || panels.length === 0) {
+        console.log('[TABS] Tabs or panels not found, retrying...');
+        setTimeout(initTabs, 100);
+        return;
+      }
+      
+      console.log('[TABS] Initializing tab switching for', tabs.length, 'tabs');
+      
+      tabs.forEach((tab) => {
+        // Remove any existing listeners by cloning
+        const newTab = tab.cloneNode(true);
+        tab.parentNode.replaceChild(newTab, tab);
+        
+        // Add fresh event listener
+        newTab.addEventListener("click", function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          
+          const target = newTab.dataset.tab;
+          console.log('[TABS] Tab clicked:', target, 'Element:', newTab);
+          
+          if (!target) {
+            console.error('[TABS] No data-tab attribute found on', newTab);
+            return false;
+          }
+          
+          // Call the switchTab function
+          if (window.switchTab) {
+            window.switchTab(target, newTab);
+          } else {
+            // Fallback if switchTab not available
+            // Remove active from all tabs
+            document.querySelectorAll(".equity-tabs .tab").forEach((t) => {
+              t.classList.remove("active");
+            });
+            
+            // Remove active from all panels
+            document.querySelectorAll(".tab-panel").forEach((p) => {
+              p.classList.remove("active");
+              p.style.display = 'none';
+            });
+            
+            // Add active to clicked tab
+            newTab.classList.add("active");
+            
+            // Show corresponding panel
+            const targetPanel = document.getElementById("tab-" + target);
+            if (targetPanel) {
+              targetPanel.classList.add("active");
+              targetPanel.style.display = 'block';
+              console.log('[TABS] Activated panel:', targetPanel.id);
+            } else {
+              console.error('[TABS] Panel not found: tab-' + target);
+            }
+          }
+          
+          return false;
+        }, false); // Use bubble phase, not capture
+      });
+      
+      console.log('[TABS] Tab event listeners attached');
+    }
+    
+    // Try multiple times to ensure it runs
+    function tryInit() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(initTabs, 50);
+        });
+      } else {
+        setTimeout(initTabs, 50);
+      }
+    }
+    
+    tryInit();
+    // Also try after a delay in case DOM isn't fully ready
+    setTimeout(tryInit, 500);
+    setTimeout(tryInit, 1000);
+    setTimeout(tryInit, 2000);
+  })();
 
   // Scenario sliders with real calculations (Homebot-style formulas)
   function calculatePayoff(extraPayment, loanBalance, interestRate, monthlyPayment, loanTermYears, loanStartDate) {
@@ -1825,36 +1992,61 @@
     };
   }
 
-  function calculateCashOut(cashOutAmount, currentBalance, interestRate, currentPayment, homeValue, loanTermYears, loanStartDate) {
+  function calculateCashOut(cashOutAmount, currentBalance, interestRate, currentPayment, homeValue, loanTermYears, loanStartDate, propertyTaxMonthly, insuranceMonthly, currentPMI) {
     if (!cashOutAmount || cashOutAmount <= 0) {
-      return { newBalance: currentBalance, newPayment: currentPayment, newLTV: 0 };
+      return { 
+        newBalance: currentBalance, 
+        newPaymentPI: currentPayment, 
+        newPaymentTotal: currentPayment,
+        newLTV: 0, 
+        paymentIncrease: 0,
+        newPMI: currentPMI || 0
+      };
     }
     
     const newBalance = currentBalance + cashOutAmount;
     const newLTV = (newBalance / homeValue) * 100;
     
-    // Calculate remaining term based on loan start date and term
-    let remainingMonths = 360; // Default 30 years
-    if (loanTermYears && loanStartDate) {
-      const startDate = new Date(loanStartDate);
-      const today = new Date();
-      const monthsElapsed = (today.getFullYear() - startDate.getFullYear()) * 12 + (today.getMonth() - startDate.getMonth());
-      const totalMonths = loanTermYears * 12;
-      remainingMonths = Math.max(1, totalMonths - monthsElapsed);
-    } else if (loanTermYears) {
-      remainingMonths = loanTermYears * 12;
+    // IMPORTANT: Cash-out refinancing is a NEW loan with a NEW term
+    // Don't use remaining term from old loan - use full new loan term (typically 30 years)
+    // This ensures the payment calculation is correct for a fresh refinance
+    const newLoanTermYears = 30; // Standard for cash-out refinancing
+    const newLoanTermMonths = newLoanTermYears * 12;
+    
+    // Calculate new Principal & Interest (P&I) payment using amortization formula for the NEW loan
+    const monthlyRate = interestRate / 100 / 12;
+    const newPaymentPI = newBalance * (monthlyRate * Math.pow(1 + monthlyRate, newLoanTermMonths)) / 
+                      (Math.pow(1 + monthlyRate, newLoanTermMonths) - 1);
+    
+    // Calculate new PMI (typically required if LTV > 80%)
+    // PMI is usually 0.5% to 1% of the loan amount per year, divided by 12
+    let newPMI = 0;
+    if (newLTV > 80) {
+      // Use 0.75% of loan amount per year as average PMI rate
+      newPMI = (newBalance * 0.0075) / 12;
     }
     
-    // Calculate new payment using amortization formula (Homebot-style)
-    const monthlyRate = interestRate / 100 / 12;
-    const newPayment = newBalance * (monthlyRate * Math.pow(1 + monthlyRate, remainingMonths)) / 
-                      (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+    // Property taxes and insurance typically stay the same (or increase slightly with higher value)
+    // For now, we'll use the same amounts, but they could increase if the home value assessment goes up
+    const newPropertyTax = propertyTaxMonthly || 0;
+    const newInsurance = insuranceMonthly || 0;
+    
+    // Calculate total monthly payment (PITI: Principal, Interest, Taxes, Insurance, PMI)
+    const newPaymentTotal = newPaymentPI + newPropertyTax + newInsurance + newPMI;
+    
+    // Calculate current total payment (if we have the breakdown)
+    // If current payment seems to be P&I only, add taxes/insurance/PMI
+    const currentTotalPayment = currentPayment + (propertyTaxMonthly || 0) + (insuranceMonthly || 0) + (currentPMI || 0);
     
     return {
       newBalance: newBalance,
-      newPayment: newPayment,
+      newPaymentPI: newPaymentPI,
+      newPaymentTotal: newPaymentTotal,
       newLTV: newLTV,
-      paymentIncrease: newPayment - currentPayment
+      paymentIncrease: newPaymentTotal - currentTotalPayment,
+      newPMI: newPMI,
+      propertyTax: newPropertyTax,
+      insurance: newInsurance
     };
   }
 
@@ -1864,10 +2056,14 @@
   const snapshotData = {
     loanBalance: {% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance }}{% else %}0{% endif %},
     valueEstimate: {% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate }}{% else %}0{% endif %},
-    loanRate: {% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% else %}4.5{% endif %},
+    loanRate: {% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% else %}6.1{% endif %},
+    currentMarketRate: 6.1, // Current market rate for new loans, refinancing, HELOC, etc.
     loanPayment: {% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment }}{% else %}0{% endif %},
     loanTermYears: {% if snapshot and snapshot.loan_term_years %}{{ snapshot.loan_term_years }}{% else %}30{% endif %},
-    loanStartDate: {% if snapshot and snapshot.loan_start_date %}'{{ snapshot.loan_start_date|e }}'{% else %}null{% endif %}
+    loanStartDate: {% if snapshot and snapshot.loan_start_date %}'{{ snapshot.loan_start_date|e }}'{% else %}null{% endif %},
+    propertyTaxMonthly: {% if snapshot and snapshot.property_tax_monthly %}{{ snapshot.property_tax_monthly }}{% else %}0{% endif %},
+    insuranceMonthly: {% if snapshot and snapshot.homeowners_insurance_monthly %}{{ snapshot.homeowners_insurance_monthly }}{% else %}0{% endif %},
+    pmiMonthly: {% if snapshot and snapshot.pmi_monthly %}{{ snapshot.pmi_monthly }}{% else %}0{% endif %}
   };
   /* eslint-enable */
 
@@ -1889,7 +2085,7 @@
         const result = calculatePayoff(
           value,
           snapshotData.loanBalance,
-          snapshotData.loanRate || 4.5,
+          snapshotData.loanRate || snapshotData.currentMarketRate || 6.1,
           snapshotData.loanPayment || 2000,
           snapshotData.loanTermYears || 30,
           snapshotData.loanStartDate
@@ -1920,14 +2116,19 @@
         const actualCashOut = Math.min(value, maxCashOut);
         
         if (actualCashOut > 0 && snapshotData.loanBalance > 0) {
+          // Use current market rate (6.1%) for cash-out refinancing, not existing loan rate
+          const cashOutRate = snapshotData.currentMarketRate || 6.1;
           const result = calculateCashOut(
             actualCashOut,
             snapshotData.loanBalance,
-            snapshotData.loanRate || 4.5,
+            cashOutRate, // Always use current market rate for new financing
             snapshotData.loanPayment || 2000,
             snapshotData.valueEstimate,
             snapshotData.loanTermYears || 30,
-            snapshotData.loanStartDate
+            snapshotData.loanStartDate,
+            snapshotData.propertyTaxMonthly || 0,
+            snapshotData.insuranceMonthly || 0,
+            snapshotData.pmiMonthly || 0
           );
           
           valueDisplay.innerHTML = '<strong style="color: var(--olive-green);">Access $' + 
@@ -1935,19 +2136,42 @@
           
           output.textContent = 'Cash-out refinance scenario:';
           
+          // Calculate current total payment
+          const currentTotal = (snapshotData.loanPayment || 0) + (snapshotData.propertyTaxMonthly || 0) + (snapshotData.insuranceMonthly || 0) + (snapshotData.pmiMonthly || 0);
+          
           const paymentChange = result.paymentIncrease > 0 ? '+' : '';
+          const paymentChangeColor = result.paymentIncrease > 0 ? '#d32f2f' : 'var(--olive-green)';
+          
           details.innerHTML = 
             '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
             '<p style="margin: 0.25rem 0;"><strong>New loan balance:</strong> $' + 
             Math.round(result.newBalance).toLocaleString() + '</p>' +
             '<p style="margin: 0.25rem 0;"><strong>New LTV:</strong> ' + 
-            result.newLTV.toFixed(1) + '%</p>' +
-            '<p style="margin: 0.25rem 0;"><strong>Current payment:</strong> $' + 
-            Math.round(snapshotData.loanPayment || 2000).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.25rem 0; color: ' + (result.paymentIncrease > 0 ? '#d32f2f' : 'var(--olive-green)') + ';"><strong>Estimated new payment:</strong> $' + 
-            Math.round(result.newPayment).toLocaleString() + '/month (' + paymentChange + '$' + Math.round(Math.abs(result.paymentIncrease)).toLocaleString() + ' change)</p>' +
+            result.newLTV.toFixed(1) + '%' + (result.newLTV > 80 ? ' (PMI required)' : '') + '</p>' +
+            '<p style="margin: 0.5rem 0 0.25rem; padding-top: 0.5rem; border-top: 1px solid rgba(200, 180, 151, 0.2);"><strong style="color: var(--charcoal-brown);">Current Total Payment:</strong></p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Principal & Interest: $' + 
+            Math.round(snapshotData.loanPayment || 0).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Property Tax: $' + 
+            Math.round(snapshotData.propertyTaxMonthly || 0).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Insurance: $' + 
+            Math.round(snapshotData.insuranceMonthly || 0).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">PMI: $' + 
+            Math.round(snapshotData.pmiMonthly || 0).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.25rem 0 0.5rem; font-weight: 600;"><strong>Total: $' + 
+            Math.round(currentTotal).toLocaleString() + '/month</strong></p>' +
+            '<p style="margin: 0.5rem 0 0.25rem; padding-top: 0.5rem; border-top: 1px solid rgba(200, 180, 151, 0.2);"><strong style="color: ' + paymentChangeColor + ';">New Total Payment:</strong></p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Principal & Interest: $' + 
+            Math.round(result.newPaymentPI).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Property Tax: $' + 
+            Math.round(result.propertyTax).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Insurance: $' + 
+            Math.round(result.insurance).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">PMI: $' + 
+            Math.round(result.newPMI).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.25rem 0; color: ' + paymentChangeColor + '; font-weight: 600;"><strong>Total: $' + 
+            Math.round(result.newPaymentTotal).toLocaleString() + '/month (' + paymentChange + '$' + Math.round(Math.abs(result.paymentIncrease)).toLocaleString() + ' change)</strong></p>' +
             '<p style="margin: 0.5rem 0 0; font-size: 0.8rem; color: #999; font-style: italic;">' +
-            'Note: Actual terms depend on current rates and your credit. Talk to your lender for exact numbers.</p>' +
+            'Note: Calculations use current market rate of 6.1%. P&I calculated on new 30-year loan. Taxes and insurance assumed same as current. PMI applies if LTV > 80%. Actual terms depend on your credit, loan-to-value ratio, and lender. Talk to your lender for exact numbers.</p>' +
             '</div>';
         } else if (value > maxCashOut) {
           valueDisplay.innerHTML = '<strong style="color: #d32f2f;">Maximum available: $' + 
@@ -2002,7 +2226,6 @@
     }
   });
 </script>
-{% endif %}
 
 <!-- Edit Address Modal -->
 <div id="editAddressModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">

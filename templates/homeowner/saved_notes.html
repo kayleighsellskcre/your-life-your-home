@@ -396,7 +396,7 @@
     <div class="create-board-card">
       <h2>Create a New Mood Board</h2>
       
-      <form method="post" enctype="multipart/form-data" id="createBoardForm">
+      <form method="post" action="{{ url_for('homeowner_saved_notes') }}" enctype="multipart/form-data" id="createBoardForm">
         <input type="hidden" name="action" value="create_board">
         
         <!-- Board Name -->
@@ -660,17 +660,14 @@
                   >
                     Edit
                   </button>
-                  <form
-                    method="post"
-                    style="margin: 0;"
-                    onsubmit="return confirm('Delete {{ board_name }}? This cannot be undone.');"
+                  <button 
+                    type="button"
+                    class="board-btn delete delete-board-btn"
+                    data-board-name="{{ board_name }}"
+                    onclick="deleteBoard('{{ board_name }}')"
                   >
-                    <input type="hidden" name="action" value="delete_board">
-                    <input type="hidden" name="board_name" value="{{ board_name }}">
-                    <button type="submit" class="board-btn delete">
-                      Delete
-                    </button>
-                  </form>
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
@@ -761,10 +758,60 @@
     window.location.href = `{{ url_for('homeowner_design_board_view', board_name='BOARD_NAME') }}`.replace('BOARD_NAME', encodeURIComponent(boardName)) + '?edit=1';
   }
 
-  // Smooth scroll on form submit
-  document.getElementById('createBoardForm').addEventListener('submit', function() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+  // Smooth scroll on form submit (only for create board form)
+  const createBoardForm = document.getElementById('createBoardForm');
+  if (createBoardForm) {
+    createBoardForm.addEventListener('submit', function(e) {
+      // Only scroll if this is the create board form, not delete forms
+      if (e.target.id === 'createBoardForm') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    });
+  }
+  
+  // Simple, direct delete function
+  function deleteBoard(boardName) {
+    console.log('[DELETE BOARD] Attempting to delete:', boardName);
+    
+    if (!confirm('Delete "' + boardName + '"? This cannot be undone.')) {
+      console.log('[DELETE BOARD] User cancelled');
+      return false;
+    }
+    
+    console.log('[DELETE BOARD] User confirmed, sending request...');
+    
+    // Create form data
+    const formData = new FormData();
+    formData.append('action', 'delete_board');
+    formData.append('board_name', boardName);
+    
+    // Send POST request
+    fetch('{{ url_for("homeowner_saved_notes") }}', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(function(response) {
+      console.log('[DELETE BOARD] Response status:', response.status);
+      if (response.ok || response.redirected) {
+        // Reload the page to show updated list
+        window.location.reload();
+      } else {
+        return response.text().then(function(text) {
+          console.error('[DELETE BOARD] Error response:', text);
+          alert('Error deleting board. Please try again.');
+        });
+      }
+    })
+    .catch(function(error) {
+      console.error('[DELETE BOARD] Network error:', error);
+      alert('Network error. Please check your connection and try again.');
+    });
+    
+    return false;
+  }
 
   // Sherwin-Williams Color Database (1000+ colors organized by category)
   const sherwinWilliamsColors = [
