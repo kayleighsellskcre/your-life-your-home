@@ -1,5 +1,5 @@
 {% extends "homeowner/layout.html" %}
-{% block title %}Track Your Home Wealth{% endblock %}
+{% block title %}Equity Overview • Your Life Your Home{% endblock %}
 
 {% block homeowner_content %}
 <style>
@@ -60,39 +60,112 @@
   
   .widget-section {
     background: var(--white);
-    border: 1px solid var(--taupe-beige);
+    border: 2px solid var(--taupe-beige);
     border-radius: var(--border-radius-lg);
     padding: 0;
-    min-height: 600px;
-    box-shadow: var(--shadow-light);
-    overflow: visible;
+    min-height: 800px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
     position: relative;
-    isolation: isolate; /* Isolate from other page elements */
+    isolation: isolate;
+    margin-bottom: 3rem;
+  }
+  
+  /* Ensure widget section doesn't cause page scroll issues */
+  .widget-section::after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+  
+  .widget-header {
+    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .widget-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .widget-header p {
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
   }
   
   #homebot_homeowner {
     width: 100%;
-    min-height: 600px;
+    min-height: 700px;
     position: relative;
     border: none;
     margin: 0;
     padding: 0;
     display: block;
     z-index: 1;
-    pointer-events: auto; /* Ensure widget can receive clicks */
+    pointer-events: auto;
+    background: var(--white);
   }
   
   #homebot_homeowner iframe {
     width: 100% !important;
-    min-height: 600px !important;
+    min-height: 700px !important;
     border: none !important;
     display: block !important;
-    pointer-events: auto !important; /* Critical: allow iframe interactions */
+    pointer-events: auto !important;
+    transition: height 0.3s ease;
   }
   
   /* Prevent any parent click handlers from interfering */
   .widget-section * {
     pointer-events: auto;
+  }
+  
+  .ylh-actions-below {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  
+  .ylh-action-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  
+  .ylh-action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+    border-color: var(--olive-green);
+  }
+  
+  .ylh-action-card h3 {
+    color: var(--charcoal-brown);
+    margin: 0 0 0.75rem;
+    font-size: 1.3rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .ylh-action-card p {
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+    font-size: 0.95rem;
   }
   
   .no-homebot-message {
@@ -118,10 +191,10 @@
 </style>
 
 <div class="homebot-hero">
-  <h1>🏠 Track Your Home Wealth</h1>
+  <h1>🏠 Your Home Equity Dashboard</h1>
   <p>
-    Get automatic monthly updates on your home value, equity, and refinance opportunities – 
-    all connected directly to your real estate professional.
+    Everything you need to track your home's value, understand your equity, and explore your options – 
+    all in one place, powered by Homebot and personalized by your real estate professional.
   </p>
 </div>
 
@@ -218,7 +291,14 @@
 
 <div class="widget-section">
   {% if homebot_widget_id %}
-    <div id="homebot_homeowner" style="width: 100%; min-height: 600px; position: relative;"></div>
+    <div class="widget-header">
+      <h2>
+        <span>🏠</span>
+        <span>Your Home Value & Equity Dashboard</span>
+      </h2>
+      <p>Powered by Homebot • All tools and scenarios run right here in your dashboard</p>
+    </div>
+    <div id="homebot_homeowner" style="width: 100%; min-height: 700px; position: relative;"></div>
   {% else %}
     <div class="no-homebot-message">
       <h2>Homebot Not Connected</h2>
@@ -234,6 +314,43 @@
       </a>
       {% endif %}
     </div>
+  {% endif %}
+</div>
+
+<!-- YLYH Action Cards Below Widget -->
+<div class="ylh-actions-below">
+  <a href="{{ url_for('homeowner_value_my_home') }}" class="ylh-action-card">
+    <h3>
+      <span>📊</span>
+      <span>Get Instant Home Worth</span>
+    </h3>
+    <p>Pull a comprehensive home value report with comparable sales, market trends, and detailed property insights.</p>
+  </a>
+  
+  <a href="{{ url_for('homeowner_reno_planner') }}" class="ylh-action-card">
+    <h3>
+      <span>🔨</span>
+      <span>Plan Your Renovations</span>
+    </h3>
+    <p>Explore how your home equity can fund your next renovation project. Calculate ROI and plan your upgrades.</p>
+  </a>
+  
+  <a href="{{ url_for('homeowner_next_plan_move') }}" class="ylh-action-card">
+    <h3>
+      <span>🏡</span>
+      <span>Plan Your Next Move</span>
+    </h3>
+    <p>Use your current home equity to plan your next home purchase. Calculate affordability and explore options.</p>
+  </a>
+  
+  {% if professional_info and professional_info.email %}
+  <a href="mailto:{{ professional_info.email }}?subject=Home Equity Questions" class="ylh-action-card">
+    <h3>
+      <span>💬</span>
+      <span>Talk to Your Professional</span>
+    </h3>
+    <p>Have questions about your home value or equity? Reach out to {{ professional_info.name }} for personalized guidance.</p>
+  </a>
   {% endif %}
 </div>
 
@@ -336,7 +453,7 @@
                 // Force pointer events
                 iframe.style.cssText += 'pointer-events: auto !important;';
                 
-                // Monitor for widget interactions
+                // Monitor for widget interactions and prevent redirects
                 iframe.addEventListener('load', function() {
                   console.log('[HOMEBOT] ✅ Iframe content loaded - widget should be fully functional');
                   console.log('[HOMEBOT] Iframe allow:', iframe.getAttribute('allow'));
@@ -347,7 +464,75 @@
                     iframe.style.pointerEvents = 'auto';
                     console.log('[HOMEBOT] ✅ Pointer events confirmed: auto');
                   }, 500);
+                  
+                  // Prevent any navigation away from the page
+                  // The iframe should handle all interactions internally
+                  try {
+                    var iframeWindow = iframe.contentWindow;
+                    if (iframeWindow) {
+                      // Override any top-level navigation attempts
+                      var originalOpen = iframeWindow.open;
+                      if (originalOpen) {
+                        iframeWindow.open = function(url, target) {
+                          // If trying to open in parent/top, open in new tab instead
+                          if (target === '_parent' || target === '_top') {
+                            window.open(url, '_blank');
+                            return null;
+                          }
+                          return originalOpen.call(this, url, target);
+                        };
+                      }
+                    }
+                  } catch (e) {
+                    // CORS - can't access iframe content, which is fine
+                    console.log('[HOMEBOT] ℹ️ Cannot access iframe window (CORS) - widget will handle navigation internally');
+                  }
                 });
+                
+                // Listen for any messages from the iframe (Homebot might send postMessage)
+                window.addEventListener('message', function(event) {
+                  // Only accept messages from Homebot domains
+                  if (event.origin.includes('homebotapp.com')) {
+                    console.log('[HOMEBOT] Message received from widget:', event.data);
+                    
+                    // Handle iframe resize requests (Homebot might request height changes)
+                    if (event.data && (event.data.type === 'resize' || event.data.height)) {
+                      var newHeight = event.data.height || event.data;
+                      if (typeof newHeight === 'number' && newHeight > 0) {
+                        iframe.style.height = newHeight + 'px';
+                        containerEl.style.minHeight = newHeight + 'px';
+                        console.log('[HOMEBOT] Iframe resized to:', newHeight + 'px');
+                      }
+                    }
+                    
+                    // Handle any navigation requests by keeping them in the iframe
+                    if (event.data && event.data.type === 'navigate') {
+                      // Prevent navigation - widget should handle internally
+                      console.log('[HOMEBOT] Navigation request intercepted - keeping in iframe');
+                    }
+                  }
+                });
+                
+                // Monitor iframe for dynamic content changes and auto-resize
+                var resizeObserver = new ResizeObserver(function(entries) {
+                  for (var entry of entries) {
+                    var height = entry.contentRect.height;
+                    if (height > 0) {
+                      iframe.style.height = height + 'px';
+                      console.log('[HOMEBOT] Auto-resized iframe to:', height + 'px');
+                    }
+                  }
+                });
+                
+                // Try to observe iframe content (may fail due to CORS)
+                try {
+                  var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                  if (iframeDoc && iframeDoc.body) {
+                    resizeObserver.observe(iframeDoc.body);
+                  }
+                } catch (e) {
+                  console.log('[HOMEBOT] ℹ️ Cannot observe iframe content (CORS) - will use postMessage for resize');
+                }
               } else {
                 console.warn('[HOMEBOT] ⚠️ Iframe not found after initialization');
               }
