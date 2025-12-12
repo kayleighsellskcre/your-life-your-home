@@ -281,6 +281,32 @@ def init_db() -> None:
     except:
         pass
 
+    # ------------- SNAPSHOT HISTORY (Monthly tracking) -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS homeowner_snapshot_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            property_id INTEGER,
+            snapshot_date TEXT DEFAULT CURRENT_TIMESTAMP,
+            value_estimate REAL,
+            equity_estimate REAL,
+            loan_balance REAL,
+            loan_rate REAL,
+            loan_payment REAL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create index for faster history queries
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_snapshot_history_user_property ON homeowner_snapshot_history(user_id, property_id, snapshot_date)")
+    except:
+        pass
+
     # ------------- HOMEOWNER NOTES (DESIGN BOARDS) -------------
     cur.execute(
         """
@@ -2293,7 +2319,8 @@ def upsert_homeowner_snapshot_for_property(
     )
     existing = cur.fetchone()
 
-    # Merge with existing data
+    # Merge with existing data - only update fields that are explicitly provided (not None)
+    # This ensures empty form fields don't overwrite existing data
     if existing:
         merged_value = value_estimate if value_estimate is not None else existing["value_estimate"]
         merged_loan_balance = loan_balance if loan_balance is not None else existing["loan_balance"]
@@ -2302,6 +2329,7 @@ def upsert_homeowner_snapshot_for_property(
         merged_loan_term_years = loan_term_years if loan_term_years is not None else existing["loan_term_years"]
         merged_loan_start_date = loan_start_date if loan_start_date is not None else existing["loan_start_date"]
     else:
+        # No existing data - use provided values (or None if not provided)
         merged_value = value_estimate
         merged_loan_balance = loan_balance
         merged_loan_rate = loan_rate
@@ -2314,26 +2342,72 @@ def upsert_homeowner_snapshot_for_property(
     if merged_value is not None and merged_loan_balance is not None:
         equity = merged_value - merged_loan_balance
 
-    # Upsert
+    # Upsert - use COALESCE to preserve existing values when None is passed
     cur.execute(
         """INSERT INTO homeowner_snapshots 
            (user_id, property_id, value_estimate, equity_estimate, loan_balance, 
             loan_rate, loan_payment, loan_term_years, loan_start_date, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
            ON CONFLICT(user_id, property_id) DO UPDATE SET
-               value_estimate = excluded.value_estimate,
-               equity_estimate = excluded.equity_estimate,
-               loan_balance = excluded.loan_balance,
-               loan_rate = excluded.loan_rate,
-               loan_payment = excluded.loan_payment,
-               loan_term_years = excluded.loan_term_years,
-               loan_start_date = excluded.loan_start_date,
+               value_estimate = COALESCE(excluded.value_estimate, homeowner_snapshots.value_estimate),
+               equity_estimate = COALESCE(excluded.equity_estimate, homeowner_snapshots.equity_estimate),
+               loan_balance = COALESCE(excluded.loan_balance, homeowner_snapshots.loan_balance),
+               loan_rate = COALESCE(excluded.loan_rate, homeowner_snapshots.loan_rate),
+               loan_payment = COALESCE(excluded.loan_payment, homeowner_snapshots.loan_payment),
+               loan_term_years = COALESCE(excluded.loan_term_years, homeowner_snapshots.loan_term_years),
+               loan_start_date = COALESCE(excluded.loan_start_date, homeowner_snapshots.loan_start_date),
                updated_at = CURRENT_TIMESTAMP""",
         (user_id, property_id, merged_value, equity, merged_loan_balance, 
          merged_loan_rate, merged_loan_payment, merged_loan_term_years, merged_loan_start_date),
     )
     conn.commit()
+    
+    # Create monthly history record when snapshot is updated (only if we have meaningful data)
+    if merged_value is not None or merged_loan_balance is not None:
+        try:
+            # Check if we already have a history record for today
+            cur.execute(
+                """SELECT id FROM homeowner_snapshot_history 
+                   WHERE user_id = ? AND property_id = ? AND date(snapshot_date) = date('now')
+                   LIMIT 1""",
+                (user_id, property_id)
+            )
+            existing_today = cur.fetchone()
+            
+            if not existing_today:
+                # Only create new history if we don't have one for today
+                cur.execute(
+                    """INSERT INTO homeowner_snapshot_history 
+                       (user_id, property_id, snapshot_date, value_estimate, equity_estimate, 
+                        loan_balance, loan_rate, loan_payment)
+                       VALUES (?, ?, date('now'), ?, ?, ?, ?, ?)""",
+                    (user_id, property_id, merged_value, equity, merged_loan_balance, 
+                     merged_loan_rate, merged_loan_payment),
+                )
+                conn.commit()
+        except Exception as e:
+            print(f"Error creating snapshot history: {e}")
+            # Don't fail the main update if history fails
+    
     conn.close()
+
+
+def get_snapshot_history(user_id: int, property_id: int, limit: int = 12) -> List[Dict[str, Any]]:
+    """Get historical snapshots for a property, ordered by date descending."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """SELECT snapshot_date, value_estimate, equity_estimate, loan_balance, 
+                  loan_rate, loan_payment
+           FROM homeowner_snapshot_history
+           WHERE user_id = ? AND property_id = ?
+           ORDER BY snapshot_date DESC
+           LIMIT ?""",
+        (user_id, property_id, limit)
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows] if rows else []
 
 
 # ====================== CRM INTERACTIONS & AUTOMATED EMAILS ======================

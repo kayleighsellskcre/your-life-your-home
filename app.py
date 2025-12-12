@@ -1005,6 +1005,67 @@ Your Life, Your Home Team
             )
 
 
+def update_home_values_daily():
+    """Automatically update home values daily using Homebot-style appreciation formulas."""
+    from database import get_connection, get_user_properties, get_homeowner_snapshot_for_property, upsert_homeowner_snapshot_for_property
+    from datetime import datetime, timedelta
+    
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        # Get all homeowners with snapshots
+        cur.execute("""
+            SELECT DISTINCT user_id, property_id 
+            FROM homeowner_snapshots 
+            WHERE value_estimate IS NOT NULL OR loan_balance IS NOT NULL
+        """)
+        snapshots = cur.fetchall()
+        conn.close()
+        
+        updated_count = 0
+        for row in snapshots:
+            user_id = row['user_id']
+            property_id = row['property_id'] if row['property_id'] else None
+            
+            if not property_id:
+                continue
+                
+            # Get current snapshot
+            snapshot = get_homeowner_snapshot_for_property(user_id, property_id)
+            if not snapshot:
+                continue
+            
+            # Apply Homebot-style daily appreciation (3.5% annual = ~0.0096% daily)
+            # Only update if value hasn't been refreshed in last 24 hours
+            last_refresh = snapshot.get('last_value_refresh')
+            if last_refresh:
+                try:
+                    last_date = datetime.fromisoformat(last_refresh.replace('Z', '+00:00'))
+                    if (datetime.now() - last_date.replace(tzinfo=None)).days < 1:
+                        continue  # Skip if updated in last 24 hours
+                except:
+                    pass
+            
+            current_value = snapshot.get('value_estimate')
+            if current_value and current_value > 0:
+                # Daily appreciation: 1.035^(1/365) - 1 ≈ 0.000094% per day
+                daily_rate = (1.035 ** (1/365)) - 1
+                new_value = current_value * (1 + daily_rate)
+                
+                # Update snapshot with new value (preserve other fields)
+                upsert_homeowner_snapshot_for_property(
+                    user_id=user_id,
+                    property_id=property_id,
+                    value_estimate=new_value,
+                )
+                updated_count += 1
+        
+        print(f"✓ Daily value update: {updated_count} properties updated")
+    except Exception as e:
+        print(f"Error in daily value update: {e}")
+
+
 def start_scheduler():
     """Start background scheduler safely without blocking app startup."""
     try:
@@ -1016,10 +1077,12 @@ def start_scheduler():
         scheduler.add_job(send_seasonal_checklists, "cron", day=1, hour=10, minute=0)  # 1st of month, 10 AM
         scheduler.add_job(send_equity_updates, "cron", day=1, hour=10, minute=5)  # 1st of month, 10:05 AM
         scheduler.add_job(send_holiday_greetings, "cron", hour=9, minute=10)  # 9:10 AM daily
+        # Automatic daily home value updates (Homebot-style)
+        scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.start()
-        print("✓ Reminder scheduler started with CRM automation.")
+        print("✓ Reminder scheduler started with CRM automation and daily value updates.")
     except Exception as e:
-        print(f"⚠ Scheduler could not start (non-critical): {e}")
+        print(f"⚠ Scheduler error: {e}")(f"⚠ Scheduler could not start (non-critical): {e}")
 
 
 # Start scheduler when app starts (non-blocking)
@@ -2922,7 +2985,7 @@ def homeowner_value_equity_overview():
         
         property_id = primary_property.get('id')
         
-        # Parse form data
+        # Parse form data - only update fields that are actually provided (not empty)
         def safe_float(val):
             if not val or val == "":
                 return None
@@ -2931,14 +2994,29 @@ def homeowner_value_equity_overview():
             except (ValueError, TypeError):
                 return None
         
-        value_estimate = safe_float(request.form.get("value_estimate"))
-        loan_balance = safe_float(request.form.get("loan_balance"))
-        loan_rate = safe_float(request.form.get("loan_rate"))
-        loan_payment = safe_float(request.form.get("loan_payment"))
-        loan_term_years = safe_float(request.form.get("loan_term_years"))
-        loan_start_date = request.form.get("loan_start_date", "").strip() or None
+        # Get form values - only update fields that have actual values (not empty)
+        # Empty form fields should preserve existing data
+        def get_form_value(field_name):
+            val = request.form.get(field_name, "").strip()
+            return val if val else None
         
-        # Update snapshot
+        form_value_estimate = get_form_value("value_estimate")
+        form_loan_balance = get_form_value("loan_balance")
+        form_loan_rate = get_form_value("loan_rate")
+        form_loan_payment = get_form_value("loan_payment")
+        form_loan_term_years = get_form_value("loan_term_years")
+        form_loan_start_date = get_form_value("loan_start_date")
+        
+        # Convert to appropriate types, but only if value was provided
+        # If None, the function will preserve existing data
+        value_estimate = safe_float(form_value_estimate) if form_value_estimate else None
+        loan_balance = safe_float(form_loan_balance) if form_loan_balance else None
+        loan_rate = safe_float(form_loan_rate) if form_loan_rate else None
+        loan_payment = safe_float(form_loan_payment) if form_loan_payment else None
+        loan_term_years = safe_float(form_loan_term_years) if form_loan_term_years else None
+        loan_start_date = form_loan_start_date if form_loan_start_date else None
+        
+        # Update snapshot - function will preserve existing data for None values
         upsert_homeowner_snapshot_for_property(
             user_id=homeowner_id,
             property_id=property_id,
@@ -3084,8 +3162,9 @@ def homeowner_value_equity_overview():
                 homeowner_data['address'] = all_properties[0].get('address')
     
     # Get homeowner snapshot data (synced from Homebot webhook)
-    from database import get_primary_property, get_homeowner_snapshot_for_property
+    from database import get_primary_property, get_homeowner_snapshot_for_property, get_snapshot_history
     snapshot_data = None
+    snapshot_history = []
     primary_property = get_primary_property(homeowner_id)
     if primary_property:
         property_id = primary_property.get('id')
@@ -3093,6 +3172,8 @@ def homeowner_value_equity_overview():
         # Calculate equity if we have value and loan balance
         if snapshot_data and snapshot_data.get('value_estimate') and snapshot_data.get('loan_balance'):
             snapshot_data['equity_estimate'] = snapshot_data.get('value_estimate') - snapshot_data.get('loan_balance')
+        # Get historical snapshots
+        snapshot_history = get_snapshot_history(homeowner_id, property_id, limit=24)
     
     # Debug logging
     print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
@@ -3110,6 +3191,7 @@ def homeowner_value_equity_overview():
         professional_info=professional_info,
         homeowner_data=homeowner_data,
         snapshot=snapshot_data,
+        snapshot_history=snapshot_history,
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
@@ -5830,6 +5912,9 @@ def homebot_webhook():
         
         # Update homeowner snapshot with Homebot data
         from datetime import datetime
+        import time
+        
+        # Mark data as synced from Homebot
         upsert_homeowner_snapshot_for_property(
             user_id=homeowner_id,
             property_id=property_id,

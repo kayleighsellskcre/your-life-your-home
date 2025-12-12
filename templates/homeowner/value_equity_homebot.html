@@ -1317,19 +1317,152 @@
 
           <div class="history-layout">
             <div class="chart-card">
-              <h3>Value vs Balance</h3>
+              <h3>Value vs Balance Over Time</h3>
+              {% if snapshot_history and snapshot_history|length > 0 %}
+              <div class="chart-container" style="margin-top: 1.5rem; position: relative; height: 300px;">
+                <canvas id="equityChart"></canvas>
+              </div>
+              <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+              <script>
+                // eslint-disable-next-line
+                (function() {
+                  // Template variable - will be replaced by Jinja2
+                  const historyData = {{ snapshot_history|tojson|safe if snapshot_history else '[]' }};
+                  if (historyData && Array.isArray(historyData) && historyData.length > 0) {
+                    const ctx = document.getElementById('equityChart');
+                    if (ctx) {
+                      const dates = historyData.map(h => {
+                        const d = h.snapshot_date ? h.snapshot_date.substring(0, 10) : '';
+                        return d || '—';
+                      }).reverse();
+                      const values = historyData.map(h => h.value_estimate || 0).reverse();
+                      const balances = historyData.map(h => h.loan_balance || 0).reverse();
+                      const equities = historyData.map(h => {
+                        if (h.equity_estimate) return h.equity_estimate;
+                        if (h.value_estimate && h.loan_balance) return h.value_estimate - h.loan_balance;
+                        return 0;
+                      }).reverse();
+                      
+                      new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                          labels: dates,
+                          datasets: [
+                            {
+                              label: 'Home Value',
+                              data: values,
+                              borderColor: '#6B6A45',
+                              backgroundColor: 'rgba(107, 106, 69, 0.1)',
+                              tension: 0.4,
+                              fill: false
+                            },
+                            {
+                              label: 'Loan Balance',
+                              data: balances,
+                              borderColor: '#C8B497',
+                              backgroundColor: 'rgba(200, 180, 151, 0.1)',
+                              tension: 0.4,
+                              fill: false
+                            },
+                            {
+                              label: 'Equity',
+                              data: equities,
+                              borderColor: '#5A6D47',
+                              backgroundColor: 'rgba(90, 109, 71, 0.1)',
+                              tension: 0.4,
+                              fill: true
+                            }
+                          ]
+                        },
+                        options: {
+                          responsive: true,
+                          maintainAspectRatio: false,
+                          plugins: {
+                            legend: {
+                              position: 'bottom',
+                              labels: {
+                                font: { family: 'inherit', size: 12 },
+                                color: '#3A352C'
+                              }
+                            },
+                            tooltip: {
+                              mode: 'index',
+                              intersect: false,
+                              callbacks: {
+                                label: function(context) {
+                                  return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                                }
+                              }
+                            }
+                          },
+                          scales: {
+                            y: {
+                              beginAtZero: false,
+                              ticks: {
+                                callback: function(value) {
+                                  return '$' + value.toLocaleString();
+                                },
+                                font: { size: 11 },
+                                color: '#666'
+                              },
+                              grid: {
+                                color: 'rgba(200, 180, 151, 0.2)'
+                              }
+                            },
+                            x: {
+                              ticks: {
+                                font: { size: 10 },
+                                color: '#666',
+                                maxRotation: 45,
+                                minRotation: 45
+                              },
+                              grid: {
+                                display: false
+                              }
+                            }
+                          }
+                        }
+                      });
+                    }
+                  }
+                })();
+              </script>
+              {% else %}
               <div class="chart-placeholder">
-                <p>Chart placeholder – value & loan over time.</p>
+                <p>Chart will appear here once you have historical data.</p>
                 <p style="font-size: 0.85rem; margin-top: 0.5rem; color: #999;">
-                  Historical data visualization coming soon
+                  Historical snapshots are created automatically when you update your loan details.
                 </p>
               </div>
+              {% endif %}
             </div>
 
             <div class="history-list">
               <h3>Monthly Snapshots</h3>
               <ul>
-                {% if snapshot and snapshot.updated_at %}
+                {% if snapshot_history and snapshot_history|length > 0 %}
+                  {% for hist in snapshot_history %}
+                  <li>
+                    <span class="snap-date">{{ hist.snapshot_date[:10] if hist.snapshot_date and hist.snapshot_date|length > 10 else (hist.snapshot_date or '—') }}</span>
+                    <span class="snap-value">
+                      {% if hist.value_estimate %}
+                        ${{ "{:,.0f}".format(hist.value_estimate) }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </span>
+                    <span class="snap-equity">
+                      {% if hist.equity_estimate %}
+                        ${{ "{:,.0f}".format(hist.equity_estimate) }}
+                      {% elif hist.value_estimate and hist.loan_balance %}
+                        ${{ "{:,.0f}".format(hist.value_estimate - hist.loan_balance) }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </span>
+                  </li>
+                  {% endfor %}
+                {% elif snapshot and snapshot.updated_at %}
                 <li>
                   <span class="snap-date">{{ snapshot.updated_at[:10] if snapshot.updated_at|length > 10 else snapshot.updated_at }}</span>
                   <span class="snap-value">
@@ -1365,7 +1498,7 @@
       <button class="action-btn" type="button" onclick="window.location.href='{{ url_for('homeowner_next_loan_paths') }}'">
         <span>🔍</span> <span>Explore refinance options</span>
       </button>
-      <button class="action-btn" type="button" onclick="document.querySelector('[data-tab=\"scenarios\"]').click(); setTimeout(() => document.querySelector('.scenario-slider[data-scenario=\"cashout\"]').focus(), 300);">
+      <button class="action-btn" type="button" onclick="document.querySelector('[data-tab=&quot;scenarios&quot;]').click(); setTimeout(function(){ document.querySelector('.scenario-slider[data-scenario=&quot;cashout&quot;]').focus(); }, 300);">
         <span>💰</span> <span>See cash-out equity ideas</span>
       </button>
       <button class="action-btn" type="button" onclick="window.location.href='{{ url_for('homeowner_next_plan_move') }}'">
@@ -1488,6 +1621,8 @@
 
   // Initialize widget
   (function() {
+    // Template variable - will be replaced by Jinja2
+    // eslint-disable-next-line
     var widgetId = '{{ homebot_widget_id|e }}';
     widgetId = widgetId.trim();
     
@@ -1564,48 +1699,66 @@
     });
   });
 
-  // Scenario sliders with real calculations
-  function calculatePayoff(extraPayment, loanBalance, interestRate, monthlyPayment) {
+  // Scenario sliders with real calculations (Homebot-style formulas)
+  function calculatePayoff(extraPayment, loanBalance, interestRate, monthlyPayment, loanTermYears, loanStartDate) {
     if (!loanBalance || !interestRate || !monthlyPayment || loanBalance <= 0) {
-      return { years: 0, months: 0, interestSaved: 0, newPayment: monthlyPayment };
+      return { years: 0, months: 0, interestSaved: 0, newPayment: monthlyPayment, yearsSaved: 0, origPayoffYears: 0, origPayoffMonths: 0 };
     }
     
     const monthlyRate = interestRate / 100 / 12;
+    
+    // Calculate remaining term based on loan start date and term (Homebot-style)
+    let remainingMonths = 360; // Default 30 years
+    if (loanTermYears && loanStartDate) {
+      const startDate = new Date(loanStartDate);
+      const today = new Date();
+      const monthsElapsed = (today.getFullYear() - startDate.getFullYear()) * 12 + (today.getMonth() - startDate.getMonth());
+      const totalMonths = loanTermYears * 12;
+      remainingMonths = Math.max(1, totalMonths - monthsElapsed);
+    } else if (loanTermYears) {
+      remainingMonths = loanTermYears * 12;
+    }
+    
+    // Calculate payoff with extra payment
     let balance = loanBalance;
     let totalInterest = 0;
     let months = 0;
     const totalPayment = monthlyPayment + extraPayment;
     
-    while (balance > 0.01 && months < 600) {
+    while (balance > 0.01 && months < remainingMonths + 60) {
       const interestPayment = balance * monthlyRate;
-      const principalPayment = totalPayment - interestPayment;
+      const principalPayment = Math.min(totalPayment - interestPayment, balance);
       balance -= principalPayment;
       totalInterest += interestPayment;
       months++;
+      if (balance <= 0.01) break;
     }
     
-    // Calculate original payoff
+    // Calculate original payoff (without extra payment)
     let origBalance = loanBalance;
     let origMonths = 0;
     let origInterest = 0;
-    while (origBalance > 0.01 && origMonths < 600) {
+    while (origBalance > 0.01 && origMonths < remainingMonths + 60) {
       const origInterestPayment = origBalance * monthlyRate;
-      const origPrincipalPayment = monthlyPayment - origInterestPayment;
+      const origPrincipalPayment = Math.min(monthlyPayment - origInterestPayment, origBalance);
       origBalance -= origPrincipalPayment;
       origInterest += origInterestPayment;
       origMonths++;
+      if (origBalance <= 0.01) break;
     }
     
     return {
       years: Math.floor(months / 12),
       months: months % 12,
-      interestSaved: origInterest - totalInterest,
+      interestSaved: Math.max(0, origInterest - totalInterest),
       newPayment: totalPayment,
-      yearsSaved: Math.floor((origMonths - months) / 12)
+      yearsSaved: Math.max(0, Math.floor((origMonths - months) / 12)),
+      origPayoffYears: Math.floor(origMonths / 12),
+      origPayoffMonths: origMonths % 12
     };
   }
 
-  function calculateCashOut(cashOutAmount, currentBalance, interestRate, currentPayment, homeValue) {
+  function calculateCashOut(cashOutAmount, currentBalance, interestRate, currentPayment, homeValue, loanTermYears, loanStartDate) {
     if (!cashOutAmount || cashOutAmount <= 0) {
       return { newBalance: currentBalance, newPayment: currentPayment, newLTV: 0 };
     }
@@ -1613,10 +1766,20 @@
     const newBalance = currentBalance + cashOutAmount;
     const newLTV = (newBalance / homeValue) * 100;
     
-    // Estimate new payment (simplified - assumes same rate and term)
-    // This is a rough estimate - actual would depend on new loan terms
+    // Calculate remaining term based on loan start date and term
+    let remainingMonths = 360; // Default 30 years
+    if (loanTermYears && loanStartDate) {
+      const startDate = new Date(loanStartDate);
+      const today = new Date();
+      const monthsElapsed = (today.getFullYear() - startDate.getFullYear()) * 12 + (today.getMonth() - startDate.getMonth());
+      const totalMonths = loanTermYears * 12;
+      remainingMonths = Math.max(1, totalMonths - monthsElapsed);
+    } else if (loanTermYears) {
+      remainingMonths = loanTermYears * 12;
+    }
+    
+    // Calculate new payment using amortization formula (Homebot-style)
     const monthlyRate = interestRate / 100 / 12;
-    const remainingMonths = 360; // Simplified - would need actual remaining term
     const newPayment = newBalance * (monthlyRate * Math.pow(1 + monthlyRate, remainingMonths)) / 
                       (Math.pow(1 + monthlyRate, remainingMonths) - 1);
     
@@ -1629,12 +1792,17 @@
   }
 
   // Get snapshot data from page
+  // Template variables below will be replaced by Jinja2 before JavaScript execution
+  /* eslint-disable */
   const snapshotData = {
     loanBalance: {% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance }}{% else %}0{% endif %},
     valueEstimate: {% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate }}{% else %}0{% endif %},
     loanRate: {% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% else %}4.5{% endif %},
-    loanPayment: {% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment }}{% else %}0{% endif %}
+    loanPayment: {% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment }}{% else %}0{% endif %},
+    loanTermYears: {% if snapshot and snapshot.loan_term_years %}{{ snapshot.loan_term_years }}{% else %}30{% endif %},
+    loanStartDate: {% if snapshot and snapshot.loan_start_date %}'{{ snapshot.loan_start_date|e }}'{% else %}null{% endif %}
   };
+  /* eslint-enable */
 
   document.querySelectorAll(".scenario-slider").forEach((slider) => {
     const type = slider.dataset.scenario;
@@ -1655,7 +1823,9 @@
           value,
           snapshotData.loanBalance,
           snapshotData.loanRate || 4.5,
-          snapshotData.loanPayment || 2000
+          snapshotData.loanPayment || 2000,
+          snapshotData.loanTermYears || 30,
+          snapshotData.loanStartDate
         );
         
         if (value > 0 && result.years > 0) {
@@ -1666,11 +1836,12 @@
           
           details.innerHTML = 
             '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
-            '<p style="margin: 0.25rem 0;"><strong>New payoff:</strong> ' + result.years + ' years, ' + result.months + ' months</p>' +
+            '<p style="margin: 0.25rem 0;"><strong>Current payoff:</strong> ' + result.origPayoffYears + ' years, ' + result.origPayoffMonths + ' months</p>' +
+            '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>New payoff:</strong> ' + result.years + ' years, ' + result.months + ' months</p>' +
             '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>Interest saved:</strong> $' + 
             Math.round(result.interestSaved).toLocaleString() + '</p>' +
             '<p style="margin: 0.25rem 0; font-size: 0.8rem; color: #999;">New monthly payment: $' + 
-            Math.round(result.newPayment).toLocaleString() + '</p>' +
+            Math.round(result.newPayment).toLocaleString() + '/month</p>' +
             '</div>';
         } else {
           valueDisplay.textContent = '';
@@ -1687,7 +1858,9 @@
             snapshotData.loanBalance,
             snapshotData.loanRate || 4.5,
             snapshotData.loanPayment || 2000,
-            snapshotData.valueEstimate
+            snapshotData.valueEstimate,
+            snapshotData.loanTermYears || 30,
+            snapshotData.loanStartDate
           );
           
           valueDisplay.innerHTML = '<strong style="color: var(--olive-green);">Access $' + 
@@ -1695,14 +1868,17 @@
           
           output.textContent = 'Cash-out refinance scenario:';
           
+          const paymentChange = result.paymentIncrease > 0 ? '+' : '';
           details.innerHTML = 
             '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
             '<p style="margin: 0.25rem 0;"><strong>New loan balance:</strong> $' + 
             Math.round(result.newBalance).toLocaleString() + '</p>' +
             '<p style="margin: 0.25rem 0;"><strong>New LTV:</strong> ' + 
             result.newLTV.toFixed(1) + '%</p>' +
-            '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>Estimated new payment:</strong> $' + 
-            Math.round(result.newPayment).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.25rem 0;"><strong>Current payment:</strong> $' + 
+            Math.round(snapshotData.loanPayment || 2000).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.25rem 0; color: ' + (result.paymentIncrease > 0 ? '#d32f2f' : 'var(--olive-green)') + ';"><strong>Estimated new payment:</strong> $' + 
+            Math.round(result.newPayment).toLocaleString() + '/month (' + paymentChange + '$' + Math.round(Math.abs(result.paymentIncrease)).toLocaleString() + ' change)</p>' +
             '<p style="margin: 0.5rem 0 0; font-size: 0.8rem; color: #999; font-style: italic;">' +
             'Note: Actual terms depend on current rates and your credit. Talk to your lender for exact numbers.</p>' +
             '</div>';
