@@ -3253,19 +3253,48 @@ def homeowner_value_equity_overview():
             primary_property = get_property_by_id(property_id)
             all_properties = get_user_properties(homeowner_id)
     
-    current_property = primary_property if primary_property else (all_properties[0] if all_properties else None)
-    current_property_id = current_property.get('id') if current_property else None
+    # Get current property - ensure it's a dict
+    current_property = None
+    if primary_property:
+        current_property = dict(primary_property) if hasattr(primary_property, 'keys') and not isinstance(primary_property, dict) else primary_property
+    elif all_properties and len(all_properties) > 0:
+        first_prop = all_properties[0]
+        current_property = dict(first_prop) if hasattr(first_prop, 'keys') and not isinstance(first_prop, dict) else first_prop
+    
+    # Get current property ID safely
+    current_property_id = None
+    if current_property:
+        if isinstance(current_property, dict):
+            current_property_id = current_property.get('id')
+        elif hasattr(current_property, 'get'):
+            current_property_id = current_property.get('id')
+        elif hasattr(current_property, 'id'):
+            current_property_id = current_property.id
     
     # Get homeowner snapshot data (synced from Homebot webhook)
     snapshot_data = None
     snapshot_history = []
     if current_property_id:
-        snapshot_data = get_homeowner_snapshot_for_property(homeowner_id, current_property_id)
-        # Calculate equity if we have value and loan balance
-        if snapshot_data and snapshot_data.get('value_estimate') and snapshot_data.get('loan_balance'):
-            snapshot_data['equity_estimate'] = snapshot_data.get('value_estimate') - snapshot_data.get('loan_balance')
-        # Get historical snapshots
-        snapshot_history = get_snapshot_history(homeowner_id, current_property_id, limit=24)
+        try:
+            snapshot_data = get_homeowner_snapshot_for_property(homeowner_id, current_property_id)
+            # Convert to dict if it's a Row object
+            if snapshot_data and hasattr(snapshot_data, 'keys') and not isinstance(snapshot_data, dict):
+                snapshot_data = dict(snapshot_data)
+            # Calculate equity if we have value and loan balance
+            if snapshot_data and snapshot_data.get('value_estimate') and snapshot_data.get('loan_balance'):
+                snapshot_data['equity_estimate'] = snapshot_data.get('value_estimate') - snapshot_data.get('loan_balance')
+            # Get historical snapshots
+            try:
+                snapshot_history = get_snapshot_history(homeowner_id, current_property_id, limit=24)
+            except Exception as e:
+                print(f"[HOMEBOT] Error getting snapshot history: {e}")
+                snapshot_history = []
+        except Exception as e:
+            print(f"[HOMEBOT] Error getting snapshot data: {e}")
+            import traceback
+            print(traceback.format_exc())
+            snapshot_data = None
+            snapshot_history = []
     
     # Debug logging
     print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
@@ -3274,21 +3303,50 @@ def homeowner_value_equity_overview():
     print(f"[HOMEBOT] Professional Info: {professional_info}")
     print(f"[HOMEBOT] Homeowner Data: {homeowner_data}")
     print(f"[HOMEBOT] Snapshot Data: {snapshot_data}")
-    print(f"[HOMEBOT] Properties: {len(all_properties)} total, current: {current_property_id}")
+    print(f"[HOMEBOT] Properties: {len(all_properties) if all_properties else 0} total, current: {current_property_id}")
+    
+    # Ensure all variables are properly formatted for template
+    # Convert all properties to dicts
+    properties_list = []
+    for prop in (all_properties or []):
+        if hasattr(prop, 'keys') and not isinstance(prop, dict):
+            properties_list.append(dict(prop))
+        elif isinstance(prop, dict):
+            properties_list.append(prop)
+        else:
+            properties_list.append(prop)
+    
+    # Ensure current_property is a dict
+    if current_property and hasattr(current_property, 'keys') and not isinstance(current_property, dict):
+        current_property = dict(current_property)
+    elif not current_property:
+        current_property = {}
+    
+    # Ensure snapshot_data is a dict
+    if snapshot_data and hasattr(snapshot_data, 'keys') and not isinstance(snapshot_data, dict):
+        snapshot_data = dict(snapshot_data)
     
     # Render Homebot-powered equity page
-    response = make_response(render_template(
-        "homeowner/value_equity_homebot.html",
-        brand_name=FRONT_BRAND_NAME,
-        homebot_widget_id=homebot_widget_id,
-        professional_info=professional_info,
-        homeowner_data=homeowner_data,
-        snapshot=snapshot_data,
-        snapshot_history=snapshot_history,
-        properties=all_properties,
-        current_property=current_property,
-        current_property_id=current_property_id,
-    ))
+    try:
+        response = make_response(render_template(
+            "homeowner/value_equity_homebot.html",
+            brand_name=FRONT_BRAND_NAME,
+            homebot_widget_id=homebot_widget_id,
+            professional_info=professional_info,
+            homeowner_data=homeowner_data or {},
+            snapshot=snapshot_data,
+            snapshot_history=snapshot_history or [],
+            properties=properties_list,
+            current_property=current_property or {},
+            current_property_id=current_property_id,
+        ))
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"[HOMEBOT] ERROR rendering template: {str(e)}")
+        print(error_trace)
+        flash(f"Error loading equity page: {str(e)}", "error")
+        return redirect(url_for("homeowner_overview"))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
     # VERY permissive CSP to ensure Homebot widget works fully (address autocomplete, form submission, etc.)
