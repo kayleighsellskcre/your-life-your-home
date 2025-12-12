@@ -1,105 +1,467 @@
 {% extends "homeowner/layout.html" %}
-{% block title %}Equity Overview • Your Life Your Home{% endblock %}
+{% block title %}Equity Center • Your Life Your Home{% endblock %}
 
 {% block homeowner_content %}
 <style>
-  .homebot-hero {
-    text-align: center;
-    padding: 3rem 2rem 2rem;
+  /* Equity Center - Product-Style Layout */
+  .equity-page {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* HERO SECTION */
+  .equity-hero {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    padding: 2.5rem;
     background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
-    color: white;
-    margin-bottom: 2rem;
     border-radius: var(--border-radius-lg);
-  }
-  
-  .homebot-hero h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.75rem;
     color: white;
   }
-  
-  .homebot-hero p {
+
+  @media (max-width: 1024px) {
+    .equity-hero {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .equity-hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .equity-hero .eyebrow {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .equity-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 400;
+    margin: 0 0 1rem;
+    color: white;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .equity-hero .sub {
     font-size: 1.1rem;
     opacity: 0.95;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-  
-  .professional-info {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
+    line-height: 1.7;
     margin-bottom: 2rem;
+  }
+
+  .equity-status-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .status-pill {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    padding: 0.75rem 1.25rem;
+    border-radius: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .status-pill .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.8;
+  }
+
+  .status-pill .value {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  /* AGENT CARD */
+  .equity-hero-right {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
-    box-shadow: var(--shadow-light);
+    justify-content: flex-end;
   }
-  
-  .professional-info img {
+
+  .agent-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    max-width: 400px;
+    width: 100%;
+    color: var(--charcoal-brown);
+  }
+
+  .agent-photo {
     width: 80px;
     height: 80px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid var(--olive-green);
+    margin-bottom: 1rem;
   }
-  
-  .professional-info-content h2 {
-    font-size: 1.3rem;
-    color: var(--charcoal-brown);
+
+  .agent-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--olive-green);
+    font-weight: 600;
     margin-bottom: 0.5rem;
   }
-  
-  .professional-info-content p {
+
+  .agent-card h2 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
     color: var(--charcoal-brown);
-    opacity: 0.8;
+    font-weight: 500;
+  }
+
+  .agent-brokerage {
+    color: #666;
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+  }
+
+  .agent-contact {
+    color: #666;
+    font-size: 0.9rem;
     margin: 0.25rem 0;
   }
-  
-  .widget-section {
+
+  .agent-cta {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--olive-green);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: all 0.3s ease;
+  }
+
+  .agent-cta:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+
+  /* SNAPSHOT CARDS */
+  .equity-snapshot {
+    margin-bottom: 3rem;
+  }
+
+  .snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .snapshot-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .snapshot-card.clickable {
+    cursor: pointer;
+  }
+
+  .snapshot-card.clickable:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+    border-color: var(--olive-green);
+  }
+
+  .snapshot-card.clickable::after {
+    content: '→';
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    color: var(--olive-green);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(-10px);
+  }
+
+  .snapshot-card.clickable:hover::after {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .snapshot-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--taupe-beige);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+
+  .snapshot-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: var(--olive-green);
+  }
+
+  .snapshot-card:hover::before {
+    transform: scaleX(1);
+    background: var(--olive-green);
+  }
+
+  .snapshot-card.snapshot-primary {
+    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
+    color: white;
+    border: none;
+  }
+
+  .snapshot-card.snapshot-primary.clickable:hover {
+    background: linear-gradient(135deg, #5A6D47 0%, #7A6A4A 100%);
+  }
+
+  .snapshot-card.snapshot-primary.clickable::after {
+    color: white;
+  }
+
+  .snapshot-card.snapshot-primary p[style*="font-size: 0.85rem"] {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .snapshot-card.snapshot-primary::before {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .snapshot-card h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 1rem;
+    opacity: 0.8;
+    font-weight: 600;
+  }
+
+  .snapshot-card.snapshot-primary h3 {
+    opacity: 0.9;
+  }
+
+  .snapshot-card .big-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    color: var(--charcoal-brown);
+    line-height: 1;
+  }
+
+  .snapshot-card.snapshot-primary .big-number {
+    color: white;
+  }
+
+  .snapshot-card .delta {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+  }
+
+  .snapshot-card.snapshot-primary .delta {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .snapshot-card .hint {
+    font-size: 0.85rem;
+    color: #999;
+    margin: 0;
+  }
+
+  .snapshot-card.snapshot-primary .hint {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* PROGRESS BAR */
+  .paydown-progress {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+  }
+
+  .paydown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+  }
+
+  .paydown-label {
+    font-size: 0.9rem;
+    color: var(--olive-green);
+    font-weight: 500;
+  }
+
+  .progress-bar {
+    height: 12px;
+    background: var(--light-cream);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6B6A45 0%, #8B7A5A 100%);
+    border-radius: 6px;
+    transition: width 1s ease;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .progress-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  /* MAIN AREA WITH TABS */
+  .equity-main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  @media (max-width: 1024px) {
+    .equity-main {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .equity-main-left {
     background: var(--white);
     border: 2px solid var(--taupe-beige);
     border-radius: var(--border-radius-lg);
     padding: 0;
-    min-height: 800px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+
+  /* TABS */
+  .equity-tabs {
+    display: flex;
+    background: var(--light-cream);
+    border-bottom: 2px solid var(--taupe-beige);
+  }
+
+  .equity-tabs .tab {
+    flex: 1;
+    padding: 1.25rem 2rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+
+  .equity-tabs .tab:hover {
+    color: var(--olive-green);
+    background: rgba(107, 106, 69, 0.05);
+  }
+
+  .equity-tabs .tab.active {
+    color: var(--olive-green);
+    border-bottom-color: var(--olive-green);
+    background: var(--white);
+  }
+
+  /* TAB PANELS */
+  .tab-panels {
+    padding: 2.5rem;
+  }
+
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .tab-panel h2 {
+    font-size: 1.75rem;
+    margin: 0 0 0.5rem;
+    color: var(--charcoal-brown);
+    font-weight: 400;
+  }
+
+  .panel-sub {
+    color: #666;
+    margin: 0 0 2rem;
+    line-height: 1.6;
+  }
+
+  /* HOMEBOT WIDGET CONTAINER */
+  .homebot-widget-container {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 0;
+    min-height: 700px;
     overflow: hidden;
     position: relative;
     isolation: isolate;
-    margin-bottom: 3rem;
   }
-  
-  /* Ensure widget section doesn't cause page scroll issues */
-  .widget-section::after {
-    content: '';
-    display: block;
-    clear: both;
-  }
-  
-  .widget-header {
-    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
-    color: white;
-    padding: 1.5rem 2rem;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .widget-header h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .widget-header p {
-    margin: 0.5rem 0 0;
-    opacity: 0.9;
-    font-size: 0.95rem;
-  }
-  
+
   #homebot_homeowner {
     width: 100%;
     min-height: 700px;
@@ -110,9 +472,8 @@
     display: block;
     z-index: 1;
     pointer-events: auto;
-    background: var(--white);
   }
-  
+
   #homebot_homeowner iframe {
     width: 100% !important;
     min-height: 700px !important;
@@ -121,238 +482,927 @@
     pointer-events: auto !important;
     transition: height 0.3s ease;
   }
-  
-  /* Prevent any parent click handlers from interfering */
-  .widget-section * {
-    pointer-events: auto;
+
+  .homebot-skeleton {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #999;
   }
-  
-  .ylh-actions-below {
+
+  .empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    background: var(--light-cream);
+    border-radius: var(--border-radius-lg);
+  }
+
+  .empty-state h3 {
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+  }
+
+  /* SCENARIO CARDS */
+  .scenario-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-top: 3rem;
   }
-  
-  .ylh-action-card {
+
+  .scenario-card {
     background: var(--white);
     border: 2px solid var(--taupe-beige);
     border-radius: var(--border-radius-lg);
     padding: 2rem;
     transition: all 0.3s ease;
-    text-decoration: none;
-    color: inherit;
-    display: block;
   }
-  
-  .ylh-action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+  .scenario-card:hover {
     border-color: var(--olive-green);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   }
-  
-  .ylh-action-card h3 {
-    color: var(--charcoal-brown);
-    margin: 0 0 0.75rem;
+
+  .scenario-card h3 {
     font-size: 1.3rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  
-  .ylh-action-card p {
-    color: #666;
-    margin: 0;
-    line-height: 1.6;
-    font-size: 0.95rem;
-  }
-  
-  .no-homebot-message {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: var(--white);
-    border: 2px dashed var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-  }
-  
-  .no-homebot-message h2 {
+    margin: 0 0 0.75rem;
     color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .scenario-card p {
+    color: #666;
+    margin: 0 0 1.5rem;
+    line-height: 1.6;
+  }
+
+  .scenario-card label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+  .scenario-slider {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--light-cream);
+    outline: none;
+    -webkit-appearance: none;
     margin-bottom: 1rem;
   }
-  
-  .no-homebot-message p {
+
+  .scenario-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--olive-green);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .scenario-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.4);
+  }
+
+  .scenario-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--olive-green);
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+  }
+
+  .scenario-output {
+    padding: 1rem;
+    background: var(--light-cream);
+    border-radius: var(--border-radius);
     color: var(--charcoal-brown);
-    opacity: 0.8;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  .linkish {
+    background: none;
+    border: none;
+    color: var(--olive-green);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    font-family: inherit;
+  }
+
+  .linkish:hover {
+    color: #5A6D47;
+  }
+
+  /* HISTORY SECTION */
+  .history-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .history-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .chart-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+  }
+
+  .chart-card h3 {
+    font-size: 1.2rem;
+    margin: 0 0 1.5rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .chart-placeholder {
+    height: 300px;
+    background: var(--light-cream);
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    border: 2px dashed var(--taupe-beige);
+  }
+
+  .history-list {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+  }
+
+  .history-list h3 {
+    font-size: 1.2rem;
+    margin: 0 0 1.5rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .history-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .history-list li {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--taupe-beige);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .history-list li:last-child {
+    border-bottom: none;
+  }
+
+  .snap-date {
+    color: #666;
+  }
+
+  .snap-value {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+  }
+
+  .snap-equity {
+    color: var(--olive-green);
+    font-weight: 500;
+  }
+
+  /* RIGHT SIDEBAR */
+  .equity-main-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .equity-main-right h3 {
+    font-size: 1.3rem;
+    margin: 0 0 0.5rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .action-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: var(--olive-green);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    font-size: 0.95rem;
+  }
+
+  .action-btn:hover {
+    background: #5A6D47;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+
+  .action-btn.secondary {
+    background: var(--white);
+    color: var(--olive-green);
+    border: 2px solid var(--olive-green);
+  }
+
+  .action-btn.secondary:hover {
+    background: var(--light-cream);
+  }
+
+  .info-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+  }
+
+  .info-card.subtle {
+    background: var(--light-cream);
+    border-color: rgba(200, 180, 151, 0.3);
+  }
+
+  .info-card h4 {
+    font-size: 1rem;
+    margin: 0 0 0.75rem;
+    color: var(--charcoal-brown);
+    font-weight: 600;
+  }
+
+  .info-card p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
     line-height: 1.6;
-    max-width: 600px;
-    margin: 0 auto 1.5rem;
+  }
+
+  /* INTERACTIVE TOOLTIPS */
+  .tooltip-trigger {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    border-bottom: 1px dotted var(--olive-green);
+    color: var(--olive-green);
+    font-weight: 500;
+  }
+
+  .tooltip {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--charcoal-brown);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    width: 250px;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateX(-50%) translateY(-10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--charcoal-brown);
+  }
+
+  .tooltip-trigger:hover .tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+
+  /* EXPANDABLE EDUCATIONAL CARDS */
+  .edu-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .edu-card:hover {
+    border-color: var(--olive-green);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .edu-card-header {
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--light-cream);
+    transition: background 0.3s ease;
+  }
+
+  .edu-card-header:hover {
+    background: rgba(107, 106, 69, 0.05);
+  }
+
+  .edu-card-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .edu-card-toggle {
+    font-size: 1.2rem;
+    color: var(--olive-green);
+    transition: transform 0.3s ease;
+  }
+
+  .edu-card.expanded .edu-card-toggle {
+    transform: rotate(180deg);
+  }
+
+  .edu-card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    padding: 0 1.5rem;
+  }
+
+  .edu-card.expanded .edu-card-content {
+    max-height: 500px;
+    padding: 1.5rem;
+  }
+
+  .edu-card-content p {
+    margin: 0 0 1rem;
+    color: #666;
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  .edu-card-content ul {
+    margin: 0.5rem 0 1rem 1.5rem;
+    padding: 0;
+    color: #666;
+    line-height: 1.8;
+  }
+
+  .edu-card-content li {
+    margin-bottom: 0.5rem;
+  }
+
+  /* ENHANCED SCENARIO CARDS WITH CALCULATIONS */
+  .scenario-card {
+    position: relative;
+  }
+
+  .scenario-value-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    margin-bottom: 0.5rem;
+    min-height: 1.5rem;
+  }
+
+  .scenario-details {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.5rem;
+    line-height: 1.6;
+  }
+
+  /* ANIMATED NUMBER COUNTERS */
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .big-number {
+    animation: countUp 0.6s ease;
+  }
+
+  /* SMOOTH CARD ENTRANCE */
+  @keyframes slideInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .snapshot-card {
+    animation: slideInUp 0.5s ease backwards;
+  }
+
+  .snapshot-card:nth-child(1) { animation-delay: 0.1s; }
+  .snapshot-card:nth-child(2) { animation-delay: 0.2s; }
+  .snapshot-card:nth-child(3) { animation-delay: 0.3s; }
+  .snapshot-card:nth-child(4) { animation-delay: 0.4s; }
+
+  /* PULSE ANIMATION FOR IMPORTANT INFO */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .highlight-pulse {
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* INTERACTIVE HOVER STATES */
+  .status-pill {
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+
+  .status-pill:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+
+  /* SMOOTH PROGRESS BAR ANIMATION */
+  .progress-fill {
+    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ENHANCED ACTION BUTTONS */
+  .action-btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+  }
+
+  .action-btn:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+
+  .action-btn span {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* EDUCATIONAL BADGES */
+  .learn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--olive-green);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-left: 0.5rem;
   }
 </style>
 
-<div class="homebot-hero">
-  <h1>🏠 Your Home Equity Dashboard</h1>
-  <p>
-    Everything you need to track your home's value, understand your equity, and explore your options – 
-    all in one place, powered by Homebot and personalized by your real estate professional.
-  </p>
-</div>
+<section class="equity-page">
+  <!-- HERO + AGENT CARD -->
+  <header class="equity-hero">
+    <div class="equity-hero-left">
+      <p class="eyebrow">Your Life Your Home · Equity Center</p>
+      <h1>See What Your Home Is Doing For You</h1>
+      <p class="sub">
+        Track your home value, loan payoff, and equity — all in one place.
+        Powered by Homebot, presented inside your YLYH dashboard.
+      </p>
 
-{% if professional_info %}
-<div class="professional-info">
-  {% if professional_info.professional_photo %}
-  <img src="{{ url_for('static', filename=professional_info.professional_photo) if not professional_info.professional_photo.startswith('http') else professional_info.professional_photo }}" alt="{{ professional_info.name }}">
-  {% else %}
-  <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
-    {{ professional_info.name[0] if professional_info.name else '?' }}
-  </div>
-  {% endif %}
-  <div class="professional-info-content">
-    <h2>Your Real Estate Professional</h2>
-    <p><strong>{{ professional_info.name }}</strong></p>
-    {% if professional_info.brokerage_name %}
-    <p>{{ professional_info.brokerage_name }}{% if professional_info.team_name %} - {{ professional_info.team_name }}{% endif %}</p>
-    {% endif %}
-    {% if professional_info.email %}
-    <p style="margin-top: 0.5rem;">
-      <a href="mailto:{{ professional_info.email }}" style="color: var(--olive-green); text-decoration: none;">
-        {{ professional_info.email }}
-      </a>
-    </p>
-    {% endif %}
-  </div>
-</div>
-{% endif %}
+      <div class="equity-status-row">
+        <div class="status-pill">
+          <span class="label">Home</span>
+          <span class="value">
+            {% if homeowner_data and homeowner_data.address %}
+              {{ homeowner_data.address }}
+            {% else %}
+              Your home address
+            {% endif %}
+          </span>
+        </div>
+        <div class="status-pill">
+          <span class="label">Last Update</span>
+          <span class="value">
+            {% if snapshot and snapshot.updated_at %}
+              {{ snapshot.updated_at[:10] if snapshot.updated_at|length > 10 else snapshot.updated_at }}
+            {% else %}
+              Updates monthly
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
 
-{% if snapshot and (snapshot.value_estimate or snapshot.loan_balance) %}
-<!-- Homebot Synced Data Display -->
-<div class="dashboard-section" style="margin-bottom: 2rem;">
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-    {% if snapshot.value_estimate %}
-    <div class="card" style="background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%); color: white; border: none;">
-      <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Home Value</div>
-      <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.value_estimate) }}</div>
-      <div style="font-size: 0.75rem; opacity: 0.8;">Synced from Homebot</div>
-    </div>
-    {% endif %}
-    
-    {% if snapshot.loan_balance %}
-    <div class="card" style="background: linear-gradient(135deg, #8B7A5A 0%, #A69B7A 100%); color: white; border: none;">
-      <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Loan Balance</div>
-      <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.loan_balance) }}</div>
-      <div style="font-size: 0.75rem; opacity: 0.8;">Synced from Homebot</div>
-    </div>
-    {% endif %}
-    
-    {% if snapshot.equity_estimate %}
-    <div class="card" style="background: linear-gradient(135deg, #5A6D47 0%, #6B6A45 100%); color: white; border: none;">
-      <div style="font-size: 0.85rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">Your Equity</div>
-      <div style="font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.equity_estimate) }}</div>
-      <div style="font-size: 0.75rem; opacity: 0.8;">Synced from Homebot</div>
-    </div>
-    {% endif %}
-    
-    {% if snapshot.loan_rate %}
-    <div class="card" style="background: var(--white); border: 2px solid var(--taupe-beige);">
-      <div style="font-size: 0.85rem; color: var(--olive-green); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Interest Rate</div>
-      <div style="font-size: 1.75rem; font-weight: 700; color: var(--charcoal-brown); margin-bottom: 0.5rem;">{{ "{:.2f}".format(snapshot.loan_rate) }}%</div>
-      <div style="font-size: 0.75rem; color: #999;">Synced from Homebot</div>
-    </div>
-    {% endif %}
-    
-    {% if snapshot.loan_payment %}
-    <div class="card" style="background: var(--white); border: 2px solid var(--taupe-beige);">
-      <div style="font-size: 0.85rem; color: var(--olive-green); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Monthly Payment</div>
-      <div style="font-size: 1.75rem; font-weight: 700; color: var(--charcoal-brown); margin-bottom: 0.5rem;">${{ "{:,.0f}".format(snapshot.loan_payment) }}</div>
-      <div style="font-size: 0.75rem; color: #999;">Synced from Homebot</div>
-    </div>
-    {% endif %}
-  </div>
-  
-  {% if snapshot.value_estimate and snapshot.loan_balance %}
-  <div style="margin-top: 1.5rem; padding: 1rem; background: var(--light-cream); border-radius: var(--border-radius); border-left: 4px solid var(--olive-green);">
-    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-      <span style="font-size: 1.2rem;">📊</span>
-      <strong style="color: var(--charcoal-brown);">Loan-to-Value (LTV):</strong>
-      <span style="color: var(--olive-green); font-weight: 700; font-size: 1.1rem;">
-        {{ "{:.1f}".format((snapshot.loan_balance / snapshot.value_estimate) * 100) }}%
-      </span>
-    </div>
-    <p style="margin: 0; font-size: 0.9rem; color: #666;">
-      This data is automatically synced from Homebot when you link your account. 
-      {% if snapshot.updated_at %}
-      Last updated: {{ snapshot.updated_at[:10] if snapshot.updated_at else 'Recently' }}
+    <div class="equity-hero-right">
+      {% if professional_info %}
+      <div class="agent-card">
+        {% if professional_info.professional_photo %}
+        <img class="agent-photo" src="{{ url_for('static', filename=professional_info.professional_photo) if not professional_info.professional_photo.startswith('http') else professional_info.professional_photo }}" alt="{{ professional_info.name }}">
+        {% else %}
+        <div class="agent-photo" style="background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
+          {{ professional_info.name[0] if professional_info.name else '?' }}
+        </div>
+        {% endif %}
+        <div class="agent-text">
+          <p class="agent-label">Your Real Estate Pro</p>
+          <h2>{{ professional_info.name }}</h2>
+          {% if professional_info.brokerage_name %}
+            <p class="agent-brokerage">{{ professional_info.brokerage_name }}{% if professional_info.team_name %} - {{ professional_info.team_name }}{% endif %}</p>
+          {% endif %}
+          {% if professional_info.email %}
+            <p class="agent-contact">{{ professional_info.email }}</p>
+          {% endif %}
+          <button type="button" class="agent-cta" onclick="window.location.href='mailto:{{ professional_info.email }}'">
+            Message {{ professional_info.name.split(' ')[0] if professional_info.name else 'Your Pro' }}
+          </button>
+        </div>
+      </div>
       {% endif %}
-    </p>
-  </div>
-  {% endif %}
-</div>
-{% endif %}
-
-<div class="widget-section">
-  {% if homebot_widget_id %}
-    <div class="widget-header">
-      <h2>
-        <span>🏠</span>
-        <span>Your Home Value & Equity Dashboard</span>
-      </h2>
-      <p>Powered by Homebot • All tools and scenarios run right here in your dashboard</p>
     </div>
-    <div id="homebot_homeowner" style="width: 100%; min-height: 700px; position: relative;"></div>
-  {% else %}
-    <div class="no-homebot-message">
-      <h2>Homebot Not Connected</h2>
-      <p>
-        Your {{ 'agent' if professional_info and professional_info.role == 'agent' else 'lender' }} hasn't connected their Homebot account yet.
-      </p>
-      <p>
-        Please reach out to them directly for equity updates and home value tracking.
-      </p>
+  </header>
+
+  <!-- SNAPSHOT: BIG NUMBERS -->
+  <section class="equity-snapshot">
+    <div class="snapshot-grid">
+      <article class="snapshot-card snapshot-primary clickable" data-snap="value" onclick="window.location.href='{{ url_for('homeowner_value_my_home') }}'">
+        <h3>Estimated Home Value</h3>
+        <p class="big-number">
+          {% if snapshot and snapshot.value_estimate %}
+            ${{ "{:,.0f}".format(snapshot.value_estimate) }}
+          {% else %}
+            —
+          {% endif %}
+        </p>
+        <p class="delta">
+          {% if snapshot and snapshot.value_refresh_source %}
+            Synced from {{ snapshot.value_refresh_source }}
+          {% else %}
+            Monthly updates via Homebot
+          {% endif %}
+        </p>
+        <p style="margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.9; font-style: italic;">Click to get detailed home value report</p>
+      </article>
+
+      <article class="snapshot-card clickable" data-snap="loan" onclick="window.location.href='{{ url_for('homeowner_next_loan_paths') }}'">
+        <h3>Loan Balance</h3>
+        <p class="big-number">
+          {% if snapshot and snapshot.loan_balance %}
+            ${{ "{:,.0f}".format(snapshot.loan_balance) }}
+          {% else %}
+            —
+          {% endif %}
+        </p>
+        <p class="hint">Updates as you make payments</p>
+        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to explore refinance options</p>
+      </article>
+
+      <article class="snapshot-card clickable" data-snap="equity" onclick="document.querySelector('[data-tab=\"scenarios\"]').click(); setTimeout(() => { document.querySelector('.scenario-slider[data-scenario=\"cashout\"]').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300);">
+        <h3>
+          Total Equity
+          <span class="tooltip-trigger">
+            ℹ️
+            <span class="tooltip">
+              Equity is the portion of your home you actually own. It's your home's value minus what you still owe. You can use equity for renovations, investments, or as a down payment on your next home.
+            </span>
+          </span>
+        </h3>
+        <p class="big-number">
+          {% if snapshot and snapshot.equity_estimate %}
+            ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
+          {% elif snapshot and snapshot.value_estimate and snapshot.loan_balance %}
+            ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}
+          {% else %}
+            —
+          {% endif %}
+        </p>
+        <p class="hint">Value minus loan balance</p>
+        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to explore equity scenarios</p>
+      </article>
+
+      <article class="snapshot-card clickable" data-snap="ltv" onclick="window.location.href='{{ url_for('homeowner_next_loan_paths') }}'">
+        <h3>
+          Loan-to-Value (LTV)
+          <span class="tooltip-trigger">
+            ℹ️
+            <span class="tooltip">
+              LTV is your loan balance divided by your home's value. Lower LTV (under 80%) often means better rates and no PMI. Lenders use this to assess risk.
+            </span>
+          </span>
+        </h3>
+        <p class="big-number">
+          {% if snapshot and snapshot.value_estimate and snapshot.loan_balance and snapshot.value_estimate > 0 %}
+            {{ "{:.1f}".format((snapshot.loan_balance / snapshot.value_estimate) * 100) }}%
+          {% else %}
+            —
+          {% endif %}
+        </p>
+        <p class="hint">Lower is usually better for financing</p>
+        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to learn about refinancing</p>
+      </article>
+    </div>
+
+    {% if snapshot and snapshot.loan_balance and snapshot.value_estimate %}
+    <div class="paydown-progress">
+      <div class="paydown-header">
+        <span>Loan Paydown Journey</span>
+        <span class="paydown-label">
+          {% set paydown_percent = ((snapshot.value_estimate - snapshot.loan_balance) / snapshot.value_estimate * 100) if snapshot.value_estimate > 0 else 0 %}
+          {% if paydown_percent < 20 %}
+            You're on your way to payoff
+          {% elif paydown_percent < 50 %}
+            Making great progress
+          {% elif paydown_percent < 80 %}
+            Over halfway there
+          {% else %}
+            Almost paid off
+          {% endif %}
+        </span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: {{ paydown_percent }}%;"></div>
+      </div>
+      <div class="progress-footer">
+        <span>Current Balance: ${{ "{:,.0f}".format(snapshot.loan_balance) }}</span>
+        <span>Equity: ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}</span>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- MAIN AREA: TABS + HOMEBOT WIDGET -->
+  <section class="equity-main">
+    <div class="equity-main-left">
+      <!-- TABS -->
+      <div class="equity-tabs">
+        <button class="tab active" data-tab="overview">Overview</button>
+        <button class="tab" data-tab="scenarios">Scenarios</button>
+        <button class="tab" data-tab="history">History</button>
+      </div>
+
+      <!-- TAB PANELS -->
+      <div class="tab-panels">
+        <!-- OVERVIEW: HOMEBOT INLINE -->
+        <div class="tab-panel active" id="tab-overview">
+          <h2>Live Equity Overview</h2>
+          <p class="panel-sub">
+            Use the tool below to view your current home value and equity.
+            Everything runs inside Your Life Your Home but is powered by your
+            agent's Homebot account.
+          </p>
+
+          {% if homebot_widget_id %}
+          <div id="homebot_homeowner" class="homebot-widget-container">
+            <!-- Homebot will fully render here -->
+            <div class="homebot-skeleton">
+              <p>Loading your equity experience…</p>
+            </div>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <h3>Coming Soon</h3>
+            <p>
+              Your agent hasn't connected their Homebot account yet.
+              {% if professional_info and professional_info.name %}
+              Reach out to {{ professional_info.name }} to turn on automatic equity updates.
+              {% else %}
+              Contact your agent to turn on automatic equity updates.
+              {% endif %}
+            </p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- SCENARIOS -->
+        <div class="tab-panel" id="tab-scenarios">
+          <h2>What-If Scenarios</h2>
+          <p class="panel-sub">
+            Play with different strategies: extra payments, cash-out, or a future move.
+            These tools use your latest value and loan data as a starting point.
+          </p>
+
+          <div class="scenario-grid">
+            <div class="scenario-card">
+              <h3>Payoff Faster</h3>
+              <p>Add an extra principal payment and see how much sooner you could be debt-free and how much interest you'd save.</p>
+              <label>Extra per month: <span id="payoff-amount-display">$0</span></label>
+              <input type="range" min="0" max="1000" step="50" value="0"
+                     class="scenario-slider" data-scenario="payoff" id="payoff-slider">
+              <div class="scenario-value-display" data-output="payoff"></div>
+              <p class="scenario-output" data-output="payoff">
+                Drag the slider to see your payoff timeline and interest savings.
+              </p>
+              <div class="scenario-details" data-details="payoff"></div>
+            </div>
+
+            <div class="scenario-card">
+              <h3>Cash-Out Equity</h3>
+              <p>See how much cash you could access while keeping a comfortable payment. Cash-out refinancing lets you borrow against your equity.</p>
+              <label>Target cash-out amount: <span id="cashout-amount-display">$0</span></label>
+              <input type="range" min="0" max="200000" step="10000" value="0"
+                     class="scenario-slider" data-scenario="cashout" id="cashout-slider">
+              <div class="scenario-value-display" data-output="cashout"></div>
+              <p class="scenario-output" data-output="cashout">
+                Drag the slider to explore cash-out options.
+              </p>
+              <div class="scenario-details" data-details="cashout"></div>
+            </div>
+
+            <div class="scenario-card">
+              <h3>Stay vs. Move</h3>
+              <p>Compare using equity to upgrade this home vs. roll it into a new one.</p>
+              <button class="linkish" type="button" onclick="window.location.href='{{ url_for('homeowner_next_plan_move') }}'">
+                Start a "Stay vs Move" comparison →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="tab-panel" id="tab-history">
+          <h2>Value & Equity Over Time</h2>
+          <p class="panel-sub">
+            Track how your home value, loan balance, and equity have changed over time.
+          </p>
+
+          <div class="history-layout">
+            <div class="chart-card">
+              <h3>Value vs Balance</h3>
+              <div class="chart-placeholder">
+                <p>Chart placeholder – value & loan over time.</p>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem; color: #999;">
+                  Historical data visualization coming soon
+                </p>
+              </div>
+            </div>
+
+            <div class="history-list">
+              <h3>Monthly Snapshots</h3>
+              <ul>
+                {% if snapshot and snapshot.updated_at %}
+                <li>
+                  <span class="snap-date">{{ snapshot.updated_at[:10] if snapshot.updated_at|length > 10 else snapshot.updated_at }}</span>
+                  <span class="snap-value">
+                    {% if snapshot.value_estimate %}
+                      ${{ "{:,.0f}".format(snapshot.value_estimate) }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </span>
+                  <span class="snap-equity">
+                    {% if snapshot.equity_estimate %}
+                      ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
+                    {% elif snapshot.value_estimate and snapshot.loan_balance %}
+                      ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </span>
+                </li>
+                {% else %}
+                <li>No history yet. Your first snapshot will appear after your next update.</li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR: ACTIONS -->
+    <aside class="equity-main-right">
+      <h3>Quick Actions</h3>
+      <button class="action-btn" type="button" onclick="window.location.href='{{ url_for('homeowner_next_loan_paths') }}'">
+        <span>🔍</span> <span>Explore refinance options</span>
+      </button>
+      <button class="action-btn" type="button" onclick="document.querySelector('[data-tab=\"scenarios\"]').click(); setTimeout(() => document.querySelector('.scenario-slider[data-scenario=\"cashout\"]').focus(), 300);">
+        <span>💰</span> <span>See cash-out equity ideas</span>
+      </button>
+      <button class="action-btn" type="button" onclick="window.location.href='{{ url_for('homeowner_next_plan_move') }}'">
+        <span>🏡</span> <span>Plan my "next home" timeline</span>
+      </button>
       {% if professional_info and professional_info.email %}
-      <a href="mailto:{{ professional_info.email }}" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; text-decoration: none; border-radius: var(--border-radius); font-weight: 500;">
-        Contact {{ professional_info.name }}
-      </a>
+      <button class="action-btn secondary" type="button" onclick="window.location.href='mailto:{{ professional_info.email }}?subject=Home Equity Questions'">
+        Ask {{ professional_info.name.split(' ')[0] if professional_info.name else 'Your Pro' }} a question
+      </button>
       {% endif %}
-    </div>
-  {% endif %}
-</div>
 
-<!-- YLYH Action Cards Below Widget -->
-<div class="ylh-actions-below">
-  <a href="{{ url_for('homeowner_value_my_home') }}" class="ylh-action-card">
-    <h3>
-      <span>📊</span>
-      <span>Get Instant Home Worth</span>
-    </h3>
-    <p>Pull a comprehensive home value report with comparable sales, market trends, and detailed property insights.</p>
-  </a>
-  
-  <a href="{{ url_for('homeowner_reno_planner') }}" class="ylh-action-card">
-    <h3>
-      <span>🔨</span>
-      <span>Plan Your Renovations</span>
-    </h3>
-    <p>Explore how your home equity can fund your next renovation project. Calculate ROI and plan your upgrades.</p>
-  </a>
-  
-  <a href="{{ url_for('homeowner_next_plan_move') }}" class="ylh-action-card">
-    <h3>
-      <span>🏡</span>
-      <span>Plan Your Next Move</span>
-    </h3>
-    <p>Use your current home equity to plan your next home purchase. Calculate affordability and explore options.</p>
-  </a>
-  
-  {% if professional_info and professional_info.email %}
-  <a href="mailto:{{ professional_info.email }}?subject=Home Equity Questions" class="ylh-action-card">
-    <h3>
-      <span>💬</span>
-      <span>Talk to Your Professional</span>
-    </h3>
-    <p>Have questions about your home value or equity? Reach out to {{ professional_info.name }} for personalized guidance.</p>
-  </a>
-  {% endif %}
-</div>
+      <div class="edu-card">
+        <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+          <h4>
+            <span>📚</span>
+            <span>How This Works</span>
+          </h4>
+          <span class="edu-card-toggle">▼</span>
+        </div>
+        <div class="edu-card-content">
+          <p>
+            <strong>Homebot Integration:</strong> Homebot automatically tracks your home's value and equity in the background using real estate data and market trends.
+          </p>
+          <p>
+            <strong>Your Dashboard:</strong> Your Life Your Home turns that data into an interactive dashboard with tools from your agent and lender, all in one place.
+          </p>
+          <p>
+            <strong>Monthly Updates:</strong> Your equity numbers update monthly, so you always know where you stand without having to check multiple sources.
+          </p>
+        </div>
+      </div>
+
+      <div class="edu-card">
+        <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+          <h4>
+            <span>🔒</span>
+            <span>Data Ownership & Privacy</span>
+          </h4>
+          <span class="edu-card-toggle">▼</span>
+        </div>
+        <div class="edu-card-content">
+          <p>
+            {% if professional_info and professional_info.name %}
+            Your equity experience is tied to {{ professional_info.name }}'s Homebot account,
+            {% else %}
+            Your equity experience is tied to your agent's Homebot account,
+            {% endif %}
+            so your relationship stays directly with your trusted pro — not with a portal.
+          </p>
+          <p>
+            <strong>Your Data:</strong> All your home value and equity information is private and only shared with your real estate professional. We never sell your data.
+          </p>
+        </div>
+      </div>
+
+      <div class="edu-card">
+        <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
+          <h4>
+            <span>💡</span>
+            <span>Understanding Equity</span>
+          </h4>
+          <span class="edu-card-toggle">▼</span>
+        </div>
+        <div class="edu-card-content">
+          <p>
+            <strong>What is Equity?</strong> Equity is the portion of your home you actually own. It grows as you pay down your mortgage and as your home's value increases.
+          </p>
+          <p>
+            <strong>How to Use Equity:</strong>
+          </p>
+          <ul>
+            <li><strong>Renovations:</strong> Use equity to fund home improvements that increase value</li>
+            <li><strong>Debt Consolidation:</strong> Refinance to pay off high-interest debt</li>
+            <li><strong>Investments:</strong> Use equity for other investments or opportunities</li>
+            <li><strong>Next Home:</strong> Use equity as a down payment on your next property</li>
+          </ul>
+          <p>
+            <strong>Talk to Your Pro:</strong> Always consult with your lender or agent before making equity decisions. They can help you understand the best options for your situation.
+          </p>
+        </div>
+      </div>
+    </aside>
+  </section>
+</section>
 
 {% if homebot_widget_id %}
 <script>
@@ -360,27 +1410,24 @@
   (function() {
     'use strict';
     
-    // Mark widget container so other scripts can identify it
     var widgetContainer = document.getElementById('homebot_homeowner');
-    var widgetSection = document.querySelector('.widget-section');
+    var widgetSection = document.querySelector('.homebot-widget-container');
     
     if (widgetContainer) {
-      // Add data attribute to identify widget area
       widgetContainer.setAttribute('data-homebot-widget', 'true');
       if (widgetSection) {
         widgetSection.setAttribute('data-homebot-widget', 'true');
       }
       
-      // Stop event propagation at the container level
       ['click', 'mousedown', 'mouseup', 'submit', 'focusin', 'focusout'].forEach(function(eventType) {
         widgetContainer.addEventListener(eventType, function(e) {
           e.stopPropagation();
-        }, true); // Capture phase
+        }, true);
       });
     }
   })();
 
-  // Homebot embed code - EXACT format from Homebot's embed instructions
+  // Homebot embed code
   (function (h, b) {
     var w = window, d = document, s = 'script', x, y;
     w['_hb_namespace'] = h;
@@ -392,22 +1439,15 @@
     x.parentNode.insertBefore(y, x);
   })('Homebot');
 
-  // Initialize widget - Clean and simple
+  // Initialize widget
   (function() {
-    // Get widget ID - ensure it's a clean string, not HTML
     var widgetId = '{{ homebot_widget_id|e }}';
-    
-    // Clean the widget ID - remove any HTML tags or extra content
     widgetId = widgetId.trim();
     
-    // If widget ID contains HTML tags, extract just the ID
     if (widgetId.indexOf('<') !== -1 || widgetId.indexOf('&lt;') !== -1) {
-      console.error('[HOMEBOT] ❌ Widget ID appears to contain HTML. Expected just the ID string.');
-      // Try to extract ID from common patterns
       var idMatch = widgetId.match(/['"]([a-f0-9]{40,})['"]/);
       if (idMatch) {
         widgetId = idMatch[1];
-        console.log('[HOMEBOT] Extracted widget ID:', widgetId);
       } else {
         console.error('[HOMEBOT] ❌ Could not extract valid widget ID');
         return;
@@ -418,162 +1458,259 @@
     var maxAttempts = 50;
     var attempts = 0;
     
-    console.log('[HOMEBOT] Starting initialization...');
-    console.log('[HOMEBOT] Widget ID (cleaned):', widgetId);
-    console.log('[HOMEBOT] Widget ID length:', widgetId.length);
-    console.log('[HOMEBOT] Container:', container);
-    
     function initHomebot() {
       attempts++;
       
       if (typeof window.Homebot === 'function') {
-        console.log('[HOMEBOT] ✅ Homebot function found, initializing widget...');
         try {
-          // Use exact Homebot format: Homebot(container, widgetId)
           window.Homebot(container, widgetId);
-          console.log('[HOMEBOT] ✅ Widget initialization call completed');
           
-          // Verify iframe creation and functionality
           setTimeout(function() {
             var containerEl = document.querySelector(container);
             if (containerEl) {
               var iframe = containerEl.querySelector('iframe');
               if (iframe) {
-                console.log('[HOMEBOT] ✅✅✅ Iframe successfully created!');
-                console.log('[HOMEBOT] Iframe src:', iframe.src);
-                console.log('[HOMEBOT] Iframe dimensions:', iframe.offsetWidth + 'x' + iframe.offsetHeight);
-                
-                // CRITICAL: Ensure iframe can receive ALL events and submit forms
-                // DO NOT use sandbox - it blocks form submissions!
-                // Homebot needs full iframe functionality
                 iframe.style.pointerEvents = 'auto';
                 iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; geolocation');
                 iframe.setAttribute('allowfullscreen', 'true');
-                
-                // Force pointer events
                 iframe.style.cssText += 'pointer-events: auto !important;';
                 
-                // Monitor for widget interactions and prevent redirects
-                iframe.addEventListener('load', function() {
-                  console.log('[HOMEBOT] ✅ Iframe content loaded - widget should be fully functional');
-                  console.log('[HOMEBOT] Iframe allow:', iframe.getAttribute('allow'));
-                  console.log('[HOMEBOT] Iframe pointer-events:', window.getComputedStyle(iframe).pointerEvents);
-                  
-                  // Ensure pointer events are still active after load
-                  setTimeout(function() {
-                    iframe.style.pointerEvents = 'auto';
-                    console.log('[HOMEBOT] ✅ Pointer events confirmed: auto');
-                  }, 500);
-                  
-                  // Prevent any navigation away from the page
-                  // The iframe should handle all interactions internally
-                  try {
-                    var iframeWindow = iframe.contentWindow;
-                    if (iframeWindow) {
-                      // Override any top-level navigation attempts
-                      var originalOpen = iframeWindow.open;
-                      if (originalOpen) {
-                        iframeWindow.open = function(url, target) {
-                          // If trying to open in parent/top, open in new tab instead
-                          if (target === '_parent' || target === '_top') {
-                            window.open(url, '_blank');
-                            return null;
-                          }
-                          return originalOpen.call(this, url, target);
-                        };
-                      }
-                    }
-                  } catch (e) {
-                    // CORS - can't access iframe content, which is fine
-                    console.log('[HOMEBOT] ℹ️ Cannot access iframe window (CORS) - widget will handle navigation internally');
-                  }
-                });
-                
-                // Listen for any messages from the iframe (Homebot might send postMessage)
-                window.addEventListener('message', function(event) {
-                  // Only accept messages from Homebot domains
-                  if (event.origin.includes('homebotapp.com')) {
-                    console.log('[HOMEBOT] Message received from widget:', event.data);
-                    
-                    // Handle iframe resize requests (Homebot might request height changes)
-                    if (event.data && (event.data.type === 'resize' || event.data.height)) {
-                      var newHeight = event.data.height || event.data;
-                      if (typeof newHeight === 'number' && newHeight > 0) {
-                        iframe.style.height = newHeight + 'px';
-                        containerEl.style.minHeight = newHeight + 'px';
-                        console.log('[HOMEBOT] Iframe resized to:', newHeight + 'px');
-                      }
-                    }
-                    
-                    // Handle any navigation requests by keeping them in the iframe
-                    if (event.data && event.data.type === 'navigate') {
-                      // Prevent navigation - widget should handle internally
-                      console.log('[HOMEBOT] Navigation request intercepted - keeping in iframe');
-                    }
-                  }
-                });
-                
-                // Monitor iframe for dynamic content changes and auto-resize
-                var resizeObserver = new ResizeObserver(function(entries) {
-                  for (var entry of entries) {
-                    var height = entry.contentRect.height;
-                    if (height > 0) {
-                      iframe.style.height = height + 'px';
-                      console.log('[HOMEBOT] Auto-resized iframe to:', height + 'px');
-                    }
-                  }
-                });
-                
-                // Try to observe iframe content (may fail due to CORS)
-                try {
-                  var iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                  if (iframeDoc && iframeDoc.body) {
-                    resizeObserver.observe(iframeDoc.body);
-                  }
-                } catch (e) {
-                  console.log('[HOMEBOT] ℹ️ Cannot observe iframe content (CORS) - will use postMessage for resize');
+                // Remove skeleton loader
+                var skeleton = containerEl.querySelector('.homebot-skeleton');
+                if (skeleton) {
+                  skeleton.style.display = 'none';
                 }
-              } else {
-                console.warn('[HOMEBOT] ⚠️ Iframe not found after initialization');
               }
             }
           }, 2000);
         } catch (error) {
-          console.error('[HOMEBOT] ❌ Error during initialization:', error);
-          console.error('[HOMEBOT] Error stack:', error.stack);
+          console.error('[HOMEBOT] Error:', error);
         }
       } else if (window.Homebot && Array.isArray(window.Homebot.q)) {
-        // Homebot is queuing - our call is already queued, just wait
-        console.log('[HOMEBOT] Homebot script loading, call queued...');
         if (attempts < maxAttempts) {
           setTimeout(initHomebot, 100);
         }
       } else if (attempts < maxAttempts) {
-        // Keep waiting for Homebot to load
-        if (attempts % 10 === 0) {
-          console.log('[HOMEBOT] Waiting for Homebot script... (attempt ' + attempts + ')');
-        }
         setTimeout(initHomebot, 100);
-      } else {
-        console.error('[HOMEBOT] ❌ Failed to load Homebot after', maxAttempts, 'attempts');
-        var containerEl = document.querySelector(container);
-        if (containerEl) {
-          containerEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #d32f2f;"><p style="margin-bottom: 1rem; font-weight: 600;">⚠️ Unable to load Homebot widget</p><p style="font-size: 0.9rem;">Please check your browser console for errors or try refreshing the page.</p></div>';
-        }
       }
     }
     
-    // Start initialization - wait for DOM and a bit more for other scripts
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
-        // Wait a bit longer to ensure other scripts don't interfere
         setTimeout(initHomebot, 800);
       });
     } else {
-      // DOM already loaded
       setTimeout(initHomebot, 800);
     }
   })();
+
+  // Tab switching
+  document.querySelectorAll(".equity-tabs .tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.tab;
+
+      document.querySelectorAll(".equity-tabs .tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+
+      tab.classList.add("active");
+      document.getElementById("tab-" + target).classList.add("active");
+    });
+  });
+
+  // Scenario sliders with real calculations
+  function calculatePayoff(extraPayment, loanBalance, interestRate, monthlyPayment) {
+    if (!loanBalance || !interestRate || !monthlyPayment || loanBalance <= 0) {
+      return { years: 0, months: 0, interestSaved: 0, newPayment: monthlyPayment };
+    }
+    
+    const monthlyRate = interestRate / 100 / 12;
+    let balance = loanBalance;
+    let totalInterest = 0;
+    let months = 0;
+    const totalPayment = monthlyPayment + extraPayment;
+    
+    while (balance > 0.01 && months < 600) {
+      const interestPayment = balance * monthlyRate;
+      const principalPayment = totalPayment - interestPayment;
+      balance -= principalPayment;
+      totalInterest += interestPayment;
+      months++;
+    }
+    
+    // Calculate original payoff
+    let origBalance = loanBalance;
+    let origMonths = 0;
+    let origInterest = 0;
+    while (origBalance > 0.01 && origMonths < 600) {
+      const origInterestPayment = origBalance * monthlyRate;
+      const origPrincipalPayment = monthlyPayment - origInterestPayment;
+      origBalance -= origPrincipalPayment;
+      origInterest += origInterestPayment;
+      origMonths++;
+    }
+    
+    return {
+      years: Math.floor(months / 12),
+      months: months % 12,
+      interestSaved: origInterest - totalInterest,
+      newPayment: totalPayment,
+      yearsSaved: Math.floor((origMonths - months) / 12)
+    };
+  }
+
+  function calculateCashOut(cashOutAmount, currentBalance, interestRate, currentPayment, homeValue) {
+    if (!cashOutAmount || cashOutAmount <= 0) {
+      return { newBalance: currentBalance, newPayment: currentPayment, newLTV: 0 };
+    }
+    
+    const newBalance = currentBalance + cashOutAmount;
+    const newLTV = (newBalance / homeValue) * 100;
+    
+    // Estimate new payment (simplified - assumes same rate and term)
+    // This is a rough estimate - actual would depend on new loan terms
+    const monthlyRate = interestRate / 100 / 12;
+    const remainingMonths = 360; // Simplified - would need actual remaining term
+    const newPayment = newBalance * (monthlyRate * Math.pow(1 + monthlyRate, remainingMonths)) / 
+                      (Math.pow(1 + monthlyRate, remainingMonths) - 1);
+    
+    return {
+      newBalance: newBalance,
+      newPayment: newPayment,
+      newLTV: newLTV,
+      paymentIncrease: newPayment - currentPayment
+    };
+  }
+
+  // Get snapshot data from page
+  const snapshotData = {
+    loanBalance: {% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance }}{% else %}0{% endif %},
+    valueEstimate: {% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate }}{% else %}0{% endif %},
+    loanRate: {% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% else %}4.5{% endif %},
+    loanPayment: {% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment }}{% else %}0{% endif %}
+  };
+
+  document.querySelectorAll(".scenario-slider").forEach((slider) => {
+    const type = slider.dataset.scenario;
+    const amountDisplay = document.getElementById(type + '-amount-display');
+    const valueDisplay = document.querySelector('.scenario-value-display[data-output="' + type + '"]');
+    const output = document.querySelector('.scenario-output[data-output="' + type + '"]');
+    const details = document.querySelector('.scenario-details[data-details="' + type + '"]');
+    
+    slider.addEventListener("input", (e) => {
+      const value = Number(slider.value);
+      
+      if (amountDisplay) {
+        amountDisplay.textContent = '$' + value.toLocaleString();
+      }
+      
+      if (type === "payoff" && snapshotData.loanBalance > 0) {
+        const result = calculatePayoff(
+          value,
+          snapshotData.loanBalance,
+          snapshotData.loanRate || 4.5,
+          snapshotData.loanPayment || 2000
+        );
+        
+        if (value > 0 && result.years > 0) {
+          valueDisplay.innerHTML = '<strong style="color: var(--olive-green);">Pay off ' + 
+            (result.yearsSaved > 0 ? result.yearsSaved + ' years earlier' : 'faster') + '</strong>';
+          
+          output.textContent = 'With $' + value.toLocaleString() + ' extra per month:';
+          
+          details.innerHTML = 
+            '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
+            '<p style="margin: 0.25rem 0;"><strong>New payoff:</strong> ' + result.years + ' years, ' + result.months + ' months</p>' +
+            '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>Interest saved:</strong> $' + 
+            Math.round(result.interestSaved).toLocaleString() + '</p>' +
+            '<p style="margin: 0.25rem 0; font-size: 0.8rem; color: #999;">New monthly payment: $' + 
+            Math.round(result.newPayment).toLocaleString() + '</p>' +
+            '</div>';
+        } else {
+          valueDisplay.textContent = '';
+          output.textContent = 'Drag the slider to see your payoff timeline and interest savings.';
+          details.innerHTML = '';
+        }
+      } else if (type === "cashout" && snapshotData.valueEstimate > 0) {
+        const maxCashOut = Math.max(0, (snapshotData.valueEstimate * 0.8) - snapshotData.loanBalance);
+        const actualCashOut = Math.min(value, maxCashOut);
+        
+        if (actualCashOut > 0 && snapshotData.loanBalance > 0) {
+          const result = calculateCashOut(
+            actualCashOut,
+            snapshotData.loanBalance,
+            snapshotData.loanRate || 4.5,
+            snapshotData.loanPayment || 2000,
+            snapshotData.valueEstimate
+          );
+          
+          valueDisplay.innerHTML = '<strong style="color: var(--olive-green);">Access $' + 
+            actualCashOut.toLocaleString() + ' in cash</strong>';
+          
+          output.textContent = 'Cash-out refinance scenario:';
+          
+          details.innerHTML = 
+            '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
+            '<p style="margin: 0.25rem 0;"><strong>New loan balance:</strong> $' + 
+            Math.round(result.newBalance).toLocaleString() + '</p>' +
+            '<p style="margin: 0.25rem 0;"><strong>New LTV:</strong> ' + 
+            result.newLTV.toFixed(1) + '%</p>' +
+            '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>Estimated new payment:</strong> $' + 
+            Math.round(result.newPayment).toLocaleString() + '/month</p>' +
+            '<p style="margin: 0.5rem 0 0; font-size: 0.8rem; color: #999; font-style: italic;">' +
+            'Note: Actual terms depend on current rates and your credit. Talk to your lender for exact numbers.</p>' +
+            '</div>';
+        } else if (value > maxCashOut) {
+          valueDisplay.innerHTML = '<strong style="color: #d32f2f;">Maximum available: $' + 
+            Math.round(maxCashOut).toLocaleString() + '</strong>';
+          output.textContent = 'You can typically access up to 80% of your home\'s value minus your current loan.';
+          details.innerHTML = '';
+        } else {
+          valueDisplay.textContent = '';
+          output.textContent = 'Drag the slider to explore cash-out options.';
+          details.innerHTML = '';
+        }
+      }
+    });
+  });
+
+  // Animate numbers on page load
+  function animateValue(element, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const current = Math.floor(progress * (end - start) + start);
+      if (element.textContent.includes('$')) {
+        element.textContent = '$' + current.toLocaleString();
+      } else if (element.textContent.includes('%')) {
+        element.textContent = (current / 100).toFixed(1) + '%';
+      } else {
+        element.textContent = current.toLocaleString();
+      }
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    };
+    window.requestAnimationFrame(step);
+  }
+
+  // Animate snapshot cards on load
+  document.querySelectorAll('.big-number').forEach((el) => {
+    const text = el.textContent.trim();
+    if (text && text !== '—') {
+      const numMatch = text.match(/[\d,]+/);
+      if (numMatch) {
+        const num = parseInt(numMatch[0].replace(/,/g, ''));
+        if (num > 0) {
+          el.style.opacity = '0';
+          setTimeout(() => {
+            animateValue(el, 0, num, 1000);
+            el.style.opacity = '1';
+          }, 200);
+        }
+      }
+    }
+  });
 </script>
 {% endif %}
 
