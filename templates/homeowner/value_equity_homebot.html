@@ -1087,7 +1087,7 @@
         <p style="margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.9; font-style: italic;">Click to get detailed home value report</p>
       </article>
 
-      <article class="snapshot-card clickable" data-snap="loan" onclick="window.location.href='{{ url_for('homeowner_next_loan_paths') }}'">
+      <article class="snapshot-card clickable" data-snap="loan" onclick="window.location.href='{{ url_for('homeowner_value_equity_overview') }}'">
         <h3>Loan Balance</h3>
         <p class="big-number">
           {% if snapshot and snapshot.loan_balance %}
@@ -1097,10 +1097,10 @@
           {% endif %}
         </p>
         <p class="hint">Updates as you make payments</p>
-        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to explore refinance options</p>
+        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to edit loan details</p>
       </article>
 
-      <article class="snapshot-card clickable" data-snap="equity" onclick="document.querySelector('[data-tab=\"scenarios\"]').click(); setTimeout(() => { document.querySelector('.scenario-slider[data-scenario=\"cashout\"]').scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 300);">
+      <article class="snapshot-card clickable" data-snap="equity" onclick="window.location.href='{{ url_for('homeowner_value_equity_overview') }}'">
         <h3>
           Total Equity
           <span class="tooltip-trigger">
@@ -1120,7 +1120,7 @@
           {% endif %}
         </p>
         <p class="hint">Value minus loan balance</p>
-        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to explore equity scenarios</p>
+        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to update or correct your equity</p>
       </article>
 
       <article class="snapshot-card clickable" data-snap="ltv" onclick="window.location.href='{{ url_for('homeowner_next_loan_paths') }}'">
@@ -1193,6 +1193,53 @@
             Everything runs inside Your Life Your Home but is powered by your
             agent's Homebot account.
           </p>
+
+          <!-- Edit Loan Details Form -->
+          <div class="card" style="background: var(--light-cream); border: 2px solid var(--taupe-beige); margin-bottom: 2rem; padding: 2rem;">
+            <h3 style="margin: 0 0 1rem; color: var(--charcoal-brown); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
+              <span>✏️</span>
+              <span>Update Your Loan Details</span>
+            </h3>
+            <p style="margin: 0 0 1.5rem; color: #666; font-size: 0.95rem;">
+              If your home value or loan information needs correction, update it here. All numbers will automatically recalculate.
+            </p>
+            <form method="post" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+              <div>
+                <label for="value_estimate" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Home Value</label>
+                <input type="text" id="value_estimate" name="value_estimate" placeholder="e.g., 480,000" value="{% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+              </div>
+              <div>
+                <label for="loan_balance" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Balance</label>
+                <input type="text" id="loan_balance" name="loan_balance" placeholder="e.g., 275,000" value="{% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+              </div>
+              <div>
+                <label for="loan_rate" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Interest Rate (%)</label>
+                <input type="text" id="loan_rate" name="loan_rate" placeholder="e.g., 3.38" value="{% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+              </div>
+              <div>
+                <label for="loan_payment" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Monthly Payment</label>
+                <input type="text" id="loan_payment" name="loan_payment" placeholder="e.g., 2,450" value="{% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+              </div>
+              <div>
+                <label for="loan_term_years" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Term (Years)</label>
+                <select id="loan_term_years" name="loan_term_years" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;">
+                  <option value="">Select term</option>
+                  <option value="15" {% if snapshot and snapshot.loan_term_years == 15 %}selected{% endif %}>15 years</option>
+                  <option value="20" {% if snapshot and snapshot.loan_term_years == 20 %}selected{% endif %}>20 years</option>
+                  <option value="30" {% if snapshot and snapshot.loan_term_years == 30 %}selected{% endif %}>30 years</option>
+                </select>
+              </div>
+              <div>
+                <label for="loan_start_date" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Start Date</label>
+                <input type="date" id="loan_start_date" name="loan_start_date" value="{% if snapshot and snapshot.loan_start_date %}{{ snapshot.loan_start_date }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
+              </div>
+              <div style="grid-column: 1 / -1; margin-top: 0.5rem;">
+                <button type="submit" class="action-btn" style="width: auto; padding: 1rem 2rem;">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
 
           {% if homebot_widget_id %}
           <div id="homebot_homeowner" class="homebot-widget-container">

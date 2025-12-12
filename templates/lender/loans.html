@@ -1,14 +1,172 @@
 {% extends "lender/layout.html" %}
 
 {% block lender_content %}
+<style>
+  .loans-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .loan-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loan-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--taupe-beige);
+    transition: all 0.3s ease;
+  }
+
+  .loan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: var(--olive-green);
+  }
+
+  .loan-card:hover::before {
+    background: var(--olive-green);
+    width: 6px;
+  }
+
+  .loan-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .loan-main-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .loan-borrower {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .loan-type {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+  }
+
+  .loan-badges {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-badge.preapproval { background: var(--light-cream); color: var(--charcoal-brown); }
+  .status-badge.processing { background: #FFF3CD; color: #856404; }
+  .status-badge.underwriting { background: #D1ECF1; color: #0C5460; }
+  .status-badge.clear_to_close { background: #D4EDDA; color: #155724; }
+  .status-badge.closed { background: #CCE5FF; color: #004085; }
+
+  .stage-badge {
+    padding: 0.4rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--taupe-beige);
+    color: var(--charcoal-brown);
+  }
+
+  .loan-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--taupe-beige);
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+    font-weight: 600;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--light-cream);
+    border-radius: var(--border-radius-lg);
+    border: 2px dashed var(--taupe-beige);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+  }
+
+  .empty-state h3 {
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+  }
+
+  .empty-state p {
+    color: #666;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+</style>
+
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Pipeline management</p>
   <h1>Loan Processing Tracker</h1>
   <p>Give borrowers and partner agents a clear, up-to-date view of where each loan stands.</p>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
+<div class="loans-container">
+  <!-- Add Loan Form -->
+  <div class="card" style="margin-bottom: 3rem;">
     <h2>Add a Loan</h2>
     <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
       <div>
@@ -54,55 +212,51 @@
     </form>
   </div>
 
-  <div class="card" style="margin-top:2rem;">
-    <h2>Your Pipeline</h2>
-
-    {% if loans %}
-      <table class="data-table" style="margin-top:1.5rem;">
-        <thead>
-          <tr>
-            <th>Borrower</th>
-            <th>Status</th>
-            <th>Loan Type</th>
-            <th>Stage</th>
-            <th>Target Payment</th>
-            <th>Close Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for loan in loans %}
-            <tr>
-              <td style="font-weight:600;">{{ loan.borrower_name }}</td>
-              <td>
-                {% if loan.status == 'preapproval' %}
-                  <span class="badge" style="background-color:var(--soft-tan);color:var(--charcoal-brown);">Pre-Approval</span>
-                {% elif loan.status == 'processing' %}
-                  <span class="badge" style="background-color:#fff3cd;color:#856404;">Processing</span>
-                {% elif loan.status == 'underwriting' %}
-                  <span class="badge" style="background-color:#d1ecf1;color:#0c5460;">Underwriting</span>
-                {% elif loan.status == 'clear_to_close' %}
-                  <span class="badge" style="background-color:#d4edda;color:#155724;">Clear to Close</span>
-                {% elif loan.status == 'closed' %}
-                  <span class="badge" style="background-color:#cce5ff;color:#004085;">Closed</span>
-                {% else %}
-                  <span class="badge" style="background-color:var(--light-cream);color:var(--charcoal-brown);">{{ loan.status|capitalize }}</span>
-                {% endif %}
-              </td>
-              <td>{{ loan.loan_type }}</td>
-              <td>{{ loan.stage|replace('_',' ')|title }}</td>
-              <td>{{ loan.target_payment }}</td>
-              <td>{{ loan.close_date or '—' }}</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    {% else %}
-      <div class="empty-state">
-        <div style="font-size:3rem;margin-bottom:1rem;">📋</div>
-        <h3>No Loans Yet</h3>
-        <p>Add one file you are working on so you can track its path here.</p>
+  <!-- Loans List -->
+  {% if loans %}
+    <h2 style="margin-bottom: 1.5rem; font-family: var(--font-heading); color: var(--charcoal-brown);">Your Pipeline</h2>
+    
+    {% for loan in loans %}
+      <div class="loan-card">
+        <div class="loan-header">
+          <div class="loan-main-info">
+            <div class="loan-borrower">
+              <span>👤</span>
+              <span>{{ loan.borrower_name }}</span>
+            </div>
+            <div class="loan-type">
+              <strong>Loan Type:</strong> {{ loan.loan_type or 'Not specified' }}
+            </div>
+            <div class="loan-badges">
+              <span class="status-badge {{ loan.status or 'preapproval' }}">
+                {{ (loan.status or 'preapproval')|replace('_',' ')|title }}
+              </span>
+              <span class="stage-badge">
+                {{ (loan.stage or 'preapproval_started')|replace('_',' ')|title }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="loan-details">
+          <div class="detail-item">
+            <span class="detail-label">Target Payment</span>
+            <span class="detail-value">{{ loan.target_payment or 'Not set' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Close Date</span>
+            <span class="detail-value">{{ loan.close_date or 'Not set' }}</span>
+          </div>
+        </div>
       </div>
-    {% endif %}
-  </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h3>No Loans Yet</h3>
+      <p>Add one file you are working on so you can track its path here.</p>
+    </div>
+  {% endif %}
 </div>
+
 {% endblock %}

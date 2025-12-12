@@ -2236,10 +2236,20 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
             import traceback
             print(f"HOMEOWNER DASHBOARD ERROR loading professionals: {traceback.format_exc()}")
     
-    # Get snapshot (only for authenticated homeowners)
+    # Get snapshot (only for authenticated homeowners) - use property-specific for consistency with equity overview
     snapshot = None
     if homeowner_user:
-        snapshot = get_homeowner_snapshot_or_default(homeowner_user)
+        from database import get_primary_property, get_homeowner_snapshot_for_property
+        primary_property = get_primary_property(homeowner_id)
+        if primary_property:
+            property_id = primary_property.get('id')
+            snapshot = get_homeowner_snapshot_for_property(homeowner_id, property_id)
+            # Calculate equity if we have value and loan balance (same formula as equity overview)
+            if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance'):
+                snapshot['equity_estimate'] = snapshot.get('value_estimate') - snapshot.get('loan_balance')
+        if not snapshot:
+            # Fallback to user-level snapshot
+            snapshot = get_homeowner_snapshot_or_default(homeowner_user)
     else:
         # Guest mode - create empty snapshot
         snapshot = {
@@ -2899,6 +2909,49 @@ def homeowner_value_equity_overview():
         return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
     
     homeowner_id = user["id"]
+    
+    # Handle POST requests for updating loan details
+    if request.method == "POST":
+        from database import get_primary_property, upsert_homeowner_snapshot_for_property
+        
+        # Get property ID
+        primary_property = get_primary_property(homeowner_id)
+        if not primary_property:
+            flash("Please add a property first before updating loan details.", "error")
+            return redirect(url_for("homeowner_value_equity_overview"))
+        
+        property_id = primary_property.get('id')
+        
+        # Parse form data
+        def safe_float(val):
+            if not val or val == "":
+                return None
+            try:
+                return float(str(val).replace(",", "").replace("$", ""))
+            except (ValueError, TypeError):
+                return None
+        
+        value_estimate = safe_float(request.form.get("value_estimate"))
+        loan_balance = safe_float(request.form.get("loan_balance"))
+        loan_rate = safe_float(request.form.get("loan_rate"))
+        loan_payment = safe_float(request.form.get("loan_payment"))
+        loan_term_years = safe_float(request.form.get("loan_term_years"))
+        loan_start_date = request.form.get("loan_start_date", "").strip() or None
+        
+        # Update snapshot
+        upsert_homeowner_snapshot_for_property(
+            user_id=homeowner_id,
+            property_id=property_id,
+            value_estimate=value_estimate,
+            loan_balance=loan_balance,
+            loan_rate=loan_rate,
+            loan_payment=loan_payment,
+            loan_term_years=loan_term_years,
+            loan_start_date=loan_start_date,
+        )
+        
+        flash("Loan details updated successfully! Your equity numbers have been recalculated.", "success")
+        return redirect(url_for("homeowner_value_equity_overview"))
     
     # Get homeowner's professionals (agents and lenders)
     professionals = get_homeowner_professionals(homeowner_id)

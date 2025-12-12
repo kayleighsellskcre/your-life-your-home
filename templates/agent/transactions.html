@@ -1,14 +1,209 @@
 {% extends "agent/layout.html" %}
 
-
 {% block agent_content %}
-<div class="dashboard-main__header animated fadeInDown">
+<style>
+  .transactions-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .transaction-card {
+    background: var(--white);
+    border: 2px solid var(--taupe-beige);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .transaction-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--taupe-beige);
+    transition: all 0.3s ease;
+  }
+
+  .transaction-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: var(--olive-green);
+  }
+
+  .transaction-card:hover::before {
+    background: var(--olive-green);
+    width: 6px;
+  }
+
+  .transaction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .transaction-main-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .transaction-property {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .transaction-client {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 0.75rem;
+  }
+
+  .transaction-badges {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-badge.summary { background: var(--light-cream); color: var(--charcoal-brown); }
+  .status-badge.showings { background: #E3F2FD; color: #1565C0; }
+  .status-badge.under_contract { background: #FFF3E0; color: #E65100; }
+  .status-badge.earnest_money { background: #F3E5F5; color: #6A1B9A; }
+  .status-badge.inspection { background: #E8F5E9; color: #2E7D32; }
+  .status-badge.appraisal { background: #E0F2F1; color: #00695C; }
+  .status-badge.loan_commitment { background: #E1F5FE; color: #0277BD; }
+  .status-badge.final_walkthrough { background: #FFF9C4; color: #F57F17; }
+  .status-badge.closing { background: #C8E6C9; color: #1B5E20; }
+
+  .side-badge {
+    padding: 0.4rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--taupe-beige);
+    color: var(--charcoal-brown);
+  }
+
+  .side-badge.buyer { background: #E3F2FD; color: #1565C0; }
+  .side-badge.seller { background: #FFE0B2; color: #E65100; }
+  .side-badge.both { background: #F3E5F5; color: #6A1B9A; }
+
+  .transaction-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--taupe-beige);
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #999;
+    font-weight: 600;
+  }
+
+  .detail-value {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .transaction-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+
+  .action-btn-small {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .action-btn-small.delete {
+    background: rgba(192, 57, 43, 0.1);
+    color: #c0392b;
+    border: 1px solid #c0392b;
+  }
+
+  .action-btn-small.delete:hover {
+    background: #c0392b;
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--light-cream);
+    border-radius: var(--border-radius-lg);
+    border: 2px dashed var(--taupe-beige);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.6;
+  }
+
+  .empty-state h3 {
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+  }
+
+  .empty-state p {
+    color: #666;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+</style>
+
+<div class="dashboard-main__header">
   <p class="dashboard-tagline">🚀 Track every deal with ease</p>
   <h1 style="font-size:2.5rem;letter-spacing:0.02em;">AI Transaction Coordinator</h1>
   <p style="font-size:1.1rem;color:#6b6b6b;">All your files, stages, and clients in one beautiful, interactive dashboard.</p>
 </div>
 
-  <div class="card form-card animated fadeInUp" style="box-shadow:0 4px 24px rgba(0,0,0,0.07);">
+<div class="transactions-container">
+  <!-- Add Transaction Form -->
+  <div class="card form-card" style="box-shadow:0 4px 24px rgba(0,0,0,0.07); margin-bottom: 3rem;">
     <h2 style="margin-bottom:1rem;">Add a Transaction</h2>
     <form method="post" class="transaction-form">
       <div class="form-row">
@@ -49,74 +244,60 @@
     </form>
   </div>
 
-  <div class="card" style="background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border: var(--border-light); margin-top: 2rem;">
-    <h2 style="margin-bottom: 1rem; font-family: var(--font-heading); color: var(--charcoal-brown);">Your Transactions</h2>
-
-    {% if transactions %}
-      <div style="overflow-x: auto; margin-top: 1.5rem;">
-        <table class="data-table" style="width: 100%; border-collapse: collapse;">
-          <thead>
-            <tr style="background: var(--warm-cream); border-bottom: 2px solid var(--olive-green);">
-              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">🏠 Property</th>
-              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">👤 Client</th>
-              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">🤝 Side</th>
-              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">📈 Stage</th>
-              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">📅 Close Date</th>
-              <th style="padding: 1rem; text-align: left; color: var(--charcoal-brown); font-weight: 600;">⚡ Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for tx in transactions %}
-              <tr class="transaction-row clickable-row" data-href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="transition: background 0.2s; cursor: pointer; border-bottom: 1px solid var(--border-light);">
-                <td style="padding: 1rem;">
-                  <span class="property-link" style="color: var(--olive-green); font-weight: 600; text-decoration: none;">
-                    {{ tx.property_address }}
-                  </span>
-                </td>
-                <td style="padding: 1rem; color: var(--charcoal-brown);">{{ tx.client_name }}</td>
-                <td style="padding: 1rem;">
-                  <span class="badge" style="background: var(--light-cream); color: var(--charcoal-brown); padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.8rem; font-weight: 600;">{{ tx.side|capitalize }}</span>
-                </td>
-                <td style="padding: 1rem;">
-                  <span style="color: var(--charcoal-brown); font-weight: 500;">{{ tx.current_stage|replace('_',' ')|title }}</span>
-                </td>
-                <td style="padding: 1rem; color: var(--charcoal-brown);">{{ tx.target_close_date or '—' }}</td>
-                <td style="padding: 1rem; white-space: nowrap;">
-                  <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display: inline;" onclick="event.stopPropagation();">
-                    <button type="submit" class="btn btn-small" style="background: rgba(192, 57, 43, 0.1); color: #c0392b; border: 1px solid #c0392b; padding: 0.4rem 0.8rem; border-radius: var(--border-radius); font-size: 0.85rem; cursor: pointer;" onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+  <!-- Transactions List -->
+  {% if transactions %}
+    <h2 style="margin-bottom: 1.5rem; font-family: var(--font-heading); color: var(--charcoal-brown);">Your Transactions</h2>
+    
+    {% for tx in transactions %}
+      <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'">
+        <div class="transaction-header">
+          <div class="transaction-main-info">
+            <div class="transaction-property">
+              <span>🏠</span>
+              <span>{{ tx.property_address }}</span>
+            </div>
+            <div class="transaction-client">
+              <strong>Client:</strong> {{ tx.client_name }}
+            </div>
+            <div class="transaction-badges">
+              <span class="status-badge {{ tx.current_stage or 'summary' }}">
+                {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
+              </span>
+              <span class="side-badge {{ tx.side or 'buyer' }}">
+                {{ (tx.side or 'buyer')|capitalize }}
+              </span>
+            </div>
+          </div>
+          <div class="transaction-actions" onclick="event.stopPropagation();">
+            <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display: inline;">
+              <button type="submit" class="action-btn-small delete" onclick="return confirm('Delete this transaction? This cannot be undone.')">
+                Delete
+              </button>
+            </form>
+          </div>
+        </div>
+        
+        <div class="transaction-details">
+          <div class="detail-item">
+            <span class="detail-label">Close Date</span>
+            <span class="detail-value">{{ tx.target_close_date or 'Not set' }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Created</span>
+            <span class="detail-value">{{ tx.created_at[:10] if tx.created_at else '—' }}</span>
+          </div>
+        </div>
       </div>
-    {% else %}
-      <div class="empty-state" style="text-align: center; padding: 4rem 2rem;">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">📋</div>
-        <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown);">No Transactions Yet</h3>
-        <p style="color: var(--charcoal-brown); opacity: 0.8;">Once you add a transaction, you will be able to track stages here.</p>
-      </div>
-    {% endif %}
-  </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <h3>No Transactions Yet</h3>
+      <p>Once you add a transaction, you will be able to track stages here.</p>
+    </div>
+  {% endif %}
 </div>
 
-<script>
-// Make transaction rows clickable
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.clickable-row').forEach(function(row) {
-    row.addEventListener('click', function() {
-      window.location = this.dataset.href;
-    });
-    row.addEventListener('mouseenter', function() {
-      this.style.background = 'var(--warm-cream)';
-    });
-    row.addEventListener('mouseleave', function() {
-      this.style.background = 'transparent';
-    });
-  });
-});
-</script>
 <style>
 .transaction-form .form-row {
   display: flex;
@@ -128,10 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
   outline: none;
   border-color: var(--olive-green);
   box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
-}
-.property-link:hover {
-  color: var(--olive-green);
-  text-decoration: underline;
 }
 </style>
 
