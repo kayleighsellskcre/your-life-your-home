@@ -3520,6 +3520,47 @@ def homeowner_switch_property():
     )
 
 
+@app.route("/homeowner/update-property-address", methods=["POST"])
+def homeowner_update_property_address():
+    """Update the address of a property."""
+    user = get_current_user()
+    if not user:
+        flash("Please log in.", "warning")
+        return redirect(url_for("login"))
+    
+    property_id = request.form.get("property_id")
+    new_address = request.form.get("address", "").strip()
+    
+    if not property_id or not new_address:
+        flash("Property ID and address are required.", "error")
+        return redirect(url_for("homeowner_value_equity_overview"))
+    
+    try:
+        property_id = int(property_id)
+    except Exception:
+        flash("Invalid property ID.", "error")
+        return redirect(url_for("homeowner_value_equity_overview"))
+    
+    # Verify property belongs to user
+    prop = get_property_by_id(property_id)
+    if not prop or prop["user_id"] != user["id"]:
+        flash("Property not found.", "error")
+        return redirect(url_for("homeowner_value_equity_overview"))
+    
+    # Update address
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "UPDATE properties SET address = ? WHERE id = ? AND user_id = ?",
+        (new_address, property_id, user["id"])
+    )
+    conn.commit()
+    conn.close()
+    
+    flash(f"Address updated to {new_address}", "success")
+    return redirect(url_for("homeowner_value_equity_overview"))
+
+
 # ----- RENOVATION & IMPROVEMENT -----
 @app.route("/homeowner/reno/planner", methods=["GET", "POST"])
 def homeowner_reno_planner():
