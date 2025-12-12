@@ -3239,19 +3239,33 @@ def homeowner_value_equity_overview():
             if all_properties and len(all_properties) > 0 and all_properties[0].get('address'):
                 homeowner_data['address'] = all_properties[0].get('address')
     
+    # Get all properties and current property
+    from database import get_primary_property, get_homeowner_snapshot_for_property, get_snapshot_history, get_user_properties, get_property_by_id
+    all_properties = get_user_properties(homeowner_id)
+    primary_property = get_primary_property(homeowner_id)
+    
+    # If no properties exist, create a default one
+    if not all_properties or len(all_properties) == 0:
+        if not primary_property:
+            # Create default property
+            default_address = homeowner_data.get('address', 'My Home') if homeowner_data else 'My Home'
+            property_id = add_property(homeowner_id, default_address, None, "primary")
+            primary_property = get_property_by_id(property_id)
+            all_properties = get_user_properties(homeowner_id)
+    
+    current_property = primary_property if primary_property else (all_properties[0] if all_properties else None)
+    current_property_id = current_property.get('id') if current_property else None
+    
     # Get homeowner snapshot data (synced from Homebot webhook)
-    from database import get_primary_property, get_homeowner_snapshot_for_property, get_snapshot_history
     snapshot_data = None
     snapshot_history = []
-    primary_property = get_primary_property(homeowner_id)
-    if primary_property:
-        property_id = primary_property.get('id')
-        snapshot_data = get_homeowner_snapshot_for_property(homeowner_id, property_id)
+    if current_property_id:
+        snapshot_data = get_homeowner_snapshot_for_property(homeowner_id, current_property_id)
         # Calculate equity if we have value and loan balance
         if snapshot_data and snapshot_data.get('value_estimate') and snapshot_data.get('loan_balance'):
             snapshot_data['equity_estimate'] = snapshot_data.get('value_estimate') - snapshot_data.get('loan_balance')
         # Get historical snapshots
-        snapshot_history = get_snapshot_history(homeowner_id, property_id, limit=24)
+        snapshot_history = get_snapshot_history(homeowner_id, current_property_id, limit=24)
     
     # Debug logging
     print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
@@ -3260,6 +3274,7 @@ def homeowner_value_equity_overview():
     print(f"[HOMEBOT] Professional Info: {professional_info}")
     print(f"[HOMEBOT] Homeowner Data: {homeowner_data}")
     print(f"[HOMEBOT] Snapshot Data: {snapshot_data}")
+    print(f"[HOMEBOT] Properties: {len(all_properties)} total, current: {current_property_id}")
     
     # Render Homebot-powered equity page
     response = make_response(render_template(
@@ -3270,6 +3285,9 @@ def homeowner_value_equity_overview():
         homeowner_data=homeowner_data,
         snapshot=snapshot_data,
         snapshot_history=snapshot_history,
+        properties=all_properties,
+        current_property=current_property,
+        current_property_id=current_property_id,
     ))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)

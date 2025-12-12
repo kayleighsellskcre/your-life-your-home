@@ -1014,15 +1014,18 @@
       </p>
 
       <div class="equity-status-row">
-        <div class="status-pill">
+        <div class="status-pill clickable" onclick="openEditAddressModal()" style="cursor: pointer;" title="Click to edit address">
           <span class="label">Home</span>
           <span class="value">
-            {% if homeowner_data and homeowner_data.address %}
+            {% if current_property and current_property.address %}
+              {{ current_property.address }}
+            {% elif homeowner_data and homeowner_data.address %}
               {{ homeowner_data.address }}
             {% else %}
               Your home address
             {% endif %}
           </span>
+          <span style="font-size: 0.7rem; opacity: 0.7; margin-top: 0.25rem;">✏️ Click to edit</span>
         </div>
         <div class="status-pill">
           <span class="label">Last Update</span>
@@ -1034,6 +1037,37 @@
             {% endif %}
           </span>
         </div>
+        {% if properties|length > 1 %}
+        <div class="status-pill" style="background: rgba(255, 255, 255, 0.25);">
+          <span class="label">Properties</span>
+          <span class="value">{{ properties|length }} homes</span>
+        </div>
+        {% endif %}
+      </div>
+      
+      <!-- Property Selector (if multiple properties) -->
+      {% if properties|length > 1 %}
+      <div style="margin-top: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <form method="post" action="{{ url_for('homeowner_switch_property') }}" style="display: flex; gap: 1rem; align-items: center;">
+          <label style="color: white; font-weight: 600; font-size: 0.9rem;">🏡 Switch Property:</label>
+          <select name="property_id" onchange="this.form.submit()" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.9); color: var(--olive-green); font-weight: 600; cursor: pointer; min-width: 250px;">
+            {% for prop in properties %}
+            <option value="{{ prop.id }}" {% if prop.id == current_property_id %}selected{% endif %}>
+              {{ prop.address }}{% if prop.is_primary %} (Primary){% endif %}
+              {% if prop.property_type != 'primary' %} - {{ prop.property_type|title }}{% endif %}
+              {% if prop.estimated_value %} - ${{ "{:,.0f}".format(prop.estimated_value) }}{% endif %}
+            </option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+      {% endif %}
+      
+      <!-- Add Property Button -->
+      <div style="margin-top: 1rem;">
+        <button type="button" onclick="openAddPropertyModal()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 0.5rem 1.25rem; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: all 0.2s;">
+          ➕ Add Another Property
+        </button>
       </div>
 </div>
 
@@ -1967,5 +2001,92 @@
   });
 </script>
 {% endif %}
+
+<!-- Edit Address Modal -->
+<div id="editAddressModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0; color: var(--olive-green); font-size: 1.5rem;">Edit Property Address</h2>
+      <button onclick="closeEditAddressModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+    </div>
+    <form method="post" action="{{ url_for('homeowner_update_property_address') }}">
+      <input type="hidden" name="property_id" value="{{ current_property_id }}">
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Property Address</label>
+        <input type="text" name="address" value="{% if current_property %}{{ current_property.address }}{% endif %}" required style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" placeholder="123 Main St, City, State ZIP">
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" onclick="closeEditAddressModal()" style="padding: 0.75rem 1.5rem; border: 2px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--charcoal-brown);">Cancel</button>
+        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Save Address</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Property Modal -->
+<div id="addPropertyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0; color: var(--olive-green); font-size: 1.5rem;">Add New Property</h2>
+      <button onclick="closeAddPropertyModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+    </div>
+    <form method="post" action="{{ url_for('homeowner_add_property') }}">
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Property Address *</label>
+        <input type="text" name="property_address" required style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" placeholder="123 Main St, City, State ZIP">
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Estimated Value (Optional)</label>
+        <input type="text" name="estimated_value" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" placeholder="450000">
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Property Type</label>
+        <select name="property_type" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
+          <option value="primary">Primary Residence</option>
+          <option value="rental">Rental Property</option>
+          <option value="investment">Investment Property</option>
+          <option value="vacation">Vacation Home</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button type="button" onclick="closeAddPropertyModal()" style="padding: 0.75rem 1.5rem; border: 2px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--charcoal-brown);">Cancel</button>
+        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Add Property</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openEditAddressModal() {
+    document.getElementById('editAddressModal').style.display = 'flex';
+  }
+  
+  function closeEditAddressModal() {
+    document.getElementById('editAddressModal').style.display = 'none';
+  }
+  
+  function openAddPropertyModal() {
+    document.getElementById('addPropertyModal').style.display = 'flex';
+  }
+  
+  function closeAddPropertyModal() {
+    document.getElementById('addPropertyModal').style.display = 'none';
+  }
+  
+  // Close modals when clicking outside
+  var editModal = document.getElementById('editAddressModal');
+  if (editModal) {
+    editModal.addEventListener('click', function(e) {
+      if (e.target === this) closeEditAddressModal();
+    });
+  }
+  
+  var addModal = document.getElementById('addPropertyModal');
+  if (addModal) {
+    addModal.addEventListener('click', function(e) {
+      if (e.target === this) closeAddPropertyModal();
+    });
+  }
+</script>
 
 {% endblock %}
