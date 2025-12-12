@@ -3017,19 +3017,31 @@ def homeowner_value_equity_overview():
         loan_start_date = form_loan_start_date if form_loan_start_date else None
         
         # Update snapshot - function will preserve existing data for None values
-        upsert_homeowner_snapshot_for_property(
-            user_id=homeowner_id,
-            property_id=property_id,
-            value_estimate=value_estimate,
-            loan_balance=loan_balance,
-            loan_rate=loan_rate,
-            loan_payment=loan_payment,
-            loan_term_years=loan_term_years,
-            loan_start_date=loan_start_date,
-        )
-        
-        flash("Loan details updated successfully! Your equity numbers have been recalculated.", "success")
-        return redirect(url_for("homeowner_value_equity_overview"))
+        try:
+            print(f"[LOAN UPDATE] Updating snapshot for user {homeowner_id}, property {property_id}")
+            print(f"[LOAN UPDATE] Values: value={value_estimate}, balance={loan_balance}, rate={loan_rate}, payment={loan_payment}, term={loan_term_years}, start_date={loan_start_date}")
+            
+            upsert_homeowner_snapshot_for_property(
+                user_id=homeowner_id,
+                property_id=property_id,
+                value_estimate=value_estimate,
+                loan_balance=loan_balance,
+                loan_rate=loan_rate,
+                loan_payment=loan_payment,
+                loan_term_years=loan_term_years,
+                loan_start_date=loan_start_date,
+            )
+            
+            print(f"[LOAN UPDATE] Successfully updated snapshot")
+            flash("Loan details updated successfully! Your equity numbers have been recalculated.", "success")
+            return redirect(url_for("homeowner_value_equity_overview"))
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            print(f"[LOAN UPDATE] ERROR: {str(e)}")
+            print(error_trace)
+            flash(f"Error updating loan details: {str(e)}", "error")
+            # Continue to render the form so user can see the error
     
     # Get homeowner's professionals (agents and lenders)
     professionals = get_homeowner_professionals(homeowner_id)

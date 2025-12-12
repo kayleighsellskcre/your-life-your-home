@@ -49,7 +49,7 @@
     color: white;
     font-family: 'Playfair Display', Georgia, serif;
   }
-
+  
   .equity-hero .sub {
     font-size: 1.1rem;
     opacity: 0.95;
@@ -120,7 +120,7 @@
     font-weight: 600;
     margin-bottom: 0.5rem;
   }
-
+  
   .agent-card h2 {
     font-size: 1.5rem;
     margin: 0 0 0.5rem;
@@ -139,7 +139,7 @@
     font-size: 0.9rem;
     margin: 0.25rem 0;
   }
-
+  
   .agent-cta {
     margin-top: 1rem;
     padding: 0.75rem 1.5rem;
@@ -461,7 +461,7 @@
     position: relative;
     isolation: isolate;
   }
-
+  
   #homebot_homeowner {
     width: 100%;
     min-height: 700px;
@@ -647,7 +647,7 @@
     border-radius: var(--border-radius-lg);
     padding: 2rem;
   }
-
+  
   .history-list h3 {
     font-size: 1.2rem;
     margin: 0 0 1.5rem;
@@ -1035,25 +1035,25 @@
           </span>
         </div>
       </div>
-    </div>
+</div>
 
     <div class="equity-hero-right">
-      {% if professional_info %}
+{% if professional_info %}
       <div class="agent-card">
-        {% if professional_info.professional_photo %}
+  {% if professional_info.professional_photo %}
         <img class="agent-photo" src="{{ url_for('static', filename=professional_info.professional_photo) if not professional_info.professional_photo.startswith('http') else professional_info.professional_photo }}" alt="{{ professional_info.name }}">
-        {% else %}
+  {% else %}
         <div class="agent-photo" style="background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">
-          {{ professional_info.name[0] if professional_info.name else '?' }}
-        </div>
-        {% endif %}
+    {{ professional_info.name[0] if professional_info.name else '?' }}
+  </div>
+  {% endif %}
         <div class="agent-text">
           <p class="agent-label">Your Real Estate Pro</p>
           <h2>{{ professional_info.name }}</h2>
-          {% if professional_info.brokerage_name %}
+    {% if professional_info.brokerage_name %}
             <p class="agent-brokerage">{{ professional_info.brokerage_name }}{% if professional_info.team_name %} - {{ professional_info.team_name }}{% endif %}</p>
-          {% endif %}
-          {% if professional_info.email %}
+    {% endif %}
+    {% if professional_info.email %}
             <p class="agent-contact">{{ professional_info.email }}</p>
           {% endif %}
           <button type="button" class="agent-cta" onclick="window.location.href='mailto:{{ professional_info.email }}'">
@@ -1082,7 +1082,7 @@
             Synced from {{ snapshot.value_refresh_source }}
           {% else %}
             Monthly updates via Homebot
-          {% endif %}
+    {% endif %}
         </p>
         <p style="margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.9; font-style: italic;">Click to get detailed home value report</p>
       </article>
@@ -1168,9 +1168,9 @@
       <div class="progress-footer">
         <span>Current Balance: ${{ "{:,.0f}".format(snapshot.loan_balance) }}</span>
         <span>Equity: ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}</span>
-      </div>
-    </div>
-    {% endif %}
+  </div>
+</div>
+{% endif %}
   </section>
 
   <!-- MAIN AREA: TABS + HOMEBOT WIDGET -->
@@ -1203,7 +1203,7 @@
             <p style="margin: 0 0 1.5rem; color: #666; font-size: 0.95rem;">
               If your home value or loan information needs correction, update it here. All numbers will automatically recalculate.
             </p>
-            <form method="post" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+            <form method="post" action="{{ url_for('homeowner_value_equity_overview') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
               <div>
                 <label for="value_estimate" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Home Value</label>
                 <input type="text" id="value_estimate" name="value_estimate" placeholder="e.g., 480,000" value="{% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
@@ -1239,16 +1239,28 @@
                 </button>
               </div>
             </form>
+            <script>
+              // Ensure form submission works
+              document.addEventListener('DOMContentLoaded', function() {
+                var form = document.querySelector('form[method="post"]');
+                if (form) {
+                  form.addEventListener('submit', function(e) {
+                    console.log('[FORM] Form submitting...');
+                    // Don't prevent default - let it submit normally
+                  });
+                }
+              });
+            </script>
           </div>
 
-          {% if homebot_widget_id %}
+  {% if homebot_widget_id %}
           <div id="homebot_homeowner" class="homebot-widget-container">
             <!-- Homebot will fully render here -->
             <div class="homebot-skeleton">
               <p>Loading your equity experience…</p>
             </div>
           </div>
-          {% else %}
+  {% else %}
           <div class="empty-state">
             <h3>Coming Soon</h3>
             <p>
@@ -1517,7 +1529,7 @@
             <span>How This Works</span>
           </h4>
           <span class="edu-card-toggle">▼</span>
-        </div>
+    </div>
         <div class="edu-card-content">
           <p>
             <strong>Homebot Integration:</strong> Homebot automatically tracks your home's value and equity in the background using real estate data and market trends.
@@ -1545,14 +1557,14 @@
             Your equity experience is tied to {{ professional_info.name }}'s Homebot account,
             {% else %}
             Your equity experience is tied to your agent's Homebot account,
-            {% endif %}
+  {% endif %}
             so your relationship stays directly with your trusted pro — not with a portal.
           </p>
           <p>
             <strong>Your Data:</strong> All your home value and equity information is private and only shared with your real estate professional. We never sell your data.
           </p>
         </div>
-      </div>
+</div>
 
       <div class="edu-card">
         <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
@@ -1618,7 +1630,7 @@
     y.src = 'https://embed.homebotapp.com/lgw/v1/widget.js';
     x.parentNode.insertBefore(y, x);
   })('Homebot');
-
+  
   // Initialize widget
   (function() {
     // Template variable - will be replaced by Jinja2
@@ -1645,7 +1657,7 @@
       
       if (typeof window.Homebot === 'function') {
         try {
-          window.Homebot(container, widgetId);
+        window.Homebot(container, widgetId);
           
           setTimeout(function() {
             var containerEl = document.querySelector(container);

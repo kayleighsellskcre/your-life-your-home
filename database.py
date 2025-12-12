@@ -2322,6 +2322,8 @@ def upsert_homeowner_snapshot_for_property(
     # Merge with existing data - only update fields that are explicitly provided (not None)
     # This ensures empty form fields don't overwrite existing data
     if existing:
+        # Only update fields that were explicitly provided (not None)
+        # If a field is None, it means the form didn't provide it, so keep existing value
         merged_value = value_estimate if value_estimate is not None else existing["value_estimate"]
         merged_loan_balance = loan_balance if loan_balance is not None else existing["loan_balance"]
         merged_loan_rate = loan_rate if loan_rate is not None else existing["loan_rate"]
@@ -2336,31 +2338,38 @@ def upsert_homeowner_snapshot_for_property(
         merged_loan_payment = loan_payment
         merged_loan_term_years = loan_term_years
         merged_loan_start_date = loan_start_date
+    
+    # Debug logging
+    print(f"[SNAPSHOT UPDATE] user_id={user_id}, property_id={property_id}")
+    print(f"[SNAPSHOT UPDATE] Input values: value={value_estimate}, balance={loan_balance}, rate={loan_rate}")
+    print(f"[SNAPSHOT UPDATE] Merged values: value={merged_value}, balance={merged_loan_balance}, rate={merged_loan_rate}")
 
     # Calculate equity
     equity = None
     if merged_value is not None and merged_loan_balance is not None:
         equity = merged_value - merged_loan_balance
 
-    # Upsert - use COALESCE to preserve existing values when None is passed
+    # Upsert - merged values are already correct, just insert/update them
+    # Note: We already merged in Python, so we don't need COALESCE here
     cur.execute(
         """INSERT INTO homeowner_snapshots 
            (user_id, property_id, value_estimate, equity_estimate, loan_balance, 
             loan_rate, loan_payment, loan_term_years, loan_start_date, updated_at)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
            ON CONFLICT(user_id, property_id) DO UPDATE SET
-               value_estimate = COALESCE(excluded.value_estimate, homeowner_snapshots.value_estimate),
-               equity_estimate = COALESCE(excluded.equity_estimate, homeowner_snapshots.equity_estimate),
-               loan_balance = COALESCE(excluded.loan_balance, homeowner_snapshots.loan_balance),
-               loan_rate = COALESCE(excluded.loan_rate, homeowner_snapshots.loan_rate),
-               loan_payment = COALESCE(excluded.loan_payment, homeowner_snapshots.loan_payment),
-               loan_term_years = COALESCE(excluded.loan_term_years, homeowner_snapshots.loan_term_years),
-               loan_start_date = COALESCE(excluded.loan_start_date, homeowner_snapshots.loan_start_date),
+               value_estimate = excluded.value_estimate,
+               equity_estimate = excluded.equity_estimate,
+               loan_balance = excluded.loan_balance,
+               loan_rate = excluded.loan_rate,
+               loan_payment = excluded.loan_payment,
+               loan_term_years = excluded.loan_term_years,
+               loan_start_date = excluded.loan_start_date,
                updated_at = CURRENT_TIMESTAMP""",
         (user_id, property_id, merged_value, equity, merged_loan_balance, 
          merged_loan_rate, merged_loan_payment, merged_loan_term_years, merged_loan_start_date),
     )
     conn.commit()
+    print(f"[SNAPSHOT UPDATE] Successfully saved to database")
     
     # Create monthly history record when snapshot is updated (only if we have meaningful data)
     if merged_value is not None or merged_loan_balance is not None:
