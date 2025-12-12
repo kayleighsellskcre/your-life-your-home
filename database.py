@@ -1,10 +1,36 @@
 import sqlite3
 import json
+import os
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 
-DB_PATH = Path(__file__).parent / "ylh.db"
+# Use persistent storage path - Railway or local
+# Railway: Use persistent volume path if available
+# IMPORTANT: Railway's filesystem is ephemeral - database MUST be in a persistent volume
+# Set RAILWAY_VOLUME_MOUNT_PATH environment variable in Railway to your volume mount path
+volume_path = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+if volume_path:
+    # Railway deployment with persistent volume
+    DB_PATH = Path(volume_path) / "ylh.db"
+    try:
+        DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+        print(f"[DATABASE] Using Railway persistent volume: {DB_PATH}")
+    except (PermissionError, OSError) as e:
+        print(f"[DATABASE] WARNING: Cannot access volume path {volume_path}: {e}")
+        # Fallback - but this will be wiped on redeploy!
+        DB_PATH = Path(__file__).parent / "ylh.db"
+        print(f"[DATABASE] WARNING: Using ephemeral path (will be lost on redeploy): {DB_PATH}")
+elif os.environ.get("RAILWAY_ENVIRONMENT"):
+    # Railway but no volume configured - use project dir (WILL BE WIPED ON REDEPLOY)
+    DB_PATH = Path(__file__).parent / "ylh.db"
+    print(f"[DATABASE] WARNING: Railway detected but no persistent volume configured!")
+    print(f"[DATABASE] Database will be wiped on redeploy. Set RAILWAY_VOLUME_MOUNT_PATH environment variable.")
+    print(f"[DATABASE] Using ephemeral path: {DB_PATH}")
+else:
+    # Local development
+    DB_PATH = Path(__file__).parent / "ylh.db"
+    print(f"[DATABASE] Using local storage: {DB_PATH}")
 
 
 def get_connection() -> sqlite3.Connection:
@@ -2998,13 +3024,27 @@ def create_or_update_user_profile(
             from database import generate_referral_code
             referral_code = generate_referral_code(user_id, role)
         
+        # Get existing values to preserve if None is passed
+        cur.execute("SELECT professional_photo, brokerage_logo FROM user_profiles WHERE user_id = ?", (user_id,))
+        existing_media = cur.fetchone()
+        existing_photo = existing_media[0] if existing_media and existing_media[0] else None
+        existing_logo = existing_media[1] if existing_media and existing_media[1] else None
+        
+        # Use provided values, or preserve existing if None or empty string
+        # CRITICAL: Empty string means "don't update", None means "use existing"
+        final_photo = professional_photo if (professional_photo is not None and professional_photo != "") else existing_photo
+        final_logo = brokerage_logo if (brokerage_logo is not None and brokerage_logo != "") else existing_logo
+        
+        print(f"[PROFILE UPDATE] user_id={user_id}, provided_photo={professional_photo}, existing_photo={existing_photo}, final_photo={final_photo}")
+        print(f"[PROFILE UPDATE] provided_logo={brokerage_logo}, existing_logo={existing_logo}, final_logo={final_logo}")
+        
         # Update existing profile
         query = """
             UPDATE user_profiles SET
                 role = ?,
                 referral_code = COALESCE(referral_code, ?),
-                professional_photo = COALESCE(?, professional_photo),
-                brokerage_logo = COALESCE(?, brokerage_logo),
+                professional_photo = ?,
+                brokerage_logo = ?,
                 team_name = ?,
                 brokerage_name = ?,
                 website_url = ?,
@@ -3034,7 +3074,7 @@ def create_or_update_user_profile(
             WHERE user_id = ?
         """
         cur.execute(query, (
-            role, referral_code, professional_photo, brokerage_logo, team_name, brokerage_name,
+            role, referral_code, final_photo, final_logo, team_name, brokerage_name,
             website_url, facebook_url, instagram_url, linkedin_url, twitter_url,
             youtube_url, phone, call_button_enabled, schedule_button_enabled,
             schedule_url, application_url, bio, specialties, years_experience, languages,

@@ -1242,12 +1242,31 @@
             <script>
               // Ensure form submission works
               document.addEventListener('DOMContentLoaded', function() {
-                var form = document.querySelector('form[method="post"]');
+                var form = document.querySelector('form[method="post"][action*="equity-overview"]');
                 if (form) {
+                  console.log('[FORM] Found loan details form');
+                  
                   form.addEventListener('submit', function(e) {
                     console.log('[FORM] Form submitting...');
+                    var formData = new FormData(form);
+                    var data = {};
+                    for (var pair of formData.entries()) {
+                      data[pair[0]] = pair[1];
+                    }
+                    console.log('[FORM] Form data being submitted:', data);
                     // Don't prevent default - let it submit normally
                   });
+                  
+                  // Also add click handler to submit button for debugging
+                  var submitBtn = form.querySelector('button[type="submit"]');
+                  if (submitBtn) {
+                    submitBtn.addEventListener('click', function(e) {
+                      console.log('[FORM] Submit button clicked');
+                      // Don't prevent default
+                    });
+                  }
+                } else {
+                  console.error('[FORM] Loan details form not found!');
                 }
               });
             </script>

@@ -10,8 +10,7 @@ from datetime import datetime
 import sqlite3
 import json
 from types import SimpleNamespace
-from PIL import Image, ImageFilter
-import numpy as np
+from PIL import Image
 import secrets
 import pandas as pd
 import io
@@ -66,6 +65,67 @@ def remove_white_background(image_path):
     except Exception as e:
         print(f"✗ Failed: {Path(image_path).name} - {e}")
         return False
+
+
+# ---------------- HELPER FUNCTIONS FOR FILE UPLOADS ----------------
+def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", role_prefix: str = ""):
+    """
+    Consolidated helper for handling profile photo/logo uploads.
+    Returns the file URL/key or None if no file was uploaded.
+    """
+    if file_field_name not in request.files:
+        return None
+    
+    file = request.files[file_field_name]
+    if not file or not file.filename:
+        return None
+    
+    try:
+        if is_r2_enabled() and R2_CLIENT:
+            # Upload to R2 cloud storage (persists on Railway)
+            r2_result = upload_file_to_r2(file, file.filename, folder=folder)
+            file_url = r2_result.get("url") or r2_result.get("key")
+            print(f"{role_prefix}PROFILE: File uploaded to R2: {file_url}")
+            return file_url
+        else:
+            # Fallback to local storage (development)
+            safe_name = secure_filename(file.filename)
+            unique_name = f"{uuid4().hex}_{safe_name}"
+            save_path = BASE_DIR / "static" / "uploads" / folder / unique_name
+            save_path.parent.mkdir(parents=True, exist_ok=True)
+            file.save(save_path)
+            file_path = str(Path("uploads") / folder / unique_name).replace("\\", "/")
+            print(f"{role_prefix}PROFILE: File saved locally: {file_path}")
+            return file_path
+    except Exception as e:
+        print(f"{role_prefix}PROFILE: Error uploading file: {e}")
+        flash(f"Error uploading {file_field_name}: {str(e)}", "error")
+        return None
+
+
+def preserve_existing_profile_media(user_id: int, professional_photo: Optional[str] = None, 
+                                     brokerage_logo: Optional[str] = None):
+    """
+    Preserve existing profile photos/logos if new ones aren't being uploaded.
+    Returns tuple: (final_photo, final_logo)
+    """
+    from database import get_user_profile
+    
+    existing_profile = get_user_profile(user_id)
+    if existing_profile:
+        # Convert Row to dict if needed
+        if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
+            existing_profile = dict(existing_profile)
+        elif not isinstance(existing_profile, dict):
+            existing_profile = {}
+        
+        # Preserve existing photos if not uploading new ones
+        final_photo = professional_photo if professional_photo else existing_profile.get("professional_photo")
+        final_logo = brokerage_logo if brokerage_logo else existing_profile.get("brokerage_logo")
+        
+        return final_photo, final_logo
+    
+    return professional_photo, brokerage_logo
 
 
 # ---------------- YOUR PLATFORM DATABASES ----------------
@@ -2975,6 +3035,12 @@ def homeowner_value_equity_overview():
     
     # Handle POST requests for updating loan details
     if request.method == "POST":
+        print(f"\n{'='*60}")
+        print(f"[LOAN UPDATE] POST request received for user {homeowner_id}")
+        print(f"[LOAN UPDATE] Form data keys: {list(request.form.keys())}")
+        for key, value in request.form.items():
+            print(f"  {key}: {value}")
+        print(f"{'='*60}\n")
         from database import get_primary_property, upsert_homeowner_snapshot_for_property
         
         # Get property ID
@@ -4666,98 +4732,16 @@ def agent_settings_profile():
             print(f"AGENT PROFILE SAVE: Starting profile update for user {user['id']}")
             print(f"{'='*60}\n")
             
-            # Handle file uploads
-            professional_photo = None
-            brokerage_logo = None
+            # Handle file uploads using consolidated helper
+            professional_photo = handle_profile_file_upload("professional_photo", folder="profiles", role_prefix="AGENT ")
+            brokerage_logo = handle_profile_file_upload("brokerage_logo", folder="profiles", role_prefix="AGENT ")
             
-            # Upload professional photo (use R2 if available, else local)
-            if "professional_photo" in request.files:
-                photo_file = request.files["professional_photo"]
-                if photo_file and photo_file.filename:
-                    print(f"AGENT PROFILE: Uploading professional photo: {photo_file.filename}")
-                    try:
-                        if is_r2_enabled() and R2_CLIENT:
-                            # Upload to R2 cloud storage (persists on Railway)
-                            r2_result = upload_file_to_r2(photo_file, photo_file.filename, folder="profiles")
-                            professional_photo = r2_result.get("url") or r2_result.get("key")
-                            print(f"AGENT PROFILE: Photo uploaded to R2: {professional_photo}")
-                        else:
-                            # Fallback to local storage (development)
-                            safe_name = secure_filename(photo_file.filename)
-                            unique_name = f"{uuid4().hex}_{safe_name}"
-                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                            save_path.parent.mkdir(parents=True, exist_ok=True)
-                            photo_file.save(save_path)
-                            professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
-                            print(f"AGENT PROFILE: Photo saved locally: {professional_photo}")
-                    except Exception as e:
-                        print(f"AGENT PROFILE: Error uploading photo: {e}")
-                        flash(f"Error uploading photo: {str(e)}", "error")
-                else:
-                    print(f"AGENT PROFILE: No photo file provided")
+            # Preserve existing photos/logos if not uploading new ones
+            professional_photo, brokerage_logo = preserve_existing_profile_media(
+                user["id"], professional_photo, brokerage_logo
+            )
             
-            # Upload brokerage logo (use R2 if available, else local)
-            if "brokerage_logo" in request.files:
-                logo_file = request.files["brokerage_logo"]
-                if logo_file and logo_file.filename:
-                    print(f"AGENT PROFILE: Uploading brokerage logo: {logo_file.filename}")
-                    try:
-                        if is_r2_enabled() and R2_CLIENT:
-                            # Upload to R2 cloud storage (persists on Railway)
-                            r2_result = upload_file_to_r2(logo_file, logo_file.filename, folder="profiles")
-                            brokerage_logo = r2_result.get("url") or r2_result.get("key")
-                            print(f"AGENT PROFILE: Logo uploaded to R2: {brokerage_logo}")
-                        else:
-                            # Fallback to local storage (development)
-                            safe_name = secure_filename(logo_file.filename)
-                            unique_name = f"{uuid4().hex}_{safe_name}"
-                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                            save_path.parent.mkdir(parents=True, exist_ok=True)
-                            logo_file.save(save_path)
-                            brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
-                            print(f"AGENT PROFILE: Logo saved locally: {brokerage_logo}")
-                    except Exception as e:
-                        print(f"AGENT PROFILE: Error uploading logo: {e}")
-                        flash(f"Error uploading logo: {str(e)}", "error")
-                else:
-                    print(f"AGENT PROFILE: No logo file provided")
-            
-            # CRITICAL: Always preserve existing photos/logos if not uploading new ones
-            existing_profile = get_user_profile(user["id"])
-            if existing_profile:
-                # Convert Row to dict if needed
-                if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
-                    existing_profile = dict(existing_profile)
-                elif not isinstance(existing_profile, dict):
-                    existing_profile = {}
-                
-                print(f"AGENT PROFILE: Found existing profile")
-                # Preserve existing photos - CRITICAL for Railway deployments
-                if not professional_photo:
-                    professional_photo = existing_profile.get("professional_photo")
-                    print(f"AGENT PROFILE: Preserving existing photo: {professional_photo}")
-                if not brokerage_logo:
-                    brokerage_logo = existing_profile.get("brokerage_logo")
-                    print(f"AGENT PROFILE: Preserving existing logo: {brokerage_logo}")
-            else:
-                print(f"AGENT PROFILE: No existing profile found, creating new one")
-            
-            # Final safety check - never set to None if we have existing values
-            if not professional_photo and existing_profile:
-                professional_photo = existing_profile.get("professional_photo")
-            if not brokerage_logo and existing_profile:
-                brokerage_logo = existing_profile.get("brokerage_logo")
-            
-            # Get form data
-            print(f"AGENT PROFILE: Collecting form data...")
-            form_data = {
-                'team_name': request.form.get("team_name", "").strip() or None,
-                'brokerage_name': request.form.get("brokerage_name", "").strip() or None,
-                'website_url': request.form.get("website_url", "").strip() or None,
-                'phone': request.form.get("phone", "").strip() or None,
-                'bio': request.form.get("bio", "").strip() or None,
-            }
-            print(f"AGENT PROFILE: Form data collected: {form_data}")
+            print(f"AGENT PROFILE: About to save - photo={professional_photo}, logo={brokerage_logo}")
             
             profile_id = create_or_update_user_profile(
                 user_id=user["id"],
@@ -5530,81 +5514,17 @@ def lender_settings_profile():
     # Handle POST - update profile
     if request.method == "POST":
         try:
-            # Handle file uploads
-            professional_photo = None
-            brokerage_logo = None
+            # Handle file uploads using consolidated helper
+            professional_photo = handle_profile_file_upload("professional_photo", folder="profiles", role_prefix="LENDER ")
+            brokerage_logo = handle_profile_file_upload("brokerage_logo", folder="profiles", role_prefix="LENDER ")
             
-            # Upload professional photo (use R2 if available, else local)
-            if "professional_photo" in request.files:
-                photo_file = request.files["professional_photo"]
-                if photo_file and photo_file.filename:
-                    try:
-                        if is_r2_enabled() and R2_CLIENT:
-                            # Upload to R2 cloud storage (persists on Railway)
-                            r2_result = upload_file_to_r2(photo_file, photo_file.filename, folder="profiles")
-                            professional_photo = r2_result.get("url") or r2_result.get("key")
-                            print(f"LENDER PROFILE: Photo uploaded to R2: {professional_photo}")
-                        else:
-                            # Fallback to local storage (development)
-                            safe_name = secure_filename(photo_file.filename)
-                            unique_name = f"{uuid4().hex}_{safe_name}"
-                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                            save_path.parent.mkdir(parents=True, exist_ok=True)
-                            photo_file.save(save_path)
-                            professional_photo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
-                            print(f"LENDER PROFILE: Photo saved locally: {professional_photo}")
-                    except Exception as e:
-                        print(f"LENDER PROFILE: Error uploading photo: {e}")
-                        flash(f"Error uploading photo: {str(e)}", "error")
-            
-            # Upload company logo (use R2 if available, else local)
-            if "brokerage_logo" in request.files:
-                logo_file = request.files["brokerage_logo"]
-                if logo_file and logo_file.filename:
-                    try:
-                        if is_r2_enabled() and R2_CLIENT:
-                            # Upload to R2 cloud storage (persists on Railway)
-                            r2_result = upload_file_to_r2(logo_file, logo_file.filename, folder="profiles")
-                            brokerage_logo = r2_result.get("url") or r2_result.get("key")
-                            print(f"LENDER PROFILE: Logo uploaded to R2: {brokerage_logo}")
-                        else:
-                            # Fallback to local storage (development)
-                            safe_name = secure_filename(logo_file.filename)
-                            unique_name = f"{uuid4().hex}_{safe_name}"
-                            save_path = BASE_DIR / "static" / "uploads" / "profiles" / unique_name
-                            save_path.parent.mkdir(parents=True, exist_ok=True)
-                            logo_file.save(save_path)
-                            brokerage_logo = str(Path("uploads") / "profiles" / unique_name).replace("\\", "/")
-                            print(f"LENDER PROFILE: Logo saved locally: {brokerage_logo}")
-                    except Exception as e:
-                        print(f"LENDER PROFILE: Error uploading logo: {e}")
-                        flash(f"Error uploading logo: {str(e)}", "error")
-            
-            # CRITICAL: Always preserve existing photos/logos if not uploading new ones
-            existing_profile = get_user_profile(user["id"])
-            if existing_profile:
-                # Convert Row to dict if needed
-                if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
-                    existing_profile = dict(existing_profile)
-                elif not isinstance(existing_profile, dict):
-                    existing_profile = {}
-                
-                print(f"LENDER PROFILE: Found existing profile")
-                # Preserve existing photos - CRITICAL for Railway deployments
-                if not professional_photo:
-                    professional_photo = existing_profile.get("professional_photo")
-                    print(f"LENDER PROFILE: Preserving existing photo: {professional_photo}")
-                if not brokerage_logo:
-                    brokerage_logo = existing_profile.get("brokerage_logo")
-                    print(f"LENDER PROFILE: Preserving existing logo: {brokerage_logo}")
-            
-            # Final safety check - never set to None if we have existing values
-            if not professional_photo and existing_profile:
-                professional_photo = existing_profile.get("professional_photo")
-            if not brokerage_logo and existing_profile:
-                brokerage_logo = existing_profile.get("brokerage_logo")
+            # Preserve existing photos/logos if not uploading new ones
+            professional_photo, brokerage_logo = preserve_existing_profile_media(
+                user["id"], professional_photo, brokerage_logo
+            )
             
             # Get form data
+            print(f"LENDER PROFILE: About to save profile with photo={professional_photo}, logo={brokerage_logo}")
             profile_id = create_or_update_user_profile(
                 user_id=user["id"],
                 role="lender",
