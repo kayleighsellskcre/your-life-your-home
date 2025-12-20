@@ -6,7 +6,7 @@
   <p class="dashboard-tagline">Your visual mood boards</p>
   <h1>Design Boards & Inspiration</h1>
   <p>Collect inspiration photos, materials, color ideas, and notes for all your home projects in one beautiful place.</p>
-  <div style="margin-top: 1.5rem; padding: 1.5rem; background: #F6F2E8; border-left: 4px solid #6B6A45; border-radius: 4px;">
+  <div style="margin: 1.5rem auto 0; padding: 1.5rem; background: #F6F2E8; border-left: 4px solid #6B6A45; border-radius: 4px; max-width: 900px; text-align: left;">
     <p style="margin: 0; color: #3A352C; line-height: 1.6;">
       <strong>✨ What makes Design Boards special:</strong> Unlike simple inspiration galleries, your Design Boards let you organize by room, style, and budget. Add color palettes, vision statements, fixture selections, and link directly to your renovation planner. Save cost estimates from the Material & Cost Estimator directly to any board. Everything connects—your inspiration becomes your plan.
     </p>
@@ -15,12 +15,35 @@
 
 <div class="dashboard-section">
   <style>
+    /* Center content width-wise */
+    .dashboard-main__header {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      text-align: center;
+    }
+    
+    .dashboard-section {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard-main__header,
+      .dashboard-section {
+        padding: 0 1rem;
+      }
+    }
+    
     /* Premium Mood Board Enhancements - Aligned with Platform */
     .boards-container {
       display: grid;
       grid-template-columns: 1.2fr 2fr;
       gap: 3rem;
       align-items: start;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
     @media (max-width: 1024px) {
@@ -156,6 +179,14 @@
       flex-wrap: wrap;
     }
 
+    .color-input-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
     .color-input-wrapper input[type="color"] {
       width: 50px;
       height: 50px;
@@ -163,6 +194,49 @@
       border-radius: 2px;
       cursor: pointer;
       padding: 0;
+    }
+    
+    .color-input-wrapper .remove-color {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #b3574a;
+      color: white;
+      border: 2px solid white;
+      cursor: pointer;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      transition: all 0.2s ease;
+    }
+    
+    .color-input-wrapper .remove-color:hover {
+      background: #8f4538;
+      transform: scale(1.1);
+    }
+    
+    .color-input-wrapper .hex-input {
+      width: 60px;
+      padding: 0.25rem 0.35rem;
+      border: 1px solid var(--taupe-beige);
+      border-radius: 2px;
+      font-size: 0.7rem;
+      text-align: center;
+      font-family: monospace;
+      color: var(--charcoal-brown);
+    }
+    
+    .color-input-wrapper .hex-input:focus {
+      outline: none;
+      border-color: var(--olive-green);
+      box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
     }
 
     /* Preset Color Buttons */
@@ -256,12 +330,19 @@
     margin: 0 0 2rem;
     color: #3A352C;
     font-weight: 500;
+    text-align: center;
   }
 
   .boards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
+    justify-items: center;
+  }
+  
+  .boards-grid .board-card {
+    width: 100%;
+    max-width: 400px;
   }
 
   .board-card {
@@ -553,24 +634,33 @@
 
           <!-- Custom Color Pickers -->
           <p style="font-size: 0.85rem; color: #7A7265; margin-bottom: 0.75rem; font-weight: 500;">
-            🎨 Add Custom Colors
+            🎨 Create Your Own Custom Colors
+          </p>
+          <p style="font-size: 0.8rem; color: #999; margin-bottom: 1rem; line-height: 1.4;">
+            Click the color squares to pick any color you want, or enter hex codes directly. Add as many colors as you need!
           </p>
           <div class="color-palette-input" id="colorPaletteContainer">
             <div class="color-input-wrapper">
-              <input type="color" name="colors[]" value="#F6E9DF" class="custom-color-picker" />
+              <input type="color" name="colors[]" value="#F6E9DF" class="custom-color-picker" onchange="updateHexInput(this)" />
+              <input type="text" class="hex-input" placeholder="#000000" value="#F6E9DF" onchange="updateColorPicker(this)" oninput="validateHex(this)" maxlength="7" />
+              <button type="button" class="remove-color" onclick="removeColorPicker(this)" title="Remove this color">×</button>
             </div>
             <div class="color-input-wrapper">
-              <input type="color" name="colors[]" value="#B79F82" class="custom-color-picker" />
+              <input type="color" name="colors[]" value="#B79F82" class="custom-color-picker" onchange="updateHexInput(this)" />
+              <input type="text" class="hex-input" placeholder="#000000" value="#B79F82" onchange="updateColorPicker(this)" oninput="validateHex(this)" maxlength="7" />
+              <button type="button" class="remove-color" onclick="removeColorPicker(this)" title="Remove this color">×</button>
             </div>
             <div class="color-input-wrapper">
-              <input type="color" name="colors[]" value="#6B6A45" class="custom-color-picker" />
+              <input type="color" name="colors[]" value="#6B6A45" class="custom-color-picker" onchange="updateHexInput(this)" />
+              <input type="text" class="hex-input" placeholder="#000000" value="#6B6A45" onchange="updateColorPicker(this)" oninput="validateHex(this)" maxlength="7" />
+              <button type="button" class="remove-color" onclick="removeColorPicker(this)" title="Remove this color">×</button>
             </div>
-            <button type="button" onclick="addCustomColorPicker()" style="padding: 0.5rem 1rem; border: 2px dashed var(--taupe-beige); background: white; border-radius: 2px; cursor: pointer; font-size: 1.5rem; color: var(--olive-green);">
+            <button type="button" onclick="addCustomColorPicker()" style="padding: 0.5rem 1rem; border: 2px dashed var(--taupe-beige); background: white; border-radius: 2px; cursor: pointer; font-size: 1.5rem; color: var(--olive-green); transition: all 0.2s ease; min-width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.borderColor='var(--olive-green)'; this.style.background='var(--light-cream)'" onmouseout="this.style.borderColor='var(--taupe-beige)'; this.style.background='white'">
               +
             </button>
           </div>
           <p class="form-help-text">
-            Click Sherwin-Williams colors above or pick custom colors — we'll display them beautifully on your board.
+            💡 <strong>Tip:</strong> You can also click Sherwin-Williams colors above to add them, or create unlimited custom colors using the picker or hex codes.
           </p>
         </div>
 
@@ -663,8 +753,8 @@
                   <button 
                     type="button"
                     class="board-btn delete delete-board-btn"
-                    data-board-name="{{ board_name }}"
-                    onclick="deleteBoard('{{ board_name }}')"
+                    data-board-name="{{ board_name|e }}"
+                    onclick="event.preventDefault(); event.stopPropagation(); deleteBoard({{ board_name|tojson }}); return false;"
                   >
                     Delete
                   </button>
@@ -769,48 +859,75 @@
     });
   }
   
-  // Simple, direct delete function
+  // Delete function - simplified and robust
   function deleteBoard(boardName) {
-    console.log('[DELETE BOARD] Attempting to delete:', boardName);
+    console.log('[DELETE] Starting delete for:', boardName);
     
-    if (!confirm('Delete "' + boardName + '"? This cannot be undone.')) {
-      console.log('[DELETE BOARD] User cancelled');
+    // Ensure we have a string
+    let boardNameStr = String(boardName || '').trim();
+    
+    if (!boardNameStr) {
+      console.error('[DELETE] No board name provided');
+      alert('Error: Board name is missing.');
       return false;
     }
     
-    console.log('[DELETE BOARD] User confirmed, sending request...');
+    // Confirm deletion
+    if (!confirm('Are you sure you want to delete "' + boardNameStr + '"? This cannot be undone.')) {
+      console.log('[DELETE] User cancelled');
+      return false;
+    }
     
-    // Create form data
-    const formData = new FormData();
-    formData.append('action', 'delete_board');
-    formData.append('board_name', boardName);
+    console.log('[DELETE] User confirmed, submitting...');
     
-    // Send POST request
-    fetch('{{ url_for("homeowner_saved_notes") }}', {
-      method: 'POST',
-      body: formData,
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest'
+    try {
+      // Create and submit form
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '{{ url_for("homeowner_saved_notes") }}';
+      form.style.display = 'none';
+      
+      // Action
+      const actionField = document.createElement('input');
+      actionField.type = 'hidden';
+      actionField.name = 'action';
+      actionField.value = 'delete_board';
+      form.appendChild(actionField);
+      
+      // Board name
+      const nameField = document.createElement('input');
+      nameField.type = 'hidden';
+      nameField.name = 'board_name';
+      nameField.value = boardNameStr;
+      form.appendChild(nameField);
+      
+      // CSRF token (if exists)
+      const csrfInput = document.querySelector('input[name="csrf_token"]');
+      if (csrfInput) {
+        const csrfField = document.createElement('input');
+        csrfField.type = 'hidden';
+        csrfField.name = 'csrf_token';
+        csrfField.value = csrfInput.value;
+        form.appendChild(csrfField);
       }
-    })
-    .then(function(response) {
-      console.log('[DELETE BOARD] Response status:', response.status);
-      if (response.ok || response.redirected) {
-        // Reload the page to show updated list
-        window.location.reload();
-      } else {
-        return response.text().then(function(text) {
-          console.error('[DELETE BOARD] Error response:', text);
-          alert('Error deleting board. Please try again.');
-        });
-      }
-    })
-    .catch(function(error) {
-      console.error('[DELETE BOARD] Network error:', error);
-      alert('Network error. Please check your connection and try again.');
-    });
-    
-    return false;
+      
+      // Add to page and submit
+      document.body.appendChild(form);
+      console.log('[DELETE] Form created, submitting...');
+      console.log('[DELETE] Form action:', form.action);
+      console.log('[DELETE] Board name:', boardNameStr);
+      
+      // Force submit
+      setTimeout(function() {
+        form.submit();
+      }, 10);
+      
+      return false;
+    } catch (error) {
+      console.error('[DELETE] Error creating form:', error);
+      alert('Error deleting board. Please try refreshing the page and try again.');
+      return false;
+    }
   }
 
   // Sherwin-Williams Color Database (1000+ colors organized by category)
@@ -1087,18 +1204,38 @@
       
       if (emptyInput) {
         emptyInput.value = colorHex;
+        // Update the hex input if it exists
+        const wrapper = emptyInput.closest('.color-input-wrapper');
+        const hexInput = wrapper ? wrapper.querySelector('.hex-input') : null;
+        if (hexInput) {
+          hexInput.value = colorHex.toUpperCase();
+        }
       } else {
         // Add new color picker with this color
         const wrapper = document.createElement('div');
         wrapper.className = 'color-input-wrapper';
-        wrapper.innerHTML = `<input type="color" name="colors[]" value="${colorHex}" class="custom-color-picker" />`;
+        wrapper.innerHTML = `
+          <input type="color" name="colors[]" value="${colorHex}" class="custom-color-picker" onchange="updateHexInput(this)" />
+          <input type="text" class="hex-input" placeholder="#000000" value="${colorHex.toUpperCase()}" onchange="updateColorPicker(this)" oninput="validateHex(this)" maxlength="7" />
+          <button type="button" class="remove-color" onclick="removeColorPicker(this)" title="Remove this color">×</button>
+        `;
         container.insertBefore(wrapper, container.lastElementChild);
       }
     } else {
       // Remove the color
       for (let input of existingInputs) {
         if (input.value.toLowerCase() === colorHex.toLowerCase()) {
-          input.parentElement.remove();
+          const wrapper = input.closest('.color-input-wrapper');
+          if (wrapper && document.querySelectorAll('.color-input-wrapper').length > 1) {
+            wrapper.remove();
+          } else {
+            // If it's the last color, just clear it instead of removing
+            input.value = '#F6E9DF';
+            const hexInput = wrapper.querySelector('.hex-input');
+            if (hexInput) {
+              hexInput.value = '#F6E9DF';
+            }
+          }
           break;
         }
       }
@@ -1110,8 +1247,62 @@
     const container = document.getElementById('colorPaletteContainer');
     const wrapper = document.createElement('div');
     wrapper.className = 'color-input-wrapper';
-    wrapper.innerHTML = '<input type="color" name="colors[]" value="#F6E9DF" class="custom-color-picker" />';
+    const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+    wrapper.innerHTML = `
+      <input type="color" name="colors[]" value="${randomColor}" class="custom-color-picker" onchange="updateHexInput(this)" />
+      <input type="text" class="hex-input" placeholder="#000000" value="${randomColor}" onchange="updateColorPicker(this)" oninput="validateHex(this)" maxlength="7" />
+      <button type="button" class="remove-color" onclick="removeColorPicker(this)" title="Remove this color">×</button>
+    `;
     container.insertBefore(wrapper, container.lastElementChild);
+  }
+  
+  // Remove color picker
+  function removeColorPicker(button) {
+    const wrapper = button.closest('.color-input-wrapper');
+    if (wrapper && document.querySelectorAll('.color-input-wrapper').length > 1) {
+      wrapper.remove();
+    } else {
+      alert('You need at least one color in your palette.');
+    }
+  }
+  
+  // Update hex input when color picker changes
+  function updateHexInput(colorPicker) {
+    const wrapper = colorPicker.closest('.color-input-wrapper');
+    const hexInput = wrapper.querySelector('.hex-input');
+    if (hexInput) {
+      hexInput.value = colorPicker.value.toUpperCase();
+    }
+  }
+  
+  // Update color picker when hex input changes
+  function updateColorPicker(hexInput) {
+    const wrapper = hexInput.closest('.color-input-wrapper');
+    const colorPicker = wrapper.querySelector('input[type="color"]');
+    if (colorPicker && /^#[0-9A-F]{6}$/i.test(hexInput.value)) {
+      colorPicker.value = hexInput.value.toUpperCase();
+    }
+  }
+  
+  // Validate hex input format
+  function validateHex(input) {
+    let value = input.value.toUpperCase();
+    // Remove any non-hex characters
+    value = value.replace(/[^0-9A-F#]/g, '');
+    // Ensure it starts with #
+    if (value && !value.startsWith('#')) {
+      value = '#' + value;
+    }
+    // Limit to 7 characters (# + 6 hex digits)
+    if (value.length > 7) {
+      value = value.substring(0, 7);
+    }
+    input.value = value;
+    
+    // Update color picker if valid
+    if (/^#[0-9A-F]{6}$/i.test(value)) {
+      updateColorPicker(input);
+    }
   }
 
   // Toggle color dropdown
@@ -1126,5 +1317,37 @@
       arrow.textContent = '▼';
     }
   }
+
+  // Ensure delete function is available globally
+  window.deleteBoard = deleteBoard;
+  
+  // Add event listeners for delete buttons as backup
+  document.addEventListener('DOMContentLoaded', function() {
+    console.log('[DELETE] Setting up delete button listeners');
+    const deleteButtons = document.querySelectorAll('.delete-board-btn');
+    console.log('[DELETE] Found', deleteButtons.length, 'delete buttons');
+    
+    deleteButtons.forEach(function(button) {
+      const boardName = button.getAttribute('data-board-name');
+      console.log('[DELETE] Button found with board name:', boardName);
+      
+      // Remove any existing listeners by cloning
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      
+      // Add fresh listener
+      newButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[DELETE] Button clicked, board name:', boardName);
+        if (boardName) {
+          deleteBoard(boardName);
+        } else {
+          alert('Error: Could not find board name.');
+        }
+        return false;
+      });
+    });
+  });
 </script>
 {% endblock %}

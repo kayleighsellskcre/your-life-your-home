@@ -92,11 +92,35 @@
     animation: pulse-badge 3s ease-in-out infinite;
   }
   
-  /* Smooth CTA button */
+  /* Attention-grabbing zoom animation for lead generation buttons */
+  @keyframes zoom-pulse {
+    0%, 100% { 
+      transform: scale(1);
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4);
+    }
+    50% { 
+      transform: scale(1.08);
+      box-shadow: 0 15px 40px rgba(107, 106, 69, 0.4), 0 0 0 8px rgba(107, 106, 69, 0.1);
+    }
+  }
+  
+  @keyframes shimmer-glow {
+    0%, 100% {
+      background-position: 0% 50%;
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3);
+    }
+    50% {
+      background-position: 100% 50%;
+      box-shadow: 0 15px 45px rgba(107, 106, 69, 0.5), 0 0 20px rgba(107, 106, 69, 0.3);
+    }
+  }
+  
+  /* Smooth CTA button with continuous attention-grabbing animation */
   .cta-button {
     display: inline-block;
     padding: 1.1rem 3rem;
-    background: #6B6A45;
+    background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 50%, #6B6A45 100%);
+    background-size: 200% 200%;
     color: white;
     text-decoration: none;
     font-size: 0.9rem;
@@ -106,6 +130,33 @@
     font-weight: 500;
     position: relative;
     overflow: hidden;
+    animation: zoom-pulse 2.5s ease-in-out infinite, shimmer-glow 3s ease-in-out infinite;
+    animation-delay: 1.3s, 1.3s;
+    transform-origin: center;
+  }
+  
+  /* Primary lead button - even more attention-grabbing */
+  .cta-primary-lead {
+    animation: zoom-pulse 2s ease-in-out infinite, shimmer-glow 2.5s ease-in-out infinite !important;
+    animation-delay: 1.3s, 1.3s !important;
+    padding: 1.25rem 3.5rem !important;
+    font-size: 1rem !important;
+    box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  .cta-primary-lead::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.4), rgba(200, 180, 151, 0.4), rgba(107, 106, 69, 0.4));
+    background-size: 200% 200%;
+    animation: shimmer-glow 2.5s ease-in-out infinite;
+    animation-delay: 1.3s;
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(8px);
   }
   
   .cta-button::before {
@@ -127,9 +178,11 @@
   }
   
   .cta-button:hover {
-    background: #5A6D47;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3);
+    background: linear-gradient(135deg, #5A6D47 0%, #4A5D37 50%, #5A6D47 100%);
+    background-size: 200% 200%;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 20px 50px rgba(107, 106, 69, 0.4), 0 0 30px rgba(107, 106, 69, 0.3);
+    animation: zoom-pulse 1.5s ease-in-out infinite, shimmer-glow 2s ease-in-out infinite;
   }
   
   /* Interactive quick steps */
@@ -416,7 +469,7 @@
     
     
     /* Wealth Builder Section */
-    div[style*="margin: 35rem"] {
+    div[style*="margin: 42rem"], div[style*="margin: 39.5rem"], div[style*="margin: 35rem"] {
       margin: 3rem -1rem 3rem !important;
       padding: 3rem 1.5rem !important;
     }
@@ -473,7 +526,13 @@
     <h1 style="font-family: var(--font-heading); font-size: 3.5rem; line-height: 1.2; margin: 0 0 1.5rem; color: #3A352C; font-weight: 400; letter-spacing: -0.01em;">
       Welcome Home,<br/>
       <span style="color: #6B6A45; position: relative;">
-        {{ snapshot.name.split()[0] if snapshot and snapshot.name else "Friend" }}
+        {% if homeowner and homeowner.name %}
+          {{ homeowner.name.split()[0] }}
+        {% elif snapshot and snapshot.name %}
+          {{ snapshot.name.split()[0] }}
+        {% else %}
+          Friend
+        {% endif %}
         <span style="position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, #6B6A45, transparent);"></span>
       </span>
     </h1>
@@ -483,7 +542,7 @@
     </p>
     
     <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-      <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" class="cta-button" style="animation: fadeInUp 0.8s ease 0.5s both;">
+      <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" class="cta-button cta-primary-lead" style="animation: fadeInUp 0.8s ease 0.5s both;">
         <span style="position: relative; z-index: 1;">Your Instant Home Estimate →</span>
       </a>
       
@@ -604,7 +663,7 @@
 {% endif %}
 
 <!-- Live Stats: Interactive Spotlight Cards -->
-<div style="margin-bottom: 6rem;" class="animate-in">
+<div style="margin-bottom: 10rem; position: relative; z-index: 1;" class="animate-in">
   <div style="text-align: center; margin-bottom: 2rem;">
     <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
       Your Financial Snapshot
@@ -694,17 +753,76 @@
       </div>
     </div>
     
+    <!-- Card 3: Loan Overview -->
+    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important; animation: fadeInUp 0.8s ease 0.4s both;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; flex: 1;">
+        <div style="font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Loan Balance</div>
+        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #3A352C; font-weight: 400; margin-bottom: 0.35rem;">
+          {% if snapshot and snapshot.loan_balance %}
+            ${{ "{:,.0f}".format(snapshot.loan_balance) }}
+          {% else %}
+            <span style="font-size: 0.9rem; color: #6B6A45; opacity: 0.5;">Not set</span>
+          {% endif %}
+        </div>
+        {% if snapshot and snapshot.loan_rate %}
+        <div style="font-size: 0.7rem; color: #6B6A45; font-weight: 600; margin-bottom: 0.25rem;">
+          {{ "{:.2f}".format(snapshot.loan_rate) }}% Interest Rate
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.loan_term_years %}
+        <div style="font-size: 0.65rem; color: #6B6A45; opacity: 0.8; margin-bottom: 0.2rem;">
+          {{ snapshot.loan_term_years|int }}-year term
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.loan_payment %}
+        <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 500; margin-top: 0.2rem;">
+          ${{ "{:,.0f}".format(snapshot.loan_payment) }}/mo P&I
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.value_estimate and snapshot.loan_balance and snapshot.value_estimate > 0 %}
+          {% set ltv = (snapshot.loan_balance / snapshot.value_estimate * 100) | round(1) %}
+        <div style="font-size: 0.6rem; color: #6B6A45; opacity: 0.7; margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid rgba(107, 106, 69, 0.2);">
+          LTV: {{ ltv }}%
+        </div>
+        {% endif %}
+      </div>
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Loan Details</h3>
+        {% if snapshot and (snapshot.property_tax_monthly or snapshot.homeowners_insurance_monthly or snapshot.pmi_monthly) %}
+        <div style="font-size: 0.65rem; color: #6B6A45; opacity: 0.85; line-height: 1.5; margin-bottom: 0.5rem;">
+          {% set total_monthly = (snapshot.loan_payment or 0) + (snapshot.property_tax_monthly or 0) + (snapshot.homeowners_insurance_monthly or 0) + (snapshot.pmi_monthly or 0) %}
+          {% if total_monthly > 0 %}
+          <div style="margin-bottom: 0.2rem;"><strong>Total Payment:</strong> ${{ "{:,.0f}".format(total_monthly) }}/mo</div>
+          {% endif %}
+          {% if snapshot.property_tax_monthly %}
+          <div style="font-size: 0.6rem; opacity: 0.7;">Tax: ${{ "{:,.0f}".format(snapshot.property_tax_monthly) }}/mo</div>
+          {% endif %}
+          {% if snapshot.homeowners_insurance_monthly %}
+          <div style="font-size: 0.6rem; opacity: 0.7;">Insurance: ${{ "{:,.0f}".format(snapshot.homeowners_insurance_monthly) }}/mo</div>
+          {% endif %}
+          {% if snapshot.pmi_monthly and snapshot.pmi_monthly > 0 %}
+          <div style="font-size: 0.6rem; opacity: 0.7;">PMI: ${{ "{:,.0f}".format(snapshot.pmi_monthly) }}/mo</div>
+          {% endif %}
+        </div>
+        {% endif %}
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">Quick update your loan info</p>
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+          Update loan details →
+        </a>
+      </div>
+    </div>
+    
   </div>
 </div>
 
 
 <!-- Wealth Builder Section: Stacked Layout -->
-<div style="background: #F6F2E8; margin: 35rem -4rem 6rem; padding: 6rem 4rem;" class="parallax-section">
+<div style="background: #F6F2E8; margin: 12rem 0 0; padding: 4rem 2rem; position: relative; z-index: 0;" class="parallax-section">
   <div style="max-width: 1200px; margin: 0 auto;">
-    <!-- Top: Visual -->
-    <div style="margin-bottom: 4rem; margin-top: 4.5rem;">
-      <div style="position: relative; min-height: 150px; background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); display: flex; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 1.8rem; text-align: center; padding: 1.5rem; overflow: hidden;">
-        <div style="position: relative; z-index: 2;">
+    <!-- Top: Visual with Loan Info -->
+    <div style="margin-bottom: 3rem;">
+      <div style="position: relative; min-height: 120px; background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 1.8rem; text-align: center; padding: 1.5rem 2rem; overflow: hidden; border-radius: 12px;">
+        <div style="position: relative; z-index: 2; margin-bottom: 1rem;">
           Your Home • Your Legacy
         </div>
         <!-- Animated background shapes -->
@@ -737,7 +855,7 @@
     </div>
     
     <!-- Recommended Next Steps - Integrated -->
-    <div style="margin-top: 3rem;">
+    <div style="margin-top: 3rem; margin-bottom: 0;">
       <div style="text-align: center; margin-bottom: 3rem;">
         <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
           Recommended Next Steps
@@ -745,7 +863,7 @@
         <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300;">Click to explore • Each step takes less than 5 minutes</p>
       </div>
       
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-bottom: 0;">
         <a href="{{ url_for('homeowner_value_equity_overview') }}" class="step-card" style="text-decoration: none; color: inherit;">
           <div class="step-icon">📊</div>
           <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Update Your Numbers</h3>

@@ -2,17 +2,343 @@
 {% block title %}Schedule a Chat{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Pick a time that works</p>
-  <h1>Schedule a Chat</h1>
-  <p>When you're ready, pick a time that works for you. No pressure and no long sales talk, just a real conversation about what you need.</p>
-</div>
+<style>
+  .schedule-chat-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Coming Soon</h2>
-    <p class="card-subtext">This section will link to a simple calendar where you can choose a time for a call or virtual visit.</p>
-    <p class="card-subtext" style="margin-top: 1rem;">If you don't see a time that works, you'll always be able to reply to the confirmation email or text and share what you need.</p>
+  .schedule-chat-hero {
+    text-align: center;
+    padding: 4rem 0 3rem;
+    margin-bottom: 3rem;
+    position: relative;
+  }
+
+  .schedule-chat-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: pulse 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.8; transform: translateX(-50%) scale(1.05); }
+  }
+
+  .schedule-chat-hero .eyebrow {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+    font-style: italic;
+  }
+
+  .schedule-chat-hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 3.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+    line-height: 1.2;
+  }
+
+  .schedule-chat-hero .subtitle {
+    font-size: 1.2rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+    font-weight: 300;
+  }
+
+  .coming-soon-card {
+    max-width: 900px;
+    margin: 0 auto 4rem;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border-radius: 24px;
+    padding: 4rem 3.5rem;
+    box-shadow: 0 20px 60px rgba(58, 53, 44, 0.12), 0 8px 24px rgba(107, 106, 69, 0.08);
+    border: 1px solid rgba(107, 106, 69, 0.12);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .coming-soon-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(107, 106, 69, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(107, 106, 69, 0.03) 0%, transparent 50%);
+    animation: rotate 20s linear infinite;
+    pointer-events: none;
+  }
+
+  @keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .coming-soon-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent 0%, var(--olive-green) 50%, transparent 100%);
+    opacity: 0.6;
+  }
+
+  .coming-soon-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .coming-soon-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(107, 106, 69, 0.2));
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .coming-soon-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  .coming-soon-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(107, 106, 69, 0.05) 100%);
+    border: 1px solid rgba(107, 106, 69, 0.2);
+    border-radius: 50px;
+    font-size: 0.85rem;
+    color: var(--olive-green);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .coming-soon-badge::before {
+    content: '✨';
+    font-size: 1rem;
+    animation: sparkle 2s ease-in-out infinite;
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+  }
+
+  .coming-soon-description {
+    font-size: 1.1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    line-height: 1.9;
+    margin: 0 0 1.5rem;
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 300;
+  }
+
+  .coming-soon-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 3rem;
+    text-align: left;
+  }
+
+  .coming-soon-feature {
+    padding: 1.75rem;
+    background: linear-gradient(135deg, rgba(246, 242, 232, 0.4) 0%, rgba(255, 255, 255, 0.6) 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .coming-soon-feature::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--olive-green) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .coming-soon-feature:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.1);
+    border-color: rgba(107, 106, 69, 0.2);
+  }
+
+  .coming-soon-feature:hover::before {
+    opacity: 1;
+  }
+
+  .coming-soon-feature-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .coming-soon-feature-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .coming-soon-feature-text {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    opacity: 0.75;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .coming-soon-note {
+    margin-top: 2.5rem;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, rgba(246, 242, 232, 0.5) 0%, rgba(239, 233, 220, 0.5) 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--olive-green);
+    text-align: left;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .coming-soon-note-text {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    line-height: 1.8;
+    margin: 0;
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .schedule-chat-hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .schedule-chat-hero .subtitle {
+      font-size: 1rem;
+    }
+
+    .coming-soon-card {
+      padding: 2.5rem 2rem;
+      border-radius: 20px;
+    }
+
+    .coming-soon-title {
+      font-size: 2rem;
+    }
+
+    .coming-soon-description {
+      font-size: 1rem;
+    }
+
+    .coming-soon-features {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .coming-soon-feature {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<div class="schedule-chat-page">
+  <div class="schedule-chat-hero">
+    <p class="eyebrow">Pick a time that works</p>
+    <h1>Schedule a Chat</h1>
+    <p class="subtitle">When you're ready, pick a time that works for you. No pressure and no long sales talk, just a real conversation about what you need.</p>
+  </div>
+
+  <div class="coming-soon-card">
+    <div class="coming-soon-content">
+      <div class="coming-soon-icon">📅</div>
+      <div class="coming-soon-badge">Coming Soon</div>
+      <h2 class="coming-soon-title">Interactive Scheduling</h2>
+      <p class="coming-soon-description">
+        We're crafting a seamless calendar experience that lets you choose the perfect time for a call or virtual visit. Everything designed around your schedule and preferences.
+      </p>
+
+      <div class="coming-soon-features">
+        <div class="coming-soon-feature">
+          <span class="coming-soon-feature-icon">🗓️</span>
+          <h3 class="coming-soon-feature-title">Flexible Scheduling</h3>
+          <p class="coming-soon-feature-text">Choose from available time slots that work with your calendar. See real-time availability and book instantly.</p>
+        </div>
+
+        <div class="coming-soon-feature">
+          <span class="coming-soon-feature-icon">💬</span>
+          <h3 class="coming-soon-feature-title">Multiple Options</h3>
+          <p class="coming-soon-feature-text">Select between phone calls, video chats, or in-person visits. Each option tailored to what you need most.</p>
+        </div>
+
+        <div class="coming-soon-feature">
+          <span class="coming-soon-feature-icon">✉️</span>
+          <h3 class="coming-soon-feature-title">Easy Communication</h3>
+          <p class="coming-soon-feature-text">If you don't see a time that works, simply reply to your confirmation email or text to find an alternative.</p>
+        </div>
+      </div>
+
+      <div class="coming-soon-note">
+        <p class="coming-soon-note-text">
+          <strong>In the meantime:</strong> Feel free to use "Ask a Question" to start a conversation, or reach out directly. We're here to help whenever you're ready.
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

@@ -2726,18 +2726,56 @@ def homeowner_saved_notes():
 
             if new_photos or new_fixtures or edit_title or edit_notes:
                 try:
+                    # Get existing photos and fixtures to merge with new ones
+                    existing_details_list = get_design_board_details(user_id, board_name)
+                    existing_photos = []
+                    existing_fixtures = []
+                    
+                    if existing_details_list and len(existing_details_list) > 0:
+                        # Get all photos and fixtures from all notes in this board
+                        for detail in existing_details_list:
+                            detail_dict = dict(detail) if hasattr(detail, 'keys') else detail
+                            
+                            # Get existing photos
+                            existing_photos_json = detail_dict.get("photos") if isinstance(detail_dict, dict) else detail_dict.get("photos", None)
+                            if existing_photos_json:
+                                try:
+                                    parsed_photos = json.loads(existing_photos_json) if isinstance(existing_photos_json, str) else existing_photos_json
+                                    if isinstance(parsed_photos, list):
+                                        existing_photos.extend(parsed_photos)
+                                except Exception:
+                                    pass
+                            
+                            # Get existing fixtures
+                            existing_fixtures_json = detail_dict.get("fixtures") if isinstance(detail_dict, dict) else detail_dict.get("fixtures", None)
+                            if existing_fixtures_json:
+                                try:
+                                    parsed_fixtures = json.loads(existing_fixtures_json) if isinstance(existing_fixtures_json, str) else existing_fixtures_json
+                                    if isinstance(parsed_fixtures, list):
+                                        existing_fixtures.extend(parsed_fixtures)
+                                except Exception:
+                                    pass
+                    
+                    # Merge existing with new (remove duplicates)
+                    all_photos = list(dict.fromkeys(existing_photos + new_photos))  # Preserves order, removes duplicates
+                    all_fixtures = list(dict.fromkeys(existing_fixtures + new_fixtures))
+                    
+                    # Add new note with merged photos and fixtures
                     add_design_board_note(
                         user_id=user_id,
                         project_name=board_name,
                         title=edit_title,
                         details=edit_notes,
-                        photos=new_photos,
+                        photos=all_photos,
                         files=[],
-                        fixtures=new_fixtures,
+                        fixtures=all_fixtures,
                     )
                     flash("Board updated successfully!", "success")
-                except Exception:
-                    flash("Could not update board.", "error")
+                except Exception as e:
+                    import traceback
+                    print(f"[BOARD EDIT ERROR] Failed to update board: {str(e)}")
+                    print(traceback.format_exc())
+                    flash(f"Could not update board: {str(e)}", "error")
 
             return redirect(url_for("homeowner_saved_notes", view=board_name))
 
@@ -2754,8 +2792,12 @@ def homeowner_saved_notes():
                 details_list = get_design_board_details(user_id, board_name)
                 if details_list and len(details_list) > 0:
                     details = details_list[0]  # Get first detail record
+                    
+                    # Convert sqlite3.Row to dict (sqlite3.Row doesn't have .get() method)
+                    details_dict = dict(details)
+                    
                     # Delete photos
-                    photos = details.get("photos")
+                    photos = details_dict.get("photos")
                     if photos:
                         try:
                             photos_list = json.loads(photos) if isinstance(photos, str) else photos
@@ -2772,7 +2814,7 @@ def homeowner_saved_notes():
                             print(f"[BOARD DELETE] Error parsing photos: {e}")
                     
                     # Delete fixtures
-                    fixtures = details.get("fixtures")
+                    fixtures = details_dict.get("fixtures")
                     if fixtures:
                         try:
                             fixtures_list = json.loads(fixtures) if isinstance(fixtures, str) else fixtures
@@ -3304,6 +3346,52 @@ def homeowner_value_equity_overview():
     # Get homeowner's professionals (agents and lenders)
     professionals = get_homeowner_professionals(homeowner_id)
     
+    # Get market rates from lender (precedence) or agent, with defaults
+    market_rates = {
+        'va_rate_30yr': 6.1,
+        'fha_rate_30yr': 6.1,
+        'conventional_rate_30yr': 6.1
+    }
+    lender_profile = None
+    agent_profile = None
+    
+    # Find lender first (lender takes precedence)
+    for prof in professionals:
+        prof_dict = dict(prof) if hasattr(prof, 'keys') else prof
+        prof_id = prof_dict.get('professional_id') or prof_dict.get('user_id')
+        prof_role = prof_dict.get('professional_role') or prof_dict.get('professional_type')
+        if prof_id and prof_role == 'lender':
+            lender_profile = get_user_profile(prof_id)
+            if lender_profile:
+                lender_dict = dict(lender_profile) if hasattr(lender_profile, 'keys') else lender_profile
+                if lender_dict.get('va_rate_30yr'):
+                    market_rates['va_rate_30yr'] = float(lender_dict.get('va_rate_30yr'))
+                if lender_dict.get('fha_rate_30yr'):
+                    market_rates['fha_rate_30yr'] = float(lender_dict.get('fha_rate_30yr'))
+                if lender_dict.get('conventional_rate_30yr'):
+                    market_rates['conventional_rate_30yr'] = float(lender_dict.get('conventional_rate_30yr'))
+                break
+    
+    # If no lender rates, check agent
+    if not lender_profile or (market_rates['va_rate_30yr'] == 6.1 and market_rates['fha_rate_30yr'] == 6.1 and market_rates['conventional_rate_30yr'] == 6.1):
+        for prof in professionals:
+            prof_dict = dict(prof) if hasattr(prof, 'keys') else prof
+            prof_id = prof_dict.get('professional_id') or prof_dict.get('user_id')
+            prof_role = prof_dict.get('professional_role') or prof_dict.get('professional_type')
+            if prof_id and prof_role == 'agent':
+                agent_profile = get_user_profile(prof_id)
+                if agent_profile:
+                    agent_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') else agent_profile
+                    # Only use agent rates if lender rates weren't set
+                    if not lender_profile:
+                        if agent_dict.get('va_rate_30yr'):
+                            market_rates['va_rate_30yr'] = float(agent_dict.get('va_rate_30yr'))
+                        if agent_dict.get('fha_rate_30yr'):
+                            market_rates['fha_rate_30yr'] = float(agent_dict.get('fha_rate_30yr'))
+                        if agent_dict.get('conventional_rate_30yr'):
+                            market_rates['conventional_rate_30yr'] = float(agent_dict.get('conventional_rate_30yr'))
+                    break
+    
     # Find the first professional (agent preferred, then lender) with a Homebot widget ID
     homebot_widget_id = None
     professional_info = None
@@ -3526,6 +3614,7 @@ def homeowner_value_equity_overview():
             homebot_widget_id=homebot_widget_id,
             professional_info=professional_info,
             homeowner_data=homeowner_data or {},
+            market_rates=market_rates,
             snapshot=snapshot_data,
             snapshot_history=snapshot_history or [],
             properties=properties_list,
@@ -5127,6 +5216,9 @@ def agent_settings_profile():
                 company_state=request.form.get("company_state", "").strip() or None,
                 company_zip=request.form.get("company_zip", "").strip() or None,
                 homebot_widget_id=request.form.get("homebot_widget_id", "").strip() or None,
+                va_rate_30yr=float(request.form.get("va_rate_30yr")) if request.form.get("va_rate_30yr") else None,
+                fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
+                conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
             )
             print(f"AGENT PROFILE: Profile saved successfully with ID {profile_id}")
             print(f"{'='*60}\n")
@@ -5911,6 +6003,9 @@ def lender_settings_profile():
                 company_state=request.form.get("company_state", "").strip() or None,
                 company_zip=request.form.get("company_zip", "").strip() or None,
                 homebot_widget_id=request.form.get("homebot_widget_id", "").strip() or None,
+                va_rate_30yr=float(request.form.get("va_rate_30yr")) if request.form.get("va_rate_30yr") else None,
+                fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
+                conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
             )
             flash("Profile updated successfully!", "success")
             return redirect(url_for("lender_settings_profile"))
@@ -6033,15 +6128,6 @@ def homeowner_next_buy_sell_guidance():
     """Buy and sell guidance."""
     return render_template(
         "homeowner/next_buy_sell_guidance.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
-
-
-@app.route("/homeowner/next/pathways", methods=["GET"])
-def homeowner_next_pathways():
-    """Next home pathways."""
-    return render_template(
-        "homeowner/next_pathways.html",
         brand_name=FRONT_BRAND_NAME,
     )
 

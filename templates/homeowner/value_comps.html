@@ -1590,8 +1590,8 @@ function openCompDetail(property) {
         ` : ''}
         
         <div style="display: flex; gap: 1rem;">
-          <button onclick="alert('Contact feature coming soon!')" style="flex: 1; padding: 1rem; background: #6B6A45; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Contact Agent</button>
-          <button onclick="alert('Save feature coming soon!')" style="flex: 1; padding: 1rem; background: white; color: #6B6A45; border: 2px solid #6B6A45; border-radius: 8px; font-weight: 600; cursor: pointer;">Save Property</button>
+          <a href="{{ url_for('homeowner_support_ask_question') }}" style="flex: 1; padding: 1rem; background: #6B6A45; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; text-decoration: none; text-align: center; display: flex; align-items: center; justify-content: center; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 16px rgba(107, 106, 69, 0.2);" onmouseover="this.style.background='#5A6D47'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(107, 106, 69, 0.3)'" onmouseout="this.style.background='#6B6A45'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(107, 106, 69, 0.2)'">Contact Agent</a>
+          <button onclick="alert('Save feature coming soon!')" style="flex: 1; padding: 1rem; background: white; color: #6B6A45; border: 2px solid #6B6A45; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);" onmouseover="this.style.background='#F6F2E8'; this.style.borderColor='#5A6D47'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 16px rgba(107, 106, 69, 0.15)'" onmouseout="this.style.background='white'; this.style.borderColor='#6B6A45'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">Save Property</button>
         </div>
       </div>
     </div>

@@ -151,6 +151,20 @@ def init_db() -> None:
         cur.execute("ALTER TABLE user_profiles ADD COLUMN homebot_widget_id TEXT")
     except:
         pass
+    
+    # Add market rate columns if they don't exist (for lenders/agents to set rates)
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN va_rate_30yr REAL")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN fha_rate_30yr REAL")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN conventional_rate_30yr REAL")
+    except:
+        pass
 
     # ------------- CLIENT RELATIONSHIPS -------------
     cur.execute(
@@ -3332,6 +3346,9 @@ def create_or_update_user_profile(
     company_state: Optional[str] = None,
     company_zip: Optional[str] = None,
     homebot_widget_id: Optional[str] = None,
+    va_rate_30yr: Optional[float] = None,
+    fha_rate_30yr: Optional[float] = None,
+    conventional_rate_30yr: Optional[float] = None,
 ) -> int:
     """Create or update user profile. Returns profile id."""
     conn = get_connection()
@@ -3397,6 +3414,9 @@ def create_or_update_user_profile(
                 company_state = ?,
                 company_zip = ?,
                 homebot_widget_id = ?,
+                va_rate_30yr = COALESCE(?, va_rate_30yr),
+                fha_rate_30yr = COALESCE(?, fha_rate_30yr),
+                conventional_rate_30yr = COALESCE(?, conventional_rate_30yr),
                 updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
         """
@@ -3406,7 +3426,8 @@ def create_or_update_user_profile(
             youtube_url, phone, call_button_enabled, schedule_button_enabled,
             schedule_url, application_url, bio, specialties, years_experience, languages,
             service_areas, nmls_number, license_number, company_address,
-            company_city, company_state, company_zip, homebot_widget_id, user_id
+            company_city, company_state, company_zip, homebot_widget_id,
+            va_rate_30yr, fha_rate_30yr, conventional_rate_30yr, user_id
         ))
         profile_id = existing[0]
     else:
@@ -3423,8 +3444,8 @@ def create_or_update_user_profile(
                 call_button_enabled, schedule_button_enabled, schedule_url, application_url,
                 bio, specialties, years_experience, languages, service_areas,
                 nmls_number, license_number, company_address, company_city,
-                company_state, company_zip, homebot_widget_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                company_state, company_zip, homebot_widget_id, va_rate_30yr, fha_rate_30yr, conventional_rate_30yr
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         cur.execute(query, (
             user_id, role, referral_code, professional_photo, brokerage_logo, team_name,
@@ -3433,7 +3454,7 @@ def create_or_update_user_profile(
             call_button_enabled, schedule_button_enabled, schedule_url, application_url,
             bio, specialties, years_experience, languages, service_areas,
             nmls_number, license_number, company_address, company_city,
-            company_state, company_zip, homebot_widget_id
+            company_state, company_zip, homebot_widget_id, va_rate_30yr, fha_rate_30yr, conventional_rate_30yr
         ))
         profile_id = cur.lastrowid
     
