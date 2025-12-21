@@ -2563,6 +2563,81 @@ def remove_fixtures_from_board(user_id: int, project_name: str, fixtures_to_remo
     conn.close()
 
 
+def get_homeowner_note_by_id(note_id: int, user_id: int) -> Optional[sqlite3.Row]:
+    """Get a single note by ID, ensuring it belongs to the user."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, created_at, project_name, title, tags, details, links,
+               photos, files, vision_statement, color_palette,
+               board_template, label_style, is_private, shareable_link,
+               product_sources, show_notes_panel, fixtures
+        FROM homeowner_notes
+        WHERE id = ? AND user_id = ?
+        """,
+        (note_id, user_id),
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def update_homeowner_note(
+    note_id: int,
+    user_id: int,
+    title: str = None,
+    details: str = None,
+    tags: str = None,
+) -> None:
+    """Update a homeowner note. Only updates provided fields."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    updates = []
+    params = []
+    
+    if title is not None:
+        updates.append("title = ?")
+        params.append(title)
+    if details is not None:
+        updates.append("details = ?")
+        params.append(details)
+    if tags is not None:
+        updates.append("tags = ?")
+        params.append(tags)
+    
+    if not updates:
+        conn.close()
+        return
+    
+    params.append(note_id)
+    params.append(user_id)
+    
+    cur.execute(
+        f"""
+        UPDATE homeowner_notes
+        SET {', '.join(updates)}
+        WHERE id = ? AND user_id = ?
+        """,
+        tuple(params),
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_homeowner_note(note_id: int, user_id: int) -> None:
+    """Delete a single homeowner note by ID."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM homeowner_notes WHERE id = ? AND user_id = ?",
+        (note_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
 def duplicate_design_board(user_id: int, original_name: str, new_name: str) -> None:
     """Create a duplicate of a design board with a new name."""
     conn = get_connection()
