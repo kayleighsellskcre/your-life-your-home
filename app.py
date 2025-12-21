@@ -4377,6 +4377,133 @@ def homeowner_reno_planner():
     )
 
 
+@app.route("/homeowner/reno/planner/project/<int:project_id>/edit", methods=["GET", "POST"])
+def homeowner_reno_planner_edit_project(project_id):
+    """Edit a renovation project."""
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        flash("Please log in to edit projects.", "error")
+        return redirect(url_for("login", role="homeowner"))
+    
+    project = get_homeowner_project(project_id, user_id)
+    if not project:
+        flash("Project not found.", "error")
+        return redirect(url_for("homeowner_reno_planner"))
+    
+    if request.method == "POST":
+        name = request.form.get("project_name", "").strip()
+        budget_raw = request.form.get("project_budget", "").replace(",", "").strip()
+        status = request.form.get("project_status", "Planning").strip()
+        category = request.form.get("project_category", "Other").strip()
+        notes = request.form.get("project_notes", "").strip()
+        
+        budget_str = budget_raw if budget_raw else ""
+        
+        if name:
+            update_homeowner_project(
+                project_id=project_id,
+                user_id=user_id,
+                name=name,
+                category=category,
+                status=status,
+                budget=budget_str,
+                notes=notes,
+            )
+            flash("Project updated successfully.", "success")
+            return redirect(url_for("homeowner_reno_planner"))
+        else:
+            flash("Project name is required.", "error")
+    
+    project_dict = dict(project) if hasattr(project, 'keys') else project
+    return render_template(
+        "homeowner/reno_planner_edit.html",
+        project=project_dict,
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/reno/planner/project/<int:project_id>/delete", methods=["POST"])
+def homeowner_reno_planner_delete_project(project_id):
+    """Delete a renovation project."""
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    
+    project = get_homeowner_project(project_id, user_id)
+    if not project:
+        return jsonify({"success": False, "error": "Project not found"}), 404
+    
+    try:
+        delete_homeowner_project(project_id, user_id)
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/homeowner/design-boards/note/<int:note_id>/edit", methods=["GET", "POST"])
+def homeowner_edit_note(note_id):
+    """Edit a note on a mood board."""
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        flash("Please log in to edit notes.", "error")
+        return redirect(url_for("login", role="homeowner"))
+    
+    note = get_homeowner_note_by_id(note_id, user_id)
+    if not note:
+        flash("Note not found.", "error")
+        return redirect(url_for("homeowner_saved_notes"))
+    
+    note_dict = dict(note) if hasattr(note, 'keys') else note
+    board_name = note_dict.get("project_name")
+    
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        details = request.form.get("details", "").strip()
+        tags = request.form.get("tags", "").strip()
+        
+        update_homeowner_note(
+            note_id=note_id,
+            user_id=user_id,
+            title=title if title else None,
+            details=details if details else None,
+            tags=tags if tags else None,
+        )
+        flash("Note updated successfully.", "success")
+        return redirect(url_for("homeowner_design_board_view", board_name=board_name))
+    
+    return render_template(
+        "homeowner/edit_note.html",
+        note=note_dict,
+        board_name=board_name,
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+@app.route("/homeowner/design-boards/note/<int:note_id>/delete", methods=["POST"])
+def homeowner_delete_note(note_id):
+    """Delete a note from a mood board."""
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    
+    note = get_homeowner_note_by_id(note_id, user_id)
+    if not note:
+        return jsonify({"success": False, "error": "Note not found"}), 404
+    
+    note_dict = dict(note) if hasattr(note, 'keys') else note
+    board_name = note_dict.get("project_name")
+    
+    try:
+        delete_homeowner_note(note_id, user_id)
+        return jsonify({"success": True, "board_name": board_name})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route("/homeowner/reno/material-cost", methods=["GET"])
 def homeowner_reno_material_cost():
     """Material & Cost Estimator - linked to mood boards."""
