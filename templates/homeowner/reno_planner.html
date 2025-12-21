@@ -42,16 +42,33 @@
   {% if projects %}
     <div class="dashboard-cards">
       {% for project in projects %}
-        <div class="card">
-          <h3>{{ project.name }}</h3>
+        <div class="card" style="position: relative; padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <h3 style="margin: 0; flex: 1;">{{ project.name }}</h3>
+            <div style="display: flex; gap: 0.5rem;">
+              <a href="{{ url_for('homeowner_reno_planner_edit_project', project_id=project.id) }}" 
+                 class="btn btn-secondary" 
+                 style="padding: 0.5rem 1rem; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+                ✏️ Edit
+              </a>
+              <button onclick="deleteProject({{ project.id }}, '{{ project.name|e }}')" 
+                      class="btn" 
+                      style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; cursor: pointer;">
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
           <p class="card-subtext">
             Status: <strong>{{ project.status or "Planning" }}</strong>
-            {% if project.budget is not none %}
-              • Budget: <strong>${{ "{:,.0f}".format(project.budget) }}</strong>
+            {% if project.budget and project.budget != '' %}
+              • Budget: <strong>${{ "{:,.0f}".format(project.budget|float) if project.budget|float else project.budget }}</strong>
+            {% endif %}
+            {% if project.category and project.category != 'Other' %}
+              • Category: <strong>{{ project.category }}</strong>
             {% endif %}
           </p>
           {% if project.notes %}
-            <p class="card-subtext">{{ project.notes }}</p>
+            <p class="card-subtext" style="margin-top: 0.75rem;">{{ project.notes }}</p>
           {% endif %}
           <p style="font-size: 0.85rem; color: #888; margin-top: 1rem;">
             Created: {{ project.created_at }}
@@ -59,6 +76,27 @@
         </div>
       {% endfor %}
     </div>
+    <script>
+    function deleteProject(projectId, projectName) {
+      if (!confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
+        return;
+      }
+      
+      fetch(`/homeowner/reno/planner/project/${projectId}/delete`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert('Could not delete project: ' + (data.error || 'Unknown error'));
+        }
+      })
+      .catch(() => alert('Could not delete project.'));
+    }
+    </script>
   {% else %}
     <div class="empty-state">
       <h3>🔨 No Projects Yet</h3>
