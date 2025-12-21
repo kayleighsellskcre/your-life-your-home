@@ -568,17 +568,29 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
   .then(data => {
     if (data.success) {
       const successMsg = document.getElementById('save-success');
-      if (data.warning) {
-        successMsg.innerHTML = '✓ Saved to planner! ⚠️ ' + data.warning;
+      if (data.saved_to_board && data.saved_to_planner) {
+        // Both saved successfully
+        successMsg.innerHTML = '✓ Successfully saved to Renovation Planner & Mood Board!';
+        successMsg.style.color = '#4a7c4a';
+        successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+      } else if (data.warning) {
+        // Saved to planner but not board
+        successMsg.innerHTML = '✓ Saved to Planner ✓ ' + data.warning;
         successMsg.style.color = '#856404';
         successMsg.style.background = 'rgba(255, 193, 7, 0.1)';
+      } else if (data.message) {
+        // Custom message
+        successMsg.innerHTML = '✓ ' + data.message;
+        successMsg.style.color = '#4a7c4a';
+        successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
       } else {
+        // Default success
         successMsg.innerHTML = '✓ Successfully saved!';
         successMsg.style.color = '#4a7c4a';
         successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
       }
       successMsg.style.display = 'block';
-      setTimeout(() => { successMsg.style.display = 'none'; }, 4000);
+      setTimeout(() => { successMsg.style.display = 'none'; }, 5000);
     } else {
       alert('Could not save: ' + (data.error || 'Unknown error'));
     }
