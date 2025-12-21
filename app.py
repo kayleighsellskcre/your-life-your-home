@@ -529,24 +529,42 @@ def homeowner_reno_planner_ajax_add():
     
     # If a board_name is provided, save as a design board note as well
     board_save_error = None
+    board_save_success = False
     if board_name:
         note_title = name
-        # Include budget and status in details
-        note_details_parts = [summary or notes or f"Project: {name}"]
+        # Include budget and status in details - create a comprehensive note
+        note_details_parts = []
+        
+        # Add summary if available
+        if summary:
+            note_details_parts.append(summary)
+        elif notes:
+            note_details_parts.append(notes)
+        else:
+            note_details_parts.append(f"Project: {name}")
+        
+        # Add budget information
         if budget:
             try:
                 budget_float = float(budget) if budget else 0
-                note_details_parts.append(f"\n\nEstimated Cost: ${budget_float:,.0f}")
+                note_details_parts.append(f"\n\n💰 Estimated Cost: ${budget_float:,.0f}")
             except (ValueError, TypeError):
                 if budget_str:
-                    note_details_parts.append(f"\n\nEstimated Cost: ${budget_str}")
+                    note_details_parts.append(f"\n\n💰 Estimated Cost: ${budget_str}")
+        
+        # Add status
         if status:
-            note_details_parts.append(f"Status: {status}")
+            note_details_parts.append(f"\n📋 Status: {status}")
+        
+        # Add category if available
+        if category and category != "Other":
+            note_details_parts.append(f"\n📁 Category: {category}")
+        
         note_details = "\n".join(note_details_parts)
         
         try:
             # add_design_board_note will create the board if it doesn't exist
-            add_design_board_note(
+            note_id = add_design_board_note(
                 user_id=user_id, 
                 project_name=board_name, 
                 title=note_title,
@@ -560,6 +578,8 @@ def homeowner_reno_planner_ajax_add():
                 is_private=0,
                 fixtures=[],
             )
+            board_save_success = True
+            print(f"[COST ESTIMATE SAVE] Successfully saved to mood board '{board_name}' (note_id: {note_id})")
         except Exception as e:
             import traceback
             error_msg = str(e)
