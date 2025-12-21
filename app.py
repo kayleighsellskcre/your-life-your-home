@@ -594,10 +594,11 @@ def homeowner_reno_planner_ajax_add():
             board_save_error = error_msg
 
     # Always save to renovation planner, even if board save fails
+    project_id = None
     try:
         # Fix: Add category parameter and correct argument order
         # Function signature: user_id, name, category, status, budget, notes
-        add_homeowner_project(user_id, name, category, status, budget_str, notes)
+        project_id = add_homeowner_project(user_id, name, category, status, budget_str, notes)
     except Exception as e:
         import traceback
         error_msg = str(e)
@@ -609,7 +610,9 @@ def homeowner_reno_planner_ajax_add():
     response_data = {
         "success": True,
         "saved_to_planner": True,
-        "saved_to_board": board_save_success
+        "saved_to_board": board_save_success,
+        "project_id": project_id,
+        "note_id": note_id if board_save_success else None
     }
     
     if board_save_success:
