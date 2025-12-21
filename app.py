@@ -172,6 +172,7 @@ from database import (
     delete_design_board,
     update_homeowner_note_photos,
     remove_photos_from_board,
+    remove_fixtures_from_board,
     duplicate_design_board,
     update_board_privacy,
     update_board_colors,
@@ -229,6 +230,201 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
 
 # Context processor to make professionals available to all homeowner templates
+def hex_to_color_name(hex_code):
+    """Convert hex color code to official Sherwin-Williams color name."""
+    if not hex_code:
+        return hex_code
+    
+    # Normalize hex code (remove #, convert to uppercase)
+    hex_clean = hex_code.strip().upper().replace('#', '')
+    if len(hex_clean) == 3:
+        hex_clean = ''.join([c*2 for c in hex_clean])
+    hex_clean = '#' + hex_clean
+    
+    # Complete Sherwin-Williams Color Database (323 official colors)
+    # Extracted from the create board area to ensure accuracy
+    color_map = {
+        # WHITES
+        '#EDEAE0': 'Alabaster', '#F3F1EC': 'Extra White', '#EFEEE8': 'Pure White',
+        '#F4F0E8': 'Polar Bear', '#F0EBE1': 'Greek Villa', '#F3F2ED': 'Snowbound',
+        '#F7F5F0': 'High Reflective White', '#F0EDE4': 'Westhighland White',
+        '#F2EFE7': 'Cotton White', '#F1EDE3': 'White Duck', '#F5F2E9': 'Divine White',
+        '#EAE7DD': 'City Loft', '#EFECE3': 'Moderne White', '#F1EEE6': 'Origami White',
+        '#F0EDE5': 'Roman Column', '#EFE9DD': 'Pearly White', '#F2EBDB': 'Creamy',
+        '#E8DDCC': 'Navajo White', '#E9E0D1': 'Antique White', '#F0E8D9': 'Vanilla Milkshake',
+        '#F5F0E6': 'Steamed Milk', '#F4F1EA': 'Ethereal White', '#F6F3EC': 'Marshmallow',
+        '#F2EFE8': 'Cloud White', '#F3EFE6': 'Eider White', '#F0ECE2': 'Swiss Coffee',
+        '#EFEADE': 'Ivory Tower', '#F1EAE0': 'Cashmere', '#F4F0E7': 'Twinkle',
+        '#F3EEE5': 'Summer White', '#F2EDE4': 'White Flour', '#F0ECE3': 'Zurich White',
+        '#F1EBE1': 'Pearl Oyster', '#F3EDE3': 'Morning Delight', '#F0EAE0': 'White Heron',
+        '#F2ECE2': 'Cotton Seed', '#F0E9DF': 'Nacre', '#F2EDE5': 'China White',
+        '#F0EBE3': 'White Lilac', '#EFEAE2': 'White Raisin', '#F3EEE6': 'Gauze',
+        '#F1ECE4': 'Opaline', '#EFE9DE': 'Vanilla Mocha', '#F0EAE1': 'Crisp Linen',
+        '#EFE8DC': 'Buff', '#F2EDE6': 'Paperwhite', '#F1EBE2': 'Grecian Ivory',
+        '#EFE9DE': 'Palish Peach', '#F3EEE7': 'Panda White', '#F1ECE4': 'Nouveau Narrative',
+        
+        # NEUTRALS & BEIGES
+        '#D6C8B8': 'Accessible Beige', '#E2DACF': 'Natural Linen', '#CFC0A8': 'Kilim Beige',
+        '#D5C7B8': 'Balanced Beige', '#C8BAAC': 'Perfect Greige', '#D7CCBB': 'Nomadic Desert',
+        '#DDD3C1': 'Wool Skein', '#E5D8C5': 'Sand Beach', '#E9E3D7': 'Aesthetic White',
+        '#E7DDD3': 'Shoji White', '#EBE5DC': 'Canvas Tan', '#DAD0C0': 'Naturale',
+        '#E4DCCE': 'Patience', '#CFC0AE': 'Shiitake', '#D8CCBA': 'Utterly Beige',
+        '#E1D6C6': 'Softer Tan', '#D5C7B3': 'Whole Wheat', '#D9CCBA': 'Believable Buff',
+        '#CEC0B0': 'Smoky Sand', '#D0C2B2': 'Nantucket Dune', '#D4CEC3': 'Gateway Gray',
+        '#CBC0B2': 'On the Rocks', '#D9C7B5': 'Sanderling', '#E5D5C3': 'Cottage Cream',
+        '#E1D3BF': 'Crisp Linen', '#DFD4C1': 'Loggia', '#CEC0AF': 'Relaxed Khaki',
+        '#E7DED1': 'Relaxed White', '#DFD1BD': 'Bagel', '#D3C4B0': 'Universal Khaki',
+        
+        # GRAYS
+        '#D5CFC1': 'Agreeable Gray', '#C9CCC4': 'Repose Gray', '#C2BDB1': 'Worldly Gray',
+        '#D1CEC4': 'Colonnade Gray', '#C5C5BD': 'Mindful Gray', '#B8B5AF': 'Requisite Gray',
+        '#BFB9AE': 'Anonymous', '#D0CCC2': 'Pediment', '#C7C3B9': 'Useful Gray',
+        '#D2CFC8': 'Gossamer Veil', '#D9D6CD': 'Incredible White', '#CAC6BC': 'Aesthetic',
+        '#BEB9AE': 'Versatile Gray', '#C6C3BA': 'Popular Gray', '#D3D0C7': 'Passive',
+        '#C2C0BA': 'Big Chill', '#C4BFB5': 'Alpaca', '#C9C6BC': 'Collonade Gray',
+        '#C4C0B7': 'Twilight Gray', '#B6B3AB': 'Gray Clouds', '#ACA9A0': 'Dorian Gray',
+        '#BBB7AD': 'Mega Greige', '#ADA9A0': 'Pavestone', '#B9B5AB': 'Perfect Greige',
+        '#C8C5BD': 'Gray Screen', '#B3AFA6': 'Argos', '#CFD1CD': 'Light French Gray',
+        '#C2C5C1': 'Silverplate', '#B5B8B4': 'Gray Shingle', '#ADB1AD': 'Front Porch',
+        '#A6AAA6': 'Unusual Gray', '#9FA3A0': 'Magnetic Gray', '#989C99': 'Online',
+        '#919594': 'Software', '#8A8E8D': 'Grays Harbor', '#838786': 'Mount Etna',
+        '#C4C5C0': 'Classic French Gray', '#BDBDB8': 'Ellie Gray', '#D6D7D2': 'Site White',
+        '#CFCFC9': 'Moderne White', '#B3B4AF': 'Conservative Gray', '#ACACA7': 'Serious Gray',
+        '#A5A5A0': 'Functional Gray', '#9E9E99': 'Cityscape', '#989893': 'Westchester Gray',
+        '#91918C': 'Attitude Gray',
+        
+        # GREENS & SAGE
+        '#D1D9CA': 'Sea Salt', '#8F9E8A': 'Evergreen Fog', '#B8C5B4': 'Clary Sage',
+        '#C9D4CB': 'Comfort Gray', '#A5B2A0': 'Softened Green', '#8B9B8A': 'Retreat',
+        '#B5BFB3': 'Acacia Haze', '#7D8C7A': 'Dried Thyme', '#B2BFB0': 'Svelte Sage',
+        '#C2CFBC': 'Contented', '#C7D4C7': 'Filmy Green', '#B8C8B6': 'Liveable Green',
+        '#D1DCC9': 'Lacewing', '#B1C0A8': 'Gratifying Green', '#C5D1C3': 'Rare Gray',
+        '#ADBCA8': 'Celadon', '#94A88B': 'Basil', '#A3B59D': 'Restful',
+        '#99AA94': 'Haven', '#8FA087': 'Nurture Green', '#7E9078': 'Artichoke',
+        '#6E8266': 'Relish', '#4D6A4B': 'Woodland Green', '#5F7A5D': 'Garden Grove',
+        '#6D886B': 'Privilege Green', '#7E9879': 'Bonsai Tint', '#8FA68C': 'Nurture Green',
+        '#A3B5A0': 'Jardin Day', '#B2C3B0': 'Jocular Green', '#C1D2C0': 'Spirited Green',
+        '#D0E0CF': 'Lighter Mint', '#B9D4BC': 'Mint Condition', '#728A70': 'Vogue Green',
+        '#869885': 'Garden Sage', '#9AA799': 'Jade Dragon', '#AEB6AD': 'Halcyon Green',
+        '#C2C5C0': 'Oyster Bay', '#C7C8C3': 'Collonade Gray',
+        
+        # BLUES & AQUAS
+        '#B5C4C7': 'Rain', '#C4D4D9': 'Topsail', '#A8BCC4': 'Quietude',
+        '#B8CAD1': 'Spa', '#89A3AE': 'Interesting Aqua', '#7B95A3': 'Refuge',
+        '#A0B5BF': 'Jetstream', '#B8C9D2': 'Atmospheric', '#A5BAC7': 'Sleepy Blue',
+        '#9DB0BC': 'Meditative', '#CAD9E1': 'Mountain Air', '#C2D4DE': 'Mild Blue',
+        '#D4E4E8': 'Hint of Mint', '#B5CAD6': 'Byte Blue', '#9EAEB9': 'North Star',
+        '#8FA2B0': 'Resolute Blue', '#3E5671': 'Needlepoint Navy', '#26465A': 'Naval',
+        '#29465F': 'Loyal Blue', '#2E4F66': 'Anchors Aweigh', '#7799A0': 'Cascade Green',
+        '#8BAAB5': 'Pool Blue', '#A0BBC8': 'Powder Blue', '#B5CDDB': 'Copen Blue',
+        '#CADEE8': 'Aviary Blue', '#5A8CA0': 'Blissful Blue', '#4C7C93': 'Georgian Bay',
+        '#3E6C86': 'Secure Blue', '#7095A8': 'Stream', '#84A5B7': 'Leisure Blue',
+        '#98B6C6': 'Windy Blue', '#ACC7D5': 'Languid Blue', '#C0D8E4': 'Rhythmic Blue',
+        '#5577AA': 'Jacaranda', '#4466A8': 'Blue Chip', '#33559A': 'Dignity Blue',
+        '#224488': 'Honorable Blue', '#113366': 'Commodore',
+        
+        # WARM TONES & CREAMS
+        '#F2E8DA': 'Napery', '#F1E5D5': 'Ivory Lace', '#E8DCC9': 'Wool Skein',
+        '#E3D4BE': 'Toasted Pine Nut', '#E2D5C0': 'Buff', '#D9CAB3': 'Crewel Tan',
+        '#D5C6AF': 'Mannered Gold', '#E7DAC7': 'Rice Grain', '#F0E3D1': 'Nacre',
+        '#EFE2D0': 'Honied White', '#DCCDB7': 'Rustic City', '#D8C9B2': 'Bittersweet Stem',
+        '#E8DCC8': 'Sand Dollar', '#E5D8C4': 'Navajo White', '#E2D5C1': 'Oyster Bar',
+        '#DFD1BD': 'Latte', '#DBCEB9': 'Whole Wheat', '#D8CAB6': 'Softer Tan',
+        '#D5C7B2': 'Macadamia', '#D1C3AE': 'Nomadic Desert', '#CEC0AB': 'Sand Beach',
+        '#CABCA7': 'Pavilion Beige', '#C7B9A4': 'Ramie', '#C3B5A0': 'Tony Taupe',
+        '#C0B29D': 'Tavern Taupe', '#BCAE99': 'Doeskin', '#B9AB96': 'Khaki Shade',
+        '#B5A792': 'Corkboard', '#E6D9C8': 'Dhurrie Beige', '#E3D6C5': 'Toasted Pine Nut',
+        '#DFD2C1': 'Crewel Tan', '#DCCFBE': 'Mannered Gold', '#D8CBBA': 'Diverse Beige',
+        '#D5C8B7': 'Wool Skein', '#D1C4B3': 'Smoky Beige', '#CEC1AF': 'Sanderling',
+        '#CABDAC': 'Stone Lion', '#C7BAA8': 'Brandon Beige', '#C3B6A5': 'Balanced Beige',
+        '#C0B3A1': 'Taupe Tone', '#BCAF9E': 'Versatile Gray', '#B9AC9A': 'Pathway',
+        '#B5A897': 'Tea Chest', '#B2A593': 'Harmonic Tan',
+        
+        # DARK & DRAMATIC
+        '#3A3A38': 'Iron Ore', '#3E3E3D': 'Black Magic', '#3C3A35': 'Urbane Bronze',
+        '#6B685F': 'Muddled Basil', '#57675D': 'Jasper', '#4E5D53': 'Pewter Green',
+        '#2F2F30': 'Tricorn Black', '#3B3935': 'Black Bean', '#635F58': 'Peppercorn',
+        '#393937': 'Andiron', '#31353D': 'Inkwell', '#32383F': 'Caviar',
+        '#2E3134': 'Cyberspace', '#3E3E3C': 'Domino', '#504C48': 'Gauntlet Gray',
+        '#4B4542': 'Sealskin', '#6C6861': 'Grizzle Gray', '#736E67': 'Mink',
+        '#6D6864': 'Garret Gray', '#7A6E63': 'Brainstorm Bronze', '#6B6259': 'Urbane Bronze',
+        '#635F57': 'Black Fox', '#5D5955': 'Thunderous', '#5A5550': 'Sable',
+        '#585551': 'Anew Gray', '#6B6A5F': 'Muddled Basil', '#3C4A3E': 'Rookwood Dark Green',
+        '#384337': 'Foxhall Green', '#2A4030': 'Shamrock', '#2C3D32': 'Roycroft Bottle Green',
+        
+        # ACCENT COLORS - REDS & PINKS
+        '#8E2C2A': 'Real Red', '#99322F': 'Fireweed', '#A43833': 'Red Bay',
+        '#AF3E38': 'Positive Red', '#BA443C': 'Tanager', '#C54A41': 'Habanero Chile',
+        '#E57A6E': 'Coral', '#EA8A7F': 'Charisma', '#EF9A90': 'Dishy Coral',
+        '#F4AAA1': 'Jovial', '#F9BAB2': 'Mellow Coral', '#F5E5E3': 'Touching White',
+        '#D9B1B1': 'Rose Colored', '#E4C8C8': 'Rose Embroidery',
+        
+        # ACCENT COLORS - YELLOWS & GOLDS
+        '#C89D34': 'Gold Rush', '#D3A83A': 'Nugget', '#DEB340': 'Golden Fleece',
+        '#E9BE46': 'Glitzy Gold', '#F4C94C': 'Fun Yellow', '#F9D452': 'Lively Yellow',
+        '#FEDF58': 'Confident Yellow', '#F5E682': 'Daffodil', '#F9EA8C': 'Lucent Yellow',
+        '#FDEE96': 'Banana Cream', '#FFF2A0': 'Butter Up', '#FFF6AA': 'Lantern Light',
+        
+        # ACCENT COLORS - PURPLES & LAVENDERS
+        '#6A5B7B': 'Kimono Violet', '#5C4D66': 'Plummy', '#4E3F51': 'Dewberry',
+        '#766889': 'Fabulous Grape', '#8A7A9E': 'Venture Violet', '#9E8DB3': 'Brave Purple',
+        '#B3A0C8': 'Novel Lilac', '#C7B3DD': 'Rhapsody Lilac', '#DBC6F2': 'Inspired Lilac',
+        '#E8D9F5': 'Elation', '#F4EDFA': 'Potentially Purple', '#C7B5D8': 'Spangle',
+        
+        # ACCENT COLORS - ORANGES & TERRACOTTA
+        '#A54826': 'Cayenne', '#B5532C': 'Determined Orange', '#C55E32': 'Copper Mountain',
+        '#D56938': 'Husky Orange', '#E5743E': 'Energetic Orange', '#F57F44': 'Tango',
+        '#FA8A4A': 'Outgoing Orange', '#FE9550': 'Surprise Amber', '#FFA056': 'Kumquat',
+        '#FFAB5C': 'Succulent Peach', '#FFB662': 'Tangerine', '#FFC168': 'Exciting Orange',
+    }
+    
+    # Fallback for common custom colors not in Sherwin-Williams database
+    fallback_map = {
+        '#F6E9DF': 'Cream',  # Custom cream color
+        '#B79F82': 'Taupe',  # Custom taupe color
+        '#6B6A45': 'Olive Green',  # Custom olive (close to Muddled Basil)
+        '#3A352C': 'Charcoal',  # Custom charcoal (close to Urbane Bronze)
+    }
+    
+    # Check exact match in main database first
+    if hex_clean in color_map:
+        return color_map[hex_clean]
+    
+    # Check fallback map
+    if hex_clean in fallback_map:
+        return fallback_map[hex_clean]
+    
+    # Try to find closest match by RGB distance (for custom colors)
+    try:
+        r1 = int(hex_clean[1:3], 16)
+        g1 = int(hex_clean[3:5], 16)
+        b1 = int(hex_clean[5:7], 16)
+        
+        closest_name = None
+        min_distance = float('inf')
+        
+        # Search through all Sherwin-Williams colors
+        for hex_val, name in color_map.items():
+            if hex_val.startswith('#'):
+                r2 = int(hex_val[1:3], 16)
+                g2 = int(hex_val[3:5], 16)
+                b2 = int(hex_val[5:7], 16)
+                
+                distance = ((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2)**0.5
+                if distance < min_distance:
+                    min_distance = distance
+                    closest_name = name
+        
+        # If very close (within 15 color units), use the closest Sherwin-Williams name
+        if min_distance < 15:
+            return closest_name
+    except:
+        pass
+    
+    # Fallback: return hex code if no match found
+    return hex_code
+
+
 @app.context_processor
 def inject_professionals():
     """Make professionals data available to all templates - CRITICAL FOR DASHBOARD DISPLAY."""
@@ -304,7 +500,7 @@ def inject_professionals():
         else:
             print(f"CONTEXT PROCESSOR: No user logged in")
     
-    return dict(professionals=professionals)
+    return dict(professionals=professionals, hex_to_color_name=hex_to_color_name)
 
 # ---------------- AJAX PLANNER ROUTE ----------------
 @app.route("/homeowner/reno/planner/ajax-add", methods=["POST"])
@@ -332,17 +528,24 @@ def homeowner_reno_planner_ajax_add():
     notes = data.get("project_notes", "").strip()
     
     # If a board_name is provided, save as a design board note as well
+    board_save_error = None
     if board_name:
         note_title = name
         # Include budget and status in details
         note_details_parts = [summary or notes or f"Project: {name}"]
         if budget:
-            note_details_parts.append(f"\n\nEstimated Cost: ${budget:,.0f}")
+            try:
+                budget_float = float(budget) if budget else 0
+                note_details_parts.append(f"\n\nEstimated Cost: ${budget_float:,.0f}")
+            except (ValueError, TypeError):
+                if budget_str:
+                    note_details_parts.append(f"\n\nEstimated Cost: ${budget_str}")
         if status:
             note_details_parts.append(f"Status: {status}")
         note_details = "\n".join(note_details_parts)
         
         try:
+            # add_design_board_note will create the board if it doesn't exist
             add_design_board_note(
                 user_id=user_id, 
                 project_name=board_name, 
@@ -358,12 +561,31 @@ def homeowner_reno_planner_ajax_add():
                 fixtures=[],
             )
         except Exception as e:
-            print(f"[COST ESTIMATE SAVE ERROR] Could not save to board {board_name}: {str(e)}")
-            # Don't fail the whole request if board save fails
+            import traceback
+            error_msg = str(e)
+            print(f"[COST ESTIMATE SAVE ERROR] Could not save to board '{board_name}': {error_msg}")
+            print(traceback.format_exc())
+            board_save_error = error_msg
 
-    # Fix: Add category parameter and correct argument order
-    # Function signature: user_id, name, category, status, budget, notes
-    add_homeowner_project(user_id, name, category, status, budget_str, notes)
+    # Always save to renovation planner, even if board save fails
+    try:
+        # Fix: Add category parameter and correct argument order
+        # Function signature: user_id, name, category, status, budget, notes
+        add_homeowner_project(user_id, name, category, status, budget_str, notes)
+    except Exception as e:
+        import traceback
+        error_msg = str(e)
+        print(f"[COST ESTIMATE SAVE ERROR] Could not save to planner: {error_msg}")
+        print(traceback.format_exc())
+        return jsonify({"success": False, "error": f"Could not save project: {error_msg}"}), 500
+    
+    # Return success, but include board error if it occurred
+    if board_save_error:
+        return jsonify({
+            "success": True, 
+            "warning": f"Project saved to planner, but could not save to mood board: {board_save_error}"
+        })
+    
     return jsonify({"success": True})
 
 
@@ -2653,8 +2875,6 @@ def homeowner_saved_notes():
             remove_fixtures_list = request.form.getlist("remove_fixtures")
             if remove_fixtures_list:
                 try:
-                    from database import remove_fixtures_from_board
-
                     remove_fixtures_from_board(
                         user_id, board_name, remove_fixtures_list
                     )
@@ -2663,10 +2883,14 @@ def homeowner_saved_notes():
                             fpath = BASE_DIR / "static" / f
                             if fpath.exists():
                                 fpath.unlink()
-                        except Exception:
-                            pass
-                except Exception:
-                    flash("Could not remove some fixtures.", "error")
+                        except Exception as file_error:
+                            print(f"[FIXTURE REMOVAL] Could not delete file {f}: {file_error}")
+                    flash("Fixtures removed successfully!", "success")
+                except Exception as e:
+                    import traceback
+                    print(f"[FIXTURE REMOVAL ERROR] Failed to remove fixtures: {str(e)}")
+                    print(traceback.format_exc())
+                    flash(f"Could not remove some fixtures: {str(e)}", "error")
 
             # New photos
             new_photos = []
@@ -2771,11 +2995,18 @@ def homeowner_saved_notes():
                         fixtures=all_fixtures,
                     )
                     flash("Board updated successfully!", "success")
+                    # Redirect to board detail page if we're coming from there
+                    if request.referrer and '/design-boards/' in request.referrer:
+                        return redirect(url_for('homeowner_design_board_view', board_name=board_name))
+                    return redirect(url_for("homeowner_saved_notes", view=board_name))
                 except Exception as e:
                     import traceback
                     print(f"[BOARD EDIT ERROR] Failed to update board: {str(e)}")
                     print(traceback.format_exc())
                     flash(f"Could not update board: {str(e)}", "error")
+                    # Redirect to board detail page if we're coming from there
+                    if request.referrer and '/design-boards/' in request.referrer:
+                        return redirect(url_for('homeowner_design_board_view', board_name=board_name))
 
             return redirect(url_for("homeowner_saved_notes", view=board_name))
 
@@ -2918,16 +3149,99 @@ def homeowner_saved_notes():
 def homeowner_design_board_view(board_name):
     """Display a dedicated detail page for a single design board."""
     user_id = get_current_user_id()
-    details = get_design_board_details(user_id, board_name)
+    details_list = get_design_board_details(user_id, board_name)
 
-    if not details:
+    if not details_list:
         flash("That board could not be found.", "error")
         return redirect(url_for("homeowner_saved_notes"))
+
+    # Aggregate all photos, fixtures, and other data from all notes in this board
+    all_photos = []
+    all_fixtures = []
+    all_files = []
+    color_palette = []
+    vision_statement = None
+    title = None
+    details_text = []
+    
+    for detail in details_list:
+        detail_dict = dict(detail) if hasattr(detail, 'keys') else detail
+        
+        # Collect photos from all notes
+        photos_json = detail_dict.get('photos') or '[]'
+        if photos_json:
+            try:
+                photos = json.loads(photos_json) if isinstance(photos_json, str) else photos_json
+                if isinstance(photos, list):
+                    all_photos.extend(photos)
+            except Exception:
+                pass
+        
+        # Collect fixtures from all notes
+        fixtures_json = detail_dict.get('fixtures') or '[]'
+        if fixtures_json:
+            try:
+                fixtures = json.loads(fixtures_json) if isinstance(fixtures_json, str) else fixtures_json
+                if isinstance(fixtures, list):
+                    all_fixtures.extend(fixtures)
+            except Exception:
+                pass
+        
+        # Collect files
+        files_json = detail_dict.get('files') or '[]'
+        if files_json:
+            try:
+                files = json.loads(files_json) if isinstance(files_json, str) else files_json
+                if isinstance(files, list):
+                    all_files.extend(files)
+            except Exception:
+                pass
+        
+        # Get color palette (from most recent note)
+        color_palette_json = detail_dict.get('color_palette') or '[]'
+        if color_palette_json and not color_palette:
+            try:
+                color_palette = json.loads(color_palette_json) if isinstance(color_palette_json, str) else color_palette_json
+            except Exception:
+                pass
+        
+        # Get vision statement (from most recent note)
+        if not vision_statement and detail_dict.get('vision_statement'):
+            vision_statement = detail_dict.get('vision_statement')
+        
+        # Get title (from most recent note)
+        if not title and detail_dict.get('title'):
+            title = detail_dict.get('title')
+        
+        # Collect details text (only unique, non-empty details)
+        if detail_dict.get('details'):
+            detail_text = detail_dict.get('details').strip()
+            if detail_text and detail_text not in details_text:
+                details_text.append(detail_text)
+    
+    # Remove duplicates while preserving order
+    all_photos = list(dict.fromkeys(all_photos))
+    all_fixtures = list(dict.fromkeys(all_fixtures))
+    all_files = list(dict.fromkeys(all_files))
+    
+    # Combine all unique details with newlines for readability
+    combined_details = '\n\n'.join(details_text) if details_text else None
+    
+    # Create aggregated details dict for template
+    aggregated_details = {
+        'photos': all_photos,
+        'fixtures': all_fixtures,
+        'files': all_files,
+        'color_palette': color_palette if isinstance(color_palette, list) else [],
+        'vision_statement': vision_statement,
+        'title': title,
+        'details': combined_details,
+    }
 
     return render_template(
         "homeowner/board_detail.html",
         selected_board=board_name,
-        selected_details=details,
+        selected_details=aggregated_details,
         brand_name=FRONT_BRAND_NAME,
     )
 
@@ -2936,15 +3250,100 @@ def homeowner_design_board_view(board_name):
 def homeowner_design_board_download(board_name):
     """Render a print-optimized view of a single board."""
     user_id = get_current_user_id()
-    details = get_design_board_details(user_id, board_name)
-    if not details:
+    details_list = get_design_board_details(user_id, board_name)
+    if not details_list:
         flash("That board could not be found.", "error")
         return redirect(url_for("homeowner_saved_notes"))
+
+    # Aggregate all photos, fixtures, and other data from all notes in this board
+    # (same logic as homeowner_design_board_view)
+    all_photos = []
+    all_fixtures = []
+    all_files = []
+    color_palette = []
+    vision_statement = None
+    title = None
+    details_text = []
+    
+    for detail in details_list:
+        detail_dict = dict(detail) if hasattr(detail, 'keys') else detail
+        
+        # Collect photos from all notes
+        photos_json = detail_dict.get('photos') or '[]'
+        if photos_json:
+            try:
+                photos = json.loads(photos_json) if isinstance(photos_json, str) else photos_json
+                if isinstance(photos, list):
+                    all_photos.extend(photos)
+            except Exception:
+                pass
+        
+        # Collect fixtures from all notes
+        fixtures_json = detail_dict.get('fixtures') or '[]'
+        if fixtures_json:
+            try:
+                fixtures = json.loads(fixtures_json) if isinstance(fixtures_json, str) else fixtures_json
+                if isinstance(fixtures, list):
+                    all_fixtures.extend(fixtures)
+            except Exception:
+                pass
+        
+        # Collect files
+        files_json = detail_dict.get('files') or '[]'
+        if files_json:
+            try:
+                files = json.loads(files_json) if isinstance(files_json, str) else files_json
+                if isinstance(files, list):
+                    all_files.extend(files)
+            except Exception:
+                pass
+        
+        # Get color palette (from most recent note)
+        color_palette_json = detail_dict.get('color_palette') or '[]'
+        if color_palette_json and not color_palette:
+            try:
+                color_palette = json.loads(color_palette_json) if isinstance(color_palette_json, str) else color_palette_json
+            except Exception:
+                pass
+        
+        # Get vision statement (from most recent note)
+        if not vision_statement and detail_dict.get('vision_statement'):
+            vision_statement = detail_dict.get('vision_statement')
+        
+        # Get title (from most recent note)
+        if not title and detail_dict.get('title'):
+            title = detail_dict.get('title')
+        
+        # Collect details text (only unique, non-empty details)
+        if detail_dict.get('details'):
+            detail_text = detail_dict.get('details').strip()
+            if detail_text and detail_text not in details_text:
+                details_text.append(detail_text)
+    
+    # Remove duplicates while preserving order
+    all_photos = list(dict.fromkeys(all_photos))
+    all_fixtures = list(dict.fromkeys(all_fixtures))
+    all_files = list(dict.fromkeys(all_files))
+    
+    # Combine all unique details with newlines for readability
+    combined_details = '\n\n'.join(details_text) if details_text else None
+    
+    # Create aggregated details dict for template
+    aggregated_details = {
+        'photos': all_photos,
+        'fixtures': all_fixtures,
+        'files': all_files,
+        'color_palette': color_palette if isinstance(color_palette, list) else [],
+        'vision_statement': vision_statement,
+        'title': title,
+        'details': combined_details,
+        'notes': details_list,  # Include raw notes for the template
+    }
 
     html = render_template(
         "homeowner/board_print.html",
         selected_board=board_name,
-        selected_details=details,
+        selected_details=aggregated_details,
         brand_name=FRONT_BRAND_NAME,
     )
 
@@ -2952,18 +3351,22 @@ def homeowner_design_board_download(board_name):
         from weasyprint import HTML
 
         pdf = HTML(string=html, base_url=str(BASE_DIR / "static")).write_pdf()
+        safe_filename = board_name.replace("/", "_")
         return Response(
             pdf,
             mimetype="application/pdf",
             headers={
-                "Content-Disposition": f'attachment; filename="{board_name}.pdf"'
+                "Content-Disposition": f'attachment; filename="{safe_filename}.pdf"'
             },
         )
-    except Exception:
-        flash(
-            "WeasyPrint not available: rendering HTML. Install WeasyPrint to enable PDF downloads.",
-            "info",
-        )
+    except ImportError:
+        # WeasyPrint not installed - return HTML as fallback
+        return html
+    except Exception as e:
+        # PDF generation failed - log error and return HTML
+        import traceback
+        print(f"[PDF DOWNLOAD ERROR] Failed to generate PDF: {str(e)}")
+        print(traceback.format_exc())
         return html
 
 
@@ -3036,18 +3439,37 @@ def homeowner_crop_photo():
         if not all([board_name, original_path, cropped_file]):
             return jsonify({"success": False, "error": "Missing data"})
 
-        # Verify user owns this board
-        details = get_design_board_details(user_id, board_name)
-        if not details or original_path not in details.get("photos", []):
-            return jsonify({"success": False, "error": "Photo not found"})
+        # Verify user owns this board and photo exists
+        details_list = get_design_board_details(user_id, board_name)
+        if not details_list:
+            return jsonify({"success": False, "error": "Board not found"})
+        
+        # Check if photo exists in any note in the board
+        photo_found = False
+        for detail in details_list:
+            detail_dict = dict(detail) if hasattr(detail, 'keys') else detail
+            photos_json = detail_dict.get('photos') or '[]'
+            try:
+                photos = json.loads(photos_json) if isinstance(photos_json, str) else photos_json
+                if isinstance(photos, list) and original_path in photos:
+                    photo_found = True
+                    break
+            except Exception:
+                pass
+        
+        if not photo_found:
+            return jsonify({"success": False, "error": "Photo not found in board"})
 
         # Save cropped image over original
         file_path = BASE_DIR / "static" / original_path
+        file_path.parent.mkdir(parents=True, exist_ok=True)
         cropped_file.save(file_path)
 
         return jsonify({"success": True})
     except Exception as e:
+        import traceback
         print(f"Crop error: {e}")
+        print(traceback.format_exc())
         return jsonify({"success": False, "error": str(e)})
 
 

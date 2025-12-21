@@ -73,9 +73,11 @@
   
   .hero-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 2rem; /* Increased gap to prevent overlap */
     margin-bottom: 2rem;
     flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
   }
   
   .hero-note {
@@ -270,13 +272,110 @@
     </p>
 
     <div class="hero-buttons">
-      <a class="btn-primary" href="{{ cloud_cma_url }}" target="_blank" rel="noopener">
+      <a class="btn-primary" id="homepage-primary-btn" href="{{ cloud_cma_url }}" target="_blank" rel="noopener">
         Discover Your Home's Worth
       </a>
-      <a class="btn-outline" href="{{ url_for('homeowner_overview') }}">
+      <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('homeowner_overview') }}">
         Explore Homeowners Dashboard
       </a>
     </div>
+    
+    <script>
+      // ELEGANT CONTINUOUS ANIMATION - PRIMARY BUTTON ONLY
+      (function() {
+        function elegantPulse(btn, duration) {
+          if (!btn) return;
+          
+          // Set transform origin to center to prevent layout shift
+          btn.style.transformOrigin = 'center center';
+          btn.style.willChange = 'transform';
+          
+          let startTime = null;
+          const minScale = 1;
+          const maxScale = 1.12; // More subtle - 12% larger (elegant, not aggressive)
+          
+          function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            
+            // Smooth sine wave for elegant motion
+            const elapsed = (timestamp - startTime) % duration;
+            const progress = elapsed / duration;
+            const scale = minScale + (maxScale - minScale) * (0.5 - 0.5 * Math.cos(progress * Math.PI * 2));
+            
+            // Smooth, elegant transform
+            btn.style.transform = 'scale(' + scale.toFixed(4) + ')';
+            btn.style.setProperty('transform', 'scale(' + scale.toFixed(4) + ')', 'important');
+            
+            // Subtle shadow enhancement
+            const shadowIntensity = (scale - 1) * 0.4;
+            btn.style.boxShadow = '0 ' + (4 + shadowIntensity * 12) + 'px ' + (12 + shadowIntensity * 25) + 'px rgba(107, 106, 69, ' + (0.15 + shadowIntensity * 0.25) + ')';
+            
+            requestAnimationFrame(animate);
+          }
+          
+          requestAnimationFrame(animate);
+        }
+        
+        function init() {
+          var btn1 = document.getElementById('homepage-primary-btn');
+          var btn2 = document.getElementById('homepage-secondary-btn');
+          
+          // Only primary button animates continuously
+          if (btn1) {
+            elegantPulse(btn1, 2000); // 2 second cycle
+          }
+          
+          // Secondary button - only animate on hover
+          if (btn2) {
+            let hoverAnimationId = null;
+            let startTime = null;
+            const minScale = 1;
+            const maxScale = 1.08; // Subtle hover effect
+            
+            function hoverPulse(timestamp) {
+              if (!startTime) startTime = timestamp;
+              
+              const elapsed = (timestamp - startTime) % 1500; // 1.5 second cycle
+              const progress = elapsed / 1500;
+              const scale = minScale + (maxScale - minScale) * (0.5 - 0.5 * Math.cos(progress * Math.PI * 2));
+              
+              btn2.style.transform = 'scale(' + scale.toFixed(4) + ')';
+              btn2.style.setProperty('transform', 'scale(' + scale.toFixed(4) + ')', 'important');
+              
+              hoverAnimationId = requestAnimationFrame(hoverPulse);
+            }
+            
+            btn2.addEventListener('mouseenter', function() {
+              btn2.style.transformOrigin = 'center center';
+              btn2.style.willChange = 'transform';
+              startTime = null;
+              hoverPulse(performance.now());
+            });
+            
+            btn2.addEventListener('mouseleave', function() {
+              if (hoverAnimationId) {
+                cancelAnimationFrame(hoverAnimationId);
+                hoverAnimationId = null;
+              }
+              btn2.style.transform = 'scale(1)';
+              btn2.style.setProperty('transform', 'scale(1)', 'important');
+              startTime = null;
+            });
+          }
+        }
+        
+        // Initialize when ready
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          init();
+        } else {
+          document.addEventListener('DOMContentLoaded', init);
+        }
+        
+        // Backup attempts
+        setTimeout(init, 100);
+        setTimeout(init, 500);
+      })();
+    </script>
 
     <p class="hero-note">
       Free for homeowners and aspiring homeowners. 

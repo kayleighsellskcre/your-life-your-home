@@ -2441,6 +2441,38 @@ def remove_photos_from_board(user_id: int, project_name: str, photos_to_remove: 
     conn.close()
 
 
+def remove_fixtures_from_board(user_id: int, project_name: str, fixtures_to_remove: List[str]) -> None:
+    """Remove specific fixtures from all notes in a design board."""
+    if not fixtures_to_remove:
+        return
+
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT id, fixtures FROM homeowner_notes WHERE user_id = ? AND project_name = ?",
+        (user_id, project_name),
+    )
+    rows = cur.fetchall()
+
+    for row in rows:
+        note_id = row["id"]
+        fixtures_json = row["fixtures"] or "[]"
+        try:
+            fixtures = json.loads(fixtures_json)
+        except Exception:
+            fixtures = []
+
+        filtered = [f for f in fixtures if f not in fixtures_to_remove]
+        if len(filtered) != len(fixtures):
+            cur.execute(
+                "UPDATE homeowner_notes SET fixtures = ? WHERE id = ?",
+                (json.dumps(filtered), note_id),
+            )
+
+    conn.commit()
+    conn.close()
+
+
 def duplicate_design_board(user_id: int, original_name: str, new_name: str) -> None:
     """Create a duplicate of a design board with a new name."""
     conn = get_connection()

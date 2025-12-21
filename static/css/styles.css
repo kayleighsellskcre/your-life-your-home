@@ -7,6 +7,15 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  cursor: default; /* Default cursor for everything */
+}
+
+/* Only show pointer cursor on actual clickable elements that redirect or perform actions */
+a[href], a[href]:not([href="#"]):not([href=""]), 
+button, input[type="submit"], input[type="button"], 
+[onclick]:not([onclick=""]), .clickable, [role="button"], 
+select, label[for], .btn, .cta-button {
+  cursor: pointer;
 }
 
 :root {

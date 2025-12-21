@@ -2,27 +2,58 @@
 
 {% block homeowner_content %}
 
-<!-- Flowing Fabric Endless Scroll Background -->
-<div class="fabric-scroll-container">
-  <div class="fabric-scroll fabric-scroll-1"></div>
-  <div class="fabric-scroll fabric-scroll-2"></div>
-  <div class="fabric-scroll fabric-scroll-3"></div>
-</div>
-
-<!-- Mediterranean Plaster Base Background -->
+<!-- Luxurious Ombre Background - Bright Creams, Sages, Golds -->
 <div style="
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: #F2EDE5;
-  background-image: url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22%3E%3Cg opacity=%220.2%22 fill=%22%23C4B5A0%22%3E%3Ccircle cx=%2280%22 cy=%2280%22 r=%224%22/%3E%3Ccircle cx=%2285%22 cy=%2275%22 r=%222.5%22/%3E%3Ccircle cx=%2275%22 cy=%2275%22 r=%222.5%22/%3E%3Ccircle cx=%2280%22 cy=%2270%22 r=%223%22/%3E%3Cline x1=%2280%22 y1=%2280%22 x2=%2280%22 y2=%22120%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3Ccircle cx=%22220%22 cy=%22160%22 r=%224%22/%3E%3Ccircle cx=%22225%22 cy=%22155%22 r=%222.5%22/%3E%3Ccircle cx=%22215%22 cy=%22155%22 r=%222.5%22/%3E%3Ccircle cx=%22220%22 cy=%22150%22 r=%223%22/%3E%3Cline x1=%22220%22 y1=%22160%22 x2=%22220%22 y2=%22200%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3Ccircle cx=%22150%22 cy=%22280%22 r=%224%22/%3E%3Ccircle cx=%22155%22 cy=%22275%22 r=%222.5%22/%3E%3Ccircle cx=%22145%22 cy=%22275%22 r=%222.5%22/%3E%3Ccircle cx=%22150%22 cy=%22270%22 r=%223%22/%3E%3Cline x1=%22150%22 y1=%22280%22 x2=%22150%22 y2=%22320%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3Ccircle cx=%22320%22 cy=%22240%22 r=%224%22/%3E%3Ccircle cx=%22325%22 cy=%22235%22 r=%222.5%22/%3E%3Ccircle cx=%22315%22 cy=%22235%22 r=%222.5%22/%3E%3Ccircle cx=%22320%22 cy=%22230%22 r=%223%22/%3E%3Cline x1=%22320%22 y1=%22240%22 x2=%22320%22 y2=%22280%22 stroke=%22%23B8A895%22 stroke-width=%222%22/%3E%3C/g%3E%3C/svg%3E');
-  background-size: 400px 400px;
-  background-repeat: repeat;
+  background: linear-gradient(135deg, 
+    #FEFCF8 0%, 
+    #FCF9F4 15%, 
+    #F5F2EA 30%, 
+    #EFECE0 45%, 
+    #E8E4D8 60%, 
+    #E0DCD0 75%, 
+    #D8D4C8 90%, 
+    #D0CCC0 100%);
+  z-index: -1000;
+  pointer-events: none;
+  opacity: 1;
+"></div>
+
+<!-- Luxurious Gradient Overlay with Gold Accents -->
+<div style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: 
+    radial-gradient(ellipse at 15% 25%, rgba(255, 215, 80, 0.4) 0%, rgba(255, 215, 80, 0.15) 40%, transparent 70%),
+    radial-gradient(ellipse at 85% 75%, rgba(160, 180, 150, 0.35) 0%, rgba(160, 180, 150, 0.12) 40%, transparent 70%),
+    radial-gradient(ellipse at 50% 50%, rgba(200, 195, 180, 0.2) 0%, rgba(200, 195, 180, 0.08) 50%, transparent 80%),
+    radial-gradient(ellipse at 70% 20%, rgba(220, 200, 140, 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 30% 80%, rgba(255, 250, 240, 0.25) 0%, transparent 50%),
+    linear-gradient(135deg, 
+      rgba(254, 252, 248, 0.5) 0%, 
+      rgba(252, 249, 244, 0.4) 20%, 
+      rgba(245, 242, 234, 0.3) 40%, 
+      rgba(239, 236, 224, 0.25) 60%, 
+      rgba(232, 228, 216, 0.3) 80%, 
+      rgba(224, 220, 208, 0.35) 100%);
   z-index: -999;
   pointer-events: none;
+  opacity: 1;
 "></div>
+
+<!-- Flowing Fabric Endless Scroll Background - Top decorative layer -->
+<div class="fabric-scroll-container">
+  <div class="fabric-scroll fabric-scroll-1"></div>
+  <div class="fabric-scroll fabric-scroll-2"></div>
+  <div class="fabric-scroll fabric-scroll-3"></div>
+</div>
 
 <style>
   /* ========================================
@@ -38,7 +69,7 @@
     overflow: hidden;
     z-index: -998;
     pointer-events: none;
-    opacity: 0.08;
+    opacity: 0.02;
   }
   
   .fabric-scroll {
@@ -121,11 +152,13 @@
     padding: 1rem 2rem;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
     margin: 0 -3rem 0;
     border-bottom: 1px solid #EDE8E3;
     box-shadow: 0 2px 8px rgba(0,0,0,0.03);
     z-index: 100;
+    position: relative;
   }
 
   .back-link {
@@ -143,6 +176,15 @@
     color: #6B6A45;
   }
 
+  .board-actions-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+  }
+
   .board-actions-right {
     margin-left: auto;
     display: flex;
@@ -157,7 +199,6 @@
     padding: 0.3rem;
     background: #F6F2E8;
     border-radius: 20px;
-    margin-right: 0.5rem;
   }
   
   .layout-btn {
@@ -277,11 +318,16 @@
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     transition: all 0.35s ease;
+    width: 180px;
+    min-height: 180px;
+    height: auto;
   }
 
   .gallery-collage.organic .gallery-item:nth-child(6n+1) {
     transform: rotate(-4deg);
     width: 180px;
+    min-height: 180px;
+    height: auto;
     margin-top: 20px;
     margin-left: -10px;
   }
@@ -289,6 +335,8 @@
   .gallery-collage.organic .gallery-item:nth-child(6n+2) {
     transform: rotate(3deg);
     width: 160px;
+    min-height: 160px;
+    height: auto;
     margin-top: -15px;
     margin-right: -8px;
   }
@@ -296,12 +344,16 @@
   .gallery-collage.organic .gallery-item:nth-child(6n+3) {
     transform: rotate(-2deg);
     width: 200px;
+    min-height: 200px;
+    height: auto;
     margin-top: 35px;
   }
 
   .gallery-collage.organic .gallery-item:nth-child(6n+4) {
     transform: rotate(3.5deg);
     width: 170px;
+    min-height: 170px;
+    height: auto;
     margin-top: -10px;
     margin-left: -12px;
   }
@@ -309,6 +361,8 @@
   .gallery-collage.organic .gallery-item:nth-child(6n+5) {
     transform: rotate(-3deg);
     width: 150px;
+    min-height: 150px;
+    height: auto;
     margin-top: 25px;
     margin-right: -10px;
   }
@@ -316,6 +370,8 @@
   .gallery-collage.organic .gallery-item:nth-child(6n) {
     transform: rotate(2.5deg);
     width: 190px;
+    min-height: 190px;
+    height: auto;
     margin-top: -5px;
   }
 
@@ -329,6 +385,8 @@
 
   .gallery-collage.grid .gallery-item {
     width: 100% !important;
+    min-height: 200px !important;
+    height: auto !important;
     transform: none !important;
     margin: 0 !important;
     background: white;
@@ -359,6 +417,8 @@
     overflow: hidden;
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     transition: all 0.3s ease;
+    min-height: 200px;
+    height: auto;
   }
 
   .gallery-collage.editorial .gallery-item:nth-child(1) {
@@ -407,9 +467,6 @@
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     transition: all 0.35s ease;
   }
-    width: 190px;
-    margin-top: -5px;
-  }
 
   .gallery-item:hover {
     transform: scale(1.15) rotate(0deg) !important;
@@ -420,42 +477,80 @@
 
   .gallery-item img {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    height: auto;
+    object-fit: contain;
     display: block;
+    min-height: 150px;
   }
 
-  /* Handwritten-style labels */
-  .gallery-item-label {
+  /* Elegant Floating Labels - Luxurious positioning on board */
+  .floating-labels-container {
     position: absolute;
-    bottom: -12px;
-    right: 10px;
-    padding: 0.3rem 0.7rem;
-    background: rgba(255, 255, 255, 0.97);
-    font-family: 'Dancing Script', cursive;
-    font-size: 0.95rem;
-    color: #6B6A45;
-    font-weight: 400;
-    transform: rotate(-5deg);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
-    border-radius: 5px;
-    z-index: 5;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    overflow: hidden;
   }
-
-  .gallery-item:nth-child(even) .gallery-item-label {
-    transform: rotate(4deg);
-    left: 10px;
-    right: auto;
+  
+  .floating-label {
+    position: absolute;
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: rgba(107, 106, 69, 0.35);
+    text-transform: lowercase;
+    letter-spacing: 0.25em;
+    padding: 0.5rem 1.2rem;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 30px;
+    pointer-events: none;
+    font-style: italic;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(107, 106, 69, 0.08), 
+                0 1px 3px rgba(107, 106, 69, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    opacity: 0;
+    animation: fadeInFloat 3s ease-out forwards;
+    transform: rotate(0deg);
+    border: 1px solid rgba(107, 106, 69, 0.08);
+    font-family: 'Playfair Display', Georgia, serif;
+    white-space: nowrap;
   }
-
-  .gallery-item:nth-child(3n) .gallery-item-label {
-    transform: rotate(-6deg);
-    bottom: -14px;
+  
+  @keyframes fadeInFloat {
+    0% {
+      opacity: 0;
+      transform: translateY(20px) rotate(0deg) scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotate(var(--label-rotation, 0deg)) scale(1);
+    }
   }
-
-  .gallery-item:nth-child(4n) .gallery-item-label {
-    transform: rotate(5deg);
-    bottom: -10px;
+  
+  .floating-label:nth-child(1) {
+    --label-rotation: -2deg;
+    animation-delay: 0.5s;
+  }
+  
+  .floating-label:nth-child(2) {
+    --label-rotation: 3deg;
+    animation-delay: 1s;
+  }
+  
+  .floating-label:nth-child(3) {
+    --label-rotation: -4deg;
+    animation-delay: 1.5s;
+  }
+  
+  /* Subtle hover effect for labels */
+  .floating-label:hover {
+    color: rgba(107, 106, 69, 0.5);
+    background: rgba(255, 255, 255, 0.85);
+    transform: scale(1.05) rotate(var(--label-rotation, 0deg));
+    transition: all 0.3s ease;
   }
 
   /* ========================================
@@ -542,22 +637,48 @@
   .color-palette-strip {
     display: flex;
     justify-content: center;
-    gap: 1.2rem;
-    margin-bottom: 2rem;
+    align-items: flex-start;
+    gap: 3rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    padding: 2rem 1rem;
+  }
+
+  .color-swatch-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    position: relative;
   }
 
   .color-swatch-circle {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    transition: all 0.3s ease;
-    border: 3px solid white;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+    transition: all 0.4s ease;
+    border: 4px solid white;
+    position: relative;
   }
 
   .color-swatch-circle:hover {
-    transform: scale(1.15);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.22);
+  }
+
+  .color-swatch-label {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1rem;
+    font-style: italic;
+    color: #5A5545;
+    letter-spacing: 0.03em;
+    text-align: center;
+    line-height: 1.5;
+    font-weight: 400;
+    min-width: 100px;
+    max-width: 120px;
+    padding: 0 0.5rem;
   }
 
   /* Subtle footer branding */
@@ -611,7 +732,7 @@
     }
   }
 
-  /* Print Styles - Legal Size (8.5×14) Optimized */
+  /* Print Styles - Single Page Optimized */
   @media print {
     * {
       -webkit-print-color-adjust: exact !important;
@@ -620,15 +741,17 @@
     }
 
     @page {
-      size: legal;
-      margin: 0.75in 0.5in;
+      size: letter landscape;
+      margin: 0.2in;
     }
 
     body, html {
       margin: 0 !important;
       padding: 0 !important;
       background: #FAF8F5 !important;
-      width: 7.5in !important;
+      width: 10.6in !important;
+      height: 8.1in !important;
+      overflow: hidden !important;
     }
 
     .ylh-sidebar-nav,
@@ -636,51 +759,88 @@
     .board-actions,
     nav,
     .action-btn,
-    .back-link {
+    .back-link,
+    .fabric-scroll-container,
+    #wallpaper-background,
+    #optionsModal,
+    #editModal {
       display: none !important;
     }
 
     .board-view {
       padding: 0 !important;
-      max-width: 7.5in !important;
+      max-width: 10.6in !important;
+      width: 10.6in !important;
       background: #FAF8F5 !important;
+      height: 8.1in !important;
+      overflow: hidden !important;
+      display: block !important;
+      position: relative !important;
     }
 
     .board-header {
-      padding: 1in 0.5in 0.8in !important;
+      padding: 0.15in 0.1in 0.1in !important;
+      margin-bottom: 0.1in !important;
       page-break-after: avoid !important;
+      page-break-inside: avoid !important;
     }
 
     .board-category {
-      margin-bottom: 0.3in !important;
+      margin-bottom: 0.05in !important;
+      font-size: 0.5rem !important;
     }
 
     .board-title {
-      font-size: 2.5rem !important;
-      margin-bottom: 0.4in !important;
+      font-size: 1.2rem !important;
+      margin-bottom: 0.05in !important;
+      line-height: 1.1 !important;
     }
 
     .board-vision {
-      font-size: 0.95rem !important;
+      font-size: 0.6rem !important;
+      margin: 0 !important;
+      line-height: 1.2 !important;
     }
 
     .gallery {
-      padding: 0 0.3in !important;
-      margin-bottom: 0.8in !important;
+      padding: 0 0.1in !important;
+      margin-bottom: 0.1in !important;
+      height: 5.5in !important;
+      overflow: hidden !important;
+      page-break-inside: avoid !important;
     }
 
     .gallery-collage {
-      gap: 0.4in !important;
+      gap: 0.08in !important;
+      display: grid !important;
+      grid-template-columns: repeat(auto-fill, minmax(1in, 1fr)) !important;
+      grid-auto-rows: 1in !important;
+      height: 100% !important;
+      overflow: hidden !important;
     }
 
     .gallery-item {
-      page-break-inside: avoid !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
       width: 100% !important;
-      max-width: 5.5in !important;
+      height: auto !important;
+      max-width: 100% !important;
       transform: none !important;
-      align-self: center;
+      overflow: visible !important;
+      page-break-inside: avoid !important;
+      page-break-after: avoid !important;
+      line-height: 0 !important;
+    }
+
+    .gallery-item img {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 2.5in !important;
+      object-fit: contain !important;
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      vertical-align: bottom !important;
     }
 
     .gallery-item:hover {
@@ -688,30 +848,121 @@
     }
 
     .gallery-item-label {
-      font-size: 1.1rem !important;
+      display: none !important;
+    }
+
+    .fixture-item {
+      width: 100% !important;
+      height: 1in !important;
+      max-height: 1in !important;
+      margin: 0 !important;
+      transform: none !important;
+      page-break-inside: avoid !important;
+      page-break-after: avoid !important;
+    }
+
+    .fixture-item img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: contain !important;
+      display: block !important;
     }
 
     .color-palette-section {
-      padding: 0.6in 0.5in !important;
+      padding: 0.1in 0.1in 0.05in !important;
       page-break-inside: avoid !important;
+      page-break-after: avoid !important;
+      margin-top: 0.05in !important;
+    }
+
+    .color-palette-title {
+      font-size: 0.6rem !important;
+      margin-bottom: 0.05in !important;
     }
 
     .color-palette-strip {
-      gap: 0.3in !important;
-      margin-bottom: 0.3in !important;
+      gap: 0.15in !important;
+      margin-bottom: 0 !important;
+    }
+
+    .color-swatch-item {
+      gap: 0.05in !important;
     }
 
     .color-swatch-circle {
-      width: 50px !important;
-      height: 50px !important;
+      width: 0.35in !important;
+      height: 0.35in !important;
+    }
+
+    .color-swatch-label {
+      font-size: 0.4rem !important;
+      min-width: auto !important;
     }
 
     .color-swatch-circle:hover {
       transform: none !important;
     }
 
+    .board-details-section {
+      display: block !important;
+      visibility: visible !important;
+      padding: 0.15in 0.1in 0.1in !important;
+      page-break-inside: avoid !important;
+      margin-top: 0.15in !important;
+      margin-bottom: 0.1in !important;
+      border-top: 2px solid #E5DDD0 !important;
+      font-size: 0.6rem !important;
+      line-height: 1.5 !important;
+    }
+
+    .board-details-title {
+      font-size: 0.7rem !important;
+      font-weight: 700 !important;
+      color: #6B6A45 !important;
+      margin-bottom: 0.08in !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+    }
+
+    .board-details-content {
+      color: #3A352C !important;
+      white-space: pre-wrap !important;
+    }
+
+    .board-details-section {
+      display: block !important;
+      visibility: visible !important;
+      padding: 0.15in 0.1in 0.1in !important;
+      margin: 0.15in 0.1in 0.1in !important;
+      page-break-inside: avoid !important;
+      border-top: 2px solid #E5DDD0 !important;
+      border-bottom: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      font-size: 0.6rem !important;
+      line-height: 1.5 !important;
+    }
+
+    .board-details-title {
+      font-size: 0.6rem !important;
+      font-weight: 700 !important;
+      color: #6B6A45 !important;
+      margin-bottom: 0.05in !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+    }
+
+    .board-details-content {
+      color: #3A352C !important;
+      font-size: 0.55rem !important;
+      line-height: 1.4 !important;
+      white-space: pre-wrap !important;
+    }
+
     .board-footer {
-      padding: 0.3in 0 !important;
+      padding: 0.05in 0 !important;
+      font-size: 0.45rem !important;
+      page-break-inside: avoid !important;
     }
   }
 </style>
@@ -723,8 +974,8 @@
       ← Back to Boards
     </a>
     
-    <div class="board-actions-right">
-      <!-- Layout Switcher -->
+    <!-- Centered Layout Switcher -->
+    <div class="board-actions-center">
       <div class="layout-switcher">
         <button type="button" class="layout-btn active" onclick="switchLayout('organic')" data-layout="organic">
           Organic
@@ -736,18 +987,12 @@
           Magazine
         </button>
       </div>
-      
+    </div>
+    
+    <!-- Right Side Options -->
+    <div class="board-actions-right">
       <button type="button" class="action-btn" onclick="showOptionsMenu()">
         ⚙️ Options
-      </button>
-      <button type="button" class="action-btn" onclick="window.print()">
-        🖨️ Print
-      </button>
-      <a href="{{ url_for('homeowner_design_board_download', board_name=selected_board) }}" class="action-btn">
-        📥 Download PDF
-      </a>
-      <button type="button" class="action-btn primary" onclick="showEditModal()">
-        ✏️ Edit Board
       </button>
     </div>
   </div>
@@ -755,12 +1000,13 @@
   <!-- Board Header -->
   <div class="board-header">
     <div class="board-category">Interior Inspiration</div>
-    <h1 class="board-title">MOODBOARD</h1>
+    <h1 class="board-title">{{ selected_board }}</h1>
     
     {% if selected_details.vision_statement %}
       <p class="board-vision">"{{ selected_details.vision_statement }}"</p>
     {% endif %}
   </div>
+
 
   <!-- Editorial Photo Collage -->
   {% if selected_details.photos and selected_details.photos|length > 0 %}
@@ -772,14 +1018,8 @@
               src="{{ url_for('static', filename=photo) }}"
               alt="Inspiration photo"
               loading="lazy"
+              onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'%3E%3Crect fill=\'%23f5f5f5\' width=\'200\' height=\'200\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\' font-family=\'sans-serif\' font-size=\'14\'%3EImage not found%3C/text%3E%3C/svg%3E';"
             />
-            {% if loop.index <= 3 %}
-              <div class="gallery-item-label">
-                {% if loop.index == 1 %}inspiration
-                {% elif loop.index == 2 %}curated style
-                {% else %}design details{% endif %}
-              </div>
-            {% endif %}
           </div>
           
           <!-- Insert fixtures between photos after 2nd photo -->
@@ -810,10 +1050,21 @@
       <h2 class="color-palette-title">Color Palette</h2>
       <div class="color-palette-strip">
         {% for color in selected_details.color_palette[:6] %}
-          <div class="color-swatch-circle" style="background-color: {{ color }};"></div>
+          <div class="color-swatch-item">
+            <div class="color-swatch-circle" style="background-color: {{ color }};"></div>
+            <div class="color-swatch-label">{{ hex_to_color_name(color) }}</div>
+          </div>
         {% endfor %}
       </div>
       <div class="board-footer">{{ selected_board }}</div>
+    </div>
+  {% endif %}
+
+  <!-- Board Details Section (Cost, Dimensions, Notes) -->
+  {% if selected_details.details %}
+    <div class="board-details-section">
+      <div class="board-details-title">Project Details</div>
+      <div class="board-details-content">{{ selected_details.details }}</div>
     </div>
   {% endif %}
 
@@ -823,7 +1074,7 @@
 <div id="editModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem 0;">
   <div style="width: 90%; max-width: 600px; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: auto; max-height: 90vh; overflow-y: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-      <h2 style="margin: 0; font-size: 1.8rem; color: #3A352C;">Add to Board</h2>
+      <h2 style="margin: 0; font-size: 1.8rem; color: #3A352C;">Edit Board</h2>
       <button onclick="closeEditModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
     </div>
 
@@ -833,30 +1084,40 @@
 
       <div>
         <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
-          Add Note/Title <span style="font-weight: 400; color: #999;">(optional)</span>
+          Board Title <span style="font-weight: 400; color: #999;">(optional)</span>
         </label>
-        <input type="text" name="edit_title" placeholder="Note title..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem;">
+        <input type="text" name="edit_title" value="{{ selected_board }}" placeholder="Board title..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem;">
       </div>
 
       <div>
         <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
-          Add Details
+          Vision Statement / Details
         </label>
-        <textarea name="edit_notes" rows="4" placeholder="Add your ideas..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem; resize: vertical;"></textarea>
+        <textarea name="edit_notes" rows="4" placeholder="Add your ideas..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem; resize: vertical;">{% if selected_details.vision_statement %}{{ selected_details.vision_statement }}{% endif %}</textarea>
       </div>
+
+      <!-- Delete Existing Photos -->
+      {% if selected_details.photos and selected_details.photos|length > 0 %}
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #b3574a; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Remove Photos
+        </label>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; max-height: 300px; overflow-y: auto; padding: 0.5rem; border: 2px solid #E5DDD0; border-radius: 8px;">
+          {% for photo in selected_details.photos %}
+            <label style="display: flex; flex-direction: column; align-items: center; padding: 0.5rem; border: 1px solid #E5DDD0; border-radius: 4px; cursor: pointer; position: relative;">
+              <input type="checkbox" name="remove_photos" value="{{ photo }}" style="position: absolute; top: 5px; left: 5px; z-index: 2; width: 20px; height: 20px; cursor: pointer;">
+              <img src="{{ url_for('static', filename=photo) }}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 4px;">
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
 
       <div>
         <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
-          Add Photos
+          Add More Photos
         </label>
         <input type="file" name="new_photos" multiple accept="image/*" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px;">
-      </div>
-
-      <div>
-        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
-          Add Fixtures/Furniture <span style="font-weight: 400; color: #999;">(backgrounds removed)</span>
-        </label>
-        <input type="file" name="new_fixtures" multiple accept="image/*" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px;">
       </div>
 
       <!-- Delete Existing Fixtures -->
@@ -867,14 +1128,21 @@
         </label>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; max-height: 200px; overflow-y: auto; padding: 0.5rem; border: 2px solid #E5DDD0; border-radius: 8px;">
           {% for fixture in selected_details.fixtures %}
-            <label style="display: flex; flex-direction: column; align-items: center; padding: 0.5rem; border: 1px solid #E5DDD0; border-radius: 4px; cursor: pointer;">
-              <input type="checkbox" name="remove_fixtures" value="{{ fixture }}" style="margin-bottom: 0.3rem;">
+            <label style="display: flex; flex-direction: column; align-items: center; padding: 0.5rem; border: 1px solid #E5DDD0; border-radius: 4px; cursor: pointer; position: relative;">
+              <input type="checkbox" name="remove_fixtures" value="{{ fixture }}" style="position: absolute; top: 5px; left: 5px; z-index: 2; width: 20px; height: 20px; cursor: pointer;">
               <img src="{{ url_for('static', filename=fixture) }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
             </label>
           {% endfor %}
         </div>
       </div>
       {% endif %}
+
+      <div>
+        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
+          Add More Fixtures/Furniture <span style="font-weight: 400; color: #999;">(backgrounds removed)</span>
+        </label>
+        <input type="file" name="new_fixtures" multiple accept="image/*" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px;">
+      </div>
 
       <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
         <button type="button" onclick="closeEditModal()" style="padding: 0.9rem 1.5rem; border: 2px solid #E5DDD0; background: white; color: #6B6A45; border-radius: 8px; font-weight: 600; cursor: pointer;">
@@ -897,6 +1165,11 @@
     </div>
 
     <div style="display: grid; gap: 1rem;">
+      <!-- Edit Board -->
+      <button onclick="showEditModal(); closeOptionsMenu();" style="width: 100%; padding: 1rem 1.5rem; text-align: left; background: #6B6A45; border: 2px solid #6B6A45; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+        ✏️ Edit Board
+      </button>
+
       <!-- Duplicate Board -->
       <button onclick="duplicateBoard()" style="width: 100%; padding: 1rem 1.5rem; text-align: left; background: white; border: 2px solid #E5DDD0; border-radius: 8px; color: #3A352C; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
         📋 Duplicate Board
@@ -907,40 +1180,10 @@
         ✂️ Crop a Photo
       </button>
 
-      <!-- Layout Options -->
-      <div style="border-top: 2px solid #E5DDD0; padding-top: 1rem;">
-        <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem;">
-          Layout Style
-        </label>
-        <div style="display: grid; gap: 0.5rem;">
-          <form method="post" action="{{ url_for('homeowner_design_board_template', board_name=selected_board) }}" style="margin: 0;">
-            <input type="hidden" name="template" value="collage">
-            <button type="submit" style="width: 100%; padding: 0.9rem; text-align: left; background: {% if selected_details.board_template == 'collage' %}linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white{% else %}white; color: #3A352C{% endif %}; border: 2px solid #E5DDD0; border-radius: 8px; font-weight: 600; cursor: pointer;">
-              🎨 Organic Collage
-            </button>
-          </form>
-          <form method="post" action="{{ url_for('homeowner_design_board_template', board_name=selected_board) }}" style="margin: 0;">
-            <input type="hidden" name="template" value="grid">
-            <button type="submit" style="width: 100%; padding: 0.9rem; text-align: left; background: {% if selected_details.board_template == 'grid' %}linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white{% else %}white; color: #3A352C{% endif %}; border: 2px solid #E5DDD0; border-radius: 8px; font-weight: 600; cursor: pointer;">
-              📐 Grid Layout
-            </button>
-          </form>
-          <form method="post" action="{{ url_for('homeowner_design_board_template', board_name=selected_board) }}" style="margin: 0;">
-            <input type="hidden" name="template" value="editorial">
-            <button type="submit" style="width: 100%; padding: 0.9rem; text-align: left; background: {% if selected_details.board_template == 'editorial' %}linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white{% else %}white; color: #3A352C{% endif %}; border: 2px solid #E5DDD0; border-radius: 8px; font-weight: 600; cursor: pointer;">
-              📰 Magazine Editorial
-            </button>
-          </form>
-        </div>
-      </div>
-
-      <!-- Privacy Toggle -->
-      <form method="post" action="{{ url_for('homeowner_design_board_privacy', board_name=selected_board) }}" style="margin: 0;">
-        <label style="display: flex; align-items: center; gap: 1rem; padding: 1rem; border: 2px solid #E5DDD0; border-radius: 8px; cursor: pointer;">
-          <input type="checkbox" name="is_private" value="1" {% if selected_details.is_private %}checked{% endif %} onchange="this.form.submit()" style="width: 20px; height: 20px; cursor: pointer;">
-          <span style="font-weight: 600; color: #3A352C;">🔒 Keep Board Private</span>
-        </label>
-      </form>
+      <!-- Download PDF / Print -->
+      <a href="{{ url_for('homeowner_design_board_download', board_name=selected_board) }}" target="_blank" style="width: 100%; padding: 1rem 1.5rem; text-align: left; background: white; border: 2px solid #E5DDD0; border-radius: 8px; color: #3A352C; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: block;">
+        📥 Download PDF / Print
+      </a>
     </div>
   </div>
 </div>
@@ -1467,14 +1710,14 @@
 </script>
 
 <!-- Crop Modal -->
-<div id="cropModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center;">
-  <div style="width: 90%; max-width: 900px; background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+<div id="cropModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; overflow-y: auto; padding: 2rem 0;">
+  <div style="width: 90%; max-width: 900px; background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5); margin: auto; max-height: 95vh; display: flex; flex-direction: column;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-shrink: 0;">
       <h2 style="margin: 0; font-size: 1.8rem; color: #3A352C;">✂️ Crop Photo</h2>
       <button onclick="closeCropModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
     </div>
 
-    <div style="margin-bottom: 1.5rem;">
+    <div style="margin-bottom: 1.5rem; flex-shrink: 0;">
       <label style="display: block; font-size: 0.9rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.8rem;">Select Photo to Crop</label>
       <select id="cropPhotoSelect" onchange="loadCropImage()" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem;">
         <option value="">Choose a photo...</option>
@@ -1484,16 +1727,19 @@
       </select>
     </div>
 
-    <div style="max-height: 500px; overflow: hidden; margin-bottom: 1.5rem; background: #f5f5f5; border-radius: 8px;">
-      <img id="cropImage" style="max-width: 100%; display: block;" />
+    <div id="cropImageContainer" style="flex: 1; min-height: 300px; max-height: 60vh; margin-bottom: 1.5rem; background: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
+      <img id="cropImage" style="max-width: 100%; max-height: 60vh; display: block;" />
     </div>
 
-    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+    <div style="display: flex; gap: 1rem; justify-content: flex-end; flex-shrink: 0; padding-top: 1rem; border-top: 1px solid #E5DDD0;">
       <button onclick="closeCropModal()" style="padding: 0.9rem 1.5rem; border: 2px solid #E5DDD0; background: white; color: #6B6A45; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
       <button onclick="applyCrop()" style="padding: 0.9rem 1.5rem; background: linear-gradient(135deg, #6B6A45 0%, #5a5939 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Apply Crop</button>
     </div>
   </div>
 </div>
+
+<!-- Cropper.js CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 
 <!-- Cropper.js Script -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
@@ -1513,7 +1759,15 @@
       cropper = null;
     }
     document.getElementById('cropPhotoSelect').value = '';
-    document.getElementById('cropImage').src = '';
+    const cropImage = document.getElementById('cropImage');
+    if (cropImage) {
+      cropImage.src = '';
+      cropImage.style.display = 'none';
+    }
+    const container = document.getElementById('cropImageContainer');
+    if (container) {
+      container.innerHTML = '<img id="cropImage" style="max-width: 100%; max-height: 500px; display: block;" />';
+    }
   }
 
   function loadCropImage() {
@@ -1531,7 +1785,21 @@
     }
     
     image.src = imgUrl;
+    image.style.display = 'block';
     image.onload = function() {
+      // Ensure container is visible
+      const container = document.getElementById('cropImageContainer');
+      if (container) {
+        container.style.display = 'flex';
+      }
+      
+      // Destroy existing cropper if any
+      if (cropper) {
+        cropper.destroy();
+        cropper = null;
+      }
+      
+      // Initialize cropper
       cropper = new Cropper(image, {
         aspectRatio: NaN,
         viewMode: 1,
@@ -1540,7 +1808,15 @@
         background: false,
         zoomable: true,
         scalable: true,
+        rotatable: true,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
       });
+    };
+    
+    image.onerror = function() {
+      alert('Error loading image. Please check the image path.');
     };
   }
 
@@ -1576,6 +1852,127 @@
       });
     });
   }
+  
+  // Luxurious Strategic Label Positioning - relative to board
+  (function() {
+    function positionFloatingLabels() {
+      const labels = document.querySelectorAll('.floating-label');
+      if (labels.length === 0) return;
+      
+      const gallery = document.querySelector('.gallery');
+      if (!gallery) return;
+      
+      const galleryRect = gallery.getBoundingClientRect();
+      const galleryWidth = galleryRect.width;
+      const galleryHeight = galleryRect.height;
+      
+      // Strategic positions for luxury placement - relative to gallery/board
+      const positions = [
+        // Top-left quadrant - elegant corner placement
+        {
+          x: galleryWidth * 0.1,
+          y: galleryHeight * 0.15,
+          rotation: -2.5
+        },
+        // Top-right quadrant - balanced placement
+        {
+          x: galleryWidth * 0.85,
+          y: galleryHeight * 0.2,
+          rotation: 3.5
+        },
+        // Bottom-left quadrant - sophisticated placement
+        {
+          x: galleryWidth * 0.08,
+          y: galleryHeight * 0.8,
+          rotation: -4
+        },
+        // Bottom-right quadrant - refined placement
+        {
+          x: galleryWidth * 0.88,
+          y: galleryHeight * 0.82,
+          rotation: 2.8
+        }
+      ];
+      
+      labels.forEach((label, index) => {
+        const pos = positions[index % positions.length];
+        
+        // Add slight random variation for organic feel (±3%)
+        const variationX = (Math.random() - 0.5) * (galleryWidth * 0.03);
+        const variationY = (Math.random() - 0.5) * (galleryHeight * 0.03);
+        const variationRot = (Math.random() - 0.5) * 1.5; // ±0.75 degrees
+        
+        const finalX = pos.x + variationX;
+        const finalY = pos.y + variationY;
+        const finalRot = pos.rotation + variationRot;
+        
+        label.style.left = finalX + 'px';
+        label.style.top = finalY + 'px';
+        label.style.setProperty('--label-rotation', finalRot + 'deg');
+        label.style.transform = `rotate(${finalRot}deg)`;
+      });
+    }
+    
+    // Position labels when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', positionFloatingLabels);
+    } else {
+      positionFloatingLabels();
+    }
+    
+    // Reposition on window resize (with debounce)
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(positionFloatingLabels, 300);
+    });
+  })();
+  
+  // Elegant Random Label Positioning
+  (function() {
+    function positionFloatingLabels() {
+      const labels = document.querySelectorAll('.floating-label');
+      const container = document.querySelector('.gallery') || document.body;
+      const containerRect = container.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      labels.forEach((label, index) => {
+        // Random position within viewport, avoiding edges
+        const margin = 100;
+        const maxX = viewportWidth - margin;
+        const maxY = viewportHeight - margin;
+        const minX = margin;
+        const minY = margin;
+        
+        // Random positions with some variation
+        const randomX = minX + Math.random() * (maxX - minX);
+        const randomY = minY + Math.random() * (maxY - minY);
+        
+        // Slight random rotation
+        const rotation = -8 + Math.random() * 16; // -8 to +8 degrees
+        
+        label.style.left = randomX + 'px';
+        label.style.top = randomY + 'px';
+        label.style.setProperty('--label-rotation', rotation + 'deg');
+        label.style.transform = `rotate(${rotation}deg)`;
+      });
+    }
+    
+    // Position labels when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', positionFloatingLabels);
+    } else {
+      positionFloatingLabels();
+    }
+    
+    // Reposition on window resize (with debounce)
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(positionFloatingLabels, 300);
+    });
+  })();
 </script>
 
 {% endblock %}

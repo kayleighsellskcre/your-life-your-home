@@ -24,6 +24,7 @@
     padding: 0 2rem;
     height: 60px;
     gap: 2rem;
+    position: relative;
   }
   
   .ylh-nav-title {
@@ -35,6 +36,19 @@
     margin: 0;
     white-space: nowrap;
     flex-shrink: 0;
+    position: absolute;
+    /* Center under the dot (•) in "Your Life • Your Home" */
+    /* The dot is approximately 8-9 characters from the start of the brand logo */
+    /* Brand logo is on the left with padding, so we calculate: left padding + ~8.5 chars width */
+    left: calc(2rem + 8.5ch); /* 2rem is nav padding, 8.5ch approximates "Your Life •" width */
+    transform: translateX(-50%); /* Center the text on the dot */
+  }
+  
+  @media (max-width: 768px) {
+    .ylh-nav-title {
+      left: 50%;
+      transform: translateX(-50%);
+    }
   }
   
   /* Agent Info in Center of Header */

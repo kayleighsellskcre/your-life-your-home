@@ -3,6 +3,18 @@
 
 {% block homeowner_content %}
 <style>
+  /* Global cursor rule - only pointer on actual clickable elements that redirect */
+  * {
+    cursor: default;
+  }
+  
+  a[href]:not([href="#"]):not([href=""]), 
+  button, input[type="submit"], input[type="button"], 
+  [onclick]:not([onclick=""]), .clickable, [role="button"], 
+  select, label[for], .btn, .cta-button {
+    cursor: pointer;
+  }
+  
   /* Interactive hover animations */
   .hero-visual {
     position: relative;
@@ -10,7 +22,7 @@
     min-height: 500px;
     background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%);
     overflow: hidden;
-    cursor: pointer;
+    cursor: default;
     transition: all 0.6s ease;
   }
   
@@ -92,15 +104,19 @@
     animation: pulse-badge 3s ease-in-out infinite;
   }
   
-  /* Attention-grabbing zoom animation for lead generation buttons */
+  /* Attention-grabbing zoom animation for lead generation buttons - VERY VISIBLE */
   @keyframes zoom-pulse {
-    0%, 100% { 
-      transform: scale(1);
-      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4);
+    0% { 
+      transform: scale(1) !important;
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4) !important;
     }
     50% { 
-      transform: scale(1.08);
-      box-shadow: 0 15px 40px rgba(107, 106, 69, 0.4), 0 0 0 8px rgba(107, 106, 69, 0.1);
+      transform: scale(1.3) !important;
+      box-shadow: 0 35px 80px rgba(107, 106, 69, 0.8), 0 0 0 20px rgba(107, 106, 69, 0.3) !important;
+    }
+    100% { 
+      transform: scale(1) !important;
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4) !important;
     }
   }
   
@@ -111,11 +127,22 @@
     }
     50% {
       background-position: 100% 50%;
-      box-shadow: 0 15px 45px rgba(107, 106, 69, 0.5), 0 0 20px rgba(107, 106, 69, 0.3);
+      box-shadow: 0 20px 50px rgba(107, 106, 69, 0.6), 0 0 30px rgba(107, 106, 69, 0.4);
     }
   }
   
-  /* Smooth CTA button with continuous attention-grabbing animation */
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+  
+  /* Luxury CTA buttons - elegant hover-only animation */
   .cta-button {
     display: inline-block;
     padding: 1.1rem 3rem;
@@ -126,23 +153,63 @@
     font-size: 0.9rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 500;
     position: relative;
     overflow: hidden;
-    animation: zoom-pulse 2.5s ease-in-out infinite, shimmer-glow 3s ease-in-out infinite;
-    animation-delay: 1.3s, 1.3s;
-    transform-origin: center;
+    transform-origin: center center;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.2);
+    border-radius: 2px;
   }
   
-  /* Primary lead button - even more attention-grabbing */
   .cta-primary-lead {
-    animation: zoom-pulse 2s ease-in-out infinite, shimmer-glow 2.5s ease-in-out infinite !important;
-    animation-delay: 1.3s, 1.3s !important;
     padding: 1.25rem 3.5rem !important;
     font-size: 1rem !important;
-    box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4) !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  /* Elegant hover effect - luxury feel */
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .cta-button:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(107, 106, 69, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #5A6D47 0%, #4A5D37 50%, #5A6D47 100%);
+    background-size: 200% 200%;
+    background-position: 100% 50%;
+  }
+  
+  .cta-button:hover::before {
+    left: 100%;
+  }
+  
+  .cta-primary-lead:hover {
+    box-shadow: 0 16px 50px rgba(107, 106, 69, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  /* Smooth return on mouse leave */
+  .cta-button:not(:hover) {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .cta-primary-lead::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: inherit;
+    background: rgba(107, 106, 69, 0.3);
+    z-index: -1;
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
   
   .cta-primary-lead::after {
@@ -152,8 +219,7 @@
     border-radius: inherit;
     background: linear-gradient(135deg, rgba(107, 106, 69, 0.4), rgba(200, 180, 151, 0.4), rgba(107, 106, 69, 0.4));
     background-size: 200% 200%;
-    animation: shimmer-glow 2.5s ease-in-out infinite;
-    animation-delay: 1.3s;
+    animation: shimmer-glow 2s ease-in-out infinite;
     z-index: -1;
     opacity: 0.6;
     filter: blur(8px);
@@ -180,9 +246,11 @@
   .cta-button:hover {
     background: linear-gradient(135deg, #5A6D47 0%, #4A5D37 50%, #5A6D47 100%);
     background-size: 200% 200%;
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 20px 50px rgba(107, 106, 69, 0.4), 0 0 30px rgba(107, 106, 69, 0.3);
-    animation: zoom-pulse 1.5s ease-in-out infinite, shimmer-glow 2s ease-in-out infinite;
+    box-shadow: 0 25px 60px rgba(107, 106, 69, 0.5), 0 0 30px rgba(107, 106, 69, 0.4) !important;
+  }
+  
+  .cta-primary-lead:hover {
+    box-shadow: 0 30px 70px rgba(107, 106, 69, 0.6), 0 0 40px rgba(107, 106, 69, 0.5) !important;
   }
   
   /* Interactive quick steps */
@@ -192,8 +260,12 @@
     text-align: center;
     border: 1px solid rgba(200, 180, 151, 0.3);
     transition: all 0.4s ease;
-    cursor: pointer;
     position: relative;
+  }
+  
+  /* Step cards wrapped in links get pointer cursor */
+  a .step-card {
+    cursor: pointer;
   }
   
   .step-card::after {
@@ -290,8 +362,8 @@
   .info-tooltip {
     position: relative;
     display: inline-block;
-    cursor: pointer;
     z-index: 50;
+    cursor: default; /* Tooltips don't redirect, so no pointer */
   }
   
   .tooltip-content {
@@ -542,14 +614,15 @@
     </p>
     
     <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-      <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" class="cta-button cta-primary-lead" style="animation: fadeInUp 0.8s ease 0.5s both;">
+      <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" class="cta-button cta-primary-lead" id="primary-cta-btn">
         <span style="position: relative; z-index: 1;">Your Instant Home Estimate →</span>
       </a>
       
-      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="cta-button" style="animation: fadeInUp 0.8s ease 0.6s both;">
+      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="cta-button" id="secondary-cta-btn">
         <span style="position: relative; z-index: 1;">Explore Your Equity →</span>
       </a>
     </div>
+    
   </div>
 </div>
 
@@ -675,7 +748,7 @@
     <!-- Card 1: Home Value with interactive tooltip -->
     <div class="stat-spotlight" style="overflow: visible; display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important; animation: fadeInUp 0.8s ease 0.2s both;">
       <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: visible; flex: 1;">
-        <div class="info-tooltip" style="position: absolute; top: 0.5rem; right: 0.5rem; width: 18px; height: 18px; border: 1px solid #6B6A45; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #6B6A45; cursor: pointer; transition: all 0.3s ease; background: transparent;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="if(!this.classList.contains('active')){this.style.background='transparent'; this.style.color='#6B6A45'}">
+        <div class="info-tooltip" style="position: absolute; top: 0.5rem; right: 0.5rem; width: 18px; height: 18px; border: 1px solid #6B6A45; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #6B6A45; transition: all 0.3s ease; background: transparent;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'" onmouseout="if(!this.classList.contains('active')){this.style.background='transparent'; this.style.color='#6B6A45'}">
           i
           <span class="tooltip-content">
             {% if snapshot and snapshot.last_value_refresh %}
