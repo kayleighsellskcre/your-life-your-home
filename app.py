@@ -536,6 +536,7 @@ def homeowner_reno_planner_ajax_add():
     # If a board_name is provided, save as a design board note as well
     board_save_error = None
     board_save_success = False
+    board_note_id = None
     if board_name:
         note_title = name
         # Include budget and status in details - create a comprehensive note
@@ -585,6 +586,7 @@ def homeowner_reno_planner_ajax_add():
                 fixtures=[],
             )
             board_save_success = True
+            board_note_id = note_id
             print(f"[COST ESTIMATE SAVE] Successfully saved to mood board '{board_name}' (note_id: {note_id})")
         except Exception as e:
             import traceback
@@ -612,7 +614,7 @@ def homeowner_reno_planner_ajax_add():
         "saved_to_planner": True,
         "saved_to_board": board_save_success,
         "project_id": project_id,
-        "note_id": note_id if board_save_success else None
+        "note_id": board_note_id if board_save_success else None
     }
     
     if board_save_success:
@@ -3273,11 +3275,25 @@ def homeowner_design_board_view(board_name):
         'title': title,
         'details': combined_details,
     }
+    
+    # Prepare individual notes with IDs for edit/delete functionality
+    notes_list = []
+    for detail in details_list:
+        detail_dict = dict(detail) if hasattr(detail, 'keys') else detail
+        note_data = {
+            'id': detail_dict.get('id'),
+            'title': detail_dict.get('title'),
+            'details': detail_dict.get('details'),
+            'created_at': detail_dict.get('created_at'),
+        }
+        if note_data['id'] and (note_data['title'] or note_data['details']):
+            notes_list.append(note_data)
 
     return render_template(
         "homeowner/board_detail.html",
         selected_board=board_name,
         selected_details=aggregated_details,
+        notes_list=notes_list,
         brand_name=FRONT_BRAND_NAME,
     )
 

@@ -577,6 +577,47 @@ function editEstimate() {
   }
 }
 
+let currentNoteId = null;
+let currentBoardName = null;
+
+function showNoteActions(noteId, boardName) {
+  currentNoteId = noteId;
+  currentBoardName = boardName;
+  const noteActions = document.getElementById('note-actions');
+  const editLink = document.getElementById('edit-note-link');
+  if (noteActions && editLink) {
+    noteActions.style.display = 'block';
+    editLink.href = `/homeowner/design-boards/note/${noteId}/edit`;
+  }
+}
+
+function deleteNoteFromBoard() {
+  if (!currentNoteId) return;
+  
+  if (!confirm('Are you sure you want to delete this note from the mood board? This action cannot be undone.')) {
+    return;
+  }
+  
+  fetch(`/homeowner/design-boards/note/${currentNoteId}/delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert('Note deleted successfully.');
+      if (data.board_name) {
+        window.location.href = `/homeowner/design-boards/${encodeURIComponent(data.board_name)}`;
+      } else {
+        location.reload();
+      }
+    } else {
+      alert('Could not delete note: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(() => alert('Could not delete note.'));
+}
+
 document.getElementById('save-to-planner').addEventListener('click', function() {
   if (!lastEstimate) {
     alert('Please calculate an estimate first.');
