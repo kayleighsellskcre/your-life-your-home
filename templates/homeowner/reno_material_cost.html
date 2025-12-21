@@ -529,9 +529,28 @@ document.getElementById('cost-estimator-form').addEventListener('submit', functi
     project_budget: cost,
     project_status: 'Planning',
     project_notes: notes,
-    project_summary: summary + ` Estimated Cost: $${cost.toLocaleString()}`
+    project_summary: summary + ` Estimated Cost: $${cost.toLocaleString()}`,
+    project_type: type,
+    project_category: type.charAt(0).toUpperCase() + type.slice(1)
   };
+  
+  // Show edit button if estimate was previously saved
+  const editBtn = document.getElementById('edit-estimate');
+  if (editBtn) {
+    editBtn.style.display = 'none'; // Hide initially, will show after save
+  }
 });
+
+function editEstimate() {
+  // Scroll back to form and allow editing
+  document.getElementById('cost-estimator-form').scrollIntoView({ behavior: 'smooth' });
+  // Re-populate form fields if needed
+  const selectedCard = document.querySelector('.category-card.selected');
+  if (selectedCard) {
+    // Form is already populated, user can modify and recalculate
+    alert('Modify your project details above and click "Calculate Estimate" to update.');
+  }
+}
 
 document.getElementById('save-to-planner').addEventListener('click', function() {
   if (!lastEstimate) {
@@ -580,7 +599,7 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
         successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
       } else if (data.warning) {
         // Saved to planner but not board
-        successMsg.innerHTML = '✓ Saved to Planner ✓ ' + data.warning;
+        successMsg.innerHTML = '✓ Saved to Planner ⚠️ ' + data.warning;
         successMsg.style.color = '#856404';
         successMsg.style.background = 'rgba(255, 193, 7, 0.1)';
       } else if (data.message) {
@@ -596,6 +615,14 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
       }
       successMsg.style.display = 'block';
       setTimeout(() => { successMsg.style.display = 'none'; }, 5000);
+      
+      // Store project ID if returned for future editing
+      if (data.project_id) {
+        lastEstimate.project_id = data.project_id;
+      }
+      if (data.note_id) {
+        lastEstimate.note_id = data.note_id;
+      }
     } else {
       alert('Could not save: ' + (data.error || 'Unknown error'));
     }
