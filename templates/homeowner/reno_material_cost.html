@@ -100,6 +100,17 @@
     </div>
     <div id="summary-details" style="font-size: 1.15rem; line-height: 1.8; color: var(--charcoal-brown); margin-bottom: 2rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light);"></div>
     <div id="summary-card" style="margin-top: 1.5rem;"></div>
+    <div id="note-actions" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
+      <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Manage on Mood Board</h4>
+      <div style="display: flex; gap: 1rem;">
+        <a id="edit-note-link" href="#" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; font-size: 1rem; justify-content: center; background: var(--gradient-olive); text-decoration: none; display: inline-flex; align-items: center;">
+          <span>✏️</span> Edit Note
+        </a>
+        <button id="delete-note-btn" onclick="deleteNoteFromBoard()" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; font-size: 1rem; justify-content: center; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; cursor: pointer;">
+          <span>🗑️</span> Delete Note
+        </button>
+      </div>
+    </div>
     <div id="summary-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
       <button id="save-to-planner" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe);">
         <span>💾</span> Save to Mood Board & Planner
