@@ -650,5 +650,97 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
     saveButton.innerHTML = originalText;
   });
 });
+
+// Load and display saved projects
+let savedProjectsVisible = false;
+function toggleSavedProjects() {
+  savedProjectsVisible = !savedProjectsVisible;
+  const section = document.getElementById('saved-projects-section');
+  const list = document.getElementById('saved-projects-list');
+  const toggleText = document.getElementById('toggle-projects-text');
+  
+  if (savedProjectsVisible) {
+    section.style.display = 'block';
+    toggleText.textContent = 'Hide';
+    loadSavedProjects();
+  } else {
+    section.style.display = 'none';
+    toggleText.textContent = 'Show';
+  }
+}
+
+function loadSavedProjects() {
+  fetch('/homeowner/reno/planner/projects/json')
+    .then(res => res.json())
+    .then(data => {
+      const list = document.getElementById('saved-projects-list');
+      if (data.projects && data.projects.length > 0) {
+        list.innerHTML = data.projects.slice(0, 5).map(project => {
+          let budget = 'Not set';
+          if (project.budget) {
+            try {
+              const budgetNum = typeof project.budget === 'string' ? parseFloat(project.budget.replace(/,/g, '')) : parseFloat(project.budget);
+              budget = isNaN(budgetNum) ? project.budget : budgetNum.toLocaleString();
+            } catch {
+              budget = project.budget;
+            }
+          }
+          const projectName = (project.name || 'Untitled Project').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+          return `
+            <div style="padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <h3 style="margin: 0; font-size: 1.25rem; color: var(--charcoal-brown);">${project.name || 'Untitled Project'}</h3>
+                <div style="display: flex; gap: 0.5rem;">
+                  <a href="/homeowner/reno/planner/project/${project.id}/edit" 
+                     style="padding: 0.5rem 1rem; font-size: 0.85rem; background: var(--olive-green); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                    ✏️ Edit
+                  </a>
+                  <button onclick="deleteProject(${project.id}, '${projectName}')" 
+                          style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+              <p style="margin: 0.5rem 0; color: var(--charcoal-brown);">
+                <strong>Status:</strong> ${project.status || 'Planning'} 
+                ${project.budget ? ` • <strong>Budget:</strong> $${budget}` : ''}
+                ${project.category && project.category !== 'Other' ? ` • <strong>Category:</strong> ${project.category}` : ''}
+              </p>
+              ${project.notes ? `<p style="margin-top: 0.75rem; color: var(--taupe-beige); font-size: 0.9rem;">${(project.notes || '').substring(0, 100).replace(/</g, '&lt;').replace(/>/g, '&gt;')}${(project.notes || '').length > 100 ? '...' : ''}</p>` : ''}
+            </div>
+          `;
+        }).join('');
+      } else {
+        list.innerHTML = '<p style="text-align: center; color: var(--taupe-beige); padding: 2rem;">No saved projects yet. Create an estimate and save it to see it here!</p>';
+      }
+    })
+    .catch(() => {
+      document.getElementById('saved-projects-list').innerHTML = '<p style="text-align: center; color: #b3574a; padding: 2rem;">Could not load projects.</p>';
+    });
+}
+
+function deleteProject(projectId, projectName) {
+  if (!confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
+    return;
+  }
+  
+  fetch(`/homeowner/reno/planner/project/${projectId}/delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      if (savedProjectsVisible) {
+        loadSavedProjects();
+      } else {
+        location.reload();
+      }
+    } else {
+      alert('Could not delete project: ' + (data.error || 'Unknown error'));
+    }
+  })
+  .catch(() => alert('Could not delete project.'));
+}
 </script>
 {% endblock %}
