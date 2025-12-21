@@ -4380,6 +4380,32 @@ def homeowner_reno_planner():
     )
 
 
+@app.route("/homeowner/reno/planner/projects/json", methods=["GET"])
+def homeowner_reno_planner_projects_json():
+    """Return saved projects as JSON for AJAX loading."""
+    user = get_current_user()
+    user_id = user["id"] if user else None
+    if not user_id:
+        return jsonify({"success": False, "error": "Not logged in"}), 401
+    
+    projects = list_homeowner_projects(user_id) if user_id else []
+    # Convert to dict format for JSON
+    projects_list = []
+    for project in projects:
+        project_dict = dict(project) if hasattr(project, 'keys') else project
+        projects_list.append({
+            "id": project_dict.get("id"),
+            "name": project_dict.get("name"),
+            "category": project_dict.get("category"),
+            "status": project_dict.get("status"),
+            "budget": project_dict.get("budget"),
+            "notes": project_dict.get("notes"),
+            "created_at": project_dict.get("created_at"),
+        })
+    
+    return jsonify({"success": True, "projects": projects_list})
+
+
 @app.route("/homeowner/reno/planner/project/<int:project_id>/edit", methods=["GET", "POST"])
 def homeowner_reno_planner_edit_project(project_id):
     """Edit a renovation project."""
