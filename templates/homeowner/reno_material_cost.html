@@ -12,6 +12,20 @@
 </div>
 
 <div class="dashboard-section" style="max-width: 1000px; margin: 0 auto;">
+  <!-- View Saved Projects Section -->
+  <div id="saved-projects-section" class="card-premium animate-in" style="animation-delay: 0.05s; padding: 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige); display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 1.75rem; color: var(--charcoal-brown); margin: 0;">📋 Your Saved Projects</h2>
+      <button onclick="toggleSavedProjects()" class="btn-premium" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; background: var(--gradient-taupe);">
+        <span id="toggle-projects-text">Show</span> Projects
+      </button>
+    </div>
+    <div id="saved-projects-list" style="display: grid; gap: 1rem;"></div>
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <a href="{{ url_for('homeowner_reno_planner') }}" class="btn-link" style="color: var(--olive-green); font-weight: 600; text-decoration: none; font-size: 1rem;">View All Projects in Renovation Planner →</a>
+    </div>
+  </div>
+
   <form id="cost-estimator-form" class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige);">
     <div class="form-group" style="margin-bottom: 2.5rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
       <label for="board-name" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">💾 Save to Mood Board</label>
