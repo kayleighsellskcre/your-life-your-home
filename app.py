@@ -599,14 +599,21 @@ def homeowner_reno_planner_ajax_add():
         print(traceback.format_exc())
         return jsonify({"success": False, "error": f"Could not save project: {error_msg}"}), 500
     
-    # Return success, but include board error if it occurred
-    if board_save_error:
-        return jsonify({
-            "success": True, 
-            "warning": f"Project saved to planner, but could not save to mood board: {board_save_error}"
-        })
+    # Return success response with details
+    response_data = {
+        "success": True,
+        "saved_to_planner": True,
+        "saved_to_board": board_save_success
+    }
     
-    return jsonify({"success": True})
+    if board_save_success:
+        response_data["message"] = f"Successfully saved to Renovation Planner and Mood Board '{board_name}'"
+    elif board_save_error:
+        response_data["warning"] = f"Project saved to Renovation Planner, but could not save to mood board '{board_name}': {board_save_error}"
+    else:
+        response_data["message"] = "Successfully saved to Renovation Planner"
+    
+    return jsonify(response_data)
 
 
 # ---------------- TRANSACTION HELPERS IMPORT ----------------
