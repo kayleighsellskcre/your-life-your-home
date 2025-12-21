@@ -636,6 +636,19 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
       }
       if (data.note_id) {
         lastEstimate.note_id = data.note_id;
+        lastEstimate.board_name = boardName;
+        // Show edit/delete links for the note
+        showNoteActions(data.note_id, boardName);
+      }
+      if (data.project_id) {
+        // Show edit button for project
+        const editBtn = document.getElementById('edit-estimate');
+        if (editBtn) {
+          editBtn.style.display = 'inline-flex';
+          editBtn.onclick = () => {
+            window.location.href = `/homeowner/reno/planner/project/${data.project_id}/edit`;
+          };
+        }
       }
     } else {
       alert('Could not save: ' + (data.error || 'Unknown error'));
