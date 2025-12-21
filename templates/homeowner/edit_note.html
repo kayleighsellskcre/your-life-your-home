@@ -1,0 +1,40 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Edit Note{% endblock %}
+
+{% block homeowner_content %}
+<div class="premium-header animate-in" style="margin-bottom: 3rem;">
+  <div style="text-align: center; width: 100%;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center;">Edit Note</h1>
+    <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Update your mood board note</span>
+  </div>
+</div>
+
+<div class="dashboard-section" style="max-width: 800px; margin: 0 auto;">
+  <form method="post" class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige);">
+    <div class="form-group">
+      <label for="title" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Title</label>
+      <input id="title" name="title" class="premium-input" value="{{ note.title or '' }}" placeholder="Note title..." />
+    </div>
+    
+    <div class="form-group">
+      <label for="details" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Details</label>
+      <textarea id="details" name="details" class="premium-input" rows="8" placeholder="Add project details, notes, or information...">{{ note.details or '' }}</textarea>
+    </div>
+    
+    <div class="form-group">
+      <label for="tags" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Tags (optional)</label>
+      <input id="tags" name="tags" class="premium-input" value="{{ note.tags or '' }}" placeholder="e.g. kitchen, modern, budget-friendly" />
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <button type="submit" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center;">
+        <span>💾</span> Save Changes
+      </button>
+      <a href="{{ url_for('homeowner_design_board_view', board_name=board_name) }}" class="btn-premium" style="padding: 1.25rem 1.5rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe); text-decoration: none; display: inline-flex; align-items: center;">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
