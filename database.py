@@ -1565,6 +1565,86 @@ def list_homeowner_projects(user_id: int) -> List[sqlite3.Row]:
     return rows
 
 
+def get_homeowner_project(project_id: int, user_id: int) -> Optional[sqlite3.Row]:
+    """Get a single project by ID, ensuring it belongs to the user."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT id, created_at, name, category, status, budget, notes
+        FROM homeowner_projects
+        WHERE id = ? AND user_id = ?
+        """,
+        (project_id, user_id),
+    )
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+
+def update_homeowner_project(
+    project_id: int,
+    user_id: int,
+    name: str = None,
+    category: str = None,
+    status: str = None,
+    budget: str = None,
+    notes: str = None,
+) -> None:
+    """Update a homeowner project. Only updates provided fields."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    updates = []
+    params = []
+    
+    if name is not None:
+        updates.append("name = ?")
+        params.append(name)
+    if category is not None:
+        updates.append("category = ?")
+        params.append(category)
+    if status is not None:
+        updates.append("status = ?")
+        params.append(status)
+    if budget is not None:
+        updates.append("budget = ?")
+        params.append(budget)
+    if notes is not None:
+        updates.append("notes = ?")
+        params.append(notes)
+    
+    if not updates:
+        conn.close()
+        return
+    
+    params.append(project_id)
+    params.append(user_id)
+    
+    cur.execute(
+        f"""
+        UPDATE homeowner_projects
+        SET {', '.join(updates)}
+        WHERE id = ? AND user_id = ?
+        """,
+        tuple(params),
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_homeowner_project(project_id: int, user_id: int) -> None:
+    """Delete a homeowner project."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM homeowner_projects WHERE id = ? AND user_id = ?",
+        (project_id, user_id),
+    )
+    conn.commit()
+    conn.close()
+
+
 def upsert_next_move_plan(
     user_id: int,
     timeline: str = None,
