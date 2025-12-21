@@ -86,9 +86,14 @@
     </div>
     <div id="summary-details" style="font-size: 1.15rem; line-height: 1.8; color: var(--charcoal-brown); margin-bottom: 2rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light);"></div>
     <div id="summary-card" style="margin-top: 1.5rem;"></div>
-    <button id="save-to-planner" class="btn-premium" style="margin-top: 2rem; width: 100%; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe);">
-      <span>💾</span> Save to Mood Board & Planner
-    </button>
+    <div id="summary-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <button id="save-to-planner" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe);">
+        <span>💾</span> Save to Mood Board & Planner
+      </button>
+      <button id="edit-estimate" onclick="editEstimate()" class="btn-premium" style="padding: 1.25rem 1.5rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-olive); display: none;">
+        <span>✏️</span> Edit
+      </button>
+    </div>
     <div id="save-success" style="display:none; color: #4a7c4a; text-align:center; margin-top:1rem; font-weight:600; font-size: 1.1rem; padding: 0.75rem; background: rgba(74, 124, 74, 0.1); border-radius: 8px;">✓ Successfully saved!</div>
     <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="btn-link" style="display:block; margin-top:1.5rem; text-align:center; color: var(--olive-green); font-weight: 600; text-decoration: none; transition: all 0.3s ease;">📊 See ROI Guide →</a>
   </div>
