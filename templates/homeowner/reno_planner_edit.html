@@ -1,0 +1,61 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Edit Project{% endblock %}
+
+{% block homeowner_content %}
+<div class="premium-header animate-in" style="margin-bottom: 3rem;">
+  <div style="text-align: center; width: 100%;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center;">Edit Project</h1>
+    <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Update your renovation project details</span>
+  </div>
+</div>
+
+<div class="dashboard-section" style="max-width: 800px; margin: 0 auto;">
+  <form method="post" class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige);">
+    <div class="form-group">
+      <label for="project_name" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Project Name</label>
+      <input id="project_name" name="project_name" class="premium-input" value="{{ project.name }}" required placeholder="Kitchen refresh, backyard, primary bath..." />
+    </div>
+    
+    <div class="form-group">
+      <label for="project_budget" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Estimated Budget</label>
+      <input id="project_budget" name="project_budget" class="premium-input" value="{{ project.budget or '' }}" placeholder="Example: 8,000" />
+    </div>
+    
+    <div class="form-group">
+      <label for="project_status" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Status</label>
+      <select id="project_status" name="project_status" class="premium-select">
+        <option value="Planning" {% if project.status == 'Planning' %}selected{% endif %}>Planning</option>
+        <option value="In progress" {% if project.status == 'In progress' %}selected{% endif %}>In progress</option>
+        <option value="Completed" {% if project.status == 'Completed' %}selected{% endif %}>Completed</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="project_category" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Category</label>
+      <select id="project_category" name="project_category" class="premium-select">
+        <option value="Other" {% if not project.category or project.category == 'Other' %}selected{% endif %}>Other</option>
+        <option value="Painting" {% if project.category == 'Painting' %}selected{% endif %}>Painting</option>
+        <option value="Flooring" {% if project.category == 'Flooring' %}selected{% endif %}>Flooring</option>
+        <option value="Kitchen" {% if project.category == 'Kitchen' %}selected{% endif %}>Kitchen</option>
+        <option value="Bathroom" {% if project.category == 'Bathroom' %}selected{% endif %}>Bathroom</option>
+        <option value="Outdoor" {% if project.category == 'Outdoor' %}selected{% endif %}>Outdoor</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="project_notes" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">Notes</label>
+      <textarea id="project_notes" name="project_notes" class="premium-input" rows="4" placeholder="Add any additional notes or details...">{{ project.notes or '' }}</textarea>
+    </div>
+    
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <button type="submit" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center;">
+        <span>💾</span> Save Changes
+      </button>
+      <a href="{{ url_for('homeowner_reno_planner') }}" class="btn-premium" style="padding: 1.25rem 1.5rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe); text-decoration: none; display: inline-flex; align-items: center;">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
