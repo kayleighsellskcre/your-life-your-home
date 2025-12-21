@@ -488,6 +488,16 @@ def init_db() -> None:
         )
         """
     )
+    
+    # Add category column if it doesn't exist (migration for existing databases)
+    try:
+        cur.execute("PRAGMA table_info(homeowner_projects)")
+        columns = [row[1] for row in cur.fetchall()]
+        if 'category' not in columns:
+            cur.execute("ALTER TABLE homeowner_projects ADD COLUMN category TEXT")
+    except Exception as e:
+        print(f"Warning: Could not add category column to homeowner_projects: {e}")
+        pass
 
     # ------------- NEXT MOVE PLAN -------------
     cur.execute(
