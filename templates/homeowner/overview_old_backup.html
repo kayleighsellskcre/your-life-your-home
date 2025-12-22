@@ -1,0 +1,1320 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Dashboard Overview{% endblock %}
+
+{% block homeowner_content %}
+<style>
+  /* Global cursor rule - only pointer on actual clickable elements that redirect */
+  * {
+    cursor: default;
+  }
+  
+  a[href]:not([href="#"]):not([href=""]), 
+  button, input[type="submit"], input[type="button"], 
+  [onclick]:not([onclick=""]), .clickable, [role="button"], 
+  select, label[for], .btn, .cta-button {
+    cursor: pointer;
+  }
+  
+  /* Interactive hover animations */
+  .hero-visual {
+    position: relative;
+    height: 100%;
+    min-height: 500px;
+    background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%);
+    overflow: hidden;
+    cursor: default;
+    transition: all 0.6s ease;
+  }
+  
+  .hero-visual:hover {
+    transform: scale(1.02);
+  }
+  
+  .hero-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(107,106,69,0.15) 0%, rgba(200,180,151,0.15) 100%);
+    transition: opacity 0.6s ease;
+  }
+  
+  .hero-visual:hover::after {
+    opacity: 0.5;
+  }
+  
+  /* Animated decorative elements */
+  .leaf-decoration {
+    position: absolute;
+    opacity: 0.08;
+    transition: all 0.8s ease;
+  }
+  
+  .hero-visual:hover .leaf-decoration {
+    opacity: 0.15;
+    transform: rotate(10deg) scale(1.1);
+  }
+  
+  /* Interactive stat cards */
+  .stat-spotlight {
+    background: white;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: default;
+    border: 1px solid transparent;
+    isolation: isolate;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .stat-spotlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(107,106,69,0.1), transparent);
+    transition: left 0.6s ease;
+    z-index: 0;
+  }
+  
+  .stat-spotlight:hover::before {
+    left: 100%;
+  }
+  
+  .stat-spotlight:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(58, 53, 44, 0.12);
+    z-index: 5;
+  }
+  
+  /* Ensure card content is above pseudo-elements */
+  .stat-spotlight > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  .stat-value-display {
+    transition: all 0.3s ease;
+  }
+  
+  .stat-spotlight:hover .stat-value-display {
+    transform: scale(1.05);
+    color: #6B6A45;
+  }
+  
+  /* Pulsing badge */
+  @keyframes pulse-badge {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.9; }
+  }
+  
+  .logo-badge {
+    animation: pulse-badge 3s ease-in-out infinite;
+  }
+  
+  /* Attention-grabbing zoom animation for lead generation buttons - VERY VISIBLE */
+  @keyframes zoom-pulse {
+    0% { 
+      transform: scale(1) !important;
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4) !important;
+    }
+    50% { 
+      transform: scale(1.3) !important;
+      box-shadow: 0 35px 80px rgba(107, 106, 69, 0.8), 0 0 0 20px rgba(107, 106, 69, 0.3) !important;
+    }
+    100% { 
+      transform: scale(1) !important;
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3), 0 0 0 0 rgba(107, 106, 69, 0.4) !important;
+    }
+  }
+  
+  @keyframes shimmer-glow {
+    0%, 100% {
+      background-position: 0% 50%;
+      box-shadow: 0 10px 30px rgba(107, 106, 69, 0.3);
+    }
+    50% {
+      background-position: 100% 50%;
+      box-shadow: 0 20px 50px rgba(107, 106, 69, 0.6), 0 0 30px rgba(107, 106, 69, 0.4);
+    }
+  }
+  
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1.4);
+      opacity: 0;
+    }
+  }
+  
+  /* Luxury CTA buttons - elegant hover-only animation */
+  .cta-button {
+    display: inline-block;
+    padding: 1.1rem 3rem;
+    background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 50%, #6B6A45 100%);
+    background-size: 200% 200%;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    transform-origin: center center;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.2);
+    border-radius: 2px;
+  }
+  
+  .cta-primary-lead {
+    padding: 1.25rem 3.5rem !important;
+    font-size: 1rem !important;
+    border: 2px solid rgba(255, 255, 255, 0.15) !important;
+  }
+  
+  /* Elegant hover effect - luxury feel */
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .cta-button:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 40px rgba(107, 106, 69, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: linear-gradient(135deg, #5A6D47 0%, #4A5D37 50%, #5A6D47 100%);
+    background-size: 200% 200%;
+    background-position: 100% 50%;
+  }
+  
+  .cta-button:hover::before {
+    left: 100%;
+  }
+  
+  .cta-primary-lead:hover {
+    box-shadow: 0 16px 50px rgba(107, 106, 69, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+  
+  /* Smooth return on mouse leave */
+  .cta-button:not(:hover) {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .cta-primary-lead::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: inherit;
+    background: rgba(107, 106, 69, 0.3);
+    z-index: -1;
+    animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .cta-primary-lead::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.4), rgba(200, 180, 151, 0.4), rgba(107, 106, 69, 0.4));
+    background-size: 200% 200%;
+    animation: shimmer-glow 2s ease-in-out infinite;
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(8px);
+  }
+  
+  .cta-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+  }
+  
+  .cta-button:hover::before {
+    width: 300px;
+    height: 300px;
+  }
+  
+  .cta-button:hover {
+    background: linear-gradient(135deg, #5A6D47 0%, #4A5D37 50%, #5A6D47 100%);
+    background-size: 200% 200%;
+    box-shadow: 0 25px 60px rgba(107, 106, 69, 0.5), 0 0 30px rgba(107, 106, 69, 0.4) !important;
+  }
+  
+  .cta-primary-lead:hover {
+    box-shadow: 0 30px 70px rgba(107, 106, 69, 0.6), 0 0 40px rgba(107, 106, 69, 0.5) !important;
+  }
+  
+  /* Interactive quick steps */
+  .step-card {
+    background: white;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    transition: all 0.4s ease;
+    position: relative;
+  }
+  
+  /* Step cards wrapped in links get pointer cursor */
+  a .step-card {
+    cursor: pointer;
+  }
+  
+  .step-card::after {
+    content: '→';
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+    font-size: 1.5rem;
+    color: #6B6A45;
+    transition: all 0.3s ease;
+  }
+  
+  .step-card:hover {
+    border-color: #6B6A45;
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(58, 53, 44, 0.12);
+  }
+  
+  .step-card:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  
+  .step-icon {
+    font-size: 2.5rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+  
+  .step-card:hover .step-icon {
+    transform: scale(1.2) rotateY(180deg);
+  }
+  
+  /* Outline buttons with fill animation */
+  .outline-btn {
+    padding: 1rem 2rem;
+    border: 1px solid #6B6A45;
+    color: #6B6A45;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .outline-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: #6B6A45;
+    transition: left 0.4s ease;
+    z-index: -1;
+  }
+  
+  .outline-btn:hover::before {
+    left: 0;
+  }
+  
+  .outline-btn:hover {
+    color: white;
+  }
+  
+  /* Count-up animation for stats */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-in {
+    animation: fadeInUp 0.8s ease forwards;
+  }
+  
+  /* Parallax effect for "Your Home • Your Legacy" section - smooth swoshe up */
+  .parallax-section {
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+  
+  /* Interactive info tooltip */
+  .info-tooltip {
+    position: relative;
+    display: inline-block;
+    z-index: 100;
+    cursor: default; /* Tooltips don't redirect, so no pointer */
+  }
+  
+  .tooltip-content {
+    visibility: hidden;
+    opacity: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: #3A352C;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    white-space: normal;
+    max-width: 200px;
+    word-wrap: break-word;
+    text-align: center;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 10000;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  
+  .info-tooltip:hover .tooltip-content,
+  .info-tooltip.active .tooltip-content {
+    visibility: visible;
+    opacity: 1;
+  }
+  
+  .tooltip-arrow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #3A352C;
+    border-bottom: none;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 9999;
+  }
+  
+  .info-tooltip:hover .tooltip-arrow,
+  .info-tooltip.active .tooltip-arrow {
+    opacity: 1;
+  }
+  
+  /* Progress indicators */
+  .progress-ring {
+    transition: stroke-dashoffset 1s ease;
+  }
+  
+  /* Ripple effect */
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(0);
+    animation: ripple-animation 0.6s ease-out;
+  }
+  
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+  
+  /* Gentle floating animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Subtle scale pulse */
+  @keyframes scalePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  /* Gentle glow effect */
+  @keyframes gentleGlow {
+    0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    50% { box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15); }
+  }
+  /* Gentle floating animation */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  /* Subtle scale pulse */
+  @keyframes scalePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  /* Gentle glow effect */
+  @keyframes gentleGlow {
+    0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    50% { box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15); }
+  }
+  
+  /* Mobile Specific Fixes for Overview Page */
+  /* Ultra Skinny Mobile Dashboard - Portrait Optimization */
+  @media (max-width: 768px) and (orientation: portrait) {
+    /* Hero Section - Ultra Compact */
+    .hero-section,
+    div[style*="display: grid"][style*="grid-template-columns"] {
+      min-height: auto !important;
+      padding: 0.75rem 0.875rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    /* Hero Visual - Minimal Height */
+    .hero-visual {
+      min-height: 200px !important;
+      max-height: 250px !important;
+    }
+    
+    /* Stat Cards - Compact & Luxurious */
+    .stat-spotlight {
+      padding: 1.25rem 1rem !important;
+      margin: 0.75rem 0 !important;
+      min-height: 180px !important;
+      border-radius: 12px !important;
+    }
+    
+    .stat-value-display {
+      font-size: 2rem !important;
+      margin: 0.75rem 0 !important;
+    }
+    
+    /* Section Headers - Ultra Skinny */
+    h1[style*="font-size: 2.5rem"],
+    h1[style*="font-size:2.5rem"] {
+      font-size: 1.5rem !important;
+      margin: 0.5rem 0 !important;
+      line-height: 1.3 !important;
+    }
+    
+    h2[style*="font-size: 2rem"],
+    h2[style*="font-size:2rem"] {
+      font-size: 1.25rem !important;
+      margin: 0.5rem 0 !important;
+    }
+    
+    /* Section Spacing - Tighter */
+    section,
+    div[style*="margin: 42rem"],
+    div[style*="margin: 39.5rem"],
+    div[style*="margin: 35rem"] {
+      margin: 2rem 0 !important;
+      padding: 1rem 0.875rem !important;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    /* Reset everything for mobile */
+    body {
+      font-size: 18px !important;
+      line-height: 1.6 !important;
+    }
+    
+    /* Hero section */
+    .hero-visual {
+      min-height: 180px !important;
+      margin-bottom: 2.5rem !important;
+    }
+    
+    .hero-visual > div {
+      font-size: 2rem !important;
+      padding: 2.5rem 1.5rem !important;
+      line-height: 1.3 !important;
+    }
+    
+    /* Welcome section - Much larger */
+    h1 {
+      font-size: 2.5rem !important;
+      line-height: 1.25 !important;
+      margin-bottom: 2rem !important;
+      padding: 0 1rem !important;
+    }
+    
+    p {
+      font-size: 1.1rem !important;
+      line-height: 1.7 !important;
+      padding: 0 1rem !important;
+    }
+    
+    /* Financial Snapshot Grid - Force single column with MORE spacing */
+    div[style*="display: grid"][style*="grid-template-columns"] {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2rem !important;
+      padding: 0 1rem !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+  .stat-spotlight {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 2rem 0 !important;
+    min-height: 280px !important;
+    box-sizing: border-box !important;
+    transform: none !important;
+  }
+  
+  .stat-spotlight:hover {
+    transform: none !important;
+    z-index: 1 !important;
+  }
+    
+    /* Prevent tooltip overlap on mobile */
+    .info-tooltip {
+      z-index: 100 !important;
+    }
+    
+    .tooltip-content {
+      max-width: 150px !important;
+      font-size: 0.7rem !important;
+      padding: 0.5rem 0.75rem !important;
+    }
+    
+    .stat-spotlight * {
+      font-size: 1.1rem !important;
+    }
+    
+    .stat-value-display {
+      font-size: 2.5rem !important;
+      margin: 1rem 0 !important;
+    }
+    
+    /* Buttons - Much larger and more prominent */
+    .cta-button,
+    a[class*="cta"],
+    button[style*="background"] {
+      padding: 1.75rem 2.5rem !important;
+      font-size: 1.2rem !important;
+      width: 100% !important;
+      display: block !important;
+      text-align: center !important;
+      margin: 1.25rem 0 !important;
+      min-height: 60px !important;
+      line-height: 1.4 !important;
+    }
+    
+    
+    /* Wealth Builder Section */
+    div[style*="margin: 42rem"], div[style*="margin: 39.5rem"], div[style*="margin: 35rem"], 
+    div[style*="Your Home"] {
+      margin: 4rem 0 3rem 0 !important;
+      padding: 3rem 1.5rem !important;
+    }
+    
+    /* Financial Snapshot Section */
+    div[style*="Your Financial Snapshot"] {
+      margin-bottom: 4rem !important;
+      padding-bottom: 2rem !important;
+    }
+    
+    /* All flex containers */
+    div[style*="display: flex"] {
+      flex-direction: column !important;
+    }
+  }
+</style>
+
+<!-- Hero Section: Stacked Layout -->
+<div style="margin-bottom: 6rem;" class="animate-in">
+  <!-- Top: Interactive Lifestyle Visual -->
+  <div class="hero-visual" onclick="this.style.transform='scale(1.05)'; setTimeout(() => this.style.transform='scale(1)', 200)" style="margin-bottom: 3rem; min-height: 150px;">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 2.5rem; text-align: center; padding: 1.5rem; z-index: 2;">
+      <div style="font-weight: 400; line-height: 1.2;">Your Home • Your Sanctuary</div>
+    </div>
+    
+    <!-- Animated decorative elements -->
+    <div class="leaf-decoration" style="top: 10%; left: 5%; width: 100px; height: 100px;">
+      <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+        <ellipse cx="50" cy="30" rx="25" ry="35" fill="#6B6A45" opacity="0.3"/>
+        <ellipse cx="50" cy="70" rx="20" ry="30" fill="#6B6A45" opacity="0.3"/>
+      </svg>
+    </div>
+    <div class="leaf-decoration" style="bottom: 10%; right: 5%; width: 120px; height: 120px;">
+      <svg viewBox="0 0 100 100" style="width: 100%; height: 100%;">
+        <circle cx="50" cy="50" r="40" fill="#C8B497" opacity="0.3"/>
+      </svg>
+    </div>
+  </div>
+  
+  <!-- Bottom: Welcome Message Block -->
+  <div style="text-align: center; max-width: 900px; margin: 0 auto;">
+    {% if is_guest %}
+    <!-- Guest Mode Prompt -->
+    <div style="background: #FFF9F0; border: 2px solid #F4A460; border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; animation: fadeInUp 0.8s ease;">
+      <div style="font-size: 2rem; margin-bottom: 0.75rem;">👋</div>
+      <h3 style="font-size: 1.3rem; color: #C66B3D; margin-bottom: 0.5rem; font-weight: 600;">
+        You're Using Guest Mode
+      </h3>
+      <p style="font-size: 0.95rem; color: #8B6139; margin-bottom: 1rem; line-height: 1.6;">
+        Create a free account to save your progress, track your home's value, and access all features.
+      </p>
+      <a href="{{ url_for('signup', role='homeowner') }}" 
+         style="display: inline-block; background: #C66B3D; color: white; padding: 0.75rem 1.5rem; 
+                border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+        Save My Progress - It's Free!
+      </a>
+    </div>
+    {% endif %}
+    
+    <h1 style="font-family: var(--font-heading); font-size: 3.5rem; line-height: 1.2; margin: 0 0 1.5rem; color: #3A352C; font-weight: 400; letter-spacing: -0.01em;">
+      Welcome Home,<br/>
+      <span style="color: #6B6A45; position: relative;">
+        {% if homeowner and homeowner.name %}
+          {{ homeowner.name.split()[0] }}
+        {% elif snapshot and snapshot.name %}
+          {{ snapshot.name.split()[0] }}
+        {% else %}
+          Friend
+        {% endif %}
+        <span style="position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, #6B6A45, transparent);"></span>
+      </span>
+    </h1>
+    
+    <p style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.75; margin-bottom: 3rem; font-weight: 300;">
+      Your personal wealth dashboard tracking value, equity, and opportunities. Every number tells your story. Every update brings clarity.
+    </p>
+    
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <a href="{{ cloud_cma_url }}" target="_blank" rel="noopener" class="cta-button cta-primary-lead" id="primary-cta-btn">
+        <span style="position: relative; z-index: 1;">Your Instant Home Estimate →</span>
+      </a>
+      
+      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="cta-button" id="secondary-cta-btn">
+        <span style="position: relative; z-index: 1;">Explore Your Equity →</span>
+      </a>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Premium Agent Information Section - Desktop Only -->
+{% if professionals and professionals|length > 0 %}
+  {% set primary_prof = professionals[0] %}
+  <div class="premium-agent-section" style="max-width: 1400px; margin: 0 auto 8rem auto !important; padding: 0 2rem; display: none; clear: both; position: relative; z-index: 1;">
+    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%); border-radius: 24px; padding: 3.5rem 4rem; box-shadow: 0 20px 60px rgba(58, 53, 44, 0.08), 0 8px 24px rgba(107, 106, 69, 0.06); border: 1px solid rgba(107, 106, 69, 0.1); position: relative; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+      <!-- Decorative Background Elements -->
+      <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(107, 106, 69, 0.03) 0%, transparent 70%); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
+      <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(200, 180, 151, 0.04) 0%, transparent 70%); border-radius: 50%; z-index: 0; pointer-events: none;"></div>
+      
+      <div style="display: grid; grid-template-columns: auto 1fr auto; gap: 3rem; align-items: center; position: relative; z-index: 1; isolation: isolate;">
+        <!-- Agent Photo -->
+        <div style="flex-shrink: 0;">
+          {% set photo_url = get_professional_photo_url(primary_prof.get('professional_photo')) %}
+          {% if photo_url %}
+          <div style="width: 140px; height: 140px; border-radius: 50%; overflow: hidden; border: 4px solid #F6F2E8; box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15), inset 0 0 0 1px rgba(107, 106, 69, 0.1); position: relative;" id="agent-photo-container-{{ primary_prof.get('professional_id', 'default') }}">
+            <img src="{{ photo_url }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="handlePhotoError(this, '{{ (primary_prof.name or '?')[0] }}')">
+            <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, transparent 50%); pointer-events: none;"></div>
+          </div>
+          {% else %}
+          <div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3.5rem; font-weight: 600; border: 4px solid #F6F2E8; box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15); font-family: var(--font-heading);">
+            {{ (primary_prof.name or '?')[0] }}
+          </div>
+          {% endif %}
+        </div>
+        
+        <!-- Agent Information -->
+        <div style="flex: 1; min-width: 0;">
+          <div style="display: inline-block; padding: 0.4rem 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.06) 100%); border-radius: 20px; margin-bottom: 1rem; border: 1px solid rgba(107, 106, 69, 0.12);">
+            <span style="font-size: 0.7rem; font-weight: 600; color: #6B6A45; text-transform: uppercase; letter-spacing: 0.12em;">Your Real Estate Professional</span>
+          </div>
+          
+          <h2 style="font-family: var(--font-heading); font-size: 2.5rem; color: #3A352C; margin: 0 0 0.5rem; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2;">
+            {{ primary_prof.name or 'Professional' }}
+          </h2>
+          
+          <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.25rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 6px; height: 6px; border-radius: 50%; background: #6B6A45; flex-shrink: 0;"></div>
+              <span style="font-size: 1rem; color: #6B6A45; font-weight: 500; text-transform: capitalize;">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</span>
+            </div>
+            {% if primary_prof.get('brokerage_name') %}
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.95rem; color: #3A352C; opacity: 0.7;">at</span>
+              <span style="font-size: 1rem; color: #3A352C; font-weight: 500;">{{ primary_prof.brokerage_name }}</span>
+            </div>
+            {% endif %}
+          </div>
+          
+          {% if primary_prof.get('bio') %}
+          <p style="font-size: 1rem; line-height: 1.7; color: #3A352C; opacity: 0.75; margin-bottom: 1.5rem; font-weight: 300; max-width: 600px;">
+            {{ primary_prof.bio[:200] }}{% if primary_prof.bio|length > 200 %}...{% endif %}
+          </p>
+          {% endif %}
+          
+          <!-- Contact Information -->
+          <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+            {% if primary_prof.get('phone') and primary_prof.get('call_button_enabled', 1) %}
+            <a href="tel:{{ primary_prof.phone }}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.75rem; background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 100%); color: white; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.25);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(107, 106, 69, 0.35)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(107, 106, 69, 0.25)'">
+              <span style="font-size: 1.1rem;">📞</span>
+              <span>Call {{ primary_prof.phone }}</span>
+            </a>
+            {% endif %}
+            
+            {% if primary_prof.get('email') %}
+            <a href="mailto:{{ primary_prof.email }}" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.75rem; background: white; color: #6B6A45; border: 2px solid rgba(107, 106, 69, 0.2); border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;" onmouseover="this.style.borderColor='#6B6A45'; this.style.background='#F6F2E8'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(107, 106, 69, 0.2)'; this.style.background='white'; this.style.transform='translateY(0)'">
+              <span style="font-size: 1.1rem;">✉️</span>
+              <span>Email</span>
+            </a>
+            {% endif %}
+            
+            {% if primary_prof.get('schedule_url') and primary_prof.get('schedule_button_enabled', 1) %}
+            <a href="{{ primary_prof.schedule_url }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1.75rem; background: white; color: #6B6A45; border: 2px solid rgba(107, 106, 69, 0.2); border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s ease;" onmouseover="this.style.borderColor='#6B6A45'; this.style.background='#F6F2E8'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(107, 106, 69, 0.2)'; this.style.background='white'; this.style.transform='translateY(0)'">
+              <span style="font-size: 1.1rem;">📅</span>
+              <span>Schedule Meeting</span>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+        
+        <!-- Brokerage Logo -->
+        {% if primary_prof.get('brokerage_logo') %}
+        <div style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 1.5rem; background: white; border-radius: 16px; border: 1px solid rgba(107, 106, 69, 0.1); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);">
+          <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" style="max-height: 60px; max-width: 180px; object-fit: contain; filter: brightness(0.95);">
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  
+  <style>
+    /* Show premium agent section on desktop only */
+    @media (min-width: 769px) {
+      .premium-agent-section {
+        display: block !important;
+      }
+    }
+    
+    /* Premium agent section hover effect */
+    .premium-agent-section > div:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 72px rgba(58, 53, 44, 0.12), 0 12px 32px rgba(107, 106, 69, 0.08) !important;
+    }
+    
+    /* Smooth entrance animation */
+    .premium-agent-section {
+      animation: fadeInUp 1s ease 0.7s both;
+    }
+  </style>
+{% endif %}
+
+<!-- Live Stats: Interactive Spotlight Cards -->
+<div style="margin: 0 auto 8rem auto !important; padding: 0 2rem 4rem 2rem !important; position: relative; z-index: 1; clear: both; max-width: 1400px; width: 100%; box-sizing: border-box;" class="animate-in">
+  <div style="text-align: center; margin-bottom: 3rem;">
+    <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
+      Your Financial Snapshot
+    </h2>
+    <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300; animation: fadeInUp 0.8s ease 0.3s both;">Live data • Updated daily • Always accurate</p>
+  </div>
+  
+  <div style="display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 2rem !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; box-sizing: border-box !important;">
+    <!-- Card 1: Home Value with interactive tooltip -->
+    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important; animation: fadeInUp 0.8s ease 0.2s both; box-sizing: border-box; margin: 0 !important;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: visible; flex: 1; box-sizing: border-box; z-index: 1;">
+        <div class="info-tooltip" style="position: absolute; top: 0.5rem; right: 0.5rem; width: 18px; height: 18px; border: 1px solid #6B6A45; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #6B6A45; transition: all 0.3s ease; background: transparent; z-index: 100;" onmouseover="this.style.background='#6B6A45'; this.style.color='white'; updateTooltipPosition(this)" onmouseout="if(!this.classList.contains('active')){this.style.background='transparent'; this.style.color='#6B6A45'}" onclick="toggleTooltip(this, event)">
+          i
+          <span class="tooltip-content" style="z-index: 1001;">
+            {% if snapshot and snapshot.last_value_refresh %}
+              Updated {{ snapshot.last_value_refresh }}
+            {% else %}
+              Based on recent market activity
+            {% endif %}
+          </span>
+          <span class="tooltip-arrow" style="z-index: 1000;"></span>
+        </div>
+        <div style="font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Current Value</div>
+        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #3A352C; font-weight: 400; margin-bottom: 0.35rem;">
+          {% if snapshot and snapshot.value_estimate %}
+            ${{ "{:,.0f}".format(snapshot.value_estimate) }}
+          {% else %}
+            <span style="font-size: 0.9rem; color: #6B6A45; opacity: 0.5;">Not set</span>
+          {% endif %}
+        </div>
+        {% if snapshot and snapshot.value_estimate %}
+        <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 500;">
+          ↗ +{{ ((snapshot.value_estimate - (snapshot.value_estimate * 0.95)) / (snapshot.value_estimate * 0.95) * 100) | round(1) }}% YTD
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.last_value_refresh %}
+        <div style="font-size: 0.6rem; color: #6B6A45; opacity: 0.6; margin-top: 0.35rem;">
+          Updated {{ snapshot.last_value_refresh }}
+        </div>
+        {% endif %}
+      </div>
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Home Value</h3>
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">Real-time market estimate</p>
+        <a href="{{ cloud_cma_url }}" target="_blank" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+          Get detailed report →
+        </a>
+      </div>
+    </div>
+    
+    <!-- Card 2: Equity with progress visualization -->
+    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important; animation: fadeInUp 0.8s ease 0.3s both; box-sizing: border-box; margin: 0 !important;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: visible; flex: 1; box-sizing: border-box; z-index: 1;">
+        {% if snapshot and snapshot.equity_estimate and snapshot.value_estimate %}
+          {% set equity_percent = (snapshot.equity_estimate / snapshot.value_estimate * 100) | round(0) %}
+          <!-- Circular progress indicator -->
+          <svg style="position: absolute; top: 0.5rem; right: 0.5rem; width: 35px; height: 35px; transform: rotate(-90deg);">
+            <circle cx="17.5" cy="17.5" r="14" stroke="#EFE9DC" stroke-width="2.5" fill="none"/>
+            <circle class="progress-ring" cx="17.5" cy="17.5" r="14" stroke="#6B6A45" stroke-width="2.5" fill="none"
+                    stroke-dasharray="87.96" 
+                    stroke-dashoffset="87.96"
+                    data-target-offset="{{ 87.96 - (87.96 * equity_percent / 100) }}"
+                    style="transition: stroke-dashoffset 2s cubic-bezier(0.4, 0, 0.2, 1);"/>
+          </svg>
+          <div style="position: absolute; top: 1.1rem; right: 0.95rem; font-size: 0.55rem; color: #6B6A45; font-weight: 600;">{{ equity_percent }}%</div>
+        {% endif %}
+        <div style="font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Your Equity</div>
+        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #3A352C; font-weight: 400; margin-bottom: 0.35rem;">
+          {% if snapshot and snapshot.equity_estimate %}
+            ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
+          {% else %}
+            <span style="font-size: 0.9rem; color: #6B6A45; opacity: 0.5;">Not set</span>
+          {% endif %}
+        </div>
+        {% if snapshot and snapshot.equity_estimate and snapshot.value_estimate %}
+        <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 500;">
+          {{ equity_percent }}% of home value
+        </div>
+        {% endif %}
+      </div>
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Equity Position</h3>
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">What you truly own</p>
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+          View equity dashboard →
+        </a>
+      </div>
+    </div>
+    
+    <!-- Card 3: Loan Overview -->
+    <div class="stat-spotlight" style="display: flex; flex-direction: column; min-width: 0 !important; max-width: 100% !important; width: 100% !important; animation: fadeInUp 0.8s ease 0.4s both; box-sizing: border-box; margin: 0 !important;">
+      <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); padding: 1.25rem 0.875rem; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: visible; flex: 1; box-sizing: border-box; z-index: 1;">
+        <div style="font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: #6B6A45; margin-bottom: 0.5rem; font-weight: 500;">Loan Balance</div>
+        <div class="stat-value-display" style="font-family: var(--font-heading); font-size: 1.6rem; color: #3A352C; font-weight: 400; margin-bottom: 0.35rem;">
+          {% if snapshot and snapshot.loan_balance %}
+            ${{ "{:,.0f}".format(snapshot.loan_balance) }}
+          {% else %}
+            <span style="font-size: 0.9rem; color: #6B6A45; opacity: 0.5;">Not set</span>
+          {% endif %}
+        </div>
+        {% if snapshot and snapshot.loan_rate %}
+        <div style="font-size: 0.7rem; color: #6B6A45; font-weight: 600; margin-bottom: 0.25rem;">
+          {{ "{:.2f}".format(snapshot.loan_rate) }}% Interest Rate
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.loan_term_years %}
+        <div style="font-size: 0.65rem; color: #6B6A45; opacity: 0.8; margin-bottom: 0.2rem;">
+          {{ snapshot.loan_term_years|int }}-year term
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.loan_payment %}
+        <div style="font-size: 0.65rem; color: #6B6A45; font-weight: 500; margin-top: 0.2rem;">
+          ${{ "{:,.0f}".format(snapshot.loan_payment) }}/mo P&I
+        </div>
+        {% endif %}
+        {% if snapshot and snapshot.value_estimate and snapshot.loan_balance and snapshot.value_estimate > 0 %}
+          {% set ltv = (snapshot.loan_balance / snapshot.value_estimate * 100) | round(1) %}
+        <div style="font-size: 0.6rem; color: #6B6A45; opacity: 0.7; margin-top: 0.3rem; padding-top: 0.3rem; border-top: 1px solid rgba(107, 106, 69, 0.2);">
+          LTV: {{ ltv }}%
+        </div>
+        {% endif %}
+      </div>
+      <div style="padding: 1rem 0.875rem;">
+        <h3 style="font-family: var(--font-heading); font-size: 0.95rem; margin: 0 0 0.35rem; color: #3A352C; font-weight: 400;">Loan Details</h3>
+        {% if snapshot and (snapshot.property_tax_monthly or snapshot.homeowners_insurance_monthly or snapshot.pmi_monthly) %}
+        <div style="font-size: 0.65rem; color: #6B6A45; opacity: 0.85; line-height: 1.5; margin-bottom: 0.5rem;">
+          {% set total_monthly = (snapshot.loan_payment or 0) + (snapshot.property_tax_monthly or 0) + (snapshot.homeowners_insurance_monthly or 0) + (snapshot.pmi_monthly or 0) %}
+          {% if total_monthly > 0 %}
+          <div style="margin-bottom: 0.2rem;"><strong>Total Payment:</strong> ${{ "{:,.0f}".format(total_monthly) }}/mo</div>
+          {% endif %}
+          {% if snapshot.property_tax_monthly %}
+          <div style="font-size: 0.6rem; opacity: 0.7;">Tax: ${{ "{:,.0f}".format(snapshot.property_tax_monthly) }}/mo</div>
+          {% endif %}
+          {% if snapshot.homeowners_insurance_monthly %}
+          <div style="font-size: 0.6rem; opacity: 0.7;">Insurance: ${{ "{:,.0f}".format(snapshot.homeowners_insurance_monthly) }}/mo</div>
+          {% endif %}
+          {% if snapshot.pmi_monthly and snapshot.pmi_monthly > 0 %}
+          <div style="font-size: 0.6rem; opacity: 0.7;">PMI: ${{ "{:,.0f}".format(snapshot.pmi_monthly) }}/mo</div>
+          {% endif %}
+        </div>
+        {% endif %}
+        <p style="font-size: 0.7rem; color: #6B6A45; font-weight: 400; opacity: 0.8; line-height: 1.4; margin-bottom: 0.6rem;">Quick update your loan info</p>
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" style="display: inline-block; font-size: 0.7rem; color: #6B6A45; text-decoration: none; border-bottom: 1px solid #6B6A45; padding-bottom: 2px; transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.borderBottom='1px solid transparent'" onmouseout="this.style.borderBottom='1px solid #6B6A45'">
+          Update loan details →
+        </a>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+
+<!-- Wealth Builder Section: Stacked Layout -->
+<div style="background: #F6F2E8; margin: 0 !important; margin-top: 8rem !important; padding: 5rem 2rem !important; position: relative; z-index: 0; clear: both; width: 100%; box-sizing: border-box; opacity: 1;" class="parallax-section">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <!-- Top: Visual with Loan Info -->
+    <div style="margin-bottom: 3rem;">
+      <div style="position: relative; min-height: 120px; background: linear-gradient(135deg, #EFE9DC 0%, #D7C4A5 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6B6A45; font-family: var(--font-heading); font-size: 1.8rem; text-align: center; padding: 1.5rem 2rem; overflow: hidden; border-radius: 12px;">
+        <div style="position: relative; z-index: 2; margin-bottom: 1rem;">
+          Your Home • Your Legacy
+        </div>
+        <!-- Animated background shapes -->
+        <div style="position: absolute; top: 10%; right: 10%; width: 100px; height: 100px; border: 2px solid rgba(107,106,69,0.2); border-radius: 50%; animation: pulse-badge 4s ease-in-out infinite;"></div>
+        <div style="position: absolute; bottom: 15%; left: 15%; width: 80px; height: 80px; border: 2px solid rgba(107,106,69,0.2); animation: pulse-badge 3s ease-in-out infinite; animation-delay: 1s;"></div>
+      </div>
+    </div>
+    
+    <!-- Bottom: Text Content -->
+    <div style="text-align: center; max-width: 900px; margin: 0 auto;">
+      <div style="display: inline-block; padding: 0.4rem 1rem; background: white; border: 1px solid #6B6A45; margin-bottom: 2rem; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: #6B6A45; font-weight: 500;">
+        Your Wealth Journey
+      </div>
+      <h2 style="font-family: var(--font-heading); font-size: 3.5rem; line-height: 1.25; margin: 0 0 2rem; color: #3A352C; font-weight: 400;">
+        Every Month,<br/>
+        Your Wealth Grows
+      </h2>
+      <p style="font-size: 1.15rem; line-height: 2; color: #3A352C; opacity: 0.75; font-weight: 300; margin-bottom: 1rem;">
+        {% if snapshot and snapshot.loan_payment and snapshot.loan_balance and snapshot.loan_rate %}
+          {% set monthly_principal = (snapshot.loan_payment - (snapshot.loan_balance * snapshot.loan_rate / 100 / 12)) %}
+          Every payment adds <strong style="color: #6B6A45; font-weight: 500;">${{ "{:,.0f}".format(monthly_principal) }}</strong> to your equity.
+        {% else %}
+          Every payment builds your equity. Every improvement adds value.
+        {% endif %}
+        Every decision shapes your future.
+      </p>
+      <p style="font-size: 1.05rem; line-height: 2; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">
+        We're here to help you see the full picture and make choices that feel right for your life.
+      </p>
+    </div>
+    
+    <!-- Recommended Next Steps - Integrated -->
+    <div style="margin-top: 3rem; margin-bottom: 0;">
+      <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-family: var(--font-heading); font-size: 2.8rem; margin-bottom: 1rem; color: #3A352C; font-weight: 400; letter-spacing: 0.01em;">
+          Recommended Next Steps
+        </h2>
+        <p style="font-size: 1rem; color: #6B6A45; opacity: 0.8; font-weight: 300;">Click to explore • Each step takes less than 5 minutes</p>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; margin-bottom: 0; isolation: isolate;">
+        <a href="{{ url_for('homeowner_value_equity_overview') }}" class="step-card" style="text-decoration: none; color: inherit;">
+          <div class="step-icon">📊</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Update Your Numbers</h3>
+          <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">Refresh loan details for accurate equity tracking</p>
+        </a>
+        
+        <a href="{{ url_for('homeowner_reno_planner') }}" class="step-card" style="text-decoration: none; color: inherit;">
+          <div class="step-icon">🔨</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Plan Renovations</h3>
+          <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">Track ideas, costs, and ROI for home improvements</p>
+        </a>
+        
+        <a href="{{ url_for('homeowner_next_plan_move') }}" class="step-card" style="text-decoration: none; color: inherit;">
+          <div class="step-icon">🏡</div>
+          <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 1.5rem 0 1rem; color: #3A352C; font-weight: 400;">Explore Moving</h3>
+          <p style="font-size: 0.95rem; line-height: 1.9; color: #3A352C; opacity: 0.7; font-weight: 300; margin-bottom: 2rem;">See timing, affordability, and next home options</p>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Advanced count-up animation for all stat values
+document.addEventListener('DOMContentLoaded', function() {
+  // Animate all stat values on page load
+  const statValues = document.querySelectorAll('.stat-value-display');
+  
+  statValues.forEach(stat => {
+    const text = stat.textContent.trim();
+    
+    // Skip empty values and placeholder text
+    if (text === '—' || text === '' || text.includes('Not set')) return;
+    
+    // Handle currency values
+    if (text.includes('$')) {
+      const value = parseFloat(text.replace(/[$,]/g, ''));
+      if (!isNaN(value) && value > 0) {
+        stat.setAttribute('data-target', value);
+        animateValue(stat, 0, value, 2000, 'currency');
+      }
+    }
+    // Handle percentages
+    else if (text.includes('%')) {
+      const value = parseFloat(text.replace(/%/g, ''));
+      if (!isNaN(value) && value > 0) {
+        stat.setAttribute('data-target', value);
+        animateValue(stat, 0, value, 1800, 'percent');
+      }
+    }
+  });
+  
+  function animateValue(element, start, end, duration, type) {
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Smooth easing function
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      const current = start + (end - start) * easeOutCubic;
+      
+      if (type === 'currency') {
+        element.textContent = '$' + Math.floor(current).toLocaleString();
+      } else if (type === 'percent') {
+        element.textContent = current.toFixed(2) + '%';
+      }
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        // Ensure final value is exact
+        if (type === 'currency') {
+          element.textContent = '$' + Math.floor(end).toLocaleString();
+        } else if (type === 'percent') {
+          element.textContent = end.toFixed(2) + '%';
+        }
+      }
+    }
+    
+    requestAnimationFrame(update);
+  }
+  
+  // Animate progress rings
+  const progressRings = document.querySelectorAll('.progress-ring');
+  progressRings.forEach(ring => {
+    // Trigger animation after a short delay
+    setTimeout(() => {
+      const targetOffset = ring.getAttribute('data-target-offset');
+      if (targetOffset) {
+        ring.style.strokeDashoffset = targetOffset;
+      }
+    }, 300);
+  });
+  
+  // Parallax effect for "Your Home • Your Legacy" section - smooth swoshe up movement (no fade)
+  let ticking = false;
+  
+  function updateParallax() {
+    const parallaxSection = document.querySelector('.parallax-section');
+    if (!parallaxSection) return;
+    
+    const scrolled = window.pageYOffset;
+    const sectionTop = parallaxSection.getBoundingClientRect().top + scrolled;
+    const windowHeight = window.innerHeight;
+    const sectionHeight = parallaxSection.offsetHeight;
+    
+    // Calculate when section enters viewport
+    const viewportTop = scrolled;
+    const viewportBottom = scrolled + windowHeight;
+    const sectionBottom = sectionTop + sectionHeight;
+    
+    // Only apply parallax when section is visible or approaching viewport
+    if (sectionBottom > viewportTop && sectionTop < viewportBottom) {
+      // Calculate scroll progress (0 when section top reaches viewport, 1 when fully scrolled past)
+      const scrollProgress = Math.max(0, Math.min(1, (scrolled - sectionTop + windowHeight * 0.5) / (windowHeight + sectionHeight * 0.5)));
+      
+      // Smooth upward movement - moves up as you scroll down
+      const maxOffset = 50; // Maximum pixels to move up
+      const yOffset = scrollProgress * maxOffset;
+      
+      // Apply smooth swoshe up transform
+      parallaxSection.style.transform = `translateY(-${yOffset}px)`;
+      parallaxSection.style.opacity = '1'; // Always visible, no fade
+    } else if (sectionTop > viewportBottom) {
+      // Section hasn't entered viewport yet - reset transform
+      parallaxSection.style.transform = 'translateY(0)';
+      parallaxSection.style.opacity = '1';
+    }
+    
+    ticking = false;
+  }
+  
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(updateParallax);
+      ticking = true;
+    }
+  });
+  
+  // Initial check on load
+  updateParallax();
+  
+  // Update on resize
+  window.addEventListener('resize', updateParallax);
+  
+  // Enhanced ripple effect on stat cards (removed - cards are not clickable)
+  const statCards = document.querySelectorAll('.stat-spotlight');
+  
+  statCards.forEach(card => {
+    // Add subtle hover feedback
+    card.addEventListener('mouseenter', function() {
+      this.style.borderColor = 'rgba(107, 106, 69, 0.3)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+      this.style.borderColor = 'transparent';
+    });
+  });
+  
+  // Smooth scroll for internal links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href !== '#') {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      }
+    });
+  });
+  
+  // Add intersection observer for fade-in animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+  
+  // Observe all sections
+  document.querySelectorAll('.stat-spotlight, .step-card').forEach(el => {
+    observer.observe(el);
+  });
+  
+  // Add click handler for info tooltips (for mobile/tablet)
+  document.querySelectorAll('.info-tooltip').forEach(tooltip => {
+    tooltip.addEventListener('click', function(e) {
+      e.stopPropagation();
+      
+      // Close other tooltips
+      document.querySelectorAll('.info-tooltip.active').forEach(other => {
+        if (other !== this) {
+          other.classList.remove('active');
+        }
+      });
+      
+      // Toggle this tooltip
+      this.classList.toggle('active');
+    });
+  });
+  
+  // Close tooltip when clicking outside
+  document.addEventListener('click', function() {
+    document.querySelectorAll('.info-tooltip.active').forEach(tooltip => {
+      tooltip.classList.remove('active');
+    });
+  });
+});
+
+// Handle photo loading errors
+function handlePhotoError(imgElement, initial) {
+  const container = imgElement.parentElement;
+  if (container) {
+    container.innerHTML = '<div style="width: 140px; height: 140px; border-radius: 50%; background: linear-gradient(135deg, #6B6A45 0%, #5A6D47 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3.5rem; font-weight: 600; border: 4px solid #F6F2E8; box-shadow: 0 12px 32px rgba(107, 106, 69, 0.15); font-family: var(--font-heading);">' + initial + '</div>';
+  }
+}
+
+// Update tooltip position to prevent overlap
+function updateTooltipPosition(tooltip) {
+  const tooltipContent = tooltip.querySelector('.tooltip-content');
+  const tooltipArrow = tooltip.querySelector('.tooltip-arrow');
+  if (tooltipContent && tooltipArrow) {
+    const rect = tooltip.getBoundingClientRect();
+    const contentHeight = tooltipContent.offsetHeight || 60;
+    const spaceAbove = rect.top;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    
+    // Position above if there's space, otherwise below
+    if (spaceAbove > contentHeight + 20) {
+      tooltipContent.style.top = (rect.top - contentHeight - 8) + 'px';
+      tooltipContent.style.bottom = 'auto';
+      tooltipArrow.style.top = (rect.top - 1) + 'px';
+      tooltipArrow.style.bottom = 'auto';
+      tooltipArrow.style.borderTop = '8px solid #3A352C';
+      tooltipArrow.style.borderBottom = 'none';
+    } else {
+      tooltipContent.style.top = (rect.bottom + 8) + 'px';
+      tooltipContent.style.bottom = 'auto';
+      tooltipArrow.style.top = (rect.bottom - 1) + 'px';
+      tooltipArrow.style.bottom = 'auto';
+      tooltipArrow.style.borderTop = 'none';
+      tooltipArrow.style.borderBottom = '8px solid #3A352C';
+    }
+    
+    tooltipContent.style.left = rect.left + (rect.width / 2) + 'px';
+    tooltipContent.style.transform = 'translateX(-50%)';
+    tooltipArrow.style.left = rect.left + (rect.width / 2) + 'px';
+    tooltipArrow.style.transform = 'translateX(-50%)';
+  }
+}
+
+// Toggle tooltip on click
+function toggleTooltip(tooltip, event) {
+  event.stopPropagation();
+  const isActive = tooltip.classList.contains('active');
+  
+  // Close all tooltips
+  document.querySelectorAll('.info-tooltip.active').forEach(t => {
+    t.classList.remove('active');
+  });
+  
+  // Toggle this one
+  if (!isActive) {
+    tooltip.classList.add('active');
+    updateTooltipPosition(tooltip);
+  }
+}
+</script>
+
+{% endblock %}
