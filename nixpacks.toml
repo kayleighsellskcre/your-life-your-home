@@ -1,0 +1,9 @@
+[phases.setup]
+nixPkgs = ["python311", "cairo", "pango", "gdk-pixbuf", "libffi", "libjpeg", "zlib"]
+
+[phases.install]
+cmds = ["pip install --upgrade pip", "pip install -r requirements.txt"]
+
+[start]
+cmd = "gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 --access-logfile - --error-logfile -"
+
