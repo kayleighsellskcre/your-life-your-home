@@ -1,3349 +1,875 @@
 {% extends "homeowner/layout.html" %}
-{% block title %}Equity Center • Your Life Your Home{% endblock %}
+{% block title %}Value & Equity • Your Life Your Home{% endblock %}
 
 {% block homeowner_content %}
 <style>
-  /* Equity Center - Product-Style Layout */
-  .equity-page {
-    max-width: 1600px;
+  /* ===========================
+     VALUE & EQUITY PAGE
+     Organic • Luxurious • Effortless
+     =========================== */
+  
+  .value-equity-page {
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 0 1rem;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 3rem 2rem;
+  }
+  
+  /* PAGE HEADER */
+  .page-header {
+    margin-bottom: 3rem;
     text-align: center;
   }
-
-  /* HERO SECTION - VISUALLY APPEALING */
-  .equity-hero {
-    max-width: 100%;
-    width: 100%;
-    margin: 0 auto 2rem;
-    padding: 2rem 2.5rem;
-    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
+  
+  .page-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+  }
+  
+  .page-header p {
+    font-size: 1.125rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  /* FINANCIAL SNAPSHOT CARDS */
+  .snapshot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .snapshot-card {
+    background: var(--white);
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(58, 53, 44, 0.08);
+  }
+  
+  .snapshot-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.12);
+    border-color: rgba(107, 106, 69, 0.25);
+  }
+  
+  .snapshot-card-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(58, 53, 44, 0.6);
+    margin-bottom: 0.75rem;
+  }
+  
+  .snapshot-card-value {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 400;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+  }
+  
+  .snapshot-card-sublabel {
+    font-size: 0.9rem;
+    color: rgba(58, 53, 44, 0.6);
+    line-height: 1.5;
+  }
+  
+  .snapshot-card-edit {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--taupe-beige);
+    border-radius: 6px;
+    color: var(--olive-green);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .snapshot-card-edit:hover {
+    background: var(--light-cream);
+    border-color: var(--olive-green);
+  }
+  
+  /* HOMEBOT WIDGET SECTION */
+  .homebot-section {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border: 1px solid rgba(107, 106, 69, 0.15);
     border-radius: 16px;
-    color: white;
-    box-shadow: 0 12px 48px rgba(58, 53, 44, 0.15), 0 6px 20px rgba(107, 106, 69, 0.1);
+    padding: 2.5rem;
+    margin-bottom: 3rem;
     position: relative;
     overflow: hidden;
   }
-
-  .equity-hero::before {
+  
+  .homebot-section::before {
     content: '';
     position: absolute;
     top: -50%;
     right: -20%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.12) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: float 8s ease-in-out infinite;
-  }
-
-  .equity-hero::after {
-    content: '';
-    position: absolute;
-    bottom: -30%;
-    left: -10%;
     width: 400px;
     height: 400px;
-    background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(107, 106, 69, 0.08) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    animation: float 10s ease-in-out infinite reverse;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(20px, -20px) scale(1.05); }
-  }
-
-  @media (max-width: 1024px) {
-    .equity-hero-left {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .equity-hero-actions {
-      align-items: flex-start;
-      min-width: auto;
-    }
-
-    .equity-status-row {
-      justify-content: flex-start;
-    }
-
-    .equity-hero-actions-bottom {
-      align-items: flex-start;
-    }
   }
   
-  @media (max-width: 768px) {
-    .equity-hero {
-      padding: 1.5rem 1.5rem;
-    }
-
-    .equity-hero-left {
-      gap: 1.25rem;
-    }
-    
-    .equity-hero h1 {
-      font-size: 1.5rem;
-    }
-    
-    .equity-hero .sub {
-      font-size: 0.85rem;
-      line-height: 1.5;
-    }
-    
-    .equity-hero .eyebrow {
-      font-size: 0.65rem;
-    }
-    
-    .status-pill {
-      padding: 0.5rem 1rem;
-    }
-    
-    .status-pill .label {
-      font-size: 0.6rem;
-    }
-    
-    .status-pill .value {
-      font-size: 0.75rem;
-    }
-
-    .elegant-add-btn {
-      width: 100%;
-      justify-content: center;
-    }
+  .homebot-section h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+    font-weight: 400;
   }
-
-  .equity-hero-left {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2rem;
-    align-items: center;
+  
+  .homebot-section p {
+    font-size: 1rem;
+    color: rgba(58, 53, 44, 0.7);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  
+  .homebot-widget {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 2rem;
+    min-height: 400px;
+    box-shadow: 0 4px 16px rgba(58, 53, 44, 0.08);
     position: relative;
     z-index: 1;
   }
-
-  .equity-hero-content {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .equity-hero .eyebrow {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    opacity: 0.9;
-    margin-bottom: 0.25rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.95);
-    display: inline-block;
-  }
-
-  .equity-hero h1 {
-    font-size: 2rem;
-    font-weight: 400;
-    margin: 0;
-    color: white;
-    font-family: 'Playfair Display', Georgia, serif;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
-  }
   
-  .equity-hero .sub {
-    font-size: 0.9rem;
-    opacity: 0.95;
-    line-height: 1.6;
-    margin: 0;
-    color: rgba(255, 255, 255, 0.98);
-    font-weight: 300;
-    max-width: 600px;
-  }
-
-  .equity-hero-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    align-items: flex-end;
-    min-width: 280px;
-  }
-
-  .equity-status-row {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    align-items: center;
-  }
-
-  .equity-hero-actions-bottom {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    align-items: flex-end;
-    width: 100%;
-  }
-
-  .status-pill {
-    background: white;
-    padding: 0.75rem 1.25rem;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    border: 1px solid rgba(200, 180, 151, 0.3);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    min-width: auto;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(58, 53, 44, 0.08);
-  }
-
-  .status-pill::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(107, 106, 69, 0.08), transparent);
-    transition: left 0.6s ease;
-  }
-
-  .status-pill:hover::before {
-    left: 100%;
-  }
-
-  .status-pill:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.12);
-    border-color: #6B6A45;
-  }
-
-  .status-pill.clickable {
-    cursor: pointer;
-  }
-
-  .status-pill.clickable:active {
-    transform: translateY(-2px);
-    transition: transform 0.15s ease;
-  }
-
-  .status-pill .label {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #6B6A45;
-    font-weight: 600;
-    line-height: 1.3;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-
-  .status-pill .value {
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: #3A352C;
-    line-height: 1.4;
-    letter-spacing: 0.01em;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-
-  /* AGENT CARD */
-  .equity-hero-right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-  }
-
-  .agent-card {
-    background: white;
-    border-radius: var(--border-radius-lg);
-    padding: 0.6rem;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    max-width: 300px;
-    width: 100%;
-    color: var(--charcoal-brown);
-  }
-
-  .agent-photo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--olive-green);
-    margin-bottom: 0.4rem;
-  }
-
-  .agent-label {
-    font-size: 0.55rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--olive-green);
-    font-weight: 600;
-    margin-bottom: 0.2rem;
-  }
-  
-  .agent-card h2 {
-    font-size: 0.9rem;
-    margin: 0 0 0.2rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-    line-height: 1.2;
-  }
-
-  .agent-brokerage {
-    color: #666;
-    margin: 0 0 0.3rem;
-    font-size: 0.7rem;
-    line-height: 1.2;
-  }
-
-  .agent-contact {
-    color: #666;
-    font-size: 0.65rem;
-    margin: 0.1rem 0;
-    line-height: 1.2;
-  }
-  
-  .agent-cta {
-    margin-top: 0.4rem;
-    padding: 0.35rem 0.75rem;
-    background: var(--olive-green);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    cursor: pointer;
-    width: 100%;
-    transition: all 0.3s ease;
-    font-size: 0.75rem;
-  }
-
-  .agent-cta:hover {
-    background: #5A6D47;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
-  }
-
-  /* SNAPSHOT CARDS */
-  .equity-snapshot {
-    margin: 0 auto 3rem;
-    width: 100%;
-    max-width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .snapshot-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1.5rem;
-    margin: 0 auto 2rem;
-    width: 100%;
-    max-width: 100%;
-    justify-items: center;
-  }
-
-  .snapshot-card {
+  /* TABS SECTION */
+  .tabs-container {
     background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 16px;
     overflow: hidden;
-    cursor: pointer;
-  }
-
-  .snapshot-card.clickable {
-    cursor: pointer;
-  }
-
-  .snapshot-card.clickable:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
-    border-color: var(--olive-green);
-  }
-
-  .snapshot-card.clickable::after {
-    content: '→';
-    position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
-    font-size: 1.5rem;
-    color: var(--olive-green);
-    opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: translateX(-10px);
-  }
-
-  .snapshot-card.clickable:hover::after {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  .snapshot-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--taupe-beige);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.3s ease;
-  }
-
-  .snapshot-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-    border-color: var(--olive-green);
-  }
-
-  .snapshot-card:hover::before {
-    transform: scaleX(1);
-    background: var(--olive-green);
-  }
-
-  .snapshot-card.snapshot-primary {
-    background: linear-gradient(135deg, #6B6A45 0%, #8B7A5A 100%);
-    color: white;
-    border: none;
-  }
-
-  .snapshot-card.snapshot-primary.clickable:hover {
-    background: linear-gradient(135deg, #5A6D47 0%, #7A6A4A 100%);
-  }
-
-  .snapshot-card.snapshot-primary.clickable::after {
-    color: white;
-  }
-
-  .snapshot-card.snapshot-primary p[style*="font-size: 0.85rem"] {
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .snapshot-card.snapshot-primary::before {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  .snapshot-card h3 {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin: 0 0 1rem;
-    opacity: 0.8;
-    font-weight: 600;
-  }
-
-  .snapshot-card.snapshot-primary h3 {
-    opacity: 0.9;
-  }
-
-  .snapshot-card .big-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem;
-    color: var(--charcoal-brown);
-    line-height: 1;
-  }
-
-  .snapshot-card.snapshot-primary .big-number {
-    color: white;
-  }
-  
-  .snapshot-card .delta {
-    font-size: 0.9rem;
-    color: #666;
-    margin: 0;
-  }
-
-  .snapshot-card.snapshot-primary .delta {
-    color: rgba(255, 255, 255, 0.9);
-  }
-
-  .snapshot-card .hint {
-    font-size: 0.85rem;
-    color: #999;
-    margin: 0;
-  }
-
-  .snapshot-card.snapshot-primary .hint {
-    color: rgba(255, 255, 255, 0.8);
-  }
-
-  /* PROGRESS BAR */
-  .paydown-progress {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 0.75rem 1.5rem;
-    box-shadow: var(--shadow-light);
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto;
-  }
-
-  .paydown-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--charcoal-brown);
-    font-size: 0.85rem;
-  }
-
-  .paydown-label {
-    font-size: 0.75rem;
-    color: var(--olive-green);
-    font-weight: 500;
-  }
-
-  .progress-bar {
-    height: 8px;
-    background: var(--light-cream);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 0.5rem;
-    position: relative;
-  }
-
-  .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #6B6A45 0%, #8B7A5A 100%);
-    border-radius: 6px;
-    transition: width 1s ease;
-    position: relative;
-  }
-
-  .progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 2s infinite;
-  }
-
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-
-  .progress-footer {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.7rem;
-    color: #666;
-    margin-top: 0.25rem;
-  }
-
-  /* MAIN AREA WITH TABS */
-  .equity-main {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 3rem;
     margin-bottom: 3rem;
-    width: 100%;
-    max-width: 100%;
   }
-
-  @media (max-width: 1024px) {
-    .equity-main {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .equity-main-left {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 0;
-    overflow: hidden;
-  }
-
-  /* TABS */
-  .equity-tabs {
+  
+  .tabs-nav {
     display: flex;
+    border-bottom: 1px solid rgba(107, 106, 69, 0.15);
     background: var(--light-cream);
-    border-bottom: 2px solid var(--taupe-beige);
   }
-
-  .equity-tabs .tab {
+  
+  .tab-button {
     flex: 1;
-    padding: 1.25rem 2rem;
-    background: none;
+    padding: 1.25rem 1.5rem;
+    background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
-    font-size: 1rem;
-    font-weight: 500;
-    color: #666;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(58, 53, 44, 0.6);
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: inherit;
-    position: relative;
-    z-index: 100;
-    pointer-events: auto !important;
-    user-select: none;
-    -webkit-user-select: none;
   }
-
-  .equity-tabs .tab:hover {
-    color: var(--olive-green);
-    background: rgba(107, 106, 69, 0.05);
+  
+  .tab-button:hover {
+    background: rgba(107, 106, 69, 0.08);
+    color: var(--charcoal-brown);
   }
-
-  .equity-tabs .tab.active {
-    color: var(--olive-green);
+  
+  .tab-button.active {
+    color: var(--charcoal-brown);
     border-bottom-color: var(--olive-green);
     background: var(--white);
+    font-weight: 700;
   }
-
-  /* TAB PANELS */
-  .tab-panels {
+  
+  .tab-content {
     padding: 2.5rem;
   }
-
+  
   .tab-panel {
     display: none;
   }
-
+  
   .tab-panel.active {
     display: block;
-    animation: fadeIn 0.3s ease;
   }
-
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .tab-panel h2 {
-    font-size: 1.75rem;
-    margin: 0 0 0.5rem;
+  
+  .tab-panel h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
+    margin-bottom: 1rem;
     font-weight: 400;
   }
-
-  .panel-sub {
-    color: #666;
-    margin: 0 0 2rem;
-    line-height: 1.6;
-  }
-
-  /* HOMEBOT WIDGET CONTAINER */
-  .homebot-widget-container {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 0;
-    min-height: 700px;
-    overflow: hidden;
-    position: relative;
-    isolation: isolate;
-  }
   
-  #homebot_homeowner {
-    width: 100%;
-    min-height: 700px;
-    position: relative;
-    border: none;
-    margin: 0;
-    padding: 0;
-    display: block;
-    z-index: 1;
-    pointer-events: auto;
-  }
-
-  #homebot_homeowner iframe {
-    width: 100% !important;
-    min-height: 700px !important;
-    border: none !important;
-    display: block !important;
-    pointer-events: auto !important;
-    transition: height 0.3s ease;
-  }
-
-  .homebot-skeleton {
-    padding: 4rem 2rem;
-    text-align: center;
-    color: #999;
-  }
-
-  .empty-state {
-    padding: 4rem 2rem;
-    text-align: center;
-    background: var(--light-cream);
-    border-radius: var(--border-radius-lg);
-  }
-
-  .empty-state h3 {
-    color: var(--charcoal-brown);
-    margin-bottom: 1rem;
-  }
-
-  /* SCENARIO CARDS */
-  .scenario-grid {
-    display: grid;
-    gap: 1.5rem;
-  }
-
-  .scenario-card {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    transition: all 0.3s ease;
-  }
-
-  .scenario-card:hover {
-    border-color: var(--olive-green);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  }
-
-  .scenario-card h3 {
-    font-size: 1.3rem;
-    margin: 0 0 0.75rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-
-  .scenario-card p {
-    color: #666;
-    margin: 0 0 1.5rem;
-    line-height: 1.6;
-  }
-
-  .scenario-card label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--olive-green);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.75rem;
-  }
-
-  .scenario-slider {
-    width: 100%;
-    height: 8px;
-    border-radius: 4px;
-    background: var(--light-cream);
-    outline: none;
-    -webkit-appearance: none;
-    margin-bottom: 1rem;
-  }
-
-  .scenario-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--olive-green);
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .scenario-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.4);
-  }
-
-  .scenario-slider::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--olive-green);
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
-  }
-
-  .scenario-output {
-    padding: 1rem;
-    background: var(--light-cream);
-    border-radius: var(--border-radius);
-    color: var(--charcoal-brown);
-    font-weight: 500;
-    margin: 0;
-  }
-
-  .linkish {
-    background: none;
-    border: none;
-    color: var(--olive-green);
-    text-decoration: underline;
-    cursor: pointer;
+  .tab-panel p {
     font-size: 1rem;
-    padding: 0;
-    font-family: inherit;
-  }
-
-  .linkish:hover {
-    color: #5A6D47;
-  }
-
-  /* HISTORY SECTION */
-  .history-layout {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 2rem;
-  }
-
-  @media (max-width: 768px) {
-    .history-layout {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* ============================================
-     COMPREHENSIVE MOBILE RESPONSIVE STYLES
-     ============================================ */
-  @media (max-width: 768px) {
-    /* Page Container - Center and full width */
-    .equity-page {
-      max-width: 100%;
-      padding: 0 1rem;
-      margin: 0 auto;
-    }
-
-    /* Hero Section - Stack and center */
-    .equity-hero {
-      padding: 2rem 1.5rem !important;
-      max-width: 100% !important;
-      padding: 1.5rem 1rem !important;
-      text-align: center;
-      gap: 1.5rem;
-    }
-
-    .equity-hero-left {
-      text-align: center;
-      align-items: center;
-    }
-
-    .equity-hero h1 {
-      font-size: 1.3rem !important;
-      line-height: 1.4;
-    }
-
-    .equity-hero .sub {
-      font-size: 0.85rem !important;
-      text-align: center;
-    }
-
-    .equity-status-row {
-      justify-content: center;
-      gap: 0.75rem;
-    }
-
-    .status-pill {
-      min-width: auto;
-      flex: 1 1 auto;
-      max-width: 100%;
-    }
-
-    .equity-hero-right {
-      justify-content: center;
-    }
-
-    .agent-card {
-      max-width: 100%;
-      width: 100%;
-    }
-
-    /* Snapshot Grid - Single column on mobile */
-    .snapshot-grid {
-      grid-template-columns: 1fr !important;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .snapshot-card {
-      padding: 1.5rem !important;
-      text-align: center;
-    }
-
-    .snapshot-card h3 {
-      font-size: 0.8rem !important;
-      text-align: center;
-    }
-
-    .snapshot-card .big-number {
-      font-size: 2rem !important;
-      text-align: center;
-    }
-
-    .snapshot-card .delta,
-    .snapshot-card .hint {
-      font-size: 0.8rem !important;
-      text-align: center;
-    }
-
-    .snapshot-card.clickable::after {
-      display: none; /* Hide arrow on mobile */
-    }
-
-    /* Main Content Area - Stack */
-    .equity-main {
-      grid-template-columns: 1fr !important;
-      gap: 2rem;
-    }
-
-    .equity-main-left {
-      padding: 0;
-    }
-
-    /* Tabs - Full width, larger touch targets */
-    .equity-tabs {
-      flex-wrap: wrap;
-    }
-
-    .equity-tabs .tab {
-      padding: 1rem 0.75rem !important;
-      font-size: 0.9rem;
-      min-height: 48px; /* Touch-friendly */
-      flex: 1 1 33.333%;
-    }
-
-    /* Tab Panels - Better spacing */
-    .tab-panels {
-      padding: 1.5rem 1rem !important;
-    }
-
-    .tab-panel h2 {
-      font-size: 1.5rem !important;
-      text-align: center;
-    }
-
-    .panel-sub {
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    /* Forms - Full width, larger inputs */
-    .card form {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 1rem !important;
-    }
-
-    .card form > div {
-      width: 100% !important;
-      grid-column: 1 / -1 !important;
-    }
-
-    .card input,
-    .card select,
-    .card textarea {
-      width: 100% !important;
-      padding: 1rem !important;
-      font-size: 16px !important; /* Prevents zoom on iOS */
-      min-height: 44px; /* Touch-friendly */
-    }
-
-    .card label {
-      font-size: 0.85rem !important;
-      margin-bottom: 0.5rem;
-    }
-
-    /* Buttons - Full width, larger */
-    .action-btn,
-    button[type="submit"],
-    .btn-primary {
-      width: 100% !important;
-      padding: 1.25rem 1.5rem !important;
-      font-size: 1rem !important;
-      min-height: 48px; /* Touch-friendly */
-      text-align: center !important;
-    }
-
-    /* Progress Bar */
-    .paydown-progress {
-      padding: 0.5rem 1rem !important;
-    }
-
-    .paydown-header {
-      flex-direction: row;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.75rem;
-    }
-
-    .paydown-footer {
-      flex-direction: row;
-      gap: 1rem;
-      text-align: center;
-      font-size: 0.65rem;
-    }
-
-    /* History List */
-    .history-list li {
-      grid-template-columns: 1fr !important;
-      gap: 0.5rem;
-      text-align: center;
-      padding: 1rem 0;
-    }
-
-    /* Sidebar Cards */
-    .equity-main-right {
-      width: 100%;
-    }
-
-    .info-card {
-      padding: 1.5rem 1rem !important;
-    }
-
-    /* Charts */
-    .chart-card {
-      padding: 1.5rem 1rem !important;
-    }
-
-    .chart-placeholder {
-      height: 250px;
-    }
-
-    /* Modals - Full screen on mobile */
-    #quickEditModal,
-    #editAddressModal,
-    #addPropertyModal {
-      padding: 1rem !important;
-      align-items: flex-start !important;
-      overflow-y: auto;
-    }
-
-    #quickEditModal > div,
-    #editAddressModal > div,
-    #addPropertyModal > div {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      border-radius: 0 !important;
-      max-height: 100vh;
-      overflow-y: auto;
-    }
-
-    /* Property selector */
-    form[action*="switch-property"] {
-      flex-direction: column !important;
-      width: 100%;
-    }
-
-    form[action*="switch-property"] label,
-    form[action*="switch-property"] select,
-    form[action*="switch-property"] button {
-      width: 100% !important;
-      margin-bottom: 0.5rem;
-    }
-
-    /* Add Property Button */
-    .add-property-btn {
-      width: 100% !important;
-      padding: 1rem !important;
-      font-size: 0.95rem !important;
-    }
-  }
-
-  /* Extra small phones */
-  @media (max-width: 480px) {
-    .equity-hero h1 {
-      font-size: 1.1rem !important;
-    }
-
-    .snapshot-card .big-number {
-      font-size: 1.75rem !important;
-    }
-
-    .tab-panel h2 {
-      font-size: 1.3rem !important;
-    }
-
-    .equity-tabs .tab {
-      font-size: 0.85rem !important;
-      padding: 0.875rem 0.5rem !important;
-    }
-  }
-
-  .chart-card {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-  }
-
-  .chart-card h3 {
-    font-size: 1.2rem;
-    margin: 0 0 1.5rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-
-  .chart-placeholder {
-    height: 300px;
-    background: var(--light-cream);
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-    border: 2px dashed var(--taupe-beige);
-  }
-
-  .history-list {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
   }
   
-  .history-list h3 {
-    font-size: 1.2rem;
-    margin: 0 0 1.5rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-
-  .history-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .history-list li {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--taupe-beige);
+  /* INFO CARDS */
+  .info-cards-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 1rem;
-    font-size: 0.9rem;
-  }
-
-  .history-list li:last-child {
-    border-bottom: none;
-  }
-
-  .snap-date {
-    color: #666;
-  }
-
-  .snap-value {
-    font-weight: 600;
-    color: var(--charcoal-brown);
-  }
-
-  .snap-equity {
-    color: var(--olive-green);
-    font-weight: 500;
-  }
-
-  /* RIGHT SIDEBAR */
-  .equity-main-right {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
+    margin-top: 2rem;
   }
-
-  .equity-main-right h3 {
-    font-size: 1.3rem;
-    margin: 0 0 0.5rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-
-  .action-btn {
-    width: 100%;
-    padding: 1rem 1.5rem;
-    background: var(--olive-green);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: left;
-    font-size: 0.95rem;
-  }
-
-  .action-btn:hover {
-    background: #5A6D47;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
-  }
-
-  .action-btn.secondary {
-    background: var(--white);
-    color: var(--olive-green);
-    border: 2px solid var(--olive-green);
-  }
-
-  .action-btn.secondary:hover {
-    background: var(--light-cream);
-  }
-
+  
   .info-card {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
+    background: var(--light-cream);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    border-radius: 12px;
     padding: 1.5rem;
   }
-
-  .info-card.subtle {
-    background: var(--light-cream);
-    border-color: rgba(200, 180, 151, 0.3);
-  }
-
+  
   .info-card h4 {
     font-size: 1rem;
-    margin: 0 0 0.75rem;
-    color: var(--charcoal-brown);
     font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
   }
-
+  
   .info-card p {
-    margin: 0;
-    color: #666;
     font-size: 0.9rem;
+    color: rgba(58, 53, 44, 0.7);
     line-height: 1.6;
-  }
-
-  /* INTERACTIVE TOOLTIPS */
-  .tooltip-trigger {
-    position: relative;
-    display: inline-block;
-    cursor: help;
-    border-bottom: 1px dotted var(--olive-green);
-    color: var(--olive-green);
-    font-weight: 500;
-  }
-
-  .tooltip {
-    position: absolute;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--charcoal-brown);
-    color: white;
-    padding: 0.75rem 1rem;
-    border-radius: var(--border-radius);
-    font-size: 0.85rem;
-    width: 250px;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: translateX(-50%) translateY(-10px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  .tooltip::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 6px solid transparent;
-    border-top-color: var(--charcoal-brown);
-  }
-
-  .tooltip-trigger:hover .tooltip {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-    pointer-events: auto;
-  }
-
-  /* EXPANDABLE EDUCATIONAL CARDS */
-  .edu-card {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    margin-bottom: 1rem;
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-
-  .edu-card:hover {
-    border-color: var(--olive-green);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  .edu-card-header {
-    padding: 1.25rem 1.5rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--light-cream);
-    transition: background 0.3s ease;
-  }
-
-  .edu-card-header:hover {
-    background: rgba(107, 106, 69, 0.05);
-  }
-
-  .edu-card-header h4 {
     margin: 0;
-    font-size: 1rem;
-    color: var(--charcoal-brown);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
   }
-
-  .edu-card-toggle {
-    font-size: 1.2rem;
-    color: var(--olive-green);
-    transition: transform 0.3s ease;
+  
+  /* CHART CONTAINER */
+  .chart-container {
+    background: var(--light-cream);
+    border: 1px solid rgba(107, 106, 69, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 2rem;
+    min-height: 350px;
   }
-
-  .edu-card.expanded .edu-card-toggle {
-    transform: rotate(180deg);
-  }
-
-  .edu-card-content {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease, padding 0.4s ease;
-    padding: 0 1.5rem;
-  }
-
-  .edu-card.expanded .edu-card-content {
-    max-height: 2000px;
-    padding: 1.5rem;
-  }
-
-  .edu-card-content p {
-    margin: 0 0 1rem;
-    color: #666;
-    line-height: 1.7;
-    font-size: 0.95rem;
-  }
-
-  .edu-card-content ul {
-    margin: 0.5rem 0 1rem 1.5rem;
-    padding: 0;
-    color: #666;
-    line-height: 1.8;
-  }
-
-  .edu-card-content li {
-    margin-bottom: 0.5rem;
-  }
-
-  /* ENHANCED SCENARIO CARDS WITH CALCULATIONS */
-  .scenario-card {
-    position: relative;
-  }
-
-  .scenario-value-display {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--olive-green);
-    margin-bottom: 0.5rem;
-    min-height: 1.5rem;
-  }
-
-  .scenario-details {
-    font-size: 0.85rem;
-    color: #666;
-    margin-top: 0.5rem;
-    line-height: 1.6;
-  }
-
-  /* ANIMATED NUMBER COUNTERS */
-  @keyframes countUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .big-number {
-    animation: countUp 0.6s ease;
-  }
-
-  /* SMOOTH CARD ENTRANCE */
-  @keyframes slideInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
+  
+  /* MOBILE RESPONSIVE */
+  @media (max-width: 768px) {
+    .value-equity-page {
+      padding: 2rem 1rem;
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+    }
+    
+    .page-header p {
+      font-size: 1rem;
+    }
+    
+    .snapshot-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .snapshot-card {
+      padding: 1.5rem;
+    }
+    
+    .snapshot-card-value {
+      font-size: 2rem;
+    }
+    
+    .homebot-section {
+      padding: 1.5rem;
+    }
+    
+    .homebot-section h2 {
+      font-size: 1.5rem;
+    }
+    
+    .homebot-widget {
+      padding: 1rem;
+      min-height: 300px;
+    }
+    
+    .tabs-nav {
+      flex-direction: column;
+    }
+    
+    .tab-button {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(107, 106, 69, 0.1);
+      border-left: 3px solid transparent;
+    }
+    
+    .tab-button.active {
+      border-left-color: var(--olive-green);
+      border-bottom-color: rgba(107, 106, 69, 0.1);
+    }
+    
+    .tab-content {
+      padding: 1.5rem;
+    }
+    
+    .info-cards-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .chart-container {
+      padding: 1rem;
+      min-height: 250px;
     }
   }
-
-  .snapshot-card {
-    animation: slideInUp 0.5s ease backwards;
-  }
-
-  .snapshot-card:nth-child(1) { animation-delay: 0.1s; }
-  .snapshot-card:nth-child(2) { animation-delay: 0.2s; }
-  .snapshot-card:nth-child(3) { animation-delay: 0.3s; }
-  .snapshot-card:nth-child(4) { animation-delay: 0.4s; }
-
-  /* PULSE ANIMATION FOR IMPORTANT INFO */
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-  }
-
-  .highlight-pulse {
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  /* PLATFORM-MATCHING BUTTON STYLES */
-  .elegant-add-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #6B6A45;
-    color: white;
-    padding: 0.65rem 1.5rem;
+  
+  /* PROPERTY SELECTOR */
+  .property-selector {
+    background: var(--light-cream);
+    border: 1px solid rgba(107, 106, 69, 0.15);
     border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-    font-size: 0.75rem;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    position: relative;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.2);
-  }
-
-  .elegant-add-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s ease, height 0.6s ease;
-  }
-
-  .elegant-add-btn:hover::before {
-    width: 300px;
-    height: 300px;
-  }
-
-  .elegant-add-btn:hover {
-    background: #5A6D47;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.3);
-  }
-
-  .elegant-add-btn:active {
-    transform: translateY(0);
-    transition: transform 0.15s ease;
-  }
-
-  .elegant-add-btn .btn-icon {
-    font-size: 0.85rem;
-    font-weight: 300;
-    line-height: 1;
-    width: 20px;
-    height: 20px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
     display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .property-selector label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+  }
+  
+  .property-selector select {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--taupe-beige);
+    border-radius: 6px;
+    background: var(--white);
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+  }
+  
+  .property-selector button {
+    padding: 0.625rem 1.25rem;
+    background: var(--olive-green);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .property-selector button:hover {
+    background: #5A5938;
+  }
+  
+  /* MODALS */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 10000;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.15);
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1;
+    padding: 1rem;
   }
-
-  .elegant-add-btn:hover .btn-icon {
-    background: rgba(255, 255, 255, 0.25);
-    transform: rotate(90deg);
+  
+  .modal-overlay.active {
+    display: flex;
   }
-
-  .elegant-add-btn .btn-text {
-    position: relative;
-    z-index: 1;
+  
+  .modal-content {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
   }
-
-  .elegant-select-label {
-    color: white;
+  
+  .modal-header h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+  }
+  
+  .modal-body {
+    margin-bottom: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 0.9rem;
     font-weight: 600;
-    font-size: 0.7rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  }
-
-  .elegant-select {
-    padding: 0.65rem 2.5rem 0.65rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(200, 180, 151, 0.3);
-    background: white;
     color: var(--olive-green);
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid var(--taupe-beige);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    background: var(--white);
+    transition: all 0.2s ease;
+  }
+  
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .modal-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+  }
+  
+  .btn-secondary {
+    padding: 0.875rem 1.5rem;
+    background: var(--light-cream);
+    border: 1px solid var(--taupe-beige);
+    border-radius: 8px;
+    color: var(--charcoal-brown);
     font-weight: 500;
     cursor: pointer;
-    font-size: 0.75rem;
-    min-width: 200px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B6A45' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 10px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    box-shadow: 0 2px 8px rgba(58, 53, 44, 0.08);
-    letter-spacing: 0.01em;
+    transition: all 0.2s ease;
   }
-
-  .elegant-select:hover {
-    border-color: #6B6A45;
-    box-shadow: 0 4px 16px rgba(58, 53, 44, 0.12);
-    transform: translateY(-1px);
+  
+  .btn-secondary:hover {
+    background: #E5E1D3;
   }
-
-  .elegant-select:focus {
-    outline: none;
-    border-color: #6B6A45;
-    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 16px rgba(58, 53, 44, 0.12);
-    transform: translateY(-1px);
+  
+  .btn-primary {
+    padding: 0.875rem 1.5rem;
+    background: var(--olive-green);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
   }
-
-  /* SMOOTH PROGRESS BAR ANIMATION */
-  .progress-fill {
-    transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  .btn-primary:hover {
+    background: #5A5938;
   }
-
-  /* ENHANCED ACTION BUTTONS */
-  .action-btn {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .action-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s ease, height 0.6s ease;
-  }
-
-  .action-btn:hover::before {
-    width: 300px;
-    height: 300px;
-  }
-
-  .action-btn span {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* EDUCATIONAL BADGES */
-  .learn-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.75rem;
-    color: var(--olive-green);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-left: 0.5rem;
+  
+  @media (max-width: 768px) {
+    .modal-content {
+      padding: 1.5rem;
+      max-height: 95vh;
+    }
+    
+    .modal-footer {
+      flex-direction: column;
+    }
+    
+    .btn-secondary,
+    .btn-primary {
+      width: 100%;
+    }
   }
 </style>
 
-<section class="equity-page" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-  <!-- HERO + AGENT CARD -->
-  <header class="equity-hero">
-    <div class="equity-hero-left">
-      <div class="equity-hero-content">
-        <p class="eyebrow">Your Life Your Home · Equity Center</p>
-        <h1>See What Your Home Is Doing For You</h1>
-        <p class="sub">
-          Track your home value, loan payoff, and equity — all in one place.
-          Powered by Homebot, presented inside your YLYH dashboard.
-        </p>
+<div class="value-equity-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Value & Equity</h1>
+    <p>Track your home's value, equity growth, and financial position with clarity and confidence.</p>
+  </div>
+  
+  <!-- Property Selector (if multiple properties) -->
+  {% if user_properties and user_properties|length > 1 %}
+  <div class="property-selector">
+    <form method="POST" action="{{ url_for('homeowner_switch_property') }}" style="display: flex; align-items: center; gap: 1rem; width: 100%; flex-wrap: wrap;">
+      <label for="property_select">Viewing Property:</label>
+      <select name="property_id" id="property_select">
+        {% for prop in user_properties %}
+          <option value="{{ prop.property_id }}" {% if current_property and prop.property_id == current_property.property_id %}selected{% endif %}>
+            {{ prop.address or 'Property ' + loop.index|string }}
+          </option>
+        {% endfor %}
+      </select>
+      <button type="submit">Switch</button>
+    </form>
+  </div>
+  {% endif %}
+  
+  <!-- Financial Snapshot Cards -->
+  <div class="snapshot-grid">
+    <!-- Home Value -->
+    <div class="snapshot-card">
+      <div class="snapshot-card-label">Estimated Home Value</div>
+      <div class="snapshot-card-value">
+        {% if snapshot and snapshot.get('value_estimate') %}
+          ${{ "{:,}".format(snapshot.get('value_estimate')|int) }}
+        {% else %}
+          —
+        {% endif %}
       </div>
-
-      <div class="equity-hero-actions">
-        <div class="equity-status-row">
-          <div class="status-pill clickable" onclick="openEditAddressModal()" style="cursor: pointer;" title="Click to edit address">
-            <span class="label">Home</span>
-            <span class="value">
-              {% if current_property and current_property.get('address') %}
-                {{ current_property.address }}
-              {% elif homeowner_data and homeowner_data.get('address') %}
-                {{ homeowner_data.address }}
+      <div class="snapshot-card-sublabel">Your home's current market value</div>
+      <button class="snapshot-card-edit" onclick="openEditModal('value')">Update Value</button>
+    </div>
+    
+    <!-- Equity -->
+    <div class="snapshot-card">
+      <div class="snapshot-card-label">Total Equity</div>
+      <div class="snapshot-card-value">
+        {% if snapshot and snapshot.get('equity_estimate') %}
+          ${{ "{:,}".format(snapshot.get('equity_estimate')|int) }}
+        {% elif snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
+          ${{ "{:,}".format((snapshot.get('value_estimate') - snapshot.get('loan_balance'))|int) }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <div class="snapshot-card-sublabel">Value minus loan balance</div>
+    </div>
+    
+    <!-- Loan Balance -->
+    <div class="snapshot-card">
+      <div class="snapshot-card-label">Loan Balance</div>
+      <div class="snapshot-card-value">
+        {% if snapshot and snapshot.get('loan_balance') %}
+          ${{ "{:,}".format(snapshot.get('loan_balance')|int) }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+      <div class="snapshot-card-sublabel">Current mortgage balance</div>
+      <button class="snapshot-card-edit" onclick="openEditModal('loan')">Update Loan</button>
+    </div>
+  </div>
+  
+  <!-- Homebot Widget Section -->
+  <div class="homebot-section">
+    <h2>Your Homebot Digest</h2>
+    <p>Get personalized insights about your home's value, equity opportunities, and market trends.</p>
+    <div class="homebot-widget">
+      {% if homebot_widget_html %}
+        {{ homebot_widget_html|safe }}
+      {% else %}
+        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(58, 53, 44, 0.5);">
+          <p>Homebot insights will appear here once configured.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  
+  <!-- Tabs Section -->
+  <div class="tabs-container">
+    <div class="tabs-nav">
+      <button class="tab-button active" onclick="switchTab(event, 'overview')">Overview</button>
+      <button class="tab-button" onclick="switchTab(event, 'scenarios')">Scenarios</button>
+      <button class="tab-button" onclick="switchTab(event, 'history')">History</button>
+    </div>
+    
+    <div class="tab-content">
+      <!-- Overview Panel -->
+      <div class="tab-panel active" id="overview">
+        <h3>Financial Overview</h3>
+        <p>A clear snapshot of your home's financial position and key metrics.</p>
+        
+        <div class="info-cards-grid">
+          <div class="info-card">
+            <h4>Loan-to-Value (LTV)</h4>
+            <p>
+              {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') and snapshot.get('value_estimate') > 0 %}
+                {% set ltv = (snapshot.get('loan_balance') / snapshot.get('value_estimate') * 100) %}
+                {{ "%.1f"|format(ltv) }}%
               {% else %}
-                Your home address
+                —
               {% endif %}
-            </span>
+            </p>
           </div>
-          <div class="status-pill">
-            <span class="label">Last Update</span>
-            <span class="value">
-              {% if snapshot and snapshot.updated_at %}
-                {{ snapshot.updated_at[:10] if snapshot.updated_at|length > 10 else snapshot.updated_at }}
+          
+          <div class="info-card">
+            <h4>Interest Rate</h4>
+            <p>
+              {% if snapshot and snapshot.get('loan_rate') %}
+                {{ "%.2f"|format(snapshot.get('loan_rate')) }}%
               {% else %}
-                Updates monthly
+                —
               {% endif %}
-            </span>
+            </p>
           </div>
-          {% if properties and properties|length > 1 %}
-          <div class="status-pill">
-            <span class="label">Properties</span>
-            <span class="value">{{ properties|length }} homes</span>
+          
+          <div class="info-card">
+            <h4>Monthly Payment</h4>
+            <p>
+              {% if snapshot and snapshot.get('loan_payment') %}
+                ${{ "{:,}".format(snapshot.get('loan_payment')|int) }}
+              {% else %}
+                —
+              {% endif %}
+            </p>
           </div>
-          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Scenarios Panel -->
+      <div class="tab-panel" id="scenarios">
+        <h3>What-If Scenarios</h3>
+        <p>Explore different financial scenarios to understand your options and opportunities.</p>
+        
+        <div class="info-cards-grid">
+          <div class="info-card">
+            <h4>Refinance Opportunity</h4>
+            <p>See how refinancing at today's rates could impact your monthly payment and long-term savings.</p>
+          </div>
+          
+          <div class="info-card">
+            <h4>Cash-Out Refinance</h4>
+            <p>Unlock your equity for renovations, investments, or other financial goals.</p>
+          </div>
+          
+          <div class="info-card">
+            <h4>Future Value Projection</h4>
+            <p>Estimate your home's value and equity growth over the next 1, 3, or 5 years.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- History Panel -->
+      <div class="tab-panel" id="history">
+        <h3>Value & Equity History</h3>
+        <p>Track how your home's value, loan balance, and equity have changed over time.</p>
+        
+        {% if snapshot_history and snapshot_history|length > 0 %}
+        <div class="chart-container">
+          <canvas id="equityChart"></canvas>
         </div>
         
-        <div class="equity-hero-actions-bottom">
-          <!-- Property Selector (if multiple properties) -->
-          {% if properties and properties|length > 1 %}
-          <form method="post" action="{{ url_for('homeowner_switch_property') }}" style="display: flex; gap: 0.75rem; align-items: center; width: 100%; justify-content: flex-end;">
-            <label class="elegant-select-label">Switch:</label>
-            <select name="property_id" onchange="this.form.submit()" class="elegant-select" style="flex: 1; max-width: 250px;">
-              {% for prop in properties %}
-              <option value="{{ prop.get('id') if prop.get('id') else prop.id }}" {% if (prop.get('id') if prop.get('id') else prop.id) == current_property_id %}selected{% endif %}>
-                {{ prop.get('address') if prop.get('address') else prop.address }}{% if prop.get('is_primary') or (prop.is_primary if prop.is_primary else False) %} (Primary){% endif %}
-                {% set prop_type = prop.get('property_type') if prop.get('property_type') else prop.property_type %}
-                {% if prop_type and prop_type != 'primary' %} - {{ prop_type|title }}{% endif %}
-                {% set est_value = prop.get('estimated_value') if prop.get('estimated_value') else prop.estimated_value %}
-                {% if est_value %} - ${{ "{:,.0f}".format(est_value) }}{% endif %}
-              </option>
-              {% endfor %}
-            </select>
-          </form>
-          {% endif %}
-          
-          <!-- Add Property Button -->
-          <button type="button" onclick="openAddPropertyModal()" class="elegant-add-btn" style="align-self: flex-end;">
-            <span class="btn-icon">+</span>
-            <span class="btn-text">Add Property</span>
-          </button>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+        <script>
+          (function() {
+            const historyData = {{ snapshot_history|tojson|safe }};
+            if (historyData && Array.isArray(historyData) && historyData.length > 0) {
+              const ctx = document.getElementById('equityChart');
+              if (ctx) {
+                const dates = historyData.map(h => {
+                  const d = h.snapshot_date ? h.snapshot_date.substring(0, 10) : '';
+                  return d || '—';
+                }).reverse();
+                const values = historyData.map(h => h.value_estimate || 0).reverse();
+                const balances = historyData.map(h => h.loan_balance || 0).reverse();
+                const equities = historyData.map(h => {
+                  if (h.equity_estimate) return h.equity_estimate;
+                  if (h.value_estimate && h.loan_balance) return h.value_estimate - h.loan_balance;
+                  return 0;
+                }).reverse();
+                
+                new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                    labels: dates,
+                    datasets: [
+                      {
+                        label: 'Home Value',
+                        data: values,
+                        borderColor: '#6B6A45',
+                        backgroundColor: 'rgba(107, 106, 69, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                      },
+                      {
+                        label: 'Loan Balance',
+                        data: balances,
+                        borderColor: '#C8B497',
+                        backgroundColor: 'rgba(200, 180, 151, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                      },
+                      {
+                        label: 'Equity',
+                        data: equities,
+                        borderColor: '#5A6D47',
+                        backgroundColor: 'rgba(90, 109, 71, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                      }
+                    ]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        position: 'bottom',
+                        labels: {
+                          font: { family: 'inherit', size: 12 },
+                          color: '#3A352C',
+                          padding: 16
+                        }
+                      },
+                      tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                          label: function(context) {
+                            return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                          }
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        beginAtZero: false,
+                        ticks: {
+                          callback: function(value) {
+                            return '$' + value.toLocaleString();
+                          },
+                          font: { size: 11 },
+                          color: '#666'
+                        },
+                        grid: {
+                          color: 'rgba(200, 180, 151, 0.2)'
+                        }
+                      },
+                      x: {
+                        ticks: {
+                          font: { size: 11 },
+                          color: '#666',
+                          maxRotation: 45,
+                          minRotation: 0
+                        },
+                        grid: {
+                          display: false
+                        }
+                      }
+                    }
+                  }
+                });
+              }
+            }
+          })();
+        </script>
+        {% else %}
+        <div class="info-card">
+          <h4>No History Yet</h4>
+          <p>As you track your home's value over time, your historical data will appear here.</p>
         </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- SNAPSHOT: BIG NUMBERS -->
-  <section class="equity-snapshot">
-    <div class="snapshot-grid">
-      <article class="snapshot-card snapshot-primary clickable" data-snap="value" onclick="openEditModal('value')">
-        <h3>Estimated Home Value</h3>
-        <p class="big-number" id="display-value-estimate">
-          {% if snapshot and snapshot.value_estimate %}
-            ${{ "{:,.0f}".format(snapshot.value_estimate) }}
-          {% else %}
-            —
-          {% endif %}
-        </p>
-        <p class="delta">
-          {% if snapshot and snapshot.value_refresh_source %}
-            Synced from {{ snapshot.value_refresh_source }}
-          {% else %}
-            Monthly updates via Homebot
-    {% endif %}
-        </p>
-        <p style="margin-top: 0.75rem; font-size: 0.85rem; opacity: 0.9; font-style: italic;">Click to edit home value</p>
-      </article>
-
-      <article class="snapshot-card clickable" data-snap="loan" onclick="openEditModal('loan')">
-        <h3>Loan Balance</h3>
-        <p class="big-number" id="display-loan-balance">
-          {% if snapshot and snapshot.loan_balance %}
-            ${{ "{:,.0f}".format(snapshot.loan_balance) }}
-          {% else %}
-            —
-          {% endif %}
-        </p>
-        <p class="hint">Updates as you make payments</p>
-        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to edit loan balance</p>
-      </article>
-
-      <article class="snapshot-card clickable" data-snap="equity" onclick="openEditModal('equity')">
-        <h3>
-          Total Equity
-          <span class="tooltip-trigger">
-            ℹ️
-            <span class="tooltip">
-              Equity is the portion of your home you actually own. It's your home's value minus what you still owe. You can use equity for renovations, investments, or as a down payment on your next home.
-            </span>
-          </span>
-        </h3>
-        <p class="big-number" id="display-equity">
-          {% if snapshot and snapshot.equity_estimate %}
-            ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
-          {% elif snapshot and snapshot.value_estimate and snapshot.loan_balance %}
-            ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}
-          {% else %}
-            —
-          {% endif %}
-        </p>
-        <p class="hint">Value minus loan balance</p>
-        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to update or correct your equity</p>
-      </article>
-
-      <article class="snapshot-card clickable" data-snap="ltv" onclick="openEditModal('ltv')">
-        <h3>
-          Loan-to-Value (LTV)
-          <span class="tooltip-trigger">
-            ℹ️
-            <span class="tooltip">
-              LTV is your loan balance divided by your home's value. Lower LTV (under 80%) often means better rates and no PMI. Lenders use this to assess risk.
-            </span>
-          </span>
-        </h3>
-        <p class="big-number" id="display-ltv">
-          {% if snapshot and snapshot.value_estimate and snapshot.loan_balance and snapshot.value_estimate > 0 %}
-            {{ "{:.1f}".format((snapshot.loan_balance / snapshot.value_estimate) * 100) }}%
-          {% else %}
-            —
-          {% endif %}
-        </p>
-        <p class="hint">Lower is usually better for financing</p>
-        <p style="margin-top: 0.75rem; font-size: 0.85rem; color: var(--olive-green); font-weight: 500;">Click to edit home value or loan balance</p>
-      </article>
-    </div>
-
-    {% if snapshot and snapshot.loan_balance and snapshot.value_estimate %}
-    <div class="paydown-progress">
-      <div class="paydown-header">
-        <span>Loan Paydown Journey</span>
-        <span class="paydown-label">
-          {% set paydown_percent = ((snapshot.value_estimate - snapshot.loan_balance) / snapshot.value_estimate * 100) if snapshot.value_estimate > 0 else 0 %}
-          {% if paydown_percent < 20 %}
-            You're on your way to payoff
-          {% elif paydown_percent < 50 %}
-            Making great progress
-          {% elif paydown_percent < 80 %}
-            Over halfway there
-          {% else %}
-            Almost paid off
-          {% endif %}
-        </span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: {{ paydown_percent }}%;"></div>
-      </div>
-      <div class="progress-footer">
-        <span>Current Balance: ${{ "{:,.0f}".format(snapshot.loan_balance) }}</span>
-        <span>Equity: ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}</span>
-  </div>
-</div>
-{% endif %}
-  </section>
-
-  <!-- HOMEBOT WIDGET SECTION -->
-  {% if homebot_widget_id %}
-  <section style="margin: 0 auto 3rem; max-width: 1200px; width: 100%; padding: 0 2rem;">
-    <div id="homebot_homeowner" class="homebot-widget-container">
-      <!-- Homebot will fully render here -->
-      <div class="homebot-skeleton">
-        <p>Loading your equity experience…</p>
-      </div>
-    </div>
-  </section>
-  {% else %}
-  <section style="margin: 0 auto 4rem; max-width: 900px; width: 100%; padding: 0 2rem;">
-    <div style="background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%); border-radius: 24px; padding: 4rem 3.5rem; box-shadow: 0 20px 60px rgba(58, 53, 44, 0.12), 0 8px 24px rgba(107, 106, 69, 0.08); border: 1px solid rgba(107, 106, 69, 0.12); position: relative; overflow: hidden; text-align: center;">
-      <!-- Animated background -->
-      <div style="position: absolute; top: -50%; right: -20%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(107, 106, 69, 0.06) 0%, transparent 70%); border-radius: 50%; animation: float 8s ease-in-out infinite;"></div>
-      <div style="position: absolute; bottom: -30%; left: -10%; width: 400px; height: 400px; background: radial-gradient(circle, rgba(107, 106, 69, 0.04) 0%, transparent 70%); border-radius: 50%; animation: float 10s ease-in-out infinite reverse;"></div>
-      
-      <div style="position: relative; z-index: 1;">
-        <div style="font-size: 4rem; margin-bottom: 1.5rem; display: inline-block; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 4px 12px rgba(107, 106, 69, 0.2));">✨</div>
-        <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1.25rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(107, 106, 69, 0.05) 100%); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: 50px; font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2rem;">
-          <span>✨</span>
-          <span>Coming Soon</span>
-        </div>
-        <h3 style="font-family: 'Playfair Display', Georgia, serif; color: var(--charcoal-brown); margin: 0 0 1.5rem; font-size: 2.5rem; font-weight: 400; letter-spacing: -0.01em; line-height: 1.3;">Equity Experience</h3>
-        <p style="font-size: 1.1rem; color: var(--charcoal-brown); opacity: 0.8; line-height: 1.9; margin: 0 0 2rem; max-width: 650px; margin-left: auto; margin-right: auto; font-weight: 300;">
-          Your agent hasn't connected their Homebot account yet.
-          {% if professional_info and professional_info.name %}
-          Reach out to <strong style="color: var(--olive-green); font-weight: 600;">{{ professional_info.name }}</strong> to turn on automatic equity updates.
-          {% else %}
-          Contact your agent to turn on automatic equity updates.
-          {% endif %}
-        </p>
-        {% if professional_info and professional_info.email %}
-        <a href="mailto:{{ professional_info.email }}?subject=Homebot Equity Updates" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.9rem 2rem; background: #6B6A45; color: white; text-decoration: none; border-radius: 12px; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 16px rgba(107, 106, 69, 0.2); position: relative; overflow: hidden;" onmouseover="this.style.background='#5A6D47'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(107, 106, 69, 0.3)'" onmouseout="this.style.background='#6B6A45'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(107, 106, 69, 0.2)'">
-          <span style="position: relative; z-index: 1;">Contact Agent</span>
-          <span style="position: relative; z-index: 1;">→</span>
-        </a>
         {% endif %}
       </div>
     </div>
-  </section>
-  {% endif %}
-
-  <!-- MAIN AREA: TABS -->
-  <section class="equity-main">
-    <div class="equity-main-left">
-      <!-- TABS -->
-      <div class="equity-tabs">
-        <button type="button" class="tab active" data-tab="overview">Overview</button>
-        <button type="button" class="tab" data-tab="scenarios">Scenarios</button>
-        <button type="button" class="tab" data-tab="history">History</button>
-      </div>
-
-      <!-- TAB PANELS -->
-      <div class="tab-panels">
-        <!-- OVERVIEW: HOMEBOT INLINE -->
-        <div class="tab-panel active" id="tab-overview">
-          <h2>Live Equity Overview</h2>
-          <p class="panel-sub">
-            Use the tool below to view your current home value and equity.
-            Everything runs inside Your Life Your Home but is powered by your
-            agent's Homebot account.
-          </p>
-
-          <!-- Edit Loan Details Form -->
-          <div class="card" style="background: var(--light-cream); border: 2px solid var(--taupe-beige); margin-bottom: 2rem; padding: 2rem;">
-            <h3 style="margin: 0 0 1rem; color: var(--charcoal-brown); font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-              <span>✏️</span>
-              <span>Update Your Loan Details</span>
-            </h3>
-            <p style="margin: 0 0 1.5rem; color: #666; font-size: 0.95rem;">
-              If your home value or loan information needs correction, update it here. All numbers will automatically recalculate.
-            </p>
-            <form method="post" action="{{ url_for('homeowner_value_equity_overview') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-              <div>
-                <label for="value_estimate" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Home Value</label>
-                <input type="text" id="value_estimate" name="value_estimate" placeholder="e.g., 480,000" value="{% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-              </div>
-              <div>
-                <label for="loan_balance" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Balance</label>
-                <input type="text" id="loan_balance" name="loan_balance" placeholder="e.g., 275,000" value="{% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-              </div>
-              <div>
-                <label for="loan_rate" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Interest Rate (%)</label>
-                <input type="text" id="loan_rate" name="loan_rate" placeholder="e.g., 3.38" value="{% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-              </div>
-              <div>
-                <label for="loan_payment" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Monthly Payment</label>
-                <input type="text" id="loan_payment" name="loan_payment" placeholder="e.g., 2,450" value="{% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-              </div>
-              <div>
-                <label for="loan_term_years" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Term (Years)</label>
-                <select id="loan_term_years" name="loan_term_years" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;">
-                  <option value="">Select term</option>
-                  <option value="15" {% if snapshot and snapshot.loan_term_years == 15 %}selected{% endif %}>15 years</option>
-                  <option value="20" {% if snapshot and snapshot.loan_term_years == 20 %}selected{% endif %}>20 years</option>
-                  <option value="30" {% if snapshot and snapshot.loan_term_years == 30 %}selected{% endif %}>30 years</option>
-                </select>
-              </div>
-              <div>
-                <label for="loan_start_date" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Loan Start Date</label>
-                <input type="date" id="loan_start_date" name="loan_start_date" value="{% if snapshot and snapshot.loan_start_date %}{{ snapshot.loan_start_date }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-              </div>
-              <div>
-                <label for="property_tax_monthly" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Property Tax (Monthly)</label>
-                <input type="text" id="property_tax_monthly" name="property_tax_monthly" placeholder="e.g., 400" value="{% if snapshot and snapshot.property_tax_monthly %}{{ snapshot.property_tax_monthly|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-                <small style="color: #666; font-size: 0.8rem;">Monthly property tax amount</small>
-              </div>
-              <div>
-                <label for="homeowners_insurance_monthly" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Insurance (Monthly)</label>
-                <input type="text" id="homeowners_insurance_monthly" name="homeowners_insurance_monthly" placeholder="e.g., 150" value="{% if snapshot and snapshot.homeowners_insurance_monthly %}{{ snapshot.homeowners_insurance_monthly|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-                <small style="color: #666; font-size: 0.8rem;">Monthly homeowners insurance</small>
-              </div>
-              <div>
-                <label for="pmi_monthly" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">PMI (Monthly)</label>
-                <input type="text" id="pmi_monthly" name="pmi_monthly" placeholder="e.g., 0 or 200" value="{% if snapshot and snapshot.pmi_monthly %}{{ snapshot.pmi_monthly|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-                <small style="color: #666; font-size: 0.8rem;">PMI if LTV > 80% (usually 0.5-1% of loan/year)</small>
-              </div>
-              <div style="grid-column: 1 / -1; margin-top: 0.5rem;">
-                <button type="submit" class="action-btn" style="width: auto; padding: 1rem 2rem;">
-                  Save Changes
-                </button>
-              </div>
-            </form>
-            <script>
-              // Ensure form submission works
-              document.addEventListener('DOMContentLoaded', function() {
-                var form = document.querySelector('form[method="post"][action*="equity-overview"]');
-                if (form) {
-                  console.log('[FORM] Found loan details form');
-                  
-                  form.addEventListener('submit', function(e) {
-                    console.log('[FORM] Form submitting...');
-                    var formData = new FormData(form);
-                    var data = {};
-                    for (var pair of formData.entries()) {
-                      data[pair[0]] = pair[1];
-                    }
-                    console.log('[FORM] Form data being submitted:', data);
-                    // Don't prevent default - let it submit normally
-                  });
-                  
-                  // Also add click handler to submit button for debugging
-                  var submitBtn = form.querySelector('button[type="submit"]');
-                  if (submitBtn) {
-                    submitBtn.addEventListener('click', function(e) {
-                      console.log('[FORM] Submit button clicked');
-                      // Don't prevent default
-                    });
-                  }
-                } else {
-                  console.error('[FORM] Loan details form not found!');
-                }
-              });
-            </script>
-          </div>
-
-        </div>
-
-        <!-- SCENARIOS -->
-        <div class="tab-panel" id="tab-scenarios">
-          <h2>What-If Scenarios</h2>
-          <p class="panel-sub">
-            Play with different strategies: extra payments, cash-out, or a future move.
-            These tools use your latest value and loan data as a starting point.
-          </p>
-
-          <!-- Current Market Rates Notice -->
-          <div style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); border: 2px solid var(--olive-green); border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 2rem;">
-            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-              <span style="font-size: 2rem;">📊</span>
-              <div style="flex: 1;">
-                <h3 style="margin: 0; color: var(--olive-green); font-size: 1.25rem; font-weight: 600;">Current Market Rates</h3>
-                <p style="margin: 0.25rem 0 0; color: var(--charcoal-brown); font-size: 0.9rem;">
-                  {% if professional_info %}
-                    Rates set by your {{ 'lender' if professional_info.role == 'lender' else 'professional' }}
-                  {% else %}
-                    Current 30-year fixed rates
-                  {% endif %}
-                </p>
-              </div>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
-              <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--taupe-beige);">
-                <div style="font-size: 0.7rem; text-transform: uppercase; color: #666; margin-bottom: 0.5rem;">Conventional</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: var(--olive-green);">{{ "{:.2f}".format(market_rates.conventional_rate_30yr) }}%</div>
-              </div>
-              <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--taupe-beige);">
-                <div style="font-size: 0.7rem; text-transform: uppercase; color: #666; margin-bottom: 0.5rem;">FHA</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: var(--olive-green);">{{ "{:.2f}".format(market_rates.fha_rate_30yr) }}%</div>
-              </div>
-              <div style="background: white; padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--taupe-beige);">
-                <div style="font-size: 0.7rem; text-transform: uppercase; color: #666; margin-bottom: 0.5rem;">VA</div>
-                <div style="font-size: 1.5rem; font-weight: 700; color: var(--olive-green);">{{ "{:.2f}".format(market_rates.va_rate_30yr) }}%</div>
-              </div>
-            </div>
-            <p style="margin: 0.5rem 0 0; color: #666; font-size: 0.9rem; line-height: 1.6;">
-              <strong>Important:</strong> These rates are for 30-year fixed-rate mortgages and are updated weekly. Your existing loan rate remains unchanged. 
-              <strong>Cash-out refinancing, HELOCs, and other loan products may have different rates.</strong> Please speak with your lender to determine the best rate and terms for your specific situation.
-            </p>
-          </div>
-
-          <div class="scenario-grid">
-            <div class="scenario-card">
-              <h3>Payoff Faster</h3>
-              <p>Add an extra principal payment and see how much sooner you could be debt-free and how much interest you'd save.</p>
-              <label>Extra per month: <span id="payoff-amount-display">$0</span></label>
-              <input type="range" min="0" max="1000" step="50" value="0"
-                     class="scenario-slider" data-scenario="payoff" id="payoff-slider">
-              <div class="scenario-value-display" data-output="payoff"></div>
-              <p class="scenario-output" data-output="payoff">
-                Drag the slider to see your payoff timeline and interest savings.
-              </p>
-              <div class="scenario-details" data-details="payoff"></div>
-            </div>
-
-            <div class="scenario-card">
-              <h3>Cash-Out Equity</h3>
-              <p>See how much cash you could access while keeping a comfortable payment. Cash-out refinancing lets you borrow against your equity.</p>
-              <p style="font-size: 0.85rem; color: #666; margin: 0.5rem 0; font-style: italic;">
-                💡 Calculations use current market rate of <strong>6.1%</strong> for new financing
-              </p>
-              <label>Target cash-out amount: <span id="cashout-amount-display">$0</span></label>
-              <input type="range" min="0" max="200000" step="10000" value="0"
-                     class="scenario-slider" data-scenario="cashout" id="cashout-slider">
-              <div class="scenario-value-display" data-output="cashout"></div>
-              <p class="scenario-output" data-output="cashout">
-                Drag the slider to explore cash-out options.
-              </p>
-              <div class="scenario-details" data-details="cashout"></div>
-            </div>
-
-            <div class="scenario-card">
-              <h3>Stay vs. Move</h3>
-              <p>Compare using equity to upgrade this home vs. roll it into a new one.</p>
-              <button class="linkish" type="button" onclick="window.location.href='{{ url_for('homeowner_next_plan_move') }}'">
-                Start a "Stay vs Move" comparison →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- HISTORY -->
-        <div class="tab-panel" id="tab-history">
-          <h2>Value & Equity Over Time</h2>
-          <p class="panel-sub">
-            Track how your home value, loan balance, and equity have changed over time.
-          </p>
-
-          <div class="history-layout">
-            <div class="chart-card">
-              <h3>Value vs Balance Over Time</h3>
-              {% if snapshot_history and snapshot_history|length > 0 %}
-              <div class="chart-container" style="margin-top: 1.5rem; position: relative; height: 300px;">
-                <canvas id="equityChart"></canvas>
-              </div>
-              <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-              <script>
-                // eslint-disable-next-line
-                (function() {
-                  // Template variable - will be replaced by Jinja2
-                  const historyData = {{ snapshot_history|tojson|safe if snapshot_history else '[]' }};
-                  if (historyData && Array.isArray(historyData) && historyData.length > 0) {
-                    const ctx = document.getElementById('equityChart');
-                    if (ctx) {
-                      const dates = historyData.map(h => {
-                        const d = h.snapshot_date ? h.snapshot_date.substring(0, 10) : '';
-                        return d || '—';
-                      }).reverse();
-                      const values = historyData.map(h => h.value_estimate || 0).reverse();
-                      const balances = historyData.map(h => h.loan_balance || 0).reverse();
-                      const equities = historyData.map(h => {
-                        if (h.equity_estimate) return h.equity_estimate;
-                        if (h.value_estimate && h.loan_balance) return h.value_estimate - h.loan_balance;
-                        return 0;
-                      }).reverse();
-                      
-                      new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                          labels: dates,
-                          datasets: [
-                            {
-                              label: 'Home Value',
-                              data: values,
-                              borderColor: '#6B6A45',
-                              backgroundColor: 'rgba(107, 106, 69, 0.1)',
-                              tension: 0.4,
-                              fill: false
-                            },
-                            {
-                              label: 'Loan Balance',
-                              data: balances,
-                              borderColor: '#C8B497',
-                              backgroundColor: 'rgba(200, 180, 151, 0.1)',
-                              tension: 0.4,
-                              fill: false
-                            },
-                            {
-                              label: 'Equity',
-                              data: equities,
-                              borderColor: '#5A6D47',
-                              backgroundColor: 'rgba(90, 109, 71, 0.1)',
-                              tension: 0.4,
-                              fill: true
-                            }
-                          ]
-                        },
-                        options: {
-                          responsive: true,
-                          maintainAspectRatio: false,
-                          plugins: {
-                            legend: {
-                              position: 'bottom',
-                              labels: {
-                                font: { family: 'inherit', size: 12 },
-                                color: '#3A352C'
-                              }
-                            },
-                            tooltip: {
-                              mode: 'index',
-                              intersect: false,
-                              callbacks: {
-                                label: function(context) {
-                                  return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
-                                }
-                              }
-                            }
-                          },
-                          scales: {
-                            y: {
-                              beginAtZero: false,
-                              ticks: {
-                                callback: function(value) {
-                                  return '$' + value.toLocaleString();
-                                },
-                                font: { size: 11 },
-                                color: '#666'
-                              },
-                              grid: {
-                                color: 'rgba(200, 180, 151, 0.2)'
-                              }
-                            },
-                            x: {
-                              ticks: {
-                                font: { size: 10 },
-                                color: '#666',
-                                maxRotation: 45,
-                                minRotation: 45
-                              },
-                              grid: {
-                                display: false
-                              }
-                            }
-                          }
-                        }
-                      });
-                    }
-                  }
-                })();
-              </script>
-              {% else %}
-              <div class="chart-placeholder">
-                <p>Chart will appear here once you have historical data.</p>
-                <p style="font-size: 0.85rem; margin-top: 0.5rem; color: #999;">
-                  Historical snapshots are created automatically when you update your loan details.
-                </p>
-              </div>
-              {% endif %}
-            </div>
-
-            <div class="history-list">
-              <h3>Monthly Snapshots</h3>
-              <ul>
-                {% if snapshot_history and snapshot_history|length > 0 %}
-                  {% for hist in snapshot_history %}
-                  <li>
-                    <span class="snap-date">{{ hist.snapshot_date[:10] if hist.snapshot_date and hist.snapshot_date|length > 10 else (hist.snapshot_date or '—') }}</span>
-                    <span class="snap-value">
-                      {% if hist.value_estimate %}
-                        ${{ "{:,.0f}".format(hist.value_estimate) }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </span>
-                    <span class="snap-equity">
-                      {% if hist.equity_estimate %}
-                        ${{ "{:,.0f}".format(hist.equity_estimate) }}
-                      {% elif hist.value_estimate and hist.loan_balance %}
-                        ${{ "{:,.0f}".format(hist.value_estimate - hist.loan_balance) }}
-                      {% else %}
-                        —
-                      {% endif %}
-                    </span>
-                  </li>
-                  {% endfor %}
-                {% elif snapshot and snapshot.updated_at %}
-                <li>
-                  <span class="snap-date">{{ snapshot.updated_at[:10] if snapshot.updated_at|length > 10 else snapshot.updated_at }}</span>
-                  <span class="snap-value">
-                    {% if snapshot.value_estimate %}
-                      ${{ "{:,.0f}".format(snapshot.value_estimate) }}
-                    {% else %}
-                      —
-                    {% endif %}
-                  </span>
-                  <span class="snap-equity">
-                    {% if snapshot.equity_estimate %}
-                      ${{ "{:,.0f}".format(snapshot.equity_estimate) }}
-                    {% elif snapshot.value_estimate and snapshot.loan_balance %}
-                      ${{ "{:,.0f}".format(snapshot.value_estimate - snapshot.loan_balance) }}
-                    {% else %}
-                      —
-                    {% endif %}
-                  </span>
-                </li>
-                {% else %}
-                <li>No history yet. Your first snapshot will appear after your next update.</li>
-                {% endif %}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT SIDEBAR: MARKET RATES -->
-    <aside class="equity-main-right">
-      <div class="info-card" style="background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%); border: 2px solid var(--olive-green); margin-bottom: 1.5rem;">
-        <h3 style="color: var(--olive-green); margin-bottom: 1rem; font-size: 1.3rem; font-weight: 600; text-align: center;">📊 Current Market Rates</h3>
-        <p style="margin: 0 0 1rem; font-size: 0.85rem; color: #666; line-height: 1.5; text-align: center;">
-          {% if professional_info %}
-            Rates set by your {{ 'lender' if professional_info.role == 'lender' else 'professional' }}
-          {% else %}
-            Current market rates (30-year fixed)
-          {% endif %}
-        </p>
-        
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--taupe-beige); text-align: center;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 0.25rem;">Conventional</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--olive-green);">
-              {{ "{:.2f}".format(market_rates.conventional_rate_30yr) }}%
-            </div>
-            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">30-year fixed</div>
-          </div>
-          
-          <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--taupe-beige); text-align: center;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 0.25rem;">FHA</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--olive-green);">
-              {{ "{:.2f}".format(market_rates.fha_rate_30yr) }}%
-            </div>
-            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">30-year fixed</div>
-          </div>
-          
-          <div style="background: white; padding: 1rem; border-radius: 8px; border: 1px solid var(--taupe-beige); text-align: center;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 0.25rem;">VA</div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--olive-green);">
-              {{ "{:.2f}".format(market_rates.va_rate_30yr) }}%
-            </div>
-            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">30-year fixed</div>
-          </div>
-        </div>
-        
-        <p style="margin: 1rem 0 0; font-size: 0.85rem; color: #666; line-height: 1.5; text-align: center; padding-top: 1rem; border-top: 1px solid rgba(200, 180, 151, 0.3);">
-          <strong>Note:</strong> These rates are for 30-year fixed-rate mortgages and are updated weekly. Your existing loan rate remains unchanged. 
-          <strong>Cash-out refinancing, HELOCs, and other loan products may have different rates.</strong> Please speak with your lender to determine the best rate and terms for your specific situation.
-        </p>
-      </div>
-
-      <div class="edu-card">
-        <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
-          <h4>
-            <span>📚</span>
-            <span>How This Works</span>
-          </h4>
-          <span class="edu-card-toggle">▼</span>
-    </div>
-        <div class="edu-card-content">
-          <p>
-            <strong>Homebot Integration:</strong> Homebot automatically tracks your home's value and equity in the background using real estate data and market trends.
-      </p>
-      <p>
-            <strong>Your Dashboard:</strong> Your Life Your Home turns that data into an interactive dashboard with tools from your agent and lender, all in one place.
-          </p>
-          <p>
-            <strong>Monthly Updates:</strong> Your equity numbers update monthly, so you always know where you stand without having to check multiple sources.
-          </p>
-    </div>
-      </div>
-
-      <div class="edu-card">
-        <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
-          <h4>
-            <span>🔒</span>
-            <span>Data Ownership & Privacy</span>
-          </h4>
-          <span class="edu-card-toggle">▼</span>
-        </div>
-        <div class="edu-card-content">
-          <p>
-            {% if professional_info and professional_info.name %}
-            Your equity experience is tied to {{ professional_info.name }}'s Homebot account,
-            {% else %}
-            Your equity experience is tied to your agent's Homebot account,
-  {% endif %}
-            so your relationship stays directly with your trusted pro — not with a portal.
-          </p>
-          <p>
-            <strong>Your Data:</strong> All your home value and equity information is private and only shared with your real estate professional. We never sell your data.
-          </p>
-        </div>
-</div>
-
-      <div class="edu-card">
-        <div class="edu-card-header" onclick="this.parentElement.classList.toggle('expanded')">
-          <h4>
-            <span>💡</span>
-            <span>Understanding Equity</span>
-          </h4>
-          <span class="edu-card-toggle">▼</span>
-        </div>
-        <div class="edu-card-content">
-          <p>
-            <strong>What is Equity?</strong> Equity is the portion of your home you actually own. It grows as you pay down your mortgage and as your home's value increases.
-          </p>
-          <p>
-            <strong>How to Use Equity:</strong>
-          </p>
-          <ul>
-            <li><strong>Renovations:</strong> Use equity to fund home improvements that increase value</li>
-            <li><strong>Debt Consolidation:</strong> Refinance to pay off high-interest debt</li>
-            <li><strong>Investments:</strong> Use equity for other investments or opportunities</li>
-            <li><strong>Next Home:</strong> Use equity as a down payment on your next property</li>
-          </ul>
-          <p>
-            <strong>Talk to Your Pro:</strong> Always consult with your lender or agent before making equity decisions. They can help you understand the best options for your situation.
-          </p>
-        </div>
-      </div>
-    </aside>
-  </section>
-</section>
-
-<script>
-  // Tab switching function - MUST be defined before any onclick handlers
-  // This function is called directly from the tab buttons' onclick attributes
-  window.switchTab = function(tabName, clickedButton) {
-    console.log('[TABS] switchTab called:', tabName, clickedButton);
-    
-    // Remove active from all tabs
-    document.querySelectorAll(".equity-tabs .tab").forEach((t) => {
-      t.classList.remove("active");
-    });
-    
-    // Hide all panels
-    document.querySelectorAll(".tab-panel").forEach((p) => {
-      p.classList.remove("active");
-      p.style.display = 'none';
-    });
-    
-    // Add active to clicked tab
-    if (clickedButton) {
-      clickedButton.classList.add("active");
-    } else {
-      const tab = document.querySelector(`.equity-tabs .tab[data-tab="${tabName}"]`);
-      if (tab) tab.classList.add("active");
-    }
-    
-    // Show corresponding panel
-    const targetPanel = document.getElementById("tab-" + tabName);
-    if (targetPanel) {
-      targetPanel.classList.add("active");
-      targetPanel.style.display = 'block';
-      console.log('[TABS] Activated panel:', targetPanel.id);
-    } else {
-      console.error('[TABS] Panel not found: tab-' + tabName);
-    }
-    
-    return false;
-  };
-</script>
-
-{% if homebot_widget_id %}
-<script>
-  // CRITICAL: Isolate Homebot widget from any page-level click handlers
-  (function() {
-    'use strict';
-    
-    var widgetContainer = document.getElementById('homebot_homeowner');
-    var widgetSection = document.querySelector('.homebot-widget-container');
-    
-    if (widgetContainer) {
-      widgetContainer.setAttribute('data-homebot-widget', 'true');
-      if (widgetSection) {
-        widgetSection.setAttribute('data-homebot-widget', 'true');
-      }
-      
-      ['click', 'mousedown', 'mouseup', 'submit', 'focusin', 'focusout'].forEach(function(eventType) {
-        widgetContainer.addEventListener(eventType, function(e) {
-          e.stopPropagation();
-        }, true);
-      });
-    }
-  })();
-
-  // Homebot embed code
-  (function (h, b) {
-    var w = window, d = document, s = 'script', x, y;
-    w['_hb_namespace'] = h;
-    w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
-    y = d.createElement(s); 
-    x = d.getElementsByTagName(s)[0];
-    y.async = 1;
-    y.src = 'https://embed.homebotapp.com/lgw/v1/widget.js';
-    x.parentNode.insertBefore(y, x);
-  })('Homebot');
-  
-  // Initialize widget
-  (function() {
-    // Template variable - will be replaced by Jinja2
-    // eslint-disable-next-line
-    var widgetId = '{{ homebot_widget_id|e }}';
-    widgetId = widgetId.trim();
-    
-    if (widgetId.indexOf('<') !== -1 || widgetId.indexOf('&lt;') !== -1) {
-      var idMatch = widgetId.match(/['"]([a-f0-9]{40,})['"]/);
-      if (idMatch) {
-        widgetId = idMatch[1];
-      } else {
-        console.error('[HOMEBOT] ❌ Could not extract valid widget ID');
-        return;
-      }
-    }
-    
-    var container = '#homebot_homeowner';
-    var maxAttempts = 50;
-    var attempts = 0;
-    
-    function initHomebot() {
-      attempts++;
-      
-      if (typeof window.Homebot === 'function') {
-        try {
-        window.Homebot(container, widgetId);
-          
-          setTimeout(function() {
-            var containerEl = document.querySelector(container);
-            if (containerEl) {
-              var iframe = containerEl.querySelector('iframe');
-              if (iframe) {
-                iframe.style.pointerEvents = 'auto';
-                iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; geolocation');
-                iframe.setAttribute('allowfullscreen', 'true');
-                iframe.style.cssText += 'pointer-events: auto !important;';
-                
-                // Remove skeleton loader
-                var skeleton = containerEl.querySelector('.homebot-skeleton');
-                if (skeleton) {
-                  skeleton.style.display = 'none';
-                }
-              }
-            }
-          }, 2000);
-        } catch (error) {
-          console.error('[HOMEBOT] Error:', error);
-        }
-      } else if (window.Homebot && Array.isArray(window.Homebot.q)) {
-        if (attempts < maxAttempts) {
-          setTimeout(initHomebot, 100);
-        }
-      } else if (attempts < maxAttempts) {
-        setTimeout(initHomebot, 100);
-      }
-    }
-    
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(initHomebot, 800);
-      });
-    } else {
-      setTimeout(initHomebot, 800);
-    }
-  })();
-</script>
-{% endif %}
-
-<script>
-  // Tab switching - backup event listeners (in case onclick doesn't work)
-  (function() {
-    function initTabs() {
-      const tabs = document.querySelectorAll(".equity-tabs .tab");
-      const panels = document.querySelectorAll(".tab-panel");
-      
-      if (tabs.length === 0 || panels.length === 0) {
-        console.log('[TABS] Tabs or panels not found, retrying...');
-        setTimeout(initTabs, 100);
-        return;
-      }
-      
-      console.log('[TABS] Initializing tab switching for', tabs.length, 'tabs');
-      
-      tabs.forEach((tab) => {
-        // Remove any existing listeners by cloning
-        const newTab = tab.cloneNode(true);
-        tab.parentNode.replaceChild(newTab, tab);
-        
-        // Add fresh event listener
-        newTab.addEventListener("click", function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          e.stopImmediatePropagation();
-          
-          const target = newTab.dataset.tab;
-          console.log('[TABS] Tab clicked:', target, 'Element:', newTab);
-          
-          if (!target) {
-            console.error('[TABS] No data-tab attribute found on', newTab);
-            return false;
-          }
-          
-          // Call the switchTab function
-          if (window.switchTab) {
-            window.switchTab(target, newTab);
-          } else {
-            // Fallback if switchTab not available
-            // Remove active from all tabs
-            document.querySelectorAll(".equity-tabs .tab").forEach((t) => {
-              t.classList.remove("active");
-            });
-            
-            // Remove active from all panels
-            document.querySelectorAll(".tab-panel").forEach((p) => {
-              p.classList.remove("active");
-              p.style.display = 'none';
-            });
-            
-            // Add active to clicked tab
-            newTab.classList.add("active");
-            
-            // Show corresponding panel
-            const targetPanel = document.getElementById("tab-" + target);
-            if (targetPanel) {
-              targetPanel.classList.add("active");
-              targetPanel.style.display = 'block';
-              console.log('[TABS] Activated panel:', targetPanel.id);
-            } else {
-              console.error('[TABS] Panel not found: tab-' + target);
-            }
-          }
-          
-          return false;
-        }, false); // Use bubble phase, not capture
-      });
-      
-      console.log('[TABS] Tab event listeners attached');
-    }
-    
-    // Try multiple times to ensure it runs
-    function tryInit() {
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-          setTimeout(initTabs, 50);
-        });
-      } else {
-        setTimeout(initTabs, 50);
-      }
-    }
-    
-    tryInit();
-    // Also try after a delay in case DOM isn't fully ready
-    setTimeout(tryInit, 500);
-    setTimeout(tryInit, 1000);
-    setTimeout(tryInit, 2000);
-  })();
-
-  // Scenario sliders with real calculations (Homebot-style formulas)
-  function calculatePayoff(extraPayment, loanBalance, interestRate, monthlyPayment, loanTermYears, loanStartDate) {
-    if (!loanBalance || !interestRate || !monthlyPayment || loanBalance <= 0) {
-      return { years: 0, months: 0, interestSaved: 0, newPayment: monthlyPayment, yearsSaved: 0, origPayoffYears: 0, origPayoffMonths: 0 };
-    }
-    
-    const monthlyRate = interestRate / 100 / 12;
-    
-    // Calculate remaining term based on loan start date and term (Homebot-style)
-    let remainingMonths = 360; // Default 30 years
-    if (loanTermYears && loanStartDate) {
-      const startDate = new Date(loanStartDate);
-      const today = new Date();
-      const monthsElapsed = (today.getFullYear() - startDate.getFullYear()) * 12 + (today.getMonth() - startDate.getMonth());
-      const totalMonths = loanTermYears * 12;
-      remainingMonths = Math.max(1, totalMonths - monthsElapsed);
-    } else if (loanTermYears) {
-      remainingMonths = loanTermYears * 12;
-    }
-    
-    // Calculate payoff with extra payment
-    let balance = loanBalance;
-    let totalInterest = 0;
-    let months = 0;
-    const totalPayment = monthlyPayment + extraPayment;
-    
-    while (balance > 0.01 && months < remainingMonths + 60) {
-      const interestPayment = balance * monthlyRate;
-      const principalPayment = Math.min(totalPayment - interestPayment, balance);
-      balance -= principalPayment;
-      totalInterest += interestPayment;
-      months++;
-      if (balance <= 0.01) break;
-    }
-    
-    // Calculate original payoff (without extra payment)
-    let origBalance = loanBalance;
-    let origMonths = 0;
-    let origInterest = 0;
-    while (origBalance > 0.01 && origMonths < remainingMonths + 60) {
-      const origInterestPayment = origBalance * monthlyRate;
-      const origPrincipalPayment = Math.min(monthlyPayment - origInterestPayment, origBalance);
-      origBalance -= origPrincipalPayment;
-      origInterest += origInterestPayment;
-      origMonths++;
-      if (origBalance <= 0.01) break;
-    }
-    
-    return {
-      years: Math.floor(months / 12),
-      months: months % 12,
-      interestSaved: Math.max(0, origInterest - totalInterest),
-      newPayment: totalPayment,
-      yearsSaved: Math.max(0, Math.floor((origMonths - months) / 12)),
-      origPayoffYears: Math.floor(origMonths / 12),
-      origPayoffMonths: origMonths % 12
-    };
-  }
-
-  function calculateCashOut(cashOutAmount, currentBalance, interestRate, currentPayment, homeValue, loanTermYears, loanStartDate, propertyTaxMonthly, insuranceMonthly, currentPMI) {
-    if (!cashOutAmount || cashOutAmount <= 0) {
-      return { 
-        newBalance: currentBalance, 
-        newPaymentPI: currentPayment, 
-        newPaymentTotal: currentPayment,
-        newLTV: 0, 
-        paymentIncrease: 0,
-        newPMI: currentPMI || 0
-      };
-    }
-    
-    const newBalance = currentBalance + cashOutAmount;
-    const newLTV = (newBalance / homeValue) * 100;
-    
-    // IMPORTANT: Cash-out refinancing is a NEW loan with a NEW term
-    // Don't use remaining term from old loan - use full new loan term (typically 30 years)
-    // This ensures the payment calculation is correct for a fresh refinance
-    const newLoanTermYears = 30; // Standard for cash-out refinancing
-    const newLoanTermMonths = newLoanTermYears * 12;
-    
-    // Calculate new Principal & Interest (P&I) payment using amortization formula for the NEW loan
-    const monthlyRate = interestRate / 100 / 12;
-    const newPaymentPI = newBalance * (monthlyRate * Math.pow(1 + monthlyRate, newLoanTermMonths)) / 
-                      (Math.pow(1 + monthlyRate, newLoanTermMonths) - 1);
-    
-    // Calculate new PMI (typically required if LTV > 80%)
-    // PMI is usually 0.5% to 1% of the loan amount per year, divided by 12
-    let newPMI = 0;
-    if (newLTV > 80) {
-      // Use 0.75% of loan amount per year as average PMI rate
-      newPMI = (newBalance * 0.0075) / 12;
-    }
-    
-    // Property taxes and insurance typically stay the same (or increase slightly with higher value)
-    // For now, we'll use the same amounts, but they could increase if the home value assessment goes up
-    const newPropertyTax = propertyTaxMonthly || 0;
-    const newInsurance = insuranceMonthly || 0;
-    
-    // Calculate total monthly payment (PITI: Principal, Interest, Taxes, Insurance, PMI)
-    const newPaymentTotal = newPaymentPI + newPropertyTax + newInsurance + newPMI;
-    
-    // Calculate current total payment (if we have the breakdown)
-    // If current payment seems to be P&I only, add taxes/insurance/PMI
-    const currentTotalPayment = currentPayment + (propertyTaxMonthly || 0) + (insuranceMonthly || 0) + (currentPMI || 0);
-    
-    return {
-      newBalance: newBalance,
-      newPaymentPI: newPaymentPI,
-      newPaymentTotal: newPaymentTotal,
-      newLTV: newLTV,
-      paymentIncrease: newPaymentTotal - currentTotalPayment,
-      newPMI: newPMI,
-      propertyTax: newPropertyTax,
-      insurance: newInsurance
-    };
-  }
-
-  // Get snapshot data from page
-  // Template variables below will be replaced by Jinja2 before JavaScript execution
-  /* eslint-disable */
-  const snapshotData = {
-    loanBalance: {% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance }}{% else %}0{% endif %},
-    valueEstimate: {% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate }}{% else %}0{% endif %},
-    loanRate: {% if snapshot and snapshot.loan_rate %}{{ snapshot.loan_rate }}{% else %}6.1{% endif %},
-    currentMarketRate: {{ market_rates.conventional_rate_30yr }}, // Current market rate for new loans (Conventional default)
-    marketRates: {
-      conventional: {{ market_rates.conventional_rate_30yr }},
-      fha: {{ market_rates.fha_rate_30yr }},
-      va: {{ market_rates.va_rate_30yr }}
-    },
-    loanPayment: {% if snapshot and snapshot.loan_payment %}{{ snapshot.loan_payment }}{% else %}0{% endif %},
-    loanTermYears: {% if snapshot and snapshot.loan_term_years %}{{ snapshot.loan_term_years }}{% else %}30{% endif %},
-    loanStartDate: {% if snapshot and snapshot.loan_start_date %}'{{ snapshot.loan_start_date|e }}'{% else %}null{% endif %},
-    propertyTaxMonthly: {% if snapshot and snapshot.property_tax_monthly %}{{ snapshot.property_tax_monthly }}{% else %}0{% endif %},
-    insuranceMonthly: {% if snapshot and snapshot.homeowners_insurance_monthly %}{{ snapshot.homeowners_insurance_monthly }}{% else %}0{% endif %},
-    pmiMonthly: {% if snapshot and snapshot.pmi_monthly %}{{ snapshot.pmi_monthly }}{% else %}0{% endif %}
-  };
-  /* eslint-enable */
-
-  document.querySelectorAll(".scenario-slider").forEach((slider) => {
-    const type = slider.dataset.scenario;
-    const amountDisplay = document.getElementById(type + '-amount-display');
-    const valueDisplay = document.querySelector('.scenario-value-display[data-output="' + type + '"]');
-    const output = document.querySelector('.scenario-output[data-output="' + type + '"]');
-    const details = document.querySelector('.scenario-details[data-details="' + type + '"]');
-    
-    slider.addEventListener("input", (e) => {
-      const value = Number(slider.value);
-      
-      if (amountDisplay) {
-        amountDisplay.textContent = '$' + value.toLocaleString();
-      }
-      
-      if (type === "payoff" && snapshotData.loanBalance > 0) {
-        const result = calculatePayoff(
-          value,
-          snapshotData.loanBalance,
-          snapshotData.loanRate || snapshotData.currentMarketRate || snapshotData.marketRates?.conventional || 6.1,
-          snapshotData.loanPayment || 2000,
-          snapshotData.loanTermYears || 30,
-          snapshotData.loanStartDate
-        );
-        
-        if (value > 0 && result.years > 0) {
-          valueDisplay.innerHTML = '<strong style="color: var(--olive-green);">Pay off ' + 
-            (result.yearsSaved > 0 ? result.yearsSaved + ' years earlier' : 'faster') + '</strong>';
-          
-          output.textContent = 'With $' + value.toLocaleString() + ' extra per month:';
-          
-          details.innerHTML = 
-            '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
-            '<p style="margin: 0.25rem 0;"><strong>Current payoff:</strong> ' + result.origPayoffYears + ' years, ' + result.origPayoffMonths + ' months</p>' +
-            '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>New payoff:</strong> ' + result.years + ' years, ' + result.months + ' months</p>' +
-            '<p style="margin: 0.25rem 0; color: var(--olive-green);"><strong>Interest saved:</strong> $' + 
-            Math.round(result.interestSaved).toLocaleString() + '</p>' +
-            '<p style="margin: 0.25rem 0; font-size: 0.8rem; color: #999;">New monthly payment: $' + 
-            Math.round(result.newPayment).toLocaleString() + '/month</p>' +
-            '</div>';
-        } else {
-          valueDisplay.textContent = '';
-          output.textContent = 'Drag the slider to see your payoff timeline and interest savings.';
-          details.innerHTML = '';
-        }
-      } else if (type === "cashout" && snapshotData.valueEstimate > 0) {
-        const maxCashOut = Math.max(0, (snapshotData.valueEstimate * 0.8) - snapshotData.loanBalance);
-        const actualCashOut = Math.min(value, maxCashOut);
-        
-        if (actualCashOut > 0 && snapshotData.loanBalance > 0) {
-          // Use current market rate (Conventional default) for cash-out refinancing, not existing loan rate
-          const cashOutRate = snapshotData.currentMarketRate || snapshotData.marketRates?.conventional || 6.1;
-          const result = calculateCashOut(
-            actualCashOut,
-            snapshotData.loanBalance,
-            cashOutRate, // Always use current market rate for new financing
-            snapshotData.loanPayment || 2000,
-            snapshotData.valueEstimate,
-            snapshotData.loanTermYears || 30,
-            snapshotData.loanStartDate,
-            snapshotData.propertyTaxMonthly || 0,
-            snapshotData.insuranceMonthly || 0,
-            snapshotData.pmiMonthly || 0
-          );
-          
-          valueDisplay.innerHTML = '<strong style="color: var(--olive-green);">Access $' + 
-            actualCashOut.toLocaleString() + ' in cash</strong>';
-          
-          output.textContent = 'Cash-out refinance scenario:';
-          
-          // Calculate current total payment
-          const currentTotal = (snapshotData.loanPayment || 0) + (snapshotData.propertyTaxMonthly || 0) + (snapshotData.insuranceMonthly || 0) + (snapshotData.pmiMonthly || 0);
-          
-          const paymentChange = result.paymentIncrease > 0 ? '+' : '';
-          const paymentChangeColor = result.paymentIncrease > 0 ? '#d32f2f' : 'var(--olive-green)';
-          
-          details.innerHTML = 
-            '<div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--taupe-beige);">' +
-            '<p style="margin: 0.25rem 0;"><strong>New loan balance:</strong> $' + 
-            Math.round(result.newBalance).toLocaleString() + '</p>' +
-            '<p style="margin: 0.25rem 0;"><strong>New LTV:</strong> ' + 
-            result.newLTV.toFixed(1) + '%' + (result.newLTV > 80 ? ' (PMI required)' : '') + '</p>' +
-            '<p style="margin: 0.5rem 0 0.25rem; padding-top: 0.5rem; border-top: 1px solid rgba(200, 180, 151, 0.2);"><strong style="color: var(--charcoal-brown);">Current Total Payment:</strong></p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Principal & Interest: $' + 
-            Math.round(snapshotData.loanPayment || 0).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Property Tax: $' + 
-            Math.round(snapshotData.propertyTaxMonthly || 0).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Insurance: $' + 
-            Math.round(snapshotData.insuranceMonthly || 0).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">PMI: $' + 
-            Math.round(snapshotData.pmiMonthly || 0).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.25rem 0 0.5rem; font-weight: 600;"><strong>Total: $' + 
-            Math.round(currentTotal).toLocaleString() + '/month</strong></p>' +
-            '<p style="margin: 0.5rem 0 0.25rem; padding-top: 0.5rem; border-top: 1px solid rgba(200, 180, 151, 0.2);"><strong style="color: ' + paymentChangeColor + ';">New Total Payment:</strong></p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Principal & Interest: $' + 
-            Math.round(result.newPaymentPI).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Property Tax: $' + 
-            Math.round(result.propertyTax).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">Insurance: $' + 
-            Math.round(result.insurance).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.15rem 0; font-size: 0.9rem; padding-left: 1rem;">PMI: $' + 
-            Math.round(result.newPMI).toLocaleString() + '/month</p>' +
-            '<p style="margin: 0.25rem 0; color: ' + paymentChangeColor + '; font-weight: 600;"><strong>Total: $' + 
-            Math.round(result.newPaymentTotal).toLocaleString() + '/month (' + paymentChange + '$' + Math.round(Math.abs(result.paymentIncrease)).toLocaleString() + ' change)</strong></p>' +
-            '<p style="margin: 0.5rem 0 0; font-size: 0.8rem; color: #999; font-style: italic;">' +
-            'Note: Calculations use current market rate of 6.1%. P&I calculated on new 30-year loan. Taxes and insurance assumed same as current. PMI applies if LTV > 80%. Actual terms depend on your credit, loan-to-value ratio, and lender. Talk to your lender for exact numbers.</p>' +
-            '</div>';
-        } else if (value > maxCashOut) {
-          valueDisplay.innerHTML = '<strong style="color: #d32f2f;">Maximum available: $' + 
-            Math.round(maxCashOut).toLocaleString() + '</strong>';
-          output.textContent = 'You can typically access up to 80% of your home\'s value minus your current loan.';
-          details.innerHTML = '';
-        } else {
-          valueDisplay.textContent = '';
-          output.textContent = 'Drag the slider to explore cash-out options.';
-          details.innerHTML = '';
-        }
-      }
-    });
-  });
-
-  // Animate numbers on page load
-  function animateValue(element, start, end, duration) {
-    let startTimestamp = null;
-    const step = (timestamp) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const current = Math.floor(progress * (end - start) + start);
-      if (element.textContent.includes('$')) {
-        element.textContent = '$' + current.toLocaleString();
-      } else if (element.textContent.includes('%')) {
-        element.textContent = (current / 100).toFixed(1) + '%';
-      } else {
-        element.textContent = current.toLocaleString();
-      }
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-    window.requestAnimationFrame(step);
-  }
-
-  // Animate snapshot cards on load
-  document.querySelectorAll('.big-number').forEach((el) => {
-    const text = el.textContent.trim();
-    if (text && text !== '—') {
-      const numMatch = text.match(/[\d,]+/);
-      if (numMatch) {
-        const num = parseInt(numMatch[0].replace(/,/g, ''));
-        if (num > 0) {
-          el.style.opacity = '0';
-          setTimeout(() => {
-            animateValue(el, 0, num, 1000);
-            el.style.opacity = '1';
-          }, 200);
-        }
-      }
-    }
-  });
-</script>
-
-<!-- Edit Address Modal -->
-<div id="editAddressModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <h2 style="margin: 0; color: var(--olive-green); font-size: 1.5rem;">Edit Property Address</h2>
-      <button onclick="closeEditAddressModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
-    </div>
-    <form method="post" action="{{ url_for('homeowner_update_property_address') }}">
-      <input type="hidden" name="property_id" value="{{ current_property_id or '' }}">
-      <div style="margin-bottom: 1.5rem;">
-        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Property Address</label>
-        <input type="text" name="address" value="{% if current_property and current_property.get('address') %}{{ current_property.address }}{% elif current_property %}{{ current_property.get('address', '') }}{% endif %}" required style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" placeholder="123 Main St, City, State ZIP">
-      </div>
-      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-        <button type="button" onclick="closeEditAddressModal()" style="padding: 0.75rem 1.5rem; border: 2px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--charcoal-brown);">Cancel</button>
-        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Save Address</button>
-      </div>
-    </form>
   </div>
 </div>
 
-<!-- Add Property Modal -->
-<div id="addPropertyModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <h2 style="margin: 0; color: var(--olive-green); font-size: 1.5rem;">Add New Property</h2>
-      <button onclick="closeAddPropertyModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+<!-- Edit Value/Loan Modal -->
+<div id="editModal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="editModalTitle">Update Value</h2>
     </div>
-    <form method="post" action="{{ url_for('homeowner_add_property') }}">
-      <div style="margin-bottom: 1.5rem;">
-        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Property Address *</label>
-        <input type="text" name="property_address" required style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" placeholder="123 Main St, City, State ZIP">
+    <form id="editForm" method="POST" action="{{ url_for('homeowner_value_equity_overview') }}">
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="editField" id="editLabel">New Value</label>
+          <input type="text" id="editField" name="edit_field" placeholder="e.g., 485,000" required />
+        </div>
       </div>
-      <div style="margin-bottom: 1.5rem;">
-        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Estimated Value (Optional)</label>
-        <input type="text" name="estimated_value" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;" placeholder="450000">
-      </div>
-      <div style="margin-bottom: 1.5rem;">
-        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Property Type</label>
-        <select name="property_type" style="width: 100%; padding: 0.75rem; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;">
-          <option value="primary">Primary Residence</option>
-          <option value="rental">Rental Property</option>
-          <option value="investment">Investment Property</option>
-          <option value="vacation">Vacation Home</option>
-        </select>
-      </div>
-      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-        <button type="button" onclick="closeAddPropertyModal()" style="padding: 0.75rem 1.5rem; border: 2px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; font-weight: 600; color: var(--charcoal-brown);">Cancel</button>
-        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Add Property</button>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn-primary">Save Changes</button>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  function openEditAddressModal() {
-    document.getElementById('editAddressModal').style.display = 'flex';
+  // Tab Switching
+  function switchTab(event, tabName) {
+    // Hide all tab panels
+    const panels = document.querySelectorAll('.tab-panel');
+    panels.forEach(panel => panel.classList.remove('active'));
+    
+    // Remove active from all buttons
+    const buttons = document.querySelectorAll('.tab-button');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // Show selected panel and activate button
+    document.getElementById(tabName).classList.add('active');
+    event.currentTarget.classList.add('active');
   }
   
-  function closeEditAddressModal() {
-    document.getElementById('editAddressModal').style.display = 'none';
-  }
-  
-  function openAddPropertyModal() {
-    document.getElementById('addPropertyModal').style.display = 'flex';
-  }
-  
-  function closeAddPropertyModal() {
-    document.getElementById('addPropertyModal').style.display = 'none';
-  }
-  
-  // Close modals when clicking outside
-  var editModal = document.getElementById('editAddressModal');
-  if (editModal) {
-    editModal.addEventListener('click', function(e) {
-      if (e.target === this) closeEditAddressModal();
-    });
-  }
-  
-  var addModal = document.getElementById('addPropertyModal');
-  if (addModal) {
-    addModal.addEventListener('click', function(e) {
-      if (e.target === this) closeAddPropertyModal();
-    });
-  }
-
-  // Quick Edit Modals for Snapshot Cards
+  // Modal Functions
   function openEditModal(type) {
-    const modal = document.getElementById('quickEditModal');
-    const modalTitle = document.getElementById('quickEditModalTitle');
-    const modalForm = document.getElementById('quickEditForm');
-    const modalField = document.getElementById('quickEditField');
-    const modalLabel = document.getElementById('quickEditLabel');
-    
-    if (!modal) return;
-    
-    // Set up modal based on type
-    let title = '';
-    let label = '';
-    let fieldName = '';
-    let currentValue = '';
-    let placeholder = '';
-    
-    const snapshotData = {
-      value_estimate: {% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% else %}null{% endif %},
-      loan_balance: {% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance|int }}{% else %}null{% endif %},
-      equity_estimate: {% if snapshot and snapshot.equity_estimate %}{{ snapshot.equity_estimate|int }}{% elif snapshot and snapshot.value_estimate and snapshot.loan_balance %}{{ (snapshot.value_estimate - snapshot.loan_balance)|int }}{% else %}null{% endif %}
-    };
+    const modal = document.getElementById('editModal');
+    const title = document.getElementById('editModalTitle');
+    const label = document.getElementById('editLabel');
+    const field = document.getElementById('editField');
     
     if (type === 'value') {
-      title = 'Edit Home Value';
-      label = 'Home Value';
-      fieldName = 'value_estimate';
-      currentValue = snapshotData.value_estimate || '';
-      placeholder = 'e.g., 480,000';
+      title.textContent = 'Update Home Value';
+      label.textContent = 'Estimated Home Value';
+      field.placeholder = 'e.g., 485,000';
+      field.name = 'value_estimate';
+      {% if snapshot and snapshot.get('value_estimate') %}
+      field.value = '{{ snapshot.get("value_estimate")|int }}';
+      {% endif %}
     } else if (type === 'loan') {
-      title = 'Edit Loan Balance';
-      label = 'Loan Balance';
-      fieldName = 'loan_balance';
-      currentValue = snapshotData.loan_balance || '';
-      placeholder = 'e.g., 275,000';
-    } else if (type === 'equity') {
-      title = 'Edit Total Equity';
-      label = 'Total Equity';
-      fieldName = 'equity_estimate';
-      currentValue = snapshotData.equity_estimate || '';
-      placeholder = 'e.g., 246,318';
-    } else if (type === 'ltv') {
-      // LTV is calculated, so show option to edit either value or loan balance
-      title = 'Edit Loan-to-Value';
-      label = 'To change LTV, edit either Home Value or Loan Balance';
-      fieldName = 'ltv_edit';
-      currentValue = '';
-      placeholder = 'LTV is calculated from home value and loan balance';
+      title.textContent = 'Update Loan Balance';
+      label.textContent = 'Current Loan Balance';
+      field.placeholder = 'e.g., 275,000';
+      field.name = 'loan_balance';
+      {% if snapshot and snapshot.get('loan_balance') %}
+      field.value = '{{ snapshot.get("loan_balance")|int }}';
+      {% endif %}
     }
     
-    modalTitle.textContent = title;
-    modalLabel.textContent = label;
-    modalField.name = fieldName;
-    modalField.value = currentValue;
-    modalField.placeholder = placeholder;
-    modalField.type = type === 'ltv' ? 'hidden' : 'text';
-    modalForm.setAttribute('data-edit-type', type);
-    
-    // Show/hide appropriate fields for LTV
-    if (type === 'ltv') {
-      document.getElementById('ltvEditOptions').style.display = 'block';
-      modalField.style.display = 'none';
-      document.getElementById('quickEditLabel').style.display = 'none';
-    } else {
-      document.getElementById('ltvEditOptions').style.display = 'none';
-      modalField.style.display = 'block';
-      document.getElementById('quickEditLabel').style.display = 'block';
-    }
-    
-    modal.style.display = 'flex';
+    modal.classList.add('active');
   }
   
-  function closeQuickEditModal() {
-    document.getElementById('quickEditModal').style.display = 'none';
+  function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
   }
   
-  // Handle quick edit form submission
-  document.getElementById('quickEditForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const form = this;
-    const type = form.getAttribute('data-edit-type');
-    const formData = new FormData(form);
-    
-    // For LTV, determine which field was edited
-    if (type === 'ltv') {
-      const ltvValue = document.getElementById('ltvValueInput').value;
-      const ltvLoan = document.getElementById('ltvLoanInput').value;
-      if (ltvValue && ltvValue.trim()) {
-        formData.set('value_estimate', ltvValue.replace(/,/g, ''));
-      }
-      if (ltvLoan && ltvLoan.trim()) {
-        formData.set('loan_balance', ltvLoan.replace(/,/g, ''));
-      }
+  // Close modal on outside click
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+      closeEditModal();
     }
-    
-    // For equity, we need to calculate it from value and loan balance, or set it directly
-    // If equity is set directly, we'll need to adjust either value or loan balance
-    // For now, let's just update the equity_estimate field if provided
-    if (type === 'equity' && formData.has('equity_estimate')) {
-      const equityValue = formData.get('equity_estimate').replace(/,/g, '');
-      formData.set('equity_estimate', equityValue);
-    }
-    
-    // Clean up numeric values (remove commas and dollar signs)
-    if (formData.has('value_estimate')) {
-      formData.set('value_estimate', formData.get('value_estimate').replace(/[,$]/g, ''));
-    }
-    if (formData.has('loan_balance')) {
-      formData.set('loan_balance', formData.get('loan_balance').replace(/[,$]/g, ''));
-    }
-    
-    // Add all other form fields from the main form to preserve them
-    const mainForm = document.querySelector('form[method="post"][action*="equity-overview"]');
-    if (mainForm) {
-      const mainFormData = new FormData(mainForm);
-      for (let [key, value] of mainFormData.entries()) {
-        if (!formData.has(key)) {
-          formData.append(key, value);
-        }
-      }
-    }
-    
-    // Submit via AJAX
-    fetch('{{ url_for("homeowner_value_equity_overview") }}', {
-      method: 'POST',
-      body: formData
-    })
-    .then(response => {
-      // Always update the display first, then handle response
-      updateDisplayValues(formData);
-      updateMainForm(formData);
-      refreshAllCalculations(); // Refresh all dependent calculations
-      
-      if (response.redirected || response.ok) {
-        // Success - show message and reload after a brief delay to show the update
-        showSuccessMessage('Updated successfully!');
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      } else {
-        return response.text().then(text => {
-          try {
-            return JSON.parse(text);
-          } catch {
-            // If not JSON, it might be HTML (error page)
-            throw new Error('Server error');
-          }
-        });
-      }
-    })
-    .then(data => {
-      if (data && data.success) {
-        closeQuickEditModal();
-        showSuccessMessage('Updated successfully!');
-        // Reload to ensure everything is in sync
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      } else if (data) {
-        alert('Error updating: ' + (data.error || 'Please try again.'));
-      }
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      // Even on error, try to update the display with what we have
-      updateDisplayValues(formData);
-      updateMainForm(formData);
-      // Reload to get fresh data from server
-      showSuccessMessage('Saving...');
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    });
   });
   
-  function updateDisplayValues(formData) {
-    let valueEstimate = null;
-    let loanBalance = null;
-    let equityEstimate = null;
-    
-    // Update value_estimate everywhere
-    if (formData.has('value_estimate')) {
-      valueEstimate = parseFloat(formData.get('value_estimate').replace(/[,$]/g, ''));
-      if (!isNaN(valueEstimate) && valueEstimate > 0) {
-        // Update card display
-        const displayEl = document.getElementById('display-value-estimate');
-        if (displayEl) displayEl.textContent = '$' + valueEstimate.toLocaleString();
-        
-        // Update all form fields with name="value_estimate"
-        document.querySelectorAll('[name="value_estimate"]').forEach(field => {
-          field.value = Math.round(valueEstimate);
-        });
-        
-        // Update snapshotData for calculations
-        if (typeof snapshotData !== 'undefined') {
-          snapshotData.valueEstimate = valueEstimate;
-        }
-      }
-    } else {
-      // Get current value from form if not in formData
-      const formField = document.getElementById('value_estimate');
-      if (formField && formField.value) {
-        valueEstimate = parseFloat(formField.value.replace(/[,$]/g, ''));
-        if (!isNaN(valueEstimate) && typeof snapshotData !== 'undefined') {
-          snapshotData.valueEstimate = valueEstimate;
-        }
-      }
+  // Format number inputs
+  document.getElementById('editField').addEventListener('blur', function() {
+    let val = this.value.replace(/,/g, '');
+    if (!isNaN(val) && val !== '') {
+      this.value = parseInt(val).toLocaleString();
     }
-    
-    // Update loan_balance everywhere
-    if (formData.has('loan_balance')) {
-      loanBalance = parseFloat(formData.get('loan_balance').replace(/[,$]/g, ''));
-      if (!isNaN(loanBalance) && loanBalance >= 0) {
-        // Update card display
-        const displayEl = document.getElementById('display-loan-balance');
-        if (displayEl) displayEl.textContent = '$' + loanBalance.toLocaleString();
-        
-        // Update all form fields with name="loan_balance"
-        document.querySelectorAll('[name="loan_balance"]').forEach(field => {
-          field.value = Math.round(loanBalance);
-        });
-        
-        // Update snapshotData for calculations
-        if (typeof snapshotData !== 'undefined') {
-          snapshotData.loanBalance = loanBalance;
-        }
-      }
-    } else {
-      // Get current value from form if not in formData
-      const formField = document.getElementById('loan_balance');
-      if (formField && formField.value) {
-        loanBalance = parseFloat(formField.value.replace(/[,$]/g, ''));
-        if (!isNaN(loanBalance) && typeof snapshotData !== 'undefined') {
-          snapshotData.loanBalance = loanBalance;
-        }
-      }
-    }
-    
-    // Update equity_estimate if provided directly
-    if (formData.has('equity_estimate')) {
-      equityEstimate = parseFloat(formData.get('equity_estimate').replace(/[,$]/g, ''));
-      if (!isNaN(equityEstimate)) {
-        const displayEl = document.getElementById('display-equity');
-        if (displayEl) displayEl.textContent = '$' + equityEstimate.toLocaleString();
-      }
-    }
-    
-    // Recalculate equity and LTV if we have both value and loan balance
-    if (valueEstimate === null) {
-      const formField = document.getElementById('value_estimate');
-      if (formField && formField.value) {
-        valueEstimate = parseFloat(formField.value.replace(/[,$]/g, ''));
-      }
-    }
-    
-    if (loanBalance === null) {
-      const formField = document.getElementById('loan_balance');
-      if (formField && formField.value) {
-        loanBalance = parseFloat(formField.value.replace(/[,$]/g, ''));
-      }
-    }
-    
-    if (valueEstimate !== null && loanBalance !== null && valueEstimate > 0 && loanBalance >= 0) {
-      const equity = valueEstimate - loanBalance;
-      const ltv = (loanBalance / valueEstimate) * 100;
-      
-      // Update equity display
-      const equityDisplay = document.getElementById('display-equity');
-      if (equityDisplay) {
-        equityDisplay.textContent = '$' + equity.toLocaleString();
-      }
-      
-      // Update LTV display
-      const ltvDisplay = document.getElementById('display-ltv');
-      if (ltvDisplay) {
-        ltvDisplay.textContent = ltv.toFixed(1) + '%';
-      }
-      
-      // Update snapshotData
-      if (typeof snapshotData !== 'undefined') {
-        snapshotData.valueEstimate = valueEstimate;
-        snapshotData.loanBalance = loanBalance;
-      }
-    }
-    
-    // Update any other fields that were changed
-    for (let [key, value] of formData.entries()) {
-      if (key !== 'value_estimate' && key !== 'loan_balance' && key !== 'equity_estimate' && key !== 'action' && key !== 'board_name') {
-        const field = document.querySelector('[name="' + key + '"]');
-        if (field) {
-          const cleanValue = String(value).replace(/[,$]/g, '');
-          field.value = cleanValue;
-        }
-      }
-    }
-  }
-  
-  function updateMainForm(formData) {
-    // Update ALL form fields with matching names across the entire page
-    for (let [key, value] of formData.entries()) {
-      if (key === 'action' || key === 'board_name') continue; // Skip non-field data
-      
-      // Clean the value (remove commas, dollar signs)
-      const cleanValue = String(value).replace(/[,$]/g, '');
-      
-      // Find ALL fields with this name (not just in one form)
-      document.querySelectorAll('[name="' + key + '"]').forEach(field => {
-        // Only update if it's a number field or if the value is different
-        if (field.type === 'text' || field.type === 'number' || field.tagName === 'INPUT' || field.tagName === 'SELECT') {
-          field.value = cleanValue;
-          // Trigger change event to update any dependent calculations
-          field.dispatchEvent(new Event('change', { bubbles: true }));
-          field.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-      });
-    }
-  }
-  
-  function showSuccessMessage(message) {
-    // Create or update success message
-    let msgDiv = document.getElementById('quickEditSuccess');
-    if (!msgDiv) {
-      msgDiv = document.createElement('div');
-      msgDiv.id = 'quickEditSuccess';
-      msgDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #4a7c4a; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10000;';
-      document.body.appendChild(msgDiv);
-    }
-    msgDiv.textContent = message;
-    msgDiv.style.display = 'block';
-    setTimeout(() => {
-      msgDiv.style.display = 'none';
-    }, 3000);
-  }
-  
-  // Function to refresh all calculations and displays after value updates
-  function refreshAllCalculations() {
-    // Get current values from form
-    const valueField = document.getElementById('value_estimate');
-    const loanField = document.getElementById('loan_balance');
-    
-    if (valueField && loanField) {
-      const valueEstimate = parseFloat(valueField.value.replace(/[,$]/g, '')) || 0;
-      const loanBalance = parseFloat(loanField.value.replace(/[,$]/g, '')) || 0;
-      
-      if (valueEstimate > 0 && loanBalance >= 0) {
-        // Update snapshotData for scenario calculations
-        if (typeof snapshotData !== 'undefined') {
-          snapshotData.valueEstimate = valueEstimate;
-          snapshotData.loanBalance = loanBalance;
-        }
-        
-        // Recalculate and update equity
-        const equity = valueEstimate - loanBalance;
-        const equityDisplay = document.getElementById('display-equity');
-        if (equityDisplay) {
-          equityDisplay.textContent = '$' + equity.toLocaleString();
-        }
-        
-        // Recalculate and update LTV
-        const ltv = (loanBalance / valueEstimate) * 100;
-        const ltvDisplay = document.getElementById('display-ltv');
-        if (ltvDisplay) {
-          ltvDisplay.textContent = ltv.toFixed(1) + '%';
-        }
-        
-        // Update any scenario calculations if they're visible
-        // This will trigger recalculation of payoff and cashout scenarios
-        document.querySelectorAll('.scenario-slider').forEach(slider => {
-          slider.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-      }
-    }
-  }
-  
-  // Close modal when clicking outside
-  document.getElementById('quickEditModal').addEventListener('click', function(e) {
-    if (e.target === this) closeQuickEditModal();
   });
-  
-  // Update LTV preview as user types
-  function updateLTVPreview() {
-    const valueInput = document.getElementById('ltvValueInput');
-    const loanInput = document.getElementById('ltvLoanInput');
-    const preview = document.getElementById('ltvPreviewValue');
-    
-    if (!valueInput || !loanInput || !preview) return;
-    
-    const value = parseFloat(valueInput.value.replace(/,/g, ''));
-    const loan = parseFloat(loanInput.value.replace(/,/g, ''));
-    
-    if (!isNaN(value) && !isNaN(loan) && value > 0) {
-      const ltv = (loan / value) * 100;
-      preview.textContent = ltv.toFixed(1) + '%';
-    } else {
-      preview.textContent = '—';
-    }
-  }
 </script>
-
-<!-- Quick Edit Modal -->
-<div id="quickEditModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;">
-  <div style="background: white; border-radius: 16px; padding: 2rem; max-width: 500px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.2);">
-    <h2 id="quickEditModalTitle" style="margin: 0 0 1.5rem; color: var(--charcoal-brown); font-family: var(--font-heading);">Edit Value</h2>
-    <form id="quickEditForm" data-edit-type="">
-      <div style="margin-bottom: 1.5rem;">
-        <label id="quickEditLabel" for="quickEditField" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Value</label>
-        <input type="text" id="quickEditField" name="" placeholder="" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" />
-      </div>
-      
-      <!-- LTV Edit Options -->
-      <div id="ltvEditOptions" style="display: none; margin-bottom: 1.5rem;">
-        <p style="margin: 0 0 1rem; color: #666; font-size: 0.9rem;">LTV is calculated from your home value and loan balance. Edit either value to change your LTV:</p>
-        <div style="margin-bottom: 1rem;">
-          <label for="ltvValueInput" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Home Value</label>
-          <input type="text" id="ltvValueInput" placeholder="e.g., 480,000" value="{% if snapshot and snapshot.value_estimate %}{{ snapshot.value_estimate|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" oninput="updateLTVPreview()" />
-        </div>
-        <div>
-          <label for="ltvLoanInput" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Loan Balance</label>
-          <input type="text" id="ltvLoanInput" placeholder="e.g., 275,000" value="{% if snapshot and snapshot.loan_balance %}{{ snapshot.loan_balance|int }}{% endif %}" style="width: 100%; padding: 0.875rem; border: 2px solid var(--taupe-beige); border-radius: var(--border-radius); font-size: 1rem;" oninput="updateLTVPreview()" />
-        </div>
-        <div id="ltvPreview" style="margin-top: 0.75rem; padding: 0.75rem; background: #f5f5f5; border-radius: 8px; font-size: 0.9rem; color: #666;">
-          <strong>New LTV:</strong> <span id="ltvPreviewValue">—</span>
-        </div>
-      </div>
-      
-      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-        <button type="button" onclick="closeQuickEditModal()" style="padding: 0.75rem 1.5rem; background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: 500;">Cancel</button>
-        <button type="submit" style="padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500;">Save</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 {% endblock %}
