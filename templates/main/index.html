@@ -242,6 +242,110 @@
   }
   
   @media (max-width: 768px) {
+    /* Ultra Skinny & No Horizontal Scroll - Portrait Mobile */
+    html, body {
+      overflow-x: hidden !important;
+      max-width: 100vw !important;
+      width: 100% !important;
+    }
+    
+    * {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    
+    .hero-wrapper {
+      grid-template-columns: 1fr !important;
+      min-height: auto !important;
+      padding: 1rem 0.875rem !important;
+    }
+    
+    .hero-content-side {
+      padding: 1rem 0.875rem !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+    }
+    
+    .hero-image-side {
+      min-height: 200px !important;
+      max-height: 300px !important;
+    }
+    
+    .hero-decorative-text {
+      font-size: 4rem !important;
+    }
+    
+    .hero-tagline {
+      font-size: 1rem !important;
+    }
+    
+    .hero-title {
+      font-size: 2rem !important;
+      margin: 0.5rem 0 1rem !important;
+    }
+    
+    .hero-description {
+      font-size: 0.95rem !important;
+      margin: 0 0 1.5rem !important;
+    }
+    
+    .hero-buttons {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      width: 100% !important;
+    }
+    
+    .hero-buttons a,
+    .hero-buttons button {
+      width: 100% !important;
+      padding: 1rem 1.25rem !important;
+      font-size: 1rem !important;
+      min-height: 52px !important;
+    }
+    
+    .featured-section {
+      padding: 3rem 0.875rem !important;
+    }
+    
+    .section-header {
+      margin-bottom: 2rem !important;
+    }
+    
+    .section-title {
+      font-size: 1.75rem !important;
+    }
+    
+    .section-subtitle {
+      font-size: 0.95rem !important;
+    }
+    
+    .role-cards {
+      grid-template-columns: 1fr !important;
+      gap: 1.5rem !important;
+    }
+    
+    .role-card {
+      padding: 1.5rem 1rem !important;
+    }
+    
+    .role-card-title {
+      font-size: 1.25rem !important;
+    }
+    
+    .role-card-description {
+      font-size: 0.9rem !important;
+    }
+    
+    .role-card-buttons {
+      gap: 0.75rem !important;
+    }
+    
+    .role-card-buttons a,
+    .role-card-buttons button {
+      width: 100% !important;
+      padding: 1rem 1.25rem !important;
+      min-height: 52px !important;
+    }
     .hero-title {
       font-size: 2.5rem;
     }
