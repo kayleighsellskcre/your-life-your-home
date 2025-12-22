@@ -28,10 +28,12 @@
     align-items: center;
     justify-content: flex-start;
     padding: 0 2rem;
-    height: 60px;
+    min-height: 60px;
+    height: auto;
     gap: 1.5rem;
     position: relative;
     overflow: visible;
+    flex-wrap: wrap;
   }
   
   .ylh-nav-title {
@@ -315,14 +317,14 @@
   .ylh-nav-items {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
-    flex: 1;
+    gap: 0.5rem;
+    flex: 1 1 auto;
     justify-content: flex-start;
     margin-right: 0;
     overflow: visible;
     position: relative;
-    flex-shrink: 1;
     min-width: 0;
+    flex-wrap: wrap;
   }
   
   .agent-info-widget {
@@ -360,7 +362,7 @@
     border-bottom: 3px solid transparent;
     position: relative;
     min-height: 44px;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     text-decoration: none;
     flex-shrink: 0;
@@ -413,6 +415,8 @@
   
   .ylh-dropdown {
     position: relative;
+    display: inline-block;
+    flex-shrink: 0;
   }
   
   .ylh-dropdown-menu {
@@ -856,35 +860,35 @@
           <div class="agent-info-widget" style="display: flex; align-items: center; gap: 1rem; margin-left: 1.5rem; flex-wrap: wrap;">
             {# Agent Branding #}
             {% if agent_prof %}
-            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <div style="display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0.875rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
               {# Agent Photo #}
               {% set agent_photo_url = get_professional_photo_url(agent_prof.get('professional_photo')) %}
               {% if agent_photo_url %}
-              <img src="{{ agent_photo_url }}" alt="{{ agent_prof.name or 'Agent' }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: none; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0; border: 2px solid var(--taupe-beige);">{{ (agent_prof.name or 'A')[0] }}</div>
+              <img src="{{ agent_photo_url }}" alt="{{ agent_prof.name or 'Agent' }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: none; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0; border: 2px solid var(--taupe-beige);">{{ (agent_prof.name or 'A')[0] }}</div>
               {% else %}
-              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0;">{{ (agent_prof.name or 'A')[0] }}</div>
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0;">{{ (agent_prof.name or 'A')[0] }}</div>
               {% endif %}
               
-              <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0;">
-                <div style="font-size: 0.65rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Agent</div>
+              <div style="display: flex; flex-direction: column; gap: 0.2rem; min-width: 0;">
+                <div style="font-size: 0.625rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Agent</div>
                 {# Logo or Brokerage Name or Agent Name #}
                 {% if agent_prof.get('brokerage_logo') %}
-                <img src="{{ url_for('static', filename=agent_prof.brokerage_logo) }}" alt="{{ agent_prof.get('brokerage_name', 'Company') }}" style="height: 18px; max-width: 120px; object-fit: contain;">
+                <img src="{{ url_for('static', filename=agent_prof.brokerage_logo) }}" alt="{{ agent_prof.get('brokerage_name', 'Company') }}" style="height: 16px; max-width: 110px; object-fit: contain;">
                 {% elif agent_prof.get('brokerage_name') %}
-                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.brokerage_name }}</div>
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.brokerage_name }}</div>
                 {% elif agent_prof.get('name') %}
-                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.name }}</div>
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.name }}</div>
                 {% endif %}
                 
                 {# Phone Number #}
                 {% if agent_prof.get('phone') %}
-                <a href="tel:{{ agent_prof.phone }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  📞 {{ agent_prof.phone }}
+                <a href="tel:{{ agent_prof.phone }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  {{ agent_prof.phone }}
                 </a>
                 {% elif agent_prof.get('email') %}
-                <a href="mailto:{{ agent_prof.email }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  ✉️ Contact
+                <a href="mailto:{{ agent_prof.email }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  Contact
                 </a>
                 {% endif %}
               </div>
@@ -893,35 +897,35 @@
             
             {# Lender Branding #}
             {% if lender_prof %}
-            <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 1rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: var(--border-radius); box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+            <div style="display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0.875rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
               {# Lender Photo #}
               {% set lender_photo_url = get_professional_photo_url(lender_prof.get('professional_photo')) %}
               {% if lender_photo_url %}
-              <img src="{{ lender_photo_url }}" alt="{{ lender_prof.name or 'Lender' }}" style="width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: none; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0; border: 2px solid var(--taupe-beige);">{{ (lender_prof.name or 'L')[0] }}</div>
+              <img src="{{ lender_photo_url }}" alt="{{ lender_prof.name or 'Lender' }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: none; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0; border: 2px solid var(--taupe-beige);">{{ (lender_prof.name or 'L')[0] }}</div>
               {% else %}
-              <div style="width: 45px; height: 45px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.2rem; font-weight: 600; flex-shrink: 0;">{{ (lender_prof.name or 'L')[0] }}</div>
+              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0;">{{ (lender_prof.name or 'L')[0] }}</div>
               {% endif %}
               
-              <div style="display: flex; flex-direction: column; gap: 0.25rem; min-width: 0;">
-                <div style="font-size: 0.65rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Lender</div>
+              <div style="display: flex; flex-direction: column; gap: 0.2rem; min-width: 0;">
+                <div style="font-size: 0.625rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Lender</div>
                 {# Logo or Company Name or Lender Name #}
                 {% if lender_prof.get('brokerage_logo') %}
-                <img src="{{ url_for('static', filename=lender_prof.brokerage_logo) }}" alt="{{ lender_prof.get('brokerage_name', 'Company') }}" style="height: 18px; max-width: 120px; object-fit: contain;">
+                <img src="{{ url_for('static', filename=lender_prof.brokerage_logo) }}" alt="{{ lender_prof.get('brokerage_name', 'Company') }}" style="height: 16px; max-width: 110px; object-fit: contain;">
                 {% elif lender_prof.get('brokerage_name') %}
-                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.brokerage_name }}</div>
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.brokerage_name }}</div>
                 {% elif lender_prof.get('name') %}
-                <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.name }}</div>
+                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.name }}</div>
                 {% endif %}
                 
                 {# Phone Number #}
                 {% if lender_prof.get('phone') %}
-                <a href="tel:{{ lender_prof.phone }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  📞 {{ lender_prof.phone }}
+                <a href="tel:{{ lender_prof.phone }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  {{ lender_prof.phone }}
                 </a>
                 {% elif lender_prof.get('email') %}
-                <a href="mailto:{{ lender_prof.email }}" style="font-size: 0.7rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 0.25rem;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  ✉️ Contact
+                <a href="mailto:{{ lender_prof.email }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                  Contact
                 </a>
                 {% endif %}
               </div>
