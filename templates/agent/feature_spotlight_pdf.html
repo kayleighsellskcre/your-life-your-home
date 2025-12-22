@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <style>
         @page {
-            size: letter landscape;
-            margin: 0.35in;
+            size: 11in 8.5in;
+            margin: 0.125in;
             background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
         }
         
@@ -22,12 +22,12 @@
         }
         
         .page {
-            width: 100%;
+            width: 11in;
             height: 8.5in;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 0.3in;
+            grid-template-columns: 5.375in 5.375in;
+            grid-template-rows: 4.125in 4.125in;
+            gap: 0.25in;
             padding: 0;
             page-break-after: always;
             background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
@@ -40,7 +40,7 @@
         .card {
             background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%);
             border: 1.5px solid rgba(200, 180, 151, 0.25);
-            padding: 0.45in 0.5in;
+            padding: 0.5in 0.55in;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -48,6 +48,8 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             position: relative;
             overflow: hidden;
+            width: 5.375in;
+            height: 4.125in;
         }
         
         .card::before {
