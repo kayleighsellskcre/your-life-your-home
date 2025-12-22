@@ -5868,7 +5868,7 @@ def refine_feature_text(feature):
                     from openai import OpenAI
                     client = OpenAI(api_key=openai_api_key)
                     
-                    prompt = f"""You are helping write property feature descriptions that sound natural and human.
+                    prompt = f"""You are helping write property feature descriptions that sound natural, human, and luxurious.
 
 Original Feature:
 Title: {title}
@@ -5876,27 +5876,30 @@ Room: {room}
 Description: {description}
 
 Make this sound better by:
-1. Using simple, everyday words that regular people use (NO fancy vocabulary)
-2. Sounding like a real person talking about a home they love
+1. Using natural, conversational language that regular people use
+2. Sounding like a real person describing a beautiful, high-quality home
 3. Being clear and specific (1-2 short sentences max)
-4. Focusing on what people actually care about (comfort, convenience, space)
+4. Adding subtle luxury through quality words, not fancy jargon
+5. Focusing on what people care about (comfort, space, quality, light, style)
 
-AVOID words like: meticulously, exquisite, boasts, features, showcases, curated, bespoke, sanctuary, haven, oasis, epitome, essence, seamlessly, elegantly appointed, thoughtfully designed, impeccably, stunning, breathtaking
+AVOID overly fancy words like: meticulously, exquisite, boasts, showcases, curated, bespoke, epitome, essence, seamlessly, impeccably
 
-USE words like: has, includes, offers, great, nice, perfect for, easy, simple, plenty of, lots of, opens to, leads to, keeps, helps, makes, gives you
+LUXURY WORDS TO USE (sparingly, naturally): beautiful, spacious, custom, elegant, warm, bright, open, generous, premium, quality, designer, modern, classic, updated, refined, inviting, peaceful, private, sun-filled, hand-crafted
+
+EVERYDAY CONNECTORS: has, includes, offers, with, perfect for, great for, opens to, leads to, keeps, helps, makes, gives you
 
 Return ONLY a JSON object with "title" and "description" fields. No other text.
 
 Example format:
-{{"title": "Hidden Storage Pantry", "description": "Pull-out shelving gives you plenty of storage space and keeps counters clear."}}"""
+{{"title": "Custom Walk-In Pantry", "description": "Beautiful custom shelving offers generous storage space and keeps counters clear for easy meal prep."}}"""
 
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": "You are a helpful assistant who writes in plain, natural English. Use simple everyday words."},
+                            {"role": "system", "content": "You are a helpful assistant who writes natural, conversational property descriptions with subtle luxury. Sound human and authentic."},
                             {"role": "user", "content": prompt}
                         ],
-                        temperature=0.6,
+                        temperature=0.65,
                         max_tokens=150
                     )
                     
@@ -5909,7 +5912,7 @@ Example format:
                     import openai
                     openai.api_key = openai_api_key
                     
-                    prompt = f"""You are helping write property feature descriptions that sound natural and human.
+                    prompt = f"""You are helping write property feature descriptions that sound natural, human, and luxurious.
 
 Original Feature:
 Title: {title}
@@ -5917,27 +5920,30 @@ Room: {room}
 Description: {description}
 
 Make this sound better by:
-1. Using simple, everyday words that regular people use (NO fancy vocabulary)
-2. Sounding like a real person talking about a home they love
+1. Using natural, conversational language that regular people use
+2. Sounding like a real person describing a beautiful, high-quality home
 3. Being clear and specific (1-2 short sentences max)
-4. Focusing on what people actually care about (comfort, convenience, space)
+4. Adding subtle luxury through quality words, not fancy jargon
+5. Focusing on what people care about (comfort, space, quality, light, style)
 
-AVOID words like: meticulously, exquisite, boasts, features, showcases, curated, bespoke, sanctuary, haven, oasis, epitome, essence, seamlessly, elegantly appointed, thoughtfully designed, impeccably, stunning, breathtaking
+AVOID overly fancy words like: meticulously, exquisite, boasts, showcases, curated, bespoke, epitome, essence, seamlessly, impeccably
 
-USE words like: has, includes, offers, great, nice, perfect for, easy, simple, plenty of, lots of, opens to, leads to, keeps, helps, makes, gives you
+LUXURY WORDS TO USE (sparingly, naturally): beautiful, spacious, custom, elegant, warm, bright, open, generous, premium, quality, designer, modern, classic, updated, refined, inviting, peaceful, private, sun-filled, hand-crafted
+
+EVERYDAY CONNECTORS: has, includes, offers, with, perfect for, great for, opens to, leads to, keeps, helps, makes, gives you
 
 Return ONLY a JSON object with "title" and "description" fields. No other text.
 
 Example format:
-{{"title": "Hidden Storage Pantry", "description": "Pull-out shelving gives you plenty of storage space and keeps counters clear."}}"""
+{{"title": "Custom Walk-In Pantry", "description": "Beautiful custom shelving offers generous storage space and keeps counters clear for easy meal prep."}}"""
 
                     response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": "You are a helpful assistant who writes in plain, natural English. Use simple everyday words."},
+                            {"role": "system", "content": "You are a helpful assistant who writes natural, conversational property descriptions with subtle luxury. Sound human and authentic."},
                             {"role": "user", "content": prompt}
                         ],
-                        temperature=0.6,
+                        temperature=0.65,
                         max_tokens=150
                     )
                     
