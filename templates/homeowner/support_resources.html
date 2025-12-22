@@ -1,24 +1,522 @@
 {% extends "homeowner/layout.html" %}
-{% block title %}Resource Library{% endblock %}
+{% block title %}Support & Resources • Your Life Your Home{% endblock %}
 
 {% block homeowner_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Learn at your pace</p>
-  <h1>Resource Library</h1>
-  <p>Short, clear guides on buying, selling, investing, renovating, and caring for your home. No fluff or scare tactics.</p>
-</div>
+<style>
+  /* ===========================
+     SUPPORT & RESOURCES
+     Organic • Luxurious • Effortless
+     =========================== */
+  
+  .support-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+  
+  /* PAGE HEADER */
+  .page-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+  
+  .page-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+  }
+  
+  .page-header p {
+    font-size: 1.125rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  /* QUICK CONTACT SECTION */
+  .quick-contact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .contact-card {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  
+  .contact-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.12);
+    border-color: rgba(107, 106, 69, 0.25);
+    background: var(--white);
+  }
+  
+  .contact-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    font-weight: 400;
+  }
+  
+  .contact-card p {
+    font-size: 0.95rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .contact-card-btn {
+    display: inline-block;
+    margin-top: 1.25rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--olive-green);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .contact-card-btn:hover {
+    background: #5A5938;
+    transform: scale(1.05);
+  }
+  
+  /* RESOURCES SECTION */
+  .resources-section {
+    margin-bottom: 3rem;
+  }
+  
+  .section-header {
+    margin-bottom: 2rem;
+  }
+  
+  .section-header h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+  }
+  
+  .section-header p {
+    font-size: 1rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+  }
+  
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .resource-card {
+    background: var(--white);
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .resource-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--olive-green);
+    border-radius: 12px 0 0 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .resource-card:hover {
+    transform: translateX(8px);
+    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.12);
+    border-color: rgba(107, 106, 69, 0.25);
+  }
+  
+  .resource-card:hover::before {
+    opacity: 1;
+  }
+  
+  .resource-category {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    background: rgba(107, 106, 69, 0.1);
+    color: var(--olive-green);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+  }
+  
+  .resource-card h3 {
+    font-size: 1.25rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  
+  .resource-card p {
+    font-size: 0.95rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .resource-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(107, 106, 69, 0.1);
+    font-size: 0.85rem;
+    color: rgba(58, 53, 44, 0.6);
+  }
+  
+  /* FAQ SECTION */
+  .faq-section {
+    background: var(--white);
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .faq-section h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 2rem;
+    font-weight: 400;
+  }
+  
+  .faq-item {
+    border-bottom: 1px solid rgba(107, 106, 69, 0.1);
+    padding: 1.5rem 0;
+  }
+  
+  .faq-item:last-child {
+    border-bottom: none;
+  }
+  
+  .faq-question {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: color 0.2s ease;
+  }
+  
+  .faq-question:hover {
+    color: var(--olive-green);
+  }
+  
+  .faq-answer {
+    font-size: 0.95rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.7;
+    margin: 0;
+  }
+  
+  /* HELP CENTER */
+  .help-center {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 16px;
+    padding: 3rem;
+    text-align: center;
+  }
+  
+  .help-center h2 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+    font-weight: 400;
+  }
+  
+  .help-center p {
+    font-size: 1rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .help-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .help-btn {
+    padding: 0.875rem 2rem;
+    background: var(--olive-green);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .help-btn:hover {
+    background: #5A5938;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 53, 44, 0.15);
+  }
+  
+  .help-btn-secondary {
+    background: var(--white);
+    color: var(--olive-green);
+    border: 2px solid var(--olive-green);
+  }
+  
+  .help-btn-secondary:hover {
+    background: var(--olive-green);
+    color: var(--white);
+  }
+  
+  /* MOBILE RESPONSIVE */
+  @media (max-width: 768px) {
+    .support-page {
+      padding: 2rem 1rem;
+    }
+    
+    .page-header h1 {
+      font-size: 1.75rem;
+    }
+    
+    .page-header p {
+      font-size: 1rem;
+    }
+    
+    .quick-contact {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .contact-card {
+      padding: 1.5rem;
+    }
+    
+    .resource-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    .resource-card {
+      padding: 1.5rem;
+    }
+    
+    .faq-section {
+      padding: 1.5rem;
+    }
+    
+    .help-center {
+      padding: 2rem 1.5rem;
+    }
+    
+    .help-actions {
+      flex-direction: column;
+    }
+    
+    .help-btn {
+      width: 100%;
+    }
+  }
+</style>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>What Will Be Inside</h2>
-    <ul style="font-size: 0.95rem; margin: 1rem 0 0 1.5rem; padding: 0; line-height: 1.8;">
-      <li>First-time buyer basics in plain language</li>
-      <li>Step-by-step selling checklists</li>
-      <li>Renovation planning and budget guides</li>
-      <li>Equity and refinancing primers</li>
-      <li>Simple home maintenance cheat sheets</li>
-    </ul>
-    <p class="card-subtext" style="margin-top: 1rem;">As the library grows, you'll be able to save your favorite pieces and mark which ones you've already worked through.</p>
+<div class="support-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>Support & Resources</h1>
+    <p>Everything you need to make confident, informed decisions about your home. We're here to help every step of the way.</p>
+  </div>
+  
+  <!-- Quick Contact Options -->
+  <div class="quick-contact">
+    <div class="contact-card" onclick="window.location.href='{{ url_for('homeowner_support_ask_question') }}'">
+      <h3>Ask a Question</h3>
+      <p>Get clear answers from our knowledgeable team. No question is too simple or complex.</p>
+      <a href="{{ url_for('homeowner_support_ask_question') }}" class="contact-card-btn">Submit Question</a>
+    </div>
+    
+    <div class="contact-card" onclick="window.location.href='{{ url_for('homeowner_support_chat_human') }}'">
+      <h3>Chat with Us</h3>
+      <p>Connect with a real person who understands your situation and can guide you forward.</p>
+      <a href="{{ url_for('homeowner_support_chat_human') }}" class="contact-card-btn">Start Chat</a>
+    </div>
+    
+    <div class="contact-card" onclick="window.location.href='{{ url_for('homeowner_support_schedule_chat') }}'">
+      <h3>Schedule a Call</h3>
+      <p>Book a convenient time to discuss your questions and explore your options in depth.</p>
+      <a href="{{ url_for('homeowner_support_schedule_chat') }}" class="contact-card-btn">Book Time</a>
+    </div>
+  </div>
+  
+  <!-- Resource Library -->
+  <div class="resources-section">
+    <div class="section-header">
+      <h2>Resource Library</h2>
+      <p>Short, clear guides on buying, selling, investing, renovating, and caring for your home. No fluff or scare tactics.</p>
+    </div>
+    
+    <div class="resource-grid">
+      <!-- First-Time Buyer Guide -->
+      <div class="resource-card">
+        <span class="resource-category">Buying</span>
+        <h3>First-Time Buyer Basics</h3>
+        <p>Plain-language guide to understanding mortgages, down payments, inspections, and closing costs.</p>
+        <div class="resource-meta">
+          <span>8 min read</span>
+          <span>•</span>
+          <span>Beginner</span>
+        </div>
+      </div>
+      
+      <!-- Selling Checklist -->
+      <div class="resource-card">
+        <span class="resource-category">Selling</span>
+        <h3>Step-by-Step Selling Checklist</h3>
+        <p>From prep to closing, everything you need to sell your home with confidence and clarity.</p>
+        <div class="resource-meta">
+          <span>12 min read</span>
+          <span>•</span>
+          <span>Intermediate</span>
+        </div>
+      </div>
+      
+      <!-- Renovation Planning -->
+      <div class="resource-card">
+        <span class="resource-category">Renovation</span>
+        <h3>Renovation Planning & Budget Guide</h3>
+        <p>How to plan renovations that add value, avoid common pitfalls, and stay on budget.</p>
+        <div class="resource-meta">
+          <span>10 min read</span>
+          <span>•</span>
+          <span>All Levels</span>
+        </div>
+      </div>
+      
+      <!-- Equity Primer -->
+      <div class="resource-card">
+        <span class="resource-category">Finance</span>
+        <h3>Understanding Your Home Equity</h3>
+        <p>Learn how equity builds, when to tap it, and how refinancing or HELOCs work in simple terms.</p>
+        <div class="resource-meta">
+          <span>7 min read</span>
+          <span>•</span>
+          <span>Beginner</span>
+        </div>
+      </div>
+      
+      <!-- Maintenance Guide -->
+      <div class="resource-card">
+        <span class="resource-category">Care</span>
+        <h3>Home Maintenance Cheat Sheet</h3>
+        <p>Simple seasonal maintenance tasks that protect your investment and prevent costly repairs.</p>
+        <div class="resource-meta">
+          <span>5 min read</span>
+          <span>•</span>
+          <span>All Levels</span>
+        </div>
+      </div>
+      
+      <!-- Market Insights -->
+      <div class="resource-card">
+        <span class="resource-category">Market</span>
+        <h3>Reading Local Market Trends</h3>
+        <p>How to interpret market data, understand timing, and make informed decisions for your area.</p>
+        <div class="resource-meta">
+          <span>9 min read</span>
+          <span>•</span>
+          <span>Intermediate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+    
+    <div class="faq-item">
+      <div class="faq-question">How often should I check my home value?</div>
+      <p class="faq-answer">
+        We recommend checking quarterly to stay informed about market changes. Your dashboard updates automatically with Homebot integration, making it effortless to track value and equity growth over time.
+      </p>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">What's the best time to renovate for maximum ROI?</div>
+      <p class="faq-answer">
+        It depends on your local market and goals. Kitchen and bathroom updates typically return 60-80% of costs. Our ROI Guide helps you prioritize projects based on your specific situation and timeline.
+      </p>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">How do I know if refinancing makes sense?</div>
+      <p class="faq-answer">
+        Generally, if you can reduce your rate by 0.5-0.75% and plan to stay in your home for 2+ years, refinancing may be worthwhile. Use our calculator or chat with us to run your specific numbers.
+      </p>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">What maintenance tasks are most important?</div>
+      <p class="faq-answer">
+        Focus on: HVAC filter changes monthly, gutter cleaning twice yearly, and seasonal roof/foundation inspections. These prevent the most expensive repairs. See our full maintenance guide for detailed schedules.
+      </p>
+    </div>
+    
+    <div class="faq-item">
+      <div class="faq-question">Can I work with multiple professionals through your platform?</div>
+      <p class="faq-answer">
+        Yes! You can connect with agents, lenders, and other professionals who are part of your trusted team. They'll have access to share insights and updates directly through your dashboard.
+      </p>
+    </div>
+  </div>
+  
+  <!-- Help Center CTA -->
+  <div class="help-center">
+    <h2>Still Have Questions?</h2>
+    <p>We're here to help you feel confident and informed at every stage of your homeownership journey. Connect with our team anytime.</p>
+    <div class="help-actions">
+      <a href="{{ url_for('homeowner_support_chat_human') }}" class="help-btn">Chat Now</a>
+      <a href="{{ url_for('homeowner_support_meet_team') }}" class="help-btn help-btn-secondary">Meet Your Team</a>
+    </div>
   </div>
 </div>
+
 {% endblock %}
