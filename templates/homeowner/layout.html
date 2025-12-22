@@ -5,14 +5,20 @@
 
 {% block content %}
 <style>
-  /* Integrated Header + Dashboard Navigation */
+  /* Integrated Header + Dashboard Navigation - Refined */
   .ylh-horizontal-nav {
-    background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);
-    border-bottom: 3px solid rgba(107, 106, 69, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(135deg, rgba(246, 242, 232, 0.98) 0%, rgba(239, 233, 220, 0.98) 100%);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(107, 106, 69, 0.12);
+    box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
     position: sticky;
     top: 5rem;
     z-index: 999;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .ylh-horizontal-nav:hover {
+    box-shadow: 0 4px 20px rgba(58, 53, 44, 0.08);
   }
   
   .ylh-nav-container {
@@ -346,7 +352,7 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     border-bottom: 2px solid transparent;
     position: relative;
@@ -354,6 +360,7 @@
     display: flex;
     align-items: center;
     text-decoration: none;
+    border-radius: 6px;
   }
   
   .ylh-nav-button:hover {
