@@ -610,7 +610,7 @@ def homeowner_reno_planner_ajax_add():
                 project_name=board_name, 
                 title=note_title,
                 details=note_details,
-                photos=[],
+            photos=[],
                 files=[],
                 vision_statement=None,
                 color_palette=None,
@@ -632,8 +632,8 @@ def homeowner_reno_planner_ajax_add():
     # Always save to renovation planner, even if board save fails
     project_id = None
     try:
-        # Fix: Add category parameter and correct argument order
-        # Function signature: user_id, name, category, status, budget, notes
+    # Fix: Add category parameter and correct argument order
+    # Function signature: user_id, name, category, status, budget, notes
         project_id = add_homeowner_project(user_id, name, category, status, budget_str, notes)
     except Exception as e:
         import traceback
@@ -2750,7 +2750,7 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
                 snapshot['equity_estimate'] = snapshot.get('value_estimate') - snapshot.get('loan_balance')
         if not snapshot:
             # Fallback to user-level snapshot
-            snapshot = get_homeowner_snapshot_or_default(homeowner_user)
+        snapshot = get_homeowner_snapshot_or_default(homeowner_user)
     else:
         # Guest mode - create empty snapshot
         snapshot = {
@@ -2974,7 +2974,7 @@ def homeowner_saved_notes():
                 print(f"[BOARD CREATE] Fresh boards query after creation: {list(fresh_boards.keys())}")
                 
                 flash("✨ Beautiful board created!", "success")
-                return redirect(url_for("homeowner_saved_notes", view=board_name))
+            return redirect(url_for("homeowner_saved_notes", view=board_name))
             except ValueError as ve:
                 print(f"[BOARD CREATE VALIDATION ERROR] {str(ve)}")
                 flash(f"Validation error: {str(ve)}", "error")
@@ -3173,10 +3173,10 @@ def homeowner_saved_notes():
                             photos_list = json.loads(photos) if isinstance(photos, str) else photos
                             if isinstance(photos_list, list):
                                 for photo in photos_list:
-                                    try:
-                                        file_path = BASE_DIR / "static" / photo
-                                        if file_path.exists():
-                                            file_path.unlink()
+                            try:
+                                file_path = BASE_DIR / "static" / photo
+                                if file_path.exists():
+                                    file_path.unlink()
                                             print(f"[BOARD DELETE] Deleted photo: {photo}")
                                     except Exception as e:
                                         print(f"[BOARD DELETE] Error deleting photo {photo}: {e}")
@@ -3201,7 +3201,7 @@ def homeowner_saved_notes():
                             print(f"[BOARD DELETE] Error parsing fixtures: {e}")
                 
                 # Delete from database
-                delete_design_board(user_id, board_name)
+                    delete_design_board(user_id, board_name)
                 print(f"[BOARD DELETE] Successfully deleted board '{board_name}' from database")
                 flash("Board deleted successfully.", "success")
             except Exception as e:
@@ -3240,10 +3240,10 @@ def homeowner_saved_notes():
                     else:
                         board_details[board_name] = {
                             "project_name": board_name,
-                            "photos": [],
-                            "notes": [],
-                            "files": [],
-                        }
+                "photos": [],
+                "notes": [],
+                "files": [],
+            }
                 else:
                     board_details[board_name] = {
                         "project_name": board_name,
@@ -4150,7 +4150,7 @@ def homeowner_value_equity_overview():
             print(traceback.format_exc())
             snapshot_data = None
             snapshot_history = []
-    
+
     # Debug logging
     print(f"[HOMEBOT] Widget ID found: {homebot_widget_id is not None}")
     if homebot_widget_id:
@@ -4183,11 +4183,11 @@ def homeowner_value_equity_overview():
     
     # Render Homebot-powered equity page
     try:
-        response = make_response(render_template(
-            "homeowner/value_equity_homebot.html",
-            brand_name=FRONT_BRAND_NAME,
-            homebot_widget_id=homebot_widget_id,
-            professional_info=professional_info,
+    response = make_response(render_template(
+        "homeowner/value_equity_homebot.html",
+        brand_name=FRONT_BRAND_NAME,
+        homebot_widget_id=homebot_widget_id,
+        professional_info=professional_info,
             homeowner_data=homeowner_data or {},
             market_rates=market_rates,
             snapshot=snapshot_data,
@@ -4355,7 +4355,7 @@ def test_homebot():
         "img-src 'self' data: https: blob:; "
         "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com wss: ws:; "
         "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
-    )
+        )
     
     return response
 
