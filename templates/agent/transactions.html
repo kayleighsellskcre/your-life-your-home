@@ -17,6 +17,20 @@
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-premium);
+  }
+  
+  .transaction-card::after {
+    content: '→';
+    position: absolute;
+    top: 50%;
+    right: 2rem;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: var(--olive-green);
+    opacity: 0;
+    transition: all 0.3s ease;
+    font-weight: bold;
   }
 
   .transaction-card::before {
@@ -32,13 +46,18 @@
 
   .transaction-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-premium-hover);
     border-color: var(--olive-green);
   }
 
   .transaction-card:hover::before {
     background: var(--olive-green);
     width: 6px;
+  }
+  
+  .transaction-card:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(5px);
   }
 
   .transaction-header {
@@ -172,88 +191,149 @@
   .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    background: var(--light-cream);
+    background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%);
     border-radius: var(--border-radius-lg);
     border: 2px dashed var(--taupe-beige);
+    box-shadow: var(--shadow-premium);
+    max-width: 600px;
+    margin: 0 auto;
   }
 
   .empty-state-icon {
     font-size: 4rem;
     margin-bottom: 1rem;
     opacity: 0.6;
+    filter: grayscale(0.3);
   }
 
   .empty-state h3 {
     color: var(--charcoal-brown);
     margin-bottom: 0.75rem;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
   }
 
   .empty-state p {
-    color: #666;
+    color: rgba(58, 53, 44, 0.7);
     max-width: 500px;
     margin: 0 auto;
+    font-size: 1rem;
+    line-height: 1.6;
   }
 </style>
 
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">🚀 Track every deal with ease</p>
-  <h1 style="font-size:2.5rem;letter-spacing:0.02em;">AI Transaction Coordinator</h1>
-  <p style="font-size:1.1rem;color:#6b6b6b;">All your files, stages, and clients in one beautiful, interactive dashboard.</p>
+<!-- Premium Header -->
+<div class="premium-header animate-in" style="margin-bottom: 3rem; display: block !important; text-align: center !important; justify-content: center !important;">
+  <div style="text-align: center; width: 100%;">
+    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center; font-family: var(--font-heading); color: var(--charcoal-brown);">AI Transaction Coordinator</h1>
+    <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Track every deal with ease — All your files, stages, and clients in one beautiful, interactive dashboard</span>
+  </div>
 </div>
 
 <div class="transactions-container">
-  <!-- Add Transaction Form -->
-  <div class="card form-card" style="box-shadow:0 4px 24px rgba(0,0,0,0.07); margin-bottom: 3rem;">
-    <h2 style="margin-bottom:1rem;">Add a Transaction</h2>
-    <form method="post" class="transaction-form">
-      <div class="form-row">
-        <label for="property_address">🏠 Property Address</label>
-        <input id="property_address" name="property_address" required placeholder="123 Main St" />
+  <!-- Premium Add Transaction Form -->
+  <div class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; margin-bottom: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige); max-width: 800px; margin-left: auto; margin-right: auto;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 2.25rem; color: var(--charcoal-brown); margin-bottom: 0.5rem; position: relative; padding-bottom: 1rem;">
+        <span style="display: inline-block; position: relative;">
+          Add a Transaction
+          <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
+        </span>
+      </h2>
+    </div>
+    
+    <form method="post" class="transaction-form-premium">
+      <div class="premium-form-grid">
+        <div class="premium-form-group">
+          <label for="property_address" class="premium-form-label">
+            <span>Property Address</span>
+          </label>
+          <input 
+            id="property_address" 
+            name="property_address" 
+            type="text"
+            required 
+            placeholder="123 Main St, City, State" 
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="client_name" class="premium-form-label">
+            <span>Client Name</span>
+          </label>
+          <input 
+            id="client_name" 
+            name="client_name" 
+            type="text"
+            required 
+            placeholder="Jane Doe" 
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="side" class="premium-form-label">
+            <span>Side</span>
+          </label>
+          <select id="side" name="side" class="premium-select">
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="stage" class="premium-form-label">
+            <span>Stage</span>
+          </label>
+          <select id="stage" name="stage" class="premium-select">
+            <option value="summary">Summary</option>
+            <option value="showings">Showings</option>
+            <option value="under_contract">Under Contract</option>
+            <option value="earnest_money">Earnest Money</option>
+            <option value="inspection">Inspection</option>
+            <option value="appraisal">Appraisal</option>
+            <option value="loan_commitment">Loan Commitment</option>
+            <option value="final_walkthrough">Final Walkthrough</option>
+            <option value="closing">Closing</option>
+          </select>
+        </div>
+        
+        <div class="premium-form-group premium-form-full">
+          <label for="close_date" class="premium-form-label">
+            <span>Target Close Date <span style="font-weight: normal; font-size: 0.85em; color: rgba(58, 53, 44, 0.6); font-style: italic;">(Optional - can be added later)</span></span>
+          </label>
+          <input 
+            type="date" 
+            id="close_date" 
+            name="close_date" 
+            class="premium-input"
+          />
+        </div>
       </div>
-      <div class="form-row">
-        <label for="client_name">👤 Client Name</label>
-        <input id="client_name" name="client_name" required placeholder="Jane Doe" />
-      </div>
-      <div class="form-row">
-        <label for="side">🤝 Side</label>
-        <select id="side" name="side">
-          <option value="buyer">Buyer</option>
-          <option value="seller">Seller</option>
-          <option value="both">Both</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label for="stage">📈 Stage</label>
-        <select id="stage" name="stage">
-          <option value="summary">Summary</option>
-          <option value="showings">Showings</option>
-          <option value="under_contract">Under Contract</option>
-          <option value="earnest_money">Earnest Money</option>
-          <option value="inspection">Inspection</option>
-          <option value="appraisal">Appraisal</option>
-          <option value="loan_commitment">Loan Commitment</option>
-          <option value="final_walkthrough">Final Walkthrough</option>
-          <option value="closing">Closing</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label for="close_date">📅 Target Close Date</label>
-        <input type="date" id="close_date" name="close_date" />
-      </div>
-      <button class="btn btn-primary" type="submit" style="margin-top:1.5rem;transition:box-shadow 0.2s;box-shadow:0 2px 8px rgba(0,0,0,0.08);">🚀 Start Transaction</button>
+      
+      <button class="btn-premium" type="submit" style="margin-top: 2rem; width: 100%; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-olive);">
+        Start Transaction
+      </button>
     </form>
   </div>
 
   <!-- Transactions List -->
   {% if transactions %}
-    <h2 style="margin-bottom: 1.5rem; font-family: var(--font-heading); color: var(--charcoal-brown);">Your Transactions</h2>
+    <div style="max-width: 1600px; margin: 0 auto;">
+      <h2 style="margin-bottom: 2rem; font-family: var(--font-heading); color: var(--charcoal-brown); font-size: 2rem; text-align: center; position: relative; padding-bottom: 1rem;">
+        <span style="display: inline-block; position: relative;">
+          Your Transactions
+          <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
+        </span>
+      </h2>
     
     {% for tx in transactions %}
-      <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'">
+      <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'" title="Click to open AI Transaction Coordinator">
         <div class="transaction-header">
           <div class="transaction-main-info">
             <div class="transaction-property">
-              <span>🏠</span>
               <span>{{ tx.property_address }}</span>
             </div>
             <div class="transaction-client">
@@ -266,6 +346,9 @@
               <span class="side-badge {{ tx.side or 'buyer' }}">
                 {{ (tx.side or 'buyer')|capitalize }}
               </span>
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--taupe-beige); font-size: 0.85rem; color: var(--olive-green); font-weight: 600;">
+              Click anywhere on this card to access the full AI Transaction Coordinator
             </div>
           </div>
           <div class="transaction-actions" onclick="event.stopPropagation();">
@@ -289,26 +372,150 @@
         </div>
       </div>
     {% endfor %}
+    </div>
   {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon">📋</div>
-      <h3>No Transactions Yet</h3>
+    <div class="empty-state animate-in" style="animation-delay: 0.2s;">
+      <h3 style="font-family: var(--font-heading);">No Transactions Yet</h3>
       <p>Once you add a transaction, you will be able to track stages here.</p>
     </div>
   {% endif %}
 </div>
 
 <style>
-.transaction-form .form-row {
-  display: flex;
-  flex-direction: column;
+/* Premium Form Styling */
+.transaction-form-premium {
+  width: 100%;
+}
+
+.premium-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
   margin-bottom: 1rem;
 }
-.transaction-form input:focus,
-.transaction-form select:focus {
+
+.premium-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-form-full {
+  grid-column: 1 / -1;
+}
+
+.premium-form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--olive-green);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+
+.premium-input,
+.premium-select {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--taupe-beige);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--charcoal-brown);
+  background: var(--white);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.05);
+}
+
+.premium-input:hover,
+.premium-select:hover {
+  border-color: var(--olive-green);
+  box-shadow: 0 4px 12px rgba(107, 106, 69, 0.1);
+}
+
+.premium-input:focus,
+.premium-select:focus {
   outline: none;
   border-color: var(--olive-green);
-  box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
+  box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.15), 0 4px 16px rgba(58, 53, 44, 0.1);
+  transform: translateY(-1px);
+}
+
+.premium-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233A352C' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.premium-input::placeholder {
+  color: rgba(58, 53, 44, 0.4);
+  font-style: italic;
+}
+
+/* Premium Button Styling */
+.btn-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(58, 53, 44, 0.15);
+  text-decoration: none;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(58, 53, 44, 0.2);
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.15);
+}
+
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .premium-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .premium-header h1 {
+    font-size: 2rem !important;
+  }
+  
+  .card-premium {
+    padding: 2rem 1.5rem !important;
+  }
 }
 </style>
 

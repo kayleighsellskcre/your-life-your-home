@@ -15,6 +15,14 @@ import secrets
 import pandas as pd
 import io
 
+# Load environment variables from .env file (if it exists)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # python-dotenv not installed - that's okay, will use system env vars
+    pass
+
 from flask import (
     Flask,
     render_template,
@@ -506,7 +514,33 @@ def inject_professionals():
         else:
             print(f"CONTEXT PROCESSOR: No user logged in")
     
-    return dict(professionals=professionals, hex_to_color_name=hex_to_color_name)
+    # Helper function to check if photo exists and return correct path
+    def get_professional_photo_url(photo_path):
+        """Get professional photo URL, checking if file exists."""
+        if not photo_path:
+            return None
+        # If it's already a full URL, return it
+        if photo_path.startswith('http://') or photo_path.startswith('https://'):
+            return photo_path
+        # Check if file exists in static folder
+        from pathlib import Path
+        import os
+        static_folder = app.static_folder or 'static'
+        static_path = Path(static_folder) / photo_path
+        # Normalize path to handle any directory separators
+        static_path = static_path.resolve()
+        static_folder_path = Path(static_folder).resolve()
+        # Ensure the path is within static folder for security
+        try:
+            static_path.relative_to(static_folder_path)
+            if static_path.exists() and static_path.is_file():
+                return url_for('static', filename=photo_path)
+        except ValueError:
+            # Path is outside static folder, don't serve it
+            pass
+        return None
+    
+    return dict(professionals=professionals, hex_to_color_name=hex_to_color_name, get_professional_photo_url=get_professional_photo_url)
 
 # ---------------- AJAX PLANNER ROUTE ----------------
 @app.route("/homeowner/reno/planner/ajax-add", methods=["POST"])
@@ -634,6 +668,7 @@ from transaction_helpers import (
     create_transaction,
     get_agent_transactions,
     delete_transaction,
+    update_transaction,
     get_transaction_detail,
     get_transaction_documents,
     get_transaction_participants,
@@ -731,21 +766,87 @@ def require_homeowner_access(homeowner_id: int) -> Tuple[Optional[dict], Optiona
 @app.route("/agent/transactions/<int:tx_id>/participants/add", methods=["POST"])
 def agent_add_participant(tx_id):
     """Add a participant to an agent transaction."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        if request.is_json or request.content_type == 'application/json':
+            return jsonify({"success": False, "error": "Unauthorized"}), 401
+        return redirect(url_for("login", role="agent"))
+    
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        if request.is_json or request.content_type == 'application/json':
+            return jsonify({"success": False, "error": "Transaction not found"}), 404
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+    
     name = request.form.get("participant_name", "").strip()
     email = request.form.get("participant_email", "").strip()
-    role = request.form.get("participant_role", "").strip()
+    phone = request.form.get("participant_phone", "").strip()
+    role = request.form.get("participant_role", "client").strip()
 
-    if not name or not email or not role:
-        flash("All participant fields are required.", "error")
+    if not name:
+        if request.is_json or request.content_type == 'application/json':
+            return jsonify({"success": False, "error": "Name is required"}), 400
+        flash("Participant name is required.", "error")
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
     try:
-        add_transaction_participant(tx_id, name, email, role)
+        from transaction_helpers import add_transaction_participant
+        participant_id = add_transaction_participant(
+            transaction_id=tx_id,
+            participant_type='client',
+            name=name,
+            email=email or None,
+            phone=phone or None,
+            permissions='view_only',
+            user_id=None,
+            added_by=user["id"]
+        )
+        
+        # Always return JSON for AJAX requests (check if it's a fetch request)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json or request.content_type == 'application/json':
+            return jsonify({"success": True, "message": "Client added successfully", "participant_id": participant_id}), 200
+        
         flash("Participant added successfully!", "success")
     except Exception as e:
+        import traceback
+        print(f"Error adding participant: {traceback.format_exc()}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json or request.content_type == 'application/json':
+            return jsonify({"success": False, "error": str(e)}), 500
         flash(f"Error adding participant: {e}", "error")
 
     return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+
+@app.route("/agent/transactions/<int:tx_id>/participants/<int:participant_id>/remove", methods=["POST"])
+def agent_remove_participant(tx_id, participant_id):
+    """Remove a participant from a transaction."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        return jsonify({"success": False, "error": "Transaction not found"}), 404
+    
+    try:
+        from transaction_helpers import get_db
+        with get_db() as conn:
+            cursor = conn.cursor()
+            # Verify participant belongs to this transaction
+            cursor.execute("SELECT id FROM transaction_participants WHERE id = ? AND transaction_id = ?", (participant_id, tx_id))
+            if not cursor.fetchone():
+                return jsonify({"success": False, "error": "Participant not found"}), 404
+            
+            # Mark as removed instead of deleting
+            cursor.execute("UPDATE transaction_participants SET status = 'removed' WHERE id = ?", (participant_id,))
+            conn.commit()
+        
+        return jsonify({"success": True, "message": "Client removed successfully"}), 200
+    except Exception as e:
+        import traceback
+        print(f"Error removing participant: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 # -------------------------------------------------
@@ -5436,6 +5537,28 @@ def agent_transactions():
         stage = request.form.get("stage", "pre_contract").strip()
         close_date = request.form.get("close_date", "").strip() or None
 
+        # Map form stage values to database stage values
+        # Database allows: 'pre_contract', 'under_contract', 'in_escrow', 'clear_to_close', 'closed', 'cancelled'
+        stage_mapping = {
+            'summary': 'pre_contract',
+            'showings': 'pre_contract',
+            'under_contract': 'under_contract',
+            'earnest_money': 'under_contract',
+            'inspection': 'in_escrow',
+            'appraisal': 'in_escrow',
+            'loan_commitment': 'in_escrow',
+            'final_walkthrough': 'clear_to_close',
+            'closing': 'clear_to_close',
+            'pre_contract': 'pre_contract',
+            'in_escrow': 'in_escrow',
+            'clear_to_close': 'clear_to_close',
+            'closed': 'closed',
+            'cancelled': 'cancelled'
+        }
+        
+        # Convert form stage to database stage, default to 'pre_contract' if not found
+        db_stage = stage_mapping.get(stage, 'pre_contract')
+
         if property_address and client_name:
             try:
                 create_transaction(
@@ -5443,7 +5566,7 @@ def agent_transactions():
                     property_address=property_address,
                     client_name=client_name,
                     side=side,
-                    current_stage=stage,
+                    current_stage=db_stage,
                     target_close_date=close_date,
                     client_email=request.form.get("client_email", "").strip(),
                     client_phone=request.form.get("client_phone", "").strip(),
@@ -5511,6 +5634,192 @@ def agent_transaction_detail(tx_id):
     )
 
 
+@app.route("/agent/transactions/<int:tx_id>/add-client-to-crm", methods=["POST"])
+def agent_transaction_add_client_to_crm(tx_id):
+    """Add transaction client to CRM."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        return jsonify({"success": False, "error": "Transaction not found"}), 404
+
+    try:
+        # Get client info from form data or transaction
+        if request.is_json:
+            data = request.get_json()
+            client_name = data.get("client_name", "").strip()
+            client_email = data.get("client_email", "").strip()
+            client_phone = data.get("client_phone", "").strip()
+        else:
+            client_name = request.form.get("client_name", "").strip()
+            client_email = request.form.get("client_email", "").strip()
+            client_phone = request.form.get("client_phone", "").strip()
+        
+        # Fallback to transaction data if not provided
+        if not client_name:
+            client_name = transaction.get("client_name") or ""
+        if not client_email:
+            client_email = transaction.get("client_email") or ""
+        if not client_phone:
+            client_phone = transaction.get("client_phone") or ""
+        
+        property_address = transaction.get("property_address") or ""
+        
+        if not client_name:
+            return jsonify({"success": False, "error": "Client name is required"}), 400
+        
+        # Check if contact already exists
+        from database import list_agent_contacts
+        contacts = list_agent_contacts(user["id"])
+        existing = None
+        for contact in contacts:
+            contact_dict = dict(contact) if hasattr(contact, 'keys') else contact
+            if (contact_dict.get('name', '').lower() == client_name.lower() or
+                (client_email and contact_dict.get('email', '').lower() == client_email.lower()) or
+                (client_phone and contact_dict.get('phone', '') == client_phone)):
+                existing = contact_dict
+                break
+        
+        if existing:
+            return jsonify({"success": True, "message": "Client already exists in CRM", "contact_id": existing.get('id')}), 200
+        
+        # Add to CRM
+        from database import add_agent_contact
+        contact_id = add_agent_contact(
+            agent_user_id=user["id"],
+            name=client_name,
+            email=client_email,
+            phone=client_phone,
+            stage="active",
+            property_address=property_address
+        )
+        
+        return jsonify({"success": True, "message": "Client added to CRM successfully", "contact_id": contact_id}), 200
+    except Exception as e:
+        import traceback
+        print(f"Error adding client to CRM: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/agent/transactions/<int:tx_id>/edit", methods=["GET", "POST"])
+def agent_transaction_edit(tx_id):
+    """Edit transaction details."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+
+    if request.method == "POST":
+        # Map form stage values to database stage values
+        stage_mapping = {
+            'summary': 'pre_contract',
+            'showings': 'pre_contract',
+            'under_contract': 'under_contract',
+            'earnest_money': 'under_contract',
+            'inspection': 'in_escrow',
+            'appraisal': 'in_escrow',
+            'loan_commitment': 'in_escrow',
+            'final_walkthrough': 'clear_to_close',
+            'closing': 'clear_to_close',
+            'pre_contract': 'pre_contract',
+            'in_escrow': 'in_escrow',
+            'clear_to_close': 'clear_to_close',
+            'closed': 'closed',
+            'cancelled': 'cancelled'
+        }
+        
+        stage = request.form.get("stage", "").strip()
+        db_stage = stage_mapping.get(stage, transaction.get('current_stage', 'pre_contract'))
+        
+        close_date = request.form.get("close_date", "").strip() or None
+        purchase_price = request.form.get("purchase_price", "").strip()
+        
+        update_data = {
+            'property_address': request.form.get("property_address", "").strip(),
+            'client_name': request.form.get("client_name", "").strip(),
+            'client_email': request.form.get("client_email", "").strip(),
+            'client_phone': request.form.get("client_phone", "").strip(),
+            'side': request.form.get("side", "").strip(),
+            'current_stage': db_stage,
+            'purchase_price': float(purchase_price) if purchase_price else None,
+            'target_close_date': close_date,
+            'notes': request.form.get("notes", "").strip(),
+        }
+        
+        if update_transaction(tx_id, user["id"], **update_data):
+            flash("Transaction updated successfully!", "success")
+            return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+        else:
+            flash("Error updating transaction.", "error")
+
+    # Get participants for displaying additional clients
+    participants = get_transaction_participants(tx_id)
+    transaction['participants'] = participants
+    
+    return render_template(
+        "agent/transaction_edit.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        transaction=transaction,
+    )
+
+
+@app.route("/agent/transactions/<int:tx_id>/change-stage", methods=["POST"])
+def agent_transaction_change_stage(tx_id):
+    """Change transaction stage."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+
+    new_stage = request.form.get("new_stage", "").strip()
+    sub_stage = request.form.get("sub_stage", "").strip()
+    
+    # Handle custom format (pre_contract:summary or pre_contract:showings)
+    if ':' in new_stage:
+        parts = new_stage.split(':')
+        new_stage = parts[0]
+        sub_stage = parts[1] if len(parts) > 1 else sub_stage
+    
+    if not new_stage:
+        flash("Please select a stage.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+    # Validate stage
+    valid_stages = ['pre_contract', 'under_contract', 'in_escrow', 'clear_to_close', 'closed', 'cancelled']
+    if new_stage not in valid_stages:
+        flash("Invalid stage selected.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+    try:
+        from transaction_helpers import update_transaction_stage
+        if update_transaction_stage(tx_id, new_stage, user["id"], auto_changed=False):
+            # Store sub-stage in notes if needed (for Summary vs Showings distinction)
+            if sub_stage and new_stage == 'pre_contract':
+                # We could store this in a separate field or notes, but for now just update stage
+                # The timeline display logic will handle showing Summary vs Showings correctly
+                pass
+            flash("Transaction stage updated successfully.", "success")
+        else:
+            flash("Could not update transaction stage.", "error")
+    except Exception as e:
+        import traceback
+        print(f"Error changing stage: {traceback.format_exc()}")
+        flash(f"Error updating stage: {str(e)}", "error")
+
+    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+
+
 @app.route("/agent/transactions/<int:tx_id>/delete", methods=["POST"])
 def agent_transaction_delete(tx_id):
     """Delete a transaction."""
@@ -5524,6 +5833,289 @@ def agent_transaction_delete(tx_id):
         flash("Could not delete transaction.", "error")
 
     return redirect(url_for("agent_transactions"))
+
+
+def refine_feature_text(feature):
+    """
+    Refine feature title and description to be more elegant, human, and professional.
+    Uses OpenAI if available, otherwise uses simple text processing.
+    """
+    title = feature.get('title', '').strip()
+    description = feature.get('description', '').strip()
+    room = feature.get('room', '').strip()
+    
+    # Simple refinement rules (fallback)
+    refined_title = title.strip()
+    refined_description = description.strip()
+    
+    # Clean up title
+    if refined_title:
+        refined_title = refined_title[0].upper() + refined_title[1:] if len(refined_title) > 1 else refined_title.upper()
+    
+    # Clean up description
+    if refined_description:
+        if refined_description[-1] not in '.!?':
+            refined_description += '.'
+        refined_description = refined_description[0].upper() + refined_description[1:] if len(refined_description) > 1 else refined_description.upper()
+    
+    # Try OpenAI if available
+    try:
+        openai_api_key = os.environ.get('OPENAI_API_KEY')
+        if openai_api_key:
+            try:
+                # Try new OpenAI API (v1.0+)
+                try:
+                    from openai import OpenAI
+                    client = OpenAI(api_key=openai_api_key)
+                    
+                    prompt = f"""You are a real estate marketing assistant creating elegant feature descriptions for luxury property listings.
+
+Original Feature:
+Title: {title}
+Room: {room}
+Description: {description}
+
+Please refine this to be:
+1. Elegant and professional
+2. Natural and warm (keep the agent's voice)
+3. Concise (1-2 short sentences max for description)
+4. Highlight both emotional and practical value
+
+Return ONLY a JSON object with "title" and "description" fields. No other text.
+
+Example format:
+{{"title": "Hidden Storage Pantry", "description": "Custom pull-out shelving maximizes storage while keeping countertops clutter-free."}}"""
+
+                    response = client.chat.completions.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a professional real estate copywriter. Return only valid JSON."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=150
+                    )
+                    
+                    import json
+                    result = json.loads(response.choices[0].message.content.strip())
+                    refined_title = result.get('title', refined_title)
+                    refined_description = result.get('description', refined_description)
+                except (ImportError, AttributeError):
+                    # Fall back to old OpenAI API format
+                    import openai
+                    openai.api_key = openai_api_key
+                    
+                    prompt = f"""You are a real estate marketing assistant creating elegant feature descriptions for luxury property listings.
+
+Original Feature:
+Title: {title}
+Room: {room}
+Description: {description}
+
+Please refine this to be:
+1. Elegant and professional
+2. Natural and warm (keep the agent's voice)
+3. Concise (1-2 short sentences max for description)
+4. Highlight both emotional and practical value
+
+Return ONLY a JSON object with "title" and "description" fields. No other text.
+
+Example format:
+{{"title": "Hidden Storage Pantry", "description": "Custom pull-out shelving maximizes storage while keeping countertops clutter-free."}}"""
+
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a professional real estate copywriter. Return only valid JSON."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.7,
+                        max_tokens=150
+                    )
+                    
+                    import json
+                    result = json.loads(response.choices[0].message.content.strip())
+                    refined_title = result.get('title', refined_title)
+                    refined_description = result.get('description', refined_description)
+            except ImportError:
+                # OpenAI library not installed
+                pass
+            except Exception as e:
+                # OpenAI API call failed, use simple refinement
+                print(f"OpenAI refinement failed, using simple refinement: {e}")
+                import traceback
+                print(traceback.format_exc())
+                pass
+    except Exception as e:
+        # Fall back to simple refinement
+        print(f"Refinement error: {e}")
+        pass
+    
+    return {
+        'title': refined_title,
+        'room': room,
+        'description': refined_description
+    }
+
+
+@app.route("/agent/transactions/<int:tx_id>/feature-spotlight-cards")
+def agent_feature_spotlight_cards(tx_id):
+    """Feature Spotlight Cards generator page."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+
+    return render_template(
+        "agent/feature_spotlight_cards.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        tx_id=tx_id,
+        transaction=transaction,
+    )
+
+
+@app.route("/agent/feature-spotlight/refine", methods=["POST"])
+def agent_feature_spotlight_refine():
+    """Refine a single feature's text using AI."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        feature = {
+            'title': data.get('title', ''),
+            'room': data.get('room', ''),
+            'description': data.get('description', '')
+        }
+        
+        refined = refine_feature_text(feature)
+        
+        return jsonify({
+            "success": True,
+            "refined": refined
+        })
+    except Exception as e:
+        import traceback
+        print(f"Error refining feature: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/agent/transactions/<int:tx_id>/feature-spotlight-cards/generate", methods=["POST"])
+def agent_feature_spotlight_cards_generate(tx_id):
+    """Generate Feature Spotlight Cards PDF."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+
+    # Parse features from form data
+    features = []
+    import re
+    
+    # Get all form keys
+    form_data = request.form.to_dict(flat=False)
+    
+    # Find all feature indices
+    feature_indices = set()
+    for key in form_data.keys():
+        match = re.search(r'features\[(\d+)\]\[(\w+)\]', key)
+        if match:
+            feature_indices.add(int(match.group(1)))
+    
+    # Build features list
+    for idx in sorted(feature_indices):
+        title_key = f'features[{idx}][title]'
+        room_key = f'features[{idx}][room]'
+        desc_key = f'features[{idx}][description]'
+        
+        title = request.form.get(title_key, '').strip()
+        room = request.form.get(room_key, '').strip()
+        desc = request.form.get(desc_key, '').strip()
+        
+        if title and room and desc:
+            features.append({
+                'title': title,
+                'room': room,
+                'description': desc
+            })
+    
+    if not features:
+        flash("Please add at least one feature.", "error")
+        return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
+
+    # Refine features with AI
+    refined_features = []
+    for feature in features:
+        refined_feature = refine_feature_text(feature)
+        refined_features.append(refined_feature)
+    
+    # Generate PDF
+    try:
+        from weasyprint import HTML
+        
+        html = render_template(
+            "agent/feature_spotlight_pdf.html",
+            features=refined_features,
+            property_address=transaction.get('property_address', 'Property'),
+        )
+        
+        pdf = HTML(string=html, base_url=str(BASE_DIR / "static")).write_pdf()
+        
+        safe_filename = f"feature-spotlight-cards-{tx_id}-{datetime.now().strftime('%Y%m%d')}.pdf"
+        
+        response = Response(
+            pdf,
+            mimetype='application/pdf',
+            headers={
+                'Content-Disposition': f'inline; filename="{safe_filename}"'
+            }
+        )
+        return response
+        
+    except ImportError:
+        # WeasyPrint not installed - show HTML preview with print button
+        html_preview = render_template(
+            "agent/feature_spotlight_pdf.html",
+            features=refined_features,
+            property_address=transaction.get('property_address', 'Property'),
+        )
+        return html_preview
+    except (OSError, Exception) as e:
+        import traceback
+        error_msg = str(e)
+        print(f"Error generating PDF: {traceback.format_exc()}")
+        
+        # Check if it's a Windows GTK+ dependency issue
+        if 'libgobject' in error_msg.lower() or 'gtk' in error_msg.lower() or '0x7e' in error_msg:
+            # Windows dependency issue - return HTML with print functionality
+            html_preview = render_template(
+                "agent/feature_spotlight_pdf.html",
+                features=refined_features,
+                property_address=transaction.get('property_address', 'Property'),
+            )
+            return html_preview
+        else:
+            # Other error - try HTML preview as fallback
+            try:
+                html_preview = render_template(
+                    "agent/feature_spotlight_pdf.html",
+                    features=refined_features,
+                    property_address=transaction.get('property_address', 'Property'),
+                )
+                return html_preview
+            except:
+                flash(f"Error generating PDF: {str(e)}", "error")
+                return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
 
 
 @app.route("/agent/communications", methods=["GET", "POST"])

@@ -250,9 +250,69 @@
   </div>
 </nav>
 
-<div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;">
+<div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;" class="agent-content-wrapper">
   {% block agent_content %}
   {% endblock %}
 </div>
+
+<style>
+  @media (max-width: 768px) {
+    .agent-content-wrapper {
+      padding: 1.5rem 1rem !important;
+    }
+    
+    /* Feature Spotlight Cards Mobile */
+    .feature-spotlight-container {
+      padding: 1rem !important;
+    }
+    
+    .premium-header h1 {
+      font-size: 1.5rem !important;
+    }
+    
+    .premium-header p {
+      font-size: 0.9rem !important;
+    }
+    
+    .card-premium {
+      padding: 1.5rem 1rem !important;
+    }
+    
+    .feature-card {
+      padding: 1rem !important;
+    }
+    
+    /* Transaction Pages Mobile */
+    .transaction-header,
+    .transaction-detail-header {
+      flex-direction: column !important;
+      gap: 1rem !important;
+    }
+    
+    .transaction-actions {
+      flex-direction: column !important;
+      width: 100% !important;
+    }
+    
+    .transaction-actions button,
+    .transaction-actions a {
+      width: 100% !important;
+    }
+    
+    /* Form Pages Mobile */
+    .form-group {
+      margin-bottom: 1.25rem !important;
+    }
+    
+    /* CRM Tables Mobile */
+    .crm-table-wrapper {
+      overflow-x: auto !important;
+    }
+    
+    table {
+      min-width: 600px !important;
+    }
+  }
+</style>
 
 {% endblock %}

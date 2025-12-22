@@ -261,16 +261,73 @@ def get_transaction_documents(transaction_id: int) -> List[Dict]:
     
     return documents
 
-def get_document_checklist(stage: str) -> List[Dict]:
-    """Get required documents for a stage"""
+def get_document_checklist(stage: str, side: str = None) -> List[Dict]:
+    """Get required documents for a stage, filtered by buyer/seller side"""
     conn = get_db()
     cursor = conn.cursor()
     
-    cursor.execute("""
-        SELECT * FROM document_checklists
-        WHERE stage = ?
-        ORDER BY display_order
-    """, (stage,))
+    # Buyer-specific documents (only shown for buyer transactions)
+    buyer_only_docs = {
+        'pre_contract': ['pre_approval_letter', 'proof_of_funds', 'buyer_agency_agreement'],
+        'under_contract': ['earnest_money_receipt'],
+        'in_escrow': ['loan_application', 'homeowners_insurance'],
+        'clear_to_close': ['clear_to_close_letter'],
+    }
+    
+    # Seller-specific documents (only shown for seller transactions)
+    seller_only_docs = {
+        'pre_contract': ['listing_agreement', 'seller_disclosures_preliminary', 'property_info_sheet'],
+        'under_contract': ['seller_disclosures'],
+        'in_escrow': [],
+        'clear_to_close': ['utilities_transfer'],
+    }
+    
+    # Common documents (shown for both buyer and seller)
+    common_docs = {
+        'pre_contract': [],
+        'under_contract': ['purchase_agreement', 'hoa_documents'],
+        'in_escrow': ['inspection_report', 'inspection_response', 'appraisal_report', 'title_report'],
+        'clear_to_close': ['final_walkthrough', 'closing_disclosure', 'wire_instructions'],
+        'closed': ['recorded_deed', 'settlement_statement', 'keys'],
+    }
+    
+    # Determine which documents to show based on side
+    if side == 'buyer':
+        relevant_doc_types = buyer_only_docs.get(stage, []) + common_docs.get(stage, [])
+    elif side == 'seller':
+        relevant_doc_types = seller_only_docs.get(stage, []) + common_docs.get(stage, [])
+    elif side == 'both':
+        # Show all documents for both sides
+        relevant_doc_types = list(set(
+            buyer_only_docs.get(stage, []) + 
+            seller_only_docs.get(stage, []) + 
+            common_docs.get(stage, [])
+        ))
+    else:
+        # Default: show all documents (for backward compatibility)
+        relevant_doc_types = None
+    
+    if relevant_doc_types:
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_doc_types = []
+        for doc_type in relevant_doc_types:
+            if doc_type not in seen:
+                seen.add(doc_type)
+                unique_doc_types.append(doc_type)
+        
+        placeholders = ','.join(['?'] * len(unique_doc_types))
+        cursor.execute(f"""
+            SELECT * FROM document_checklists
+            WHERE stage = ? AND document_type IN ({placeholders})
+            ORDER BY display_order
+        """, (stage, *unique_doc_types))
+    else:
+        cursor.execute("""
+            SELECT * FROM document_checklists
+            WHERE stage = ?
+            ORDER BY display_order
+        """, (stage,))
     
     checklist = [dict(row) for row in cursor.fetchall()]
     conn.close()
@@ -278,14 +335,18 @@ def get_document_checklist(stage: str) -> List[Dict]:
     return checklist
 
 def get_transaction_document_status(transaction_id: int) -> Dict:
-    """Get checklist with completion status"""
+    """Get checklist with completion status, filtered by buyer/seller side"""
     with get_db() as conn:
         cursor = conn.cursor()
-        # Get current stage
-        cursor.execute("SELECT current_stage FROM transactions WHERE id = ?", (transaction_id,))
-        stage = cursor.fetchone()[0]
-        # Get checklist for stage
-        checklist = get_document_checklist(stage)
+        # Get current stage and side
+        cursor.execute("SELECT current_stage, side FROM transactions WHERE id = ?", (transaction_id,))
+        row = cursor.fetchone()
+        if not row:
+            return {'checklist': [], 'completed': 0, 'total': 0, 'progress_percentage': 0}
+        stage = row[0]
+        side = row[1] if len(row) > 1 else None
+        # Get checklist for stage filtered by side
+        checklist = get_document_checklist(stage, side)
         # Get uploaded documents
         cursor.execute("""
             SELECT document_type FROM transaction_documents
@@ -317,19 +378,56 @@ def add_transaction_participant(transaction_id: int, participant_type: str,
     invitation_token = secrets.token_urlsafe(32)
     with get_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO transaction_participants
-            (transaction_id, participant_type, user_id, name, email, phone,
-             permissions, invitation_token, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending')
-        """, (transaction_id, participant_type, user_id, name, email, phone,
-              permissions, invitation_token))
+        
+        # Check which columns exist
+        cursor.execute("PRAGMA table_info(transaction_participants)")
+        columns = {col[1]: col for col in cursor.fetchall()}
+        
+        # Build insert statement dynamically based on available columns
+        # Map permissions to match schema default ('view' not 'view_only')
+        mapped_permissions = 'view' if permissions == 'view_only' else permissions
+        
+        if 'participant_type' in columns and 'name' in columns:
+            # New schema with participant_type and name
+            if 'role' in columns:
+                # Both columns exist - use both for compatibility (role is NOT NULL)
+                cursor.execute("""
+                    INSERT INTO transaction_participants
+                    (transaction_id, participant_type, role, user_id, name, email, phone,
+                     permissions, invitation_token, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active')
+                """, (transaction_id, participant_type, participant_type, user_id, name, email, phone,
+                      mapped_permissions, invitation_token))
+            else:
+                # Only new schema columns
+                cursor.execute("""
+                    INSERT INTO transaction_participants
+                    (transaction_id, participant_type, user_id, name, email, phone,
+                     permissions, invitation_token, status)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active')
+                """, (transaction_id, participant_type, user_id, name, email, phone,
+                      mapped_permissions, invitation_token))
+        elif 'role' in columns:
+            # Old schema - use role and email as name fallback (role is NOT NULL)
+            cursor.execute("""
+                INSERT INTO transaction_participants
+                (transaction_id, role, user_id, email, permissions, status)
+                VALUES (?, ?, ?, ?, ?, 'active')
+            """, (transaction_id, participant_type, user_id, email or name, mapped_permissions))
+        else:
+            # Fallback - try minimal insert
+            cursor.execute("""
+                INSERT INTO transaction_participants
+                (transaction_id, participant_type, name, email, phone, status)
+                VALUES (?, ?, ?, ?, ?, 'active')
+            """, (transaction_id, participant_type, name, email, phone))
+        
         participant_id = cursor.lastrowid
         conn.commit()
     # Log timeline event (outside the with block to avoid nested DB writes)
     log_timeline_event(
         transaction_id, 'participant_added',
-        f"👥 {name} added as {participant_type.replace('_', ' ').title()}",
+        f"{name} added as {participant_type.replace('_', ' ').title()}",
         added_by
     )
     return participant_id
@@ -339,15 +437,26 @@ def get_transaction_participants(transaction_id: int) -> List[Dict]:
     conn = get_db()
     cursor = conn.cursor()
     
+    # Handle both INTEGER and TEXT transaction_id types
     cursor.execute("""
         SELECT tp.*, u.email as user_email
         FROM transaction_participants tp
         LEFT JOIN users u ON tp.user_id = u.id
-        WHERE tp.transaction_id = ? AND tp.status != 'removed'
-        ORDER BY tp.added_at DESC
-    """, (transaction_id,))
+        WHERE CAST(tp.transaction_id AS TEXT) = CAST(? AS TEXT) AND tp.status != 'removed'
+        ORDER BY COALESCE(tp.added_at, tp.created_at) DESC
+    """, (str(transaction_id),))
     
-    participants = [dict(row) for row in cursor.fetchall()]
+    participants = []
+    for row in cursor.fetchall():
+        participant = dict(row)
+        # Ensure participant_type exists (use role as fallback)
+        if not participant.get('participant_type') and participant.get('role'):
+            participant['participant_type'] = participant['role']
+        # Ensure name exists (use email as fallback for old schema)
+        if not participant.get('name') and participant.get('email'):
+            participant['name'] = participant['email']
+        participants.append(participant)
+    
     conn.close()
     
     return participants
@@ -466,6 +575,58 @@ def handle_document_upload_and_auto_progression(transaction_id, document_type):
             (transaction_id, f"Stage auto-progressed to {next_stage} via {document_type}")
         )
         db.commit()
+
+def update_transaction(transaction_id: int, agent_id: int, **kwargs) -> bool:
+    """Update transaction details"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # Verify ownership
+        cursor.execute("SELECT agent_id FROM transactions WHERE id = ?", (transaction_id,))
+        row = cursor.fetchone()
+        if not row or row[0] != agent_id:
+            return False
+        
+        # Build update query dynamically based on provided fields
+        updates = []
+        values = []
+        
+        allowed_fields = {
+            'property_address': 'property_address',
+            'client_name': 'client_name',
+            'client_email': 'client_email',
+            'client_phone': 'client_phone',
+            'side': 'side',
+            'current_stage': 'current_stage',
+            'purchase_price': 'purchase_price',
+            'target_close_date': 'target_close_date',
+            'notes': 'notes'
+        }
+        
+        for key, value in kwargs.items():
+            if key in allowed_fields and value is not None:
+                updates.append(f"{allowed_fields[key]} = ?")
+                values.append(value)
+        
+        if not updates:
+            return False
+        
+        # Add updated_at timestamp
+        updates.append("updated_at = CURRENT_TIMESTAMP")
+        values.append(transaction_id)
+        
+        query = f"UPDATE transactions SET {', '.join(updates)} WHERE id = ?"
+        cursor.execute(query, values)
+        conn.commit()
+        
+        # Log timeline event - use 'date_changed' if date was updated, otherwise 'note_added'
+        event_type = 'date_changed' if 'target_close_date' in kwargs else 'note_added'
+        log_timeline_event(
+            transaction_id, event_type,
+            "Transaction details updated",
+            agent_id
+        )
+        
+        return True
 
 def delete_transaction(transaction_id, agent_id):
     db = get_db()

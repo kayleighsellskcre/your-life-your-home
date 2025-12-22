@@ -4,14 +4,14 @@
 <style>
   /* Transaction Header */
   .transaction-header {
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
+    padding: 0;
+    border-radius: 16px;
+    margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
-    border: var(--border-light);
-    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.08);
   }
   
   .transaction-header::after {
@@ -24,18 +24,16 @@
   .transaction-header-content {
     position: relative;
     z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
   }
   
   .property-address {
     font-family: var(--font-heading);
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    text-align: center;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
   }
   
   .transaction-meta {
@@ -56,78 +54,91 @@
   }
   
   .stage-badge {
-    background: var(--olive-green);
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
     color: var(--white);
-    padding: 0.5rem 1.5rem;
-    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: capitalize;
-    letter-spacing: 0.02em;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 2px 10px rgba(107, 106, 69, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
   }
   
   /* Progress Bar */
   .progress-section {
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 242, 232, 0.95) 100%);
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
     margin-bottom: 1.5rem;
-    border: var(--border-light);
-    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(10px);
   }
   
   .progress-bar-container {
-    height: 10px;
-    background: var(--warm-cream);
-    border-radius: var(--border-radius);
+    height: 8px;
+    background: rgba(200, 180, 151, 0.15);
+    border-radius: 10px;
     overflow: hidden;
     margin: 0.75rem 0;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   }
   
   .progress-bar-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.8) 100%);
-    transition: width 0.6s ease;
+    background: linear-gradient(90deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.85) 100%);
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 4px rgba(107, 106, 69, 0.3);
+    border-radius: 10px;
   }
   
   .progress-text {
     text-align: center;
     color: var(--charcoal-brown);
-    font-size: 0.9rem;
+    font-size: 0.875rem;
     margin-top: 0.5rem;
     font-weight: 500;
+    letter-spacing: 0.01em;
   }
   
   /* Tabs */
   .tabs {
     display: flex;
-    gap: 1rem;
-    border-bottom: 2px solid var(--border-light);
+    gap: 0.5rem;
+    border-bottom: 1.5px solid rgba(200, 180, 151, 0.2);
     margin-bottom: 2rem;
+    padding: 0 0.5rem;
   }
   
   .tab {
-    padding: 1rem 2rem;
+    padding: 0.875rem 1.5rem;
     background: transparent;
     border: none;
-    color: var(--charcoal-brown);
-    font-weight: 500;
+    color: rgba(58, 53, 44, 0.7);
+    font-weight: 600;
     cursor: pointer;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    opacity: 0.7;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    position: relative;
   }
   
   .tab.active {
     color: var(--olive-green);
     border-bottom-color: var(--olive-green);
-    opacity: 1;
   }
   
   .tab:hover {
     color: var(--olive-green);
-    opacity: 1;
+    background: rgba(107, 106, 69, 0.03);
+  }
+  
+  .tab.active:hover {
+    background: transparent;
   }
   
   /* Document Checklist */
@@ -330,9 +341,9 @@
   }
 
   .action-btn {
-    height: 48px;
-    padding: 1rem 1.2rem;
-    font-size: 0.95rem;
+    height: 44px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -340,27 +351,36 @@
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    box-shadow: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing: 0.02em;
     border: none;
   }
 
   .action-btn.primary {
-    background: #6B6A45;
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
     color: white;
-    border: none;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.25);
   }
 
   .action-btn.primary:hover {
-    background: #5A6D47;
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.95) 0%, var(--olive-green) 100%);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.35);
+    transform: translateY(-1px);
   }
 
   .action-btn.secondary {
     background: white;
-    color: #6B6A45;
-    border: 2px solid #6B6A45;
+    color: var(--olive-green);
+    border: 1.5px solid rgba(107, 106, 69, 0.3);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .action-btn.secondary:hover {
+    background: rgba(107, 106, 69, 0.05);
+    border-color: var(--olive-green);
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.15);
+    transform: translateY(-1px);
   }
 
   .action-btn.secondary.alt {
@@ -464,6 +484,23 @@
     background: #F6F2E8;
   }
   
+  /* Premium Edit & Delete Buttons */
+  .btn-premium-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.3);
+  }
+  
+  .btn-premium-delete:hover {
+    transform: translateY(-2px);
+    background: rgba(198, 107, 61, 1) !important;
+    box-shadow: 0 6px 20px rgba(198, 107, 61, 0.3);
+  }
+  
+  .btn-premium-edit:active,
+  .btn-premium-delete:active {
+    transform: translateY(0);
+  }
+  
   /* Mobile Responsive */
   @media (max-width: 768px) {
     .property-address {
@@ -487,69 +524,124 @@
 
 <!-- Transaction Header -->
 <div class="transaction-header">
-  <div class="transaction-header-content">
-    <h1 class="property-address">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</h1>
-    <div class="transaction-meta">
-      <div class="meta-item">
-        <span>👤</span>
-        <span><strong>Client:</strong> {{ transaction.client_name or transaction.get('client_name', 'N/A') }}</span>
+  <div class="transaction-header-content" style="padding: 1.5rem 2rem;">
+    <!-- Top Row: Stage Badge, Property Address, Action Buttons -->
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
+        <div class="stage-badge">{{ (transaction.current_stage or transaction.get('current_stage', 'unknown'))|replace('_', ' ')|title }}</div>
+        <h1 class="property-address" style="font-size: 1.6rem; margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3;">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</h1>
       </div>
-      <div class="meta-item">
-        <span>📧</span>
-        <span><strong>Email:</strong> {{ transaction.client_email or transaction.get('client_email', 'N/A') }}</span>
-      </div>
-      <div class="meta-item">
-        <span>📞</span>
-        <span><strong>Phone:</strong> {{ transaction.client_phone or transaction.get('client_phone', 'N/A') }}</span>
-      </div>
-      <div class="meta-item">
-        <span>💰</span>
-        <span><strong>Price:</strong> ${{ transaction.purchase_price or transaction.get('purchase_price', 'N/A') }}</span>
-      </div>
-      <div class="meta-item">
-        <span>📅</span>
-        <span><strong>Close Date:</strong> {{ transaction.target_close_date or transaction.get('target_close_date', 'N/A') }}</span>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <a href="{{ url_for('agent_transaction_edit', tx_id=transaction.id or transaction.get('id')) }}" class="btn-premium-edit" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: var(--gradient-olive); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(107, 106, 69, 0.2); border: none; cursor: pointer;">
+          Edit
+        </a>
+        <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=transaction.id or transaction.get('id')) }}" onsubmit="return confirm('Are you sure you want to delete this transaction? This cannot be undone.')" style="margin: 0;">
+          <button type="submit" class="btn-premium-delete" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(198, 107, 61, 0.9); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(198, 107, 61, 0.2);">
+            Delete
+          </button>
+        </form>
       </div>
     </div>
-    <div class="stage-badge" style="position:absolute;top:0.75rem;left:1rem;margin:0;z-index:10;">{{ (transaction.current_stage or transaction.get('current_stage', 'unknown'))|replace('_', ' ')|title }}</div>
-    <div style="position: absolute; top: 0.05rem; right: 1rem; z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; width: 120px;">
-      <form method="POST" action="/agent/transactions/{{ transaction.id or transaction.get('id') }}/delete" onsubmit="return confirm('Are you sure you want to delete this transaction? This cannot be undone.')" style="margin: 0;">
-        <button type="submit" class="secondary-btn" style="background:#C66B3D;color:white;padding:0.15rem 0.7rem;font-size:0.85rem;border-radius:6px;min-width:unset;line-height:1;font-family:'Segoe UI',Arial,sans-serif;font-weight:400;letter-spacing:0.03em;box-shadow:none;opacity:0.85;">Delete</button>
-      </form>
-      <a href="/agent/transactions/{{ transaction.id or transaction.get('id') }}/edit" style="display:block;margin-top:0.1rem;text-align:center;background:#8A9A5B;color:white;padding:0.15rem 0.7rem;font-size:0.85rem;border-radius:8px;min-width:unset;line-height:1;font-family:'Segoe UI',Arial,sans-serif;font-weight:400;letter-spacing:0.03em;box-shadow:0 2px 8px rgba(107,106,69,0.15);border:2px solid #6B6A45;text-decoration:none;">Edit</a>
+    
+    <!-- Second Row: Transaction Details Grid -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
+      <!-- Left: Clients -->
+      <div>
+        <h3 style="margin: 0 0 1rem 0; font-size: 0.75rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.1em;">Clients</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <!-- Primary Client -->
+          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 10px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
+            <div style="font-weight: 600; color: var(--olive-green); font-size: 0.7rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Primary Client</div>
+            <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 1rem; margin-bottom: 0.5rem; letter-spacing: -0.01em;">{{ transaction.client_name or transaction.get('client_name', 'N/A') }}</div>
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              {% if transaction.client_email or transaction.get('client_email') %}
+                <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ transaction.client_email or transaction.get('client_email') }}</div>
+              {% endif %}
+              {% if transaction.client_phone or transaction.get('client_phone') %}
+                <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ transaction.client_phone or transaction.get('client_phone') }}</div>
+              {% endif %}
+            </div>
+          </div>
+          
+          <!-- Additional Clients -->
+          {% if participants %}
+            {% for participant in participants %}
+              {% set participant_dict = participant if participant is mapping else dict(participant) %}
+              {% if participant_dict.get('participant_type') == 'client' and participant_dict.get('status') != 'removed' %}
+                <div style="padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 10px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
+                  <div style="font-weight: 600; color: var(--olive-green); font-size: 0.7rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Additional Client</div>
+                  <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 1rem; margin-bottom: 0.5rem; letter-spacing: -0.01em;">{{ participant_dict.get('name', 'N/A') }}</div>
+                  <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                    {% if participant_dict.get('email') %}
+                      <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ participant_dict.get('email') }}</div>
+                    {% endif %}
+                    {% if participant_dict.get('phone') %}
+                      <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ participant_dict.get('phone') }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+      
+      <!-- Right: Transaction Details -->
+      <div>
+        <h3 style="margin: 0 0 1rem 0; font-size: 0.75rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.1em;">Transaction Details</h3>
+        <div style="padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 10px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.7rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Side</div>
+              <div style="font-size: 0.95rem; color: var(--charcoal-brown); font-weight: 500;">{{ (transaction.side or transaction.get('side', 'N/A'))|capitalize }}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.7rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Purchase Price</div>
+              <div style="font-size: 1.1rem; color: var(--charcoal-brown); font-weight: 600;">${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}</div>
+            </div>
+            <div>
+              <div style="font-size: 0.7rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Target Close Date</div>
+              <div style="font-size: 0.95rem; color: var(--charcoal-brown); font-weight: 500;">{{ transaction.target_close_date or transaction.get('target_close_date', 'Not set') }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 
 <!-- Progress Section -->
-<div class="progress-section" style="width: 1100px; max-width: 99vw; min-width: 220px; margin: 0 auto 0.7rem auto; padding: 0.2rem 0; display: flex; flex-direction: column; align-items: center;">
-  <h3 style="margin: 0 0 0.3rem 0; color: #3A352C; font-size:1.05rem;">Transaction Progress</h3>
-  <div class="progress-bar-container" style="height: 0.7px; width: 100%; margin: 0.1rem 0;">
-    <div class="progress-bar-fill" style="width: {{ doc_status.progress_percentage|round(0) }}%; height: 100%;"></div>
+<div class="progress-section" style="width: 1100px; max-width: 99vw; min-width: 220px; margin: 0 auto 1.25rem auto; display: flex; flex-direction: column; align-items: center;">
+  <h3 style="margin: 0 0 0.75rem 0; color: #3A352C; font-size: 1rem; font-weight: 600; letter-spacing: 0.02em;">Transaction Progress</h3>
+  <div class="progress-bar-container" style="width: 100%; margin: 0.5rem 0;">
+    <div class="progress-bar-fill" style="width: {{ doc_status.progress_percentage|round(0) }}%;"></div>
   </div>
-  <div class="progress-text" style="font-size: 0.92rem; margin-top: 0.1rem;">
-    <strong>{{ doc_status.progress_percentage|round(0) }}% Complete</strong> • {{ doc_status.completed }} of {{ doc_status.total }} documents uploaded
+  <div class="progress-text">
+    <strong style="font-weight: 600;">{{ doc_status.progress_percentage|round(0) }}% Complete</strong> <span style="color: rgba(58, 53, 44, 0.6);">•</span> {{ doc_status.completed }} of {{ doc_status.total }} documents uploaded
   </div>
 </div>
 <!-- Action Buttons Centered Below Progress Bar -->
-<div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0.7rem; margin-bottom: 1.2rem;">
+<div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
   <button class="action-btn primary" onclick="document.getElementById('share-modal').style.display='flex'">
-    <span>👥</span> Share with Client
+    Share with Client
   </button>
   <button class="action-btn primary" onclick="document.getElementById('add-participant-modal').style.display='flex'">
-    <span>➕</span> Add Participant
+    Add Participant
   </button>
-  <button class="action-btn secondary" style="min-width:90px;max-width:110px;" onclick="document.getElementById('change-stage-modal').style.display='flex'">
+  <button class="action-btn secondary" style="min-width: 130px;" onclick="document.getElementById('change-stage-modal').style.display='flex'">
     Change Stage
   </button>
+  <a href="{{ url_for('agent_feature_spotlight_cards', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn primary" style="min-width: 180px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
+    Feature Spotlight Cards
+  </a>
 </div>
 
 <!-- Tabs -->
 <div class="tabs">
-  <button class="tab active" onclick="showTab('documents')">📄 Documents</button>
-  <button class="tab" onclick="showTab('participants')">👥 Participants</button>
-  <button class="tab" onclick="showTab('details')">ℹ️ Details</button>
+  <button class="tab active" onclick="showTab('documents')">Documents</button>
+  <button class="tab" onclick="showTab('participants')">Participants</button>
+  <button class="tab" onclick="showTab('details')">Details</button>
 </div>
 
 </div>
@@ -562,7 +654,7 @@
     <div style="flex: 1; max-width: 420px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
       <h3 style="margin: 0 0 1.2rem 0; color: #6B6A45; font-size:1.15rem; font-weight:600;">Documents</h3>
       <button class="primary-btn" style="margin-bottom: 1.2rem; width:100%;" onclick="document.getElementById('upload-modal').style.display='flex'">
-        <span>📤</span> Upload Document
+        Upload Document
       </button>
       <div style="display: flex; flex-direction: column; gap: 0.7rem;">
         {% for item in doc_status.checklist %}
@@ -574,12 +666,12 @@
             style="width: 100%; height: 44px; margin-left: 0;">
             <div class="checklist-item-info">
               <div class="checklist-item-title" style="font-size:0.97rem;">
-                {% if item.completed %}✅ {% else %}📋 {% endif %}{{ item.document_name }}
+                {{ item.document_name }}
               </div>
               <div class="checklist-item-desc" style="font-size:0.8rem;">
                 {{ item.description }}
                 {% if item.required %} • <strong>Required</strong>{% endif %}
-                {% if item.triggers_stage_change %} • <strong>Auto-advances stage! 🤖</strong>{% endif %}
+                {% if item.triggers_stage_change %} • <strong>Auto-advances stage</strong>{% endif %}
               </div>
             </div>
           </div>
@@ -589,16 +681,38 @@
     <div style="width: 340px; min-width: 220px; max-width: 420px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
       <h3 style="margin: 0 0 1.2rem 0; color: #6B6A45; font-size:1.15rem; font-weight:600;">Activity Timeline</h3>
       <div class="timeline" style="display: flex; flex-direction: column; gap: 0.5rem; position: relative;">
-        {% set stages = [
-          'Summary', 'Showings', 'Under Contract', 'EMD', 'Inspections', 'Appraisal', 'Final Walkthrough', 'Closing'
+        {% set current_stage_db = (transaction.current_stage or transaction.get('current_stage', 'pre_contract'))|lower %}
+        {% set display_stages = [
+          ('Summary', 'pre_contract', 0),
+          ('Showings', 'pre_contract', 1),
+          ('Under Contract', 'under_contract', 2),
+          ('EMD', 'under_contract', 3),
+          ('Inspections', 'in_escrow', 4),
+          ('Appraisal', 'in_escrow', 5),
+          ('Final Walkthrough', 'clear_to_close', 6),
+          ('Closing', 'closed', 7)
         ] %}
-        {% for stage in stages %}
+        {% set stage_order = {
+          'pre_contract': 0,
+          'under_contract': 2,
+          'in_escrow': 4,
+          'clear_to_close': 6,
+          'closed': 7,
+          'cancelled': -1
+        } %}
+        {% set current_stage_order = stage_order.get(current_stage_db, 0) %}
+        {% for stage_name, stage_db, stage_index in display_stages %}
           {% set status = 'next' %}
-          {# Example logic: you should replace this with real status from backend #}
-          {% if loop.index0 == 0 %}
-            {% set status = 'done' %}
-          {% elif loop.index0 == 1 %}
-            {% set status = 'in_progress' %}
+          {% set stage_order_value = stage_order.get(stage_db, 999) %}
+          {% if current_stage_order >= 0 %}
+            {% if stage_order_value < current_stage_order %}
+              {% set status = 'done' %}
+            {% elif stage_order_value == current_stage_order %}
+              {# Only mark the first stage (Summary) as in_progress when in pre_contract #}
+              {% if stage_index == 0 %}
+                {% set status = 'in_progress' %}
+              {% endif %}
+            {% endif %}
           {% endif %}
           <div style="display: flex; align-items: center; min-height: 48px;">
             <!-- Status on far left -->
@@ -614,7 +728,7 @@
             <!-- Stage name -->
             <div style="flex: 1; font-weight: 600; padding-left: 1.2rem;
               color: {% if status == 'done' %}#4CAF50{% elif status == 'in_progress' %}#FFD600{% else %}#AAA{% endif %};">
-              {{ stage }}
+              {{ stage_name }}
             </div>
             <!-- Timeline dot/line on far right -->
             <div style="display: flex; flex-direction: column; align-items: center; position: relative; width: 32px;">
@@ -738,7 +852,6 @@
       </div>
       
       <div class="drop-zone" onclick="document.getElementById('file-input').click()">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">📤</div>
         <h3 style="margin: 0 0 0.5rem 0; color: #3A352C;">Drag & Drop or Click to Upload</h3>
         <p style="margin: 0; color: #666;">Supports PDF, DOC, DOCX, JPG, PNG</p>
         <input type="file" id="file-input" style="display: none;">
@@ -825,6 +938,54 @@
   </div>
 </div>
 
+<!-- Change Stage Modal -->
+<div id="change-stage-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Change Transaction Stage</h2>
+      <button class="modal-close" onclick="document.getElementById('change-stage-modal').style.display='none'">&times;</button>
+    </div>
+    
+    <form method="POST" action="{{ url_for('agent_transaction_change_stage', tx_id=transaction.id or transaction.get('id')) }}" style="display: grid; gap: 1.5rem;">
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Current Stage</label>
+        {% set current_stage_display = (transaction.current_stage or transaction.get('current_stage', 'unknown'))|lower %}
+        {% if current_stage_display == 'pre_contract' %}
+          {% set current_stage_display = 'Summary' %}
+        {% else %}
+          {% set current_stage_display = current_stage_display|replace('_', ' ')|title %}
+        {% endif %}
+        <div style="padding: 0.75rem; background: #F6F2E8; border-radius: 6px; color: #3A352C;">
+          {{ current_stage_display }}
+        </div>
+      </div>
+      
+      <div>
+        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">New Stage</label>
+        <select name="new_stage" id="new_stage_select" required style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;">
+          <option value="pre_contract:summary">Summary</option>
+          <option value="pre_contract:showings">Showings</option>
+          <option value="under_contract">Under Contract</option>
+          <option value="in_escrow">In Escrow</option>
+          <option value="clear_to_close">Clear to Close</option>
+          <option value="closed">Closed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <input type="hidden" name="sub_stage" id="sub_stage_input" value="">
+      </div>
+      
+      <div style="display: flex; gap: 1rem;">
+        <button type="submit" class="primary-btn" style="flex: 1; justify-content: center;">
+          Update Stage
+        </button>
+        <button type="button" class="secondary-btn" onclick="document.getElementById('change-stage-modal').style.display='none'" style="flex: 1; justify-content: center;">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
 <script>
   function showTab(tabName) {
@@ -841,6 +1002,31 @@
     // Add active class to clicked button
     event.target.classList.add('active');
   }
+
+  // Handle stage selection change to extract sub-stage
+  document.addEventListener('DOMContentLoaded', function() {
+    const stageSelect = document.getElementById('new_stage_select');
+    const subStageInput = document.getElementById('sub_stage_input');
+    const changeStageForm = stageSelect ? stageSelect.closest('form') : null;
+    
+    if (stageSelect && subStageInput && changeStageForm) {
+      // Set initial value based on current stage
+      const currentStage = '{{ (transaction.current_stage or transaction.get("current_stage", ""))|lower }}';
+      if (currentStage === 'pre_contract') {
+        stageSelect.value = 'pre_contract:summary';
+      }
+      
+      // Handle form submission to parse the value
+      changeStageForm.addEventListener('submit', function(e) {
+        const value = stageSelect.value;
+        if (value.includes(':')) {
+          const parts = value.split(':');
+          stageSelect.value = parts[0]; // Set main stage (pre_contract)
+          subStageInput.value = parts[1]; // Store sub-stage
+        }
+      });
+    }
+  });
 
   // Drag and drop functionality
   const dropZone = document.querySelector('.drop-zone');

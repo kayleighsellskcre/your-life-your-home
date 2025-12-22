@@ -90,6 +90,17 @@
       }
       
       @media (max-width: 768px) {
+        /* Base Mobile Styles */
+        html {
+          font-size: 16px !important;
+          -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+          overflow-x: hidden !important;
+          width: 100% !important;
+        }
+        
         .site-header {
           padding: 0.75rem 0 !important;
           min-height: auto !important;
@@ -126,6 +137,170 @@
           padding: 0.4rem 0.7rem !important;
         }
         
+        /* Global Container Padding */
+        div[style*="max-width: 1600px"],
+        div[style*="max-width: 1200px"],
+        .container,
+        .dashboard-container {
+          padding: 1rem !important;
+          max-width: 100% !important;
+        }
+        
+        /* All Buttons - Full Width on Mobile */
+        button:not(.btn-remove):not(.btn-refine),
+        .btn,
+        .btn-premium,
+        .btn-secondary,
+        .btn-primary,
+        a[class*="btn"] {
+          width: 100% !important;
+          padding: 1rem 1.5rem !important;
+          font-size: 1rem !important;
+          min-height: 48px !important;
+          box-sizing: border-box !important;
+          margin: 0.5rem 0 !important;
+        }
+        
+        /* Button Groups - Stack Vertically */
+        .button-group,
+        div[style*="display: flex"][style*="gap"] {
+          flex-direction: column !important;
+          gap: 1rem !important;
+          width: 100% !important;
+        }
+        
+        /* All Forms - Full Width */
+        form {
+          width: 100% !important;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="file"],
+        select,
+        textarea,
+        .premium-input,
+        .premium-select,
+        .premium-textarea {
+          width: 100% !important;
+          padding: 0.875rem !important;
+          font-size: 1rem !important;
+          min-height: 48px !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Cards - Full Width */
+        .card,
+        .card-premium,
+        .feature-card,
+        div[class*="card"] {
+          width: 100% !important;
+          padding: 1.25rem 1rem !important;
+          margin: 1rem 0 !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Grids - Single Column */
+        div[style*="display: grid"],
+        div[style*="grid-template-columns"],
+        .dashboard-grid,
+        .dashboard-cards,
+        .stats-grid {
+          display: flex !important;
+          flex-direction: column !important;
+          grid-template-columns: 1fr !important;
+          gap: 1rem !important;
+        }
+        
+        /* Flex Containers - Stack Vertically */
+        div[style*="display: flex"]:not(.header-content):not(.main-nav ul) {
+          flex-direction: column !important;
+          gap: 1rem !important;
+        }
+        
+        /* Typography */
+        h1 {
+          font-size: 1.75rem !important;
+          line-height: 1.3 !important;
+        }
+        
+        h2 {
+          font-size: 1.5rem !important;
+          line-height: 1.3 !important;
+        }
+        
+        h3 {
+          font-size: 1.25rem !important;
+          line-height: 1.3 !important;
+        }
+        
+        /* Tables - Scrollable */
+        table {
+          display: block !important;
+          overflow-x: auto !important;
+          width: 100% !important;
+          font-size: 0.9rem !important;
+        }
+        
+        th, td {
+          padding: 0.75rem 0.5rem !important;
+          white-space: nowrap !important;
+        }
+        
+        /* Modals - Full Width */
+        [id*="modal"] > div,
+        .modal-content {
+          width: 95% !important;
+          max-width: 95% !important;
+          padding: 1.5rem !important;
+          margin: 1rem auto !important;
+        }
+        
+        /* Images - Responsive */
+        img {
+          max-width: 100% !important;
+          height: auto !important;
+        }
+        
+        /* Hide Desktop Elements */
+        .desktop-only {
+          display: none !important;
+        }
+        
+        /* Show Mobile Elements */
+        .mobile-only {
+          display: block !important;
+        }
+      }
+      
+      /* Extra Small Devices */
+      @media (max-width: 480px) {
+        html {
+          font-size: 14px !important;
+        }
+        
+        h1 {
+          font-size: 1.5rem !important;
+        }
+        
+        h2 {
+          font-size: 1.25rem !important;
+        }
+        
+        .card,
+        .card-premium {
+          padding: 1rem 0.75rem !important;
+        }
+        
+        button,
+        .btn {
+          padding: 0.875rem 1rem !important;
+          font-size: 0.95rem !important;
+        }
       }
     </style>
   </head>
@@ -143,8 +318,10 @@
           {% set primary_prof = professionals[0] %}
           <div class="header-agent-info">
             <!-- Professional Photo -->
-            {% if primary_prof.get('professional_photo') %}
-            <img src="{{ url_for('static', filename=primary_prof.professional_photo) }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); flex-shrink: 0;">
+            {% set header_photo_url = get_professional_photo_url(primary_prof.get('professional_photo')) if primary_prof else None %}
+            {% if header_photo_url %}
+            <img src="{{ header_photo_url }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: none; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] if primary_prof else '?' }}</div>
             {% else %}
             <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] }}</div>
             {% endif %}
@@ -222,5 +399,8 @@
         });
       });
     </script>
+    
+    {% block extra_js %}
+    {% endblock %}
   </body>
 </html>

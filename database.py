@@ -651,6 +651,56 @@ def init_db() -> None:
         )
         """
     )
+    
+    # Migrate transaction_participants table to new schema if needed
+    try:
+        cur.execute("PRAGMA table_info(transaction_participants)")
+        columns = [col[1] for col in cur.fetchall()]
+        
+        # Add missing columns for new transaction system
+        if 'participant_type' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN participant_type TEXT")
+            # Migrate existing 'role' to 'participant_type' if role exists
+            if 'role' in columns:
+                cur.execute("UPDATE transaction_participants SET participant_type = role WHERE participant_type IS NULL")
+        
+        if 'name' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN name TEXT")
+        
+        if 'phone' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN phone TEXT")
+        
+        if 'company' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN company TEXT")
+        
+        if 'invitation_token' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN invitation_token TEXT")
+            # Add unique constraint separately if needed
+            try:
+                cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_invitation_token ON transaction_participants(invitation_token) WHERE invitation_token IS NOT NULL")
+            except:
+                pass
+        
+        if 'invitation_sent_at' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN invitation_sent_at TIMESTAMP")
+        
+        if 'invitation_accepted_at' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN invitation_accepted_at TIMESTAMP")
+        
+        # Update transaction_id to INTEGER if it's TEXT
+        if 'transaction_id' in columns:
+            cur.execute("SELECT typeof(transaction_id) FROM transaction_participants LIMIT 1")
+            result = cur.fetchone()
+            if result and result[0] == 'text':
+                # SQLite doesn't support changing column type directly, so we'll handle it in queries
+                pass
+        
+        # Ensure added_at exists
+        if 'added_at' not in columns:
+            cur.execute("ALTER TABLE transaction_participants ADD COLUMN added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    except Exception as e:
+        print(f"Note: Could not migrate transaction_participants table: {e}")
+        pass
 
     # ------------- LENDER LOANS -------------
     cur.execute(

@@ -1,0 +1,460 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .feature-spotlight-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .premium-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .premium-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .premium-header p {
+    color: rgba(58, 53, 44, 0.7);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .card-premium {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--olive-green);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .premium-input,
+  .premium-select,
+  .premium-textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    background: white;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+
+  .premium-input:focus,
+  .premium-select:focus,
+  .premium-textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+
+  .premium-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .feature-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card-title {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    font-size: 1rem;
+  }
+
+  .btn-remove {
+    background: rgba(198, 107, 61, 0.1);
+    color: rgba(198, 107, 61, 0.9);
+    border: 1px solid rgba(198, 107, 61, 0.3);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-remove:hover {
+    background: rgba(198, 107, 61, 0.2);
+  }
+
+  .btn-premium {
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.875rem 2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 10px rgba(107, 106, 69, 0.3);
+    letter-spacing: 0.02em;
+  }
+
+  .btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.4);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: var(--olive-green);
+    border: 1.5px solid rgba(107, 106, 69, 0.3);
+    border-radius: 8px;
+    padding: 0.875rem 2rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(107, 106, 69, 0.05);
+    border-color: var(--olive-green);
+  }
+
+  .button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  
+  /* Mobile Responsive Styles */
+  @media (max-width: 768px) {
+    .feature-spotlight-container {
+      padding: 1rem !important;
+    }
+    
+    .premium-header {
+      margin-bottom: 1.5rem !important;
+      padding-bottom: 1rem !important;
+    }
+    
+    .premium-header h1 {
+      font-size: 1.5rem !important;
+    }
+    
+    .premium-header p {
+      font-size: 0.9rem !important;
+    }
+    
+    .card-premium {
+      padding: 1.5rem 1rem !important;
+      border-radius: 12px !important;
+    }
+    
+    .feature-card {
+      padding: 1rem !important;
+    }
+    
+    .feature-card-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 0.75rem !important;
+    }
+    
+    .btn-remove {
+      width: 100% !important;
+      text-align: center !important;
+    }
+    
+    .button-group {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      margin-top: 1.5rem !important;
+    }
+    
+    .btn-premium,
+    .btn-secondary {
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    
+    .btn-refine {
+      width: 100% !important;
+      margin-top: 0.75rem !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .premium-header h1 {
+      font-size: 1.25rem !important;
+    }
+    
+    .card-premium {
+      padding: 1rem 0.75rem !important;
+    }
+    
+    .feature-card {
+      padding: 0.875rem !important;
+    }
+  }
+</style>
+
+<div class="feature-spotlight-container">
+  <div class="premium-header">
+    <h1>Feature Spotlight Cards</h1>
+    <p>Create elegant, print-ready feature cards for in-home showings</p>
+  </div>
+
+  <div class="card-premium">
+    <form id="feature-form" method="POST" action="{{ url_for('agent_feature_spotlight_cards_generate', tx_id=tx_id) }}">
+      <div id="features-container">
+        <!-- Feature cards will be added here dynamically -->
+      </div>
+
+      <div style="text-align: center; margin-top: 2rem;">
+        <button type="button" id="add-feature-btn" class="btn-secondary" style="margin-right: 1rem;">
+          + Add Feature
+        </button>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn-premium">
+          Generate & Print Cards
+        </button>
+        <button type="button" class="btn-secondary" onclick="previewCards()" style="margin-right: 0.5rem;">
+          Preview Cards
+        </button>
+        <a href="{{ url_for('agent_transaction_detail', tx_id=tx_id) }}" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+  let featureCount = 0;
+
+  function addFeatureCard() {
+    featureCount++;
+    const container = document.getElementById('features-container');
+    if (!container) {
+      console.error('Features container not found!');
+      return;
+    }
+    
+    const card = document.createElement('div');
+    card.className = 'feature-card';
+    card.id = 'feature-' + featureCount;
+    
+    card.innerHTML = '<div class="feature-card-header">' +
+      '<div class="feature-card-title">Feature ' + featureCount + '</div>' +
+      '<button type="button" class="btn-remove" onclick="removeFeatureCard(' + featureCount + ')">Remove</button>' +
+      '</div>' +
+      '<div class="form-group">' +
+      '<label>Feature Title</label>' +
+      '<input type="text" name="features[' + featureCount + '][title]" class="premium-input" placeholder="e.g., Hidden Storage Pantry" required>' +
+      '</div>' +
+      '<div class="form-group">' +
+      '<label>Room/Location</label>' +
+      '<input type="text" name="features[' + featureCount + '][room]" class="premium-input" placeholder="e.g., Kitchen" required>' +
+      '</div>' +
+      '<div class="form-group">' +
+      '<label>Description</label>' +
+      '<textarea name="features[' + featureCount + '][description]" class="premium-textarea" placeholder="Custom pull-out shelving maximizes storage while keeping countertops clutter-free." required></textarea>' +
+      '<button type="button" class="btn-refine" onclick="refineFeature(' + featureCount + ')" style="margin-top: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.8rem; background: rgba(107, 106, 69, 0.1); color: var(--olive-green); border: 1px solid rgba(107, 106, 69, 0.3); border-radius: 6px; cursor: pointer;">' +
+      'Make it sound better' +
+      '</button>' +
+      '</div>';
+    
+    container.appendChild(card);
+  }
+
+  function removeFeatureCard(id) {
+    const card = document.getElementById('feature-' + id);
+    if (card) {
+      card.remove();
+    }
+  }
+
+  // Refine feature with AI
+  async function refineFeature(featureId) {
+    const titleInput = document.querySelector('input[name="features[' + featureId + '][title]"]');
+    const roomInput = document.querySelector('input[name="features[' + featureId + '][room]"]');
+    const descInput = document.querySelector('textarea[name="features[' + featureId + '][description]"]');
+    
+    if (!titleInput || !descInput) {
+      alert('Feature fields not found.');
+      return;
+    }
+    
+    if (!titleInput.value.trim() || !descInput.value.trim()) {
+      alert('Please enter a title and description before refining.');
+      return;
+    }
+    
+    const refineBtn = event.target;
+    const originalText = refineBtn.textContent;
+    refineBtn.textContent = 'Refining...';
+    refineBtn.disabled = true;
+    
+    try {
+      const response = await fetch('/agent/feature-spotlight/refine', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: titleInput.value,
+          room: roomInput.value || '',
+          description: descInput.value
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        titleInput.value = data.refined.title || titleInput.value;
+        descInput.value = data.refined.description || descInput.value;
+        if (data.refined.room) {
+          roomInput.value = data.refined.room;
+        }
+      } else {
+        alert('Refinement failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error refining feature:', error);
+      alert('Error refining feature. Please try again.');
+    } finally {
+      refineBtn.textContent = originalText;
+      refineBtn.disabled = false;
+    }
+  }
+
+  // Preview cards before generating PDF
+  function previewCards() {
+    const form = document.getElementById('feature-form');
+    const formData = new FormData(form);
+    
+    // Collect all features
+    const features = [];
+    const featureIndices = new Set();
+    
+    // Find all feature indices
+    formData.forEach((value, key) => {
+      const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
+      if (match) {
+        featureIndices.add(parseInt(match[1]));
+      }
+    });
+    
+    // Build features array
+    for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
+      const title = formData.get('features[' + idx + '][title]') || '';
+      const room = formData.get('features[' + idx + '][room]') || '';
+      const description = formData.get('features[' + idx + '][description]') || '';
+      
+      if (title && room && description) {
+        features.push({ title, room, description });
+      }
+    }
+    
+    if (features.length === 0) {
+      alert('Please add at least one feature before previewing.');
+      return;
+    }
+    
+    // Open preview in new window
+    const previewWindow = window.open('', '_blank');
+    const featuresJson = JSON.stringify(features);
+    
+    // Build HTML using string concatenation to avoid template literal issues
+    let previewHtml = '<!DOCTYPE html><html><head><title>Feature Spotlight Cards Preview</title><style>';
+    previewHtml += '@page { size: legal; margin: 0.5in; }';
+    previewHtml += '* { margin: 0; padding: 0; box-sizing: border-box; }';
+    previewHtml += 'body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); padding: 1rem; min-height: 100vh; }';
+    previewHtml += '.page { width: 100%; min-height: 14in; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0.5in; padding: 0.25in; page-break-after: always; margin-bottom: 1rem; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); }';
+    previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 1.5px solid rgba(200, 180, 151, 0.25); padding: 0.65in; display: flex; flex-direction: column; justify-content: flex-start; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); position: relative; overflow: hidden; }';
+    previewHtml += '.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, rgba(200, 180, 151, 0.6) 0%, rgba(200, 180, 151, 0.3) 50%, rgba(200, 180, 151, 0.6) 100%); }';
+    previewHtml += '.card-title { font-size: 20pt; font-weight: 600; color: #2C2820; margin-bottom: 0.35in; letter-spacing: -0.02em; line-height: 1.25; font-family: Georgia, serif; }';
+    previewHtml += '.card-room { font-size: 9pt; color: #8B7355; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.35in; font-weight: 600; font-family: Arial, sans-serif; }';
+    previewHtml += '.card-divider { width: 50px; height: 2px; background: linear-gradient(90deg, rgba(200, 180, 151, 0.8) 0%, rgba(200, 180, 151, 0.4) 100%); margin-bottom: 0.35in; border-radius: 1px; }';
+    previewHtml += '.card-description { font-size: 11.5pt; color: #3A352C; line-height: 1.7; flex: 1; font-family: Georgia, serif; font-weight: 400; }';
+    previewHtml += '.print-button { position: fixed; top: 1rem; right: 1rem; background: linear-gradient(135deg, #6B6A45 0%, rgba(107, 106, 69, 0.95) 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(107, 106, 69, 0.3); z-index: 1000; font-size: 0.95rem; }';
+    previewHtml += '.print-button:hover { background: linear-gradient(135deg, rgba(107, 106, 69, 0.95) 0%, #6B6A45 100%); transform: translateY(-1px); }';
+    previewHtml += '@media print { .print-button { display: none; } body { padding: 0; } }';
+    previewHtml += '</style></head><body><button class="print-button" onclick="window.print()">Print Cards</button><div id="cards-container"></div><script>';
+    previewHtml += 'const features = ' + featuresJson + ';';
+    previewHtml += 'const container = document.getElementById("cards-container");';
+    previewHtml += 'let html = "";';
+    previewHtml += 'features.forEach(function(feature, index) {';
+    previewHtml += 'if (index % 4 === 0) { if (index > 0) html += "</div>"; html += "<div class=\\"page\\">"; }';
+    previewHtml += 'html += "<div class=\\"card\\"><div class=\\"card-room\\">" + escapeHtml(feature.room) + "</div>";';
+    previewHtml += 'html += "<div class=\\"card-title\\">" + escapeHtml(feature.title) + "</div>";';
+    previewHtml += 'html += "<div class=\\"card-divider\\"></div>";';
+    previewHtml += 'html += "<div class=\\"card-description\\">" + escapeHtml(feature.description) + "</div></div>";';
+    previewHtml += 'if (index % 4 === 3 || index === features.length - 1) { html += "</div>"; }';
+    previewHtml += '});';
+    previewHtml += 'container.innerHTML = html;';
+    previewHtml += 'function escapeHtml(text) { const div = document.createElement("div"); div.textContent = text; return div.innerHTML; }';
+    previewHtml += '<\/script></body></html>';
+    
+    previewWindow.document.write(previewHtml);
+    previewWindow.document.close();
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add first feature card on page load
+    addFeatureCard();
+    
+    // Add click event listener to Add Feature button
+    const addFeatureBtn = document.getElementById('add-feature-btn');
+    if (addFeatureBtn) {
+      addFeatureBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        addFeatureCard();
+        return false;
+      });
+    } else {
+      console.error('Add Feature button not found!');
+    }
+  });
+</script>
+{% endblock %}
+

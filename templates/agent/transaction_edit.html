@@ -1,0 +1,667 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<!-- Premium Header -->
+<div class="premium-header animate-in" style="margin-bottom: 3rem; display: block !important; text-align: center !important; justify-content: center !important;">
+  <div style="text-align: center; width: 100%;">
+    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center; font-family: var(--font-heading); color: var(--charcoal-brown);">Edit Transaction</h1>
+    <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Update transaction details — Keep everything current and organized</span>
+  </div>
+</div>
+
+<div style="max-width: 900px; margin: 0 auto;">
+  <!-- Premium Edit Form -->
+  <div class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige);">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+      <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--charcoal-brown); margin-bottom: 0.5rem; position: relative; padding-bottom: 1rem;">
+        <span style="display: inline-block; position: relative;">
+          Transaction Details
+          <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
+        </span>
+      </h2>
+      <p style="color: rgba(58, 53, 44, 0.7); font-size: 1rem; margin-top: 0.5rem;">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</p>
+    </div>
+    
+    <form method="post" class="transaction-edit-form-premium">
+      <div class="premium-form-grid">
+        <div class="premium-form-group premium-form-full">
+          <label for="property_address" class="premium-form-label">
+            <span>Property Address</span>
+          </label>
+          <input 
+            id="property_address" 
+            name="property_address" 
+            type="text"
+            required 
+            value="{{ transaction.property_address or transaction.get('property_address', '') }}"
+            placeholder="123 Main St, City, State" 
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="client_name" class="premium-form-label">
+            <span>Client Name</span>
+          </label>
+          <input 
+            id="client_name" 
+            name="client_name" 
+            type="text"
+            required 
+            value="{{ transaction.client_name or transaction.get('client_name', '') }}"
+            placeholder="Jane Doe" 
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="side" class="premium-form-label">
+            <span>Side</span>
+          </label>
+          <select id="side" name="side" class="premium-select">
+            <option value="buyer" {% if (transaction.side or transaction.get('side', '')) == 'buyer' %}selected{% endif %}>Buyer</option>
+            <option value="seller" {% if (transaction.side or transaction.get('side', '')) == 'seller' %}selected{% endif %}>Seller</option>
+            <option value="both" {% if (transaction.side or transaction.get('side', '')) == 'both' %}selected{% endif %}>Both</option>
+          </select>
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="client_email" class="premium-form-label">
+            <span>Client Email</span>
+          </label>
+          <input 
+            id="client_email" 
+            name="client_email" 
+            type="email"
+            value="{{ transaction.client_email or transaction.get('client_email', '') }}"
+            placeholder="client@email.com" 
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="client_phone" class="premium-form-label">
+            <span>Client Phone</span>
+          </label>
+          <div style="display: flex; gap: 0.75rem;">
+            <input 
+              id="client_phone" 
+              name="client_phone" 
+              type="tel"
+              value="{{ transaction.client_phone or transaction.get('client_phone', '') }}"
+              placeholder="(555) 123-4567" 
+              class="premium-input"
+              style="flex: 1;"
+            />
+            <button type="button" onclick="addClientToCRM()" class="btn-premium-add-client" style="padding: 1rem 1.5rem; background: var(--gradient-taupe); color: white; border-radius: 8px; font-size: 0.9rem; font-weight: 600; border: none; cursor: pointer; white-space: nowrap; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(58, 53, 44, 0.1);">
+              Add to CRM
+            </button>
+          </div>
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="purchase_price" class="premium-form-label" id="price_label">
+            <span id="price_label_text">Purchase Price</span>
+          </label>
+          <input 
+            id="purchase_price" 
+            name="purchase_price" 
+            type="number"
+            step="1000"
+            value="{{ transaction.purchase_price or transaction.get('purchase_price', '') }}"
+            placeholder="500000" 
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="stage" class="premium-form-label">
+            <span>Stage</span>
+          </label>
+          <select id="stage" name="stage" class="premium-select">
+            {% set current_stage = transaction.current_stage or transaction.get('current_stage', 'pre_contract') %}
+            {# Map database stages to form display stages #}
+            {% set db_to_form_map = {
+              'pre_contract': 'summary',
+              'under_contract': 'under_contract',
+              'in_escrow': 'inspection',
+              'clear_to_close': 'final_walkthrough',
+              'closed': 'closing',
+              'cancelled': 'cancelled'
+            } %}
+            {% set form_stage = db_to_form_map.get(current_stage, 'summary') %}
+            <option value="summary" {% if form_stage == 'summary' %}selected{% endif %}>Summary</option>
+            <option value="showings" {% if form_stage == 'showings' %}selected{% endif %}>Showings</option>
+            <option value="under_contract" {% if form_stage == 'under_contract' %}selected{% endif %}>Under Contract</option>
+            <option value="earnest_money" {% if form_stage == 'earnest_money' %}selected{% endif %}>Earnest Money</option>
+            <option value="inspection" {% if form_stage == 'inspection' %}selected{% endif %}>Inspection</option>
+            <option value="appraisal" {% if form_stage == 'appraisal' %}selected{% endif %}>Appraisal</option>
+            <option value="loan_commitment" {% if form_stage == 'loan_commitment' %}selected{% endif %}>Loan Commitment</option>
+            <option value="final_walkthrough" {% if form_stage == 'final_walkthrough' %}selected{% endif %}>Final Walkthrough</option>
+            <option value="closing" {% if form_stage == 'closing' %}selected{% endif %}>Closing</option>
+          </select>
+        </div>
+        
+        <div class="premium-form-group">
+          <label for="close_date" class="premium-form-label">
+            <span>Target Close Date</span>
+          </label>
+          <input 
+            type="date" 
+            id="close_date" 
+            name="close_date" 
+            value="{{ transaction.target_close_date or transaction.get('target_close_date', '') }}"
+            class="premium-input"
+          />
+        </div>
+        
+        <div class="premium-form-group premium-form-full">
+          <label for="notes" class="premium-form-label">
+            <span>Notes</span>
+          </label>
+          <textarea 
+            id="notes" 
+            name="notes" 
+            rows="4"
+            placeholder="Additional notes about this transaction..."
+            class="premium-input"
+            style="resize: vertical; min-height: 100px; font-family: var(--font-body);"
+          >{{ transaction.notes or transaction.get('notes', '') }}</textarea>
+        </div>
+      </div>
+      
+      <!-- Additional Buyers/Sellers Section -->
+      <div class="premium-form-group premium-form-full" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--taupe-beige);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <h3 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--charcoal-brown); margin: 0;">Additional Clients</h3>
+          <button type="button" onclick="showAddClientModal()" class="btn-premium" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; background: var(--gradient-olive);">
+            Add Client
+          </button>
+        </div>
+        
+        <div id="additional-clients-list" style="display: grid; gap: 1rem;">
+          {% if transaction.participants %}
+            {% for participant in transaction.participants %}
+              {% set participant_dict = participant if participant is mapping else dict(participant) %}
+              {% if participant_dict.get('participant_type') == 'client' and participant_dict.get('status') != 'removed' %}
+                <div class="additional-client-card" data-participant-id="{{ participant_dict.get('id') }}">
+                  <div style="display: flex; justify-content: space-between; align-items: start; gap: 1rem;">
+                    <div style="flex: 1;">
+                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 1rem; margin-bottom: 0.5rem;">{{ participant_dict.get('name', 'N/A') }}</div>
+                      {% if participant_dict.get('email') %}
+                        <div style="font-size: 0.9rem; color: rgba(58, 53, 44, 0.7); margin-bottom: 0.25rem;">{{ participant_dict.get('email') }}</div>
+                      {% endif %}
+                      {% if participant_dict.get('phone') %}
+                        <div style="font-size: 0.9rem; color: rgba(58, 53, 44, 0.7);">{{ participant_dict.get('phone') }}</div>
+                      {% endif %}
+                    </div>
+                    <button type="button" onclick="removeAdditionalClient({{ participant_dict.get('id') }})" class="btn-remove-client" style="padding: 0.5rem 1rem; background: rgba(198, 107, 61, 0.1); color: #C66B3D; border: 1px solid #C66B3D; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              {% endif %}
+            {% endfor %}
+          {% endif %}
+          {% if not transaction.participants or transaction.participants|selectattr('participant_type', 'equalto', 'client')|list|length == 0 %}
+            <div style="text-align: center; padding: 2rem; color: rgba(58, 53, 44, 0.5); font-style: italic;">
+              No additional clients added yet
+            </div>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div style="display: flex; gap: 1rem; margin-top: 2.5rem;">
+        <button class="btn-premium" type="submit" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-olive);">
+          Save Changes
+        </button>
+        <a href="{{ url_for('agent_transaction_detail', tx_id=transaction.id or transaction.get('id')) }}" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe); text-decoration: none; display: inline-flex; align-items: center;">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Client Modal -->
+<div id="add-client-modal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="modal-content-premium" style="background: white; border-radius: 12px; padding: 2.5rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); position: relative;">
+    <button onclick="closeAddClientModal()" style="position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: rgba(58, 53, 44, 0.5); cursor: pointer; padding: 0.5rem; line-height: 1; transition: color 0.3s ease;">&times;</button>
+    
+    <h2 style="font-family: var(--font-heading); font-size: 1.75rem; color: var(--charcoal-brown); margin-bottom: 1.5rem; margin-top: 0;">Add Client</h2>
+    
+    <form id="add-client-form" onsubmit="addAdditionalClient(event)">
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <div>
+          <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Name *</label>
+          <input type="text" id="new_client_name" required class="premium-input" placeholder="John Doe" />
+        </div>
+        
+        <div>
+          <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Email</label>
+          <input type="email" id="new_client_email" class="premium-input" placeholder="john@email.com" />
+        </div>
+        
+        <div>
+          <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">Phone</label>
+          <input type="tel" id="new_client_phone" class="premium-input" placeholder="(555) 123-4567" />
+        </div>
+        
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+          <button type="submit" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; background: var(--gradient-olive);">
+            Add Client
+          </button>
+          <button type="button" onclick="closeAddClientModal()" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; background: var(--gradient-taupe);">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+/* Premium Form Styling */
+.transaction-edit-form-premium {
+  width: 100%;
+}
+
+.premium-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.premium-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.premium-form-full {
+  grid-column: 1 / -1;
+}
+
+.premium-form-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--olive-green);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.premium-input,
+.premium-select {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--taupe-beige);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--charcoal-brown);
+  background: var(--white);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.05);
+}
+
+.premium-input:hover,
+.premium-select:hover {
+  border-color: var(--olive-green);
+  box-shadow: 0 4px 12px rgba(107, 106, 69, 0.1);
+}
+
+.premium-input:focus,
+.premium-select:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.15), 0 4px 16px rgba(58, 53, 44, 0.1);
+  transform: translateY(-1px);
+}
+
+.premium-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233A352C' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.premium-input::placeholder {
+  color: rgba(58, 53, 44, 0.4);
+  font-style: italic;
+}
+
+textarea.premium-input {
+  resize: vertical;
+  min-height: 100px;
+  font-family: var(--font-body);
+  line-height: 1.6;
+}
+
+/* Premium Button Styling */
+.btn-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(58, 53, 44, 0.15);
+  text-decoration: none;
+}
+
+.btn-premium:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(58, 53, 44, 0.2);
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.15);
+}
+
+.btn-premium span {
+  font-size: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .premium-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .premium-header h1 {
+    font-size: 2rem !important;
+  }
+  
+  .card-premium {
+    padding: 2rem 1.5rem !important;
+  }
+  
+  .btn-premium {
+    flex-direction: column;
+  }
+}
+
+.btn-premium-add-client:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(58, 53, 44, 0.2);
+}
+
+.btn-premium-add-client:active {
+  transform: translateY(0);
+}
+
+.btn-premium-add-client:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.additional-client-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%);
+  border: 1px solid var(--taupe-beige);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
+}
+
+.additional-client-card:hover {
+  box-shadow: 0 4px 12px rgba(58, 53, 44, 0.1);
+  transform: translateY(-1px);
+}
+
+.btn-remove-client:hover {
+  background: #C66B3D !important;
+  color: white !important;
+}
+
+.modal-overlay {
+  display: none;
+}
+
+.modal-overlay.show {
+  display: flex !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const sideSelect = document.getElementById('side');
+  const priceLabelText = document.getElementById('price_label_text');
+  
+  if (sideSelect && priceLabelText) {
+    function updatePriceLabel() {
+      const side = sideSelect.value;
+      if (side === 'seller' || side === 'both') {
+        priceLabelText.textContent = 'Listing Price';
+      } else {
+        priceLabelText.textContent = 'Purchase Price';
+      }
+    }
+    
+    // Set initial label based on current selection
+    updatePriceLabel();
+    
+    // Update label when side changes
+    sideSelect.addEventListener('change', updatePriceLabel);
+  }
+});
+
+function addClientToCRM() {
+  const txId = {{ transaction.id or transaction.get('id') }};
+  const clientName = document.getElementById('client_name').value;
+  const clientEmail = document.getElementById('client_email').value;
+  const clientPhone = document.getElementById('client_phone').value;
+  
+  if (!clientName.trim()) {
+    alert('Please enter a client name first.');
+    return;
+  }
+  
+  // Show loading state
+  const btn = document.querySelector('.btn-premium-add-client');
+  const originalText = btn.textContent;
+  btn.textContent = 'Adding...';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+  
+  fetch(`/agent/transactions/${txId}/add-client-to-crm`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      client_name: clientName,
+      client_email: clientEmail,
+      client_phone: clientPhone
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    
+    if (data.success) {
+      alert(data.message || 'Client added to CRM successfully!');
+    } else {
+      alert('Error: ' + (data.error || 'Failed to add client to CRM'));
+    }
+  })
+  .catch(error => {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    console.error('Error:', error);
+    alert('Network error. Please try again.');
+  });
+}
+
+function showAddClientModal() {
+  document.getElementById('add-client-modal').classList.add('show');
+  document.getElementById('new_client_name').focus();
+}
+
+function closeAddClientModal() {
+  document.getElementById('add-client-modal').classList.remove('show');
+  document.getElementById('add-client-form').reset();
+}
+
+function addAdditionalClient(event) {
+  event.preventDefault();
+  const txId = {{ transaction.id or transaction.get('id') }};
+  const name = document.getElementById('new_client_name').value.trim();
+  const email = document.getElementById('new_client_email').value.trim();
+  const phone = document.getElementById('new_client_phone').value.trim();
+  
+  if (!name) {
+    alert('Please enter a name.');
+    return;
+  }
+  
+  // Show loading state
+  const submitBtn = event.target.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.textContent = 'Adding...';
+  submitBtn.disabled = true;
+  
+  // Create form data
+  const formData = new FormData();
+  formData.append('participant_name', name);
+  formData.append('participant_email', email);
+  formData.append('participant_phone', phone);
+  formData.append('participant_role', 'client');
+  
+  console.log('Adding client:', { name, email, phone, txId });
+  
+  fetch(`/agent/transactions/${txId}/participants/add`, {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: formData
+  })
+  .then(async response => {
+    console.log('Response status:', response.status);
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+    
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    
+    try {
+      if (response.ok) {
+        if (isJson) {
+          const data = await response.json();
+          console.log('Response data:', data);
+          if (data.success) {
+            closeAddClientModal();
+            // Small delay to ensure database is updated
+            setTimeout(() => {
+              location.reload(); // Reload to show new client
+            }, 300);
+            return;
+          } else {
+            throw new Error(data.error || 'Failed to add client');
+          }
+        } else {
+          // It's a redirect or HTML response, reload the page
+          console.log('Non-JSON response, reloading...');
+          closeAddClientModal();
+          setTimeout(() => {
+            location.reload();
+          }, 300);
+          return;
+        }
+      } else {
+        // Error response
+        console.error('Response not OK:', response.status);
+        let errorMessage = 'Failed to add client';
+        
+        if (isJson) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.error || errorMessage;
+          } catch (e) {
+            // If JSON parsing fails, try text
+            const text = await response.text();
+            errorMessage = text || errorMessage;
+          }
+        } else {
+          const text = await response.text();
+          errorMessage = text || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      // Re-throw to be caught by outer catch
+      throw error;
+    }
+  })
+  .catch(error => {
+    console.error('Error adding client:', error);
+    alert('Error adding client: ' + (error.message || 'Unknown error occurred'));
+  });
+}
+
+function removeAdditionalClient(participantId) {
+  if (!confirm('Are you sure you want to remove this client?')) {
+    return;
+  }
+  
+  const txId = {{ transaction.id or transaction.get('id') }};
+  
+  fetch(`/agent/transactions/${txId}/participants/${participantId}/remove`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    }
+  })
+  .then(response => {
+    if (response.ok) {
+      location.reload(); // Reload to reflect removal
+    } else {
+      return response.json().then(data => {
+        throw new Error(data.error || 'Failed to remove client');
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Error removing client: ' + error.message);
+  });
+}
+</script>
+
+{% endblock %}
+
