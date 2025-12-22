@@ -50,11 +50,19 @@
   
   /* NAVIGATION ITEMS CONTAINER */
   .ylh-nav-items {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    flex: 1;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    flex: 1 !important;
+    justify-content: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  .ylh-nav-items > * {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: inline-flex !important;
   }
   
   /* NAVIGATION BUTTONS - UNIFORM STYLING */
@@ -113,8 +121,11 @@
   
   /* DROPDOWN CONTAINER */
   .ylh-dropdown {
-    position: relative;
-    display: inline-block;
+    position: relative !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* DROPDOWN MENU */
