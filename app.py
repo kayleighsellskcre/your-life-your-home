@@ -5868,31 +5868,35 @@ def refine_feature_text(feature):
                     from openai import OpenAI
                     client = OpenAI(api_key=openai_api_key)
                     
-                    prompt = f"""You are a real estate marketing assistant creating elegant feature descriptions for luxury property listings.
+                    prompt = f"""You are helping write property feature descriptions that sound natural and human.
 
 Original Feature:
 Title: {title}
 Room: {room}
 Description: {description}
 
-Please refine this to be:
-1. Elegant and professional
-2. Natural and warm (keep the agent's voice)
-3. Concise (1-2 short sentences max for description)
-4. Highlight both emotional and practical value
+Make this sound better by:
+1. Using simple, everyday words that regular people use (NO fancy vocabulary)
+2. Sounding like a real person talking about a home they love
+3. Being clear and specific (1-2 short sentences max)
+4. Focusing on what people actually care about (comfort, convenience, space)
+
+AVOID words like: meticulously, exquisite, boasts, features, showcases, curated, bespoke, sanctuary, haven, oasis, epitome, essence, seamlessly, elegantly appointed, thoughtfully designed, impeccably, stunning, breathtaking
+
+USE words like: has, includes, offers, great, nice, perfect for, easy, simple, plenty of, lots of, opens to, leads to, keeps, helps, makes, gives you
 
 Return ONLY a JSON object with "title" and "description" fields. No other text.
 
 Example format:
-{{"title": "Hidden Storage Pantry", "description": "Custom pull-out shelving maximizes storage while keeping countertops clutter-free."}}"""
+{{"title": "Hidden Storage Pantry", "description": "Pull-out shelving gives you plenty of storage space and keeps counters clear."}}"""
 
                     response = client.chat.completions.create(
                         model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": "You are a professional real estate copywriter. Return only valid JSON."},
+                            {"role": "system", "content": "You are a helpful assistant who writes in plain, natural English. Use simple everyday words."},
                             {"role": "user", "content": prompt}
                         ],
-                        temperature=0.7,
+                        temperature=0.6,
                         max_tokens=150
                     )
                     
@@ -5905,31 +5909,35 @@ Example format:
                     import openai
                     openai.api_key = openai_api_key
                     
-                    prompt = f"""You are a real estate marketing assistant creating elegant feature descriptions for luxury property listings.
+                    prompt = f"""You are helping write property feature descriptions that sound natural and human.
 
 Original Feature:
 Title: {title}
 Room: {room}
 Description: {description}
 
-Please refine this to be:
-1. Elegant and professional
-2. Natural and warm (keep the agent's voice)
-3. Concise (1-2 short sentences max for description)
-4. Highlight both emotional and practical value
+Make this sound better by:
+1. Using simple, everyday words that regular people use (NO fancy vocabulary)
+2. Sounding like a real person talking about a home they love
+3. Being clear and specific (1-2 short sentences max)
+4. Focusing on what people actually care about (comfort, convenience, space)
+
+AVOID words like: meticulously, exquisite, boasts, features, showcases, curated, bespoke, sanctuary, haven, oasis, epitome, essence, seamlessly, elegantly appointed, thoughtfully designed, impeccably, stunning, breathtaking
+
+USE words like: has, includes, offers, great, nice, perfect for, easy, simple, plenty of, lots of, opens to, leads to, keeps, helps, makes, gives you
 
 Return ONLY a JSON object with "title" and "description" fields. No other text.
 
 Example format:
-{{"title": "Hidden Storage Pantry", "description": "Custom pull-out shelving maximizes storage while keeping countertops clutter-free."}}"""
+{{"title": "Hidden Storage Pantry", "description": "Pull-out shelving gives you plenty of storage space and keeps counters clear."}}"""
 
                     response = openai.ChatCompletion.create(
                         model="gpt-3.5-turbo",
                         messages=[
-                            {"role": "system", "content": "You are a professional real estate copywriter. Return only valid JSON."},
+                            {"role": "system", "content": "You are a helpful assistant who writes in plain, natural English. Use simple everyday words."},
                             {"role": "user", "content": prompt}
                         ],
-                        temperature=0.7,
+                        temperature=0.6,
                         max_tokens=150
                     )
                     
