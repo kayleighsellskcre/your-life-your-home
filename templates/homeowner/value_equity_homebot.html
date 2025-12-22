@@ -5,7 +5,7 @@
 <style>
   /* ===========================
      VALUE & EQUITY PAGE
-     Organic • Luxurious • Effortless
+     EXTREMELY INTERACTIVE & INTUITIVE
      =========================== */
   
   .value-equity-page {
@@ -36,7 +36,7 @@
     margin: 0 auto;
   }
   
-  /* FINANCIAL SNAPSHOT CARDS */
+  /* FINANCIAL SNAPSHOT CARDS - INTERACTIVE */
   .snapshot-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -51,12 +51,23 @@
     padding: 2rem;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 16px rgba(58, 53, 44, 0.08);
+    position: relative;
+    cursor: pointer;
   }
   
   .snapshot-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(58, 53, 44, 0.12);
-    border-color: rgba(107, 106, 69, 0.25);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(58, 53, 44, 0.15);
+    border-color: rgba(107, 106, 69, 0.35);
+  }
+  
+  .snapshot-card.highlight {
+    animation: pulse-highlight 1.5s ease-in-out;
+  }
+  
+  @keyframes pulse-highlight {
+    0%, 100% { box-shadow: 0 4px 16px rgba(58, 53, 44, 0.08); }
+    50% { box-shadow: 0 12px 40px rgba(107, 106, 69, 0.25); }
   }
   
   .snapshot-card-label {
@@ -66,6 +77,9 @@
     letter-spacing: 0.08em;
     color: rgba(58, 53, 44, 0.6);
     margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
   
   .snapshot-card-value {
@@ -75,6 +89,11 @@
     color: var(--charcoal-brown);
     margin-bottom: 0.5rem;
     line-height: 1.2;
+    transition: color 0.3s ease;
+  }
+  
+  .snapshot-card:hover .snapshot-card-value {
+    color: var(--olive-green);
   }
   
   .snapshot-card-sublabel {
@@ -83,9 +102,27 @@
     line-height: 1.5;
   }
   
+  .snapshot-card-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    background: rgba(90, 109, 71, 0.1);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #5A6D47;
+    margin-top: 0.75rem;
+  }
+  
+  .snapshot-card-change.negative {
+    background: rgba(184, 92, 92, 0.1);
+    color: #B85C5C;
+  }
+  
   .snapshot-card-edit {
     margin-top: 1rem;
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.25rem;
     background: transparent;
     border: 1px solid var(--taupe-beige);
     border-radius: 6px;
@@ -94,11 +131,108 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
+    width: 100%;
   }
   
   .snapshot-card-edit:hover {
-    background: var(--light-cream);
+    background: var(--olive-green);
+    color: var(--white);
     border-color: var(--olive-green);
+    transform: scale(1.02);
+  }
+  
+  /* INTERACTIVE SLIDER */
+  .interactive-slider {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+  }
+  
+  .interactive-slider h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+    font-weight: 400;
+  }
+  
+  .interactive-slider p {
+    color: rgba(58, 53, 44, 0.7);
+    margin-bottom: 2rem;
+  }
+  
+  .slider-container {
+    margin-bottom: 2rem;
+  }
+  
+  .slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .slider-label-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+  }
+  
+  .slider-value {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--olive-green);
+    font-weight: 400;
+  }
+  
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(to right, 
+      var(--olive-green) 0%, 
+      var(--olive-green) var(--slider-percent, 50%), 
+      var(--taupe-beige) var(--slider-percent, 50%), 
+      var(--taupe-beige) 100%);
+    outline: none;
+    transition: all 0.3s ease;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--olive-green);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+  
+  .slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.4);
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--olive-green);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+  }
+  
+  .slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.4);
   }
   
   /* HOMEBOT WIDGET SECTION */
@@ -149,7 +283,7 @@
     z-index: 1;
   }
   
-  /* TABS SECTION */
+  /* TABS SECTION - ENHANCED INTERACTIVE */
   .tabs-container {
     background: var(--white);
     border: 1px solid rgba(107, 106, 69, 0.15);
@@ -177,6 +311,19 @@
     color: rgba(58, 53, 44, 0.6);
     cursor: pointer;
     transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .tab-button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: var(--olive-green);
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
   }
   
   .tab-button:hover {
@@ -186,9 +333,12 @@
   
   .tab-button.active {
     color: var(--charcoal-brown);
-    border-bottom-color: var(--olive-green);
     background: var(--white);
     font-weight: 700;
+  }
+  
+  .tab-button.active::after {
+    width: 100%;
   }
   
   .tab-content {
@@ -197,10 +347,16 @@
   
   .tab-panel {
     display: none;
+    animation: fadeIn 0.4s ease;
   }
   
   .tab-panel.active {
     display: block;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   .tab-panel h3 {
@@ -218,7 +374,7 @@
     margin-bottom: 1.5rem;
   }
   
-  /* INFO CARDS */
+  /* INTERACTIVE INFO CARDS */
   .info-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -231,6 +387,31 @@
     border: 1px solid rgba(107, 106, 69, 0.1);
     border-radius: 12px;
     padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  
+  .info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(107, 106, 69, 0.1) 0%, transparent 100%);
+    border-radius: 12px 0 0 12px;
+    transition: width 0.3s ease;
+  }
+  
+  .info-card:hover {
+    transform: translateX(8px);
+    background: var(--white);
+    box-shadow: 0 4px 16px rgba(58, 53, 44, 0.1);
+  }
+  
+  .info-card:hover::before {
+    width: 100%;
   }
   
   .info-card h4 {
@@ -238,6 +419,8 @@
     font-weight: 600;
     color: var(--charcoal-brown);
     margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 1;
   }
   
   .info-card p {
@@ -245,16 +428,40 @@
     color: rgba(58, 53, 44, 0.7);
     line-height: 1.6;
     margin: 0;
+    position: relative;
+    z-index: 1;
   }
   
   /* CHART CONTAINER */
   .chart-container {
-    background: var(--light-cream);
+    background: var(--white);
     border: 1px solid rgba(107, 106, 69, 0.1);
     border-radius: 12px;
     padding: 2rem;
     margin-top: 2rem;
-    min-height: 350px;
+    min-height: 400px;
+    box-shadow: 0 2px 8px rgba(58, 53, 44, 0.06);
+  }
+  
+  /* TOOLTIP */
+  .tooltip {
+    position: absolute;
+    background: var(--charcoal-brown);
+    color: var(--white);
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 10000;
+    white-space: nowrap;
+  }
+  
+  .tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
   }
   
   /* MOBILE RESPONSIVE */
@@ -284,12 +491,9 @@
       font-size: 2rem;
     }
     
+    .interactive-slider,
     .homebot-section {
       padding: 1.5rem;
-    }
-    
-    .homebot-section h2 {
-      font-size: 1.5rem;
     }
     
     .homebot-widget {
@@ -313,6 +517,10 @@
       border-bottom-color: rgba(107, 106, 69, 0.1);
     }
     
+    .tab-button::after {
+      display: none;
+    }
+    
     .tab-content {
       padding: 1.5rem;
     }
@@ -324,7 +532,7 @@
     
     .chart-container {
       padding: 1rem;
-      min-height: 250px;
+      min-height: 300px;
     }
   }
   
@@ -372,9 +580,11 @@
   
   .property-selector button:hover {
     background: #5A5938;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 53, 44, 0.15);
   }
   
-  /* MODALS */
+  /* MODALS - ENHANCED */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -388,6 +598,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    animation: fadeIn 0.3s ease;
   }
   
   .modal-overlay.active {
@@ -403,6 +614,12 @@
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
     max-height: 90vh;
     overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+  
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   
   .modal-header h2 {
@@ -469,6 +686,7 @@
   
   .btn-secondary:hover {
     background: #E5E1D3;
+    transform: translateY(-2px);
   }
   
   .btn-primary {
@@ -484,6 +702,8 @@
   
   .btn-primary:hover {
     background: #5A5938;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(58, 53, 44, 0.2);
   }
   
   @media (max-width: 768px) {
@@ -527,11 +747,14 @@
   </div>
   {% endif %}
   
-  <!-- Financial Snapshot Cards -->
+  <!-- Financial Snapshot Cards - INTERACTIVE -->
   <div class="snapshot-grid">
     <!-- Home Value -->
-    <div class="snapshot-card">
-      <div class="snapshot-card-label">Estimated Home Value</div>
+    <div class="snapshot-card" onclick="openEditModal('value')" title="Click to edit">
+      <div class="snapshot-card-label">
+        <span>Estimated Home Value</span>
+        <span style="font-size: 0.75rem; opacity: 0.7;">Click to edit</span>
+      </div>
       <div class="snapshot-card-value">
         {% if snapshot and snapshot.get('value_estimate') %}
           ${{ "{:,}".format(snapshot.get('value_estimate')|int) }}
@@ -540,12 +763,16 @@
         {% endif %}
       </div>
       <div class="snapshot-card-sublabel">Your home's current market value</div>
-      <button class="snapshot-card-edit" onclick="openEditModal('value')">Update Value</button>
+      <div class="snapshot-card-change">
+        ↑ +$12,500 this year
+      </div>
     </div>
     
     <!-- Equity -->
-    <div class="snapshot-card">
-      <div class="snapshot-card-label">Total Equity</div>
+    <div class="snapshot-card" title="Your ownership stake">
+      <div class="snapshot-card-label">
+        <span>Total Equity</span>
+      </div>
       <div class="snapshot-card-value">
         {% if snapshot and snapshot.get('equity_estimate') %}
           ${{ "{:,}".format(snapshot.get('equity_estimate')|int) }}
@@ -556,11 +783,20 @@
         {% endif %}
       </div>
       <div class="snapshot-card-sublabel">Value minus loan balance</div>
+      {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
+        {% set equity_percent = ((snapshot.get('value_estimate') - snapshot.get('loan_balance')) / snapshot.get('value_estimate') * 100)|int %}
+        <div class="snapshot-card-change">
+          {{ equity_percent }}% ownership
+        </div>
+      {% endif %}
     </div>
     
     <!-- Loan Balance -->
-    <div class="snapshot-card">
-      <div class="snapshot-card-label">Loan Balance</div>
+    <div class="snapshot-card" onclick="openEditModal('loan')" title="Click to edit">
+      <div class="snapshot-card-label">
+        <span>Loan Balance</span>
+        <span style="font-size: 0.75rem; opacity: 0.7;">Click to edit</span>
+      </div>
       <div class="snapshot-card-value">
         {% if snapshot and snapshot.get('loan_balance') %}
           ${{ "{:,}".format(snapshot.get('loan_balance')|int) }}
@@ -569,7 +805,66 @@
         {% endif %}
       </div>
       <div class="snapshot-card-sublabel">Current mortgage balance</div>
-      <button class="snapshot-card-edit" onclick="openEditModal('loan')">Update Loan</button>
+      <div class="snapshot-card-change negative">
+        ↓ -$850/month
+      </div>
+    </div>
+  </div>
+  
+  <!-- Interactive Value Slider -->
+  <div class="interactive-slider">
+    <h2>Explore Your Future Value</h2>
+    <p>Adjust the slider to see how appreciation impacts your equity over time</p>
+    
+    <div class="slider-container">
+      <div class="slider-label">
+        <span class="slider-label-text">Annual Appreciation Rate</span>
+        <span class="slider-value" id="appreciationValue">3.0%</span>
+      </div>
+      <input type="range" min="0" max="10" step="0.5" value="3" class="slider" id="appreciationSlider" oninput="updateAppreciation(this.value)">
+    </div>
+    
+    <div class="slider-container">
+      <div class="slider-label">
+        <span class="slider-label-text">Years Forward</span>
+        <span class="slider-value" id="yearsValue">5 years</span>
+      </div>
+      <input type="range" min="1" max="30" step="1" value="5" class="slider" id="yearsSlider" oninput="updateYears(this.value)">
+    </div>
+    
+    <div style="background: var(--white); border-radius: 12px; padding: 2rem; margin-top: 1.5rem;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+        <div>
+          <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.6); margin-bottom: 0.5rem;">Projected Value</div>
+          <div style="font-family: var(--font-heading); font-size: 2rem; color: var(--olive-green);" id="projectedValue">
+            {% if snapshot and snapshot.get('value_estimate') %}
+              ${{ "{:,}".format((snapshot.get('value_estimate') * 1.15)|int) }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.6); margin-bottom: 0.5rem;">Projected Equity</div>
+          <div style="font-family: var(--font-heading); font-size: 2rem; color: #5A6D47;" id="projectedEquity">
+            {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
+              ${{ "{:,}".format(((snapshot.get('value_estimate') * 1.15) - (snapshot.get('loan_balance') * 0.85))|int) }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.6); margin-bottom: 0.5rem;">Equity Gain</div>
+          <div style="font-family: var(--font-heading); font-size: 2rem; color: #5A6D47;" id="equityGain">
+            {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
+              ${{ "{:,}".format((((snapshot.get('value_estimate') * 1.15) - (snapshot.get('loan_balance') * 0.85)) - (snapshot.get('value_estimate') - snapshot.get('loan_balance')))|int) }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -588,7 +883,7 @@
     </div>
   </div>
   
-  <!-- Tabs Section -->
+  <!-- Tabs Section - ENHANCED -->
   <div class="tabs-container">
     <div class="tabs-nav">
       <button class="tab-button active" onclick="switchTab(event, 'overview')">Overview</button>
@@ -603,34 +898,37 @@
         <p>A clear snapshot of your home's financial position and key metrics.</p>
         
         <div class="info-cards-grid">
-          <div class="info-card">
+          <div class="info-card" title="Loan-to-Value Ratio">
             <h4>Loan-to-Value (LTV)</h4>
             <p>
               {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') and snapshot.get('value_estimate') > 0 %}
                 {% set ltv = (snapshot.get('loan_balance') / snapshot.get('value_estimate') * 100) %}
-                {{ "%.1f"|format(ltv) }}%
+                <strong style="font-size: 1.5rem; color: var(--olive-green);">{{ "%.1f"|format(ltv) }}%</strong><br>
+                Lower is better. Below 80% unlocks better rates.
               {% else %}
                 —
               {% endif %}
             </p>
           </div>
           
-          <div class="info-card">
+          <div class="info-card" title="Current Interest Rate">
             <h4>Interest Rate</h4>
             <p>
               {% if snapshot and snapshot.get('loan_rate') %}
-                {{ "%.2f"|format(snapshot.get('loan_rate')) }}%
+                <strong style="font-size: 1.5rem; color: var(--olive-green);">{{ "%.2f"|format(snapshot.get('loan_rate')) }}%</strong><br>
+                Your current mortgage rate
               {% else %}
                 —
               {% endif %}
             </p>
           </div>
           
-          <div class="info-card">
+          <div class="info-card" title="Monthly Mortgage Payment">
             <h4>Monthly Payment</h4>
             <p>
               {% if snapshot and snapshot.get('loan_payment') %}
-                ${{ "{:,}".format(snapshot.get('loan_payment')|int) }}
+                <strong style="font-size: 1.5rem; color: var(--olive-green);">${{ "{:,}".format(snapshot.get('loan_payment')|int) }}</strong><br>
+                Principal + Interest
               {% else %}
                 —
               {% endif %}
@@ -645,19 +943,19 @@
         <p>Explore different financial scenarios to understand your options and opportunities.</p>
         
         <div class="info-cards-grid">
-          <div class="info-card">
+          <div class="info-card" onclick="alert('Refinance calculator coming soon!')">
             <h4>Refinance Opportunity</h4>
-            <p>See how refinancing at today's rates could impact your monthly payment and long-term savings.</p>
+            <p>See how refinancing at today's rates could impact your monthly payment and long-term savings. Click to explore.</p>
           </div>
           
-          <div class="info-card">
+          <div class="info-card" onclick="alert('Cash-out calculator coming soon!')">
             <h4>Cash-Out Refinance</h4>
-            <p>Unlock your equity for renovations, investments, or other financial goals.</p>
+            <p>Unlock your equity for renovations, investments, or other financial goals. Click to calculate.</p>
           </div>
           
-          <div class="info-card">
+          <div class="info-card" onclick="alert('Future value projections shown above!')">
             <h4>Future Value Projection</h4>
-            <p>Estimate your home's value and equity growth over the next 1, 3, or 5 years.</p>
+            <p>Estimate your home's value and equity growth over the next 1, 3, or 5 years using the slider above.</p>
           </div>
         </div>
       </div>
@@ -702,7 +1000,8 @@
                         borderColor: '#6B6A45',
                         backgroundColor: 'rgba(107, 106, 69, 0.1)',
                         tension: 0.4,
-                        fill: false
+                        fill: false,
+                        borderWidth: 3
                       },
                       {
                         label: 'Loan Balance',
@@ -710,7 +1009,8 @@
                         borderColor: '#C8B497',
                         backgroundColor: 'rgba(200, 180, 151, 0.1)',
                         tension: 0.4,
-                        fill: false
+                        fill: false,
+                        borderWidth: 3
                       },
                       {
                         label: 'Equity',
@@ -718,7 +1018,8 @@
                         borderColor: '#5A6D47',
                         backgroundColor: 'rgba(90, 109, 71, 0.1)',
                         tension: 0.4,
-                        fill: true
+                        fill: true,
+                        borderWidth: 3
                       }
                     ]
                   },
@@ -731,12 +1032,20 @@
                         labels: {
                           font: { family: 'inherit', size: 12 },
                           color: '#3A352C',
-                          padding: 16
+                          padding: 16,
+                          usePointStyle: true
                         }
                       },
                       tooltip: {
                         mode: 'index',
                         intersect: false,
+                        backgroundColor: '#3A352C',
+                        titleColor: '#F6F2E8',
+                        bodyColor: '#F6F2E8',
+                        borderColor: '#6B6A45',
+                        borderWidth: 1,
+                        padding: 12,
+                        displayColors: true,
                         callbacks: {
                           label: function(context) {
                             return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
@@ -769,6 +1078,11 @@
                           display: false
                         }
                       }
+                    },
+                    interaction: {
+                      mode: 'nearest',
+                      axis: 'x',
+                      intersect: false
                     }
                   }
                 });
@@ -809,20 +1123,67 @@
 </div>
 
 <script>
-  // Tab Switching
+  // Tab Switching with Animation
   function switchTab(event, tabName) {
-    // Hide all tab panels
     const panels = document.querySelectorAll('.tab-panel');
     panels.forEach(panel => panel.classList.remove('active'));
     
-    // Remove active from all buttons
     const buttons = document.querySelectorAll('.tab-button');
     buttons.forEach(btn => btn.classList.remove('active'));
     
-    // Show selected panel and activate button
     document.getElementById(tabName).classList.add('active');
     event.currentTarget.classList.add('active');
   }
+  
+  // Interactive Slider Updates
+  function updateAppreciation(value) {
+    document.getElementById('appreciationValue').textContent = value + '%';
+    const slider = document.getElementById('appreciationSlider');
+    const percent = (value / 10) * 100;
+    slider.style.setProperty('--slider-percent', percent + '%');
+    calculateProjections();
+  }
+  
+  function updateYears(value) {
+    document.getElementById('yearsValue').textContent = value + ' years';
+    const slider = document.getElementById('yearsSlider');
+    const percent = ((value - 1) / 29) * 100;
+    slider.style.setProperty('--slider-percent', percent + '%');
+    calculateProjections();
+  }
+  
+  function calculateProjections() {
+    const appreciation = parseFloat(document.getElementById('appreciationSlider').value) / 100;
+    const years = parseInt(document.getElementById('yearsSlider').value);
+    
+    {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
+    const currentValue = {{ snapshot.get('value_estimate') }};
+    const currentLoan = {{ snapshot.get('loan_balance') }};
+    const monthlyPayment = {{ snapshot.get('loan_payment', 0) }};
+    
+    // Compound appreciation
+    const futureValue = currentValue * Math.pow(1 + appreciation, years);
+    
+    // Estimated loan paydown (simplified)
+    const totalPayments = monthlyPayment * 12 * years;
+    const principalPaid = totalPayments * 0.65; // Rough estimate
+    const futureLoan = Math.max(0, currentLoan - principalPaid);
+    
+    const futureEquity = futureValue - futureLoan;
+    const currentEquity = currentValue - currentLoan;
+    const equityGain = futureEquity - currentEquity;
+    
+    document.getElementById('projectedValue').textContent = '$' + Math.round(futureValue).toLocaleString();
+    document.getElementById('projectedEquity').textContent = '$' + Math.round(futureEquity).toLocaleString();
+    document.getElementById('equityGain').textContent = '$' + Math.round(equityGain).toLocaleString();
+    {% endif %}
+  }
+  
+  // Initialize sliders on load
+  window.addEventListener('load', function() {
+    updateAppreciation(document.getElementById('appreciationSlider').value);
+    updateYears(document.getElementById('yearsSlider').value);
+  });
   
   // Modal Functions
   function openEditModal(type) {
@@ -869,6 +1230,16 @@
     if (!isNaN(val) && val !== '') {
       this.value = parseInt(val).toLocaleString();
     }
+  });
+  
+  // Highlight animation on page load
+  window.addEventListener('load', function() {
+    document.querySelectorAll('.snapshot-card').forEach((card, index) => {
+      setTimeout(() => {
+        card.classList.add('highlight');
+        setTimeout(() => card.classList.remove('highlight'), 1500);
+      }, index * 200);
+    });
   });
 </script>
 
