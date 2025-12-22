@@ -5969,6 +5969,10 @@ def agent_feature_spotlight_cards(tx_id):
     if not transaction or transaction.get("agent_id") != user["id"]:
         flash("Transaction not found.", "error")
         return redirect(url_for("agent_transactions"))
+    
+    # Get saved card sets for this transaction
+    from database import get_spotlight_card_sets
+    saved_sets = get_spotlight_card_sets(user["id"], tx_id)
 
     return render_template(
         "agent/feature_spotlight_cards.html",
@@ -5976,6 +5980,7 @@ def agent_feature_spotlight_cards(tx_id):
         user=user,
         tx_id=tx_id,
         transaction=transaction,
+        saved_sets=saved_sets,
     )
 
 
@@ -6052,6 +6057,24 @@ def agent_feature_spotlight_cards_generate(tx_id):
     if not features:
         flash("Please add at least one feature.", "error")
         return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
+    
+    # Save the card set if requested
+    save_set = request.form.get('save_set')
+    set_name = request.form.get('set_name', '').strip()
+    
+    if save_set and set_name:
+        from database import save_spotlight_card_set
+        try:
+            save_spotlight_card_set(
+                user["id"],
+                tx_id,
+                set_name,
+                transaction.get('property_address', ''),
+                features
+            )
+            flash(f"Card set '{set_name}' saved successfully!", "success")
+        except Exception as e:
+            flash(f"Error saving card set: {e}", "error")
 
     # Refine features with AI
     refined_features = []
@@ -6116,6 +6139,67 @@ def agent_feature_spotlight_cards_generate(tx_id):
             except:
                 flash(f"Error generating PDF: {str(e)}", "error")
                 return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
+
+
+@app.route("/agent/spotlight-cards/<int:set_id>/load")
+def agent_spotlight_cards_load(set_id):
+    """Load a saved spotlight card set."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    from database import get_spotlight_card_set
+    card_set = get_spotlight_card_set(set_id, user["id"])
+    
+    if not card_set:
+        return jsonify({"success": False, "error": "Card set not found"}), 404
+    
+    return jsonify({
+        "success": True,
+        "card_set": card_set
+    })
+
+
+@app.route("/agent/spotlight-cards/<int:set_id>/update", methods=["POST"])
+def agent_spotlight_cards_update(set_id):
+    """Update a saved spotlight card set."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    from database import update_spotlight_card_set
+    
+    data = request.get_json()
+    set_name = data.get('set_name', '').strip()
+    property_address = data.get('property_address', '').strip()
+    features = data.get('features', [])
+    
+    if not set_name or not features:
+        return jsonify({"success": False, "error": "Missing required fields"}), 400
+    
+    success = update_spotlight_card_set(set_id, user["id"], set_name, property_address, features)
+    
+    if success:
+        return jsonify({"success": True, "message": "Card set updated successfully"})
+    else:
+        return jsonify({"success": False, "error": "Failed to update card set"}), 500
+
+
+@app.route("/agent/spotlight-cards/<int:set_id>/delete", methods=["POST"])
+def agent_spotlight_cards_delete(set_id):
+    """Delete a saved spotlight card set."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    from database import delete_spotlight_card_set
+    
+    success = delete_spotlight_card_set(set_id, user["id"])
+    
+    if success:
+        return jsonify({"success": True, "message": "Card set deleted successfully"})
+    else:
+        return jsonify({"success": False, "error": "Failed to delete card set"}), 500
 
 
 @app.route("/agent/communications", methods=["GET", "POST"])

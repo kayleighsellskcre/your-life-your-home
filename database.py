@@ -904,6 +904,24 @@ def init_db() -> None:
         )
         """
     )
+    
+    # ------------- FEATURE SPOTLIGHT CARD SETS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS spotlight_card_sets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            transaction_id INTEGER,
+            set_name TEXT NOT NULL,
+            property_address TEXT,
+            features_json TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (transaction_id) REFERENCES agent_transactions(id) ON DELETE SET NULL
+        )
+        """
+    )
 
     conn.commit()
     conn.close()
@@ -4107,6 +4125,135 @@ def deactivate_referral_link(token: str) -> bool:
            WHERE token = ?""",
         (token,)
     )
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+
+# =========================
+# SPOTLIGHT CARD SETS
+# =========================
+
+def save_spotlight_card_set(agent_user_id: int, transaction_id: Optional[int], set_name: str, 
+                            property_address: str, features: List[Dict[str, str]]) -> int:
+    """Save a new spotlight card set."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    features_json = json.dumps(features)
+    
+    cur.execute(
+        """INSERT INTO spotlight_card_sets 
+           (agent_user_id, transaction_id, set_name, property_address, features_json)
+           VALUES (?, ?, ?, ?, ?)""",
+        (agent_user_id, transaction_id, set_name, property_address, features_json)
+    )
+    
+    set_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return set_id
+
+
+def get_spotlight_card_sets(agent_user_id: int, transaction_id: Optional[int] = None) -> List[Dict[str, Any]]:
+    """Get all spotlight card sets for an agent, optionally filtered by transaction."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    if transaction_id:
+        cur.execute(
+            """SELECT * FROM spotlight_card_sets 
+               WHERE agent_user_id = ? AND transaction_id = ?
+               ORDER BY updated_at DESC""",
+            (agent_user_id, transaction_id)
+        )
+    else:
+        cur.execute(
+            """SELECT * FROM spotlight_card_sets 
+               WHERE agent_user_id = ?
+               ORDER BY updated_at DESC""",
+            (agent_user_id,)
+        )
+    
+    rows = cur.fetchall()
+    conn.close()
+    
+    result = []
+    for row in rows:
+        result.append({
+            'id': row['id'],
+            'transaction_id': row['transaction_id'],
+            'set_name': row['set_name'],
+            'property_address': row['property_address'],
+            'features': json.loads(row['features_json']),
+            'created_at': row['created_at'],
+            'updated_at': row['updated_at']
+        })
+    
+    return result
+
+
+def get_spotlight_card_set(set_id: int, agent_user_id: int) -> Optional[Dict[str, Any]]:
+    """Get a specific spotlight card set."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    cur.execute(
+        """SELECT * FROM spotlight_card_sets 
+           WHERE id = ? AND agent_user_id = ?""",
+        (set_id, agent_user_id)
+    )
+    
+    row = cur.fetchone()
+    conn.close()
+    
+    if not row:
+        return None
+    
+    return {
+        'id': row['id'],
+        'transaction_id': row['transaction_id'],
+        'set_name': row['set_name'],
+        'property_address': row['property_address'],
+        'features': json.loads(row['features_json']),
+        'created_at': row['created_at'],
+        'updated_at': row['updated_at']
+    }
+
+
+def update_spotlight_card_set(set_id: int, agent_user_id: int, set_name: str, 
+                              property_address: str, features: List[Dict[str, str]]) -> bool:
+    """Update an existing spotlight card set."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    features_json = json.dumps(features)
+    
+    cur.execute(
+        """UPDATE spotlight_card_sets 
+           SET set_name = ?, property_address = ?, features_json = ?, updated_at = CURRENT_TIMESTAMP
+           WHERE id = ? AND agent_user_id = ?""",
+        (set_name, property_address, features_json, set_id, agent_user_id)
+    )
+    
+    success = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return success
+
+
+def delete_spotlight_card_set(set_id: int, agent_user_id: int) -> bool:
+    """Delete a spotlight card set."""
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    cur.execute(
+        """DELETE FROM spotlight_card_sets 
+           WHERE id = ? AND agent_user_id = ?""",
+        (set_id, agent_user_id)
+    )
+    
     success = cur.rowcount > 0
     conn.commit()
     conn.close()

@@ -237,8 +237,40 @@
     <p>Create elegant, print-ready feature cards for in-home showings</p>
   </div>
 
+  {% if saved_sets %}
+  <div class="card-premium" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;">Saved Card Sets</h3>
+    <div style="display: grid; gap: 0.75rem;">
+      {% for card_set in saved_sets %}
+      <div class="saved-set-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border: 1px solid rgba(200, 180, 151, 0.2); border-radius: 8px;">
+        <div>
+          <div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">{{ card_set.set_name }}</div>
+          <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7);">{{ card_set.features|length }} cards • {{ card_set.updated_at }}</div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn-secondary" onclick="loadSavedSet({{ card_set.id }})" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+            Load
+          </button>
+          <button type="button" class="btn-remove" onclick="deleteSavedSet({{ card_set.id }}, '{{ card_set.set_name }}')" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+            Delete
+          </button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
   <div class="card-premium">
     <form id="feature-form" method="POST" action="{{ url_for('agent_feature_spotlight_cards_generate', tx_id=tx_id) }}">
+      <div class="form-group">
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+          <input type="checkbox" id="save-set-checkbox" name="save_set" style="width: auto; cursor: pointer;">
+          <span style="font-weight: 600; color: var(--olive-green); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;">Save this card set for later</span>
+        </label>
+        <input type="text" name="set_name" id="set-name-input" class="premium-input" placeholder="Enter a name for this card set (e.g., 'Kitchen Features')" style="display: none;">
+      </div>
+      
       <div id="features-container">
         <!-- Feature cards will be added here dynamically -->
       </div>
@@ -448,6 +480,66 @@
     previewWindow.document.close();
   }
 
+  // Load a saved card set
+  async function loadSavedSet(setId) {
+    try {
+      const response = await fetch('/agent/spotlight-cards/' + setId + '/load');
+      const data = await response.json();
+      
+      if (data.success) {
+        const cardSet = data.card_set;
+        
+        // Clear existing features
+        const container = document.getElementById('features-container');
+        container.innerHTML = '';
+        featureCount = 0;
+        
+        // Load features from saved set
+        for (const feature of cardSet.features) {
+          addFeatureCard();
+          const currentIdx = featureCount;
+          
+          // Populate fields
+          document.querySelector('input[name="features[' + currentIdx + '][title]"]').value = feature.title;
+          document.querySelector('input[name="features[' + currentIdx + '][room]"]').value = feature.room;
+          document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
+        }
+        
+        // Show success message
+        alert('Card set "' + cardSet.set_name + '" loaded successfully!');
+      } else {
+        alert('Error loading card set: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error loading card set:', error);
+      alert('Error loading card set. Please try again.');
+    }
+  }
+  
+  // Delete a saved card set
+  async function deleteSavedSet(setId, setName) {
+    if (!confirm('Are you sure you want to delete "' + setName + '"? This cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch('/agent/spotlight-cards/' + setId + '/delete', {
+        method: 'POST'
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Card set deleted successfully!');
+        location.reload();
+      } else {
+        alert('Error deleting card set: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error deleting card set:', error);
+      alert('Error deleting card set. Please try again.');
+    }
+  }
+
   // Initialize on page load
   document.addEventListener('DOMContentLoaded', function() {
     // Add first feature card on page load
@@ -464,6 +556,21 @@
       });
     } else {
       console.error('Add Feature button not found!');
+    }
+    
+    // Toggle set name input when save checkbox is checked
+    const saveCheckbox = document.getElementById('save-set-checkbox');
+    const setNameInput = document.getElementById('set-name-input');
+    if (saveCheckbox && setNameInput) {
+      saveCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          setNameInput.style.display = 'block';
+          setNameInput.required = true;
+        } else {
+          setNameInput.style.display = 'none';
+          setNameInput.required = false;
+        }
+      });
     }
   });
 </script>
