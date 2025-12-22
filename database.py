@@ -922,6 +922,8 @@ def init_db() -> None:
         )
         """
     )
+    
+    print("[DATABASE] ✓ All tables created/verified including spotlight_card_sets")
 
     conn.commit()
     conn.close()

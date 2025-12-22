@@ -6058,23 +6058,28 @@ def agent_feature_spotlight_cards_generate(tx_id):
         flash("Please add at least one feature.", "error")
         return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
     
-    # Save the card set if requested
-    save_set = request.form.get('save_set')
+    # Always save the card set automatically
     set_name = request.form.get('set_name', '').strip()
     
-    if save_set and set_name:
-        from database import save_spotlight_card_set
-        try:
-            save_spotlight_card_set(
-                user["id"],
-                tx_id,
-                set_name,
-                transaction.get('property_address', ''),
-                features
-            )
-            flash(f"Card set '{set_name}' saved successfully!", "success")
-        except Exception as e:
-            flash(f"Error saving card set: {e}", "error")
+    # If no name provided, generate one with timestamp
+    if not set_name:
+        from datetime import datetime
+        set_name = f"Cards - {datetime.now().strftime('%b %d, %Y %I:%M %p')}"
+    
+    from database import save_spotlight_card_set
+    try:
+        save_spotlight_card_set(
+            user["id"],
+            tx_id,
+            set_name,
+            transaction.get('property_address', ''),
+            features
+        )
+        print(f"✓ Card set '{set_name}' saved successfully for user {user['id']}, tx {tx_id}")
+    except Exception as e:
+        print(f"✗ Error saving card set: {e}")
+        import traceback
+        traceback.print_exc()
 
     # Refine features with AI
     refined_features = []

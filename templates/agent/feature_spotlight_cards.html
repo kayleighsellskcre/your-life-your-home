@@ -263,12 +263,10 @@
 
   <div class="card-premium">
     <form id="feature-form" method="POST" action="{{ url_for('agent_feature_spotlight_cards_generate', tx_id=tx_id) }}">
-      <div class="form-group">
-        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-          <input type="checkbox" id="save-set-checkbox" name="save_set" style="width: auto; cursor: pointer;">
-          <span style="font-weight: 600; color: var(--olive-green); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;">Save this card set for later</span>
-        </label>
-        <input type="text" name="set_name" id="set-name-input" class="premium-input" placeholder="Enter a name for this card set (e.g., 'Kitchen Features')" style="display: none;">
+      <div class="form-group" style="background: rgba(107, 106, 69, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(107, 106, 69, 0.15); margin-bottom: 1.5rem;">
+        <label style="font-weight: 600; color: var(--olive-green); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; display: block;">Card Set Name (Optional)</label>
+        <input type="text" name="set_name" id="set-name-input" class="premium-input" placeholder="e.g., 'Kitchen Features' (auto-saves with timestamp if blank)" style="margin-bottom: 0.5rem;">
+        <div style="font-size: 0.8rem; color: rgba(58, 53, 44, 0.7); font-style: italic;">💾 Your cards will be saved automatically so you can reprint or edit them later</div>
       </div>
       
       <div id="features-container">
@@ -558,20 +556,6 @@
       console.error('Add Feature button not found!');
     }
     
-    // Toggle set name input when save checkbox is checked
-    const saveCheckbox = document.getElementById('save-set-checkbox');
-    const setNameInput = document.getElementById('set-name-input');
-    if (saveCheckbox && setNameInput) {
-      saveCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-          setNameInput.style.display = 'block';
-          setNameInput.required = true;
-        } else {
-          setNameInput.style.display = 'none';
-          setNameInput.required = false;
-        }
-      });
-    }
   });
 </script>
 {% endblock %}
