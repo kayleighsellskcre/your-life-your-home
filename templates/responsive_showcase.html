@@ -1,0 +1,501 @@
+{% extends "base.html" %}
+
+{% block page_title %}Responsive Component Showcase • Your Life Your Home{% endblock %}
+
+{% block content %}
+<style>
+  .showcase-section {
+    margin: 3rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid var(--taupe-beige);
+  }
+  
+  .showcase-section:first-child {
+    border-top: none;
+  }
+  
+  .showcase-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--olive-green);
+    margin-bottom: 1rem;
+  }
+  
+  .showcase-description {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    margin-bottom: 2rem;
+    max-width: 600px;
+  }
+  
+  .code-snippet {
+    background: var(--light-cream);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--olive-green);
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+  
+  .code-snippet code {
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--charcoal-brown);
+  }
+  
+  .demo-container {
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(58, 53, 44, 0.1);
+    margin: 1.5rem 0;
+  }
+  
+  .feature-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: var(--olive-green);
+    color: white;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+</style>
+
+<div class="dashboard-container">
+  <!-- Header -->
+  <div style="text-align: center; margin-bottom: 4rem;">
+    <h1 style="font-size: 3.5rem; margin-bottom: 1rem;">Responsive Component Showcase</h1>
+    <p style="font-size: 1.2rem; color: var(--olive-green); font-style: italic;">
+      High-end, mobile-first components that work beautifully everywhere
+    </p>
+    <div style="margin-top: 1.5rem;">
+      <span class="feature-badge">Mobile-First</span>
+      <span class="feature-badge">Touch-Optimized</span>
+      <span class="feature-badge">Accessible</span>
+      <span class="feature-badge">Luxury Design</span>
+    </div>
+  </div>
+
+  <!-- 1. BUTTONS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">1. Buttons</h2>
+    <p class="showcase-description">
+      Full-width on mobile (52px min-height), generous touch targets, smooth animations
+    </p>
+    
+    <div class="demo-container">
+      <button class="btn btn-primary">Primary Button</button>
+      <button class="btn btn-secondary">Secondary Button</button>
+      <button class="btn btn-outline">Outline Button</button>
+      <button class="btn btn-premium">Premium Button</button>
+    </div>
+    
+    <div class="code-snippet">
+      <code>&lt;button class="btn btn-primary"&gt;Primary Button&lt;/button&gt;</code>
+    </div>
+  </section>
+
+  <!-- 2. CARDS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">2. Cards</h2>
+    <p class="showcase-description">
+      Responsive cards with premium shadows, hover effects, and mobile-optimized spacing
+    </p>
+    
+    <div class="dashboard-grid">
+      <div class="card">
+        <h3>Standard Card</h3>
+        <p>This is a standard card with basic styling. It automatically stacks on mobile.</p>
+        <button class="btn btn-primary">Action</button>
+      </div>
+      
+      <div class="card-premium">
+        <h3>Premium Card</h3>
+        <p>Premium cards feature enhanced shadows and subtle gradient backgrounds.</p>
+        <button class="btn btn-secondary">Action</button>
+      </div>
+      
+      <div class="card-hero">
+        <h3>Hero Card</h3>
+        <p>Hero cards are perfect for featured content and important information.</p>
+        <button class="btn btn-outline">Learn More</button>
+      </div>
+    </div>
+    
+    <div class="code-snippet">
+      <code>&lt;div class="card"&gt;<br>
+  &lt;h3&gt;Card Title&lt;/h3&gt;<br>
+  &lt;p&gt;Content...&lt;/p&gt;<br>
+  &lt;button class="btn btn-primary"&gt;Action&lt;/button&gt;<br>
+&lt;/div&gt;</code>
+    </div>
+  </section>
+
+  <!-- 3. FORMS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">3. Forms</h2>
+    <p class="showcase-description">
+      Touch-friendly forms with 16px font size (prevents iOS zoom), large input fields
+    </p>
+    
+    <div class="demo-container">
+      <form>
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" placeholder="Enter your name">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" class="form-control" placeholder="you@example.com">
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Property Type</label>
+          <select class="form-control">
+            <option>Select...</option>
+            <option>Single Family Home</option>
+            <option>Condo</option>
+            <option>Townhouse</option>
+            <option>Multi-Family</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea class="form-control" rows="4" placeholder="Tell us about your needs..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Submit Form</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- 4. ALERTS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">4. Alerts & Messages</h2>
+    <p class="showcase-description">
+      Beautiful, accessible alert messages for different scenarios
+    </p>
+    
+    <div class="demo-container">
+      <div class="alert alert-success">
+        ✓ Success! Your changes have been saved.
+      </div>
+      
+      <div class="alert alert-error">
+        ✕ Error! Please check your information and try again.
+      </div>
+      
+      <div class="alert alert-info">
+        ℹ Info: Your session will expire in 10 minutes.
+      </div>
+    </div>
+    
+    <div class="code-snippet">
+      <code>&lt;div class="alert alert-success"&gt;<br>
+  Success message here<br>
+&lt;/div&gt;</code>
+    </div>
+  </section>
+
+  <!-- 5. STATS GRID -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">5. Stats Display</h2>
+    <p class="showcase-description">
+      Responsive stat cards that stack beautifully on mobile
+    </p>
+    
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Value</div>
+        <div class="stat-value">$485,000</div>
+        <div class="stat-change positive">+$12,500 this month</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Equity Built</div>
+        <div class="stat-value">$95,000</div>
+        <div class="stat-change positive">+5.2%</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Monthly Payment</div>
+        <div class="stat-value">$2,450</div>
+        <div class="stat-change">Fixed rate</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Years Remaining</div>
+        <div class="stat-value">23</div>
+        <div class="stat-change">68% complete</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. TABLES -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">6. Tables</h2>
+    <p class="showcase-description">
+      Scrollable tables on mobile with sticky headers
+    </p>
+    
+    <div class="demo-container">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Dec 1, 2024</td>
+              <td>Mortgage Payment</td>
+              <td>$2,450</td>
+              <td>Paid</td>
+            </tr>
+            <tr>
+              <td>Nov 15, 2024</td>
+              <td>Home Insurance</td>
+              <td>$1,200</td>
+              <td>Paid</td>
+            </tr>
+            <tr>
+              <td>Nov 1, 2024</td>
+              <td>Property Tax</td>
+              <td>$3,500</td>
+              <td>Paid</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. MODALS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">7. Modals</h2>
+    <p class="showcase-description">
+      Bottom sheet style on mobile, centered dialog on desktop
+    </p>
+    
+    <div class="demo-container">
+      <button class="btn btn-primary" onclick="openDemoModal()">Open Modal</button>
+      
+      <div class="modal-overlay" id="demoModal" style="display: none;">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">Modal Title</h2>
+          </div>
+          <div class="modal-body">
+            <p>This is a responsive modal that slides up from the bottom on mobile and appears centered on desktop.</p>
+            <p>On mobile, it provides a native app-like experience.</p>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeDemoModal()">Confirm</button>
+            <button class="btn btn-secondary" onclick="closeDemoModal()">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      function openDemoModal() {
+        document.getElementById('demoModal').style.display = 'flex';
+      }
+      function closeDemoModal() {
+        document.getElementById('demoModal').style.display = 'none';
+      }
+    </script>
+  </section>
+
+  <!-- 8. MOBILE TABS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">8. Mobile Tabs</h2>
+    <p class="showcase-description">
+      Horizontal scrolling tabs that work great on all screen sizes
+    </p>
+    
+    <div class="demo-container">
+      <div class="mobile-tabs">
+        <button class="mobile-tab active" onclick="showDemoTab(1)">Overview</button>
+        <button class="mobile-tab" onclick="showDemoTab(2)">Details</button>
+        <button class="mobile-tab" onclick="showDemoTab(3)">History</button>
+        <button class="mobile-tab" onclick="showDemoTab(4)">Documents</button>
+        <button class="mobile-tab" onclick="showDemoTab(5)">Settings</button>
+      </div>
+      
+      <div id="demoTab1" class="tab-content" style="padding: 2rem; background: var(--light-cream); border-radius: 8px; margin-top: 1rem;">
+        <h3>Overview Tab</h3>
+        <p>This is the overview content. Tabs automatically scroll horizontally on mobile.</p>
+      </div>
+      
+      <div id="demoTab2" class="tab-content" style="display: none; padding: 2rem; background: var(--light-cream); border-radius: 8px; margin-top: 1rem;">
+        <h3>Details Tab</h3>
+        <p>This is the details content.</p>
+      </div>
+      
+      <div id="demoTab3" class="tab-content" style="display: none; padding: 2rem; background: var(--light-cream); border-radius: 8px; margin-top: 1rem;">
+        <h3>History Tab</h3>
+        <p>This is the history content.</p>
+      </div>
+      
+      <div id="demoTab4" class="tab-content" style="display: none; padding: 2rem; background: var(--light-cream); border-radius: 8px; margin-top: 1rem;">
+        <h3>Documents Tab</h3>
+        <p>This is the documents content.</p>
+      </div>
+      
+      <div id="demoTab5" class="tab-content" style="display: none; padding: 2rem; background: var(--light-cream); border-radius: 8px; margin-top: 1rem;">
+        <h3>Settings Tab</h3>
+        <p>This is the settings content.</p>
+      </div>
+    </div>
+    
+    <script>
+      function showDemoTab(num) {
+        // Hide all tabs
+        for (let i = 1; i <= 5; i++) {
+          const tab = document.getElementById('demoTab' + i);
+          if (tab) tab.style.display = 'none';
+        }
+        
+        // Remove active from all buttons
+        document.querySelectorAll('.mobile-tab').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        
+        // Show selected tab
+        const selectedTab = document.getElementById('demoTab' + num);
+        if (selectedTab) selectedTab.style.display = 'block';
+        
+        // Add active to clicked button
+        event.target.classList.add('active');
+      }
+    </script>
+  </section>
+
+  <!-- 9. SWIPEABLE CARDS -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">9. Swipeable Cards</h2>
+    <p class="showcase-description">
+      Horizontal scrolling card carousel for mobile
+    </p>
+    
+    <div class="swipeable-container">
+      <div class="swipeable-card card">
+        <h3>Card 1</h3>
+        <p>Swipe horizontally to see more cards. This works great on mobile!</p>
+        <button class="btn btn-outline">Learn More</button>
+      </div>
+      
+      <div class="swipeable-card card">
+        <h3>Card 2</h3>
+        <p>Each card snaps into position as you swipe.</p>
+        <button class="btn btn-outline">Learn More</button>
+      </div>
+      
+      <div class="swipeable-card card">
+        <h3>Card 3</h3>
+        <p>Perfect for image galleries, product showcases, and more.</p>
+        <button class="btn btn-outline">Learn More</button>
+      </div>
+      
+      <div class="swipeable-card card">
+        <h3>Card 4</h3>
+        <p>Smooth scrolling with momentum.</p>
+        <button class="btn btn-outline">Learn More</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. BADGES -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">10. Badges</h2>
+    <p class="showcase-description">
+      Status badges and labels for highlighting information
+    </p>
+    
+    <div class="demo-container">
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <span class="badge-premium">Premium</span>
+        <span class="badge-outline">Outline</span>
+        <span style="display: inline-block; padding: 0.5rem 1rem; background: var(--taupe-beige); color: white; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Active</span>
+        <span style="display: inline-block; padding: 0.5rem 1rem; background: var(--light-cream); color: var(--charcoal-brown); border-radius: 20px; font-size: 0.85rem; font-weight: 600;">Pending</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTING SECTION -->
+  <section class="showcase-section">
+    <h2 class="showcase-title">Testing Guide</h2>
+    <p class="showcase-description">
+      Resize your browser or use DevTools to test responsive behavior
+    </p>
+    
+    <div class="demo-container">
+      <h3>Screen Size Detection</h3>
+      <div id="screenInfo" style="padding: 1.5rem; background: var(--light-cream); border-radius: 8px; margin: 1rem 0;">
+        <p><strong>Window Width:</strong> <span id="windowWidth"></span>px</p>
+        <p><strong>Window Height:</strong> <span id="windowHeight"></span>px</p>
+        <p><strong>Device:</strong> <span id="deviceType"></span></p>
+        <p><strong>Orientation:</strong> <span id="orientation"></span></p>
+      </div>
+      
+      <script>
+        function updateScreenInfo() {
+          document.getElementById('windowWidth').textContent = window.innerWidth;
+          document.getElementById('windowHeight').textContent = window.innerHeight;
+          
+          let deviceType = 'Desktop';
+          if (window.innerWidth <= 480) deviceType = 'Small Phone';
+          else if (window.innerWidth <= 768) deviceType = 'Phone/Tablet';
+          else if (window.innerWidth <= 1200) deviceType = 'Tablet/Small Desktop';
+          else if (window.innerWidth >= 1920) deviceType = '4K/Ultra-Wide';
+          
+          document.getElementById('deviceType').textContent = deviceType;
+          document.getElementById('orientation').textContent = window.innerWidth > window.innerHeight ? 'Landscape' : 'Portrait';
+        }
+        
+        updateScreenInfo();
+        window.addEventListener('resize', updateScreenInfo);
+      </script>
+      
+      <h3 style="margin-top: 2rem;">Test Checklist</h3>
+      <ul style="line-height: 2;">
+        <li>✓ All buttons are full-width on mobile</li>
+        <li>✓ Touch targets are 52px+ tall</li>
+        <li>✓ Forms don't trigger zoom on iOS (16px font)</li>
+        <li>✓ Cards stack vertically on mobile</li>
+        <li>✓ Tables scroll horizontally when needed</li>
+        <li>✓ Modals become bottom sheets on mobile</li>
+        <li>✓ No horizontal page scroll</li>
+        <li>✓ Typography scales appropriately</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div style="text-align: center; margin-top: 6rem; padding: 3rem 0; border-top: 2px solid var(--taupe-beige);">
+    <h2 style="font-family: var(--font-heading); font-size: 2rem; color: var(--olive-green); margin-bottom: 1rem;">
+      Beautiful on Every Screen
+    </h2>
+    <p style="font-size: 1.1rem; opacity: 0.85; max-width: 600px; margin: 0 auto;">
+      This showcase demonstrates all responsive components. Test each one by resizing your browser or using Chrome DevTools device emulation.
+    </p>
+    <p style="margin-top: 2rem; font-size: 0.9rem; opacity: 0.7;">
+      📚 See <strong>RESPONSIVE_DESIGN_GUIDE.md</strong> for complete documentation
+    </p>
+  </div>
+</div>
+{% endblock %}
+

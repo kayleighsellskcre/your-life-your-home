@@ -2,8 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    
+    <!-- Responsive Mobile-First Meta Tags -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#6B6A45" />
+    <meta name="format-detection" content="telephone=no" />
+    
+    <!-- Performance -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
     <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
+    <meta name="description" content="Luxury homeowner platform connecting you with trusted real estate professionals" />
 
     <!-- Main CSS -->
     <link
@@ -11,9 +24,9 @@
       href="{{ url_for('static', filename='css/styles.css') }}"
     />
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts - Optimized Loading -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&family=Dancing+Script:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     

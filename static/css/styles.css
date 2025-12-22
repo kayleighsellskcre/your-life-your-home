@@ -709,8 +709,10 @@ tr:hover {
 }
 
 /* ===========================
-   RESPONSIVE DESIGN
+   RESPONSIVE DESIGN - LUXURY MOBILE EXPERIENCE
    =========================== */
+
+/* Large Tablets and Small Desktops */
 @media (max-width: 1200px) {
   .container,
   .dashboard-container {
@@ -724,8 +726,20 @@ tr:hover {
   h2 {
     font-size: 2.3rem;
   }
+  
+  /* Optimize navigation spacing */
+  .main-nav ul {
+    gap: 2rem;
+  }
+  
+  /* Better card spacing */
+  .dashboard-grid,
+  .dashboard-cards {
+    gap: 1.5rem;
+  }
 }
 
+/* Tablets Portrait */
 @media (max-width: 900px) {
   .header-content {
     padding: 0 2rem;
@@ -735,57 +749,105 @@ tr:hover {
     gap: 1.5rem;
   }
   
+  /* Single column layouts for better readability */
   .dashboard-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
   
   .footer-content {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  /* Better touch targets */
+  .btn {
+    min-height: 48px;
+    padding: 0.875rem 2rem;
+  }
+  
+  /* Optimize card layouts */
+  .board-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
+/* ===========================
+   MOBILE FIRST - LUXURY RESPONSIVE
+   Optimized for 768px and below
+   =========================== */
 @media (max-width: 768px) {
-  /* Typography */
+  /* ========== TYPOGRAPHY ========== */
+  /* Fluid, readable typography for mobile */
   h1 {
     font-size: 2rem !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.01em !important;
   }
   
   h2 {
     font-size: 1.5rem !important;
+    line-height: 1.3 !important;
   }
   
   h3 {
     font-size: 1.25rem !important;
+    line-height: 1.4 !important;
   }
   
-  /* Navigation */
+  h4 {
+    font-size: 1.1rem !important;
+  }
+  
+  p {
+    font-size: 1rem !important;
+    line-height: 1.65 !important;
+  }
+  
+  /* ========== NAVIGATION ========== */
+  /* Hamburger-friendly navigation */
   .main-nav ul {
     flex-direction: column;
-    gap: 1rem;
+    gap: 0;
   }
   
-  /* Footer */
+  .main-nav a {
+    display: block;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  /* ========== LAYOUT CONTAINERS ========== */
+  .container,
+  .dashboard-container {
+    padding: 1.5rem 1rem !important;
+  }
+  
+  /* Footer becomes single column */
   .footer-content {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
   
-  /* Grids and Cards */
+  /* ========== GRIDS AND CARDS ========== */
+  /* All grids become single column for clarity */
   .stats-grid,
   .dashboard-grid,
   .dashboard-cards {
     grid-template-columns: 1fr !important;
-    gap: 1rem !important;
+    gap: 1.25rem !important;
   }
   
-  /* Containers */
-  .container,
-  .dashboard-container {
-    padding: 1rem !important;
+  .board-grid {
+    grid-template-columns: 1fr !important;
   }
   
-  /* Dashboard Headers */
+  /* ========== DASHBOARD HEADERS ========== */
   .dashboard-main__header {
     padding-bottom: 1rem !important;
+    margin-bottom: 1.5rem !important;
   }
   
   .dashboard-main__header h1 {
@@ -795,115 +857,274 @@ tr:hover {
   
   .dashboard-main__header p {
     font-size: 0.95rem !important;
+    line-height: 1.6 !important;
   }
   
   .dashboard-tagline {
     font-size: 1.1rem !important;
+    margin-bottom: 0.75rem !important;
   }
   
-  /* Buttons */
+  /* ========== BUTTONS - TOUCH OPTIMIZED ========== */
+  /* All buttons full-width with generous touch targets */
   .btn,
   .btn-primary,
   .btn-secondary,
-  .btn-outline {
-    padding: 0.875rem 1.25rem !important;
-    font-size: 0.95rem !important;
-    min-height: 48px !important;
+  .btn-outline,
+  .btn-premium {
+    padding: 1rem 1.5rem !important;
+    font-size: 1rem !important;
+    min-height: 52px !important;
     width: 100% !important;
     justify-content: center !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    /* Smooth press effect */
+    transition: all 0.2s ease !important;
+    -webkit-tap-highlight-color: transparent !important;
   }
   
-  /* Cards */
-  .card {
-    padding: 1.25rem !important;
+  .btn:active,
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: scale(0.98) !important;
+  }
+  
+  /* ========== CARDS - MOBILE OPTIMIZED ========== */
+  .card,
+  .card-premium {
+    padding: 1.5rem 1.25rem !important;
+    margin-bottom: 1.25rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 12px rgba(58, 53, 44, 0.08) !important;
+  }
+  
+  .card:active {
+    transform: scale(0.99) !important;
   }
   
   .card-value {
     font-size: 2rem !important;
+    margin: 0.5rem 0 !important;
   }
   
   .card-subtext {
     font-size: 0.9rem !important;
+    line-height: 1.5 !important;
   }
   
-  /* Form Elements */
+  /* ========== FORMS - TOUCH FRIENDLY ========== */
+  /* Large, easy-to-tap form controls */
   input[type="text"],
   input[type="email"],
   input[type="password"],
   input[type="number"],
   input[type="tel"],
+  input[type="date"],
   select,
   textarea {
-    padding: 0.875rem !important;
-    font-size: 1rem !important;
-    min-height: 48px !important;
+    padding: 1rem !important;
+    font-size: 16px !important; /* Prevents iOS zoom */
+    min-height: 52px !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
   }
   
-  /* Tables */
+  /* Better select styling on mobile */
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236B6A45' d='M1.41 0L6 4.58 10.59 0 12 1.41l-6 6-6-6z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 1rem center !important;
+    padding-right: 3rem !important;
+  }
+  
+  textarea {
+    min-height: 120px !important;
+    resize: vertical !important;
+  }
+  
+  /* Form labels */
+  label,
+  .form-label {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.5rem !important;
+    font-weight: 600 !important;
+    display: block !important;
+  }
+  
+  /* Form groups */
+  .form-group {
+    margin-bottom: 1.5rem !important;
+  }
+  
+  /* ========== TABLES - SWIPE TO VIEW ========== */
+  .table-wrapper {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin: 1rem -1rem !important;
+    padding: 0 1rem !important;
+  }
+  
   table {
     font-size: 0.9rem !important;
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
   
   th, td {
-    padding: 0.75rem 0.5rem !important;
+    padding: 0.875rem 0.75rem !important;
+    white-space: nowrap !important;
   }
   
-  /* Flex Layouts */
+  th {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+  }
+  
+  /* ========== FLEX LAYOUTS - STACK VERTICALLY ========== */
   .d-flex {
     flex-direction: column !important;
     gap: 1rem !important;
+    align-items: stretch !important;
   }
   
-  /* Header Buttons */
+  /* ========== HEADER ACTION BUTTONS ========== */
   .dashboard-main__header > div {
     flex-direction: column !important;
+    gap: 1rem !important;
   }
   
   .dashboard-main__header button,
   .dashboard-main__header a[style*="background"] {
     width: 100% !important;
     justify-content: center !important;
+    min-height: 52px !important;
   }
   
-  /* Modals */
+  /* ========== MODALS - BOTTOM SHEET STYLE ========== */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  
+  .modal,
   [id*="modal"] > div {
-    width: 95% !important;
-    max-width: 95% !important;
-    padding: 1.5rem !important;
-    margin: 1rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    margin: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 1.5rem 1rem !important;
+    animation: slideUpModal 0.3s ease-out !important;
   }
   
-  /* Charts and Visualizations */
+  @keyframes slideUpModal {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  
+  .modal-header {
+    padding-bottom: 1rem !important;
+    margin-bottom: 1rem !important;
+    border-bottom: 2px solid var(--light-cream) !important;
+  }
+  
+  .modal-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .modal-footer {
+    gap: 1rem !important;
+    flex-direction: column !important;
+    padding-top: 1.5rem !important;
+    border-top: 2px solid var(--light-cream) !important;
+  }
+  
+  .modal-footer .btn {
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* ========== CHARTS AND VISUALIZATIONS ========== */
   canvas,
   .chart-container {
     max-width: 100% !important;
     height: auto !important;
+    min-height: 250px !important;
   }
   
-  /* Lists */
+  /* ========== LISTS ========== */
   ul, ol {
-    padding-left: 1.25rem !important;
+    padding-left: 1.5rem !important;
+    margin: 1rem 0 !important;
   }
   
-  /* Images */
+  li {
+    margin-bottom: 0.75rem !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* ========== IMAGES - RESPONSIVE ========== */
   img {
     max-width: 100% !important;
     height: auto !important;
+    border-radius: 8px !important;
   }
   
-  /* Sliders */
+  .board-image,
+  .board-card img {
+    border-radius: 8px !important;
+    object-fit: cover !important;
+  }
+  
+  /* ========== SLIDERS - TOUCH OPTIMIZED ========== */
   input[type="range"] {
-    height: 16px !important;
+    height: 20px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    background: var(--light-cream) !important;
+    border-radius: 10px !important;
+    outline: none !important;
   }
   
   input[type="range"]::-webkit-slider-thumb {
-    width: 32px !important;
-    height: 32px !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: var(--olive-green) !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.3) !important;
   }
   
   input[type="range"]::-moz-range-thumb {
-    width: 32px !important;
-    height: 32px !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: var(--olive-green) !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.3) !important;
+  }
+  
+  /* ========== ALERTS AND NOTIFICATIONS ========== */
+  .alert {
+    padding: 1.25rem !important;
+    margin-bottom: 1.5rem !important;
+    border-radius: 8px !important;
+    font-size: 0.95rem !important;
   }
   
   /* Dashboard Sections */
@@ -922,14 +1143,155 @@ tr:hover {
     margin-top: 1.5rem !important;
   }
   
-  /* Hide desktop-only elements */
+  /* ========== VISIBILITY UTILITIES ========== */
   .desktop-only {
     display: none !important;
   }
   
-  /* Show mobile-only elements */
   .mobile-only {
     display: block !important;
+  }
+  
+  /* ========== BOTTOM NAVIGATION (for apps) ========== */
+  .bottom-nav {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: white !important;
+    border-top: 2px solid var(--light-cream) !important;
+    padding: 0.75rem 0 !important;
+    display: flex !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08) !important;
+    z-index: 1000 !important;
+  }
+  
+  .bottom-nav-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    padding: 0.5rem !important;
+    min-width: 60px !important;
+    text-align: center !important;
+    font-size: 0.7rem !important;
+    color: var(--olive-green) !important;
+    text-decoration: none !important;
+  }
+  
+  .bottom-nav-item.active {
+    color: var(--charcoal-brown) !important;
+    font-weight: 600 !important;
+  }
+  
+  /* ========== FLOATING ACTION BUTTON ========== */
+  .fab {
+    position: fixed !important;
+    bottom: 1.5rem !important;
+    right: 1.5rem !important;
+    width: 56px !important;
+    height: 56px !important;
+    border-radius: 50% !important;
+    background: var(--olive-green) !important;
+    color: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.4) !important;
+    z-index: 999 !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+  }
+  
+  .fab:active {
+    transform: scale(0.95) !important;
+  }
+  
+  /* ========== PULL TO REFRESH INDICATOR ========== */
+  .pull-to-refresh {
+    padding: 1rem !important;
+    text-align: center !important;
+    color: var(--olive-green) !important;
+    font-size: 0.9rem !important;
+  }
+  
+  /* ========== MOBILE TABS ========== */
+  .mobile-tabs {
+    display: flex !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 0.5rem !important;
+    padding: 0 1rem !important;
+    margin-bottom: 1.5rem !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  .mobile-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .mobile-tab {
+    flex-shrink: 0 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 20px !important;
+    background: var(--light-cream) !important;
+    color: var(--charcoal-brown) !important;
+    border: 2px solid transparent !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    transition: all 0.2s ease !important;
+  }
+  
+  .mobile-tab.active {
+    background: var(--olive-green) !important;
+    color: white !important;
+  }
+  
+  /* ========== SWIPEABLE CARDS ========== */
+  .swipeable-container {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-snap-type: x mandatory !important;
+    display: flex !important;
+    gap: 1rem !important;
+    padding: 0 1rem !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  
+  .swipeable-container::-webkit-scrollbar {
+    display: none !important;
+  }
+  
+  .swipeable-card {
+    flex-shrink: 0 !important;
+    scroll-snap-align: start !important;
+    width: 85vw !important;
+    max-width: 400px !important;
+  }
+  
+  /* ========== ACCORDION - MOBILE FRIENDLY ========== */
+  .accordion-header {
+    padding: 1.25rem !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: var(--light-cream) !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    min-height: 60px !important;
+    font-weight: 600 !important;
+  }
+  
+  .accordion-content {
+    padding: 1.25rem !important;
+    font-size: 0.95rem !important;
+    line-height: 1.7 !important;
   }
   
   /* CRITICAL: Prevent ALL horizontal scrolling - Portrait Mobile */
@@ -1380,8 +1742,12 @@ tr:hover {
   }
 }
 
-/* Extra Small Devices - Portrait Phones */
+/* ===========================
+   EXTRA SMALL DEVICES - PORTRAIT PHONES
+   Maximum optimization for small screens (480px and below)
+   =========================== */
 @media (max-width: 480px) and (orientation: portrait) {
+  /* ========== BASE ========== */
   html {
     font-size: 16px !important; /* Keep readable - don't shrink */
   }
@@ -1390,42 +1756,54 @@ tr:hover {
     padding: 0 !important;
   }
   
+  /* ========== TYPOGRAPHY - COMPACT ========== */
   h1 {
     font-size: 1.5rem !important;
     line-height: 1.25 !important;
+    margin-bottom: 0.75rem !important;
   }
   
   h2 {
     font-size: 1.25rem !important;
     line-height: 1.3 !important;
+    margin-bottom: 0.625rem !important;
   }
   
   h3 {
     font-size: 1.1rem !important;
     line-height: 1.35 !important;
+    margin-bottom: 0.5rem !important;
   }
   
-  /* Tighter but professional spacing */
+  p {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* ========== SPACING - TIGHTER ========== */
   .container,
   .dashboard-container,
   .agent-content-wrapper {
-    padding: 0.875rem 0.75rem !important;
+    padding: 1rem 0.875rem !important;
   }
   
   .card,
   .card-premium {
     padding: 1.25rem 1rem !important;
-    margin: 0.875rem 0 !important;
+    margin: 1rem 0 !important;
   }
   
+  /* ========== BUTTONS - STILL TOUCHABLE ========== */
   button,
-  .btn {
+  .btn,
+  .btn-primary,
+  .btn-secondary {
     padding: 0.9375rem 1.125rem !important;
     font-size: 0.95rem !important;
     min-height: 50px !important;
   }
   
-  /* Form inputs - prevent zoom on iOS */
+  /* ========== FORMS - iOS ZOOM PREVENTION ========== */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -1434,24 +1812,46 @@ tr:hover {
   input[type="date"],
   select,
   textarea {
-    font-size: 16px !important;
+    font-size: 16px !important; /* Prevents iOS zoom */
     padding: 0.875rem !important;
+    min-height: 50px !important;
   }
   
-  /* Navigation - Compact */
+  /* ========== NAVIGATION - ULTRA COMPACT ========== */
   .ylh-nav-button,
   .ylh-nav-link {
     font-size: 0.7rem !important;
     padding: 0.5rem 0.625rem !important;
+    min-height: 40px !important;
   }
   
-  /* Tables - More compact */
+  .site-header {
+    padding: 0.5rem 0 !important;
+  }
+  
+  /* ========== TABLES - COMPACT ========== */
   table {
     font-size: 0.85rem !important;
   }
   
   th, td {
     padding: 0.625rem 0.5rem !important;
+  }
+  
+  /* ========== STATS - SINGLE COLUMN ========== */
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .stat-value {
+    font-size: 2rem !important;
+  }
+  
+  /* ========== MODALS - FULL SCREEN ========== */
+  .modal,
+  [id*="modal"] > div {
+    height: 100vh !important;
+    border-radius: 0 !important;
   }
 }
 
@@ -2505,3 +2905,396 @@ img:hover {
     margin: 0.25rem 0 !important;
   }
 }
+
+/* ===========================
+   LANDSCAPE MOBILE OPTIMIZATION
+   Phones in landscape orientation
+   =========================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  /* Reduce vertical spacing for landscape phones */
+  .dashboard-container,
+  .container {
+    padding: 0.75rem 1rem !important;
+  }
+  
+  .section {
+    padding: 2rem 0 !important;
+  }
+  
+  h1 {
+    font-size: 1.5rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+    margin: 0.5rem 0 !important;
+  }
+  
+  h3 {
+    font-size: 1.1rem !important;
+    margin: 0.4rem 0 !important;
+  }
+  
+  .card,
+  .card-premium {
+    padding: 1rem !important;
+    margin: 0.75rem 0 !important;
+  }
+  
+  /* Navigation stays horizontal in landscape */
+  .main-nav ul {
+    flex-direction: row !important;
+    gap: 1rem !important;
+  }
+  
+  /* Modals use less vertical space */
+  .modal,
+  [id*="modal"] > div {
+    max-height: 85vh !important;
+    padding: 1rem !important;
+  }
+  
+  /* Smaller buttons vertically */
+  button,
+  .btn {
+    padding: 0.75rem 1.5rem !important;
+    min-height: 44px !important;
+  }
+  
+  /* Stack stats horizontally if space allows */
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  }
+  
+  /* Header stays compact */
+  .site-header {
+    padding: 0.5rem 0 !important;
+  }
+}
+
+/* ===========================
+   VERY LARGE SCREENS (4K, Ultra-wide)
+   Premium experience for high-end displays
+   =========================== */
+@media (min-width: 1920px) {
+  /* Constrain max-width for readability */
+  .container,
+  .dashboard-container {
+    max-width: 1800px !important;
+    margin: 0 auto !important;
+    padding: 4rem !important;
+  }
+  
+  /* Scale up typography */
+  h1 {
+    font-size: 4rem;
+  }
+  
+  h2 {
+    font-size: 3.2rem;
+  }
+  
+  h3 {
+    font-size: 2.4rem;
+  }
+  
+  p {
+    font-size: 1.125rem;
+    line-height: 1.9;
+  }
+  
+  /* More generous spacing */
+  .card,
+  .card-premium {
+    padding: 3rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .section {
+    padding: 8rem 0;
+  }
+  
+  /* Larger buttons with better proportions */
+  .btn,
+  .btn-primary,
+  .btn-secondary {
+    font-size: 1.125rem;
+    padding: 1.5rem 3.5rem;
+    min-height: 68px;
+  }
+  
+  /* Multi-column layouts */
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2.5rem;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+  
+  /* Larger form controls */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 1.125rem;
+    padding: 1.25rem 1.5rem;
+    min-height: 60px;
+  }
+  
+  /* Scale up tables */
+  table {
+    font-size: 1.125rem;
+  }
+  
+  th, td {
+    padding: 1.5rem;
+  }
+  
+  /* Larger modals */
+  .modal {
+    max-width: 800px;
+    padding: 3rem;
+  }
+  
+  .modal-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* ===========================
+   PRINT STYLES
+   Optimize for printing documents
+   =========================== */
+@media print {
+  /* Hide non-essential elements */
+  .site-header,
+  .main-nav,
+  .footer,
+  .site-footer,
+  button,
+  .btn,
+  .no-print {
+    display: none !important;
+  }
+  
+  /* Ensure good readability */
+  body {
+    font-size: 12pt;
+    line-height: 1.6;
+    color: black !important;
+    background: white !important;
+  }
+  
+  h1 {
+    font-size: 24pt;
+    page-break-after: avoid;
+  }
+  
+  h2 {
+    font-size: 20pt;
+    page-break-after: avoid;
+  }
+  
+  h3 {
+    font-size: 16pt;
+    page-break-after: avoid;
+  }
+  
+  /* Avoid page breaks inside elements */
+  .card,
+  .card-premium,
+  table,
+  .timeline-item {
+    page-break-inside: avoid;
+  }
+  
+  /* Remove shadows and backgrounds */
+  * {
+    box-shadow: none !important;
+    background: transparent !important;
+    border-color: #333 !important;
+  }
+  
+  /* Show links */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 10pt;
+    color: #666;
+  }
+  
+  /* Tables print full width */
+  table {
+    width: 100% !important;
+    font-size: 10pt;
+  }
+  
+  /* Ensure images print */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}
+
+/* ===========================
+   ACCESSIBILITY ENHANCEMENTS
+   Better experience for all users
+   =========================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  body {
+    font-weight: 500;
+  }
+  
+  .btn,
+  .card,
+  input,
+  select,
+  textarea {
+    border-width: 2px !important;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode support (if desired in future) */
+@media (prefers-color-scheme: dark) {
+  /* Uncomment to enable dark mode */
+  /*
+  :root {
+    --warm-cream: #2A2720;
+    --light-cream: #3A352C;
+    --charcoal-brown: #EFE9DC;
+    --white: #1A1815;
+  }
+  
+  body {
+    background: #1A1815;
+    color: #EFE9DC;
+  }
+  */
+}
+
+/* ===========================
+   UTILITY CLASSES FOR RESPONSIVE DESIGN
+   Helper classes for quick responsive adjustments
+   =========================== */
+
+/* Responsive visibility */
+.show-mobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .show-mobile {
+    display: block !important;
+  }
+  
+  .hide-mobile {
+    display: none !important;
+  }
+}
+
+.show-tablet {
+  display: none !important;
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .show-tablet {
+    display: block !important;
+  }
+  
+  .hide-tablet {
+    display: none !important;
+  }
+}
+
+.show-desktop {
+  display: none !important;
+}
+
+@media (min-width: 1201px) {
+  .show-desktop {
+    display: block !important;
+  }
+  
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+/* Responsive text alignment */
+@media (max-width: 768px) {
+  .text-center-mobile {
+    text-align: center !important;
+  }
+  
+  .text-left-mobile {
+    text-align: left !important;
+  }
+}
+
+/* Responsive spacing */
+@media (max-width: 768px) {
+  .p-mobile-0 { padding: 0 !important; }
+  .p-mobile-1 { padding: 1rem !important; }
+  .p-mobile-2 { padding: 1.5rem !important; }
+  
+  .m-mobile-0 { margin: 0 !important; }
+  .m-mobile-1 { margin: 1rem !important; }
+  .m-mobile-2 { margin: 1.5rem !important; }
+  
+  .mt-mobile-0 { margin-top: 0 !important; }
+  .mt-mobile-1 { margin-top: 1rem !important; }
+  .mt-mobile-2 { margin-top: 1.5rem !important; }
+  
+  .mb-mobile-0 { margin-bottom: 0 !important; }
+  .mb-mobile-1 { margin-bottom: 1rem !important; }
+  .mb-mobile-2 { margin-bottom: 1.5rem !important; }
+}
+
+/* Responsive widths */
+@media (max-width: 768px) {
+  .w-mobile-100 { width: 100% !important; }
+  .w-mobile-auto { width: auto !important; }
+}
+
+/* Safe area insets for notched devices */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+  
+  .site-header {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
+  
+  .bottom-nav {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* END OF RESPONSIVE DESIGN SYSTEM */
