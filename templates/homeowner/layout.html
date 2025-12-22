@@ -1,384 +1,94 @@
-{# templates/homeowner/layout.html #}
 {% extends "base.html" %}
 
 {% block page_title %}Dashboard • Your Life Your Home{% endblock %}
 
 {% block content %}
 <style>
-  /* Integrated Header + Dashboard Navigation - Refined */
+  /* ===========================
+     LUXURIOUS DASHBOARD NAVIGATION
+     Professional • Uniform • Perfect Spacing
+     =========================== */
+  
+  :root {
+    --nav-height: 56px;
+    --nav-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+  
+  /* NAVIGATION BAR */
   .ylh-horizontal-nav {
-    background: linear-gradient(135deg, rgba(246, 242, 232, 0.98) 0%, rgba(239, 233, 220, 0.98) 100%);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(107, 106, 69, 0.12);
+    background: linear-gradient(180deg, #f8f6f0 0%, #f5f1e8 100%);
+    border-bottom: 1px solid rgba(107, 106, 69, 0.2);
     box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
     position: sticky;
     top: 5rem;
     z-index: 999;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .ylh-horizontal-nav:hover {
-    box-shadow: 0 4px 20px rgba(58, 53, 44, 0.08);
+    width: 100%;
   }
   
   .ylh-nav-container {
-    max-width: 1800px;
+    max-width: 1600px;
     margin: 0 auto;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     padding: 0 2rem;
-    min-height: 60px;
-    height: auto;
-    gap: 1.5rem;
-    position: relative;
-    overflow: visible;
-    flex-wrap: wrap;
+    height: var(--nav-height);
+    gap: 2rem;
   }
   
+  /* DASHBOARD TITLE */
   .ylh-nav-title {
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 1.25rem;
     color: #6B6A45;
-    font-weight: 400;
-    letter-spacing: 0.02em;
+    font-weight: 500;
+    letter-spacing: 0.01em;
     margin: 0;
     white-space: nowrap;
     flex-shrink: 0;
-    margin-right: 1rem;
   }
   
-  /* Mobile Responsive - Ultra Skinny & Luxurious */
-  @media (max-width: 768px) {
-    .ylh-horizontal-nav {
-      top: 0 !important;
-      border-bottom: 1px solid rgba(107, 106, 69, 0.15) !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-      background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%) !important;
-    }
-    
-    .ylh-nav-container {
-      padding: 0.375rem 0.875rem !important;
-      flex-direction: row !important;
-      height: 44px !important;
-      min-height: 44px !important;
-      max-height: 44px !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      gap: 0.5rem !important;
-    }
-    
-    .ylh-nav-title {
-      font-size: 0.875rem !important;
-      font-weight: 600 !important;
-      margin: 0 !important;
-      color: #6B6A45 !important;
-      letter-spacing: 0.03em !important;
-      white-space: nowrap !important;
-      flex-shrink: 0 !important;
-      left: 0.875rem !important;
-      transform: none !important;
-      position: relative !important;
-    }
-    
-    .ylh-nav-items {
-      width: auto !important;
-      flex: 1 !important;
-      justify-content: flex-end !important;
-      flex-wrap: nowrap !important;
-      gap: 0.25rem !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      -webkit-overflow-scrolling: touch !important;
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
-      margin-right: 0 !important;
-    }
-    
-    .ylh-nav-items::-webkit-scrollbar {
-      display: none !important;
-    }
-    
-    .ylh-nav-button {
-      padding: 0.375rem 0.625rem !important;
-      font-size: 0.7rem !important;
-      letter-spacing: 0.04em !important;
-      min-height: 32px !important;
-      height: 32px !important;
-      border-bottom: 2px solid transparent !important;
-      white-space: nowrap !important;
-      flex-shrink: 0 !important;
-      border-radius: 6px !important;
-      transition: all 0.2s ease !important;
-    }
-    
-    .ylh-nav-button:hover {
-      background: rgba(107, 106, 69, 0.08) !important;
-      border-bottom-color: transparent !important;
-    }
-    
-    .ylh-nav-button.active {
-      background: rgba(107, 106, 69, 0.12) !important;
-      border-bottom-color: #6B6A45 !important;
-      font-weight: 600 !important;
-    }
-    
-    /* Dropdowns - Mobile Friendly Bottom Sheet */
-    .ylh-dropdown {
-      position: relative !important;
-    }
-    
-    .ylh-dropdown-menu {
-      position: fixed !important;
-      top: auto !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      width: 100% !important;
-      min-width: 100% !important;
-      max-height: 60vh !important;
-      border-radius: 16px 16px 0 0 !important;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
-      transform: translateY(100%) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      overflow-y: auto !important;
-      z-index: 10000 !important;
-      background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%) !important;
-      backdrop-filter: blur(20px) !important;
-    }
-    
-    .ylh-dropdown.active .ylh-dropdown-menu {
-      transform: translateY(0) !important;
-    }
-    
-    /* Backdrop overlay for mobile dropdowns */
-    .ylh-dropdown.active::before {
-      content: '' !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      background: rgba(58, 53, 44, 0.4) !important;
-      z-index: 9999 !important;
-      backdrop-filter: blur(4px) !important;
-    }
-    
-    .ylh-dropdown-item {
-      padding: 1rem 1.25rem !important;
-      font-size: 0.9rem !important;
-      min-height: 52px !important;
-      border-left: none !important;
-      border-bottom: 1px solid rgba(107, 106, 69, 0.1) !important;
-    }
-    
-    .ylh-dropdown-item:last-child {
-      border-bottom: none !important;
-    }
-    
-    /* Hide agent center on mobile */
-    .ylh-agent-center {
-      display: none !important;
-    }
-  }
-  
-  /* Extra Small - Even Skinnier */
-  @media (max-width: 480px) {
-    .ylh-nav-container {
-      padding: 0.3125rem 0.75rem !important;
-      height: 40px !important;
-      min-height: 40px !important;
-      max-height: 40px !important;
-    }
-    
-    .ylh-nav-title {
-      font-size: 0.8rem !important;
-    }
-    
-    .ylh-nav-button {
-      padding: 0.3125rem 0.5rem !important;
-      font-size: 0.65rem !important;
-      min-height: 28px !important;
-      height: 28px !important;
-    }
-  }
-  
-  /* Agent Info in Center of Header */
-  .ylh-agent-center {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    min-width: 0;
-    padding: 0 1rem;
-  }
-  
-  .ylh-agent-branding {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.6);
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    border: 1px solid rgba(107, 106, 69, 0.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-  }
-  
-  .ylh-agent-branding:hover {
-    background: rgba(255, 255, 255, 0.8);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  .ylh-agent-photo {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(107, 106, 69, 0.3);
-    flex-shrink: 0;
-  }
-  
-  .ylh-agent-photo-placeholder {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: #6B6A45;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: 600;
-    flex-shrink: 0;
-    border: 2px solid rgba(107, 106, 69, 0.3);
-  }
-  
-  .ylh-agent-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-    min-width: 0;
-  }
-  
-  .ylh-agent-name {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 0.95rem;
-    color: #3A352C;
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .ylh-agent-role {
-    font-size: 0.7rem;
-    color: #6B6A45;
-    text-transform: capitalize;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-  }
-  
-  .ylh-agent-brokerage {
-    font-size: 0.7rem;
-    color: #3A352C;
-    opacity: 0.7;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .ylh-agent-logo {
-    max-height: 32px;
-    max-width: 100px;
-    object-fit: contain;
-    flex-shrink: 0;
-    margin-left: 0.5rem;
-  }
-  
-  .ylh-agent-contact {
-    font-size: 0.65rem;
-    color: #6B6A45;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    margin-top: 0.15rem;
-    transition: opacity 0.2s ease;
-  }
-  
-  .ylh-agent-contact:hover {
-    opacity: 0.8;
-  }
-  
+  /* NAVIGATION ITEMS CONTAINER */
   .ylh-nav-items {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    flex: 1 1 auto;
-    justify-content: flex-start;
-    margin-right: 0;
-    overflow: visible;
-    position: relative;
-    min-width: 0;
-    flex-wrap: wrap;
+    gap: 0.25rem;
+    flex: 1;
+    justify-content: center;
   }
   
-  .agent-info-widget {
-    display: none; /* Hide old widget, using center placement now */
-  }
-  
-  @media (max-width: 1200px) {
-    .ylh-agent-center {
-      display: none; /* Hide on smaller screens to save space */
-    }
-  }
-  
-  @media (max-width: 1024px) {
-    .ylh-agent-center {
-      display: none !important;
-    }
-  }
-  
-  .ylh-nav-items::-webkit-scrollbar {
-    display: none;
-  }
-  
+  /* NAVIGATION BUTTONS - UNIFORM STYLING */
   .ylh-nav-button {
     background: transparent;
     border: none;
     color: #6B6A45;
-    padding: 0.625rem 0.875rem;
-    font-size: 0.7rem;
+    padding: 0.75rem 1.25rem;
+    font-family: var(--nav-font);
+    font-size: 0.8125rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.075em;
     cursor: pointer;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
-    border-bottom: 3px solid transparent;
-    position: relative;
-    min-height: 44px;
+    border-radius: 6px;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    text-decoration: none;
-    flex-shrink: 0;
+    justify-content: center;
+    position: relative;
   }
   
-  .ylh-nav-button:hover {
-    background: rgba(107, 106, 69, 0.1);
-    color: #3A352C;
-    border-bottom-color: rgba(107, 106, 69, 0.5);
-  }
-  
-  .ylh-nav-button.active {
-    background: transparent;
-    color: #3A352C;
-    border-bottom-color: #6B6A45;
-    font-weight: 700;
+  .ylh-nav-button::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: #6B6A45;
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
   }
   
   .ylh-nav-button:hover {
@@ -386,54 +96,42 @@
     color: #3A352C;
   }
   
-  .ylh-nav-link {
-    color: #6B6A45;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    border-bottom: 3px solid transparent;
-    display: inline-block;
+  .ylh-nav-button:hover::after {
+    width: 70%;
   }
   
-  .ylh-nav-link:hover {
-    background: rgba(107, 106, 69, 0.1);
+  .ylh-nav-button.active {
+    background: rgba(107, 106, 69, 0.12);
     color: #3A352C;
-    border-bottom-color: rgba(107, 106, 69, 0.5);
+    font-weight: 700;
   }
   
-  .ylh-nav-link.active {
-    background: rgba(107, 106, 69, 0.15);
-    color: #3A352C;
-    border-bottom-color: #6B6A45;
-    font-weight: 600;
+  .ylh-nav-button.active::after {
+    width: 70%;
   }
   
+  /* DROPDOWN CONTAINER */
   .ylh-dropdown {
     position: relative;
     display: inline-block;
-    flex-shrink: 0;
   }
   
+  /* DROPDOWN MENU */
   .ylh-dropdown-menu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     left: 0;
     background: white;
-    min-width: 280px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-top: 3px solid #6B6A45;
+    min-width: 240px;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(107, 106, 69, 0.15);
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 9999;
-    max-height: 80vh;
-    overflow-y: auto;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    overflow: hidden;
   }
   
   .ylh-dropdown.is-open .ylh-dropdown-menu {
@@ -442,518 +140,374 @@
     transform: translateY(0);
   }
   
-  @keyframes dropdownSlide {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
+  /* DROPDOWN ITEMS */
   .ylh-dropdown-item {
     display: block;
-    padding: 1rem 1.5rem;
+    padding: 0.875rem 1.25rem;
     color: #3A352C;
     text-decoration: none;
-    font-size: 0.95rem;
-    font-weight: 400;
+    font-family: var(--nav-font);
+    font-size: 0.875rem;
+    font-weight: 500;
     transition: all 0.2s ease;
     border-left: 3px solid transparent;
-    min-height: 48px;
-    display: flex;
-    align-items: center;
   }
   
   .ylh-dropdown-item:hover {
-    background: #F6F2E8;
+    background: #f6f2e8;
     border-left-color: #C8B497;
-    padding-left: 1.75rem;
+    padding-left: 1.5rem;
   }
   
   .ylh-dropdown-item.active {
-    background: #EFE9DC;
+    background: #efe9dc;
     color: #6B6A45;
-    font-weight: 500;
+    font-weight: 600;
     border-left-color: #6B6A45;
   }
   
-  @media (max-width: 768px) {
+  /* AGENT/LENDER INFO - RIGHT SIDE */
+  .agent-info-widget {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+  
+  .agent-lender-card {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    background: white;
+    border: 1px solid rgba(107, 106, 69, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(58, 53, 44, 0.06);
+    transition: all 0.2s ease;
+  }
+  
+  .agent-lender-card:hover {
+    box-shadow: 0 4px 12px rgba(58, 53, 44, 0.1);
+  }
+  
+  .agent-lender-photo {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #C8B497;
+    flex-shrink: 0;
+  }
+  
+  .agent-lender-photo-placeholder {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #6B6A45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  
+  .agent-lender-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-width: 0;
+  }
+  
+  .agent-lender-label {
+    font-size: 0.625rem;
+    color: rgba(58, 53, 44, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  
+  .agent-lender-name {
+    font-size: 0.75rem;
+    color: #3A352C;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+  
+  /* MOBILE RESPONSIVE */
+  @media (max-width: 1200px) {
     .ylh-nav-container {
-      padding: 0.35rem 0.75rem !important;
-      flex-direction: row !important;
-      height: auto !important;
-      min-height: 32px !important;
-      gap: 0.3rem !important;
+      gap: 1rem;
+    }
+    
+    .ylh-nav-items {
+      gap: 0.125rem;
+    }
+    
+    .ylh-nav-button {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.75rem;
+    }
+    
+    .agent-info-widget {
+      gap: 0.5rem;
+    }
+  }
+  
+  @media (max-width: 968px) {
+    .ylh-nav-container {
+      flex-wrap: wrap;
+      height: auto;
+      padding: 0.75rem 1.5rem;
+      gap: 0.75rem;
     }
     
     .ylh-nav-title {
-      font-size: 0.95rem !important;
-      margin: 0 !important;
-      padding: 0 !important;
+      font-size: 1.125rem;
+      width: 100%;
+      text-align: center;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(107, 106, 69, 0.15);
     }
     
     .ylh-nav-items {
       width: 100%;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 0.2rem;
+      gap: 0.375rem;
     }
     
-    .ylh-nav-button,
-    .ylh-nav-link {
-      padding: 0.3rem 0.5rem !important;
-      font-size: 0.65rem !important;
-      letter-spacing: 0.05em;
-      min-height: 28px !important;
-      line-height: 1.2 !important;
+    .ylh-nav-button {
+      padding: 0.625rem 1rem;
+      font-size: 0.75rem;
+    }
+    
+    .agent-info-widget {
+      width: 100%;
+      justify-content: center;
+      padding-top: 0.5rem;
+      border-top: 1px solid rgba(107, 106, 69, 0.15);
     }
     
     .ylh-dropdown-menu {
-      font-size: 0.7rem !important;
-    }
-    
-    .ylh-dropdown-item {
-      padding: 0.6rem 0.8rem !important;
-      font-size: 0.7rem !important;
-    }
-  }
-    
-    .ylh-dropdown-menu {
+      position: fixed;
+      top: auto;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
       min-width: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1rem;
+      max-height: 60vh;
+      border-radius: 16px 16px 0 0;
+      transform: translateY(100%);
     }
     
-    .ylh-dropdown-item {
-      padding: 1.25rem 1.5rem;
-      font-size: 1rem;
-      min-height: 52px;
+    .ylh-dropdown.is-open .ylh-dropdown-menu {
+      transform: translateY(0);
     }
   }
   
-  /* Global Mobile Optimizations for All Pages */
-  @media (max-width: 768px) {
-    /* Force mobile viewport */
-    html {
-      font-size: 16px !important;
+  @media (max-width: 640px) {
+    .ylh-nav-container {
+      padding: 0.625rem 1rem;
     }
     
-    body {
-      overflow-x: hidden !important;
+    .ylh-nav-title {
+      font-size: 1rem;
     }
     
-    /* Main Content Padding */
-    div[style*="max-width: 1600px"] {
-      padding: 2rem 1rem !important;
-      max-width: 100% !important;
+    .ylh-nav-button {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.7rem;
     }
     
-    /* All Flex Containers - Stack vertically */
-    div[style*="display: flex"],
-    div[style*="display:flex"] {
-      flex-direction: column !important;
-      gap: 1.5rem !important;
-      align-items: stretch !important;
+    .agent-lender-card {
+      padding: 0.375rem 0.625rem;
     }
     
-    /* All Buttons - Full width */
-    button,
-    a[style*="padding"][style*="background"],
-    .btn,
-    .cta-button {
-      width: 100% !important;
-      padding: 1.25rem 2rem !important;
-      font-size: 1rem !important;
-      justify-content: center !important;
-      text-align: center !important;
-      display: block !important;
-      box-sizing: border-box !important;
+    .agent-lender-photo,
+    .agent-lender-photo-placeholder {
+      width: 32px;
+      height: 32px;
     }
     
-    /* All Grid Layouts - Single column */
-    div[style*="display: grid"],
-    div[style*="grid-template-columns"],
-    .dashboard-cards,
-    .dashboard-grid {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 1.5rem !important;
-      grid-template-columns: 1fr !important;
-    }
-    
-    /* All Cards and Boxes */
-    div[style*="background: white"],
-    div[style*="background: #"],
-    div[class*="card"],
-    .card {
-      padding: 1.5rem 1rem !important;
-      margin: 0.75rem 0 !important;
-      width: 100% !important;
-      box-sizing: border-box !important;
-    }
-    
-    /* All Headings */
-    h1 {
-      font-size: 2rem !important;
-      line-height: 1.3 !important;
-    }
-    
-    h2 {
-      font-size: 1.5rem !important;
-      line-height: 1.3 !important;
-    }
-    
-    h3 {
-      font-size: 1.25rem !important;
-    }
-    
-    /* All Form Inputs */
-    input[type="text"],
-    input[type="number"],
-    input[type="email"],
-    input[type="password"],
-    input[type="tel"],
-    select,
-    textarea {
-      width: 100% !important;
-      padding: 1rem !important;
-      font-size: 1rem !important;
-      min-height: 48px !important;
-      box-sizing: border-box !important;
-    }
-    
-    /* All Tables */
-    table {
-      display: block !important;
-      overflow-x: auto !important;
-      font-size: 0.9rem !important;
-      width: 100% !important;
-    }
-    
-    th, td {
-      padding: 0.75rem 0.5rem !important;
-      font-size: 0.9rem !important;
-    }
-    
-    /* All Images */
-    img {
-      max-width: 100% !important;
-      height: auto !important;
-    }
-    
-    /* Font Size Adjustments */
-    div[style*="font-size: 2"],
-    div[style*="font-size:2"] {
-      font-size: 1.5rem !important;
-    }
-    
-    div[style*="font-size: 1.5"],
-    div[style*="font-size:1.5"] {
-      font-size: 1.25rem !important;
-    }
-    
-    div[style*="font-size: 1.4"],
-    div[style*="font-size:1.4"] {
-      font-size: 1.2rem !important;
-    }
-    
-    /* Spacing Adjustments */
-    div[style*="padding: 2rem"],
-    div[style*="padding:2rem"] {
-      padding: 1.5rem 1rem !important;
-    }
-    
-    div[style*="padding: 3rem"],
-    div[style*="padding:3rem"] {
-      padding: 2rem 1rem !important;
-    }
-    
-    div[style*="gap: 2rem"],
-    div[style*="gap: 3rem"] {
-      gap: 1.5rem !important;
-    }
-    
-    /* Modals */
-    div[id*="modal"] > div,
-    div[style*="position: fixed"] > div {
-      width: 95% !important;
-      max-width: 95% !important;
-      padding: 2rem 1rem !important;
-      margin: 1rem !important;
-    }
-    
-    /* Charts and Canvas */
-    canvas {
-      max-width: 100% !important;
-      height: auto !important;
-    }
-    
-    /* Stat Displays - Stack them */
-    div[style*="text-align: center"][style*="border-left"] {
-      border-left: none !important;
-      border-top: 2px solid !important;
-      padding-top: 1.25rem !important;
-      padding-left: 0 !important;
-      margin-top: 1rem !important;
-      width: 100% !important;
-    }
-    
-    /* Large Value Displays */
-    div[style*="font-size: 2.5rem"],
-    div[style*="font-size: 3rem"],
-    div[style*="font-size:2.5rem"],
-    div[style*="font-size:3rem"] {
-      font-size: 2rem !important;
-    }
-    
-    /* Remove fixed heights on mobile */
-    div[style*="height: 108px"],
-    div[style*="min-height: 150px"],
-    div[style*="height:108px"],
-    div[style*="min-height:150px"] {
-      height: auto !important;
-      min-height: auto !important;
-    }
-    
-    /* Prevent horizontal overflow */
-    * {
-      max-width: 100vw !important;
+    .agent-lender-name {
+      font-size: 0.7rem;
+      max-width: 100px;
     }
   }
 </style>
 
-  {% set path = request.path or '' %}
-
-  {# Figure out which section is active based on the current URL #}
-  {% set is_home_base = path.startswith('/homeowner/overview') or path.startswith('/homeowner/upload-documents') %}
-  {% set is_value = path.startswith('/homeowner/value/') %}
-  {% set is_reno = path.startswith('/homeowner/reno/') or path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}
-  {% set is_next = path.startswith('/homeowner/next/') %}
-  {% set is_care = path.startswith('/homeowner/care/') %}
-  {% set is_support = path.startswith('/homeowner/support/') %}
-
-  <!-- Horizontal Navigation Bar -->
-  <nav class="ylh-horizontal-nav">
-    <div class="ylh-nav-container">
-      <h1 class="ylh-nav-title">Dashboard</h1>
+<!-- Navigation Bar -->
+<nav class="ylh-horizontal-nav">
+  <div class="ylh-nav-container">
+    <!-- Dashboard Title -->
+    <h1 class="ylh-nav-title">Dashboard</h1>
+    
+    <!-- Navigation Items -->
+    {% set path = request.path %}
+    {% set is_home_base = path == '/homeowner' or path == '/homeowner/' %}
+    {% set is_value = path.startswith('/homeowner/value') %}
+    {% set is_reno = path.startswith('/homeowner/reno/') or path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}
+    {% set is_next = path.startswith('/homeowner/next/') %}
+    {% set is_care = path.startswith('/homeowner/care/') or path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}
+    {% set is_support = path.startswith('/homeowner/support/') %}
+    
+    <div class="ylh-nav-items">
+      <a href="{{ url_for('homeowner_overview') }}" class="ylh-nav-button {% if is_home_base %}active{% endif %}">
+        Home Base
+      </a>
       
-      <!-- Agent/Lender Info removed - now in main green header -->
+      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="ylh-nav-button {% if is_value %}active{% endif %}">
+        Value & Equity
+      </a>
       
-      <div class="ylh-nav-items">
-        <a href="{{ url_for('homeowner_overview') }}" class="ylh-nav-button {% if is_home_base %}active{% endif %}">
-          Home Base
-        </a>
-        
-        <!-- Value & Equity Direct Link -->
-        <a href="{{ url_for('homeowner_value_equity_overview') }}" class="ylh-nav-button {% if is_value or path.startswith('/homeowner/value') %}active{% endif %}">
-          Value & Equity
-        </a>
-        
-        <!-- Renovation & Improvement Dropdown -->
-        <div class="ylh-dropdown">
-          <button type="button" class="ylh-nav-button {% if is_reno %}active{% endif %}" onclick="toggleDropdown(this, event)">
-            Renovation ▾
-          </button>
-          <div class="ylh-dropdown-menu">
-            <a href="{{ url_for('homeowner_saved_notes') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}active{% endif %}">
-              Mood Board & Planner
-            </a>
-            <a href="{{ url_for('homeowner_reno_material_cost') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/material-cost') %}active{% endif %}">
-              Cost Estimator
-            </a>
-            <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/roi-guide') %}active{% endif %}">
-              ROI Guide
-            </a>
-          </div>
+      <div class="ylh-dropdown">
+        <button type="button" class="ylh-nav-button {% if is_reno %}active{% endif %}" onclick="toggleDropdown(this, event)">
+          Renovation ▾
+        </button>
+        <div class="ylh-dropdown-menu">
+          <a href="{{ url_for('homeowner_saved_notes') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}active{% endif %}">
+            Mood Board & Planner
+          </a>
+          <a href="{{ url_for('homeowner_reno_material_cost') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/material-cost') %}active{% endif %}">
+            Cost Estimator
+          </a>
+          <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/reno/roi-guide') %}active{% endif %}">
+            ROI Guide
+          </a>
         </div>
-        
-        <!-- Next Home Strategy Dropdown -->
-        <div class="ylh-dropdown">
-          <button type="button" class="ylh-nav-button {% if is_next %}active{% endif %}" onclick="toggleDropdown(this, event)">
-            Next Home ▾
-          </button>
-          <div class="ylh-dropdown-menu">
-            <a href="{{ url_for('homeowner_next_plan_move') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/plan-my-move') %}active{% endif %}">
-              Plan My Move
-            </a>
-            <a href="{{ url_for('homeowner_next_buy_sell_guidance') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/buy-sell-guidance') %}active{% endif %}">
-              Buy & Sell Guidance
-            </a>
-            <a href="{{ url_for('homeowner_next_loan_paths') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/loan-paths') %}active{% endif %}">
-              Loan Paths
-            </a>
-            <a href="{{ url_for('homeowner_next_affordability') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/affordability') %}active{% endif %}">
-              Affordability
-            </a>
-          </div>
+      </div>
+      
+      <div class="ylh-dropdown">
+        <button type="button" class="ylh-nav-button {% if is_next %}active{% endif %}" onclick="toggleDropdown(this, event)">
+          Next Home ▾
+        </button>
+        <div class="ylh-dropdown-menu">
+          <a href="{{ url_for('homeowner_next_plan_move') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/plan-my-move') %}active{% endif %}">
+            Plan My Move
+          </a>
+          <a href="{{ url_for('homeowner_next_buy_sell_guidance') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/buy-sell-guidance') %}active{% endif %}">
+            Buy & Sell Guidance
+          </a>
+          <a href="{{ url_for('homeowner_next_loan_paths') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/loan-paths') %}active{% endif %}">
+            Loan Paths
+          </a>
+          <a href="{{ url_for('homeowner_next_affordability') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/affordability') %}active{% endif %}">
+            Affordability
+          </a>
         </div>
-        
-        <!-- Ownership Care Dropdown -->
-        <div class="ylh-dropdown">
-          <button type="button" class="ylh-nav-button {% if is_care %}active{% endif %}" onclick="toggleDropdown(this, event)">
-            Care ▾
-          </button>
-          <div class="ylh-dropdown-menu">
-            <a href="{{ url_for('homeowner_upload_documents') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}active{% endif %}">
-              Documents & Timeline
-            </a>
-            <a href="{{ url_for('homeowner_care_maintenance_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/maintenance-guide') %}active{% endif %}">
-              Maintenance Guide
-            </a>
-            <a href="{{ url_for('homeowner_care_seasonal_checklists') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/seasonal-checklists') %}active{% endif %}">
-              Seasonal Checklists
-            </a>
-            <a href="{{ url_for('homeowner_care_home_protection') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/home-protection') %}active{% endif %}">
-              Home Protection
-            </a>
-            <a href="{{ url_for('homeowner_care_warranty_log') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/warranty-log') %}active{% endif %}">
-              Warranty Log
-            </a>
-            <a href="{{ url_for('homeowner_care_energy_savings') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/energy-savings') %}active{% endif %}">
-              Energy Savings
-            </a>
-          </div>
+      </div>
+      
+      <div class="ylh-dropdown">
+        <button type="button" class="ylh-nav-button {% if is_care %}active{% endif %}" onclick="toggleDropdown(this, event)">
+          Care ▾
+        </button>
+        <div class="ylh-dropdown-menu">
+          <a href="{{ url_for('homeowner_upload_documents') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}active{% endif %}">
+            Documents & Timeline
+          </a>
+          <a href="{{ url_for('homeowner_care_maintenance_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/maintenance-guide') %}active{% endif %}">
+            Maintenance Guide
+          </a>
+          <a href="{{ url_for('homeowner_care_seasonal_checklists') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/seasonal-checklists') %}active{% endif %}">
+            Seasonal Checklists
+          </a>
+          <a href="{{ url_for('homeowner_care_home_protection') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/home-protection') %}active{% endif %}">
+            Home Protection
+          </a>
+          <a href="{{ url_for('homeowner_care_warranty_log') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/warranty-log') %}active{% endif %}">
+            Warranty Log
+          </a>
+          <a href="{{ url_for('homeowner_care_energy_savings') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/energy-savings') %}active{% endif %}">
+            Energy Savings
+          </a>
         </div>
-        
-        <!-- Support Dropdown -->
-        <div class="ylh-dropdown">
-          <button type="button" class="ylh-nav-button {% if is_support %}active{% endif %}" onclick="toggleDropdown(this, event)">
-            Support ▾
-          </button>
-          <div class="ylh-dropdown-menu">
-            <a href="{{ url_for('homeowner_support_ask_question') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/ask-question') %}active{% endif %}">
-              Ask a Question
-            </a>
-            <a href="{{ url_for('homeowner_support_chat_human') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/chat-human') %}active{% endif %}">
-              Chat with Human
-            </a>
-            <a href="{{ url_for('homeowner_support_schedule_chat') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/schedule-chat') %}active{% endif %}">
-              Schedule Chat
-            </a>
-            <a href="{{ url_for('homeowner_support_resources') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/resources') %}active{% endif %}">
-              Resources
-            </a>
-            <a href="{{ url_for('homeowner_support_meet_team') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/meet-team') %}active{% endif %}">
-              Meet Team
-            </a>
-          </div>
+      </div>
+      
+      <div class="ylh-dropdown">
+        <button type="button" class="ylh-nav-button {% if is_support %}active{% endif %}" onclick="toggleDropdown(this, event)">
+          Support ▾
+        </button>
+        <div class="ylh-dropdown-menu">
+          <a href="{{ url_for('homeowner_support_ask_question') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/ask-question') %}active{% endif %}">
+            Ask a Question
+          </a>
+          <a href="{{ url_for('homeowner_support_chat_human') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/chat-human') %}active{% endif %}">
+            Chat with Human
+          </a>
+          <a href="{{ url_for('homeowner_support_schedule_chat') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/schedule-chat') %}active{% endif %}">
+            Schedule Chat
+          </a>
+          <a href="{{ url_for('homeowner_support_resources') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/resources') %}active{% endif %}">
+            Resources
+          </a>
+          <a href="{{ url_for('homeowner_support_meet_team') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/meet-team') %}active{% endif %}">
+            Meet Team
+          </a>
         </div>
-        
-        {# Professional Branding Widget - Upper Right Corner #}
-        {% if professionals %}
-          {% set agent_prof = None %}
-          {% set lender_prof = None %}
-          {% for prof in professionals %}
-            {% set is_agent = prof.get('professional_role') == 'agent' or prof.get('professional_type') == 'agent' or (prof.get('role') == 'agent' if prof.get('role') else False) %}
-            {% set is_lender = prof.get('professional_role') == 'lender' or prof.get('professional_type') == 'lender' or (prof.get('role') == 'lender' if prof.get('role') else False) %}
-            {% if is_agent and not agent_prof %}
-              {% set agent_prof = prof %}
-            {% elif is_lender and not lender_prof %}
-              {% set lender_prof = prof %}
-            {% endif %}
-          {% endfor %}
-          
-          <div class="agent-info-widget" style="display: flex; align-items: center; gap: 1rem; margin-left: 1.5rem; flex-wrap: wrap;">
-            {# Agent Branding #}
-            {% if agent_prof %}
-            <div style="display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0.875rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-              {# Agent Photo #}
-              {% set agent_photo_url = get_professional_photo_url(agent_prof.get('professional_photo')) %}
-              {% if agent_photo_url %}
-              <img src="{{ agent_photo_url }}" alt="{{ agent_prof.name or 'Agent' }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: none; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0; border: 2px solid var(--taupe-beige);">{{ (agent_prof.name or 'A')[0] }}</div>
-              {% else %}
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0;">{{ (agent_prof.name or 'A')[0] }}</div>
-              {% endif %}
-              
-              <div style="display: flex; flex-direction: column; gap: 0.2rem; min-width: 0;">
-                <div style="font-size: 0.625rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Agent</div>
-                {# Logo or Brokerage Name or Agent Name #}
-                {% if agent_prof.get('brokerage_logo') %}
-                <img src="{{ url_for('static', filename=agent_prof.brokerage_logo) }}" alt="{{ agent_prof.get('brokerage_name', 'Company') }}" style="height: 16px; max-width: 110px; object-fit: contain;">
-                {% elif agent_prof.get('brokerage_name') %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.brokerage_name }}</div>
-                {% elif agent_prof.get('name') %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ agent_prof.name }}</div>
-                {% endif %}
-                
-                {# Phone Number #}
-                {% if agent_prof.get('phone') %}
-                <a href="tel:{{ agent_prof.phone }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  {{ agent_prof.phone }}
-                </a>
-                {% elif agent_prof.get('email') %}
-                <a href="mailto:{{ agent_prof.email }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  Contact
-                </a>
-                {% endif %}
-              </div>
-            </div>
-            {% endif %}
-            
-            {# Lender Branding #}
-            {% if lender_prof %}
-            <div style="display: flex; align-items: center; gap: 0.625rem; padding: 0.5rem 0.875rem; background: var(--white); border: 1px solid rgba(107, 106, 69, 0.2); border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-              {# Lender Photo #}
-              {% set lender_photo_url = get_professional_photo_url(lender_prof.get('professional_photo')) %}
-              {% if lender_photo_url %}
-              <img src="{{ lender_photo_url }}" alt="{{ lender_prof.name or 'Lender' }}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--taupe-beige); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: none; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0; border: 2px solid var(--taupe-beige);">{{ (lender_prof.name or 'L')[0] }}</div>
-              {% else %}
-              <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--olive-green); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1rem; font-weight: 600; flex-shrink: 0;">{{ (lender_prof.name or 'L')[0] }}</div>
-              {% endif %}
-              
-              <div style="display: flex; flex-direction: column; gap: 0.2rem; min-width: 0;">
-                <div style="font-size: 0.625rem; color: var(--charcoal-brown); opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Your Lender</div>
-                {# Logo or Company Name or Lender Name #}
-                {% if lender_prof.get('brokerage_logo') %}
-                <img src="{{ url_for('static', filename=lender_prof.brokerage_logo) }}" alt="{{ lender_prof.get('brokerage_name', 'Company') }}" style="height: 16px; max-width: 110px; object-fit: contain;">
-                {% elif lender_prof.get('brokerage_name') %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.brokerage_name }}</div>
-                {% elif lender_prof.get('name') %}
-                <div style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.9; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ lender_prof.name }}</div>
-                {% endif %}
-                
-                {# Phone Number #}
-                {% if lender_prof.get('phone') %}
-                <a href="tel:{{ lender_prof.phone }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  {{ lender_prof.phone }}
-                </a>
-                {% elif lender_prof.get('email') %}
-                <a href="mailto:{{ lender_prof.email }}" style="font-size: 0.65rem; color: var(--olive-green); text-decoration: none; font-weight: 600; white-space: nowrap;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                  Contact
-                </a>
-                {% endif %}
-              </div>
-            </div>
-            {% endif %}
-          </div>
-        {% endif %}
       </div>
     </div>
-  </nav>
-
-  <div style="max-width: 1600px; margin: 0 auto; padding: 3rem 4rem;">
-    <!-- Main content area -->
-    <section>
-      {% block homeowner_content %}{% endblock %}
-    </section>
+    
+    <!-- Agent/Lender Info -->
+    {% if professionals %}
+      {% set agent_prof = None %}
+      {% set lender_prof = None %}
+      {% for prof in professionals %}
+        {% set is_agent = prof.get('professional_role') == 'agent' or prof.get('professional_type') == 'agent' or (prof.get('role') == 'agent' if prof.get('role') else False) %}
+        {% set is_lender = prof.get('professional_role') == 'lender' or prof.get('professional_type') == 'lender' or (prof.get('role') == 'lender' if prof.get('role') else False) %}
+        {% if is_agent and not agent_prof %}
+          {% set agent_prof = prof %}
+        {% elif is_lender and not lender_prof %}
+          {% set lender_prof = prof %}
+        {% endif %}
+      {% endfor %}
+      
+      <div class="agent-info-widget">
+        <!-- Agent Card -->
+        {% if agent_prof %}
+        <div class="agent-lender-card">
+          {% set agent_photo_url = get_professional_photo_url(agent_prof.get('professional_photo')) %}
+          {% if agent_photo_url %}
+            <img src="{{ agent_photo_url }}" alt="{{ agent_prof.name or 'Agent' }}" class="agent-lender-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="agent-lender-photo-placeholder" style="display: none;">{{ (agent_prof.name or 'A')[0] }}</div>
+          {% else %}
+            <div class="agent-lender-photo-placeholder">{{ (agent_prof.name or 'A')[0] }}</div>
+          {% endif %}
+          <div class="agent-lender-info">
+            <div class="agent-lender-label">Agent</div>
+            <div class="agent-lender-name">{{ agent_prof.get('brokerage_name') or agent_prof.name or 'Your Agent' }}</div>
+          </div>
+        </div>
+        {% endif %}
+        
+        <!-- Lender Card -->
+        {% if lender_prof %}
+        <div class="agent-lender-card">
+          {% set lender_photo_url = get_professional_photo_url(lender_prof.get('professional_photo')) %}
+          {% if lender_photo_url %}
+            <img src="{{ lender_photo_url }}" alt="{{ lender_prof.name or 'Lender' }}" class="agent-lender-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="agent-lender-photo-placeholder" style="display: none;">{{ (lender_prof.name or 'L')[0] }}</div>
+          {% else %}
+            <div class="agent-lender-photo-placeholder">{{ (lender_prof.name or 'L')[0] }}</div>
+          {% endif %}
+          <div class="agent-lender-info">
+            <div class="agent-lender-label">Lender</div>
+            <div class="agent-lender-name">{{ lender_prof.get('brokerage_name') or lender_prof.name or 'Your Lender' }}</div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    {% endif %}
   </div>
-  
-  <style>
-    @media (max-width: 768px) {
-      /* Override main content padding on mobile */
-      div[style*="max-width: 1600px"][style*="padding: 3rem 4rem"] {
-        padding: 1.5rem 1rem !important;
-      }
-    }
-  </style>
+</nav>
 
 <script>
+// Dropdown Toggle
 function toggleDropdown(btn, evt) {
   evt.stopPropagation();
   evt.preventDefault();
@@ -973,84 +527,16 @@ function toggleDropdown(btn, evt) {
   }
 }
 
-// Close when clicking outside (but NOT inside Homebot widget)
+// Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
-  // Don't close dropdowns if clicking inside Homebot widget
-  var widgetContainer = document.getElementById('homebot_homeowner');
-  var widgetSection = document.querySelector('.widget-section');
-  var target = e.target;
-  
-  // Skip if click is on tab buttons
-  if (target.closest('.equity-tabs') || target.classList.contains('tab') || target.closest('.tab')) {
-    return;
-  }
-  
-  // Skip if click is inside widget area
-  if (widgetContainer && (widgetContainer.contains(target) || target.closest('#homebot_homeowner'))) {
-    return;
-  }
-  if (widgetSection && widgetSection.contains(target)) {
-    // Check if it's actually the widget, not just the section
-    if (target.closest('#homebot_homeowner') || target.closest('iframe')) {
-      return;
-    }
-  }
-  
-  // Close dropdowns for clicks outside
   var allDropdowns = document.querySelectorAll('.ylh-dropdown');
   for (var i = 0; i < allDropdowns.length; i++) {
     allDropdowns[i].classList.remove('is-open');
   }
-  
-  // Mobile dropdown toggle functionality
-  if (window.innerWidth <= 768) {
-    const dropdowns = document.querySelectorAll('.ylh-dropdown');
-    
-    dropdowns.forEach(function(dropdown) {
-      const button = dropdown.querySelector('.ylh-nav-button');
-      const menu = dropdown.querySelector('.ylh-dropdown-menu');
-      
-      if (button && menu) {
-        // Toggle dropdown on click
-        button.addEventListener('click', function(e) {
-          e.preventDefault();
-          e.stopPropagation();
-          
-          // Close other dropdowns
-          dropdowns.forEach(function(otherDropdown) {
-            if (otherDropdown !== dropdown) {
-              otherDropdown.classList.remove('active');
-            }
-          });
-          
-          // Toggle current dropdown
-          dropdown.classList.toggle('active');
-        });
-        
-          // Close dropdown when clicking outside or on backdrop
-        document.addEventListener('click', function(e) {
-          if (!dropdown.contains(e.target)) {
-            dropdown.classList.remove('active');
-          }
-        });
-        
-        // Close dropdown when clicking backdrop
-        dropdown.addEventListener('click', function(e) {
-          if (e.target === dropdown || e.target.classList.contains('ylh-dropdown')) {
-            dropdown.classList.remove('active');
-          }
-        });
-        
-        // Close dropdown when clicking a menu item
-        const menuItems = menu.querySelectorAll('.ylh-dropdown-item');
-        menuItems.forEach(function(item) {
-          item.addEventListener('click', function() {
-            dropdown.classList.remove('active');
-          });
-        });
-      }
-    });
-  }
 });
 </script>
+
+<!-- Main Content Area -->
+{% block homeowner_content %}{% endblock %}
+
 {% endblock %}
