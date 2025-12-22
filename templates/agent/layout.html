@@ -155,33 +155,154 @@
     font-weight: 600;
   }
   
-  /* Mobile Responsive */
+  /* Mobile Responsive - Ultra Skinny & Luxurious */
   @media (max-width: 768px) {
+    .ylh-horizontal-nav {
+      top: 0 !important;
+      border-bottom: 1px solid rgba(107, 106, 69, 0.15) !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+      background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%) !important;
+    }
+    
     .ylh-nav-container {
-      padding: 0.5rem 1rem;
-      flex-direction: column;
-      height: auto;
-      gap: 0.25rem;
+      padding: 0.375rem 0.875rem !important;
+      flex-direction: row !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      max-height: 44px !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 0.5rem !important;
     }
     
     .ylh-nav-title {
-      font-size: 1.05rem;
-      margin: 0.25rem 0 0.15rem 0;
+      font-size: 0.875rem !important;
+      font-weight: 600 !important;
+      margin: 0 !important;
+      color: #6B6A45 !important;
+      letter-spacing: 0.03em !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
     }
     
     .ylh-nav-items {
-      width: 100%;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 0.2rem;
+      width: auto !important;
+      flex: 1 !important;
+      justify-content: flex-end !important;
+      flex-wrap: nowrap !important;
+      gap: 0.25rem !important;
+      overflow-x: auto !important;
+      overflow-y: hidden !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    
+    .ylh-nav-items::-webkit-scrollbar {
+      display: none !important;
     }
     
     .ylh-nav-button,
     .ylh-nav-link {
-      padding: 0.55rem 0.8rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.05em;
-      min-height: 38px;
+      padding: 0.375rem 0.625rem !important;
+      font-size: 0.7rem !important;
+      letter-spacing: 0.04em !important;
+      min-height: 32px !important;
+      height: 32px !important;
+      border-bottom: 2px solid transparent !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      border-radius: 6px !important;
+      transition: all 0.2s ease !important;
+    }
+    
+    .ylh-nav-button:hover,
+    .ylh-nav-link:hover {
+      background: rgba(107, 106, 69, 0.08) !important;
+      border-bottom-color: transparent !important;
+    }
+    
+    .ylh-nav-button.active,
+    .ylh-nav-link.active {
+      background: rgba(107, 106, 69, 0.12) !important;
+      border-bottom-color: #6B6A45 !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Dropdowns - Mobile Friendly */
+    .ylh-dropdown {
+      position: relative !important;
+    }
+    
+    .ylh-dropdown-menu {
+      position: fixed !important;
+      top: auto !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      width: 100% !important;
+      min-width: 100% !important;
+      max-height: 60vh !important;
+      border-radius: 16px 16px 0 0 !important;
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+      transform: translateY(100%) !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      overflow-y: auto !important;
+      z-index: 10000 !important;
+      background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%) !important;
+      backdrop-filter: blur(20px) !important;
+    }
+    
+    .ylh-dropdown.active .ylh-dropdown-menu {
+      transform: translateY(0) !important;
+    }
+    
+    /* Backdrop overlay for mobile dropdowns */
+    .ylh-dropdown.active::before {
+      content: '' !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      background: rgba(58, 53, 44, 0.4) !important;
+      z-index: 9999 !important;
+      backdrop-filter: blur(4px) !important;
+    }
+    
+    .ylh-dropdown-item {
+      padding: 1rem 1.25rem !important;
+      font-size: 0.9rem !important;
+      min-height: 52px !important;
+      border-left: none !important;
+      border-bottom: 1px solid rgba(107, 106, 69, 0.1) !important;
+    }
+    
+    .ylh-dropdown-item:last-child {
+      border-bottom: none !important;
+    }
+  }
+  
+  /* Extra Small - Even Skinnier */
+  @media (max-width: 480px) {
+    .ylh-nav-container {
+      padding: 0.3125rem 0.75rem !important;
+      height: 40px !important;
+      min-height: 40px !important;
+      max-height: 40px !important;
+    }
+    
+    .ylh-nav-title {
+      font-size: 0.8rem !important;
+    }
+    
+    .ylh-nav-button,
+    .ylh-nav-link {
+      padding: 0.3125rem 0.5rem !important;
+      font-size: 0.65rem !important;
+      min-height: 28px !important;
+      height: 28px !important;
     }
   }
 </style>
@@ -358,14 +479,64 @@
       padding: 0.75rem 0.625rem !important;
     }
     
+    /* Dashboard Headers - Ultra Compact & Luxurious */
+    .dashboard-main__header {
+      padding: 0.75rem 0.875rem !important;
+      margin-bottom: 1rem !important;
+      border-bottom: 1px solid rgba(107, 106, 69, 0.1) !important;
+    }
+    
+    .dashboard-main__header .dashboard-tagline {
+      font-size: 0.7rem !important;
+      margin-bottom: 0.25rem !important;
+      color: #6B6A45 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.1em !important;
+      font-weight: 600 !important;
+    }
+    
+    .dashboard-main__header h1 {
+      font-size: 1.25rem !important;
+      margin: 0 0 0.375rem 0 !important;
+      line-height: 1.3 !important;
+      font-weight: 600 !important;
+    }
+    
+    .dashboard-main__header p {
+      font-size: 0.85rem !important;
+      margin: 0 !important;
+      line-height: 1.5 !important;
+      color: rgba(58, 53, 44, 0.7) !important;
+    }
+    
     /* Dashboard Cards - Stack Vertically */
     .dashboard-cards {
       grid-template-columns: 1fr !important;
-      gap: 1rem !important;
+      gap: 0.875rem !important;
+      margin-top: 0.75rem !important;
     }
     
     .card-value {
-      font-size: 2rem !important;
+      font-size: 1.75rem !important;
+    }
+    
+    .card h3 {
+      font-size: 0.9rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .card-subtext {
+      font-size: 0.8rem !important;
+    }
+    
+    /* Quick Actions - Compact */
+    .action-card {
+      padding: 0.875rem !important;
+      gap: 0.75rem !important;
+    }
+    
+    .action-card span {
+      font-size: 1.5rem !important;
     }
     
     /* Modals - Full Screen Feel */
@@ -377,6 +548,24 @@
       border-radius: 0 !important;
       min-height: 100vh !important;
       padding: 1.5rem 1rem !important;
+    }
+  }
+  
+  @media (max-width: 480px) and (orientation: portrait) {
+    .dashboard-main__header {
+      padding: 0.625rem 0.75rem !important;
+    }
+    
+    .dashboard-main__header h1 {
+      font-size: 1.1rem !important;
+    }
+    
+    .dashboard-main__header .dashboard-tagline {
+      font-size: 0.65rem !important;
+    }
+    
+    .dashboard-main__header p {
+      font-size: 0.8rem !important;
     }
   }
   
