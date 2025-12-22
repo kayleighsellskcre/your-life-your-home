@@ -256,6 +256,130 @@
 </div>
 
 <style>
+  /* Portrait Mobile Optimization */
+  @media (max-width: 768px) and (orientation: portrait) {
+    .agent-content-wrapper {
+      padding: 1.25rem 0.875rem !important;
+    }
+    
+    /* Navigation - Compact but readable */
+    .ylh-nav-container {
+      padding: 0.75rem 0.875rem !important;
+    }
+    
+    .ylh-nav-title {
+      font-size: 1rem !important;
+      margin-bottom: 0.5rem !important;
+    }
+    
+    .ylh-nav-button,
+    .ylh-nav-link {
+      font-size: 0.75rem !important;
+      padding: 0.5rem 0.75rem !important;
+      min-height: 40px !important;
+    }
+    
+    /* Feature Spotlight Cards - Portrait Optimized */
+    .feature-spotlight-container {
+      padding: 0.875rem !important;
+    }
+    
+    .premium-header {
+      margin-bottom: 1.5rem !important;
+      padding-bottom: 1rem !important;
+    }
+    
+    .premium-header h1 {
+      font-size: 1.5rem !important;
+      line-height: 1.3 !important;
+    }
+    
+    .premium-header p {
+      font-size: 0.9rem !important;
+      line-height: 1.5 !important;
+    }
+    
+    .card-premium {
+      padding: 1.5rem 1.125rem !important;
+      margin-bottom: 1.5rem !important;
+    }
+    
+    .feature-card {
+      padding: 1.25rem 1rem !important;
+      margin-bottom: 1rem !important;
+    }
+    
+    /* Transaction Pages - Portrait Layout */
+    .transaction-header,
+    .transaction-detail-header {
+      flex-direction: column !important;
+      gap: 1rem !important;
+      align-items: stretch !important;
+      padding: 1rem 0.875rem !important;
+    }
+    
+    .transaction-actions,
+    .transaction-actions-group {
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 0.75rem !important;
+    }
+    
+    .transaction-actions button,
+    .transaction-actions a,
+    .transaction-actions-group button {
+      width: 100% !important;
+      margin: 0 !important;
+    }
+    
+    /* Form Pages - Professional Spacing */
+    .form-group {
+      margin-bottom: 1.5rem !important;
+    }
+    
+    .form-group label {
+      margin-bottom: 0.625rem !important;
+    }
+    
+    /* CRM Tables - Scrollable */
+    .crm-table-wrapper {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      margin: 0 -0.875rem !important;
+      padding: 0 0.875rem !important;
+    }
+    
+    table {
+      min-width: 650px !important;
+      font-size: 0.9rem !important;
+    }
+    
+    th, td {
+      padding: 0.75rem 0.625rem !important;
+    }
+    
+    /* Dashboard Cards - Stack Vertically */
+    .dashboard-cards {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+    
+    .card-value {
+      font-size: 2rem !important;
+    }
+    
+    /* Modals - Full Screen Feel */
+    .modal-content,
+    [id*="modal"] > div {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      min-height: 100vh !important;
+      padding: 1.5rem 1rem !important;
+    }
+  }
+  
   @media (max-width: 768px) {
     .agent-content-wrapper {
       padding: 1.5rem 1rem !important;

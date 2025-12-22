@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
 
     <!-- Main CSS -->
@@ -89,16 +89,61 @@
         }
       }
       
-      @media (max-width: 768px) {
+      /* Portrait Mobile Optimization - Primary Focus */
+      @media (max-width: 768px) and (orientation: portrait) {
         /* Base Mobile Styles */
         html {
           font-size: 16px !important;
           -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
         
         body {
           overflow-x: hidden !important;
           width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        /* Ensure no horizontal scrolling */
+        * {
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        /* Remove any fixed widths that could cause overflow */
+        img, video, iframe, embed, object {
+          max-width: 100% !important;
+          height: auto !important;
+        }
+      }
+      
+      @media (max-width: 768px) {
+        /* Base Mobile Styles */
+        html {
+          font-size: 16px !important;
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+          overflow-x: hidden !important;
+          width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+        
+        /* Ensure no horizontal scrolling */
+        * {
+          max-width: 100% !important;
+          box-sizing: border-box !important;
+        }
+        
+        img, video, iframe, embed, object {
+          max-width: 100% !important;
+          height: auto !important;
         }
         
         .site-header {
@@ -137,28 +182,51 @@
           padding: 0.4rem 0.7rem !important;
         }
         
-        /* Global Container Padding */
+        /* Global Container Padding - Optimized for Portrait */
         div[style*="max-width: 1600px"],
         div[style*="max-width: 1200px"],
         .container,
-        .dashboard-container {
-          padding: 1rem !important;
+        .dashboard-container,
+        .agent-content-wrapper {
+          padding: 1rem 0.875rem !important;
           max-width: 100% !important;
+          margin: 0 auto !important;
         }
         
-        /* All Buttons - Full Width on Mobile */
+        /* Remove excessive padding/margins */
+        section, article, aside {
+          padding-left: 0.875rem !important;
+          padding-right: 0.875rem !important;
+        }
+        
+        /* All Buttons - Full Width on Mobile - Professional Touch Targets */
         button:not(.btn-remove):not(.btn-refine),
         .btn,
         .btn-premium,
         .btn-secondary,
         .btn-primary,
-        a[class*="btn"] {
+        a[class*="btn"],
+        input[type="submit"],
+        input[type="button"] {
           width: 100% !important;
-          padding: 1rem 1.5rem !important;
+          padding: 1rem 1.25rem !important;
           font-size: 1rem !important;
-          min-height: 48px !important;
+          min-height: 52px !important;
           box-sizing: border-box !important;
-          margin: 0.5rem 0 !important;
+          margin: 0.75rem 0 !important;
+          border-radius: 8px !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.02em !important;
+          white-space: normal !important;
+          word-wrap: break-word !important;
+        }
+        
+        /* Small action buttons - keep compact but touchable */
+        .btn-remove,
+        .btn-refine {
+          min-height: 44px !important;
+          padding: 0.625rem 1rem !important;
+          font-size: 0.9rem !important;
         }
         
         /* Button Groups - Stack Vertically */
@@ -193,15 +261,23 @@
           box-sizing: border-box !important;
         }
         
-        /* Cards - Full Width */
+        /* Cards - Full Width with Professional Spacing */
         .card,
         .card-premium,
         .feature-card,
         div[class*="card"] {
           width: 100% !important;
-          padding: 1.25rem 1rem !important;
+          padding: 1.5rem 1.125rem !important;
           margin: 1rem 0 !important;
           box-sizing: border-box !important;
+          border-radius: 12px !important;
+        }
+        
+        /* Card headers - better spacing */
+        .card-header,
+        .feature-card-header {
+          margin-bottom: 1.25rem !important;
+          padding-bottom: 1rem !important;
         }
         
         /* Grids - Single Column */
@@ -222,20 +298,45 @@
           gap: 1rem !important;
         }
         
-        /* Typography */
+        /* Typography - Professional Mobile Sizing */
         h1 {
           font-size: 1.75rem !important;
           line-height: 1.3 !important;
+          margin: 0 0 1rem 0 !important;
+          font-weight: 600 !important;
         }
         
         h2 {
           font-size: 1.5rem !important;
-          line-height: 1.3 !important;
+          line-height: 1.35 !important;
+          margin: 0 0 0.875rem 0 !important;
+          font-weight: 600 !important;
         }
         
         h3 {
           font-size: 1.25rem !important;
-          line-height: 1.3 !important;
+          line-height: 1.4 !important;
+          margin: 0 0 0.75rem 0 !important;
+          font-weight: 600 !important;
+        }
+        
+        h4 {
+          font-size: 1.1rem !important;
+          line-height: 1.4 !important;
+          margin: 0 0 0.625rem 0 !important;
+        }
+        
+        p {
+          font-size: 1rem !important;
+          line-height: 1.6 !important;
+          margin: 0 0 1rem 0 !important;
+        }
+        
+        /* Labels and small text */
+        label {
+          font-size: 0.875rem !important;
+          margin-bottom: 0.5rem !important;
+          display: block !important;
         }
         
         /* Tables - Scrollable */
@@ -277,10 +378,67 @@
         }
       }
       
-      /* Extra Small Devices */
+      /* Extra Small Devices - Portrait Phones */
+      @media (max-width: 480px) and (orientation: portrait) {
+        html {
+          font-size: 16px !important; /* Keep readable size */
+        }
+        
+        body {
+          padding: 0 !important;
+        }
+        
+        h1 {
+          font-size: 1.5rem !important;
+          line-height: 1.25 !important;
+        }
+        
+        h2 {
+          font-size: 1.25rem !important;
+          line-height: 1.3 !important;
+        }
+        
+        h3 {
+          font-size: 1.1rem !important;
+        }
+        
+        /* Tighter but still professional spacing */
+        div[style*="max-width: 1600px"],
+        div[style*="max-width: 1200px"],
+        .container,
+        .dashboard-container {
+          padding: 0.875rem 0.75rem !important;
+        }
+        
+        .card,
+        .card-premium {
+          padding: 1.25rem 1rem !important;
+          margin: 0.875rem 0 !important;
+        }
+        
+        button,
+        .btn {
+          padding: 0.9375rem 1.125rem !important;
+          font-size: 0.95rem !important;
+          min-height: 50px !important;
+        }
+        
+        /* Form inputs - prevent zoom on iOS */
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        select,
+        textarea {
+          font-size: 16px !important;
+        }
+      }
+      
+      /* General small devices */
       @media (max-width: 480px) {
         html {
-          font-size: 14px !important;
+          font-size: 16px !important;
         }
         
         h1 {
@@ -300,6 +458,80 @@
         .btn {
           padding: 0.875rem 1rem !important;
           font-size: 0.95rem !important;
+        }
+        
+        input,
+        select,
+        textarea {
+          font-size: 16px !important; /* Prevents zoom on iOS */
+        }
+      }
+      
+      /* Portrait-Specific Enhancements for Professional Look */
+      @media (max-width: 768px) and (orientation: portrait) {
+        /* Ensure proper vertical spacing */
+        section {
+          margin: 1.5rem 0 !important;
+          padding: 1rem 0.875rem !important;
+        }
+        
+        /* Professional section headers */
+        section > h1,
+        section > h2 {
+          margin-top: 0 !important;
+          margin-bottom: 1rem !important;
+        }
+        
+        /* Better list spacing */
+        ul, ol {
+          padding-left: 1.5rem !important;
+          margin: 1rem 0 !important;
+        }
+        
+        li {
+          margin-bottom: 0.5rem !important;
+          line-height: 1.6 !important;
+        }
+        
+        /* Professional spacing between elements */
+        .spacing-section {
+          margin: 2rem 0 !important;
+        }
+        
+        /* Ensure proper text wrapping */
+        p, span, div {
+          word-wrap: break-word !important;
+          overflow-wrap: break-word !important;
+        }
+        
+        /* Professional card shadows on mobile */
+        .card,
+        .card-premium {
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        }
+        
+        /* Better focus states for accessibility */
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus,
+        a:focus {
+          outline: 3px solid rgba(107, 106, 69, 0.5) !important;
+          outline-offset: 2px !important;
+        }
+        
+        /* Smooth scrolling */
+        html {
+          scroll-behavior: smooth !important;
+        }
+        
+        /* Professional loading states */
+        .loading,
+        [class*="loading"] {
+          min-height: 200px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
         }
       }
     </style>
