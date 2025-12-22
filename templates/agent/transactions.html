@@ -503,18 +503,136 @@
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-/* Responsive Design */
+/* Responsive Design - Ultra Luxurious Mobile Portrait */
+@media (max-width: 768px) and (orientation: portrait) {
+  /* Container */
+  .transactions-container {
+    padding: 0.875rem !important;
+    max-width: 100% !important;
+  }
+  
+  /* Premium Header - Ultra Compact */
+  .premium-header {
+    padding: 0.75rem 0.875rem !important;
+    margin-bottom: 1.25rem !important;
+    text-align: center !important;
+  }
+  
+  .premium-header h1 {
+    font-size: 1.5rem !important;
+    line-height: 1.3 !important;
+    margin: 0.25rem 0 0.5rem 0 !important;
+  }
+  
+  .premium-header p {
+    font-size: 0.9rem !important;
+    margin: 0.25rem 0 !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* Cards - Luxurious Spacing */
+  .card-premium {
+    padding: 1.5rem 1rem !important;
+    margin-bottom: 1.25rem !important;
+    border-radius: 12px !important;
+  }
+  
+  /* Transaction Cards */
+  .transaction-card {
+    padding: 1.25rem 1rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 12px !important;
+  }
+  
+  .transaction-header {
+    flex-direction: column !important;
+    gap: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+  
+  .transaction-main-info {
+    width: 100% !important;
+  }
+  
+  .transaction-property {
+    font-size: 1.1rem !important;
+    line-height: 1.4 !important;
+    margin-bottom: 0.5rem !important;
+  }
+  
+  .transaction-client {
+    font-size: 0.9rem !important;
+    margin-bottom: 0.75rem !important;
+    line-height: 1.5 !important;
+  }
+  
+  .transaction-badges {
+    gap: 0.5rem !important;
+    margin-top: 0.75rem !important;
+  }
+  
+  .status-badge {
+    padding: 0.5rem 0.875rem !important;
+    font-size: 0.8rem !important;
+  }
+  
+  /* Form Grid - Single Column */
+  .premium-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+  
+  /* Form Labels */
+  .premium-form-label {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.625rem !important;
+  }
+  
+  /* Form Inputs - Touch Friendly */
+  .premium-input,
+  .premium-select {
+    padding: 0.875rem 1rem !important;
+    font-size: 1rem !important;
+    min-height: 48px !important;
+    border-radius: 8px !important;
+  }
+  
+  /* Buttons - Full Width */
+  .btn-premium {
+    width: 100% !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1rem !important;
+    min-height: 52px !important;
+    justify-content: center !important;
+    margin: 0.75rem 0 !important;
+  }
+  
+  /* Transaction Actions */
+  .transaction-actions {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+    width: 100% !important;
+  }
+  
+  .transaction-actions button,
+  .transaction-actions a {
+    width: 100% !important;
+    padding: 0.875rem 1.25rem !important;
+    min-height: 48px !important;
+  }
+}
+
 @media (max-width: 768px) {
   .premium-form-grid {
     grid-template-columns: 1fr;
   }
   
   .premium-header h1 {
-    font-size: 2rem !important;
+    font-size: 1.5rem !important;
   }
   
   .card-premium {
-    padding: 2rem 1.5rem !important;
+    padding: 1.5rem 1rem !important;
   }
 }
 </style>

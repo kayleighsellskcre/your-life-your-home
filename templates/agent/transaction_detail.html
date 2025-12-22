@@ -501,10 +501,166 @@
     transform: translateY(0);
   }
   
-  /* Mobile Responsive */
+  /* Mobile Responsive - Ultra Luxurious Portrait */
+  @media (max-width: 768px) and (orientation: portrait) {
+    /* Transaction Header - Ultra Compact */
+    .transaction-header {
+      margin-bottom: 1.25rem !important;
+      border-radius: 12px !important;
+    }
+    
+    .transaction-header-content {
+      padding: 1rem 0.875rem !important;
+    }
+    
+    /* Property Address */
+    .property-address {
+      font-size: 1.25rem !important;
+      line-height: 1.4 !important;
+      margin-bottom: 0.75rem !important;
+    }
+    
+    /* Stage Badge */
+    .stage-badge {
+      font-size: 0.7rem !important;
+      padding: 0.5rem 0.875rem !important;
+    }
+    
+    /* Action Buttons Row */
+    .transaction-header-content > div:first-child {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      align-items: stretch !important;
+    }
+    
+    .transaction-header-content > div:first-child > div:first-child {
+      width: 100% !important;
+    }
+    
+    .btn-premium-edit,
+    .btn-premium-delete {
+      width: 100% !important;
+      padding: 0.875rem 1.25rem !important;
+      min-height: 48px !important;
+      font-size: 0.9rem !important;
+      justify-content: center !important;
+    }
+    
+    /* Transaction Details Grid - Stack */
+    .transaction-header-content > div:nth-child(2) {
+      grid-template-columns: 1fr !important;
+      gap: 1.25rem !important;
+    }
+    
+    /* Client Cards */
+    .transaction-header-content > div:nth-child(2) > div:first-child > div > div {
+      padding: 1rem 0.875rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+    
+    /* Transaction Meta */
+    .transaction-meta {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      align-items: flex-start !important;
+    }
+    
+    .meta-item {
+      font-size: 0.85rem !important;
+      line-height: 1.5 !important;
+    }
+    
+    /* Progress Section */
+    .progress-section {
+      padding: 1rem 0.875rem !important;
+      margin-bottom: 1.25rem !important;
+    }
+    
+    .progress-text {
+      font-size: 0.85rem !important;
+    }
+    
+    /* Tabs - Horizontal Scroll */
+    .tabs {
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      padding: 0 0.875rem !important;
+    }
+    
+    .tabs::-webkit-scrollbar {
+      display: none !important;
+    }
+    
+    .tab-button {
+      flex-shrink: 0 !important;
+      padding: 0.75rem 1rem !important;
+      font-size: 0.85rem !important;
+      min-height: 44px !important;
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      padding: 1rem 0.875rem !important;
+    }
+    
+    /* Action Buttons */
+    .action-buttons {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+      width: 100% !important;
+    }
+    
+    .action-buttons button,
+    .action-buttons a {
+      width: 100% !important;
+      padding: 0.875rem 1.25rem !important;
+      min-height: 48px !important;
+      font-size: 0.9rem !important;
+      justify-content: center !important;
+    }
+    
+    /* Client/Participant Cards */
+    .client-card,
+    .participant-card {
+      padding: 1rem 0.875rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+    
+    /* Timeline */
+    .timeline {
+      padding: 0.875rem !important;
+    }
+    
+    .timeline-item {
+      padding: 0.875rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+    
+    /* Document List */
+    .document-list {
+      padding: 0.875rem !important;
+    }
+    
+    .document-item {
+      padding: 0.875rem !important;
+      margin-bottom: 0.75rem !important;
+    }
+    
+    /* Modals */
+    .modal-content {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 1.25rem 0.875rem !important;
+      border-radius: 12px 12px 0 0 !important;
+    }
+  }
+  
   @media (max-width: 768px) {
     .property-address {
-      font-size: 1.8rem;
+      font-size: 1.25rem !important;
     }
     
     .transaction-meta {
