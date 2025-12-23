@@ -280,7 +280,7 @@
       </div>
 
       <div class="button-group">
-        <button type="submit" class="btn-premium">
+        <button type="button" class="btn-premium" onclick="generateCards()">
           Generate & Print Cards
         </button>
         <button type="button" class="btn-secondary" onclick="previewCards()" style="margin-right: 0.5rem;">
@@ -289,6 +289,9 @@
         <a href="{{ url_for('agent_transaction_detail', tx_id=tx_id) }}" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
           Cancel
         </a>
+      </div>
+      <div id="save-status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: var(--olive-green); display: none;">
+        ✓ Card set saved! You can now close this page or continue editing.
       </div>
     </form>
   </div>
@@ -392,6 +395,54 @@
     } finally {
       refineBtn.textContent = originalText;
       refineBtn.disabled = false;
+    }
+  }
+
+  // Generate and print cards (opens in new tab, keeps current page open)
+  function generateCards() {
+    const form = document.getElementById('feature-form');
+    const formData = new FormData(form);
+    
+    // Collect all features
+    const features = [];
+    const featureIndices = new Set();
+    
+    // Find all feature indices
+    formData.forEach((value, key) => {
+      const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
+      if (match) {
+        featureIndices.add(parseInt(match[1]));
+      }
+    });
+    
+    // Build features array
+    for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
+      const title = formData.get('features[' + idx + '][title]') || '';
+      const room = formData.get('features[' + idx + '][room]') || '';
+      const description = formData.get('features[' + idx + '][description]') || '';
+      
+      if (title && room && description) {
+        features.push({ title, room, description });
+      }
+    }
+    
+    if (features.length === 0) {
+      alert('Please add at least one feature before generating.');
+      return;
+    }
+    
+    // Submit form in new tab
+    form.target = '_blank';
+    form.submit();
+    form.target = '';
+    
+    // Show save confirmation
+    const saveStatus = document.getElementById('save-status');
+    if (saveStatus) {
+      saveStatus.style.display = 'block';
+      setTimeout(function() {
+        saveStatus.style.display = 'none';
+      }, 5000);
     }
   }
 
