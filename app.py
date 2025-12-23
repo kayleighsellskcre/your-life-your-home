@@ -6119,8 +6119,12 @@ def agent_feature_spotlight_cards(tx_id):
     
     # Get agent profile for branding
     from database import get_user_profile
-    agent_profile = get_user_profile(user["id"])
-    brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+    try:
+        agent_profile = get_user_profile(user["id"])
+        brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+    except Exception as e:
+        print(f"Error getting agent profile: {e}")
+        brokerage_logo = None
     
     # Use default logo if agent doesn't have one
     if not brokerage_logo:
@@ -6272,9 +6276,13 @@ def agent_feature_spotlight_cards_generate(tx_id):
     
     # Get agent profile for branding
     from database import get_user_profile
-    agent_profile = get_user_profile(user["id"])
     agent_name = user.get("name", "Your Agent")
-    brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+    try:
+        agent_profile = get_user_profile(user["id"])
+        brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+    except Exception as e:
+        print(f"Error getting agent profile: {e}")
+        brokerage_logo = None
     
     # Use default logo if agent doesn't have one
     if not brokerage_logo:
