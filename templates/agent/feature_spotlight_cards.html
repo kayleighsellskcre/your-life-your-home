@@ -682,8 +682,8 @@
     previewHtml += 'if (index % 4 === 0) { if (index > 0) html += "</div>"; html += "<div class=\\"page\\">"; }';
     previewHtml += 'html += "<div class=\\"card\\">";';
     previewHtml += 'html += "<div class=\\"card-header\\">";';
-    previewHtml += 'html += "<img src=\\"https://i.postimg.cc/zB5B38Bq/KCRE-Logo.png\\" alt=\\"KC Realty Experts\\" class=\\"card-logo\\">";';
-    previewHtml += 'html += "<div class=\\"card-agent\\">Presented by Kayleigh Biggs</div>";';
+    previewHtml += 'html += "<img src=\\"{{ brokerage_logo }}\\" alt=\\"Brokerage Logo\\" class=\\"card-logo\\" onerror=\\"this.style.display=\'none\';\\">";';
+    previewHtml += 'html += "<div class=\\"card-agent\\">Presented by {{ user.name }}</div>";';
     previewHtml += 'html += "</div>";';
     previewHtml += 'html += "<div class=\\"card-content\\">";';
     previewHtml += 'html += "<div class=\\"card-room\\">" + escapeHtml(feature.room) + "</div>";';

@@ -6116,6 +6116,15 @@ def agent_feature_spotlight_cards(tx_id):
     # Get saved card sets for this transaction
     from database import get_spotlight_card_sets
     saved_sets = get_spotlight_card_sets(user["id"], tx_id)
+    
+    # Get agent profile for branding
+    from database import get_user_profile
+    agent_profile = get_user_profile(user["id"])
+    brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+    
+    # Use default logo if agent doesn't have one
+    if not brokerage_logo:
+        brokerage_logo = "https://i.postimg.cc/zB5B38Bq/KCRE-Logo.png"
 
     return render_template(
         "agent/feature_spotlight_cards.html",
@@ -6124,6 +6133,7 @@ def agent_feature_spotlight_cards(tx_id):
         tx_id=tx_id,
         transaction=transaction,
         saved_sets=saved_sets,
+        brokerage_logo=brokerage_logo,
     )
 
 
@@ -6260,6 +6270,16 @@ def agent_feature_spotlight_cards_generate(tx_id):
         refined_feature = refine_feature_text(feature)
         refined_features.append(refined_feature)
     
+    # Get agent profile for branding
+    from database import get_user_profile
+    agent_profile = get_user_profile(user["id"])
+    agent_name = user.get("name", "Your Agent")
+    brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+    
+    # Use default logo if agent doesn't have one
+    if not brokerage_logo:
+        brokerage_logo = "https://i.postimg.cc/zB5B38Bq/KCRE-Logo.png"
+    
     # Generate PDF
     try:
         from weasyprint import HTML
@@ -6268,6 +6288,8 @@ def agent_feature_spotlight_cards_generate(tx_id):
             "agent/feature_spotlight_pdf.html",
             features=refined_features,
             property_address=transaction.get('property_address', 'Property'),
+            agent_name=agent_name,
+            brokerage_logo=brokerage_logo,
         )
         
         pdf = HTML(string=html, base_url=str(BASE_DIR / "static")).write_pdf()
@@ -6289,6 +6311,8 @@ def agent_feature_spotlight_cards_generate(tx_id):
             "agent/feature_spotlight_pdf.html",
             features=refined_features,
             property_address=transaction.get('property_address', 'Property'),
+            agent_name=agent_name,
+            brokerage_logo=brokerage_logo,
         )
         return html_preview
     except (OSError, Exception) as e:
@@ -6303,6 +6327,8 @@ def agent_feature_spotlight_cards_generate(tx_id):
                 "agent/feature_spotlight_pdf.html",
                 features=refined_features,
                 property_address=transaction.get('property_address', 'Property'),
+                agent_name=agent_name,
+                brokerage_logo=brokerage_logo,
             )
             return html_preview
         else:
@@ -6312,6 +6338,8 @@ def agent_feature_spotlight_cards_generate(tx_id):
                     "agent/feature_spotlight_pdf.html",
                     features=refined_features,
                     property_address=transaction.get('property_address', 'Property'),
+                    agent_name=agent_name,
+                    brokerage_logo=brokerage_logo,
                 )
                 return html_preview
             except:
