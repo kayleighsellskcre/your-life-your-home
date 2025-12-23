@@ -5835,6 +5835,135 @@ def agent_transaction_delete(tx_id):
     return redirect(url_for("agent_transactions"))
 
 
+def extract_features_from_notes(notes):
+    """
+    Extract spotlight card features from walkthrough notes using AI.
+    Returns a list of feature dictionaries with title, room, and description.
+    """
+    openai_api_key = os.environ.get('OPENAI_API_KEY')
+    
+    if not openai_api_key:
+        # Fallback: return empty list if no AI available
+        print("OpenAI API key not found - cannot extract features from notes")
+        return []
+    
+    try:
+        # Try new OpenAI API (v1.0+)
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=openai_api_key)
+            
+            prompt = f"""You are helping create property feature spotlight cards from walkthrough notes.
+
+Walkthrough Notes:
+{notes}
+
+Extract ALL notable features that would make great spotlight cards. For each feature:
+1. Identify the room/area
+2. Create a short, catchy title
+3. Write a natural, conversational description (1-2 sentences)
+4. Use simple everyday words with subtle luxury
+5. Focus on what buyers care about
+
+Return ONLY a valid JSON array of features. Each feature must have: "room", "title", "description"
+
+Example format:
+[
+  {{"room": "KITCHEN", "title": "Custom Walk-In Pantry", "description": "Beautiful custom shelving offers generous storage space and keeps counters clear for easy meal prep."}},
+  {{"room": "MASTER BATH", "title": "Spa-Style Walk-In Shower", "description": "Spacious walk-in shower with elegant rainfall head and frameless glass makes every morning feel like a retreat."}}
+]
+
+Extract as many features as you can find in the notes. Be thorough!"""
+
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that extracts property features from notes. Return only valid JSON arrays."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1500
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content.strip())
+            
+            # Validate result is a list
+            if isinstance(result, list) and len(result) > 0:
+                # Ensure all features have required fields
+                valid_features = []
+                for feature in result:
+                    if 'room' in feature and 'title' in feature and 'description' in feature:
+                        valid_features.append({
+                            'room': feature['room'],
+                            'title': feature['title'],
+                            'description': feature['description']
+                        })
+                return valid_features
+            
+            return []
+            
+        except (ImportError, AttributeError):
+            # Fall back to old OpenAI API format
+            import openai
+            openai.api_key = openai_api_key
+            
+            prompt = f"""You are helping create property feature spotlight cards from walkthrough notes.
+
+Walkthrough Notes:
+{notes}
+
+Extract ALL notable features that would make great spotlight cards. For each feature:
+1. Identify the room/area
+2. Create a short, catchy title
+3. Write a natural, conversational description (1-2 sentences)
+4. Use simple everyday words with subtle luxury
+5. Focus on what buyers care about
+
+Return ONLY a valid JSON array of features. Each feature must have: "room", "title", "description"
+
+Example format:
+[
+  {{"room": "KITCHEN", "title": "Custom Walk-In Pantry", "description": "Beautiful custom shelving offers generous storage space and keeps counters clear for easy meal prep."}},
+  {{"room": "MASTER BATH", "title": "Spa-Style Walk-In Shower", "description": "Spacious walk-in shower with elegant rainfall head and frameless glass makes every morning feel like a retreat."}}
+]
+
+Extract as many features as you can find in the notes. Be thorough!"""
+
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant that extracts property features from notes. Return only valid JSON arrays."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7,
+                max_tokens=1500
+            )
+            
+            import json
+            result = json.loads(response.choices[0].message.content.strip())
+            
+            # Validate result is a list
+            if isinstance(result, list) and len(result) > 0:
+                # Ensure all features have required fields
+                valid_features = []
+                for feature in result:
+                    if 'room' in feature and 'title' in feature and 'description' in feature:
+                        valid_features.append({
+                            'room': feature['room'],
+                            'title': feature['title'],
+                            'description': feature['description']
+                        })
+                return valid_features
+            
+            return []
+            
+    except Exception as e:
+        import traceback
+        print(f"Error extracting features from notes: {traceback.format_exc()}")
+        return []
+
+
 def refine_feature_text(feature):
     """
     Refine feature title and description to be more elegant, human, and professional.
@@ -6022,6 +6151,36 @@ def agent_feature_spotlight_refine():
     except Exception as e:
         import traceback
         print(f"Error refining feature: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/agent/spotlight-cards/generate-from-notes", methods=["POST"])
+def agent_spotlight_cards_generate_from_notes():
+    """Generate spotlight cards from walkthrough notes using AI."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        notes = data.get('notes', '').strip()
+        
+        if not notes:
+            return jsonify({"success": False, "error": "No notes provided"}), 400
+        
+        # Use AI to extract features from notes
+        features = extract_features_from_notes(notes)
+        
+        if not features:
+            return jsonify({"success": False, "error": "Could not extract features from notes"}), 400
+        
+        return jsonify({
+            "success": True,
+            "features": features
+        })
+    except Exception as e:
+        import traceback
+        print(f"Error generating from notes: {traceback.format_exc()}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 

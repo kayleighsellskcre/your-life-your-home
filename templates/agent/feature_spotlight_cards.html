@@ -261,6 +261,26 @@
   </div>
   {% endif %}
 
+  <div class="card-premium" style="margin-bottom: 2rem;">
+    <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;">🤖 AI Auto-Generate from Walkthrough Notes</h3>
+    <p style="font-size: 0.9rem; color: rgba(58, 53, 44, 0.7); margin-bottom: 1rem;">
+      Paste your walkthrough notes below and let AI automatically create all your spotlight cards!
+    </p>
+    
+    <div class="form-group">
+      <label style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Walkthrough Notes</label>
+      <textarea id="walkthrough-notes" class="premium-textarea" placeholder="Example:&#10;&#10;Kitchen - Updated in 2022, gorgeous white cabinets, quartz counters, new SS appliances including built-in fridge. Big pantry with custom shelving.&#10;&#10;Master Bath - Completely renovated, walk-in shower with rainfall head and body jets, dual vanity with vessel sinks, heated floors.&#10;&#10;Backyard - New composite deck 2023, overlooks wooded lot, gas line for grill, twinkle lights already installed..." style="min-height: 200px; font-family: inherit; font-size: 0.9rem;"></textarea>
+    </div>
+    
+    <div style="text-align: center; margin-top: 1rem;">
+      <button type="button" class="btn-premium" onclick="generateFromNotes()" style="padding: 0.875rem 2rem;">
+        ✨ Auto-Create Spotlight Cards from Notes
+      </button>
+    </div>
+    
+    <div id="ai-status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+  </div>
+
   <div class="card-premium">
     <form id="feature-form" method="POST" action="{{ url_for('agent_feature_spotlight_cards_generate', tx_id=tx_id) }}">
       <div class="form-group" style="background: rgba(107, 106, 69, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(107, 106, 69, 0.15); margin-bottom: 1.5rem;">
@@ -398,6 +418,82 @@
     } finally {
       refineBtn.textContent = originalText;
       refineBtn.disabled = false;
+    }
+  }
+
+  // Generate spotlight cards from walkthrough notes using AI
+  async function generateFromNotes() {
+    const notesTextarea = document.getElementById('walkthrough-notes');
+    const notes = notesTextarea.value.trim();
+    
+    if (!notes) {
+      alert('Please paste your walkthrough notes first!');
+      return;
+    }
+    
+    // Show processing message
+    const aiStatus = document.getElementById('ai-status');
+    if (aiStatus) {
+      aiStatus.textContent = '🤖 AI is analyzing your notes and creating spotlight cards...';
+      aiStatus.style.color = 'rgba(58, 53, 44, 0.7)';
+      aiStatus.style.display = 'block';
+    }
+    
+    try {
+      const response = await fetch('/agent/spotlight-cards/generate-from-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ notes: notes })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.features && data.features.length > 0) {
+        // Clear existing features
+        const container = document.getElementById('features-container');
+        container.innerHTML = '';
+        featureCount = 0;
+        
+        // Add all generated features
+        for (const feature of data.features) {
+          addFeatureCard();
+          const currentIdx = featureCount;
+          
+          // Populate fields with AI-generated content
+          document.querySelector('input[name="features[' + currentIdx + '][title]"]').value = feature.title;
+          document.querySelector('input[name="features[' + currentIdx + '][room]"]').value = feature.room;
+          document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
+        }
+        
+        // Show success message
+        if (aiStatus) {
+          aiStatus.textContent = '✓ Created ' + data.features.length + ' spotlight cards! Review and edit them below.';
+          aiStatus.style.color = 'var(--olive-green)';
+        }
+        
+        // Clear notes textarea
+        notesTextarea.value = '';
+        
+        // Scroll to features
+        setTimeout(function() {
+          document.getElementById('features-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 500);
+        
+        // Hide success message after 7 seconds
+        setTimeout(function() {
+          aiStatus.style.display = 'none';
+        }, 7000);
+      } else {
+        throw new Error(data.error || 'No features generated');
+      }
+    } catch (error) {
+      console.error('Error generating from notes:', error);
+      if (aiStatus) {
+        aiStatus.textContent = '⚠ Error generating cards. Please try again or create cards manually.';
+        aiStatus.style.color = 'rgba(198, 107, 61, 0.9)';
+      }
     }
   }
 
