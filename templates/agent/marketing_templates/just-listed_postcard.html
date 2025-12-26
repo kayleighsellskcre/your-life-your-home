@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: 6in 4in;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #2C2820;
+            background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+            width: 6in;
+            height: 4in;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .decorative-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, rgba(107, 106, 69, 0.3) 0%, rgba(107, 106, 69, 0.9) 50%, rgba(107, 106, 69, 0.3) 100%);
+        }
+        
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0.5in 0.4in;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .logo-section {
+            margin-bottom: 1in;
+        }
+        
+        .agent-logo {
+            max-width: 3in;
+            max-height: 0.8in;
+            object-fit: contain;
+        }
+        
+        .headline {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 36pt;
+            font-weight: 700;
+            color: #6B6A45;
+            margin-bottom: 0.3in;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+        
+        .subheading {
+            font-size: 14pt;
+            color: rgba(58, 53, 44, 0.8);
+            margin-bottom: 0.6in;
+            font-weight: 400;
+            letter-spacing: 0.02em;
+        }
+        
+        .divider {
+            width: 1.5in;
+            height: 3px;
+            background: linear-gradient(90deg, rgba(107, 106, 69, 0.2) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.2) 100%);
+            margin: 0.4in auto;
+            border-radius: 2px;
+        }
+        
+        .price {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 32pt;
+            font-weight: 700;
+            color: #6B6A45;
+            margin-bottom: 0.3in;
+            letter-spacing: -0.01em;
+        }
+        
+        .address {
+            font-size: 20pt;
+            color: #3A352C;
+            margin-bottom: 0.5in;
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        
+        .custom-text {
+            font-size: 14pt;
+            color: rgba(58, 53, 44, 0.7);
+            line-height: 1.6;
+            max-width: 5in;
+            margin: 0 auto 0.6in auto;
+        }
+        
+        .agent-section {
+            margin-top: auto;
+            padding-top: 0.4in;
+            border-top: 2px solid rgba(200, 180, 151, 0.3);
+            width: 100%;
+        }
+        
+        .agent-name {
+            font-size: 18pt;
+            font-weight: 600;
+            color: #3A352C;
+            margin-bottom: 0.1in;
+        }
+        
+        .agent-contact {
+            font-size: 14pt;
+            color: rgba(58, 53, 44, 0.7);
+            margin-bottom: 0.05in;
+        }
+        
+        .agent-company {
+            font-size: 12pt;
+            color: rgba(58, 53, 44, 0.6);
+            font-style: italic;
+        }
+        
+        .lender-section {
+            margin-top: 0.3in;
+            padding-top: 0.25in;
+            border-top: 1px solid rgba(200, 180, 151, 0.2);
+        }
+        
+        .lender-label {
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(107, 106, 69, 0.7);
+            margin-bottom: 0.1in;
+            font-weight: 600;
+        }
+        
+        .lender-name {
+            font-size: 14pt;
+            font-weight: 600;
+            color: #3A352C;
+            margin-bottom: 0.05in;
+        }
+        
+        .lender-contact {
+            font-size: 12pt;
+            color: rgba(58, 53, 44, 0.7);
+        }
+        
+        .decorative-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 0.25in;
+            background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="decorative-header"></div>
+    
+    <div class="content-wrapper">
+        {% if agent_profile and agent_profile.get('brokerage_logo') %}
+        <div class="logo-section">
+            <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" class="agent-logo">
+        </div>
+        {% endif %}
+        
+        <div class="headline">{{ headline or 'Just Listed' }}</div>
+        <div class="subheading">{{ subtext or 'Luxury Living Awaits' }}</div>
+        
+        <div class="divider"></div>
+        
+        <div class="price">{{ price or '$799,000' }}</div>
+        <div class="address">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+        
+        {% if custom_text %}
+        <div class="custom-text">{{ custom_text }}</div>
+        {% endif %}
+        
+        <div class="divider"></div>
+        
+        <div class="agent-section">
+            <div class="agent-name">{{ user.name }}</div>
+            <div class="agent-contact">{{ user.phone or user.email }}</div>
+            {% if agent_profile and agent_profile.get('brokerage_name') %}
+            <div class="agent-company">{{ agent_profile.brokerage_name }}</div>
+            {% endif %}
+            
+            {% if include_lender and transaction.lender_name %}
+            <div class="lender-section">
+                <div class="lender-label">Preferred Lender</div>
+                <div class="lender-name">{{ transaction.lender_name }}</div>
+                <div class="lender-contact">{{ transaction.lender_phone or transaction.lender_email }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="decorative-footer"></div>
+</body>
+</html>
+

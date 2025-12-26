@@ -6509,6 +6509,111 @@ def agent_marketing_hub_global():
     )
 
 
+@app.route("/agent/transactions/<int:tx_id>/marketing-hub/create")
+def agent_marketing_create(tx_id):
+    """Create a marketing asset with customization."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+    
+    # Get category and asset type from query params
+    category = request.args.get('category', 'just-listed')
+    asset_type = request.args.get('type', 'flyer')
+    
+    # Get agent profile for branding
+    from database import get_user_profile
+    agent_profile = None
+    try:
+        agent_profile = get_user_profile(user["id"])
+        if agent_profile and hasattr(agent_profile, 'keys'):
+            agent_profile = dict(agent_profile)
+    except Exception as e:
+        print(f"Error getting agent profile: {e}")
+    
+    return render_template(
+        "agent/marketing_create.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        tx_id=tx_id,
+        transaction=transaction,
+        agent_profile=agent_profile,
+        category=category,
+        asset_type=asset_type,
+    )
+
+
+@app.route("/agent/transactions/<int:tx_id>/marketing-hub/generate", methods=["POST"])
+def agent_marketing_generate(tx_id):
+    """Generate the final marketing asset PDF/image."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        return jsonify({"success": False, "error": "Transaction not found"}), 404
+    
+    try:
+        # Get form data
+        category = request.form.get('category', '')
+        asset_type = request.form.get('asset_type', '')
+        headline = request.form.get('headline', '')
+        subtext = request.form.get('subtext', '')
+        price = request.form.get('price', '')
+        property_address = request.form.get('property_address', '')
+        custom_text = request.form.get('custom_text', '')
+        include_lender = request.form.get('include_lender') == 'on'
+        
+        # Get agent profile for branding
+        from database import get_user_profile
+        agent_profile = get_user_profile(user["id"])
+        if agent_profile and hasattr(agent_profile, 'keys'):
+            agent_profile = dict(agent_profile)
+        
+        # Render the marketing asset template
+        html_content = render_template(
+            f"agent/marketing_templates/{category}_{asset_type}.html",
+            transaction=transaction,
+            agent_profile=agent_profile,
+            user=user,
+            headline=headline,
+            subtext=subtext,
+            price=price,
+            property_address=property_address,
+            custom_text=custom_text,
+            include_lender=include_lender,
+        )
+        
+        # Generate PDF or image based on asset type
+        if asset_type in ['flyer', 'postcard']:
+            # Generate PDF with WeasyPrint
+            from weasyprint import HTML, CSS
+            pdf_bytes = HTML(string=html_content).write_pdf()
+            
+            # Return PDF as download
+            from datetime import datetime
+            filename = f"{category}_{asset_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            
+            return Response(
+                pdf_bytes,
+                mimetype='application/pdf',
+                headers={'Content-Disposition': f'attachment; filename={filename}'}
+            )
+        else:
+            # For social media, return HTML that can be screenshot
+            return html_content
+            
+    except Exception as e:
+        import traceback
+        print(f"Error generating marketing asset: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route("/agent/communications", methods=["GET", "POST"])
 def agent_communications():
     """Agent communications - message templates."""
