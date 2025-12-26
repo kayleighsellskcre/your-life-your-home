@@ -542,9 +542,14 @@
             <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 48pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in;">{{ price or '$799,000' }}</div>
             <div style="font-size: 18pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.25in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
             
-            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.2in; margin-top: 0.25in;">
-                <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
-                <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.2in; margin-top: 0.25in; display: flex; align-items: center; gap: 0.2in;">
+                {% if include_photo and agent_profile and agent_profile.get('professional_photo') %}
+                <img src="{{ agent_profile.professional_photo }}" alt="{{ user.name }}" style="width: 0.8in; height: 0.8in; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-color);">
+                {% endif %}
+                <div>
+                    <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                    <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+                </div>
             </div>
         </div>
     </div>
@@ -571,9 +576,14 @@
             <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 52pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in;">{{ price or '$799,000' }}</div>
             <div style="font-size: 19pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.25in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
             
-            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.25in; margin-top: 0.25in;">
-                <div style="font-size: 17pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
-                <div style="font-size: 14pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.25in; margin-top: 0.25in; display: flex; align-items: center; justify-content: center; gap: 0.2in;">
+                {% if include_photo and agent_profile and agent_profile.get('professional_photo') %}
+                <img src="{{ agent_profile.professional_photo }}" alt="{{ user.name }}" style="width: 1in; height: 1in; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-color);">
+                {% endif %}
+                <div style="text-align: left;">
+                    <div style="font-size: 17pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                    <div style="font-size: 14pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+                </div>
             </div>
         </div>
     </div>
@@ -596,9 +606,14 @@
             <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 46pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in;">{{ price or '$799,000' }}</div>
             <div style="font-size: 17pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.2in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
             
-            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.2in; margin-top: 0.2in;">
-                <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
-                <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.2in; margin-top: 0.2in; display: flex; align-items: center; gap: 0.2in;">
+                {% if include_photo and agent_profile and agent_profile.get('professional_photo') %}
+                <img src="{{ agent_profile.professional_photo }}" alt="{{ user.name }}" style="width: 0.8in; height: 0.8in; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-color);">
+                {% endif %}
+                <div>
+                    <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                    <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+                </div>
             </div>
         </div>
     </div>
@@ -621,9 +636,14 @@
             <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 42pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.12in;">{{ price or '$799,000' }}</div>
             <div style="font-size: 16pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.2in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
             
-            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.18in; margin-top: 0.18in;">
-                <div style="font-size: 15pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
-                <div style="font-size: 12pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.18in; margin-top: 0.18in; display: flex; align-items: center; gap: 0.2in;">
+                {% if include_photo and agent_profile and agent_profile.get('professional_photo') %}
+                <img src="{{ agent_profile.professional_photo }}" alt="{{ user.name }}" style="width: 0.75in; height: 0.75in; border-radius: 50%; object-fit: cover; border: 3px solid var(--accent-color);">
+                {% endif %}
+                <div>
+                    <div style="font-size: 15pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                    <div style="font-size: 12pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+                </div>
             </div>
         </div>
     </div>
@@ -653,9 +673,14 @@
             <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 48pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.12in;">{{ price or '$799,000' }}</div>
             <div style="font-size: 18pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.2in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
             
-            <div style="padding-top: 0.18in;">
-                <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
-                <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            <div style="padding-top: 0.18in; display: flex; align-items: center; justify-content: center; gap: 0.2in;">
+                {% if include_photo and agent_profile and agent_profile.get('professional_photo') %}
+                <img src="{{ agent_profile.professional_photo }}" alt="{{ user.name }}" style="width: 0.9in; height: 0.9in; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-color);">
+                {% endif %}
+                <div>
+                    <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                    <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+                </div>
             </div>
         </div>
     </div>
