@@ -1,0 +1,245 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .global-hub-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .global-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .global-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.75rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.75rem 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .global-header .tagline {
+    color: rgba(58, 53, 44, 0.7);
+    font-size: 1.2rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 400;
+  }
+
+  .global-header .description {
+    color: rgba(58, 53, 44, 0.6);
+    font-size: 1rem;
+    margin: 0;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .selection-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 20px;
+    padding: 3rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .selection-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem 0;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .transactions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .transaction-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .transaction-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: var(--olive-green);
+  }
+
+  .transaction-address {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem 0;
+    line-height: 1.3;
+  }
+
+  .transaction-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    color: rgba(58, 53, 44, 0.7);
+    margin-bottom: 0.75rem;
+  }
+
+  .transaction-stage {
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.9) 100%);
+    color: white;
+    padding: 0.375rem 0.875rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    display: inline-block;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(58, 53, 44, 0.6);
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+  }
+
+  .empty-state p {
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .custom-option {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(107, 106, 69, 0.05);
+    border: 2px dashed rgba(107, 106, 69, 0.3);
+    border-radius: 12px;
+    margin-top: 1.5rem;
+  }
+
+  .custom-option-text {
+    color: rgba(58, 53, 44, 0.7);
+    font-size: 1rem;
+    margin: 0 0 1rem 0;
+  }
+
+  .custom-btn {
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.25);
+  }
+
+  .custom-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 106, 69, 0.35);
+  }
+
+  @media (max-width: 768px) {
+    .global-hub-container {
+      padding: 1rem;
+    }
+
+    .global-header h1 {
+      font-size: 2rem;
+    }
+
+    .selection-card {
+      padding: 1.5rem;
+    }
+
+    .transactions-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="global-hub-container">
+  <!-- Header -->
+  <div class="global-header">
+    <h1>Marketing Hub</h1>
+    <p class="tagline">Professional, print-ready marketing in minutes</p>
+    <p class="description">
+      Create luxury marketing materials for your listings, buyer clients, and business development needs.
+    </p>
+  </div>
+
+  <!-- Transaction Selection -->
+  <div class="selection-card">
+    <h2 class="selection-title">Select a Transaction</h2>
+    
+    {% if transactions and transactions|length > 0 %}
+    <div class="transactions-grid">
+      {% for tx in transactions %}
+      <a href="{{ url_for('agent_marketing_hub', tx_id=tx.id or tx.get('id')) }}" class="transaction-card">
+        <div class="transaction-address">
+          {{ tx.property_address or 'Property' }}
+        </div>
+        <div class="transaction-meta">
+          {% if tx.property_city %}
+          <span>📍 {{ tx.property_city }}, {{ tx.property_state }}</span>
+          {% endif %}
+          {% if tx.list_price %}
+          <span>💰 ${{ "{:,.0f}".format(tx.list_price) }}</span>
+          {% endif %}
+          <span>🏠 {{ tx.transaction_type or 'Listing' }}</span>
+        </div>
+        <span class="transaction-stage">
+          {{ tx.stage or 'Active' }}
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <span class="empty-state-icon">🏘️</span>
+      <h3>No Active Transactions</h3>
+      <p>Add a transaction to your pipeline to create property-specific marketing.</p>
+    </div>
+    {% endif %}
+
+    <!-- Custom Marketing Option -->
+    <div class="custom-option">
+      <p class="custom-option-text">
+        Need marketing without a specific transaction?
+      </p>
+      <button class="custom-btn" onclick="alert('Custom marketing creator coming soon! For now, select a transaction above.')">
+        Create Custom Marketing
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

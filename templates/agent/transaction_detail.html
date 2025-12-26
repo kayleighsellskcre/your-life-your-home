@@ -791,6 +791,10 @@
   <a href="{{ url_for('agent_feature_spotlight_cards', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn primary" style="min-width: 180px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
     Feature Spotlight Cards
   </a>
+  <a href="{{ url_for('agent_marketing_hub', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn primary" style="min-width: 180px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%); position: relative; overflow: hidden;">
+    <span style="position: relative; z-index: 2;">Marketing Hub</span>
+    <span style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%); opacity: 0; transition: opacity 0.3s ease;"></span>
+  </a>
 </div>
 
 <!-- Tabs -->

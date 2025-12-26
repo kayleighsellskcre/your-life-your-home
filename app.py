@@ -6445,6 +6445,70 @@ def agent_spotlight_cards_delete(set_id):
         return jsonify({"success": False, "error": "Failed to delete card set"}), 500
 
 
+# -------------------------------------------------
+# MARKETING HUB ROUTES
+# -------------------------------------------------
+@app.route("/agent/transactions/<int:tx_id>/marketing-hub")
+def agent_marketing_hub(tx_id):
+    """Marketing Hub - Generate luxury marketing assets for this transaction."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+    
+    # Get agent profile for branding
+    from database import get_user_profile
+    agent_profile = None
+    try:
+        agent_profile = get_user_profile(user["id"])
+        if agent_profile and hasattr(agent_profile, 'keys'):
+            agent_profile = dict(agent_profile)
+    except Exception as e:
+        print(f"Error getting agent profile: {e}")
+    
+    return render_template(
+        "agent/marketing_hub.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        tx_id=tx_id,
+        transaction=transaction,
+        agent_profile=agent_profile,
+    )
+
+
+@app.route("/agent/marketing-hub")
+def agent_marketing_hub_global():
+    """Global Marketing Hub - Create marketing without a specific transaction."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    # Get all transactions for selection
+    transactions = get_agent_transactions(user["id"])
+    
+    # Get agent profile for branding
+    from database import get_user_profile
+    agent_profile = None
+    try:
+        agent_profile = get_user_profile(user["id"])
+        if agent_profile and hasattr(agent_profile, 'keys'):
+            agent_profile = dict(agent_profile)
+    except Exception as e:
+        print(f"Error getting agent profile: {e}")
+    
+    return render_template(
+        "agent/marketing_hub_global.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        transactions=transactions,
+        agent_profile=agent_profile,
+    )
+
+
 @app.route("/agent/communications", methods=["GET", "POST"])
 def agent_communications():
     """Agent communications - message templates."""
