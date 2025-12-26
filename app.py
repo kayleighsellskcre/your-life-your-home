@@ -6976,6 +6976,24 @@ def agent_settings_profile():
         try:
             print(f"\n{'='*60}")
             print(f"AGENT PROFILE SAVE: Starting profile update for user {user['id']}")
+            print(f"FORM FILES: {list(request.files.keys())}")
+            print(f"FORM DATA KEYS: {list(request.form.keys())}")
+            
+            # Check if files are in request
+            if 'professional_photo' in request.files:
+                photo_file = request.files['professional_photo']
+                print(f"PHOTO FILE: filename={photo_file.filename}, size={len(photo_file.read()) if photo_file.filename else 0}")
+                photo_file.seek(0)  # Reset file pointer after reading
+            else:
+                print(f"PHOTO FILE: NOT IN REQUEST")
+                
+            if 'brokerage_logo' in request.files:
+                logo_file = request.files['brokerage_logo']
+                print(f"LOGO FILE: filename={logo_file.filename}, size={len(logo_file.read()) if logo_file.filename else 0}")
+                logo_file.seek(0)  # Reset file pointer after reading
+            else:
+                print(f"LOGO FILE: NOT IN REQUEST")
+            
             print(f"{'='*60}\n")
             
             # Handle file uploads using consolidated helper
