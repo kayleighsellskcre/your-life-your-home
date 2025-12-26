@@ -7120,7 +7120,12 @@ def agent_video_studio_create():
         
         # Render video
         from video_studio import VideoRenderer
-        renderer = VideoRenderer()
+        
+        # Set up output directory
+        output_dir = Path("generated_videos")
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        renderer = VideoRenderer(output_dir=str(output_dir))
         
         result = renderer.create_listing_video(
             project_id=project_id,
