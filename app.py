@@ -7155,6 +7155,11 @@ def agent_video_studio_create():
             include_captions=include_captions
         )
         
+        print(f"[VIDEO CREATE] Render result: {result}")
+        print(f"[VIDEO CREATE] Success: {result.get('success')}")
+        print(f"[VIDEO CREATE] Output path: {result.get('output_path')}")
+        print(f"[VIDEO CREATE] Error: {result.get('error')}")
+        
         if result["success"]:
             # Update status to complete
             update_video_render_status(
@@ -7162,10 +7167,12 @@ def agent_video_studio_create():
                 'complete',
                 result["output_path"]
             )
+            print(f"[VIDEO CREATE] Updated project {project_id} to complete with path: {result['output_path']}")
             flash("✨ Video created successfully!", "success")
             return redirect(url_for("agent_video_studio_view", project_id=project_id))
         else:
             update_video_render_status(project_id, 'failed')
+            print(f"[VIDEO CREATE] Video rendering failed: {result.get('error')}")
             flash(f"Video creation failed: {result.get('error')}", "error")
             return redirect(url_for("agent_video_studio"))
         
@@ -7216,30 +7223,45 @@ def agent_video_studio_serve(project_id):
     """Serve the video file for a project"""
     user = get_current_user()
     if not user or user.get("role") != "agent":
+        print(f"[VIDEO SERVE] Access denied - no user or wrong role")
         return abort(403)
     
     try:
         from video_database import get_video_project
         project = get_video_project(project_id)
         
+        print(f"[VIDEO SERVE] Project {project_id}: {project}")
+        
         if not project or project["user_id"] != user["id"]:
+            print(f"[VIDEO SERVE] Project not found or user mismatch")
             return abort(404)
         
         if not project.get("output_path"):
+            print(f"[VIDEO SERVE] No output_path in project")
             return abort(404)
         
         # Serve the video file
         video_path = Path(project["output_path"])
+        print(f"[VIDEO SERVE] Video path: {video_path}")
+        print(f"[VIDEO SERVE] Video exists: {video_path.exists()}")
+        print(f"[VIDEO SERVE] Absolute path: {video_path.absolute()}")
+        
         if not video_path.exists():
+            print(f"[VIDEO SERVE] Video file does not exist!")
             return abort(404)
         
-        directory = str(video_path.parent)
+        directory = str(video_path.parent.absolute())
         filename = video_path.name
+        
+        print(f"[VIDEO SERVE] Serving from directory: {directory}")
+        print(f"[VIDEO SERVE] Filename: {filename}")
         
         return send_from_directory(directory, filename, mimetype='video/mp4')
         
     except Exception as e:
-        print(f"Error serving video: {e}")
+        import traceback
+        print(f"[VIDEO SERVE] Error: {e}")
+        print(traceback.format_exc())
         return abort(500)
 
 
