@@ -261,6 +261,19 @@ app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
 
+# Check if Video Studio is available
+try:
+    import video_studio
+    import video_database
+    VIDEO_STUDIO_ENABLED = True
+    print("[VIDEO STUDIO] Modules loaded successfully")
+except ImportError as e:
+    VIDEO_STUDIO_ENABLED = False
+    print(f"[VIDEO STUDIO] Disabled - import error: {e}")
+except Exception as e:
+    VIDEO_STUDIO_ENABLED = False
+    print(f"[VIDEO STUDIO] Disabled - error: {e}")
+
 # Context processor to make professionals available to all homeowner templates
 def hex_to_color_name(hex_code):
     """Convert hex color code to official Sherwin-Williams color name."""
