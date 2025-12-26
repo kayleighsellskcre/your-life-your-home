@@ -7005,7 +7005,7 @@ def agent_settings_profile():
                 user["id"], professional_photo, brokerage_logo
             )
             
-            print(f"AGENT PROFILE: About to save - photo={professional_photo}, logo={brokerage_logo}")
+            print(f"AGENT PROFILE: About to save - photo={professional_photo[:50] if professional_photo else None}, logo={brokerage_logo[:50] if brokerage_logo else None}")
             
             profile_id = create_or_update_user_profile(
                 user_id=user["id"],
