@@ -6137,15 +6137,25 @@ def agent_feature_spotlight_cards(tx_id):
     
     # Get agent profile for branding
     from database import get_user_profile
+    agent_profile = None
+    brokerage_logo = None
+    
     try:
         agent_profile = get_user_profile(user["id"])
-        brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+        if agent_profile:
+            # Convert Row to dict if needed
+            if hasattr(agent_profile, 'keys') and not isinstance(agent_profile, dict):
+                agent_profile = dict(agent_profile)
+            brokerage_logo = agent_profile.get("brokerage_logo")
+            print(f"[SPOTLIGHT CARDS] Agent profile loaded: logo={brokerage_logo[:50] if brokerage_logo else 'None'}...")
     except Exception as e:
-        print(f"Error getting agent profile: {e}")
-        brokerage_logo = None
+        import traceback
+        print(f"[SPOTLIGHT CARDS] Error getting agent profile: {e}")
+        print(traceback.format_exc())
     
-    # Use default logo if agent doesn't have one
+    # Use fallback if no logo
     if not brokerage_logo:
+        print(f"[SPOTLIGHT CARDS] No logo found, using fallback")
         brokerage_logo = "https://i.postimg.cc/zB5B38Bq/KCRE-Logo.png"
 
     return render_template(
@@ -6156,6 +6166,7 @@ def agent_feature_spotlight_cards(tx_id):
         transaction=transaction,
         saved_sets=saved_sets,
         brokerage_logo=brokerage_logo,
+        agent_name=user.get("name", ""),
     )
 
 
