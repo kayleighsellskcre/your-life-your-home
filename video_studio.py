@@ -10,8 +10,24 @@ import tempfile
 from pathlib import Path
 from typing import List, Dict, Optional
 import base64
-from PIL import Image
-import io
+
+# Check if FFmpeg is available
+try:
+    subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True, timeout=5)
+    FFMPEG_AVAILABLE = True
+except (FileNotFoundError, subprocess.SubprocessError, Exception):
+    FFMPEG_AVAILABLE = False
+    print("WARNING: FFmpeg not found. Video Studio will not be functional.")
+
+# Only import PIL if we need it
+try:
+    from PIL import Image
+    import io
+    PIL_AVAILABLE = True
+except ImportError:
+    PIL_AVAILABLE = False
+    print("WARNING: Pillow not found. Image processing may be limited.")
+
 
 class VideoRenderer:
     """
@@ -49,6 +65,13 @@ class VideoRenderer:
                 "error": "error message if failed"
             }
         """
+        
+        # Check if FFmpeg is available
+        if not FFMPEG_AVAILABLE:
+            return {
+                "success": False,
+                "error": "FFmpeg is not installed. Please install FFmpeg or wait for Railway deployment to complete."
+            }
         
         try:
             # Calculate dimensions based on aspect ratio
@@ -177,7 +200,14 @@ class VideoRenderer:
     
     def _save_base64_image(self, base64_data: str, output_path: Path) -> Optional[Path]:
         """Save base64 image to file"""
+        if not PIL_AVAILABLE:
+            print("WARNING: PIL not available, cannot save base64 image")
+            return None
+            
         try:
+            from PIL import Image
+            import io
+            
             if base64_data.startswith('data:image'):
                 # Extract base64 data
                 base64_data = base64_data.split(',')[1]

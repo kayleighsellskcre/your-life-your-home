@@ -6982,8 +6982,12 @@ def agent_video_studio():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
     
-    from video_database import get_user_video_projects
-    projects = get_user_video_projects(user["id"])
+    try:
+        from video_database import get_user_video_projects
+        projects = get_user_video_projects(user["id"])
+    except Exception as e:
+        print(f"Error loading video projects: {e}")
+        projects = []
     
     return render_template(
         "agent/video_studio.html",
@@ -6999,6 +7003,14 @@ def agent_video_studio_create():
     user = get_current_user()
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
+    
+    # Check if FFmpeg is available
+    try:
+        import subprocess
+        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True, timeout=5)
+    except (FileNotFoundError, subprocess.SubprocessError, Exception) as e:
+        flash("⚠️ Video Studio is not yet available. FFmpeg is being installed on Railway. Please try again in 5 minutes after the next deployment.", "error")
+        return redirect(url_for("agent_video_studio"))
     
     try:
         # Get form data
