@@ -6569,9 +6569,42 @@ def agent_marketing_generate(tx_id):
         property_address = request.form.get('property_address', '')
         custom_text = request.form.get('custom_text', '')
         color_scheme = request.form.get('color_scheme', 'classic')
+        layout_style = request.form.get('layout_style', 'classic')
         include_photo = request.form.get('include_photo') == 'on'
         include_logo = request.form.get('include_logo') == 'on'
         include_lender = request.form.get('include_lender') == 'on'
+        
+        # Handle property photo uploads
+        property_photos = []
+        if 'property_photos' in request.files:
+            files = request.files.getlist('property_photos')
+            for file in files[:3]:  # Limit to 3 photos
+                if file and file.filename:
+                    try:
+                        # Read file and convert to base64 for embedding
+                        import base64
+                        file_data = file.read()
+                        
+                        # Detect image type from magic bytes
+                        img_type = None
+                        if file_data.startswith(b'\xFF\xD8\xFF'):
+                            img_type = 'jpeg'
+                        elif file_data.startswith(b'\x89PNG\r\n\x1a\n'):
+                            img_type = 'png'
+                        elif file_data.startswith(b'GIF87a') or file_data.startswith(b'GIF89a'):
+                            img_type = 'gif'
+                        elif file_data.startswith(b'RIFF') and file_data[8:12] == b'WEBP':
+                            img_type = 'webp'
+                        else:
+                            img_type = 'jpeg'  # Default fallback
+                        
+                        # Convert to base64 data URL
+                        base64_data = base64.b64encode(file_data).decode('utf-8')
+                        data_url = f"data:image/{img_type};base64,{base64_data}"
+                        property_photos.append(data_url)
+                    except Exception as e:
+                        print(f"Error processing property photo: {e}")
+                        continue
         
         # Get agent profile for branding
         from database import get_user_profile
@@ -6591,6 +6624,8 @@ def agent_marketing_generate(tx_id):
             property_address=property_address,
             custom_text=custom_text,
             color_scheme=color_scheme,
+            layout_style=layout_style,
+            property_photos=property_photos,
             include_photo=include_photo,
             include_logo=include_logo,
             include_lender=include_lender,

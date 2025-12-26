@@ -404,7 +404,7 @@
     </a>
   </div>
 
-  <form id="marketing-form" method="POST" action="{{ url_for('agent_marketing_generate', tx_id=tx_id) }}" target="_blank">
+  <form id="marketing-form" method="POST" action="{{ url_for('agent_marketing_generate', tx_id=tx_id) }}" enctype="multipart/form-data" target="_blank">
     <input type="hidden" name="category" value="{{ category }}">
     <input type="hidden" name="asset_type" value="{{ asset_type }}">
     
@@ -482,6 +482,34 @@
             ✨ Enhance with AI
           </button>
           <p class="helper-text">Leave blank to use default text</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Property Photos (Optional)</label>
+          <input 
+            type="file" 
+            name="property_photos" 
+            id="property-photos-input"
+            class="form-input" 
+            accept="image/*"
+            multiple
+            onchange="handlePropertyPhotos(this)"
+            style="padding: 0.5rem;"
+          >
+          <p class="helper-text">Upload up to 3 high-quality property images</p>
+          <div id="photo-preview-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin-top: 0.5rem;"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Layout Style</label>
+          <select name="layout_style" id="layout-style-select" class="form-input" onchange="updatePreview()">
+            <option value="classic">Classic - Center Focus (No Property Photos)</option>
+            <option value="hero">Hero Image - Large Top Photo</option>
+            <option value="split">Split View - Photo Left, Details Right</option>
+            <option value="gallery">Gallery Style - 2-3 Photos Grid</option>
+            <option value="minimal">Minimal Elegance - Small Featured Photo</option>
+          </select>
+          <p class="helper-text">Choose how property photos are displayed</p>
         </div>
 
         <div class="form-group">
@@ -634,6 +662,51 @@
       alert('Failed to enhance text. Please try again.');
       button.innerHTML = originalContent;
       button.disabled = false;
+    }
+  }
+
+  // Handle property photo uploads
+  function handlePropertyPhotos(input) {
+    const previewGrid = document.getElementById('photo-preview-grid');
+    previewGrid.innerHTML = '';
+    
+    if (input.files && input.files.length > 0) {
+      // Limit to 3 photos
+      const filesToProcess = Array.from(input.files).slice(0, 3);
+      
+      filesToProcess.forEach((file, index) => {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const previewDiv = document.createElement('div');
+          previewDiv.style.cssText = 'position: relative; aspect-ratio: 4/3; border-radius: 8px; overflow: hidden; border: 2px solid rgba(200, 180, 151, 0.3);';
+          
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.cssText = 'width: 100%; height: 100%; object-fit: cover;';
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.textContent = '×';
+          removeBtn.type = 'button';
+          removeBtn.style.cssText = 'position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: 50%; background: rgba(255, 255, 255, 0.9); border: none; cursor: pointer; font-size: 18px; line-height: 1; color: #333;';
+          removeBtn.onclick = () => {
+            previewDiv.remove();
+            if (previewGrid.children.length === 0) {
+              input.value = '';
+            }
+          };
+          
+          previewDiv.appendChild(img);
+          previewDiv.appendChild(removeBtn);
+          previewGrid.appendChild(previewDiv);
+        };
+        
+        reader.readAsDataURL(file);
+      });
+      
+      if (input.files.length > 3) {
+        alert('Maximum 3 property photos allowed. Only the first 3 will be used.');
+      }
     }
   }
 </script>
