@@ -587,6 +587,168 @@
     <button class="print-button" onclick="window.print()">🖨️ Print to PDF</button>
     <div class="decorative-header"></div>
     
+    {% if layout_style == 'magazine' and property_photos and property_photos|length > 0 %}
+    <!-- Magazine Editorial Layout -->
+    <div class="content-wrapper layout-magazine">
+        <img src="{{ property_photos[0] }}" alt="Property" class="magazine-hero">
+        {% if property_photos|length > 1 %}
+        <img src="{{ property_photos[1] }}" alt="Property Detail" class="magazine-inset">
+        {% endif %}
+        
+        <div class="magazine-text-block">
+            {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
+            <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" style="max-width: 2.5in; max-height: 0.6in; margin-bottom: 0.2in; display: block;">
+            {% endif %}
+            
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 52pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in; line-height: 1.1; text-transform: uppercase;">{{ headline or 'Just Listed' }}</div>
+            <div style="font-size: 20pt; color: var(--text-medium); margin-bottom: 0.2in;">{{ subtext or 'Luxury Living Awaits' }}</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 48pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in;">{{ price or '$799,000' }}</div>
+            <div style="font-size: 18pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.25in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+            
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.2in; margin-top: 0.25in;">
+                <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif layout_style == 'showcase' and property_photos and property_photos|length > 0 %}
+    <!-- Luxury Showcase Layout -->
+    <div class="content-wrapper layout-showcase">
+        <img src="{{ property_photos[0] }}" alt="Property" class="showcase-hero">
+        
+        {% if property_photos|length > 1 %}
+        <img src="{{ property_photos[1] }}" alt="Property Detail" class="showcase-secondary">
+        {% endif %}
+        {% if property_photos|length > 2 %}
+        <img src="{{ property_photos[2] }}" alt="Property Detail" class="showcase-secondary">
+        {% endif %}
+        
+        <div class="showcase-text">
+            {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
+            <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" style="max-width: 2.5in; max-height: 0.6in; margin-bottom: 0.25in; display: block; margin-left: auto; margin-right: auto;">
+            {% endif %}
+            
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 56pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in; line-height: 1.05; text-transform: uppercase;">{{ headline or 'Just Listed' }}</div>
+            <div style="font-size: 22pt; color: var(--text-medium); margin-bottom: 0.25in;">{{ subtext or 'Luxury Living Awaits' }}</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 52pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in;">{{ price or '$799,000' }}</div>
+            <div style="font-size: 19pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.25in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+            
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.25in; margin-top: 0.25in;">
+                <div style="font-size: 17pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                <div style="font-size: 14pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif layout_style == 'modern' and property_photos and property_photos|length > 0 %}
+    <!-- Modern Elegance Layout -->
+    <div class="content-wrapper layout-modern">
+        <img src="{{ property_photos[0] }}" alt="Property" class="modern-primary">
+        {% if property_photos|length > 1 %}
+        <img src="{{ property_photos[1] }}" alt="Property Detail" class="modern-overlay">
+        {% endif %}
+        
+        <div class="modern-text-zone">
+            {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
+            <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" style="max-width: 2.5in; max-height: 0.6in; margin-bottom: 0.2in; display: block;">
+            {% endif %}
+            
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 48pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in; line-height: 1.1; text-transform: uppercase;">{{ headline or 'Just Listed' }}</div>
+            <div style="font-size: 19pt; color: var(--text-medium); margin-bottom: 0.2in;">{{ subtext or 'Luxury Living Awaits' }}</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 46pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.15in;">{{ price or '$799,000' }}</div>
+            <div style="font-size: 17pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.2in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+            
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.2in; margin-top: 0.2in;">
+                <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif layout_style == 'editorial' and property_photos and property_photos|length > 0 %}
+    <!-- Editorial Portfolio Layout -->
+    <div class="content-wrapper layout-editorial">
+        <img src="{{ property_photos[0] }}" alt="Property" class="editorial-tall">
+        {% if property_photos|length > 1 %}
+        <img src="{{ property_photos[1] }}" alt="Property Detail" class="editorial-wide">
+        {% endif %}
+        
+        <div class="editorial-text">
+            {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
+            <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" style="max-width: 2.5in; max-height: 0.6in; margin-bottom: 0.2in; display: block;">
+            {% endif %}
+            
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 44pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.12in; line-height: 1.1; text-transform: uppercase;">{{ headline or 'Just Listed' }}</div>
+            <div style="font-size: 18pt; color: var(--text-medium); margin-bottom: 0.18in;">{{ subtext or 'Luxury Living Awaits' }}</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 42pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.12in;">{{ price or '$799,000' }}</div>
+            <div style="font-size: 16pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.2in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+            
+            <div style="border-top: 2px solid var(--divider-color); padding-top: 0.18in; margin-top: 0.18in;">
+                <div style="font-size: 15pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                <div style="font-size: 12pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif layout_style == 'collection' and property_photos and property_photos|length > 0 %}
+    <!-- Premium Collection Layout -->
+    <div class="content-wrapper layout-collection">
+        <img src="{{ property_photos[0] }}" alt="Property" class="collection-featured">
+        {% if property_photos|length > 1 %}
+        <img src="{{ property_photos[1] }}" alt="Property Detail" class="collection-side">
+        {% endif %}
+        {% if property_photos|length > 2 %}
+        <img src="{{ property_photos[2] }}" alt="Property Detail" class="collection-secondary">
+        {% else %}
+        <div style="background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); border-radius: 6px;"></div>
+        {% endif %}
+        <div style="background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); border-radius: 6px;"></div>
+        <div style="background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%); border-radius: 6px;"></div>
+        
+        <div class="collection-text">
+            {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
+            <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" style="max-width: 2.5in; max-height: 0.6in; margin-bottom: 0.2in; display: block; margin-left: auto; margin-right: auto;">
+            {% endif %}
+            
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 50pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.12in; line-height: 1.05; text-transform: uppercase;">{{ headline or 'Just Listed' }}</div>
+            <div style="font-size: 20pt; color: var(--text-medium); margin-bottom: 0.18in;">{{ subtext or 'Luxury Living Awaits' }}</div>
+            <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 48pt; font-weight: 700; color: var(--primary-color); margin-bottom: 0.12in;">{{ price or '$799,000' }}</div>
+            <div style="font-size: 18pt; color: var(--text-dark); font-weight: 500; margin-bottom: 0.2in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+            
+            <div style="padding-top: 0.18in;">
+                <div style="font-size: 16pt; font-weight: 600; color: var(--text-dark);">{{ user.name }}</div>
+                <div style="font-size: 13pt; color: var(--text-light);">{{ user.phone or user.email }}</div>
+            </div>
+        </div>
+    </div>
+    
+    {% elif layout_style == 'split' and property_photos and property_photos|length > 0 %}
+    <!-- Split Layout: Photo Left, Content Right -->
+    <div class="content-wrapper layout-split">
+        <div>
+            <img src="{{ property_photos[0] }}" alt="Property" class="layout-split-photo">
+        </div>
+        <div class="layout-split-content">
+            {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
+            <div class="logo-section" style="margin-bottom: 0.3in;">
+                <img src="{{ agent_profile.brokerage_logo }}" alt="Logo" class="agent-logo" style="max-width: 2in; max-height: 0.5in;">
+            </div>
+            {% endif %}
+            
+            <div class="headline" style="font-size: 48pt; margin-bottom: 0.2in;">{{ headline or 'Just Listed' }}</div>
+            <div class="subheading" style="font-size: 18pt; margin-bottom: 0.3in;">{{ subtext or 'Luxury Living Awaits' }}</div>
+            <div class="price" style="font-size: 44pt; margin-bottom: 0.2in;">{{ price or '$799,000' }}</div>
+            <div class="address" style="font-size: 16pt; margin-bottom: 0.3in;">{{ property_address or transaction.property_address or '123 Main Street' }}</div>
+            
+            <div class="agent-section" style="margin-top: 0.4in; padding-top: 0.25in;">
+                <div class="agent-name" style="font-size: 14pt;">{{ user.name }}</div>
+                <div class="agent-contact" style="font-size: 11pt;">{{ user.phone or user.email }}</div>
+            </div>
+        </div>
+    </div>
+    
+    
     <div class="content-wrapper">
         {% if include_logo and agent_profile and agent_profile.get('brokerage_logo') %}
         <div class="logo-section">
