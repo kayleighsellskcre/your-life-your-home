@@ -6962,16 +6962,6 @@ def agent_vendors():
     )
 
 
-@app.route("/agent/settings/profile", methods=["GET", "POST"])
-def agent_settings_profile():
-    """Agent settings and profile."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
-
-    from database import get_user_profile, create_or_update_user_profile
-
-
 # -------------------------------------------------
 # AGENT VIDEO STUDIO ROUTES
 # -------------------------------------------------
