@@ -404,7 +404,7 @@
     </a>
   </div>
 
-  <form id="marketing-form" method="POST" action="#" target="_blank">
+  <form id="marketing-form" method="POST" action="{{ url_for('lender_marketing_generate', borrower_id=borrower_id) }}" target="_blank">
     <input type="hidden" name="category" value="{{ category }}">
     <input type="hidden" name="asset_type" value="{{ asset_type }}">
     
@@ -489,12 +489,47 @@
         </div>
 
         <div class="form-group">
+          <label class="form-label">Color Scheme</label>
+          <select name="color_scheme" id="color-scheme-select" class="form-input" onchange="updatePreview()">
+            <option value="classic">Classic Olive & Cream (Default)</option>
+            <option value="navy">Navy & Gold Elegance</option>
+            <option value="charcoal">Charcoal & Rose Gold</option>
+            <option value="forest">Forest Green & Ivory</option>
+            <option value="burgundy">Burgundy & Champagne</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <div class="toggle-group">
             <label class="toggle-switch">
-              <input type="checkbox" name="include_lender" id="lender-toggle" onchange="updatePreview()">
+              <input type="checkbox" name="include_photo" id="photo-toggle" checked onchange="updatePreview()">
               <span class="toggle-slider"></span>
             </label>
-            <label class="toggle-label" for="lender-toggle">
+            <label class="toggle-label" for="photo-toggle">
+              Include My Photo
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="toggle-group">
+            <label class="toggle-switch">
+              <input type="checkbox" name="include_logo" id="logo-toggle" checked onchange="updatePreview()">
+              <span class="toggle-slider"></span>
+            </label>
+            <label class="toggle-label" for="logo-toggle">
+              Include My Logo
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="toggle-group">
+            <label class="toggle-switch">
+              <input type="checkbox" name="include_nmls" id="nmls-toggle" onchange="updatePreview()">
+              <span class="toggle-slider"></span>
+            </label>
+            <label class="toggle-label" for="nmls-toggle">
               Include NMLS Number
             </label>
           </div>

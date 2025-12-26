@@ -7693,6 +7693,70 @@ def lender_marketing_create(borrower_id):
     )
 
 
+@app.route("/lender/borrowers/<int:borrower_id>/marketing-hub/generate", methods=["POST"])
+def lender_marketing_generate(borrower_id):
+    """Generate the final marketing asset HTML for printing."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    from database import get_lender_borrower
+    borrower = get_lender_borrower(borrower_id)
+    if not borrower or borrower.get("lender_id") != user["id"]:
+        flash("Borrower not found.", "error")
+        return redirect(url_for("lender_crm"))
+    
+    try:
+        # Get form data
+        category = request.form.get('category', '')
+        asset_type = request.form.get('asset_type', '')
+        headline = request.form.get('headline', '')
+        subtext = request.form.get('subtext', '')
+        loan_amount = request.form.get('loan_amount', '')
+        borrower_name = request.form.get('borrower_name', '')
+        custom_text = request.form.get('custom_text', '')
+        color_scheme = request.form.get('color_scheme', 'classic')
+        include_photo = request.form.get('include_photo') == 'on'
+        include_logo = request.form.get('include_logo') == 'on'
+        include_nmls = request.form.get('include_nmls') == 'on'
+        
+        # Get lender profile for branding
+        from database import get_user_profile
+        lender_profile = None
+        try:
+            lender_profile = get_user_profile(user["id"])
+            if lender_profile and hasattr(lender_profile, 'keys'):
+                lender_profile = dict(lender_profile)
+        except Exception as e:
+            print(f"Error getting lender profile: {e}")
+        
+        # Render the marketing asset template
+        html_content = render_template(
+            f"lender/marketing_templates/{category}_{asset_type}.html",
+            borrower=borrower,
+            lender_profile=lender_profile,
+            user=user,
+            headline=headline,
+            subtext=subtext,
+            loan_amount=loan_amount,
+            borrower_name=borrower_name,
+            custom_text=custom_text,
+            color_scheme=color_scheme,
+            include_photo=include_photo,
+            include_logo=include_logo,
+            include_nmls=include_nmls,
+        )
+        
+        # Return HTML with print button for browser-based PDF generation
+        return html_content
+            
+    except Exception as e:
+        import traceback
+        print(f"Error generating marketing asset: {traceback.format_exc()}")
+        flash(f"Error generating asset: {str(e)}", "error")
+        return redirect(url_for('lender_marketing_hub', borrower_id=borrower_id))
+
+
 @app.route("/lender/marketing/refine-text", methods=["POST"])
 def lender_marketing_refine_text():
     """Refine lender marketing text using AI to sound professional but natural."""
