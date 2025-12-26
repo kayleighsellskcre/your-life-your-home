@@ -83,7 +83,6 @@ def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", r
     Returns the data URL or None if no file was uploaded.
     """
     import base64
-    import imghdr
     
     if file_field_name not in request.files:
         return None
@@ -96,15 +95,22 @@ def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", r
         # Read file content
         file_content = file.read()
         
-        # Detect image type
-        img_type = imghdr.what(None, h=file_content)
-        if not img_type:
-            # Try to determine from filename extension
-            ext = file.filename.rsplit('.', 1)[-1].lower()
-            if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
-                img_type = ext if ext != 'jpg' else 'jpeg'
-            else:
-                img_type = 'png'  # Default fallback
+        # Detect image type from magic bytes (first few bytes of file)
+        img_type = 'png'  # default
+        if file_content.startswith(b'\xff\xd8\xff'):
+            img_type = 'jpeg'
+        elif file_content.startswith(b'\x89PNG'):
+            img_type = 'png'
+        elif file_content.startswith(b'GIF87a') or file_content.startswith(b'GIF89a'):
+            img_type = 'gif'
+        elif file_content.startswith(b'RIFF') and file_content[8:12] == b'WEBP':
+            img_type = 'webp'
+        elif file_content.startswith(b'<svg') or file_content.startswith(b'<?xml'):
+            img_type = 'svg+xml'
+        else:
+            # Fallback to filename extension
+            ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else 'png'
+            img_type = 'jpeg' if ext == 'jpg' else ext
         
         # Convert to base64
         base64_encoded = base64.b64encode(file_content).decode('utf-8')
@@ -116,7 +122,9 @@ def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", r
         return data_url
         
     except Exception as e:
+        import traceback
         print(f"{role_prefix}PROFILE: Error uploading file: {e}")
+        print(traceback.format_exc())
         flash(f"Error uploading {file_field_name}: {str(e)}", "error")
         return None
 
