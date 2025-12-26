@@ -404,6 +404,20 @@
     </a>
   </div>
 
+  {% if not agent_profile or not agent_profile.get('professional_photo') or not agent_profile.get('brokerage_logo') %}
+  <div style="background: linear-gradient(135deg, #FFF3CD 0%, #FFE69C 100%); border: 2px solid #FFCA28; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; align-items: start; gap: 1rem;">
+    <div style="font-size: 24px;">ℹ️</div>
+    <div style="flex: 1;">
+      <div style="font-weight: 600; color: #856404; margin-bottom: 0.25rem;">Profile Setup Needed</div>
+      <div style="color: #856404; font-size: 0.9rem; line-height: 1.5;">
+        Your <strong>professional photo</strong> and <strong>brokerage logo</strong> are not set. 
+        <a href="{{ url_for('agent_settings_profile') }}" style="color: #6B6A45; text-decoration: underline; font-weight: 600;">Upload them in Settings</a> 
+        to have them appear on your marketing materials.
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <form id="marketing-form" method="POST" action="{{ url_for('agent_marketing_generate', tx_id=tx_id) }}" enctype="multipart/form-data" target="_blank">
     <input type="hidden" name="category" value="{{ category }}">
     <input type="hidden" name="asset_type" value="{{ asset_type }}">
