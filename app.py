@@ -7039,9 +7039,17 @@ def agent_settings_profile():
                 fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
                 conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
             )
+            
+            # Success message with specific photo/logo confirmation
+            success_parts = ["Profile updated successfully!"]
+            if professional_photo:
+                success_parts.append("✓ Professional photo saved")
+            if brokerage_logo:
+                success_parts.append("✓ Brokerage logo saved")
+            
             print(f"AGENT PROFILE: Profile saved successfully with ID {profile_id}")
             print(f"{'='*60}\n")
-            flash("Profile updated successfully! Your information and photos have been saved.", "success")
+            flash(" | ".join(success_parts), "success")
             return redirect(url_for("agent_settings_profile"))
         except Exception as e:
             import traceback
