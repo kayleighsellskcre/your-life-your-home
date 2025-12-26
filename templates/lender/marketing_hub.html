@@ -1,0 +1,420 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<style>
+  .marketing-hub-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .hub-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .hub-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .hub-header .subtitle {
+    color: rgba(58, 53, 44, 0.7);
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .borrower-context {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
+    border: 2px solid rgba(107, 106, 69, 0.15);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+
+  .borrower-info h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+  }
+
+  .borrower-meta {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+    color: rgba(58, 53, 44, 0.7);
+  }
+
+  .borrower-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .status-badge {
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
+    color: white;
+    padding: 0.625rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.25);
+    white-space: nowrap;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+  }
+
+  .category-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, rgba(107, 106, 69, 0.3) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.3) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .category-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: var(--olive-green);
+  }
+
+  .category-card:hover::before {
+    opacity: 1;
+  }
+
+  .category-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .category-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+  }
+
+  .category-description {
+    color: rgba(58, 53, 44, 0.7);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .asset-types-section {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 242, 232, 0.92) 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    margin-top: 2rem;
+    display: none;
+  }
+
+  .asset-types-section.active {
+    display: block;
+    animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid rgba(200, 180, 151, 0.2);
+  }
+
+  .section-header h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .back-btn {
+    background: rgba(107, 106, 69, 0.1);
+    color: var(--olive-green);
+    border: 1.5px solid var(--olive-green);
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .back-btn:hover {
+    background: var(--olive-green);
+    color: white;
+  }
+
+  .asset-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .asset-type-card {
+    background: white;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .asset-type-card:hover {
+    border-color: var(--olive-green);
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .asset-type-icon {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+  }
+
+  .asset-type-title {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .asset-type-subtitle {
+    font-size: 0.8rem;
+    color: rgba(58, 53, 44, 0.6);
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .marketing-hub-container {
+      padding: 1rem;
+    }
+
+    .hub-header h1 {
+      font-size: 1.75rem;
+    }
+
+    .categories-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .borrower-context {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+<div class="marketing-hub-container">
+  <!-- Header -->
+  <div class="hub-header">
+    <h1>Marketing Hub</h1>
+    <p class="subtitle">Create professional marketing materials</p>
+  </div>
+
+  <!-- Borrower Context -->
+  <div class="borrower-context">
+    <div class="borrower-info">
+      <h3>{{ borrower.name or 'Borrower' }}</h3>
+      <div class="borrower-meta">
+        {% if borrower.email %}
+        <span>📧 {{ borrower.email }}</span>
+        {% endif %}
+        {% if borrower.loan_type %}
+        <span>🏦 {{ borrower.loan_type }}</span>
+        {% endif %}
+        {% if borrower.property_address %}
+        <span>🏠 {{ borrower.property_address }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="status-badge">
+      {{ borrower.status or 'Active' }}
+    </div>
+  </div>
+
+  <!-- Marketing Categories -->
+  <div id="categories-section">
+    <div class="categories-grid">
+      <div class="category-card" onclick="showAssetTypes('pre-approval')">
+        <span class="category-icon">🎉</span>
+        <h3 class="category-title">Pre-Approval Celebration</h3>
+        <p class="category-description">Congratulate borrowers on getting pre-approved for their dream home</p>
+      </div>
+
+      <div class="category-card" onclick="showAssetTypes('closing')">
+        <span class="category-icon">🏠</span>
+        <h3 class="category-title">Closing Congratulations</h3>
+        <p class="category-description">Celebrate successful closings with beautiful materials</p>
+      </div>
+
+      <div class="category-card" onclick="showAssetTypes('rate-announcement')">
+        <span class="category-icon">📊</span>
+        <h3 class="category-title">Rate Announcement</h3>
+        <p class="category-description">Share current rates and special program updates</p>
+      </div>
+
+      <div class="category-card" onclick="showAssetTypes('refinance')">
+        <span class="category-icon">💰</span>
+        <h3 class="category-title">Refinance Opportunity</h3>
+        <p class="category-description">Reach out about refinancing opportunities</p>
+      </div>
+
+      <div class="category-card" onclick="showAssetTypes('education')">
+        <span class="category-icon">📚</span>
+        <h3 class="category-title">First-Time Buyer Education</h3>
+        <p class="category-description">Educational materials for first-time homebuyers</p>
+      </div>
+
+      <div class="category-card" onclick="showAssetTypes('agent-thank-you')">
+        <span class="category-icon">🤝</span>
+        <h3 class="category-title">Agent Thank You</h3>
+        <p class="category-description">Appreciation materials for referring agents</p>
+      </div>
+
+      <div class="category-card" onclick="showAssetTypes('custom')">
+        <span class="category-icon">🎨</span>
+        <h3 class="category-title">Custom</h3>
+        <p class="category-description">Flexible templates for unique needs</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Asset Types Selection -->
+  <div id="asset-types-section" class="asset-types-section">
+    <div class="section-header">
+      <h2 id="selected-category-title">Select Asset Type</h2>
+      <button class="back-btn" onclick="backToCategories()">← Back to Categories</button>
+    </div>
+
+    <div class="asset-types-grid">
+      <div class="asset-type-card" onclick="createAsset('flyer')">
+        <span class="asset-type-icon">📄</span>
+        <h4 class="asset-type-title">Print Flyer</h4>
+        <p class="asset-type-subtitle">8.5" × 11" professional flyer</p>
+      </div>
+
+      <div class="asset-type-card" onclick="createAsset('postcard')">
+        <span class="asset-type-icon">✉️</span>
+        <h4 class="asset-type-title">Postcard</h4>
+        <p class="asset-type-subtitle">4" × 6" or 6" × 9"</p>
+      </div>
+
+      <div class="asset-type-card" onclick="createAsset('instagram-post')">
+        <span class="asset-type-icon">📱</span>
+        <h4 class="asset-type-title">Instagram Post</h4>
+        <p class="asset-type-subtitle">1080 × 1080 square</p>
+      </div>
+
+      <div class="asset-type-card" onclick="createAsset('facebook-post')">
+        <span class="asset-type-icon">👥</span>
+        <h4 class="asset-type-title">Facebook Post</h4>
+        <p class="asset-type-subtitle">1200 × 630 landscape</p>
+      </div>
+
+      <div class="asset-type-card" onclick="createAsset('email-header')">
+        <span class="asset-type-icon">📧</span>
+        <h4 class="asset-type-title">Email Header</h4>
+        <p class="asset-type-subtitle">600 × 300 banner</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentCategory = '';
+
+  function showAssetTypes(category) {
+    currentCategory = category;
+    
+    document.getElementById('categories-section').style.display = 'none';
+    
+    const assetTypesSection = document.getElementById('asset-types-section');
+    assetTypesSection.classList.add('active');
+    
+    const categoryTitles = {
+      'pre-approval': 'Pre-Approval Celebration',
+      'closing': 'Closing Congratulations',
+      'rate-announcement': 'Rate Announcement',
+      'refinance': 'Refinance Opportunity',
+      'education': 'First-Time Buyer Education',
+      'agent-thank-you': 'Agent Thank You',
+      'custom': 'Custom Marketing'
+    };
+    
+    document.getElementById('selected-category-title').textContent = categoryTitles[category] || 'Select Asset Type';
+  }
+
+  function backToCategories() {
+    const assetTypesSection = document.getElementById('asset-types-section');
+    assetTypesSection.classList.remove('active');
+    
+    setTimeout(() => {
+      document.getElementById('categories-section').style.display = 'block';
+      assetTypesSection.style.display = 'none';
+    }, 300);
+  }
+
+  function createAsset(assetType) {
+    const borrowerId = {{ borrower_id }};
+    window.location.href = `/lender/borrowers/${borrowerId}/marketing-hub/create?category=${currentCategory}&type=${assetType}`;
+  }
+</script>
+
+{% endblock %}
+

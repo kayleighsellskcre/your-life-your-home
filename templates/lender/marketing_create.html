@@ -1,0 +1,500 @@
+{% extends "lender/layout.html" %}
+
+{% block lender_content %}
+<style>
+  .creator-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .creator-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(200, 180, 151, 0.2);
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-left h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+  }
+
+  .header-breadcrumb {
+    color: rgba(58, 53, 44, 0.6);
+    font-size: 0.9rem;
+  }
+
+  .back-to-hub {
+    background: rgba(107, 106, 69, 0.1);
+    color: var(--olive-green);
+    border: 1.5px solid var(--olive-green);
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .back-to-hub:hover {
+    background: var(--olive-green);
+    color: white;
+  }
+
+  .creator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .editor-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 8rem;
+  }
+
+  .editor-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1.5rem 0;
+    font-weight: 600;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--olive-green);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    background: white;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+
+  .form-textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(107, 106, 69, 0.05);
+    border-radius: 8px;
+    border: 1px solid rgba(107, 106, 69, 0.15);
+  }
+
+  .toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+  }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(200, 180, 151, 0.3);
+    transition: 0.3s;
+    border-radius: 26px;
+  }
+
+  .toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
+
+  .toggle-switch input:checked + .toggle-slider {
+    background-color: var(--olive-green);
+  }
+
+  .toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+  }
+
+  .toggle-label {
+    font-weight: 500;
+    color: var(--charcoal-brown);
+    font-size: 0.95rem;
+  }
+
+  .preview-panel {
+    background: rgba(246, 242, 232, 0.5);
+    border: 2px dashed rgba(107, 106, 69, 0.2);
+    border-radius: 16px;
+    padding: 2rem;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .preview-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .preview-content {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .preview-frame {
+    width: 100%;
+    aspect-ratio: 8.5 / 11;
+    background: white;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .preview-headline {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .preview-subtext {
+    font-size: 1.25rem;
+    color: rgba(58, 53, 44, 0.8);
+    margin: 0 0 2rem 0;
+  }
+
+  .preview-price {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    color: var(--olive-green);
+    margin: 0 0 1rem 0;
+    font-weight: 700;
+  }
+
+  .preview-address {
+    font-size: 1.1rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 2rem 0;
+    font-weight: 500;
+  }
+
+  .preview-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, rgba(107, 106, 69, 0.3) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.3) 100%);
+    margin: 2rem auto;
+    border-radius: 2px;
+  }
+
+  .preview-agent-info {
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(200, 180, 151, 0.2);
+    width: 100%;
+  }
+
+  .agent-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.25rem 0;
+  }
+
+  .agent-contact {
+    font-size: 0.9rem;
+    color: rgba(58, 53, 44, 0.7);
+    margin: 0;
+  }
+
+  .generate-btn {
+    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
+    color: white;
+    border: none;
+    padding: 1rem 2.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.3);
+    margin-top: 2rem;
+    width: 100%;
+  }
+
+  .generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.4);
+  }
+
+  .helper-text {
+    font-size: 0.85rem;
+    color: rgba(58, 53, 44, 0.6);
+    font-style: italic;
+    margin-top: 0.5rem;
+  }
+
+  @media (max-width: 1200px) {
+    .creator-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .editor-panel {
+      position: static;
+    }
+
+    .preview-panel {
+      order: -1;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .creator-container {
+      padding: 1rem;
+    }
+
+    .creator-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .editor-panel {
+      padding: 1.5rem;
+    }
+
+    .preview-frame {
+      padding: 1rem;
+    }
+
+    .preview-headline {
+      font-size: 1.75rem;
+    }
+
+    .preview-price {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<div class="creator-container">
+  <!-- Header -->
+  <div class="creator-header">
+    <div class="header-left">
+      <h1>Create Marketing Asset</h1>
+      <div class="header-breadcrumb">
+        {{ category|replace('-', ' ')|title }} → {{ asset_type|replace('-', ' ')|title }}
+      </div>
+    </div>
+    <a href="{{ url_for('lender_marketing_hub', borrower_id=borrower_id) }}" class="back-to-hub">
+      ← Back to Hub
+    </a>
+  </div>
+
+  <form id="marketing-form" method="POST" action="#" target="_blank">
+    <input type="hidden" name="category" value="{{ category }}">
+    <input type="hidden" name="asset_type" value="{{ asset_type }}">
+    
+    <div class="creator-grid">
+      <!-- Editor Panel -->
+      <div class="editor-panel">
+        <h2 class="editor-title">Customize Your Marketing</h2>
+
+        <div class="form-group">
+          <label class="form-label">Headline</label>
+          <input 
+            type="text" 
+            name="headline" 
+            id="headline-input"
+            class="form-input" 
+            placeholder="Just Listed"
+            value="{% if category == 'pre-approval' %}Congratulations!{% elif category == 'closing' %}Welcome Home!{% elif category == 'rate-announcement' %}Great News on Rates{% elif category == 'refinance' %}Time to Refinance?{% elif category == 'education' %}Your Homebuying Journey{% elif category == 'agent-thank-you' %}Thank You{% else %}Financing Made Easy{% endif %}"
+            oninput="updatePreview()"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Subheading</label>
+          <input 
+            type="text" 
+            name="subtext" 
+            id="subtext-input"
+            class="form-input" 
+            placeholder="Your dream home awaits"
+            value="{% if category == 'pre-approval' %}You're pre-approved for your dream home{% elif category == 'closing' %}Your new chapter begins{% elif category == 'rate-announcement' %}Exclusive rates available now{% elif category == 'refinance' %}Lower rates, lower payments{% elif category == 'education' %}Everything you need to know{% else %}Let's make it happen{% endif %}"
+            oninput="updatePreview()"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Price</label>
+          <input 
+            type="text" 
+            name="price" 
+            id="price-input"
+            class="form-input" 
+            placeholder="$799,000"
+            value="{{ borrower.loan_amount if borrower.loan_amount else '$350,000' }}"
+            oninput="updatePreview()"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Property Address</label>
+          <input 
+            type="text" 
+            name="property_address" 
+            id="address-input"
+            class="form-input" 
+            placeholder="123 Main Street"
+            value="{{ borrower.property_address or borrower.name or '' }}"
+            oninput="updatePreview()"
+          >
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Custom Text (Optional)</label>
+          <textarea 
+            name="custom_text" 
+            id="custom-text-input"
+            class="form-textarea" 
+            placeholder="Add any additional details..."
+            oninput="updatePreview()"
+          ></textarea>
+          <p class="helper-text">Leave blank to use default text</p>
+        </div>
+
+        <div class="form-group">
+          <div class="toggle-group">
+            <label class="toggle-switch">
+              <input type="checkbox" name="include_lender" id="lender-toggle" onchange="updatePreview()">
+              <span class="toggle-slider"></span>
+            </label>
+            <label class="toggle-label" for="lender-toggle">
+              Include NMLS Number
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="generate-btn">
+          Generate & Download
+        </button>
+      </div>
+
+      <!-- Preview Panel -->
+      <div class="preview-panel">
+        <p class="preview-title">Live Preview</p>
+        <div class="preview-content">
+          <div class="preview-frame" id="preview-frame">
+            <div class="preview-headline" id="preview-headline">Congratulations!</div>
+            <div class="preview-subtext" id="preview-subtext">You're pre-approved for your dream home</div>
+            <div class="preview-divider"></div>
+            <div class="preview-price" id="preview-price">{{ borrower.loan_amount or '$350,000' }}</div>
+            <div class="preview-address" id="preview-address">{{ borrower.property_address or borrower.name or 'Your Dream Home' }}</div>
+            <div class="preview-divider"></div>
+            <div class="preview-agent-info">
+              <div class="agent-name">{{ user.name }}</div>
+              <div class="agent-contact">{{ user.phone or user.email }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  function updatePreview() {
+    // Update headline
+    const headline = document.getElementById('headline-input').value || 'Congratulations!';
+    document.getElementById('preview-headline').textContent = headline;
+
+    // Update subtext
+    const subtext = document.getElementById('subtext-input').value || 'You're pre-approved for your dream home';
+    document.getElementById('preview-subtext').textContent = subtext;
+
+    // Update price
+    const price = document.getElementById('price-input').value || '$350,000';
+    document.getElementById('preview-price').textContent = price;
+
+    // Update address
+    const address = document.getElementById('address-input').value || 'Your Dream Home';
+    document.getElementById('preview-address').textContent = address;
+  }
+
+  // Initialize preview on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    updatePreview();
+  });
+</script>
+
+{% endblock %}
+
