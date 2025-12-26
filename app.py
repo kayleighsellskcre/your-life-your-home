@@ -6568,6 +6568,9 @@ def agent_marketing_generate(tx_id):
         price = request.form.get('price', '')
         property_address = request.form.get('property_address', '')
         custom_text = request.form.get('custom_text', '')
+        color_scheme = request.form.get('color_scheme', 'classic')
+        include_photo = request.form.get('include_photo') == 'on'
+        include_logo = request.form.get('include_logo') == 'on'
         include_lender = request.form.get('include_lender') == 'on'
         
         # Get agent profile for branding
@@ -6587,6 +6590,9 @@ def agent_marketing_generate(tx_id):
             price=price,
             property_address=property_address,
             custom_text=custom_text,
+            color_scheme=color_scheme,
+            include_photo=include_photo,
+            include_logo=include_logo,
             include_lender=include_lender,
         )
         
@@ -6616,8 +6622,12 @@ def agent_marketing_refine_text():
             return jsonify({"success": False, "error": "No text provided"}), 400
         
         # Use OpenAI to refine the text
-        if not OPENAI_API_KEY:
+        openai_api_key = os.environ.get('OPENAI_API_KEY')
+        if not openai_api_key:
             return jsonify({"success": False, "error": "AI service not configured"}), 500
+        
+        from openai import OpenAI
+        client = OpenAI(api_key=openai_api_key)
         
         prompt = f"""You are a luxury real estate marketing expert. Refine this {field} to be:
 - Professional and sophisticated
@@ -6630,7 +6640,7 @@ Original {field}: {text}
 
 Return ONLY the refined text, nothing else. Keep it roughly the same length."""
 
-        response = openai_client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a luxury real estate marketing copywriter who creates elegant, natural-sounding copy."},
@@ -7699,8 +7709,12 @@ def lender_marketing_refine_text():
             return jsonify({"success": False, "error": "No text provided"}), 400
         
         # Use OpenAI to refine the text
-        if not OPENAI_API_KEY:
+        openai_api_key = os.environ.get('OPENAI_API_KEY')
+        if not openai_api_key:
             return jsonify({"success": False, "error": "AI service not configured"}), 500
+        
+        from openai import OpenAI
+        client = OpenAI(api_key=openai_api_key)
         
         prompt = f"""You are a mortgage lending marketing expert. Refine this {field} to be:
 - Professional and trustworthy
@@ -7713,7 +7727,7 @@ Original {field}: {text}
 
 Return ONLY the refined text, nothing else. Keep it roughly the same length."""
 
-        response = openai_client.chat.completions.create(
+        response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a mortgage lending marketing copywriter who creates warm, professional copy."},
