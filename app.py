@@ -1748,6 +1748,51 @@ def index():
     )
 
 
+@app.route("/health/ffmpeg")
+def health_ffmpeg():
+    """Health check endpoint to verify FFmpeg installation status"""
+    import subprocess
+    import json
+    
+    try:
+        result = subprocess.run(
+            ['ffmpeg', '-version'],
+            capture_output=True,
+            timeout=5,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            # Extract version from output
+            version_line = result.stdout.split('\n')[0] if result.stdout else "Unknown"
+            return jsonify({
+                "status": "available",
+                "version": version_line,
+                "message": "FFmpeg is installed and ready"
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "FFmpeg command returned non-zero exit code",
+                "stderr": result.stderr
+            }), 500
+    except FileNotFoundError:
+        return jsonify({
+            "status": "not_found",
+            "message": "FFmpeg is not installed or not in PATH. Railway may still be installing it."
+        }), 503
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            "status": "timeout",
+            "message": "FFmpeg check timed out"
+        }), 503
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     """
