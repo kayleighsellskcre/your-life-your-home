@@ -327,6 +327,32 @@
         <p>Create stunning luxury real estate videos in minutes</p>
     </div>
     
+    {% if projects %}
+    <div class="studio-card" style="margin-bottom: 3rem;">
+        <h2 class="card-title">Your Videos</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+            {% for project in projects %}
+            <a href="{{ url_for('agent_video_studio_view', project_id=project.id) }}" style="text-decoration: none;">
+                <div style="border: 2px solid #e8e6e1; border-radius: 15px; padding: 1.5rem; transition: all 0.3s ease; cursor: pointer;">
+                    <div style="font-weight: 600; color: #2c3e50; margin-bottom: 0.5rem; font-size: 1.1rem;">{{ project.headline }}</div>
+                    <div style="color: #5d6d7e; font-size: 0.9rem; margin-bottom: 1rem;">{{ project.property_address }}</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-size: 0.85rem; color: #5d6d7e;">{{ project.aspect_ratio }} • {{ project.duration }}s</div>
+                        {% if project.render_status == 'complete' %}
+                        <div style="background: #27ae60; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600;">✓ Ready</div>
+                        {% elif project.render_status == 'rendering' %}
+                        <div style="background: #f39c12; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600;">⏳ Rendering</div>
+                        {% else %}
+                        <div style="background: #95a5a6; color: white; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600;">Draft</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
     <div class="wizard-steps">
         <div class="wizard-step active" data-step="1">
             <span class="wizard-step-number">1</span>

@@ -6971,6 +6971,180 @@ def agent_settings_profile():
 
     from database import get_user_profile, create_or_update_user_profile
 
+
+# -------------------------------------------------
+# AGENT VIDEO STUDIO ROUTES
+# -------------------------------------------------
+@app.route("/agent/video-studio")
+def agent_video_studio():
+    """Video Studio - create marketing videos"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from video_database import get_user_video_projects
+    projects = get_user_video_projects(user["id"])
+    
+    return render_template(
+        "agent/video_studio.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        projects=projects
+    )
+
+
+@app.route("/agent/video-studio/create", methods=["POST"])
+def agent_video_studio_create():
+    """Create a new video project"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    try:
+        # Get form data
+        video_type = request.form.get('video_type')
+        aspect_ratio = request.form.get('aspect_ratio')
+        duration = int(request.form.get('duration', 30))
+        style_preset = request.form.get('style_preset')
+        headline = request.form.get('headline', '')
+        property_address = request.form.get('property_address', '')
+        highlights = request.form.get('highlights', '')
+        include_captions = request.form.get('include_captions') == 'on'
+        
+        # Handle file uploads
+        import time
+        media_files = []
+        if 'media_files' in request.files:
+            files = request.files.getlist('media_files')
+            upload_dir = Path("uploads/video_media")
+            upload_dir.mkdir(parents=True, exist_ok=True)
+            
+            for file in files:
+                if file and file.filename:
+                    filename = secure_filename(file.filename)
+                    filepath = upload_dir / f"{user['id']}_{int(time.time())}_{filename}"
+                    file.save(filepath)
+                    media_files.append(str(filepath))
+        
+        if not media_files:
+            flash("Please upload at least one photo or video", "error")
+            return redirect(url_for("agent_video_studio"))
+        
+        # Create project in database
+        from video_database import create_video_project, update_video_render_status
+        from database import get_user_profile
+        
+        project_id = create_video_project(
+            user_id=user["id"],
+            video_type=video_type,
+            aspect_ratio=aspect_ratio,
+            duration=duration,
+            style_preset=style_preset,
+            headline=headline,
+            property_address=property_address,
+            highlights=highlights,
+            media_files=media_files,
+            include_captions=include_captions
+        )
+        
+        # Update status to rendering
+        update_video_render_status(project_id, 'rendering')
+        
+        # Get agent branding
+        agent_profile = get_user_profile(user["id"])
+        agent_profile_dict = dict(agent_profile) if agent_profile and hasattr(agent_profile, 'keys') else {}
+        
+        # Render video
+        from video_studio import VideoRenderer
+        renderer = VideoRenderer()
+        
+        result = renderer.create_listing_video(
+            project_id=project_id,
+            media_files=media_files,
+            style=style_preset,
+            aspect_ratio=aspect_ratio,
+            duration=duration,
+            headline=headline,
+            property_address=property_address,
+            agent_name=user["name"],
+            agent_phone=user.get("phone", user.get("email")),
+            agent_logo=agent_profile_dict.get("brokerage_logo"),
+            agent_photo=agent_profile_dict.get("professional_photo"),
+            include_captions=include_captions
+        )
+        
+        if result["success"]:
+            # Update status to complete
+            update_video_render_status(
+                project_id,
+                'complete',
+                result["output_path"]
+            )
+            flash("✨ Video created successfully!", "success")
+            return redirect(url_for("agent_video_studio_view", project_id=project_id))
+        else:
+            update_video_render_status(project_id, 'failed')
+            flash(f"Video creation failed: {result.get('error')}", "error")
+            return redirect(url_for("agent_video_studio"))
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        flash(f"Error creating video: {str(e)}", "error")
+        return redirect(url_for("agent_video_studio"))
+
+
+@app.route("/agent/video-studio/<int:project_id>")
+def agent_video_studio_view(project_id):
+    """View a completed video project"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from video_database import get_video_project
+    project = get_video_project(project_id)
+    
+    if not project or project["user_id"] != user["id"]:
+        flash("Video project not found", "error")
+        return redirect(url_for("agent_video_studio"))
+    
+    return render_template(
+        "agent/video_studio_view.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        project=project
+    )
+
+
+@app.route("/agent/video-studio/<int:project_id>/delete", methods=["POST"])
+def agent_video_studio_delete(project_id):
+    """Delete a video project"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from video_database import delete_video_project
+    
+    if delete_video_project(project_id, user["id"]):
+        flash("Video project deleted", "success")
+    else:
+        flash("Could not delete video project", "error")
+    
+    return redirect(url_for("agent_video_studio"))
+
+
+# -------------------------------------------------
+# AGENT SETTINGS ROUTES
+# -------------------------------------------------
+@app.route("/agent/settings/profile", methods=["GET", "POST"])
+def agent_settings_profile():
+    """Agent settings and profile."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    from database import get_user_profile, create_or_update_user_profile
+
     # Handle POST - update profile
     if request.method == "POST":
         try:

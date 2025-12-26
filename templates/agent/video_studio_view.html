@@ -1,0 +1,292 @@
+{% extends "agent/layout.html" %}
+
+{% block title %}Video Preview - {{ brand_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .video-view-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #c89666;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .back-link:hover {
+        color: #b8825c;
+        transform: translateX(-4px);
+    }
+    
+    .video-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .video-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .video-title-section h1 {
+        font-size: 2rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .video-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        color: #5d6d7e;
+        font-size: 0.95rem;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .status-complete {
+        background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        color: white;
+    }
+    
+    .status-rendering {
+        background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+    
+    .status-failed {
+        background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        color: white;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    .video-player {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto 2rem;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .video-player video {
+        width: 100%;
+        display: block;
+    }
+    
+    .video-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        font-size: 1rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #c89666 0%, #b8825c 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(200, 150, 102, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(200, 150, 102, 0.4);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #2c3e50;
+        border: 2px solid #e8e6e1;
+    }
+    
+    .btn-secondary:hover {
+        border-color: #c89666;
+    }
+    
+    .btn-danger {
+        background: #e74c3c;
+        color: white;
+    }
+    
+    .btn-danger:hover {
+        background: #c0392b;
+    }
+    
+    .video-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 2px solid #e8e6e1;
+    }
+    
+    .detail-item h3 {
+        font-size: 0.85rem;
+        color: #5d6d7e;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .detail-item p {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        font-weight: 500;
+    }
+</style>
+
+<div class="video-view-container">
+    <a href="{{ url_for('agent_video_studio') }}" class="back-link">
+        ← Back to Video Studio
+    </a>
+    
+    <div class="video-card">
+        <div class="video-header">
+            <div class="video-title-section">
+                <h1>{{ project.headline or 'Video Project' }}</h1>
+                <div class="video-meta">
+                    <div class="meta-item">
+                        <span>📍</span>
+                        <span>{{ project.property_address or 'No address' }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>📅</span>
+                        <span>{{ project.created_at[:10] }}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span>⏱️</span>
+                        <span>{{ project.duration }}s</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                {% if project.render_status == 'complete' %}
+                <div class="status-badge status-complete">✓ Complete</div>
+                {% elif project.render_status == 'rendering' %}
+                <div class="status-badge status-rendering">⏳ Rendering...</div>
+                {% elif project.render_status == 'failed' %}
+                <div class="status-badge status-failed">✗ Failed</div>
+                {% else %}
+                <div class="status-badge">Draft</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% if project.render_status == 'complete' and project.output_path %}
+        <div class="video-player">
+            <video controls>
+                <source src="{{ url_for('static', filename='../' + project.output_path) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <div class="video-actions">
+            <a href="{{ url_for('static', filename='../' + project.output_path) }}" download class="btn btn-primary">
+                📥 Download Video
+            </a>
+            <button class="btn btn-secondary" onclick="copyLink()">
+                🔗 Copy Link
+            </button>
+            <form method="POST" action="{{ url_for('agent_video_studio_delete', project_id=project.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this video?')">
+                <button type="submit" class="btn btn-danger">
+                    🗑️ Delete
+                </button>
+            </form>
+        </div>
+        {% elif project.render_status == 'rendering' %}
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+            <h3 style="color: #2c3e50; margin-bottom: 0.5rem;">Your video is being created...</h3>
+            <p style="color: #5d6d7e;">This usually takes 1-2 minutes. Refresh this page to check the status.</p>
+            <button onclick="location.reload()" class="btn btn-primary" style="margin-top: 1.5rem;">
+                🔄 Refresh
+            </button>
+        </div>
+        {% elif project.render_status == 'failed' %}
+        <div style="text-align: center; padding: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">😞</div>
+            <h3 style="color: #e74c3c; margin-bottom: 0.5rem;">Video creation failed</h3>
+            <p style="color: #5d6d7e;">Please try creating the video again. If the problem persists, contact support.</p>
+            <a href="{{ url_for('agent_video_studio') }}" class="btn btn-primary" style="margin-top: 1.5rem;">
+                Create New Video
+            </a>
+        </div>
+        {% endif %}
+        
+        <div class="video-details">
+            <div class="detail-item">
+                <h3>Video Type</h3>
+                <p>{{ project.video_type.replace('-', ' ').title() }}</p>
+            </div>
+            <div class="detail-item">
+                <h3>Format</h3>
+                <p>{{ project.aspect_ratio }}</p>
+            </div>
+            <div class="detail-item">
+                <h3>Style</h3>
+                <p>{{ project.style_preset.replace('_', ' ').title() }}</p>
+            </div>
+            <div class="detail-item">
+                <h3>Duration</h3>
+                <p>{{ project.duration }} seconds</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyLink() {
+    const videoUrl = window.location.origin + "{{ url_for('static', filename='../' + project.output_path) if project.output_path else '' }}";
+    navigator.clipboard.writeText(videoUrl).then(() => {
+        alert('Video link copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}
+

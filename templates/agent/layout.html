@@ -346,6 +346,10 @@
              class="ylh-dropdown-item {% if request.path == url_for('agent_marketing_hub_global') or 'marketing-hub' in request.path %}active{% endif %}">
             Marketing Hub
           </a>
+          <a href="{{ url_for('agent_video_studio') }}" 
+             class="ylh-dropdown-item {% if 'video-studio' in request.path %}active{% endif %}">
+            🎬 Video Studio
+          </a>
           <a href="{{ url_for('agent_power_tools') }}" 
              class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
             Power Tools
