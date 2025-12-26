@@ -222,7 +222,71 @@
             color: var(--text-light);
         }
         
-        .print-button {
+                
+        /* Property Photo Layouts */
+        .property-photo-hero {
+            width: 100%;
+            height: 3.5in;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 0.5in;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .property-photo-minimal {
+            width: 2.5in;
+            height: 2in;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 0 auto 0.4in auto;
+            display: block;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .property-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(2.2in, 1fr));
+            gap: 0.25in;
+            margin: 0.4in 0;
+            max-width: 6in;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .property-gallery img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--accent-color);
+        }
+        
+        .layout-split {
+            display: grid !important;
+            grid-template-columns: 3.5in 4in;
+            gap: 0.5in;
+            align-items: center;
+            padding: 1in 0.75in !important;
+        }
+        
+        .layout-split-photo {
+            width: 100%;
+            height: 100%;
+            max-height: 8in;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .layout-split-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+.print-button {
             position: fixed;
             top: 20px;
             right: 20px;
@@ -245,7 +309,71 @@
         }
         
         @media print {
-            .print-button {
+                    
+        /* Property Photo Layouts */
+        .property-photo-hero {
+            width: 100%;
+            height: 3.5in;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 0.5in;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .property-photo-minimal {
+            width: 2.5in;
+            height: 2in;
+            object-fit: cover;
+            border-radius: 10px;
+            margin: 0 auto 0.4in auto;
+            display: block;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .property-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(2.2in, 1fr));
+            gap: 0.25in;
+            margin: 0.4in 0;
+            max-width: 6in;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .property-gallery img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 2px solid var(--accent-color);
+        }
+        
+        .layout-split {
+            display: grid !important;
+            grid-template-columns: 3.5in 4in;
+            gap: 0.5in;
+            align-items: center;
+            padding: 1in 0.75in !important;
+        }
+        
+        .layout-split-photo {
+            width: 100%;
+            height: 100%;
+            max-height: 8in;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .layout-split-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+.print-button {
                 display: none;
             }
         }
@@ -278,6 +406,16 @@
         <div class="custom-text">
             {{ custom_text or 'This property is now under contract. Looking to sell your home? Contact us to achieve similar success.' }}
         </div>
+        
+        
+        <!-- Gallery Layout: Photo Grid -->
+        {% if layout_style == 'gallery' and property_photos and property_photos|length > 0 %}
+        <div class="property-gallery">
+            {% for photo in property_photos %}
+            <img src="{{ photo }}" alt="Property Photo {{ loop.index }}">
+            {% endfor %}
+        </div>
+        {% endif %}
         
         <div class="divider"></div>
         
