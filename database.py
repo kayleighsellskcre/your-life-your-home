@@ -166,6 +166,33 @@ def init_db() -> None:
     except:
         pass
 
+    # ---------------- VIDEO STUDIO ----------------
+    # Table for video projects
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS video_projects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            transaction_id INTEGER,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            video_type TEXT NOT NULL,
+            aspect_ratio TEXT NOT NULL,
+            duration INTEGER NOT NULL,
+            style_preset TEXT NOT NULL,
+            headline TEXT,
+            property_address TEXT,
+            highlights TEXT,
+            media_files TEXT,
+            include_lender INTEGER DEFAULT 0,
+            include_captions INTEGER DEFAULT 1,
+            render_status TEXT DEFAULT 'draft',
+            output_path TEXT,
+            thumbnail_path TEXT,
+            FOREIGN KEY (user_id) REFERENCES users (id),
+            FOREIGN KEY (transaction_id) REFERENCES agent_transactions (id)
+        )
+    """)
+
     # ------------- CLIENT RELATIONSHIPS -------------
     cur.execute(
         """

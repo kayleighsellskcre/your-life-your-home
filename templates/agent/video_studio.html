@@ -1,0 +1,648 @@
+{% extends "agent/layout.html" %}
+
+{% block title %}Video Studio - {{ brand_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .video-studio-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .studio-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .studio-header h1 {
+        font-size: 2.5rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .studio-header p {
+        font-size: 1.1rem;
+        color: #5d6d7e;
+    }
+    
+    .wizard-steps {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+    }
+    
+    .wizard-step {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: #f8f6f2;
+        border-radius: 50px;
+        font-weight: 500;
+        color: #5d6d7e;
+        transition: all 0.3s ease;
+    }
+    
+    .wizard-step.active {
+        background: linear-gradient(135deg, #c89666 0%, #b8825c 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(200, 150, 102, 0.3);
+    }
+    
+    .wizard-step-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+    
+    .studio-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .video-type-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .video-type-card {
+        padding: 1.5rem;
+        border: 2px solid #e8e6e1;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .video-type-card:hover {
+        border-color: #c89666;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(200, 150, 102, 0.15);
+    }
+    
+    .video-type-card.selected {
+        border-color: #c89666;
+        background: linear-gradient(135deg, rgba(200, 150, 102, 0.1) 0%, rgba(184, 130, 92, 0.1) 100%);
+    }
+    
+    .video-type-icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .video-type-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .video-type-desc {
+        font-size: 0.9rem;
+        color: #5d6d7e;
+    }
+    
+    .format-selector {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .format-btn {
+        flex: 1;
+        min-width: 150px;
+        padding: 1rem;
+        border: 2px solid #e8e6e1;
+        border-radius: 12px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .format-btn:hover {
+        border-color: #c89666;
+    }
+    
+    .format-btn.selected {
+        border-color: #c89666;
+        background: linear-gradient(135deg, rgba(200, 150, 102, 0.1) 0%, rgba(184, 130, 92, 0.1) 100%);
+    }
+    
+    .format-label {
+        font-size: 0.85rem;
+        color: #5d6d7e;
+        margin-bottom: 0.25rem;
+    }
+    
+    .format-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .upload-zone {
+        border: 3px dashed #c89666;
+        border-radius: 20px;
+        padding: 3rem;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(200, 150, 102, 0.05) 0%, rgba(184, 130, 92, 0.05) 100%);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+    
+    .upload-zone:hover {
+        background: linear-gradient(135deg, rgba(200, 150, 102, 0.1) 0%, rgba(184, 130, 92, 0.1) 100%);
+    }
+    
+    .upload-icon {
+        font-size: 3rem;
+        color: #c89666;
+        margin-bottom: 1rem;
+    }
+    
+    .media-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+    
+    .media-item {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .media-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .media-remove {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(231, 76, 60, 0.9);
+        color: white;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+    
+    .style-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .style-card {
+        padding: 1.5rem;
+        border: 2px solid #e8e6e1;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+    
+    .style-card:hover {
+        border-color: #c89666;
+        transform: translateY(-2px);
+    }
+    
+    .style-card.selected {
+        border-color: #c89666;
+        background: linear-gradient(135deg, rgba(200, 150, 102, 0.1) 0%, rgba(184, 130, 92, 0.1) 100%);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #c89666 0%, #b8825c 100%);
+        color: white;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(200, 150, 102, 0.3);
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(200, 150, 102, 0.4);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #2c3e50;
+        padding: 1rem 2.5rem;
+        border: 2px solid #e8e6e1;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        border-color: #c89666;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 3rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e8e6e1;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #c89666;
+    }
+    
+    .step-content {
+        display: none;
+    }
+    
+    .step-content.active {
+        display: block;
+    }
+</style>
+
+<div class="video-studio-container">
+    <div class="studio-header">
+        <h1>🎬 Video Studio</h1>
+        <p>Create stunning luxury real estate videos in minutes</p>
+    </div>
+    
+    <div class="wizard-steps">
+        <div class="wizard-step active" data-step="1">
+            <span class="wizard-step-number">1</span>
+            <span>Video Type</span>
+        </div>
+        <div class="wizard-step" data-step="2">
+            <span class="wizard-step-number">2</span>
+            <span>Format</span>
+        </div>
+        <div class="wizard-step" data-step="3">
+            <span class="wizard-step-number">3</span>
+            <span>Upload Media</span>
+        </div>
+        <div class="wizard-step" data-step="4">
+            <span class="wizard-step-number">4</span>
+            <span>Style</span>
+        </div>
+        <div class="wizard-step" data-step="5">
+            <span class="wizard-step-number">5</span>
+            <span>Details</span>
+        </div>
+    </div>
+    
+    <form id="videoForm" method="POST" action="{{ url_for('agent_video_studio_create') }}" enctype="multipart/form-data">
+        <!-- Step 1: Video Type -->
+        <div class="step-content active" data-step="1">
+            <div class="studio-card">
+                <h2 class="card-title">Choose Video Type</h2>
+                <div class="video-type-grid">
+                    <div class="video-type-card" data-type="just-listed">
+                        <div class="video-type-icon">🏡</div>
+                        <div class="video-type-title">Just Listed</div>
+                        <div class="video-type-desc">Showcase a new listing</div>
+                    </div>
+                    <div class="video-type-card" data-type="coming-soon">
+                        <div class="video-type-icon">⏰</div>
+                        <div class="video-type-title">Coming Soon</div>
+                        <div class="video-type-desc">Build anticipation</div>
+                    </div>
+                    <div class="video-type-card" data-type="open-house">
+                        <div class="video-type-icon">🚪</div>
+                        <div class="video-type-title">Open House</div>
+                        <div class="video-type-desc">Promote your event</div>
+                    </div>
+                    <div class="video-type-card" data-type="sold">
+                        <div class="video-type-icon">✨</div>
+                        <div class="video-type-title">Sold</div>
+                        <div class="video-type-desc">Celebrate the sale</div>
+                    </div>
+                </div>
+                <input type="hidden" name="video_type" id="videoType" required>
+            </div>
+        </div>
+        
+        <!-- Step 2: Format -->
+        <div class="step-content" data-step="2">
+            <div class="studio-card">
+                <h2 class="card-title">Select Format & Duration</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Aspect Ratio</label>
+                    <div class="format-selector">
+                        <div class="format-btn" data-ratio="9:16">
+                            <div class="format-label">Reels / TikTok</div>
+                            <div class="format-value">9:16</div>
+                        </div>
+                        <div class="format-btn" data-ratio="16:9">
+                            <div class="format-label">YouTube</div>
+                            <div class="format-value">16:9</div>
+                        </div>
+                        <div class="format-btn" data-ratio="1:1">
+                            <div class="format-label">Square</div>
+                            <div class="format-value">1:1</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="aspect_ratio" id="aspectRatio" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Duration</label>
+                    <div class="format-selector">
+                        <div class="format-btn" data-duration="15">
+                            <div class="format-value">15 sec</div>
+                        </div>
+                        <div class="format-btn" data-duration="30">
+                            <div class="format-value">30 sec</div>
+                        </div>
+                        <div class="format-btn" data-duration="60">
+                            <div class="format-value">60 sec</div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="duration" id="duration" required>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 3: Upload Media -->
+        <div class="step-content" data-step="3">
+            <div class="studio-card">
+                <h2 class="card-title">Upload Photos & Videos</h2>
+                
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📤</div>
+                    <h3>Drag & Drop or Click to Upload</h3>
+                    <p>Photos (JPG, PNG) or Videos (MP4, MOV)</p>
+                    <input type="file" id="mediaInput" name="media_files" multiple accept="image/*,video/*" style="display: none;">
+                </div>
+                
+                <div class="media-grid" id="mediaGrid"></div>
+            </div>
+        </div>
+        
+        <!-- Step 4: Style -->
+        <div class="step-content" data-step="4">
+            <div class="studio-card">
+                <h2 class="card-title">Choose Style Preset</h2>
+                <div class="style-grid">
+                    <div class="style-card" data-style="luxury_cinematic">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎬</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Luxury Cinematic</div>
+                        <div style="font-size: 0.9rem; color: #5d6d7e;">Elegant, slow motion, dramatic</div>
+                    </div>
+                    <div class="style-card" data-style="modern_minimal">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">✨</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Modern Minimal</div>
+                        <div style="font-size: 0.9rem; color: #5d6d7e;">Clean, simple, sophisticated</div>
+                    </div>
+                    <div class="style-card" data-style="warm_inviting">
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏠</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem;">Warm & Inviting</div>
+                        <div style="font-size: 0.9rem; color: #5d6d7e;">Cozy, welcoming, homey</div>
+                    </div>
+                </div>
+                <input type="hidden" name="style_preset" id="stylePreset" required>
+            </div>
+        </div>
+        
+        <!-- Step 5: Details -->
+        <div class="step-content" data-step="5">
+            <div class="studio-card">
+                <h2 class="card-title">Video Details</h2>
+                
+                <div class="form-group">
+                    <label class="form-label">Headline</label>
+                    <input type="text" name="headline" class="form-input" placeholder="Just Listed" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Property Address</label>
+                    <input type="text" name="property_address" class="form-input" placeholder="123 Main Street" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Key Highlights (one per line)</label>
+                    <textarea name="highlights" class="form-input" rows="4" placeholder="4 Bed / 3 Bath&#10;Newly Remodeled&#10;Gourmet Kitchen&#10;Walk to Downtown"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" name="include_captions" checked>
+                        <span>Include Auto Captions</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button type="button" class="btn-secondary" id="prevBtn" style="display: none;">← Previous</button>
+            <button type="button" class="btn-primary" id="nextBtn">Next →</button>
+            <button type="submit" class="btn-primary" id="submitBtn" style="display: none;">🎬 Create Video</button>
+        </div>
+    </form>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 5;
+let uploadedFiles = [];
+
+// Step navigation
+document.getElementById('nextBtn').addEventListener('click', () => {
+    if (validateStep(currentStep)) {
+        currentStep++;
+        updateStep();
+    }
+});
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+    currentStep--;
+    updateStep();
+});
+
+function updateStep() {
+    // Update step indicators
+    document.querySelectorAll('.wizard-step').forEach(step => {
+        const stepNum = parseInt(step.dataset.step);
+        step.classList.toggle('active', stepNum === currentStep);
+    });
+    
+    // Update step content
+    document.querySelectorAll('.step-content').forEach(content => {
+        const stepNum = parseInt(content.dataset.step);
+        content.classList.toggle('active', stepNum === currentStep);
+    });
+    
+    // Update buttons
+    document.getElementById('prevBtn').style.display = currentStep > 1 ? 'block' : 'none';
+    document.getElementById('nextBtn').style.display = currentStep < totalSteps ? 'block' : 'none';
+    document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'block' : 'none';
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+    if (step === 1 && !document.getElementById('videoType').value) {
+        alert('Please select a video type');
+        return false;
+    }
+    if (step === 2 && (!document.getElementById('aspectRatio').value || !document.getElementById('duration').value)) {
+        alert('Please select format and duration');
+        return false;
+    }
+    if (step === 3 && uploadedFiles.length === 0) {
+        alert('Please upload at least one photo or video');
+        return false;
+    }
+    if (step === 4 && !document.getElementById('stylePreset').value) {
+        alert('Please select a style preset');
+        return false;
+    }
+    return true;
+}
+
+// Video type selection
+document.querySelectorAll('.video-type-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.video-type-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        document.getElementById('videoType').value = card.dataset.type;
+    });
+});
+
+// Format selection
+document.querySelectorAll('.format-btn[data-ratio]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.format-btn[data-ratio]').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('aspectRatio').value = btn.dataset.ratio;
+    });
+});
+
+document.querySelectorAll('.format-btn[data-duration]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.format-btn[data-duration]').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('duration').value = btn.dataset.duration;
+    });
+});
+
+// Style selection
+document.querySelectorAll('.style-card').forEach(card => {
+    card.addEventListener('click', () => {
+        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        document.getElementById('stylePreset').value = card.dataset.style;
+    });
+});
+
+// File upload
+const uploadZone = document.getElementById('uploadZone');
+const mediaInput = document.getElementById('mediaInput');
+const mediaGrid = document.getElementById('mediaGrid');
+
+uploadZone.addEventListener('click', () => mediaInput.click());
+
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = '#b8825c';
+});
+
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = '#c89666';
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = '#c89666';
+    handleFiles(e.dataTransfer.files);
+});
+
+mediaInput.addEventListener('change', (e) => {
+    handleFiles(e.target.files);
+});
+
+function handleFiles(files) {
+    Array.from(files).forEach(file => {
+        uploadedFiles.push(file);
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const mediaItem = document.createElement('div');
+            mediaItem.className = 'media-item';
+            mediaItem.innerHTML = `
+                <img src="${e.target.result}" alt="Media">
+                <button type="button" class="media-remove" onclick="removeMedia(${uploadedFiles.length - 1})">×</button>
+            `;
+            mediaGrid.appendChild(mediaItem);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeMedia(index) {
+    uploadedFiles.splice(index, 1);
+    mediaGrid.children[index].remove();
+}
+</script>
+{% endblock %}
+
