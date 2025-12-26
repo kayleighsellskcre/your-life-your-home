@@ -3,7 +3,6 @@ Video Studio - FFmpeg-based video generation system
 Generates luxury real estate marketing videos with branding
 """
 
-import subprocess
 import os
 import json
 import tempfile
@@ -11,13 +10,37 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import base64
 
-# Check if FFmpeg is available
+# Import subprocess with fallback
 try:
-    subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True, timeout=5)
-    FFMPEG_AVAILABLE = True
-except (FileNotFoundError, subprocess.SubprocessError, Exception):
-    FFMPEG_AVAILABLE = False
-    print("WARNING: FFmpeg not found. Video Studio will not be functional.")
+    import subprocess
+    SUBPROCESS_AVAILABLE = True
+except ImportError:
+    SUBPROCESS_AVAILABLE = False
+    print("CRITICAL: subprocess module not available. Video Studio disabled.")
+
+# Check if FFmpeg is available
+FFMPEG_AVAILABLE = False
+if SUBPROCESS_AVAILABLE:
+    try:
+        result = subprocess.run(
+            ['ffmpeg', '-version'], 
+            capture_output=True, 
+            timeout=3,
+            text=True,
+            check=False  # Don't raise on non-zero exit
+        )
+        FFMPEG_AVAILABLE = result.returncode == 0
+        if not FFMPEG_AVAILABLE:
+            print("WARNING: FFmpeg returned non-zero exit code. Video Studio will not be functional.")
+    except FileNotFoundError:
+        FFMPEG_AVAILABLE = False
+        print("WARNING: FFmpeg not found in PATH. Video Studio will not be functional.")
+    except subprocess.TimeoutExpired:
+        FFMPEG_AVAILABLE = False
+        print("WARNING: FFmpeg check timed out. Video Studio will not be functional.")
+    except Exception as e:
+        FFMPEG_AVAILABLE = False
+        print(f"WARNING: FFmpeg check failed: {e}. Video Studio will not be functional.")
 
 # Only import PIL if we need it
 try:
@@ -67,6 +90,12 @@ class VideoRenderer:
         """
         
         # Check if FFmpeg is available
+        if not SUBPROCESS_AVAILABLE:
+            return {
+                "success": False,
+                "error": "subprocess module not available. Cannot render videos."
+            }
+            
         if not FFMPEG_AVAILABLE:
             return {
                 "success": False,
