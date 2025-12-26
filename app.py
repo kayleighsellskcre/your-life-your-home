@@ -7537,6 +7537,111 @@ def lender_marketing():
     )
 
 
+# -------------------------------------------------
+# LENDER MARKETING HUB ROUTES
+# -------------------------------------------------
+@app.route("/lender/marketing-hub")
+def lender_marketing_hub_global():
+    """Global Marketing Hub for Lenders - Create marketing without a specific loan."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    
+    # Get all borrowers for selection
+    from database import get_lender_borrowers
+    borrowers = get_lender_borrowers(user["id"])
+    
+    # Get lender profile for branding
+    from database import get_user_profile
+    lender_profile = None
+    try:
+        lender_profile = get_user_profile(user["id"])
+        if lender_profile and hasattr(lender_profile, 'keys'):
+            lender_profile = dict(lender_profile)
+    except Exception as e:
+        print(f"Error getting lender profile: {e}")
+    
+    return render_template(
+        "lender/marketing_hub_global.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        borrowers=borrowers,
+        lender_profile=lender_profile,
+    )
+
+
+@app.route("/lender/borrowers/<int:borrower_id>/marketing-hub")
+def lender_marketing_hub(borrower_id):
+    """Marketing Hub for a specific borrower/loan."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    from database import get_lender_borrower
+    borrower = get_lender_borrower(borrower_id)
+    if not borrower or borrower.get("lender_id") != user["id"]:
+        flash("Borrower not found.", "error")
+        return redirect(url_for("lender_crm"))
+    
+    # Get lender profile for branding
+    from database import get_user_profile
+    lender_profile = None
+    try:
+        lender_profile = get_user_profile(user["id"])
+        if lender_profile and hasattr(lender_profile, 'keys'):
+            lender_profile = dict(lender_profile)
+    except Exception as e:
+        print(f"Error getting lender profile: {e}")
+    
+    return render_template(
+        "lender/marketing_hub.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        borrower_id=borrower_id,
+        borrower=borrower,
+        lender_profile=lender_profile,
+    )
+
+
+@app.route("/lender/borrowers/<int:borrower_id>/marketing-hub/create")
+def lender_marketing_create(borrower_id):
+    """Create a marketing asset for lender."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+
+    from database import get_lender_borrower
+    borrower = get_lender_borrower(borrower_id)
+    if not borrower or borrower.get("lender_id") != user["id"]:
+        flash("Borrower not found.", "error")
+        return redirect(url_for("lender_crm"))
+    
+    # Get category and asset type from query params
+    category = request.args.get('category', 'pre-approval')
+    asset_type = request.args.get('type', 'flyer')
+    
+    # Get lender profile for branding
+    from database import get_user_profile
+    lender_profile = None
+    try:
+        lender_profile = get_user_profile(user["id"])
+        if lender_profile and hasattr(lender_profile, 'keys'):
+            lender_profile = dict(lender_profile)
+    except Exception as e:
+        print(f"Error getting lender profile: {e}")
+    
+    return render_template(
+        "lender/marketing_create.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        borrower_id=borrower_id,
+        borrower=borrower,
+        lender_profile=lender_profile,
+        category=category,
+        asset_type=asset_type,
+    )
+
+
 @app.route("/lender/messages", methods=["GET"])
 def lender_messages():
     """Lender messages."""
