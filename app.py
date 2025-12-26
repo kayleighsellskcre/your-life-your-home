@@ -7017,6 +7017,17 @@ def agent_video_studio():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
     
+    # Check if Video Studio is enabled
+    if not VIDEO_STUDIO_ENABLED:
+        return render_template(
+            "agent/video_studio.html",
+            brand_name=FRONT_BRAND_NAME,
+            user=user,
+            projects=[],
+            video_studio_disabled=True,
+            error_message="Video Studio is temporarily unavailable. The feature is being configured on Railway."
+        )
+    
     try:
         from video_database import get_user_video_projects
         projects = get_user_video_projects(user["id"])
@@ -7028,7 +7039,8 @@ def agent_video_studio():
         "agent/video_studio.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
-        projects=projects
+        projects=projects,
+        video_studio_disabled=False
     )
 
 
@@ -7038,6 +7050,11 @@ def agent_video_studio_create():
     user = get_current_user()
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
+    
+    # Check if Video Studio is enabled
+    if not VIDEO_STUDIO_ENABLED:
+        flash("⚠️ Video Studio is temporarily unavailable. The feature is being configured on Railway. Please try again later.", "error")
+        return redirect(url_for("agent_video_studio"))
     
     # Check if FFmpeg is available
     try:
@@ -7134,6 +7151,10 @@ def agent_video_studio_create():
             flash(f"Video creation failed: {result.get('error')}", "error")
             return redirect(url_for("agent_video_studio"))
         
+    except ImportError as e:
+        print(f"Video Studio import error: {e}")
+        flash("⚠️ Video Studio is temporarily unavailable. The feature is being configured. Please try again later.", "error")
+        return redirect(url_for("agent_video_studio"))
     except Exception as e:
         import traceback
         traceback.print_exc()
