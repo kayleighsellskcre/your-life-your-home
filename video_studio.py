@@ -123,6 +123,8 @@ class VideoRenderer:
                 for idx, media_file in enumerate(media_files):
                     segment_path = temp_path / f"segment_{idx}.mp4"
                     
+                    print(f"[VIDEO RENDERER] Processing media {idx+1}/{len(media_files)}: {media_file}")
+                    
                     if self._is_image(media_file):
                         # Create video from image with Ken Burns effect
                         self._create_image_segment(
@@ -143,7 +145,12 @@ class VideoRenderer:
                             height
                         )
                     
-                    segments.append(segment_path)
+                    if segment_path.exists():
+                        print(f"[VIDEO RENDERER] ✓ Segment {idx} created: {segment_path.stat().st_size} bytes")
+                        segments.append(segment_path)
+                    else:
+                        print(f"[VIDEO RENDERER] ✗ Segment {idx} NOT created!")
+                        raise Exception(f"Failed to create segment {idx} from {media_file}")
                 
                 # Create intro card
                 intro_path = temp_path / "intro.mp4"
@@ -193,13 +200,23 @@ class VideoRenderer:
                     str(output_path)
                 ]
                 
-                subprocess.run(concat_cmd, check=True, capture_output=True)
+                print(f"[VIDEO RENDERER] Running concat command: {' '.join(concat_cmd)}")
+                result = subprocess.run(concat_cmd, check=True, capture_output=True, text=True)
+                print(f"[VIDEO RENDERER] Concat stdout: {result.stdout}")
+                print(f"[VIDEO RENDERER] Concat stderr: {result.stderr}")
                 
                 # Add music if provided
                 if music_path and os.path.exists(music_path):
                     output_with_music = self.output_dir / f"video_{project_id}_{aspect_ratio.replace(':', 'x')}_music.mp4"
                     self._add_background_music(output_path, music_path, output_with_music)
                     output_path = output_with_music
+                
+                # Verify the file was actually created
+                if not output_path.exists():
+                    raise Exception(f"Video file was not created at {output_path}")
+                
+                print(f"[VIDEO RENDERER] Successfully created video at {output_path}")
+                print(f"[VIDEO RENDERER] File size: {output_path.stat().st_size} bytes")
                 
                 return {
                     "success": True,
