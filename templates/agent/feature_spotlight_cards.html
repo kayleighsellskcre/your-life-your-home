@@ -261,6 +261,43 @@
   </div>
   {% endif %}
 
+  <!-- BRANDING PREVIEW CARD -->
+  <div class="card-premium" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%); border: 2px solid rgba(107, 106, 69, 0.2);">
+    <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+      <div style="flex: 0 0 auto;">
+        {% if brokerage_logo %}
+          <div style="background: white; padding: 1rem; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+            <img src="{{ brokerage_logo }}" alt="Your Logo" style="height: 60px; max-width: 180px; object-fit: contain; display: block;">
+          </div>
+        {% else %}
+          <div style="background: rgba(200, 180, 151, 0.1); padding: 1.5rem 2rem; border-radius: 12px; border: 2px dashed rgba(107, 106, 69, 0.3);">
+            <span style="color: rgba(58, 53, 44, 0.5); font-size: 0.85rem; font-weight: 600;">No Logo Set</span>
+          </div>
+        {% endif %}
+      </div>
+      
+      <div style="flex: 1 1 300px;">
+        <h3 style="margin: 0 0 0.5rem 0; color: var(--olive-green); font-size: 1.1rem; font-weight: 600;">
+          Your Spotlight Card Branding
+        </h3>
+        <p style="margin: 0 0 0.75rem 0; color: rgba(58, 53, 44, 0.8); font-size: 0.9rem; line-height: 1.5;">
+          {% if brokerage_logo %}
+            ✅ This logo and your name "<strong>{{ user.name }}</strong>" will appear at the top of <strong>every</strong> spotlight card.
+          {% else %}
+            ⚠️ No logo set. Cards will only show your name "<strong>{{ user.name }}</strong>".
+          {% endif %}
+        </p>
+        <a href="{{ url_for('agent_settings_profile') }}" style="color: var(--olive-green); font-size: 0.85rem; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--olive-green); padding-bottom: 1px; transition: all 0.2s ease;">
+          {% if brokerage_logo %}
+            Update Logo in Settings →
+          {% else %}
+            Add Your Logo in Settings →
+          {% endif %}
+        </a>
+      </div>
+    </div>
+  </div>
+
   <div class="card-premium" style="margin-bottom: 2rem;">
     <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;">🤖 AI Auto-Generate from Walkthrough Notes</h3>
     <p style="font-size: 0.9rem; color: rgba(58, 53, 44, 0.7); margin-bottom: 1rem;">
