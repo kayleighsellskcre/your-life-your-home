@@ -79,8 +79,12 @@ def remove_white_background(image_path):
 def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", role_prefix: str = ""):
     """
     Consolidated helper for handling profile photo/logo uploads.
-    Returns the file URL/key or None if no file was uploaded.
+    Stores files as base64 data URLs in the database so they NEVER disappear on Railway redeploys.
+    Returns the data URL or None if no file was uploaded.
     """
+    import base64
+    import imghdr
+    
     if file_field_name not in request.files:
         return None
     
@@ -89,22 +93,28 @@ def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", r
         return None
     
     try:
-        if is_r2_enabled() and R2_CLIENT:
-            # Upload to R2 cloud storage (persists on Railway)
-            r2_result = upload_file_to_r2(file, file.filename, folder=folder)
-            file_url = r2_result.get("url") or r2_result.get("key")
-            print(f"{role_prefix}PROFILE: File uploaded to R2: {file_url}")
-            return file_url
-        else:
-            # Fallback to local storage (development)
-            safe_name = secure_filename(file.filename)
-            unique_name = f"{uuid4().hex}_{safe_name}"
-            save_path = BASE_DIR / "static" / "uploads" / folder / unique_name
-            save_path.parent.mkdir(parents=True, exist_ok=True)
-            file.save(save_path)
-            file_path = str(Path("uploads") / folder / unique_name).replace("\\", "/")
-            print(f"{role_prefix}PROFILE: File saved locally: {file_path}")
-            return file_path
+        # Read file content
+        file_content = file.read()
+        
+        # Detect image type
+        img_type = imghdr.what(None, h=file_content)
+        if not img_type:
+            # Try to determine from filename extension
+            ext = file.filename.rsplit('.', 1)[-1].lower()
+            if ext in ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']:
+                img_type = ext if ext != 'jpg' else 'jpeg'
+            else:
+                img_type = 'png'  # Default fallback
+        
+        # Convert to base64
+        base64_encoded = base64.b64encode(file_content).decode('utf-8')
+        
+        # Create data URL
+        data_url = f"data:image/{img_type};base64,{base64_encoded}"
+        
+        print(f"{role_prefix}PROFILE: File converted to data URL (size: {len(data_url)} chars, type: {img_type})")
+        return data_url
+        
     except Exception as e:
         print(f"{role_prefix}PROFILE: Error uploading file: {e}")
         flash(f"Error uploading {file_field_name}: {str(e)}", "error")

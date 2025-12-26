@@ -231,10 +231,10 @@
           </div>
           {% if profile and profile.get('professional_photo') %}
           <div class="file-upload-preview" id="photo-preview-wrapper">
-            <img src="{% if profile.professional_photo.startswith('http') %}{{ profile.professional_photo }}{% else %}{{ url_for('static', filename=profile.professional_photo) }}{% endif %}" alt="Professional Photo" id="photo-preview">
+            <img src="{% if profile.professional_photo.startswith('data:') %}{{ profile.professional_photo }}{% elif profile.professional_photo.startswith('http') %}{{ profile.professional_photo }}{% else %}{{ url_for('static', filename=profile.professional_photo) }}{% endif %}" alt="Professional Photo" id="photo-preview" style="max-height: 150px; width: auto; object-fit: contain;">
             <div>
               <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Photo</p>
-              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Upload a new photo to replace</p>
+              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">✅ Permanently saved - never disappears on redeploy</p>
             </div>
           </div>
           {% else %}
@@ -259,10 +259,10 @@
           </div>
           {% if profile and profile.get('brokerage_logo') %}
           <div class="file-upload-preview" id="logo-preview-wrapper">
-            <img src="{% if profile.brokerage_logo.startswith('http') %}{{ profile.brokerage_logo }}{% else %}{{ url_for('static', filename=profile.brokerage_logo) }}{% endif %}" alt="Company Logo" id="logo-preview">
+            <img src="{% if profile.brokerage_logo.startswith('data:') %}{{ profile.brokerage_logo }}{% elif profile.brokerage_logo.startswith('http') %}{{ profile.brokerage_logo }}{% else %}{{ url_for('static', filename=profile.brokerage_logo) }}{% endif %}" alt="Company Logo" id="logo-preview" style="max-height: 120px; width: auto; object-fit: contain;">
             <div>
               <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Logo</p>
-              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Upload a new logo to replace</p>
+              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">✅ Permanently saved - never disappears on redeploy</p>
             </div>
           </div>
           {% else %}
