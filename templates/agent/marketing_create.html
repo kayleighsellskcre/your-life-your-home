@@ -296,6 +296,51 @@
     box-shadow: 0 6px 20px rgba(107, 106, 69, 0.4);
   }
 
+  .ai-refine-btn {
+    background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .ai-refine-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(139, 115, 85, 0.4);
+  }
+
+  .ai-refine-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .ai-refine-btn-full {
+    background: linear-gradient(135deg, rgba(139, 115, 85, 0.1) 0%, rgba(107, 93, 74, 0.1) 100%);
+    color: #6B5D4A;
+    border: 1.5px solid #8B7355;
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+
+  .ai-refine-btn-full:hover {
+    background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);
+    color: white;
+  }
+
+  .ai-refine-btn-full:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
   .helper-text {
     font-size: 0.85rem;
     color: rgba(58, 53, 44, 0.6);
@@ -370,28 +415,36 @@
 
         <div class="form-group">
           <label class="form-label">Headline</label>
-          <input 
-            type="text" 
-            name="headline" 
-            id="headline-input"
-            class="form-input" 
-            placeholder="Just Listed"
-            value="{% if category == 'just-listed' %}Just Listed{% elif category == 'coming-soon' %}Coming Soon{% elif category == 'open-house' %}Open House{% elif category == 'sold' %}Sold{% elif category == 'under-contract' %}Under Contract{% elif category == 'price-reduction' %}Price Reduced{% elif category == 'back-on-market' %}Back on Market{% else %}Luxury Living Awaits{% endif %}"
-            oninput="updatePreview()"
-          >
+          <div style="display: flex; gap: 0.5rem;">
+            <input 
+              type="text" 
+              name="headline" 
+              id="headline-input"
+              class="form-input" 
+              placeholder="Just Listed"
+              value="{% if category == 'just-listed' %}Just Listed{% elif category == 'coming-soon' %}Coming Soon{% elif category == 'open-house' %}Open House{% elif category == 'sold' %}Sold{% elif category == 'under-contract' %}Under Contract{% elif category == 'price-reduction' %}Price Reduced{% elif category == 'back-on-market' %}Back on Market{% else %}Luxury Living Awaits{% endif %}"
+              oninput="updatePreview()"
+              style="flex: 1;"
+            >
+            <button type="button" onclick="refineText('headline')" class="ai-refine-btn" title="AI Enhance">✨</button>
+          </div>
         </div>
 
         <div class="form-group">
           <label class="form-label">Subheading</label>
-          <input 
-            type="text" 
-            name="subtext" 
-            id="subtext-input"
-            class="form-input" 
-            placeholder="Your dream home awaits"
-            value="Luxury living in {{ transaction.property_city or 'your area' }}"
-            oninput="updatePreview()"
-          >
+          <div style="display: flex; gap: 0.5rem;">
+            <input 
+              type="text" 
+              name="subtext" 
+              id="subtext-input"
+              class="form-input" 
+              placeholder="Your dream home awaits"
+              value="Luxury living in {{ transaction.property_city or 'your area' }}"
+              oninput="updatePreview()"
+              style="flex: 1;"
+            >
+            <button type="button" onclick="refineText('subtext')" class="ai-refine-btn" title="AI Enhance">✨</button>
+          </div>
         </div>
 
         <div class="form-group">
@@ -429,6 +482,9 @@
             placeholder="Add any additional details..."
             oninput="updatePreview()"
           ></textarea>
+          <button type="button" onclick="refineText('custom_text')" class="ai-refine-btn-full" style="margin-top: 0.5rem;">
+            ✨ Enhance with AI
+          </button>
           <p class="helper-text">Leave blank to use default text</p>
         </div>
 
@@ -494,6 +550,61 @@
   document.addEventListener('DOMContentLoaded', function() {
     updatePreview();
   });
+
+  // AI Text Refinement
+  async function refineText(field) {
+    const inputId = field === 'headline' ? 'headline-input' : 
+                    field === 'subtext' ? 'subtext-input' : 
+                    'custom-text-input';
+    
+    const input = document.getElementById(inputId);
+    const originalText = input.value.trim();
+    
+    if (!originalText) {
+      alert('Please enter some text first!');
+      return;
+    }
+    
+    // Disable button and show loading
+    const button = event.target;
+    const originalContent = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '⏳';
+    
+    try {
+      const response = await fetch('/agent/marketing/refine-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: originalText,
+          field: field
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        input.value = data.refined_text;
+        updatePreview();
+        button.innerHTML = '✅';
+        setTimeout(() => {
+          button.innerHTML = originalContent;
+          button.disabled = false;
+        }, 2000);
+      } else {
+        alert('Failed to enhance text. Please try again.');
+        button.innerHTML = originalContent;
+        button.disabled = false;
+      }
+    } catch (error) {
+      console.error('Error refining text:', error);
+      alert('Failed to enhance text. Please try again.');
+      button.innerHTML = originalContent;
+      button.disabled = false;
+    }
+  }
 </script>
 
 {% endblock %}

@@ -6549,14 +6549,15 @@ def agent_marketing_create(tx_id):
 
 @app.route("/agent/transactions/<int:tx_id>/marketing-hub/generate", methods=["POST"])
 def agent_marketing_generate(tx_id):
-    """Generate the final marketing asset PDF/image."""
+    """Generate the final marketing asset HTML for printing."""
     user = get_current_user()
     if not user or user.get("role") != "agent":
-        return jsonify({"success": False, "error": "Unauthorized"}), 401
+        return redirect(url_for("login", role="agent"))
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        return jsonify({"success": False, "error": "Transaction not found"}), 404
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
     
     try:
         # Get form data
@@ -6589,29 +6590,69 @@ def agent_marketing_generate(tx_id):
             include_lender=include_lender,
         )
         
-        # Generate PDF or image based on asset type
-        if asset_type in ['flyer', 'postcard']:
-            # Generate PDF with WeasyPrint
-            from weasyprint import HTML, CSS
-            pdf_bytes = HTML(string=html_content).write_pdf()
-            
-            # Return PDF as download
-            from datetime import datetime
-            filename = f"{category}_{asset_type}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-            
-            return Response(
-                pdf_bytes,
-                mimetype='application/pdf',
-                headers={'Content-Disposition': f'attachment; filename={filename}'}
-            )
-        else:
-            # For social media, return HTML that can be screenshot
-            return html_content
+        # Return HTML with print button for browser-based PDF generation
+        return html_content
             
     except Exception as e:
         import traceback
         print(f"Error generating marketing asset: {traceback.format_exc()}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        flash(f"Error generating asset: {str(e)}", "error")
+        return redirect(url_for('agent_marketing_hub', tx_id=tx_id))
+
+
+@app.route("/agent/marketing/refine-text", methods=["POST"])
+def agent_marketing_refine_text():
+    """Refine marketing text using AI to sound professional but natural."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        text = data.get('text', '').strip()
+        field = data.get('field', 'text')
+        
+        if not text:
+            return jsonify({"success": False, "error": "No text provided"}), 400
+        
+        # Use OpenAI to refine the text
+        if not OPENAI_API_KEY:
+            return jsonify({"success": False, "error": "AI service not configured"}), 500
+        
+        prompt = f"""You are a luxury real estate marketing expert. Refine this {field} to be:
+- Professional and sophisticated
+- Natural and human-sounding (NOT robotic or overly formal)
+- Compelling and elegant
+- Concise and impactful
+- Appropriate for high-end real estate marketing
+
+Original {field}: {text}
+
+Return ONLY the refined text, nothing else. Keep it roughly the same length."""
+
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a luxury real estate marketing copywriter who creates elegant, natural-sounding copy."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=200,
+            temperature=0.7
+        )
+        
+        refined_text = response.choices[0].message.content.strip()
+        # Remove quotes if AI added them
+        refined_text = refined_text.strip('"').strip("'")
+        
+        return jsonify({
+            "success": True,
+            "refined_text": refined_text
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"Error refining marketing text: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": "Failed to refine text"}), 500
 
 
 @app.route("/agent/communications", methods=["GET", "POST"])
@@ -7640,6 +7681,60 @@ def lender_marketing_create(borrower_id):
         category=category,
         asset_type=asset_type,
     )
+
+
+@app.route("/lender/marketing/refine-text", methods=["POST"])
+def lender_marketing_refine_text():
+    """Refine lender marketing text using AI to sound professional but natural."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        text = data.get('text', '').strip()
+        field = data.get('field', 'text')
+        
+        if not text:
+            return jsonify({"success": False, "error": "No text provided"}), 400
+        
+        # Use OpenAI to refine the text
+        if not OPENAI_API_KEY:
+            return jsonify({"success": False, "error": "AI service not configured"}), 500
+        
+        prompt = f"""You are a mortgage lending marketing expert. Refine this {field} to be:
+- Professional and trustworthy
+- Natural and human-sounding (NOT robotic or overly formal)
+- Warm and celebratory (for celebrations) or informative (for educational content)
+- Concise and clear
+- Appropriate for financial services marketing
+
+Original {field}: {text}
+
+Return ONLY the refined text, nothing else. Keep it roughly the same length."""
+
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": "You are a mortgage lending marketing copywriter who creates warm, professional copy."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=200,
+            temperature=0.7
+        )
+        
+        refined_text = response.choices[0].message.content.strip()
+        refined_text = refined_text.strip('"').strip("'")
+        
+        return jsonify({
+            "success": True,
+            "refined_text": refined_text
+        })
+        
+    except Exception as e:
+        import traceback
+        print(f"Error refining lender marketing text: {traceback.format_exc()}")
+        return jsonify({"success": False, "error": "Failed to refine text"}), 500
 
 
 @app.route("/lender/messages", methods=["GET"])

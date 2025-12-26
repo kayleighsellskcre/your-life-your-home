@@ -109,9 +109,37 @@
             font-size: 14pt;
             color: rgba(58, 53, 44, 0.7);
         }
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .print-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        @media print {
+            .print-button {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <button class="print-button" onclick="window.print()">🖨️ Print to PDF</button>
     <div class="content-wrapper">
         <div class="coming-soon-badge">Coming Soon</div>
         
