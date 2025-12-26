@@ -221,13 +221,13 @@
         {% if project.render_status == 'complete' and project.output_path %}
         <div class="video-player">
             <video controls>
-                <source src="{{ url_for('static', filename='../' + project.output_path) }}" type="video/mp4">
+                <source src="{{ url_for('agent_video_studio_serve', project_id=project.id) }}" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
         
         <div class="video-actions">
-            <a href="{{ url_for('static', filename='../' + project.output_path) }}" download class="btn btn-primary">
+            <a href="{{ url_for('agent_video_studio_serve', project_id=project.id) }}" download class="btn btn-primary">
                 📥 Download Video
             </a>
             <button class="btn btn-secondary" onclick="copyLink()">
@@ -282,7 +282,7 @@
 
 <script>
 function copyLink() {
-    const videoUrl = window.location.origin + "{{ url_for('static', filename='../' + project.output_path) if project.output_path else '' }}";
+    const videoUrl = window.location.origin + "{{ url_for('agent_video_studio_serve', project_id=project.id) if project.id else '' }}";
     navigator.clipboard.writeText(videoUrl).then(() => {
         alert('Video link copied to clipboard!');
     });

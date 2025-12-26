@@ -7187,19 +7187,60 @@ def agent_video_studio_view(project_id):
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
     
-    from video_database import get_video_project
-    project = get_video_project(project_id)
-    
-    if not project or project["user_id"] != user["id"]:
-        flash("Video project not found", "error")
+    if not VIDEO_STUDIO_ENABLED:
+        flash("Video Studio is not available", "error")
         return redirect(url_for("agent_video_studio"))
     
-    return render_template(
-        "agent/video_studio_view.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-        project=project
-    )
+    try:
+        from video_database import get_video_project
+        project = get_video_project(project_id)
+        
+        if not project or project["user_id"] != user["id"]:
+            flash("Video project not found", "error")
+            return redirect(url_for("agent_video_studio"))
+        
+        return render_template(
+            "agent/video_studio_view.html",
+            brand_name=FRONT_BRAND_NAME,
+            user=user,
+            project=project
+        )
+    except Exception as e:
+        print(f"Error viewing video project: {e}")
+        flash("Error loading video project", "error")
+        return redirect(url_for("agent_video_studio"))
+
+
+@app.route("/agent/video-studio/serve/<int:project_id>")
+def agent_video_studio_serve(project_id):
+    """Serve the video file for a project"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return abort(403)
+    
+    try:
+        from video_database import get_video_project
+        project = get_video_project(project_id)
+        
+        if not project or project["user_id"] != user["id"]:
+            return abort(404)
+        
+        if not project.get("output_path"):
+            return abort(404)
+        
+        # Serve the video file
+        video_path = Path(project["output_path"])
+        if not video_path.exists():
+            return abort(404)
+        
+        directory = str(video_path.parent)
+        filename = video_path.name
+        
+        return send_from_directory(directory, filename, mimetype='video/mp4')
+        
+    except Exception as e:
+        print(f"Error serving video: {e}")
+        return abort(500)
 
 
 @app.route("/agent/video-studio/<int:project_id>/delete", methods=["POST"])
