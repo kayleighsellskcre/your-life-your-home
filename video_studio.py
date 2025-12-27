@@ -199,16 +199,57 @@ class VideoRenderer:
                         # Middle segments - no fade (will be handled by xfade)
                         filter_parts.append(f"[{i}:v]setpts=PTS-STARTPTS[v{i}]")
                 
-                # Build xfade transitions between segments
+                # Build xfade transitions between segments with VARIETY
+                import random
+                transition_types = [
+                    'fadeblack',      # Fade through black (classic)
+                    'wipeleft',       # Wipe left
+                    'wiperight',      # Wipe right
+                    'wipeup',         # Wipe up
+                    'wipedown',       # Wipe down
+                    'slideleft',      # Slide left
+                    'slideright',     # Slide right
+                    'slideup',        # Slide up
+                    'slidedown',      # Slide down
+                    'circlecrop',     # Circle crop (dramatic!)
+                    'rectcrop',       # Rectangle crop
+                    'distance',       # Distance transform
+                    'fadefast',       # Fast fade
+                    'smoothleft',     # Smooth left
+                    'smoothright',    # Smooth right
+                    'smoothup',       # Smooth up
+                    'smoothdown',     # Smooth down
+                    'circleopen',     # Circle open (eye-catching!)
+                    'circleclose',    # Circle close
+                    'vertopen',       # Vertical open
+                    'vertclose',      # Vertical close
+                    'horzopen',       # Horizontal open
+                    'horzclose',      # Horizontal close
+                    'dissolve',       # Dissolve
+                    'pixelize',       # Pixelize effect
+                    'radial',         # Radial wipe
+                    'diagtl',         # Diagonal top-left
+                    'diagtr',         # Diagonal top-right
+                    'diagbl',         # Diagonal bottom-left
+                    'diagbr',         # Diagonal bottom-right
+                ]
+                
                 xfade_chain = "[v0]"
                 for i in range(1, len(all_segments)):
                     offset = current_offset + duration_per_item - fade_duration if i > 1 else 3 - fade_duration
-                    if i == 1:
-                        xfade_chain = f"[v0][v1]xfade=transition=smoothleft:duration={fade_duration}:offset={offset}[vx1]"
-                    elif i < len(all_segments) - 1:
-                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition=smoothright:duration={fade_duration}:offset={offset}[vx{i}]"
+                    
+                    # Pick a random transition for variety (but avoid pixelize for intro/outro)
+                    if i == 1 or i == len(all_segments) - 1:
+                        transition = random.choice(['fadeblack', 'circleopen', 'dissolve', 'smoothleft', 'smoothright'])
                     else:
-                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition=fade:duration={fade_duration}:offset={offset}[outv]"
+                        transition = random.choice(transition_types)
+                    
+                    if i == 1:
+                        xfade_chain = f"[v0][v1]xfade=transition={transition}:duration={fade_duration}:offset={offset}[vx1]"
+                    elif i < len(all_segments) - 1:
+                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition={transition}:duration={fade_duration}:offset={offset}[vx{i}]"
+                    else:
+                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition={transition}:duration={fade_duration}:offset={offset}[outv]"
                 
                 # Combine filter parts
                 filter_complex = ";".join(filter_parts) + ";" + xfade_chain
@@ -308,58 +349,125 @@ class VideoRenderer:
         height: int,
         style: str
     ):
-        """Create video segment from image with DRAMATIC Ken Burns effect"""
+        """Create video segment with CINEMATIC EFFECTS - Ken Burns + particles + lens flares"""
         
         # More dramatic zoom for luxury feel
         if style == "luxury_cinematic":
-            zoom_factor = 1.2  # Increased from 1.1
+            zoom_factor = 1.25  # Even more dramatic
             # Alternate between zoom in and zoom out for variety
             import random
-            zoom_direction = random.choice(['in', 'out'])
+            zoom_direction = random.choice(['in', 'out', 'in'])  # Favor zoom in
             if zoom_direction == 'out':
-                zoom_expr = f"'if(lte(zoom,1.0),1.2,max(1.0,zoom-0.002))'"
+                zoom_expr = f"'if(lte(zoom,1.0),1.25,max(1.0,zoom-0.0025))'"
             else:
-                zoom_expr = f"'min(zoom+0.002,{zoom_factor})'"
+                zoom_expr = f"'min(zoom+0.0025,{zoom_factor})'"
         else:
-            zoom_factor = 1.15
-            zoom_expr = f"'min(zoom+0.0015,{zoom_factor})'"
+            zoom_factor = 1.18
+            zoom_expr = f"'min(zoom+0.002,{zoom_factor})'"
         
         # Add smooth panning for more dynamic movement
         import random
-        pan_direction = random.choice(['left', 'right', 'up', 'down', 'center'])
+        pan_direction = random.choice(['left', 'right', 'up', 'down', 'diagonal-tl', 'diagonal-br'])
         
         if pan_direction == 'left':
-            x_expr = f"'if(gte(on,1),x+2,x)'"
+            x_expr = f"'if(gte(on,1),x+3,x)'"
             y_expr = "'h/2-(ih*zoom/2)'"
         elif pan_direction == 'right':
-            x_expr = f"'if(gte(on,1),x-2,x)'"
+            x_expr = f"'if(gte(on,1),x-3,x)'"
             y_expr = "'h/2-(ih*zoom/2)'"
         elif pan_direction == 'up':
             x_expr = "'w/2-(iw*zoom/2)'"
-            y_expr = f"'if(gte(on,1),y+2,y)'"
+            y_expr = f"'if(gte(on,1),y+3,y)'"
         elif pan_direction == 'down':
             x_expr = "'w/2-(iw*zoom/2)'"
+            y_expr = f"'if(gte(on,1),y-3,y)'"
+        elif pan_direction == 'diagonal-tl':
+            x_expr = f"'if(gte(on,1),x+2,x)'"
+            y_expr = f"'if(gte(on,1),y+2,y)'"
+        elif pan_direction == 'diagonal-br':
+            x_expr = f"'if(gte(on,1),x-2,x)'"
             y_expr = f"'if(gte(on,1),y-2,y)'"
-        else:  # center
+        else:
             x_expr = "'w/2-(iw*zoom/2)'"
             y_expr = "'h/2-(ih*zoom/2)'"
+        
+        # Random speed ramp (slow-mo effect on some photos)
+        speed_effect = random.choice(['normal', 'slow-mo', 'normal', 'normal'])  # 25% chance of slow-mo
+        if speed_effect == 'slow-mo':
+            setpts_filter = "setpts=1.5*PTS"  # 1.5x slower for dramatic effect
+            actual_duration = duration * 1.5
+        else:
+            setpts_filter = "setpts=PTS"
+            actual_duration = duration
+        
+        # Create particle overlay (light leaks, dust, sparkles)
+        particle_effect = random.choice(['light-leak', 'sparkle', 'dust', 'none', 'none'])  # 40% chance
+        
+        if particle_effect == 'light-leak':
+            # Animated light leak overlay
+            particle_filter = (
+                f"geq=lum='255*0.3*(1+sin((X/50+T*2))*cos((Y/50+T*3)))':cb=128:cr=180,"
+                "blend=all_mode='screen':all_opacity=0.3"
+            )
+        elif particle_effect == 'sparkle':
+            # Sparkle effect
+            particle_filter = (
+                f"geq=lum='if(lt(random(1),0.001),255,lum(X,Y))':cb=128:cr=128,"
+                "unsharp=5:5:2.0"
+            )
+        elif particle_effect == 'dust':
+            # Floating dust particles
+            particle_filter = (
+                f"geq=lum='if(lt(random(1),0.0005),200,lum(X,Y))':cb=128:cr=128,"
+                "boxblur=2:1"
+            )
+        else:
+            particle_filter = ""
+        
+        # Lens flare effect (random chance)
+        lens_flare = random.choice([True, False, False])  # 33% chance
+        if lens_flare:
+            flare_filter = (
+                f"geq=lum='lum(X,Y)+100*exp(-((X-W*0.7)*(X-W*0.7)+(Y-H*0.3)*(Y-H*0.3))/(W*W*0.05))*sin(T*2)':cb=180:cr=150,"
+                "blend=all_mode='screen':all_opacity=0.4"
+            )
+        else:
+            flare_filter = ""
+        
+        # Build the complex filter chain
+        filter_chain = [
+            f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
+            f"crop={width*2}:{height*2}",
+            f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(actual_duration*30)}:s={width}x{height}",
+            f"eq=contrast=1.15:brightness=0.03:saturation=1.2:gamma=1.1",  # Enhanced color grading
+            "unsharp=5:5:1.5:5:5:0.0",  # Sharper for crisp look
+        ]
+        
+        # Add particle effects if selected
+        if particle_filter:
+            filter_chain.append(particle_filter)
+        
+        # Add lens flare if selected
+        if flare_filter:
+            filter_chain.append(flare_filter)
+        
+        # Add speed effect
+        filter_chain.append(setpts_filter)
+        
+        # Add vignette for cinematic look
+        filter_chain.append("vignette=angle=PI/3")
+        
+        filter_chain.append("format=yuv420p")
         
         cmd = [
             'ffmpeg',
             '-loop', '1',
             '-i', image_path,
-            '-vf', (
-                f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase,"  # Scale up for better zoom quality
-                f"crop={width*2}:{height*2},"
-                f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height},"
-                f"eq=contrast=1.1:brightness=0.02:saturation=1.15,"  # Color grading for luxury
-                f"unsharp=5:5:1.0:5:5:0.0,"  # Sharpen for crisp look
-                "format=yuv420p"
-            ),
-            '-t', str(duration),
+            '-vf', ",".join(filter_chain),
+            '-t', str(duration),  # Use original duration for output
             '-c:v', 'libx264',
-            '-preset', 'slow',  # Better quality
-            '-crf', '18',  # Higher quality (lower CRF)
+            '-preset', 'slow',
+            '-crf', '17',  # Even higher quality
             '-y',
             str(output_path)
         ]
@@ -402,38 +510,48 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create DRAMATIC intro card with animated text overlay"""
+        """Create CINEMATIC intro card with particles, light rays, and animated text"""
         
         # Luxury gradient backgrounds
         if style == "luxury_cinematic":
-            bg_color1 = "#1a1a2e"
-            bg_color2 = "#16213e"
+            bg_color1 = "#0a0a0f"
+            bg_color2 = "#1a1a2e"
         else:
-            bg_color1 = "#2c3e50"
-            bg_color2 = "#34495e"
+            bg_color1 = "#1c1c28"
+            bg_color2 = "#2c3e50"
         
         # Escape text for FFmpeg
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        # Create animated gradient background with zoom
+        # Create DRAMATIC animated intro with multiple effects
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
             '-vf', (
-                # Animated gradient overlay
-                f"geq=r='255*0.5*(1+cos((X+Y+T*50)/50))':g='255*0.3*(1+cos((X-Y+T*30)/40))':b='255*0.2*(1+cos((X+T*40)/30))',format=yuv420p,"
-                # Fade in
-                f"fade=t=in:st=0:d=0.8,"
-                # Animated text - headline with slide up effect
-                f"drawtext=text='{headline_escaped}':fontsize=100:fontcolor=white@0.0:x=(w-text_w)/2:y=h-((h-text_h)/2)*(t/{duration}):enable='lte(t,{duration})',"
-                # Animated text - address with fade in
-                f"drawtext=text='{address_escaped}':fontsize=50:fontcolor=#c89666:x=(w-text_w)/2:y=h/2+80:alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2))'"
+                # Layer 1: Animated radial gradient (pulsing effect)
+                f"geq=r='255*0.6*(1+0.3*sin(T*2))*(1+cos(hypot(X-W/2,Y-H/2)*0.01-T))':g='255*0.4*(1+0.3*sin(T*2))*(1+cos(hypot(X-W/2,Y-H/2)*0.01-T))':b='255*0.3*(1+0.3*sin(T*2))*(1+cos(hypot(X-W/2,Y-H/2)*0.01-T))',format=yuv420p,"
+                # Layer 2: Light rays (cinematic beams)
+                f"geq=lum='lum(X,Y)+50*max(0,cos((atan2(Y-H/2,X-W/2)+T*0.5)*4))':cb=128:cr=140,"
+                # Layer 3: Particle sparkles
+                f"geq=lum='if(lt(random(1),0.0008),255,lum(X,Y))':cb=128:cr=128,"
+                # Fade in dramatically
+                f"fade=t=in:st=0:d=1.0,"
+                # Vignette for focus
+                "vignette=angle=PI/4:mode=forward,"
+                # ANIMATED TEXT - Headline with scale + glow effect
+                f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y=h/2-100+(100*(1-min(1,t/1.2))):alpha='min(1,t/0.8)':shadowcolor=black@0.8:shadowx=4:shadowy=4,"
+                # Luxury underline that grows
+                f"drawbox=x=(w-min(tw*min(t/1.5,1),w*0.8))/2:y=h/2-20:w=min((text_w+100)*min(t/1.5,1),w*0.8):h=3:color=#c89666@0.8:t=fill:enable='gte(t,0.5)',"
+                # Address with fade + slide from bottom
+                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=h/2+60+(50*(1-min(1,(t-0.8)/0.8))):alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2))':shadowcolor=black@0.6:shadowx=3:shadowy=3,"
+                # Subtle "swipe up" prompt
+                f"drawtext=text='↑':fontsize=50:fontcolor=white@0.6:x=(w-text_w)/2:y=h-100-20*sin(T*3):alpha='if(lt(t,2),0,min(0.6,(t-2)*0.8))'"
             ),
             '-c:v', 'libx264',
             '-preset', 'slow',
-            '-crf', '18',
+            '-crf', '17',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -453,13 +571,13 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create STUNNING outro card with animated branding"""
+        """Create SHOWSTOPPING outro card with particles, light beams, and CTA"""
         
         # Luxury gradient
         if style == "luxury_cinematic":
-            bg_color1 = "#1a1a2e"
+            bg_color1 = "#0a0a0f"
         else:
-            bg_color1 = "#2c3e50"
+            bg_color1 = "#1c1c28"
         
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
@@ -469,20 +587,32 @@ class VideoRenderer:
             '-f', 'lavfi',
             '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
             '-vf', (
-                # Subtle animated gradient
-                f"geq=r='255*0.4*(1+cos((X+Y+T*40)/60))':g='255*0.25*(1+cos((X-Y+T*25)/50))':b='255*0.15*(1+cos((X+T*30)/40))',format=yuv420p,"
+                # Animated radial gradient with pulse
+                f"geq=r='255*0.5*(1+0.4*sin(T*1.5))*(1+cos(hypot(X-W/2,Y-H/2)*0.008-T*0.8))':g='255*0.35*(1+0.4*sin(T*1.5))*(1+cos(hypot(X-W/2,Y-H/2)*0.008-T*0.8))':b='255*0.25*(1+0.4*sin(T*1.5))*(1+cos(hypot(X-W/2,Y-H/2)*0.008-T*0.8))',format=yuv420p,"
+                # Light rays from center
+                f"geq=lum='lum(X,Y)+60*max(0,cos((atan2(Y-H/2,X-W/2)+T*0.6)*5))':cb=128:cr=150,"
+                # Floating particles/sparkles
+                f"geq=lum='if(lt(random(1),0.001),230,lum(X,Y))':cb=150:cr=128,"
                 # Fade in
-                f"fade=t=in:st=0:d=0.6,"
-                # Animated name - scale up effect
-                f"drawtext=text='{agent_name_escaped}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-60:alpha='if(lt(t,0.4),0,min(1,(t-0.4)*3))',"
-                # Animated contact - slide in from bottom
-                f"drawtext=text='{agent_phone_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=h-(h-h/2-20)*(1-min(1,t/0.8)):enable='gte(t,0.5)',"
-                # Call to action
-                f"drawtext=text='Contact Me Today':fontsize=40:fontcolor=white@0.8:x=(w-text_w)/2:y=h/2+120:alpha='if(lt(t,1.5),0,min(1,(t-1.5)*2))'"
+                f"fade=t=in:st=0:d=0.7,"
+                # Vignette
+                "vignette=angle=PI/4,"
+                # Name - scale up from center with glow
+                f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=h/2-100:alpha='if(lt(t,0.3),0,min(1,(t-0.3)*3))':shadowcolor=#c89666@0.8:shadowx=0:shadowy=0:shadowblur=20,"
+                # Decorative line above name
+                f"drawbox=x=(w-500)/2:y=h/2-130:w=500*min(t/0.8,1):h=2:color=#c89666@0.9:t=fill:enable='gte(t,0.2)',"
+                # Contact with pulse effect
+                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y=h/2-20:alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2.5))':shadowcolor=white@0.4:shadowx=0:shadowy=0:shadowblur=15,"
+                # Decorative line below contact
+                f"drawbox=x=(w-500)/2:y=h/2+50:w=500*min((t-0.5)/0.8,1):h=2:color=#c89666@0.9:t=fill:enable='gte(t,0.7)',"
+                # CTA with animated entrance
+                f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white@0.9:x=(w-text_w)/2:y=h/2+100+(30*(1-min(1,(t-1.2)/0.6))):alpha='if(lt(t,1.2),0,min(1,(t-1.2)*3))':shadowcolor=black@0.7:shadowx=3:shadowy=3,"
+                # Secondary CTA
+                f"drawtext=text='Let\\'s Make Your Dream Home a Reality':fontsize=38:fontcolor=white@0.7:x=(w-text_w)/2:y=h/2+170:alpha='if(lt(t,1.8),0,min(0.8,(t-1.8)*2))'"
             ),
             '-c:v', 'libx264',
             '-preset', 'slow',
-            '-crf', '18',
+            '-crf', '17',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
