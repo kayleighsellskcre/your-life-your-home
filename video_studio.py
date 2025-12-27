@@ -179,31 +179,57 @@ class VideoRenderer:
                     duration=3
                 )
                 
-                # SMOOTH FADE TRANSITIONS between segments
+                # PROFESSIONAL TRANSITION VARIETY between segments
                 all_segments = [intro_path] + segments + [outro_path]
                 
-                # Build filter complex for fade transitions
-                filter_parts = []
-                fade_duration = 0.5  # Half second cross-fades
+                # Curated list of professional, elegant transitions
+                professional_transitions = [
+                    'fade',          # Classic fade
+                    'fadeblack',     # Fade through black (cinematic)
+                    'fadewhite',     # Fade through white (clean)
+                    'wipeleft',      # Smooth wipe left
+                    'wiperight',     # Smooth wipe right
+                    'wipeup',        # Smooth wipe up
+                    'wipedown',      # Smooth wipe down
+                    'slideleft',     # Slide left
+                    'slideright',    # Slide right
+                    'slideup',       # Slide up
+                    'slidedown',     # Slide down
+                    'smoothleft',    # Smooth directional left
+                    'smoothright',   # Smooth directional right
+                    'smoothup',      # Smooth directional up
+                    'smoothdown',    # Smooth directional down
+                    'circleopen',    # Elegant circle reveal
+                    'circleclose',   # Elegant circle close
+                    'dissolve',      # Classic dissolve
+                ]
                 
-                # Load all segments
-                for i in range(len(all_segments)):
-                    filter_parts.append(f"[{i}:v]")
+                import random
+                fade_duration = 0.6  # Slightly longer for smoothness
                 
-                # Create fade transitions using xfade filter (simple fade only)
+                # Create varied transitions using xfade filter
                 xfade_chain = "[0:v]"
                 for i in range(1, len(all_segments)):
+                    # Pick a different transition for each segment
+                    # Use fadeblack for intro/outro, varied for photos
+                    if i == 1:  # Intro → First photo
+                        transition = 'fadeblack'
+                    elif i == len(all_segments) - 1:  # Last photo → Outro
+                        transition = 'fadeblack'
+                    else:  # Between photos - use variety
+                        transition = random.choice(professional_transitions)
+                    
                     if i == 1:
                         # First transition
-                        xfade_chain = f"[0:v][1:v]xfade=transition=fade:duration={fade_duration}:offset={3-fade_duration}[v1]"
+                        xfade_chain = f"[0:v][1:v]xfade=transition={transition}:duration={fade_duration}:offset={3-fade_duration}[v1]"
                     elif i < len(all_segments) - 1:
                         # Middle transitions
                         prev_offset = 3 + (i-1) * duration_per_item - (i-1) * fade_duration
-                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition=fade:duration={fade_duration}:offset={prev_offset-fade_duration}[v{i}]"
+                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition={transition}:duration={fade_duration}:offset={prev_offset-fade_duration}[v{i}]"
                     else:
                         # Last transition
                         prev_offset = 3 + (i-1) * duration_per_item - (i-1) * fade_duration
-                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition=fade:duration={fade_duration}:offset={prev_offset-fade_duration}[outv]"
+                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition={transition}:duration={fade_duration}:offset={prev_offset-fade_duration}[outv]"
                 
                 # Final output path
                 output_filename = f"video_{project_id}_{aspect_ratio.replace(':', 'x')}.mp4"
