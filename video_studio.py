@@ -363,42 +363,23 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create CINEMATIC intro card with particles, light rays, and animated text"""
+        """Create SIMPLE intro card"""
         
-        # Luxury gradient backgrounds
-        if style == "luxury_cinematic":
-            bg_color1 = "#0a0a0f"
-            bg_color2 = "#1a1a2e"
-        else:
-            bg_color1 = "#1c1c28"
-            bg_color2 = "#2c3e50"
+        bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#2c3e50"
         
-        # Escape text for FFmpeg
+        # Escape text
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        # Create DRAMATIC animated intro - SIMPLIFIED for compatibility
+        # ULTRA SIMPLE - no animations, just static text
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
-            '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
-            '-vf', (
-                # Subtle gradient (compatible)
-                f"lutyuv=u=128:v=128+20*sin(2*PI*T/{duration}),"
-                # Fade in dramatically
-                f"fade=t=in:st=0:d=1.0,"
-                # Vignette for focus
-                "vignette=angle=PI/4:mode=forward,"
-                # ANIMATED TEXT - Headline with scale + glow effect
-                f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y=h/2-100+(100*(1-min(1,t/1.2))):alpha='min(1,t/0.8)':shadowcolor=black@0.8:shadowx=4:shadowy=4,"
-                # Luxury underline that grows
-                f"drawbox=x=(w-600)/2:y=h/2-20:w=600*min(t/1.5,1):h=3:color=#c89666@0.8:t=fill,"
-                # Address with fade + slide from bottom  
-                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=h/2+60+(50*(1-min(1,(t-0.8)/0.8))):alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2))':shadowcolor=black@0.6:shadowx=3:shadowy=3"
-            ),
+            '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
+            '-vf', f"drawtext=text='{headline_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-50,drawtext=text='{address_escaped}':fontsize=50:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+50",
             '-c:v', 'libx264',
-            '-preset', 'slow',
-            '-crf', '17',
+            '-preset', 'fast',
+            '-crf', '23',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -418,45 +399,22 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create SHOWSTOPPING outro card with particles, light beams, and CTA"""
+        """Create SIMPLE outro card"""
         
-        # Luxury gradient
-        if style == "luxury_cinematic":
-            bg_color1 = "#0a0a0f"
-        else:
-            bg_color1 = "#1c1c28"
+        bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
         
-        # Create SHOWSTOPPING outro - SIMPLIFIED for compatibility
+        # ULTRA SIMPLE - no animations, just static text
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
-            '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
-            '-vf', (
-                # Subtle animated gradient (compatible)
-                f"lutyuv=u=128:v=128+25*sin(2*PI*T/{duration}),"
-                # Fade in
-                f"fade=t=in:st=0:d=0.7,"
-                # Vignette
-                "vignette=angle=PI/4,"
-                # Name - scale up from center with glow
-                f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=h/2-100:alpha='if(lt(t,0.3),0,min(1,(t-0.3)*3))':shadowcolor=#c89666@0.8:shadowx=0:shadowy=0,"
-                # Decorative line above name
-                f"drawbox=x=(w-500)/2:y=h/2-130:w=500*min(t/0.8,1):h=2:color=#c89666@0.9:t=fill,"
-                # Contact with pulse effect
-                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y=h/2-20:alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2.5))':shadowcolor=white@0.4:shadowx=0:shadowy=0,"
-                # Decorative line below contact
-                f"drawbox=x=(w-500)/2:y=h/2+50:w=500*min((t-0.5)/0.8,1):h=2:color=#c89666@0.9:t=fill,"
-                # CTA with animated entrance
-                f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white@0.9:x=(w-text_w)/2:y=h/2+100+(30*(1-min(1,(t-1.2)/0.6))):alpha='if(lt(t,1.2),0,min(1,(t-1.2)*3))':shadowcolor=black@0.7:shadowx=3:shadowy=3,"
-                # Secondary CTA
-                f"drawtext=text='Let\\'s Make Your Dream Home a Reality':fontsize=38:fontcolor=white@0.7:x=(w-text_w)/2:y=h/2+170:alpha='if(lt(t,1.8),0,min(0.8,(t-1.8)*2))'"
-            ),
+            '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
+            '-vf', f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-80,drawtext=text='{agent_phone_escaped}':fontsize=60:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+20,drawtext=text='CONTACT ME TODAY':fontsize=45:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2+120",
             '-c:v', 'libx264',
-            '-preset', 'slow',
-            '-crf', '17',
+            '-preset', 'fast',
+            '-crf', '23',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
