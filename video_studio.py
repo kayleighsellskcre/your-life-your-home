@@ -400,42 +400,14 @@ class VideoRenderer:
             setpts_filter = "setpts=PTS"
             actual_duration = duration
         
-        # Create particle overlay (light leaks, dust, sparkles) - SIMPLIFIED
-        particle_effect = random.choice(['light-leak', 'glow', 'none', 'none'])  # Simpler effects
-        
-        if particle_effect == 'light-leak':
-            # Simplified light leak overlay using curves
-            particle_filter = "curves=all='0/0 0.5/0.6 1/1'"
-        elif particle_effect == 'glow':
-            # Glow effect using unsharp
-            particle_filter = "unsharp=7:7:2.5:7:7:0"
-        else:
-            particle_filter = ""
-        
-        # Lens flare effect (simplified)
-        lens_flare = random.choice([True, False, False])  # 33% chance
-        if lens_flare:
-            # Simplified flare using curves and brightness
-            flare_filter = "eq=brightness=0.05:contrast=1.05"
-        else:
-            flare_filter = ""
-        
-        # Build the complex filter chain
+        # Build the complex filter chain - SIMPLIFIED AND TESTED
         filter_chain = [
             f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
             f"crop={width*2}:{height*2}",
             f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(actual_duration*30)}:s={width}x{height}",
-            f"eq=contrast=1.15:brightness=0.03:saturation=1.2:gamma=1.1",  # Enhanced color grading
-            "unsharp=5:5:1.5:5:5:0.0",  # Sharper for crisp look
+            f"eq=contrast=1.15:brightness=0.03:saturation=1.2",  # Color grading (removed gamma)
+            "unsharp=5:5:1.5:5:5:0.0",  # Sharpen
         ]
-        
-        # Add particle effects if selected
-        if particle_filter:
-            filter_chain.append(particle_filter)
-        
-        # Add lens flare if selected
-        if flare_filter:
-            filter_chain.append(flare_filter)
         
         # Add speed effect
         filter_chain.append(setpts_filter)
