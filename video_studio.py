@@ -395,7 +395,7 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create LUXURIOUS animated intro card"""
+        """Create LUXURIOUS static intro card with fade"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#2c3e50"
         
@@ -403,7 +403,7 @@ class VideoRenderer:
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        # LUXURIOUS with smooth animations
+        # LUXURIOUS static design with fade transition
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
@@ -413,16 +413,16 @@ class VideoRenderer:
                 "fade=t=in:st=0:d=0.8,"
                 # Vignette for cinematic look
                 "vignette=angle=PI/4:mode=forward,"
-                # Headline - fade in with slide from bottom
-                f"drawtext=text='{headline_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-50+(30*(1-min(1,t/0.8))):alpha='min(1,t/0.8)':shadowcolor=black@0.8:shadowx=4:shadowy=4,"
-                # Elegant underline that grows
-                f"drawbox=x=(w-500)/2:y=(h-text_h)/2:w=500*min(t/1.2,1):h=3:color=#c89666@0.9:t=fill,"
-                # Address - fade in with slide from bottom (delayed)
-                f"drawtext=text='{address_escaped}':fontsize=50:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+50+(20*(1-min(1,(t-0.5)/0.8))):alpha='if(lt(t,0.5),0,min(1,(t-0.5)/0.8))':shadowcolor=black@0.6:shadowx=3:shadowy=3"
+                # Headline - static, centered, with shadow
+                f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-80:shadowcolor=black@0.8:shadowx=5:shadowy=5,"
+                # Elegant gold underline (static)
+                f"drawbox=x=(w-600)/2:y=(h-text_h)/2-15:w=600:h=4:color=#c89666@0.9:t=fill,"
+                # Address - static, centered, gold color
+                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+60:shadowcolor=black@0.7:shadowx=3:shadowy=3"
             ),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '20',
+            '-preset', 'fast',
+            '-crf', '22',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -442,14 +442,14 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create LUXURIOUS animated outro card"""
+        """Create LUXURIOUS static outro card with fade"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
         
-        # LUXURIOUS with smooth animations
+        # LUXURIOUS static design with fade transition
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
@@ -459,20 +459,20 @@ class VideoRenderer:
                 "fade=t=in:st=0:d=0.7,"
                 # Vignette for cinematic look
                 "vignette=angle=PI/4,"
-                # Name - fade in with scale from center
-                f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-80:alpha='if(lt(t,0.3),0,min(1,(t-0.3)*3))':shadowcolor=#c89666@0.6:shadowx=2:shadowy=2,"
-                # Decorative line above name
-                f"drawbox=x=(w-450)/2:y=(h-text_h)/2-95:w=450*min(t/0.9,1):h=2:color=#c89666@0.9:t=fill,"
-                # Phone - fade in (delayed)
-                f"drawtext=text='{agent_phone_escaped}':fontsize=60:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+20:alpha='if(lt(t,0.7),0,min(1,(t-0.7)*2.5))':shadowcolor=white@0.3:shadowx=1:shadowy=1,"
-                # Decorative line below phone
-                f"drawbox=x=(w-450)/2:y=(h-text_h)/2+95:w=450*min((t-0.5)/0.9,1):h=2:color=#c89666@0.9:t=fill,"
-                # CTA - fade in with slide from bottom
-                f"drawtext=text='CONTACT ME TODAY':fontsize=45:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2+120+(15*(1-min(1,(t-1.2)/0.6))):alpha='if(lt(t,1.2),0,min(1,(t-1.2)*2.5))':shadowcolor=black@0.7:shadowx=3:shadowy=3"
+                # Name - static, centered, with gold shadow
+                f"drawtext=text='{agent_name_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-100:shadowcolor=#c89666@0.7:shadowx=3:shadowy=3,"
+                # Decorative line above name (static)
+                f"drawbox=x=(w-500)/2:y=(h-text_h)/2-115:w=500:h=3:color=#c89666@0.9:t=fill,"
+                # Phone - static, gold color
+                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2-10:shadowcolor=white@0.4:shadowx=2:shadowy=2,"
+                # Decorative line below phone (static)
+                f"drawbox=x=(w-500)/2:y=(h-text_h)/2+65:w=500:h=3:color=#c89666@0.9:t=fill,"
+                # CTA - static
+                f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2+120:shadowcolor=black@0.8:shadowx=4:shadowy=4"
             ),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '20',
+            '-preset', 'fast',
+            '-crf', '22',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
