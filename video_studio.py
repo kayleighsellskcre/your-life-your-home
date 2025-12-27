@@ -179,31 +179,55 @@ class VideoRenderer:
                     duration=3
                 )
                 
-                # SIMPLE CONCATENATION - No fancy transitions for now
+                # SMOOTH FADE TRANSITIONS between segments
                 all_segments = [intro_path] + segments + [outro_path]
-                concat_list_path = temp_path / "concat_list.txt"
-                with open(concat_list_path, 'w') as f:
-                    for seg in all_segments:
-                        f.write(f"file '{seg}'\n")
+                
+                # Build filter complex for fade transitions
+                filter_parts = []
+                fade_duration = 0.5  # Half second cross-fades
+                
+                # Load all segments
+                for i in range(len(all_segments)):
+                    filter_parts.append(f"[{i}:v]")
+                
+                # Create fade transitions using xfade filter (simple fade only)
+                xfade_chain = "[0:v]"
+                for i in range(1, len(all_segments)):
+                    if i == 1:
+                        # First transition
+                        xfade_chain = f"[0:v][1:v]xfade=transition=fade:duration={fade_duration}:offset={3-fade_duration}[v1]"
+                    elif i < len(all_segments) - 1:
+                        # Middle transitions
+                        prev_offset = 3 + (i-1) * duration_per_item - (i-1) * fade_duration
+                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition=fade:duration={fade_duration}:offset={prev_offset-fade_duration}[v{i}]"
+                    else:
+                        # Last transition
+                        prev_offset = 3 + (i-1) * duration_per_item - (i-1) * fade_duration
+                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition=fade:duration={fade_duration}:offset={prev_offset-fade_duration}[outv]"
                 
                 # Final output path
                 output_filename = f"video_{project_id}_{aspect_ratio.replace(':', 'x')}.mp4"
                 output_path = self.output_dir / output_filename
                 
-                # Simple concatenate - NO xfade
-                concat_cmd = [
-                    'ffmpeg',
-                    '-f', 'concat',
-                    '-safe', '0',
-                    '-i', str(concat_list_path),
-                    '-c', 'copy',
+                # Build FFmpeg command with smooth fades
+                fade_cmd = ['ffmpeg']
+                for seg in all_segments:
+                    fade_cmd.extend(['-i', str(seg)])
+                
+                fade_cmd.extend([
+                    '-filter_complex', xfade_chain,
+                    '-map', '[outv]',
+                    '-c:v', 'libx264',
+                    '-preset', 'medium',
+                    '-crf', '20',
+                    '-pix_fmt', 'yuv420p',
                     '-y',
                     str(output_path)
-                ]
+                ])
                 
-                print(f"[VIDEO RENDERER] Running simple concat...")
-                result = subprocess.run(concat_cmd, check=True, capture_output=True, text=True)
-                print(f"[VIDEO RENDERER] Concat complete")
+                print(f"[VIDEO RENDERER] Creating video with smooth fade transitions...")
+                result = subprocess.run(fade_cmd, check=True, capture_output=True, text=True)
+                print(f"[VIDEO RENDERER] Transitions complete")
                 
                 # Add music if provided
                 if music_path and os.path.exists(music_path):
@@ -277,38 +301,46 @@ class VideoRenderer:
     ):
         """Create video segment with CINEMATIC EFFECTS - Ken Burns + particles + lens flares"""
         
-        # More dramatic zoom for luxury feel - SIMPLIFIED
+        # More dramatic zoom for luxury feel
         if style == "luxury_cinematic":
-            zoom_factor = 1.2
+            zoom_factor = 1.25
         else:
-            zoom_factor = 1.15
+            zoom_factor = 1.18
         
-        # Simple zoom expression
-        zoom_expr = f"'min(zoom+0.002,{zoom_factor})'"
+        # Smooth zoom expression
+        zoom_expr = f"'min(zoom+0.0015,{zoom_factor})'"
         
-        # Simplified panning - just left or right
+        # Varied panning for visual interest
         import random
-        pan_direction = random.choice(['left', 'right', 'center'])
+        pan_direction = random.choice(['left', 'right', 'center', 'up', 'down'])
         
         if pan_direction == 'left':
-            x_expr = "'iw/2-(iw/zoom/2)+(on*2)'"  # Pan left gradually
+            x_expr = "'iw/2-(iw/zoom/2)+(on*1.5)'"  # Pan left gradually
             y_expr = "'ih/2-(ih/zoom/2)'"
         elif pan_direction == 'right':
-            x_expr = "'iw/2-(iw/zoom/2)-(on*2)'"  # Pan right gradually
+            x_expr = "'iw/2-(iw/zoom/2)-(on*1.5)'"  # Pan right gradually
             y_expr = "'ih/2-(ih/zoom/2)'"
+        elif pan_direction == 'up':
+            x_expr = "'iw/2-(iw/zoom/2)'"
+            y_expr = "'ih/2-(ih/zoom/2)+(on*1.5)'"  # Pan up gradually
+        elif pan_direction == 'down':
+            x_expr = "'iw/2-(iw/zoom/2)'"
+            y_expr = "'ih/2-(ih/zoom/2)-(on*1.5)'"  # Pan down gradually
         else:  # center
             x_expr = "'iw/2-(iw/zoom/2)'"
             y_expr = "'ih/2-(ih/zoom/2)'"
         
-        # NO speed effects - keep it simple and stable
-        
-        # Build the SIMPLE filter chain
+        # Build LUXURIOUS filter chain
         filter_chain = [
             f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
             f"crop={width*2}:{height*2}",
             f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height}",
-            f"eq=contrast=1.1:brightness=0.02:saturation=1.15",
-            "unsharp=5:5:1.0:5:5:0.0",
+            # Luxury color grading - richer, warmer tones
+            f"eq=contrast=1.15:brightness=0.03:saturation=1.2:gamma=1.05",
+            # Subtle vignette for cinematic depth
+            "vignette=angle=PI/3:mode=forward",
+            # Sharpen for clarity
+            "unsharp=5:5:1.2:5:5:0.0",
             "format=yuv420p"
         ]
         
@@ -317,10 +349,10 @@ class VideoRenderer:
             '-loop', '1',
             '-i', image_path,
             '-vf', ",".join(filter_chain),
-            '-t', str(duration),  # Use original duration for output
+            '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'slow',
-            '-crf', '17',  # Even higher quality
+            '-preset', 'medium',
+            '-crf', '18',  # Higher quality
             '-y',
             str(output_path)
         ]
@@ -363,7 +395,7 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create SIMPLE intro card"""
+        """Create LUXURIOUS animated intro card"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#2c3e50"
         
@@ -371,15 +403,26 @@ class VideoRenderer:
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        # ULTRA SIMPLE - no animations, just static text
+        # LUXURIOUS with smooth animations
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
-            '-vf', f"drawtext=text='{headline_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-50,drawtext=text='{address_escaped}':fontsize=50:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+50",
+            '-vf', (
+                # Fade in at start
+                "fade=t=in:st=0:d=0.8,"
+                # Vignette for cinematic look
+                "vignette=angle=PI/4:mode=forward,"
+                # Headline - fade in with slide from bottom
+                f"drawtext=text='{headline_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-50+(30*(1-min(1,t/0.8))):alpha='min(1,t/0.8)':shadowcolor=black@0.8:shadowx=4:shadowy=4,"
+                # Elegant underline that grows
+                f"drawbox=x=(w-500)/2:y=(h-text_h)/2:w=500*min(t/1.2,1):h=3:color=#c89666@0.9:t=fill,"
+                # Address - fade in with slide from bottom (delayed)
+                f"drawtext=text='{address_escaped}':fontsize=50:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+50+(20*(1-min(1,(t-0.5)/0.8))):alpha='if(lt(t,0.5),0,min(1,(t-0.5)/0.8))':shadowcolor=black@0.6:shadowx=3:shadowy=3"
+            ),
             '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
+            '-preset', 'medium',
+            '-crf', '20',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -399,22 +442,37 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create SIMPLE outro card"""
+        """Create LUXURIOUS animated outro card"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
         
-        # ULTRA SIMPLE - no animations, just static text
+        # LUXURIOUS with smooth animations
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
-            '-vf', f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-80,drawtext=text='{agent_phone_escaped}':fontsize=60:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+20,drawtext=text='CONTACT ME TODAY':fontsize=45:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2+120",
+            '-vf', (
+                # Fade in at start
+                "fade=t=in:st=0:d=0.7,"
+                # Vignette for cinematic look
+                "vignette=angle=PI/4,"
+                # Name - fade in with scale from center
+                f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-80:alpha='if(lt(t,0.3),0,min(1,(t-0.3)*3))':shadowcolor=#c89666@0.6:shadowx=2:shadowy=2,"
+                # Decorative line above name
+                f"drawbox=x=(w-450)/2:y=(h-text_h)/2-95:w=450*min(t/0.9,1):h=2:color=#c89666@0.9:t=fill,"
+                # Phone - fade in (delayed)
+                f"drawtext=text='{agent_phone_escaped}':fontsize=60:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+20:alpha='if(lt(t,0.7),0,min(1,(t-0.7)*2.5))':shadowcolor=white@0.3:shadowx=1:shadowy=1,"
+                # Decorative line below phone
+                f"drawbox=x=(w-450)/2:y=(h-text_h)/2+95:w=450*min((t-0.5)/0.9,1):h=2:color=#c89666@0.9:t=fill,"
+                # CTA - fade in with slide from bottom
+                f"drawtext=text='CONTACT ME TODAY':fontsize=45:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2+120+(15*(1-min(1,(t-1.2)/0.6))):alpha='if(lt(t,1.2),0,min(1,(t-1.2)*2.5))':shadowcolor=black@0.7:shadowx=3:shadowy=3"
+            ),
             '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
+            '-preset', 'medium',
+            '-crf', '20',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
