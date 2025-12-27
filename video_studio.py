@@ -365,14 +365,14 @@ class VideoRenderer:
         pan_direction = random.choice(['left', 'right', 'center'])
         
         if pan_direction == 'left':
-            x_expr = "'x+2'"
-            y_expr = "'h/2-(ih*zoom/2)'"
+            x_expr = "'iw/2-(iw/zoom/2)+(on*2)'"  # Pan left gradually
+            y_expr = "'ih/2-(ih/zoom/2)'"
         elif pan_direction == 'right':
-            x_expr = "'x-2'"
-            y_expr = "'h/2-(ih*zoom/2)'"
+            x_expr = "'iw/2-(iw/zoom/2)-(on*2)'"  # Pan right gradually
+            y_expr = "'ih/2-(ih/zoom/2)'"
         else:  # center
-            x_expr = "'w/2-(iw*zoom/2)'"
-            y_expr = "'h/2-(ih*zoom/2)'"
+            x_expr = "'iw/2-(iw/zoom/2)'"
+            y_expr = "'ih/2-(ih/zoom/2)'"
         
         # NO speed effects - keep it simple and stable
         
