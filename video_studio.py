@@ -301,11 +301,11 @@ class VideoRenderer:
     ):
         """Create video segment with CINEMATIC EFFECTS - Ken Burns + particles + lens flares"""
         
-        # More dramatic zoom for luxury feel
+        # Dramatic zoom for luxury feel
         if style == "luxury_cinematic":
-            zoom_factor = 1.25
+            zoom_factor = 1.2
         else:
-            zoom_factor = 1.18
+            zoom_factor = 1.15
         
         # Smooth zoom expression
         zoom_expr = f"'min(zoom+0.0015,{zoom_factor})'"
@@ -315,32 +315,30 @@ class VideoRenderer:
         pan_direction = random.choice(['left', 'right', 'center', 'up', 'down'])
         
         if pan_direction == 'left':
-            x_expr = "'iw/2-(iw/zoom/2)+(on*1.5)'"  # Pan left gradually
+            x_expr = "'iw/2-(iw/zoom/2)+(on*1.5)'"
             y_expr = "'ih/2-(ih/zoom/2)'"
         elif pan_direction == 'right':
-            x_expr = "'iw/2-(iw/zoom/2)-(on*1.5)'"  # Pan right gradually
+            x_expr = "'iw/2-(iw/zoom/2)-(on*1.5)'"
             y_expr = "'ih/2-(ih/zoom/2)'"
         elif pan_direction == 'up':
             x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)+(on*1.5)'"  # Pan up gradually
+            y_expr = "'ih/2-(ih/zoom/2)+(on*1.5)'"
         elif pan_direction == 'down':
             x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)-(on*1.5)'"  # Pan down gradually
+            y_expr = "'ih/2-(ih/zoom/2)-(on*1.5)'"
         else:  # center
             x_expr = "'iw/2-(iw/zoom/2)'"
             y_expr = "'ih/2-(ih/zoom/2)'"
         
-        # Build LUXURIOUS filter chain
+        # Build SIMPLE but BEAUTIFUL filter chain
         filter_chain = [
             f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
             f"crop={width*2}:{height*2}",
             f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height}",
-            # Luxury color grading - richer, warmer tones
-            f"eq=contrast=1.15:brightness=0.03:saturation=1.2:gamma=1.05",
-            # Subtle vignette for cinematic depth
-            "vignette=angle=PI/3:mode=forward",
+            # Luxury color grading
+            f"eq=contrast=1.12:brightness=0.02:saturation=1.18",
             # Sharpen for clarity
-            "unsharp=5:5:1.2:5:5:0.0",
+            "unsharp=5:5:1.0:5:5:0.0",
             "format=yuv420p"
         ]
         
@@ -351,8 +349,8 @@ class VideoRenderer:
             '-vf', ",".join(filter_chain),
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '18',  # Higher quality
+            '-preset', 'ultrafast',
+            '-crf', '20',
             '-y',
             str(output_path)
         ]
@@ -395,7 +393,7 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create LUXURIOUS static intro card with fade"""
+        """Create simple but elegant intro card"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#2c3e50"
         
@@ -403,26 +401,25 @@ class VideoRenderer:
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        # LUXURIOUS static design with fade transition
+        # Center positions (fixed values for 1080x1920 or 1920x1080)
+        headline_y = height // 2 - 80
+        underline_y = height // 2 - 15
+        address_y = height // 2 + 60
+        
+        # ULTRA SIMPLE - just fade and text, NO complex filters
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
             '-vf', (
-                # Fade in at start
-                "fade=t=in:st=0:d=0.8,"
-                # Vignette for cinematic look
-                "vignette=angle=PI/4:mode=forward,"
-                # Headline - static, centered, with shadow
-                f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-80:shadowcolor=black@0.8:shadowx=5:shadowy=5,"
-                # Elegant gold underline (static)
-                f"drawbox=x=(w-600)/2:y=(h-text_h)/2-15:w=600:h=4:color=#c89666@0.9:t=fill,"
-                # Address - static, centered, gold color
-                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+60:shadowcolor=black@0.7:shadowx=3:shadowy=3"
+                f"fade=t=in:st=0:d=0.8,"
+                f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y={headline_y}:shadowcolor=black@0.8:shadowx=5:shadowy=5,"
+                f"drawbox=x={width//2-300}:y={underline_y}:w=600:h=4:color=#c89666@0.9:t=fill,"
+                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y={address_y}:shadowcolor=black@0.7:shadowx=3:shadowy=3"
             ),
             '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '22',
+            '-preset', 'ultrafast',
+            '-crf', '23',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -442,37 +439,36 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create LUXURIOUS static outro card with fade"""
+        """Create simple but elegant outro card"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
         
-        # LUXURIOUS static design with fade transition
+        # Center positions (fixed values)
+        name_y = height // 2 - 100
+        line1_y = height // 2 - 115
+        phone_y = height // 2 - 10
+        line2_y = height // 2 + 65
+        cta_y = height // 2 + 120
+        
+        # ULTRA SIMPLE - just fade and text, NO complex filters
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
             '-vf', (
-                # Fade in at start
-                "fade=t=in:st=0:d=0.7,"
-                # Vignette for cinematic look
-                "vignette=angle=PI/4,"
-                # Name - static, centered, with gold shadow
-                f"drawtext=text='{agent_name_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-100:shadowcolor=#c89666@0.7:shadowx=3:shadowy=3,"
-                # Decorative line above name (static)
-                f"drawbox=x=(w-500)/2:y=(h-text_h)/2-115:w=500:h=3:color=#c89666@0.9:t=fill,"
-                # Phone - static, gold color
-                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2-10:shadowcolor=white@0.4:shadowx=2:shadowy=2,"
-                # Decorative line below phone (static)
-                f"drawbox=x=(w-500)/2:y=(h-text_h)/2+65:w=500:h=3:color=#c89666@0.9:t=fill,"
-                # CTA - static
-                f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2+120:shadowcolor=black@0.8:shadowx=4:shadowy=4"
+                f"fade=t=in:st=0:d=0.7,"
+                f"drawtext=text='{agent_name_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y={name_y}:shadowcolor=#c89666@0.7:shadowx=3:shadowy=3,"
+                f"drawbox=x={width//2-250}:y={line1_y}:w=500:h=3:color=#c89666@0.9:t=fill,"
+                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y={phone_y}:shadowcolor=white@0.4:shadowx=2:shadowy=2,"
+                f"drawbox=x={width//2-250}:y={line2_y}:w=500:h=3:color=#c89666@0.9:t=fill,"
+                f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white:x=(w-text_w)/2:y={cta_y}:shadowcolor=black@0.8:shadowx=4:shadowy=4"
             ),
             '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '22',
+            '-preset', 'ultrafast',
+            '-crf', '23',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
