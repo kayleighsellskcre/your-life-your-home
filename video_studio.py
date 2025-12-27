@@ -179,31 +179,64 @@ class VideoRenderer:
                     duration=3
                 )
                 
-                # Concatenate all segments
+                # Concatenate all segments with SMOOTH CROSS-FADE transitions
                 all_segments = [intro_path] + segments + [outro_path]
-                concat_list_path = temp_path / "concat_list.txt"
-                with open(concat_list_path, 'w') as f:
-                    for seg in all_segments:
-                        f.write(f"file '{seg}'\n")
+                
+                # Create a filter complex for cross-fade transitions
+                filter_parts = []
+                current_offset = 0
+                fade_duration = 0.5  # 0.5 second cross-fades
+                
+                # Build the filter complex for smooth transitions
+                for i in range(len(all_segments)):
+                    if i == 0:
+                        # First segment - fade in
+                        filter_parts.append(f"[{i}:v]fade=t=in:st=0:d=0.5,setpts=PTS-STARTPTS[v{i}]")
+                    elif i == len(all_segments) - 1:
+                        # Last segment - fade out
+                        filter_parts.append(f"[{i}:v]fade=t=out:st={duration-fade_duration}:d={fade_duration},setpts=PTS-STARTPTS[v{i}]")
+                    else:
+                        # Middle segments - no fade (will be handled by xfade)
+                        filter_parts.append(f"[{i}:v]setpts=PTS-STARTPTS[v{i}]")
+                
+                # Build xfade transitions between segments
+                xfade_chain = "[v0]"
+                for i in range(1, len(all_segments)):
+                    offset = current_offset + duration_per_item - fade_duration if i > 1 else 3 - fade_duration
+                    if i == 1:
+                        xfade_chain = f"[v0][v1]xfade=transition=smoothleft:duration={fade_duration}:offset={offset}[vx1]"
+                    elif i < len(all_segments) - 1:
+                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition=smoothright:duration={fade_duration}:offset={offset}[vx{i}]"
+                    else:
+                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition=fade:duration={fade_duration}:offset={offset}[outv]"
+                
+                # Combine filter parts
+                filter_complex = ";".join(filter_parts) + ";" + xfade_chain
                 
                 # Final output path
                 output_filename = f"video_{project_id}_{aspect_ratio.replace(':', 'x')}.mp4"
                 output_path = self.output_dir / output_filename
                 
-                # Concatenate all segments
-                concat_cmd = [
-                    'ffmpeg',
-                    '-f', 'concat',
-                    '-safe', '0',
-                    '-i', str(concat_list_path),
-                    '-c', 'copy',
-                    str(output_path)
-                ]
+                # Build FFmpeg command with xfade transitions
+                xfade_cmd = ['ffmpeg']
+                for seg in all_segments:
+                    xfade_cmd.extend(['-i', str(seg)])
                 
-                print(f"[VIDEO RENDERER] Running concat command: {' '.join(concat_cmd)}")
-                result = subprocess.run(concat_cmd, check=True, capture_output=True, text=True)
-                print(f"[VIDEO RENDERER] Concat stdout: {result.stdout}")
-                print(f"[VIDEO RENDERER] Concat stderr: {result.stderr}")
+                xfade_cmd.extend([
+                    '-filter_complex', filter_complex,
+                    '-map', '[outv]',
+                    '-c:v', 'libx264',
+                    '-preset', 'slow',
+                    '-crf', '18',
+                    '-pix_fmt', 'yuv420p',
+                    '-y',
+                    str(output_path)
+                ])
+                
+                print(f"[VIDEO RENDERER] Creating video with smooth transitions...")
+                result = subprocess.run(xfade_cmd, check=True, capture_output=True, text=True)
+                print(f"[VIDEO RENDERER] Transitions stdout: {result.stdout}")
+                print(f"[VIDEO RENDERER] Transitions stderr: {result.stderr}")
                 
                 # Add music if provided
                 if music_path and os.path.exists(music_path):
@@ -275,20 +308,58 @@ class VideoRenderer:
         height: int,
         style: str
     ):
-        """Create video segment from image with Ken Burns effect"""
+        """Create video segment from image with DRAMATIC Ken Burns effect"""
         
-        # Ken Burns zoom effect
-        zoom_factor = 1.1 if style == "luxury_cinematic" else 1.05
+        # More dramatic zoom for luxury feel
+        if style == "luxury_cinematic":
+            zoom_factor = 1.2  # Increased from 1.1
+            # Alternate between zoom in and zoom out for variety
+            import random
+            zoom_direction = random.choice(['in', 'out'])
+            if zoom_direction == 'out':
+                zoom_expr = f"'if(lte(zoom,1.0),1.2,max(1.0,zoom-0.002))'"
+            else:
+                zoom_expr = f"'min(zoom+0.002,{zoom_factor})'"
+        else:
+            zoom_factor = 1.15
+            zoom_expr = f"'min(zoom+0.0015,{zoom_factor})'"
+        
+        # Add smooth panning for more dynamic movement
+        import random
+        pan_direction = random.choice(['left', 'right', 'up', 'down', 'center'])
+        
+        if pan_direction == 'left':
+            x_expr = f"'if(gte(on,1),x+2,x)'"
+            y_expr = "'h/2-(ih*zoom/2)'"
+        elif pan_direction == 'right':
+            x_expr = f"'if(gte(on,1),x-2,x)'"
+            y_expr = "'h/2-(ih*zoom/2)'"
+        elif pan_direction == 'up':
+            x_expr = "'w/2-(iw*zoom/2)'"
+            y_expr = f"'if(gte(on,1),y+2,y)'"
+        elif pan_direction == 'down':
+            x_expr = "'w/2-(iw*zoom/2)'"
+            y_expr = f"'if(gte(on,1),y-2,y)'"
+        else:  # center
+            x_expr = "'w/2-(iw*zoom/2)'"
+            y_expr = "'h/2-(ih*zoom/2)'"
         
         cmd = [
             'ffmpeg',
             '-loop', '1',
             '-i', image_path,
-            '-vf', f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},zoompan=z='min(zoom+0.0015,{zoom_factor})':d={int(duration*30)}:s={width}x{height},format=yuv420p",
+            '-vf', (
+                f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase,"  # Scale up for better zoom quality
+                f"crop={width*2}:{height*2},"
+                f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height},"
+                f"eq=contrast=1.1:brightness=0.02:saturation=1.15,"  # Color grading for luxury
+                f"unsharp=5:5:1.0:5:5:0.0,"  # Sharpen for crisp look
+                "format=yuv420p"
+            ),
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '23',
+            '-preset', 'slow',  # Better quality
+            '-crf', '18',  # Higher quality (lower CRF)
             '-y',
             str(output_path)
         ]
@@ -331,42 +402,38 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create intro card with text overlay"""
+        """Create DRAMATIC intro card with animated text overlay"""
         
-        # Create a dark gradient background
-        bg_color = "#2c3e50" if style == "luxury_cinematic" else "#34495e"
-        
-        # Build filter complex for text overlay
-        filter_parts = [
-            f"color=c={bg_color}:s={width}x{height}:d={duration}[bg]"
-        ]
-        
-        # Add logo if provided
-        if logo_path and logo_path.exists():
-            filter_parts.append(
-                f"[bg][1:v]overlay=(W-w)/2:H/4[bg_logo]"
-            )
-            filter_base = "[bg_logo]"
+        # Luxury gradient backgrounds
+        if style == "luxury_cinematic":
+            bg_color1 = "#1a1a2e"
+            bg_color2 = "#16213e"
         else:
-            filter_base = "[bg]"
+            bg_color1 = "#2c3e50"
+            bg_color2 = "#34495e"
         
-        # Add headline text
+        # Escape text for FFmpeg
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        filter_parts.append(
-            f"{filter_base}drawtext=text='{headline_escaped}':fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf:fontsize=80:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-40"
-        )
-        
-        # Simplified command without logo for now
+        # Create animated gradient background with zoom
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
-            '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
-            '-vf', f"drawtext=text='{headline_escaped}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2",
+            '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
+            '-vf', (
+                # Animated gradient overlay
+                f"geq=r='255*0.5*(1+cos((X+Y+T*50)/50))':g='255*0.3*(1+cos((X-Y+T*30)/40))':b='255*0.2*(1+cos((X+T*40)/30))',format=yuv420p,"
+                # Fade in
+                f"fade=t=in:st=0:d=0.8,"
+                # Animated text - headline with slide up effect
+                f"drawtext=text='{headline_escaped}':fontsize=100:fontcolor=white@0.0:x=(w-text_w)/2:y=h-((h-text_h)/2)*(t/{duration}):enable='lte(t,{duration})',"
+                # Animated text - address with fade in
+                f"drawtext=text='{address_escaped}':fontsize=50:fontcolor=#c89666:x=(w-text_w)/2:y=h/2+80:alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2))'"
+            ),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '23',
+            '-preset', 'slow',
+            '-crf', '18',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -386,9 +453,13 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create outro card with agent branding"""
+        """Create STUNNING outro card with animated branding"""
         
-        bg_color = "#2c3e50" if style == "luxury_cinematic" else "#34495e"
+        # Luxury gradient
+        if style == "luxury_cinematic":
+            bg_color1 = "#1a1a2e"
+        else:
+            bg_color1 = "#2c3e50"
         
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
@@ -396,11 +467,22 @@ class VideoRenderer:
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
-            '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
-            '-vf', f"drawtext=text='{agent_name_escaped}':fontsize=60:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-50,drawtext=text='{agent_phone_escaped}':fontsize=40:fontcolor=#c89666:x=(w-text_w)/2:y=(h-text_h)/2+50",
+            '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
+            '-vf', (
+                # Subtle animated gradient
+                f"geq=r='255*0.4*(1+cos((X+Y+T*40)/60))':g='255*0.25*(1+cos((X-Y+T*25)/50))':b='255*0.15*(1+cos((X+T*30)/40))',format=yuv420p,"
+                # Fade in
+                f"fade=t=in:st=0:d=0.6,"
+                # Animated name - scale up effect
+                f"drawtext=text='{agent_name_escaped}':fontsize=80:fontcolor=white:x=(w-text_w)/2:y=(h-text_h)/2-60:alpha='if(lt(t,0.4),0,min(1,(t-0.4)*3))',"
+                # Animated contact - slide in from bottom
+                f"drawtext=text='{agent_phone_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=h-(h-h/2-20)*(1-min(1,t/0.8)):enable='gte(t,0.5)',"
+                # Call to action
+                f"drawtext=text='Contact Me Today':fontsize=40:fontcolor=white@0.8:x=(w-text_w)/2:y=h/2+120:alpha='if(lt(t,1.5),0,min(1,(t-1.5)*2))'"
+            ),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '23',
+            '-preset', 'slow',
+            '-crf', '18',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
