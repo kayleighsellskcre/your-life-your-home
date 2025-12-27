@@ -400,37 +400,23 @@ class VideoRenderer:
             setpts_filter = "setpts=PTS"
             actual_duration = duration
         
-        # Create particle overlay (light leaks, dust, sparkles)
-        particle_effect = random.choice(['light-leak', 'sparkle', 'dust', 'none', 'none'])  # 40% chance
+        # Create particle overlay (light leaks, dust, sparkles) - SIMPLIFIED
+        particle_effect = random.choice(['light-leak', 'glow', 'none', 'none'])  # Simpler effects
         
         if particle_effect == 'light-leak':
-            # Animated light leak overlay
-            particle_filter = (
-                f"geq=lum='255*0.3*(1+sin((X/50+T*2))*cos((Y/50+T*3)))':cb=128:cr=180,"
-                "blend=all_mode='screen':all_opacity=0.3"
-            )
-        elif particle_effect == 'sparkle':
-            # Sparkle effect
-            particle_filter = (
-                f"geq=lum='if(lt(random(1),0.001),255,lum(X,Y))':cb=128:cr=128,"
-                "unsharp=5:5:2.0"
-            )
-        elif particle_effect == 'dust':
-            # Floating dust particles
-            particle_filter = (
-                f"geq=lum='if(lt(random(1),0.0005),200,lum(X,Y))':cb=128:cr=128,"
-                "boxblur=2:1"
-            )
+            # Simplified light leak overlay using curves
+            particle_filter = "curves=all='0/0 0.5/0.6 1/1'"
+        elif particle_effect == 'glow':
+            # Glow effect using unsharp
+            particle_filter = "unsharp=7:7:2.5:7:7:0"
         else:
             particle_filter = ""
         
-        # Lens flare effect (random chance)
+        # Lens flare effect (simplified)
         lens_flare = random.choice([True, False, False])  # 33% chance
         if lens_flare:
-            flare_filter = (
-                f"geq=lum='lum(X,Y)+100*exp(-((X-W*0.7)*(X-W*0.7)+(Y-H*0.3)*(Y-H*0.3))/(W*W*0.05))*sin(T*2)':cb=180:cr=150,"
-                "blend=all_mode='screen':all_opacity=0.4"
-            )
+            # Simplified flare using curves and brightness
+            flare_filter = "eq=brightness=0.05:contrast=1.05"
         else:
             flare_filter = ""
         
@@ -524,18 +510,14 @@ class VideoRenderer:
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
         address_escaped = address.replace("'", "\\'").replace(":", "\\:")
         
-        # Create DRAMATIC animated intro with multiple effects
+        # Create DRAMATIC animated intro - SIMPLIFIED for compatibility
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
             '-vf', (
-                # Layer 1: Animated radial gradient (pulsing effect)
-                f"geq=r='255*0.6*(1+0.3*sin(T*2))*(1+cos(hypot(X-W/2,Y-H/2)*0.01-T))':g='255*0.4*(1+0.3*sin(T*2))*(1+cos(hypot(X-W/2,Y-H/2)*0.01-T))':b='255*0.3*(1+0.3*sin(T*2))*(1+cos(hypot(X-W/2,Y-H/2)*0.01-T))',format=yuv420p,"
-                # Layer 2: Light rays (cinematic beams)
-                f"geq=lum='lum(X,Y)+50*max(0,cos((atan2(Y-H/2,X-W/2)+T*0.5)*4))':cb=128:cr=140,"
-                # Layer 3: Particle sparkles
-                f"geq=lum='if(lt(random(1),0.0008),255,lum(X,Y))':cb=128:cr=128,"
+                # Subtle gradient (compatible)
+                f"lutyuv=u=128:v=128+20*sin(2*PI*T/{duration}),"
                 # Fade in dramatically
                 f"fade=t=in:st=0:d=1.0,"
                 # Vignette for focus
@@ -543,11 +525,9 @@ class VideoRenderer:
                 # ANIMATED TEXT - Headline with scale + glow effect
                 f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y=h/2-100+(100*(1-min(1,t/1.2))):alpha='min(1,t/0.8)':shadowcolor=black@0.8:shadowx=4:shadowy=4,"
                 # Luxury underline that grows
-                f"drawbox=x=(w-min(tw*min(t/1.5,1),w*0.8))/2:y=h/2-20:w=min((text_w+100)*min(t/1.5,1),w*0.8):h=3:color=#c89666@0.8:t=fill:enable='gte(t,0.5)',"
-                # Address with fade + slide from bottom
-                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=h/2+60+(50*(1-min(1,(t-0.8)/0.8))):alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2))':shadowcolor=black@0.6:shadowx=3:shadowy=3,"
-                # Subtle "swipe up" prompt
-                f"drawtext=text='↑':fontsize=50:fontcolor=white@0.6:x=(w-text_w)/2:y=h-100-20*sin(T*3):alpha='if(lt(t,2),0,min(0.6,(t-2)*0.8))'"
+                f"drawbox=x=(w-600)/2:y=h/2-20:w=600*min(t/1.5,1):h=3:color=#c89666@0.8:t=fill,"
+                # Address with fade + slide from bottom  
+                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y=h/2+60+(50*(1-min(1,(t-0.8)/0.8))):alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2))':shadowcolor=black@0.6:shadowx=3:shadowy=3"
             ),
             '-c:v', 'libx264',
             '-preset', 'slow',
@@ -582,29 +562,26 @@ class VideoRenderer:
         agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
         agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
         
+        # Create SHOWSTOPPING outro - SIMPLIFIED for compatibility
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color1}:s={width}x{height}:d={duration}",
             '-vf', (
-                # Animated radial gradient with pulse
-                f"geq=r='255*0.5*(1+0.4*sin(T*1.5))*(1+cos(hypot(X-W/2,Y-H/2)*0.008-T*0.8))':g='255*0.35*(1+0.4*sin(T*1.5))*(1+cos(hypot(X-W/2,Y-H/2)*0.008-T*0.8))':b='255*0.25*(1+0.4*sin(T*1.5))*(1+cos(hypot(X-W/2,Y-H/2)*0.008-T*0.8))',format=yuv420p,"
-                # Light rays from center
-                f"geq=lum='lum(X,Y)+60*max(0,cos((atan2(Y-H/2,X-W/2)+T*0.6)*5))':cb=128:cr=150,"
-                # Floating particles/sparkles
-                f"geq=lum='if(lt(random(1),0.001),230,lum(X,Y))':cb=150:cr=128,"
+                # Subtle animated gradient (compatible)
+                f"lutyuv=u=128:v=128+25*sin(2*PI*T/{duration}),"
                 # Fade in
                 f"fade=t=in:st=0:d=0.7,"
                 # Vignette
                 "vignette=angle=PI/4,"
                 # Name - scale up from center with glow
-                f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=h/2-100:alpha='if(lt(t,0.3),0,min(1,(t-0.3)*3))':shadowcolor=#c89666@0.8:shadowx=0:shadowy=0:shadowblur=20,"
+                f"drawtext=text='{agent_name_escaped}':fontsize=90:fontcolor=white:x=(w-text_w)/2:y=h/2-100:alpha='if(lt(t,0.3),0,min(1,(t-0.3)*3))':shadowcolor=#c89666@0.8:shadowx=0:shadowy=0,"
                 # Decorative line above name
-                f"drawbox=x=(w-500)/2:y=h/2-130:w=500*min(t/0.8,1):h=2:color=#c89666@0.9:t=fill:enable='gte(t,0.2)',"
+                f"drawbox=x=(w-500)/2:y=h/2-130:w=500*min(t/0.8,1):h=2:color=#c89666@0.9:t=fill,"
                 # Contact with pulse effect
-                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y=h/2-20:alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2.5))':shadowcolor=white@0.4:shadowx=0:shadowy=0:shadowblur=15,"
+                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y=h/2-20:alpha='if(lt(t,0.8),0,min(1,(t-0.8)*2.5))':shadowcolor=white@0.4:shadowx=0:shadowy=0,"
                 # Decorative line below contact
-                f"drawbox=x=(w-500)/2:y=h/2+50:w=500*min((t-0.5)/0.8,1):h=2:color=#c89666@0.9:t=fill:enable='gte(t,0.7)',"
+                f"drawbox=x=(w-500)/2:y=h/2+50:w=500*min((t-0.5)/0.8,1):h=2:color=#c89666@0.9:t=fill,"
                 # CTA with animated entrance
                 f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white@0.9:x=(w-text_w)/2:y=h/2+100+(30*(1-min(1,(t-1.2)/0.6))):alpha='if(lt(t,1.2),0,min(1,(t-1.2)*3))':shadowcolor=black@0.7:shadowx=3:shadowy=3,"
                 # Secondary CTA
