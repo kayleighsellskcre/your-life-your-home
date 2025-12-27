@@ -179,105 +179,31 @@ class VideoRenderer:
                     duration=3
                 )
                 
-                # Concatenate all segments with SMOOTH CROSS-FADE transitions
+                # SIMPLE CONCATENATION - No fancy transitions for now
                 all_segments = [intro_path] + segments + [outro_path]
-                
-                # Create a filter complex for cross-fade transitions
-                filter_parts = []
-                current_offset = 0
-                fade_duration = 0.5  # 0.5 second cross-fades
-                
-                # Build the filter complex for smooth transitions
-                for i in range(len(all_segments)):
-                    if i == 0:
-                        # First segment - fade in
-                        filter_parts.append(f"[{i}:v]fade=t=in:st=0:d=0.5,setpts=PTS-STARTPTS[v{i}]")
-                    elif i == len(all_segments) - 1:
-                        # Last segment - fade out
-                        filter_parts.append(f"[{i}:v]fade=t=out:st={duration-fade_duration}:d={fade_duration},setpts=PTS-STARTPTS[v{i}]")
-                    else:
-                        # Middle segments - no fade (will be handled by xfade)
-                        filter_parts.append(f"[{i}:v]setpts=PTS-STARTPTS[v{i}]")
-                
-                # Build xfade transitions between segments with VARIETY
-                import random
-                transition_types = [
-                    'fadeblack',      # Fade through black (classic)
-                    'wipeleft',       # Wipe left
-                    'wiperight',      # Wipe right
-                    'wipeup',         # Wipe up
-                    'wipedown',       # Wipe down
-                    'slideleft',      # Slide left
-                    'slideright',     # Slide right
-                    'slideup',        # Slide up
-                    'slidedown',      # Slide down
-                    'circlecrop',     # Circle crop (dramatic!)
-                    'rectcrop',       # Rectangle crop
-                    'distance',       # Distance transform
-                    'fadefast',       # Fast fade
-                    'smoothleft',     # Smooth left
-                    'smoothright',    # Smooth right
-                    'smoothup',       # Smooth up
-                    'smoothdown',     # Smooth down
-                    'circleopen',     # Circle open (eye-catching!)
-                    'circleclose',    # Circle close
-                    'vertopen',       # Vertical open
-                    'vertclose',      # Vertical close
-                    'horzopen',       # Horizontal open
-                    'horzclose',      # Horizontal close
-                    'dissolve',       # Dissolve
-                    'pixelize',       # Pixelize effect
-                    'radial',         # Radial wipe
-                    'diagtl',         # Diagonal top-left
-                    'diagtr',         # Diagonal top-right
-                    'diagbl',         # Diagonal bottom-left
-                    'diagbr',         # Diagonal bottom-right
-                ]
-                
-                xfade_chain = "[v0]"
-                for i in range(1, len(all_segments)):
-                    offset = current_offset + duration_per_item - fade_duration if i > 1 else 3 - fade_duration
-                    
-                    # Pick a random transition for variety (but avoid pixelize for intro/outro)
-                    if i == 1 or i == len(all_segments) - 1:
-                        transition = random.choice(['fadeblack', 'circleopen', 'dissolve', 'smoothleft', 'smoothright'])
-                    else:
-                        transition = random.choice(transition_types)
-                    
-                    if i == 1:
-                        xfade_chain = f"[v0][v1]xfade=transition={transition}:duration={fade_duration}:offset={offset}[vx1]"
-                    elif i < len(all_segments) - 1:
-                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition={transition}:duration={fade_duration}:offset={offset}[vx{i}]"
-                    else:
-                        xfade_chain += f";[vx{i-1}][v{i}]xfade=transition={transition}:duration={fade_duration}:offset={offset}[outv]"
-                
-                # Combine filter parts
-                filter_complex = ";".join(filter_parts) + ";" + xfade_chain
+                concat_list_path = temp_path / "concat_list.txt"
+                with open(concat_list_path, 'w') as f:
+                    for seg in all_segments:
+                        f.write(f"file '{seg}'\n")
                 
                 # Final output path
                 output_filename = f"video_{project_id}_{aspect_ratio.replace(':', 'x')}.mp4"
                 output_path = self.output_dir / output_filename
                 
-                # Build FFmpeg command with xfade transitions
-                xfade_cmd = ['ffmpeg']
-                for seg in all_segments:
-                    xfade_cmd.extend(['-i', str(seg)])
-                
-                xfade_cmd.extend([
-                    '-filter_complex', filter_complex,
-                    '-map', '[outv]',
-                    '-c:v', 'libx264',
-                    '-preset', 'slow',
-                    '-crf', '18',
-                    '-pix_fmt', 'yuv420p',
+                # Simple concatenate - NO xfade
+                concat_cmd = [
+                    'ffmpeg',
+                    '-f', 'concat',
+                    '-safe', '0',
+                    '-i', str(concat_list_path),
+                    '-c', 'copy',
                     '-y',
                     str(output_path)
-                ])
+                ]
                 
-                print(f"[VIDEO RENDERER] Creating video with smooth transitions...")
-                result = subprocess.run(xfade_cmd, check=True, capture_output=True, text=True)
-                print(f"[VIDEO RENDERER] Transitions stdout: {result.stdout}")
-                print(f"[VIDEO RENDERER] Transitions stderr: {result.stderr}")
+                print(f"[VIDEO RENDERER] Running simple concat...")
+                result = subprocess.run(concat_cmd, check=True, capture_output=True, text=True)
+                print(f"[VIDEO RENDERER] Concat complete")
                 
                 # Add music if provided
                 if music_path and os.path.exists(music_path):
