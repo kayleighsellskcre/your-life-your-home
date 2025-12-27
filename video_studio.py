@@ -351,71 +351,40 @@ class VideoRenderer:
     ):
         """Create video segment with CINEMATIC EFFECTS - Ken Burns + particles + lens flares"""
         
-        # More dramatic zoom for luxury feel
+        # More dramatic zoom for luxury feel - SIMPLIFIED
         if style == "luxury_cinematic":
-            zoom_factor = 1.25  # Even more dramatic
-            # Alternate between zoom in and zoom out for variety
-            import random
-            zoom_direction = random.choice(['in', 'out', 'in'])  # Favor zoom in
-            if zoom_direction == 'out':
-                zoom_expr = f"'if(lte(zoom,1.0),1.25,max(1.0,zoom-0.0025))'"
-            else:
-                zoom_expr = f"'min(zoom+0.0025,{zoom_factor})'"
+            zoom_factor = 1.2
         else:
-            zoom_factor = 1.18
-            zoom_expr = f"'min(zoom+0.002,{zoom_factor})'"
+            zoom_factor = 1.15
         
-        # Add smooth panning for more dynamic movement
+        # Simple zoom expression
+        zoom_expr = f"'min(zoom+0.002,{zoom_factor})'"
+        
+        # Simplified panning - just left or right
         import random
-        pan_direction = random.choice(['left', 'right', 'up', 'down', 'diagonal-tl', 'diagonal-br'])
+        pan_direction = random.choice(['left', 'right', 'center'])
         
         if pan_direction == 'left':
-            x_expr = f"'if(gte(on,1),x+3,x)'"
+            x_expr = "'x+2'"
             y_expr = "'h/2-(ih*zoom/2)'"
         elif pan_direction == 'right':
-            x_expr = f"'if(gte(on,1),x-3,x)'"
+            x_expr = "'x-2'"
             y_expr = "'h/2-(ih*zoom/2)'"
-        elif pan_direction == 'up':
-            x_expr = "'w/2-(iw*zoom/2)'"
-            y_expr = f"'if(gte(on,1),y+3,y)'"
-        elif pan_direction == 'down':
-            x_expr = "'w/2-(iw*zoom/2)'"
-            y_expr = f"'if(gte(on,1),y-3,y)'"
-        elif pan_direction == 'diagonal-tl':
-            x_expr = f"'if(gte(on,1),x+2,x)'"
-            y_expr = f"'if(gte(on,1),y+2,y)'"
-        elif pan_direction == 'diagonal-br':
-            x_expr = f"'if(gte(on,1),x-2,x)'"
-            y_expr = f"'if(gte(on,1),y-2,y)'"
-        else:
+        else:  # center
             x_expr = "'w/2-(iw*zoom/2)'"
             y_expr = "'h/2-(ih*zoom/2)'"
         
-        # Random speed ramp (slow-mo effect on some photos)
-        speed_effect = random.choice(['normal', 'slow-mo', 'normal', 'normal'])  # 25% chance of slow-mo
-        if speed_effect == 'slow-mo':
-            setpts_filter = "setpts=1.5*PTS"  # 1.5x slower for dramatic effect
-            actual_duration = duration * 1.5
-        else:
-            setpts_filter = "setpts=PTS"
-            actual_duration = duration
+        # NO speed effects - keep it simple and stable
         
-        # Build the complex filter chain - SIMPLIFIED AND TESTED
+        # Build the SIMPLE filter chain
         filter_chain = [
             f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
             f"crop={width*2}:{height*2}",
-            f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(actual_duration*30)}:s={width}x{height}",
-            f"eq=contrast=1.15:brightness=0.03:saturation=1.2",  # Color grading (removed gamma)
-            "unsharp=5:5:1.5:5:5:0.0",  # Sharpen
+            f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height}",
+            f"eq=contrast=1.1:brightness=0.02:saturation=1.15",
+            "unsharp=5:5:1.0:5:5:0.0",
+            "format=yuv420p"
         ]
-        
-        # Add speed effect
-        filter_chain.append(setpts_filter)
-        
-        # Add vignette for cinematic look
-        filter_chain.append("vignette=angle=PI/3")
-        
-        filter_chain.append("format=yuv420p")
         
         cmd = [
             'ffmpeg',
