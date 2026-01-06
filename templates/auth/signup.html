@@ -195,10 +195,10 @@
         <label for="role">I am signing up as</label>
         <select id="role" name="role">
           <option value="agent" {% if role == 'agent' %}selected{% endif %}>
-            🏢 Real Estate Agent
+            Real Estate Agent
           </option>
           <option value="lender" {% if role == 'lender' %}selected{% endif %}>
-            💼 Lender or Loan Officer
+            Lender or Loan Officer
           </option>
         </select>
       </div>
@@ -211,7 +211,7 @@
       {% endif %}
       
       <div class="role-hint">
-        💡 <strong>Homeowners:</strong> Free forever. 
+        <strong>Homeowners:</strong> Free forever. 
         {% if role != 'homeowner' %}
         <strong>Professionals:</strong> Free trial, then subscribe for full access.
         {% endif %}

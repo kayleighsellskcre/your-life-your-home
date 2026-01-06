@@ -1,0 +1,443 @@
+/* ===================================================================
+   YOUR LIFE YOUR HOME - PLATFORM ENHANCEMENTS
+   Brilliant interactions, luxurious feel, seamless integration
+   =================================================================== */
+
+/* ============================================
+   ENHANCED BUTTON SYSTEM - Confident & Clear
+   ============================================ */
+
+.btn-primary,
+.btn,
+button[type="submit"]:not(.btn-secondary):not(.btn-outline),
+a.btn-premium {
+  background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+  color: var(--soft-white);
+  padding: 0.875rem 2rem;
+  border-radius: var(--border-radius-lg);
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(107, 106, 69, 0.2);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+.btn-primary:hover,
+.btn:hover,
+button[type="submit"]:not(.btn-secondary):not(.btn-outline):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 106, 69, 0.3);
+  background: linear-gradient(135deg, #5A5938 0%, var(--olive-green) 100%);
+}
+
+.btn-primary:active,
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(107, 106, 69, 0.2);
+}
+
+.btn-secondary,
+.btn-outline {
+  background: var(--soft-white);
+  color: var(--olive-green);
+  border: 2px solid var(--olive-green);
+  padding: 0.875rem 2rem;
+  border-radius: var(--border-radius-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(107, 106, 69, 0.08);
+  letter-spacing: 0.02em;
+}
+
+.btn-secondary:hover,
+.btn-outline:hover {
+  background: var(--warm-cream);
+  border-color: #5A5938;
+  color: #5A5938;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 106, 69, 0.15);
+}
+
+.btn-lg {
+  padding: 1.125rem 2.5rem;
+  font-size: var(--text-lg);
+}
+
+.btn-sm {
+  padding: 0.625rem 1.5rem;
+  font-size: var(--text-sm);
+}
+
+/* ============================================
+   ENHANCED CARD SYSTEM - Elevated & Refined
+   ============================================ */
+
+.card,
+.card-premium,
+.metric-card {
+  background: var(--soft-white);
+  border: 1px solid rgba(200, 180, 151, 0.3);
+  border-radius: var(--border-radius-xl);
+  padding: var(--space-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.06);
+}
+
+.card:hover,
+.card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(58, 53, 44, 0.12);
+  border-color: rgba(107, 106, 69, 0.4);
+}
+
+/* ============================================
+   ACTION CARDS - Interactive & Inviting
+   ============================================ */
+
+.action-card,
+a.action-card {
+  background: var(--soft-white);
+  border: 1px solid rgba(200, 180, 151, 0.3);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  text-decoration: none;
+  color: var(--charcoal-brown);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(58, 53, 44, 0.06);
+}
+
+.action-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(58, 53, 44, 0.12);
+  border-color: var(--olive-green);
+  background: linear-gradient(135deg, rgba(246, 242, 232, 0.5) 0%, rgba(255, 255, 255, 1) 100%);
+}
+
+/* ============================================
+   FORM ENHANCEMENTS - Clear & Supportive
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="url"],
+select,
+textarea,
+.form-input,
+.form-select,
+.form-textarea,
+.premium-input {
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--charcoal-brown);
+  background-color: var(--soft-white);
+  border: 2px solid rgba(200, 180, 151, 0.4);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(58, 53, 44, 0.04);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+input[type="url"]:focus,
+select:focus,
+textarea:focus,
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.1), 0 2px 8px rgba(58, 53, 44, 0.08);
+  background-color: var(--soft-white);
+}
+
+label,
+.form-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--charcoal-brown);
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.02em;
+}
+
+/* ============================================
+   ENHANCED NAVIGATION - Fluid & Natural
+   ============================================ */
+
+.site-header {
+  background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+  padding: 1rem 0;
+  box-shadow: 0 2px 12px rgba(58, 53, 44, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.main-nav a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.02em;
+}
+
+.main-nav a:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--soft-white);
+}
+
+/* ============================================
+   SMOOTH PAGE TRANSITIONS
+   ============================================ */
+
+.animate-in {
+  animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-in-delay-1 {
+  animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-in-delay-2 {
+  animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-in-delay-3 {
+  animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+  opacity: 0;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   ENHANCED LOADING STATES
+   ============================================ */
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--warm-gray);
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(107, 106, 69, 0.1);
+  border-top-color: var(--olive-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   ENHANCED TOOLTIP SYSTEM
+   ============================================ */
+
+[data-tooltip] {
+  position: relative;
+  cursor: help;
+}
+
+[data-tooltip]:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 0.75rem;
+  background: var(--charcoal-brown);
+  color: var(--soft-white);
+  font-size: var(--text-xs);
+  border-radius: var(--border-radius-md);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: tooltipFadeIn 0.2s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ============================================
+   ENHANCED EMPTY STATES
+   ============================================ */
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, rgba(246, 242, 232, 0.3) 0%, rgba(239, 233, 220, 0.2) 100%);
+  border: 2px dashed rgba(200, 180, 151, 0.4);
+  border-radius: var(--border-radius-xl);
+  color: var(--warm-gray);
+}
+
+.empty-state h3 {
+  color: var(--charcoal-brown);
+  margin-bottom: var(--space-md);
+}
+
+.empty-state p {
+  color: var(--warm-gray);
+  margin-bottom: var(--space-xl);
+}
+
+/* ============================================
+   BADGE & TAG SYSTEM
+   ============================================ */
+
+.badge,
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.05em;
+  border-radius: var(--border-radius-full);
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: rgba(74, 124, 89, 0.15);
+  color: #2E5A3A;
+}
+
+.badge-warning {
+  background: rgba(184, 134, 11, 0.15);
+  color: #8B6914;
+}
+
+.badge-info {
+  background: rgba(91, 124, 141, 0.15);
+  color: #3A5A6B;
+}
+
+.badge-primary {
+  background: rgba(107, 106, 69, 0.15);
+  color: var(--olive-green-dark);
+}
+
+/* ============================================
+   RESPONSIVE ENHANCEMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .btn,
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .card,
+  .card-premium {
+    padding: var(--space-lg);
+  }
+  
+  .action-card {
+    padding: 1.25rem;
+  }
+}
+
+/* ============================================
+   SMOOTH SCROLL BEHAVIOR
+   ============================================ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ============================================
+   FOCUS STATES FOR ACCESSIBILITY
+   ============================================ */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(107, 106, 69, 0.5);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .site-header,
+  .main-nav {
+    display: none;
+  }
+  
+  body {
+    background: white;
+  }
+  
+  .card {
+    break-inside: avoid;
+  }
+}
+

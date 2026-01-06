@@ -1,0 +1,547 @@
+/* ===================================================================
+   FORM ENHANCEMENTS - Clear, Supportive, Luxurious
+   Your Life Your Home Platform
+   =================================================================== */
+
+/* ============================================
+   FORM CONTAINER - Calm & Spacious
+   ============================================ */
+
+form {
+  max-width: 100%;
+}
+
+.form-container,
+.form-wrapper {
+  background: var(--soft-white);
+  border-radius: var(--border-radius-xl);
+  padding: var(--space-2xl);
+  box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
+}
+
+.form-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.form-section-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  color: var(--charcoal-brown);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 2px solid var(--light-cream);
+}
+
+/* ============================================
+   FORM GROUPS - Consistent Spacing
+   ============================================ */
+
+.form-group,
+.premium-form-group,
+.auth-form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* ============================================
+   LABELS - Clear & Supportive
+   ============================================ */
+
+label,
+.form-label,
+.premium-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--charcoal-brown);
+  margin-bottom: var(--space-sm);
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+}
+
+label.required::after,
+.form-label.required::after {
+  content: '*';
+  color: var(--error);
+  margin-left: 0.25rem;
+}
+
+/* ============================================
+   INPUT FIELDS - Professional & Polished
+   ============================================ */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="time"],
+input[type="search"],
+.form-input,
+.premium-input {
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--charcoal-brown);
+  background-color: var(--soft-white);
+  border: 2px solid rgba(200, 180, 151, 0.4);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(58, 53, 44, 0.04);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+input[type="number"]:hover,
+input[type="tel"]:hover,
+input[type="url"]:hover,
+input[type="date"]:hover,
+.form-input:hover,
+.premium-input:hover {
+  border-color: rgba(107, 106, 69, 0.5);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="search"]:focus,
+.form-input:focus,
+.premium-input:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.1), 0 2px 8px rgba(58, 53, 44, 0.08);
+  background-color: var(--soft-white);
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="tel"]::placeholder,
+input[type="url"]::placeholder,
+textarea::placeholder {
+  color: rgba(58, 53, 44, 0.4);
+  font-style: italic;
+}
+
+/* ============================================
+   SELECT DROPDOWNS - Elegant & Functional
+   ============================================ */
+
+select,
+.form-select,
+.premium-select {
+  width: 100%;
+  padding: 0.875rem 2.5rem 0.875rem 1.125rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--charcoal-brown);
+  background-color: var(--soft-white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B6A45' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 12px;
+  border: 2px solid rgba(200, 180, 151, 0.4);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(58, 53, 44, 0.04);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+select:hover,
+.form-select:hover {
+  border-color: rgba(107, 106, 69, 0.5);
+}
+
+select:focus,
+.form-select:focus,
+.premium-select:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.1), 0 2px 8px rgba(58, 53, 44, 0.08);
+}
+
+/* ============================================
+   TEXTAREA - Comfortable & Spacious
+   ============================================ */
+
+textarea,
+.form-textarea,
+.premium-textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.875rem 1.125rem;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  color: var(--charcoal-brown);
+  background-color: var(--soft-white);
+  border: 2px solid rgba(200, 180, 151, 0.4);
+  border-radius: var(--border-radius-md);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(58, 53, 44, 0.04);
+  resize: vertical;
+}
+
+textarea:hover,
+.form-textarea:hover {
+  border-color: rgba(107, 106, 69, 0.5);
+}
+
+textarea:focus,
+.form-textarea:focus,
+.premium-textarea:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.1), 0 2px 8px rgba(58, 53, 44, 0.08);
+}
+
+/* ============================================
+   CHECKBOXES & RADIOS - Modern & Clear
+   ============================================ */
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-right: 0.5rem;
+  cursor: pointer;
+  accent-color: var(--olive-green);
+}
+
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checkbox-label,
+.radio-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: var(--weight-normal);
+  padding: 0.5rem;
+  border-radius: var(--border-radius-md);
+  transition: background-color 0.2s ease;
+}
+
+.checkbox-label:hover,
+.radio-label:hover {
+  background-color: rgba(107, 106, 69, 0.05);
+}
+
+/* ============================================
+   FILE UPLOAD - Elegant & Inviting
+   ============================================ */
+
+input[type="file"] {
+  display: block;
+  width: 100%;
+  padding: 0.875rem 1.125rem;
+  font-size: var(--text-sm);
+  color: var(--charcoal-brown);
+  background: var(--soft-white);
+  border: 2px dashed rgba(200, 180, 151, 0.5);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="file"]:hover {
+  border-color: var(--olive-green);
+  background: rgba(107, 106, 69, 0.03);
+}
+
+input[type="file"]:focus {
+  outline: none;
+  border-color: var(--olive-green);
+  box-shadow: 0 0 0 4px rgba(107, 106, 69, 0.1);
+}
+
+/* Custom file upload button */
+.file-upload-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.5rem;
+  background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+  color: white;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: var(--weight-semibold);
+}
+
+.file-upload-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+}
+
+/* ============================================
+   HELPER TEXT & VALIDATION
+   ============================================ */
+
+.form-help-text,
+.help-text {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: var(--text-xs);
+  color: rgba(58, 53, 44, 0.6);
+  line-height: 1.4;
+}
+
+.form-error,
+.error-message {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: var(--text-xs);
+  color: var(--error);
+  font-weight: var(--weight-medium);
+}
+
+.form-success,
+.success-message {
+  display: block;
+  margin-top: 0.375rem;
+  font-size: var(--text-xs);
+  color: var(--success);
+  font-weight: var(--weight-medium);
+}
+
+/* Input validation states */
+input.error,
+select.error,
+textarea.error {
+  border-color: var(--error);
+}
+
+input.error:focus,
+select.error:focus,
+textarea.error:focus {
+  box-shadow: 0 0 0 4px rgba(160, 65, 61, 0.1);
+}
+
+input.success,
+select.success,
+textarea.success {
+  border-color: var(--success);
+}
+
+input.success:focus,
+select.success:focus,
+textarea.success:focus {
+  box-shadow: 0 0 0 4px rgba(74, 124, 89, 0.1);
+}
+
+/* ============================================
+   FORM BUTTON GROUPS - Organized & Clear
+   ============================================ */
+
+.form-actions,
+.form-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: var(--space-xl);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--light-cream);
+}
+
+.form-actions.centered {
+  justify-content: center;
+}
+
+.form-actions.right {
+  justify-content: flex-end;
+}
+
+/* ============================================
+   INPUT GROUPS - Combined Inputs
+   ============================================ */
+
+.input-group {
+  display: flex;
+  gap: 0;
+}
+
+.input-group input,
+.input-group select {
+  flex: 1;
+}
+
+.input-group input:not(:first-child),
+.input-group select:not(:first-child) {
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group input:not(:last-child),
+.input-group select:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group-prepend,
+.input-group-append {
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  background: var(--light-cream);
+  border: 2px solid rgba(200, 180, 151, 0.4);
+  color: var(--charcoal-brown);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.input-group-prepend {
+  border-right: none;
+  border-top-left-radius: var(--border-radius-md);
+  border-bottom-left-radius: var(--border-radius-md);
+}
+
+.input-group-append {
+  border-left: none;
+  border-top-right-radius: var(--border-radius-md);
+  border-bottom-right-radius: var(--border-radius-md);
+}
+
+/* ============================================
+   DISABLED STATES
+   ============================================ */
+
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--light-cream);
+}
+
+/* ============================================
+   MOBILE RESPONSIVENESS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .form-container,
+  .form-wrapper {
+    padding: var(--space-lg);
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  .form-actions,
+  .form-buttons {
+    flex-direction: column;
+  }
+  
+  .form-actions button,
+  .form-buttons button {
+    width: 100%;
+  }
+  
+  .input-group {
+    flex-direction: column;
+  }
+  
+  .input-group input:not(:first-child),
+  .input-group select:not(:first-child) {
+    border-left: 2px solid rgba(200, 180, 151, 0.4);
+    border-top: none;
+    border-radius: 0;
+  }
+  
+  .input-group input:first-child,
+  .input-group select:first-child {
+    border-top-left-radius: var(--border-radius-md);
+    border-top-right-radius: var(--border-radius-md);
+    border-bottom-left-radius: 0;
+  }
+  
+  .input-group input:last-child,
+  .input-group select:last-child {
+    border-bottom-left-radius: var(--border-radius-md);
+    border-bottom-right-radius: var(--border-radius-md);
+    border-top-right-radius: 0;
+  }
+}
+
+/* ============================================
+   FORM ANIMATIONS
+   ============================================ */
+
+@keyframes formErrorShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+input.error,
+select.error,
+textarea.error {
+  animation: formErrorShake 0.5s;
+}
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(107, 106, 69, 0.5);
+  outline-offset: 2px;
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
