@@ -491,54 +491,54 @@
 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
   <!-- Column 1 -->
   <div class="stat-card-clickable" onclick="openStatModal('total')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">📊 Total Contacts</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Total Contacts</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">All contacts in your CRM</p>
   </div>
   
   <div class="stat-card-clickable" onclick="openStatModal('active')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🎯 Active Pipeline</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Active Pipeline</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.active }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Active buyers & sellers</p>
   </div>
   
   <div class="stat-card-clickable" onclick="openStatModal('new')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">⭐ New Leads</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">New Leads</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.new }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Waiting for first contact</p>
   </div>
   
   <!-- Column 2 -->
   <div class="stat-card-clickable" onclick="openStatModal('tasks')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">✅ Pending Tasks</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Pending Tasks</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.pending_tasks|default(0) }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Follow-ups & reminders</p>
   </div>
   
   <div class="stat-card-clickable" onclick="openStatModal('followup')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base); position: relative;">
     <div style="position: absolute; top: 0.5rem; right: 0.5rem;">
-      <button onclick="event.stopPropagation(); openFollowupSettings();" style="background: transparent; border: none; color: var(--olive-green); cursor: pointer; font-size: 0.8rem; padding: 0.25rem 0.5rem; z-index: 10;" title="Settings">⚙️</button>
+      <button onclick="event.stopPropagation(); openFollowupSettings();" style="background: transparent; border: none; color: var(--olive-green); cursor: pointer; font-size: 0.8rem; padding: 0.25rem 0.5rem; z-index: 10;" title="Settings">⚙</button>
     </div>
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">📞 Needs Follow-up</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Needs Follow-up</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: {% if stats.needs_followup|default(0) > 0 %}#c0392b{% else %}var(--olive-green){% endif %}; margin-bottom: 0.1rem;">{{ stats.needs_followup|default(0) }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">No contact in {{ stats.follow_up_days|default(30) }}+ days</p>
   </div>
   
   {% if stats.total_equity > 0 %}
   <div class="stat-card-clickable" onclick="openStatModal('equity')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🏠 Total Equity</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Total Equity</h3>
     <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">${{ "{:,.0f}".format(stats.total_equity) }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Tracked across all contacts</p>
   </div>
   {% elif stats.total_deals|default(0) > 0 %}
   <div class="stat-card-clickable" onclick="openStatModal('deals')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">💼 Active Deals</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Active Deals</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total_deals }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">${{ "{:,.0f}".format(stats.pipeline_value|default(0)) }} pipeline</p>
   </div>
   {% else %}
   <div class="stat-card-clickable" onclick="openStatModal('automation')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🤖 Automation</h3>
+    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Automation</h3>
     <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.with_automation }}</div>
     <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Contacts with auto-emails</p>
   </div>
@@ -549,7 +549,7 @@
 <div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light);">
   <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto auto; gap: 1rem; align-items: end;">
     <div>
-      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">🔍 Search Contacts</label>
+      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Search Contacts</label>
       <form method="get" style="display: flex; gap: 0.5rem;">
         <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, address..." style="flex: 1; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
         {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
@@ -597,7 +597,7 @@
   <div class="crm-sidebar">
     <div style="margin-bottom: 1.5rem;">
       <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none; margin-bottom: 1rem;">
-        📥 Import from Excel/CSV
+        Import from Excel/CSV
       </a>
     </div>
     <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
@@ -759,7 +759,7 @@
           {% if contact.recent_interactions %}
             <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
               <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                📋 Recent Activity ({{ contact.interaction_count }} total)
+                Recent Activity ({{ contact.interaction_count }} total)
               </strong>
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 {% for interaction in contact.recent_interactions %}
@@ -790,26 +790,26 @@
 
           <div class="auto-email-badges">
             {% if contact.auto_birthday %}
-              <span class="auto-badge">🎂 Birthday Emails</span>
+              <span class="auto-badge">Birthday Emails</span>
             {% endif %}
             {% if contact.auto_anniversary %}
-              <span class="auto-badge">🏠 Home Anniversary</span>
+              <span class="auto-badge">Home Anniversary</span>
             {% endif %}
             {% if contact.auto_seasonal %}
-              <span class="auto-badge">🍂 Seasonal Checklists</span>
+              <span class="auto-badge">Seasonal Checklists</span>
             {% endif %}
             {% if contact.auto_equity %}
-              <span class="auto-badge">💰 Equity Updates ({{ contact.equity_frequency }})</span>
+              <span class="auto-badge">Equity Updates ({{ contact.equity_frequency }})</span>
             {% endif %}
             {% if contact.auto_holidays %}
-              <span class="auto-badge">🎄 Holiday Greetings</span>
+              <span class="auto-badge">Holiday Greetings</span>
             {% endif %}
           </div>
 
           {% if contact.pending_tasks|default([])|length > 0 %}
             <div style="margin: 1rem 0; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
               <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                ✅ Pending Tasks ({{ contact.task_count|default(0) }})
+                Pending Tasks ({{ contact.task_count|default(0) }})
               </strong>
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 {% for task in contact.pending_tasks[:3] %}
@@ -835,7 +835,7 @@
           {% if contact.deals|default([])|length > 0 %}
             <div style="margin: 1rem 0; padding: 1rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
               <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                💼 Active Deals ({{ contact.deal_count|default(0) }})
+                Active Deals ({{ contact.deal_count|default(0) }})
               </strong>
               <div style="display: flex; flex-direction: column; gap: 0.5rem;">
                 {% for deal in contact.deals[:2] %}
@@ -862,24 +862,24 @@
           {% endif %}
 
           <div class="contact-actions">
-            <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">📝 Log Interaction</button>
-            <button onclick="openTaskModal({{ contact.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;">✅ Add Task</button>
-            <a href="{{ url_for('agent_transactions') }}?contact_id={{ contact.id }}" class="btn btn-small" style="background: #4caf50; color: var(--white); text-decoration: none; border: none; display: inline-block;">💼 Add Transaction</a>
+            <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Log Interaction</button>
+            <button onclick="openTaskModal({{ contact.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;">Add Task</button>
+            <a href="{{ url_for('agent_transactions') }}?contact_id={{ contact.id }}" class="btn btn-small" style="background: #4caf50; color: var(--white); text-decoration: none; border: none; display: inline-block;">Add Transaction</a>
             {% if contact.email %}
-            <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">✉️ Email</a>
+            <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">Email</a>
             {% endif %}
             {% if contact.phone %}
-              <a href="tel:{{ contact.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">📞 Call</a>
+              <a href="tel:{{ contact.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">Call</a>
             {% endif %}
             {% if contact.interaction_count > 0 %}
-            <button onclick="openHistoryModal({{ contact.id }})" class="btn btn-small" style="background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none;">📋 History ({{ contact.interaction_count }})</button>
+            <button onclick="openHistoryModal({{ contact.id }})" class="btn btn-small" style="background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none;">History ({{ contact.interaction_count }})</button>
             {% endif %}
           </div>
         </div>
       {% endfor %}
     {% else %}
       <div class="empty-state">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
+        <div style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--olive-green);">—</div>
         <h3>{% if search_query or tag_filter %}No Contacts Found{% else %}No Contacts Yet{% endif %}</h3>
         <p style="color: var(--charcoal-brown); opacity: 0.8;">
           {% if search_query or tag_filter %}
@@ -897,16 +897,16 @@
     {% if contacts %}
     <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center; display: flex; gap: 1rem; justify-content: center;">
       <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="text-decoration: none;">
-        📥 Import from Excel/CSV
+        Import from Excel/CSV
       </a>
       <button onclick="exportContacts()" class="btn" style="background: var(--olive-green); color: var(--white);">
-        📤 Export to CSV
+        Export to CSV
       </button>
     </div>
     {% else %}
     <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
       <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
-        📥 Import Your Contacts from Excel/CSV
+        Import Your Contacts from Excel/CSV
       </a>
     </div>
     {% endif %}
@@ -1030,11 +1030,11 @@
         <div>
           <label>Interaction Type *</label>
           <select name="interaction_type" required>
-            <option value="email">📧 Email</option>
-            <option value="call">📞 Phone Call</option>
-            <option value="meeting">🤝 Meeting</option>
-            <option value="text">💬 Text Message</option>
-            <option value="note">📝 Note</option>
+            <option value="email">Email</option>
+            <option value="call">Phone Call</option>
+            <option value="meeting">Meeting</option>
+            <option value="text">Text Message</option>
+            <option value="note">Note</option>
           </select>
         </div>
         <div>
@@ -1651,26 +1651,26 @@ function openStatModal(statType) {
   
   switch(statType) {
     case 'total':
-      titleText = '📊 All Contacts';
+      titleText = 'All Contacts';
       const allContacts = contacts.filter(c => true);
       html = generateContactsList(allContacts, 'All contacts in your CRM');
       break;
     case 'active':
-      titleText = '🎯 Active Pipeline';
+      titleText = 'Active Pipeline';
       const activeContacts = contacts.filter(c => c.stage === 'active');
       html = generateContactsList(activeContacts, 'Active buyers & sellers');
       break;
     case 'new':
-      titleText = '⭐ New Leads';
+      titleText = 'New Leads';
       const newContacts = contacts.filter(c => c.stage === 'new');
       html = generateContactsList(newContacts, 'New leads waiting for first contact');
       break;
     case 'tasks':
-      titleText = '✅ Pending Tasks';
+      titleText = 'Pending Tasks';
       html = generateTasksList();
       break;
     case 'followup':
-      titleText = '📞 Needs Follow-up';
+      titleText = 'Needs Follow-up';
       html = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading contacts needing follow-up...</p>';
       // Will be populated via AJAX or filter
       const followupContacts = contacts.filter(c => {
@@ -1680,16 +1680,16 @@ function openStatModal(statType) {
       html = generateContactsList(followupContacts, 'Contacts needing follow-up');
       break;
     case 'equity':
-      titleText = '🏠 Total Equity';
+      titleText = 'Total Equity';
       const equityContacts = contacts.filter(c => c.equity_estimate && c.equity_estimate > 0);
       html = generateEquityList(equityContacts);
       break;
     case 'deals':
-      titleText = '💼 Active Deals';
+      titleText = 'Active Deals';
       html = generateDealsList();
       break;
     case 'automation':
-      titleText = '🤖 Automation';
+      titleText = 'Automation';
       const autoContacts = contacts.filter(c => 
         c.auto_birthday || c.auto_anniversary || c.auto_seasonal || 
         c.auto_equity || c.auto_holidays
@@ -1731,9 +1731,9 @@ function generateContactsList(contactsList, description) {
           </span>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">
-          ${contact.email ? `<div>📧 ${contact.email}</div>` : ''}
-          ${contact.phone ? `<div>📞 ${contact.phone}</div>` : ''}
-          ${contact.property_address ? `<div>🏠 ${contact.property_address}</div>` : ''}
+          ${contact.email ? `<div>${contact.email}</div>` : ''}
+          ${contact.phone ? `<div>${contact.phone}</div>` : ''}
+          ${contact.property_address ? `<div>${contact.property_address}</div>` : ''}
         </div>
       </div>
     `;
@@ -1806,7 +1806,7 @@ function generateEquityList(contactsList) {
           <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${contact.name || 'Unnamed'}</h4>
           <strong style="color: var(--olive-green); font-size: 1.1rem;">$${(contact.equity_estimate || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
         </div>
-        ${contact.property_address ? `<p style="margin: 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">🏠 ${contact.property_address}</p>` : ''}
+        ${contact.property_address ? `<p style="margin: 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">${contact.property_address}</p>` : ''}
       </div>
     `;
   });
@@ -1845,7 +1845,7 @@ function generateDealsList() {
           ${deal.deal_value ? `<strong style="color: var(--olive-green);">$${(deal.deal_value || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>` : ''}
         </div>
         <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Contact: ${deal.contact_name || 'Unknown'}</p>
-        ${deal.property_address ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">🏠 ${deal.property_address}</p>` : ''}
+        ${deal.property_address ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">${deal.property_address}</p>` : ''}
         ${deal.stage ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Stage: ${deal.stage}</p>` : ''}
       </div>
     `;
