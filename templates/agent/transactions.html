@@ -200,10 +200,16 @@
   }
 
   .empty-state-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    opacity: 0.6;
-    filter: grayscale(0.3);
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--olive-green);
   }
 
   .empty-state h3 {
@@ -375,6 +381,7 @@
     </div>
   {% else %}
     <div class="empty-state animate-in" style="animation-delay: 0.2s;">
+      <div class="empty-state-icon">—</div>
       <h3 style="font-family: var(--font-heading);">No Transactions Yet</h3>
       <p>Once you add a transaction, you will be able to track stages here.</p>
     </div>
@@ -503,8 +510,50 @@
   animation: fadeInUp 0.6s ease-out forwards;
 }
 
-/* Responsive Design - Ultra Luxurious Mobile Portrait */
-@media (max-width: 768px) and (orientation: portrait) {
+/* ============================================
+   TABLET BREAKPOINT (768px+)
+   ============================================ */
+@media (min-width: 768px) {
+  .transactions-container {
+    padding: 2rem;
+  }
+  
+  .premium-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+  
+  .transaction-card {
+    padding: 2rem;
+  }
+  
+  .card-premium {
+    padding: 2.5rem;
+  }
+}
+
+/* ============================================
+   DESKTOP BREAKPOINT (1024px+)
+   ============================================ */
+@media (min-width: 1024px) {
+  .transactions-container {
+    padding: 3rem 2rem;
+  }
+  
+  .premium-header {
+    margin-bottom: 4rem;
+  }
+  
+  .card-premium {
+    padding: 3rem;
+    max-width: 900px;
+  }
+}
+
+/* ============================================
+   MOBILE OPTIMIZATIONS (Portrait Mode)
+   ============================================ */
+@media (max-width: 767px) and (orientation: portrait) {
   /* Container */
   .transactions-container {
     padding: 0.875rem !important;
@@ -620,6 +669,47 @@
     padding: 0.875rem 1.25rem !important;
     min-height: 48px !important;
   }
+  
+  /* Transaction Details - Stack on Mobile */
+  .transaction-details {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+    padding-top: 1rem !important;
+    margin-top: 1rem !important;
+  }
+  
+  .detail-item {
+    padding: 0.75rem;
+    background: rgba(107, 106, 69, 0.05);
+    border-radius: 8px;
+  }
+  
+  /* Empty State Mobile */
+  .empty-state {
+    padding: 3rem 1.5rem !important;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.25rem !important;
+  }
+  
+  .empty-state p {
+    font-size: 0.9375rem !important;
+  }
+}
+
+/* Touch-Friendly for All Mobile/Tablet Sizes */
+@media (max-width: 1023px) {
+  .premium-input,
+  .premium-select,
+  .btn-premium,
+  .action-btn-small {
+    min-height: 44px;
+  }
+  
+  .transaction-card::after {
+    display: none; /* Hide arrow on mobile for cleaner look */
+  }
 }
 
 @media (max-width: 768px) {
@@ -628,11 +718,27 @@
   }
   
   .premium-header h1 {
-    font-size: 1.5rem !important;
+    font-size: 2rem !important;
+  }
+  
+  .premium-header .tagline {
+    font-size: 1rem !important;
   }
   
   .card-premium {
     padding: 1.5rem 1rem !important;
+  }
+  
+  .transaction-header {
+    flex-direction: column;
+  }
+  
+  .transaction-actions {
+    width: 100%;
+  }
+  
+  .action-btn-small {
+    width: 100%;
   }
 }
 </style>
