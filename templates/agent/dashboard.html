@@ -187,86 +187,6 @@
     line-height: 1.5;
   }
   
-  /* Designer Guide Section */
-  .designer-guide {
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.12) 100%);
-    border: 2px solid var(--olive-green);
-    border-radius: var(--border-radius-2xl);
-    padding: 2rem;
-    margin-bottom: 2rem;
-  }
-  
-  .designer-guide h2 {
-    font-family: var(--font-heading);
-    font-size: 1.75rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  
-  .designer-guide-intro {
-    font-size: 1.0625rem;
-    color: var(--warm-gray);
-    line-height: 1.7;
-    margin-bottom: 2rem;
-    font-weight: 500;
-  }
-  
-  .guide-section {
-    background: white;
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
-    margin-bottom: 1.25rem;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-  }
-  
-  .guide-section h3 {
-    font-size: 1.125rem;
-    color: var(--olive-green);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-  }
-  
-  .guide-section ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .guide-section li {
-    padding-left: 1.75rem;
-    margin-bottom: 0.75rem;
-    position: relative;
-    color: var(--charcoal-brown);
-    line-height: 1.6;
-    font-size: 0.9375rem;
-  }
-  
-  .guide-section li:before {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: var(--olive-green);
-    font-weight: 700;
-  }
-  
-  .guide-section li:last-child {
-    margin-bottom: 0;
-  }
-  
-  .guide-highlight {
-    background: rgba(107, 106, 69, 0.08);
-    border-left: 4px solid var(--olive-green);
-    padding: 1.25rem;
-    border-radius: var(--border-radius-md);
-    margin-top: 1.25rem;
-    font-size: 1rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-    line-height: 1.7;
-  }
-  
   /* Transaction List */
   .transaction-item {
     display: block;
@@ -368,14 +288,6 @@
     .actions-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
-    }
-    
-    .designer-guide {
-      padding: 2.5rem;
-    }
-    
-    .guide-section {
-      padding: 2rem;
     }
   }
   
@@ -489,35 +401,6 @@
       font-size: 0.8125rem;
     }
     
-    .designer-guide {
-      padding: 1.5rem 1rem;
-    }
-    
-    .designer-guide h2 {
-      font-size: 1.5rem;
-    }
-    
-    .designer-guide-intro {
-      font-size: 0.9375rem;
-    }
-    
-    .guide-section {
-      padding: 1.25rem 1rem;
-    }
-    
-    .guide-section h3 {
-      font-size: 1rem;
-    }
-    
-    .guide-section li {
-      font-size: 0.875rem;
-    }
-    
-    .guide-highlight {
-      padding: 1rem;
-      font-size: 0.9375rem;
-    }
-    
     .btn-outline {
       width: 100%;
       padding: 1rem 1.5rem;
@@ -580,54 +463,6 @@
       <div class="metric-value">{{ metrics.followups_today|default(0) }}</div>
       <div class="metric-label">Follow-ups Today</div>
       <div class="metric-subtext">Clients to check in with</div>
-    </div>
-  </div>
-  
-  <!-- Designer Guide Section -->
-  <div class="designer-guide">
-    <h2>What to say to your designer</h2>
-    <p class="designer-guide-intro">
-      Copy any version below to communicate your responsive design needs clearly and professionally.
-    </p>
-    
-    <div class="guide-section">
-      <h3>The Complete Brief</h3>
-      <ul>
-        <li>On desktop, content should use full screen width with multiple columns where it makes sense</li>
-        <li>On mobile, everything should stack into a single column and remain easy to scroll and tap</li>
-        <li>The layout should be built with consistent breakpoints, so cards, sections, and buttons reflow smoothly from desktop → tablet → mobile</li>
-        <li>Desktop = side-by-side, mobile = stacked, with no horizontal scrolling at any size</li>
-      </ul>
-    </div>
-    
-    <div class="guide-section">
-      <h3>Designer Speak (Technical)</h3>
-      <ul>
-        <li>Please design every page using a responsive grid system (Flexbox or CSS Grid)</li>
-        <li>Desktop: multi-column layouts</li>
-        <li>Tablet: reduced columns</li>
-        <li>Mobile: single-column stacked layout</li>
-        <li>Consistent spacing and padding across all breakpoints</li>
-        <li>Touch-friendly buttons on mobile (minimum 44px tap targets)</li>
-      </ul>
-    </div>
-    
-    <div class="guide-section">
-      <h3>Quality Bar (This Matters 👀)</h3>
-      <ul>
-        <li>Mobile should feel intentionally designed, not just shrunk down</li>
-        <li>Text sizing, spacing, buttons, and cards should be optimized specifically for mobile</li>
-        <li>Touch targets should be generous (48px minimum)</li>
-        <li>No tiny text or cramped layouts on small screens</li>
-      </ul>
-    </div>
-    
-    <div class="guide-highlight">
-      <strong>One-sentence version:</strong> I want the entire platform built with mobile-first responsive design, using a flexible grid so layouts adapt naturally across desktop, tablet, and mobile.
-    </div>
-    
-    <div class="guide-highlight" style="margin-top: 1rem;">
-      <strong>Luxury-level UX:</strong> All pages should feel visually consistent and polished across devices, maintaining the same design language and hierarchy while adapting layout for screen size.
     </div>
   </div>
   
