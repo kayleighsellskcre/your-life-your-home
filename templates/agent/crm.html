@@ -2,11 +2,23 @@
 
 {% block agent_content %}
 <style>
+  /* ============================================
+     MOBILE-FIRST RESPONSIVE LAYOUT SYSTEM
+     Matches Agent Dashboard Design
+     ============================================ */
+  
+  /* Base Container - Mobile First */
+  .crm-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
   .crm-container {
     display: grid;
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 1fr;
     gap: 2rem;
-    margin-top: 2rem;
+    margin-top: 0;
   }
   .crm-sidebar {
     background: var(--gradient-warm);
@@ -259,32 +271,208 @@
     font-family: var(--font-heading);
     color: var(--charcoal-brown);
   }
-  @media (max-width: 1024px) {
-    .crm-container {
-      grid-template-columns: 1fr;
+  
+  /* ============================================
+     TABLET BREAKPOINT (768px+)
+     ============================================ */
+  @media (min-width: 768px) {
+    .crm-wrapper {
+      padding: 2rem;
     }
-    .crm-sidebar {
-      position: static;
+    
+    /* Stats: 2 columns on tablet */
+    div[style*="grid-template-columns: repeat(2, 1fr)"] {
+      gap: 1.25rem;
+    }
+    
+    /* Contact actions: wrap better */
+    .contact-actions {
+      flex-wrap: wrap;
+    }
+    
+    .btn-small {
+      padding: 0.625rem 1rem;
+      min-height: 44px;
     }
   }
-  @media (max-width: 768px) {
-    .dashboard-cards {
-      grid-template-columns: repeat(2, 1fr) !important;
+  
+  /* ============================================
+     DESKTOP BREAKPOINT (1024px+)
+     ============================================ */
+  @media (min-width: 1024px) {
+    .crm-wrapper {
+      padding: 3rem 2rem;
     }
-    .card {
+    
+    .crm-container {
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+    }
+    
+    .crm-sidebar {
+      position: sticky;
+      top: 2rem;
+    }
+    
+    /* Stats: 3 columns on desktop */
+    div[style*="grid-template-columns: repeat(2, 1fr)"]:first-of-type {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+  }
+  
+  /* ============================================
+     MOBILE OPTIMIZATIONS (Portrait Mode)
+     ============================================ */
+  @media (max-width: 767px) and (orientation: portrait) {
+    .crm-wrapper {
+      padding: 1rem 0.875rem;
+    }
+    
+    .dashboard-main__header {
+      padding: 1.25rem 1rem !important;
+      margin-bottom: 1.5rem !important;
+    }
+    
+    .dashboard-main__header h1 {
+      font-size: 1.75rem !important;
+    }
+    
+    .dashboard-main__header p {
+      font-size: 0.9375rem !important;
+    }
+    
+    /* Stats cards: full width on mobile */
+    div[style*="grid-template-columns: repeat(2, 1fr)"] {
+      grid-template-columns: 1fr !important;
+      gap: 0.875rem !important;
+    }
+    
+    .stat-card-clickable {
       padding: 1rem !important;
     }
-    .card-value {
-      font-size: 1.5rem !important;
+    
+    .stat-card-clickable h3 {
+      font-size: 0.8125rem !important;
+    }
+    
+    .stat-card-clickable div[style*="font-size: 1.75rem"] {
+      font-size: 2rem !important;
+    }
+    
+    /* Search bar: stack on mobile */
+    .card[style*="grid-template-columns: 2fr 1fr 1fr auto auto"] > div {
+      grid-template-columns: 1fr !important;
+      gap: 1rem !important;
+    }
+    
+    /* Sidebar: full width on mobile */
+    .crm-sidebar {
+      position: static !important;
+      padding: 1.25rem 1rem !important;
+    }
+    
+    .crm-container {
+      gap: 1.5rem !important;
+    }
+    
+    /* Contact cards */
+    .contact-card {
+      padding: 1.25rem 1rem !important;
+    }
+    
+    .contact-name {
+      font-size: 1.25rem !important;
+    }
+    
+    .contact-header {
+      flex-direction: column !important;
+      gap: 1rem !important;
+    }
+    
+    .contact-header > div:last-child {
+      width: 100%;
+    }
+    
+    .contact-header button {
+      width: 100% !important;
+      min-height: 48px !important;
+    }
+    
+    /* Contact info: stack on mobile */
+    .contact-info {
+      grid-template-columns: 1fr !important;
+      gap: 0.875rem !important;
+    }
+    
+    /* Contact actions: stack on mobile */
+    .contact-actions {
+      flex-direction: column !important;
+      gap: 0.75rem !important;
+    }
+    
+    .contact-actions .btn-small,
+    .contact-actions a {
+      width: 100% !important;
+      min-height: 48px !important;
+      padding: 0.875rem 1.25rem !important;
+      font-size: 0.9375rem !important;
+      justify-content: center !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    
+    /* Filter buttons: full width */
+    .filter-btn {
+      min-height: 48px !important;
+      padding: 0.875rem 1.25rem !important;
+      font-size: 0.9375rem !important;
+    }
+    
+    /* Forms: full width inputs */
+    .form-grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    /* Prevent iOS zoom */
+    input, select, textarea, button {
+      font-size: 16px !important;
+    }
+    
+    /* Modals: full screen on mobile */
+    .modal-content {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 !important;
+      padding: 1.5rem 1rem !important;
+      border-radius: 12px 12px 0 0 !important;
+      max-height: 95vh !important;
+    }
+    
+    /* Empty state */
+    .empty-state {
+      padding: 3rem 1.5rem !important;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.25rem !important;
+    }
+  }
+  
+  /* Touch-friendly buttons everywhere */
+  @media (max-width: 1023px) {
+    .btn, button, a[class*="btn"], .filter-btn {
+      min-height: 44px;
+      padding: 0.75rem 1.25rem;
     }
   }
 </style>
 
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Nurture relationships</p>
-  <h1>CRM & Lead Management</h1>
-  <p>Your complete contact management system with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
-</div>
+<div class="crm-wrapper">
+  <div class="dashboard-main__header">
+    <p class="dashboard-tagline">Nurture relationships</p>
+    <h1>CRM & Lead Management</h1>
+    <p>Your complete contact management system with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
+  </div>
 
 <!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
