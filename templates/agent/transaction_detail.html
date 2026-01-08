@@ -501,8 +501,27 @@
     transform: translateY(0);
   }
   
+  /* Desktop Two-Column Optimization */
+  @media (min-width: 769px) {
+    #documents-tab > div:nth-of-type(2) {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  }
+  
   /* Mobile Responsive - Ultra Luxurious Portrait */
   @media (max-width: 768px) and (orientation: portrait) {
+    /* Stack 2-column layout into single column */
+    #documents-tab > div:nth-of-type(2) {
+      flex-direction: column !important;
+      gap: 1.5rem !important;
+    }
+    
+    #documents-tab > div:nth-of-type(2) > div {
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+    
     /* Transaction Header - Ultra Compact */
     .transaction-header {
       margin-bottom: 1.25rem !important;
@@ -550,6 +569,12 @@
     .transaction-header-content > div:nth-child(2) {
       grid-template-columns: 1fr !important;
       gap: 1.25rem !important;
+      padding: 0 !important;
+    }
+    
+    /* Full width on mobile */
+    .transaction-header-content > div:nth-child(2) > div {
+      width: 100% !important;
     }
     
     /* Client Cards */
@@ -574,10 +599,21 @@
     .progress-section {
       padding: 1rem 0.875rem !important;
       margin-bottom: 1.25rem !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    
+    .progress-section h3 {
+      font-size: 0.95rem !important;
     }
     
     .progress-text {
       font-size: 0.85rem !important;
+    }
+    
+    /* Action Buttons Wrapper */
+    .action-buttons-wrapper {
+      padding: 0 0.875rem !important;
     }
     
     /* Tabs - Horizontal Scroll */
@@ -646,6 +682,27 @@
     .document-item {
       padding: 0.875rem !important;
       margin-bottom: 0.75rem !important;
+    }
+    
+    /* Details Tab - Stack Grid */
+    #details-tab div[style*="grid-template-columns: 1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+    
+    /* Tabs Max Width */
+    .tabs {
+      max-width: 100% !important;
+    }
+    
+    /* Tab Content Titles */
+    #documents-tab > div:first-child,
+    #participants-tab > div > h2,
+    #details-tab > div > h2 {
+      padding: 0 0.875rem !important;
+    }
+    
+    #documents-tab > div:first-child h2 {
+      font-size: 1.5rem !important;
     }
     
     /* Modals */
@@ -778,7 +835,7 @@
   </div>
 </div>
 <!-- Action Buttons Centered Below Progress Bar -->
-<div style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+<div class="action-buttons-wrapper" style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; max-width: 1200px; margin-left: auto; margin-right: auto;">
   <button class="action-btn primary" onclick="document.getElementById('share-modal').style.display='flex'">
     Share with Client
   </button>
@@ -798,20 +855,19 @@
 </div>
 
 <!-- Tabs -->
-<div class="tabs">
+<div class="tabs" style="max-width: 1200px; margin: 0 auto;">
   <button class="tab active" onclick="showTab('documents')">Documents</button>
   <button class="tab" onclick="showTab('participants')">Participants</button>
   <button class="tab" onclick="showTab('details')">Details</button>
 </div>
 
-</div>
 <!-- Documents Tab -->
 <div id="documents-tab" class="tab-content">
-  <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem;">
+  <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; padding: 0 1rem;">
     <h2 style="margin: 0; color: #3A352C; text-align: center; font-size:2rem; font-weight:700; letter-spacing:0.02em;">Transaction Overview</h2>
   </div>
-  <div style="display: flex; flex-direction: row; gap: 3rem; justify-content: center; align-items: flex-start;">
-    <div style="flex: 1; max-width: 420px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
+  <div style="display: flex; flex-direction: row; gap: 3rem; justify-content: center; align-items: flex-start; padding: 0 1rem;">
+    <div style="flex: 1; max-width: 520px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
       <h3 style="margin: 0 0 1.2rem 0; color: #6B6A45; font-size:1.15rem; font-weight:600;">Documents</h3>
       <button class="primary-btn" style="margin-bottom: 1.2rem; width:100%;" onclick="document.getElementById('upload-modal').style.display='flex'">
         Upload Document
@@ -838,7 +894,7 @@
         {% endfor %}
       </div>
     </div>
-    <div style="width: 340px; min-width: 220px; max-width: 420px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
+    <div style="flex: 1; max-width: 520px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
       <h3 style="margin: 0 0 1.2rem 0; color: #6B6A45; font-size:1.15rem; font-weight:600;">Activity Timeline</h3>
       <div class="timeline" style="display: flex; flex-direction: column; gap: 0.5rem; position: relative;">
         {% set current_stage_db = (transaction.current_stage or transaction.get('current_stage', 'pre_contract'))|lower %}
@@ -907,21 +963,25 @@
 </div>
 <!-- Participants Tab -->
 <div id="participants-tab" class="tab-content" style="display: none;">
-  <h2 style="margin: 0 0 2rem 0; color: #3A352C;">Transaction Participants</h2>
-  {% for p in participants %}
-    <div class="participant-card">
-      <div class="participant-info">
-        <div class="participant-avatar" style="background: #6B6A45;">
-          {{ p.name[:2]|upper }}
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+    <h2 style="margin: 0 0 2rem 0; color: #3A352C; text-align: center;">Transaction Participants</h2>
+    <div style="max-width: 800px; margin: 0 auto;">
+      {% for p in participants %}
+        <div class="participant-card">
+          <div class="participant-info">
+            <div class="participant-avatar" style="background: #6B6A45;">
+              {{ p.name[:2]|upper }}
+            </div>
+            <div class="participant-details">
+              <h4>{{ p.name }}</h4>
+              <p>{{ p.email or p.user_email }}{% if p.phone %} • {{ p.phone }}{% endif %}</p>
+            </div>
+          </div>
+          <span class="participant-badge">{{ p.participant_type|replace('_', ' ')|title }}</span>
         </div>
-        <div class="participant-details">
-          <h4>{{ p.name }}</h4>
-          <p>{{ p.email or p.user_email }}{% if p.phone %} • {{ p.phone }}{% endif %}</p>
-        </div>
-      </div>
-      <span class="participant-badge">{{ p.participant_type|replace('_', ' ')|title }}</span>
+      {% endfor %}
     </div>
-  {% endfor %}
+  </div>
 </div>
 
 </div>
@@ -948,43 +1008,45 @@
 
 <!-- Details Tab -->
 <div id="details-tab" class="tab-content" style="display: none;">
-  <h2 style="margin: 0 0 2rem 0; color: #3A352C;">Transaction Details</h2>
-  
-  <div style="background: white; padding: 2rem; border-radius: 12px; border: 1px solid #E5E5E5;">
-    <div style="display: grid; gap: 1.5rem;">
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Property Address</label>
-        <input type="text" value="123 Main Street" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+    <h2 style="margin: 0 0 2rem 0; color: #3A352C; text-align: center;">Transaction Details</h2>
+    
+    <div style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; border: 1px solid #E5E5E5;">
+      <div style="display: grid; gap: 1.5rem;">
         <div>
-          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Purchase Price</label>
-          <input type="text" value="$450,000" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Property Address</label>
+          <input type="text" value="123 Main Street" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
         </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Purchase Price</label>
+            <input type="text" value="$450,000" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          </div>
+          <div>
+            <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Side</label>
+            <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+              <option>Buyer</option>
+              <option>Seller</option>
+              <option>Both</option>
+            </select>
+          </div>
+        </div>
+        
         <div>
-          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Side</label>
-          <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
-            <option>Buyer</option>
-            <option>Seller</option>
-            <option>Both</option>
-          </select>
+          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Target Close Date</label>
+          <input type="date" value="2025-01-15" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
         </div>
+        
+        <div>
+          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Notes</label>
+          <textarea rows="4" placeholder="Add any notes about this transaction..." style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;"></textarea>
+        </div>
+        
+        <button class="primary-btn">
+          Save Changes
+        </button>
       </div>
-      
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Target Close Date</label>
-        <input type="date" value="2025-01-15" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
-      </div>
-      
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Notes</label>
-        <textarea rows="4" placeholder="Add any notes about this transaction..." style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;"></textarea>
-      </div>
-      
-      <button class="primary-btn">
-        Save Changes
-      </button>
     </div>
   </div>
 </div>
