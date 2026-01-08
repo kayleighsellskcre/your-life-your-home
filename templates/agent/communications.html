@@ -1,23 +1,723 @@
 {% extends "agent/layout.html" %}
 
 {% block agent_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Stay on-brand</p>
+<style>
+  /* ============================================
+     MOBILE-FIRST RESPONSIVE LAYOUT SYSTEM
+     ============================================ */
+  
+  .comms-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+  
+  /* Header */
+  .comms-header {
+    padding: 1.5rem 1rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border-radius: var(--border-radius-xl);
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .comms-tagline {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  
+  .comms-header h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  
+  .comms-header p {
+    font-size: 1rem;
+    color: var(--warm-gray);
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  /* Cards */
+  .comms-card {
+    background: var(--soft-white);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: var(--border-radius-xl);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .comms-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  
+  /* Template Grid */
+  .templates-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  
+  .template-card {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  
+  .template-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.12);
+    border-color: var(--olive-green);
+  }
+  
+  .template-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 1rem;
+    gap: 1rem;
+  }
+  
+  .template-title {
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+  }
+  
+  .template-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+  
+  .template-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--border-radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .badge-email {
+    background: rgba(107, 106, 69, 0.15);
+    color: var(--olive-green);
+  }
+  
+  .badge-text {
+    background: rgba(200, 180, 151, 0.3);
+    color: var(--charcoal-brown);
+  }
+  
+  .badge-lead { background: #E3F2FD; color: #1565C0; }
+  .badge-offer { background: #FFF3E0; color: #E65100; }
+  .badge-contract { background: #F3E5F5; color: #6A1B9A; }
+  .badge-closing { background: #E8F5E9; color: #2E7D32; }
+  .badge-followup { background: #FFF9C4; color: #F57F17; }
+  .badge-general { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
+  
+  .template-subject {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+  }
+  
+  .template-body {
+    color: var(--warm-gray);
+    line-height: 1.6;
+    font-size: 0.9375rem;
+    white-space: pre-wrap;
+    max-height: 150px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .template-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(200, 180, 151, 0.2);
+  }
+  
+  .btn-template {
+    padding: 0.5rem 1.25rem;
+    border-radius: var(--border-radius-full);
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-use {
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.3);
+  }
+  
+  .btn-use:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.4);
+  }
+  
+  .btn-copy {
+    background: white;
+    color: var(--olive-green);
+    border: 2px solid var(--olive-green);
+  }
+  
+  .btn-copy:hover {
+    background: var(--olive-green);
+    color: white;
+  }
+  
+  /* Form Styling */
+  .comms-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.625rem;
+  }
+  
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid rgba(200, 180, 151, 0.3);
+    border-radius: var(--border-radius-lg);
+    font-size: 1rem;
+    font-family: var(--font-body);
+    color: var(--charcoal-brown);
+    background: white;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+  }
+  
+  .btn-primary {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-full);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(107, 106, 69, 0.4);
+  }
+  
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
+    border-radius: var(--border-radius-2xl);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+  }
+  
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--olive-green);
+  }
+  
+  .empty-state h3 {
+    font-family: var(--font-heading);
+    color: var(--charcoal-brown);
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .empty-state p {
+    color: var(--warm-gray);
+    line-height: 1.6;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  
+  /* ============================================
+     TABLET BREAKPOINT (768px+)
+     ============================================ */
+  @media (min-width: 768px) {
+    .comms-container {
+      padding: 2rem;
+    }
+    
+    .comms-header {
+      padding: 2.5rem 2rem;
+      text-align: left;
+    }
+    
+    .comms-header h1 {
+      font-size: 2.5rem;
+    }
+    
+    .comms-header p {
+      max-width: none;
+      margin: 0;
+    }
+    
+    .templates-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+    
+    .comms-form {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+  
+  /* ============================================
+     DESKTOP BREAKPOINT (1024px+)
+     ============================================ */
+  @media (min-width: 1024px) {
+    .comms-container {
+      padding: 3rem 2rem;
+    }
+    
+    .comms-header {
+      padding: 3rem 2.5rem;
+    }
+    
+    .comms-header h1 {
+      font-size: 3rem;
+    }
+    
+    .templates-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+  
+  /* ============================================
+     MOBILE OPTIMIZATIONS (Portrait Mode)
+     ============================================ */
+  @media (max-width: 767px) and (orientation: portrait) {
+    .comms-container {
+      padding: 1rem 0.875rem;
+    }
+    
+    .comms-header {
+      padding: 1.25rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .comms-header h1 {
+      font-size: 1.75rem;
+    }
+    
+    .comms-header p {
+      font-size: 0.9375rem;
+    }
+    
+    .comms-card {
+      padding: 1.5rem 1rem;
+    }
+    
+    .comms-card h2 {
+      font-size: 1.25rem;
+    }
+    
+    .template-card {
+      padding: 1.25rem 1rem;
+    }
+    
+    .template-title {
+      font-size: 1rem;
+    }
+    
+    .template-header {
+      flex-direction: column;
+    }
+    
+    .template-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .btn-template {
+      width: 100%;
+      justify-content: center;
+      min-height: 48px;
+    }
+    
+    .form-input,
+    .form-select,
+    .form-textarea {
+      min-height: 48px;
+      font-size: 16px; /* Prevents iOS zoom */
+    }
+    
+    .btn-primary {
+      width: 100%;
+      min-height: 52px;
+      padding: 1rem 1.5rem;
+    }
+    
+    .empty-state {
+      padding: 3rem 1.5rem;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.25rem;
+    }
+  }
+  
+  /* Animation */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+</style>
+
+<div class="comms-container">
+  <!-- Header -->
+  <div class="comms-header animate-in">
+    <p class="comms-tagline">Stay on-brand</p>
   <h1>Communication Hub</h1>
   <p>Keep your most-used emails and texts in one place so you can respond quickly while staying kind and on-brand.</p>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Create a Template</h2>
-    <form method="post" style="display:grid;gap:1rem;max-width:720px;margin-top:1.5rem;">
-      <div>
-        <label for="label" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Label</label>
-        <input id="label" name="label" placeholder="Example: New lead welcome" required />
+  <!-- Pre-Built Professional Templates -->
+  <div class="comms-card">
+    <h2>Professional Templates</h2>
+    <p style="color: var(--warm-gray); margin-bottom: 1.5rem; line-height: 1.6;">Ready-to-use templates crafted for real estate professionals. Click to copy and personalize.</p>
+    
+    <div class="templates-grid">
+      <!-- New Lead Welcome Email -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">New Lead Welcome</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-lead">Lead</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Thank you for reaching out!</div>
+        <div class="template-body">Hi [Name],
+
+Thank you so much for reaching out! I'd love to help you with your real estate journey.
+
+I understand how important finding the right home is, and I'm here to guide you every step of the way.
+
+Would you be available for a quick call this week to discuss what you're looking for?
+
+Looking forward to connecting!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
       </div>
-      <div>
-        <label for="category" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Category</label>
-        <select id="category" name="category">
+      
+      <!-- Open House Follow-Up -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Open House Follow-Up</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-followup">Follow-Up</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Great seeing you at [Address]</div>
+        <div class="template-body">Hi [Name],
+
+It was wonderful meeting you at the open house for [Address] yesterday!
+
+I wanted to follow up and see if you have any questions about the property or if you'd like to schedule a private showing.
+
+I'm here to help make your home search as smooth as possible.
+
+Feel free to call or text me anytime.
+
+Warm regards,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Offer Submitted Notification -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Offer Submitted</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-offer">Offer</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Hi [Name]! Great news - your offer has been submitted for [Address]. The listing agent will review and we should hear back within 24-48 hours. I'll keep you updated every step of the way! 🏡</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Under Contract Congratulations -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Under Contract Congrats</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-contract">Contract</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Congratulations! You're under contract!</div>
+        <div class="template-body">Hi [Name],
+
+Congratulations! Your offer has been accepted and we're officially under contract!
+
+Here's what happens next:
+• Earnest money deposit due by [Date]
+• Home inspection scheduled for [Date]
+• Appraisal ordered this week
+• Closing date: [Date]
+
+I'll be with you every step of the way to ensure a smooth closing. Let me know if you have any questions!
+
+Excited for you!
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Inspection Reminder -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Inspection Reminder</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-contract">Contract</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Hi [Name]! Reminder: Your home inspection is scheduled for [Date] at [Time] at [Address]. The inspector will be there about 2-3 hours. Feel free to attend if you'd like! Let me know if you have questions.</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Closing Day Celebration -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Closing Day Message</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-closing">Closing</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Today's the day! Welcome home!</div>
+        <div class="template-body">Hi [Name],
+
+Today's the big day - CLOSING DAY!
+
+I'm so excited for you and honored to have been part of this journey. 
+
+We'll meet at the title company at [Time] to sign the final paperwork, and then the keys are yours!
+
+Congratulations on your new home! This is such an exciting milestone.
+
+See you soon!
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Monthly Check-In -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Monthly Check-In</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-followup">Follow-Up</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Checking in - how's the home search going?</div>
+        <div class="template-body">Hi [Name],
+
+I hope you're doing well! I wanted to check in and see how your home search is going.
+
+Have you seen any properties that caught your interest? Or is there anything specific you'd like me to look for?
+
+I'm here whenever you're ready to take the next step.
+
+Looking forward to hearing from you!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Showing Confirmation -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Showing Confirmed</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-general">General</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Hi [Name]! Your showing is confirmed for [Date] at [Time] at [Address]. I'll meet you there 5 minutes early. See you soon!</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Referral Thank You -->
+      <div class="template-card" onclick="copyTemplate(this)">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Referral Thank You</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-general">General</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Thank you for the referral!</div>
+        <div class="template-body">Hi [Name],
+
+Thank you so much for referring [Referral Name] to me! I truly appreciate your trust and confidence.
+
+I'll take great care of them and make sure they have an excellent experience.
+
+Your support means the world to me!
+
+Gratefully,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Create Custom Template -->
+  <div class="comms-card">
+    <h2>Create Custom Template</h2>
+    <form method="post" class="comms-form">
+      <div class="form-group">
+        <label for="label" class="form-label">Label</label>
+        <input id="label" name="label" class="form-input" placeholder="Example: New lead welcome" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="category" class="form-label">Category</label>
+        <select id="category" name="category" class="form-select">
           <option value="lead">Lead</option>
           <option value="offer">Offer</option>
           <option value="contract">Under Contract</option>
@@ -26,50 +726,110 @@
           <option value="general">General</option>
         </select>
       </div>
-      <div>
-        <label for="channel" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Channel</label>
-        <select id="channel" name="channel">
+      
+      <div class="form-group">
+        <label for="channel" class="form-label">Channel</label>
+        <select id="channel" name="channel" class="form-select">
           <option value="email">Email</option>
           <option value="text">Text</option>
         </select>
       </div>
-      <div>
-        <label for="subject" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Subject (for email)</label>
-        <input id="subject" name="subject" />
+      
+      <div class="form-group">
+        <label for="subject" class="form-label">Subject (for email)</label>
+        <input id="subject" name="subject" class="form-input" placeholder="Optional for text messages" />
       </div>
-      <div>
-        <label for="body" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Body</label>
-        <textarea id="body" name="body" rows="5" style="width:100%;padding:0.75rem;border:1px solid var(--taupe-beige);border-radius:var(--border-radius);font-size:0.95rem;font-family:inherit;resize:vertical;"></textarea>
+      
+      <div class="form-group full-width">
+        <label for="body" class="form-label">Body</label>
+        <textarea id="body" name="body" class="form-textarea" rows="8" placeholder="Your message template here..." required></textarea>
       </div>
-      <button class="btn btn-primary" type="submit">Save Template</button>
+      
+      <div class="form-group full-width">
+        <button class="btn-primary" type="submit">Save Template</button>
+      </div>
     </form>
   </div>
 
-  <div class="card" style="margin-top:2rem;">
-    <h2>Your Templates</h2>
+  <!-- Your Saved Templates -->
+  <div class="comms-card">
+    <h2>Your Saved Templates</h2>
 
     {% if templates %}
-      <div class="dashboard-cards" style="margin-top:1.5rem;">
+      <div class="templates-grid">
         {% for t in templates %}
-          <div class="card" style="background:var(--light-cream);">
-            <h3>{{ t.label }}</h3>
-            <p class="card-subtext">{{ t.category|capitalize }} • {{ t.channel|capitalize }}</p>
+          <div class="template-card">
+            <div class="template-header">
+              <div style="flex: 1;">
+                <div class="template-title">{{ t.label }}</div>
+                <div class="template-badges">
+                  <span class="template-badge badge-{{ t.channel }}">{{ t.channel|capitalize }}</span>
+                  <span class="template-badge badge-{{ t.category }}">{{ t.category|capitalize }}</span>
+                </div>
+              </div>
+            </div>
             {% if t.subject %}
-              <p class="card-subtext" style="margin-top:0.75rem;"><strong>Subject:</strong> {{ t.subject }}</p>
+              <div class="template-subject">Subject: {{ t.subject }}</div>
             {% endif %}
-            {% if t.body %}
-              <p class="card-subtext" style="white-space:pre-wrap;margin-top:0.75rem;">{{ t.body }}</p>
-            {% endif %}
+            <div class="template-body">{{ t.body }}</div>
+            <div class="template-actions">
+              <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+              <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+            </div>
           </div>
         {% endfor %}
       </div>
     {% else %}
       <div class="empty-state">
-        <div style="font-size:3rem;margin-bottom:1rem;">✉️</div>
-        <h3>No Templates Yet</h3>
-        <p>Start with one email you send often, like a warm welcome to a new lead.</p>
+        <div class="empty-icon">—</div>
+        <h3>No Custom Templates Yet</h3>
+        <p>Create your first custom template above, or use one of our professional templates to get started.</p>
       </div>
     {% endif %}
   </div>
 </div>
+
+<script>
+function copyToClipboard(button) {
+  const card = button.closest('.template-card');
+  const subject = card.querySelector('.template-subject');
+  const body = card.querySelector('.template-body');
+  
+  let text = '';
+  if (subject) {
+    text += subject.textContent.replace('Subject: ', '') + '\n\n';
+  }
+  text += body.textContent.trim();
+  
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.style.background = '#4caf50';
+    button.style.borderColor = '#4caf50';
+    button.style.color = 'white';
+    
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.style.background = '';
+      button.style.borderColor = '';
+      button.style.color = '';
+    }, 2000);
+  });
+}
+
+function useTemplate(button) {
+  const card = button.closest('.template-card');
+  const subject = card.querySelector('.template-subject');
+  const body = card.querySelector('.template-body');
+  
+  // This would integrate with email/SMS system
+  alert('Template ready to use! (This would open your email/SMS client)');
+}
+
+function copyTemplate(card) {
+  // Optional: Click on card to copy entire template
+  // You can enhance this based on your needs
+}
+</script>
+
 {% endblock %}
