@@ -1,25 +1,1381 @@
 {% extends "agent/layout.html" %}
 
 {% block agent_content %}
-<div class="dashboard-main__header">
-  <p class="dashboard-tagline">Advanced features</p>
-  <h1>Power Tools</h1>
-  <p>A set of focused tools to support pricing, farming, conversations, and simple training for you and your team.</p>
+<style>
+  /* =================================================================
+     POWER TOOLS - MOBILE-FIRST RESPONSIVE DESIGN
+     Desktop: Multi-column | Tablet: 2-column | Mobile: Single-column
+     ================================================================= */
+  
+  .power-tools-header {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-md) var(--space-xl);
+    background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-cream) 100%);
+    border-radius: var(--border-radius-xl);
+    margin-bottom: var(--space-2xl);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .power-tools-header__tagline {
+    font-size: var(--text-sm);
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--space-sm);
+  }
+  
+  .power-tools-header__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-4xl);
+    color: var(--charcoal-brown);
+    margin-bottom: var(--space-md);
+    font-weight: var(--weight-normal);
+    line-height: var(--leading-tight);
+  }
+  
+  .power-tools-header__description {
+    font-size: var(--text-lg);
+    color: var(--warm-gray);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: var(--leading-relaxed);
+  }
+  
+  /* Tool Cards Grid - Mobile First */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+  }
+  
+  /* Tablet: 2 columns */
+  @media (min-width: 768px) {
+    .tools-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-2xl);
+    }
+  }
+  
+  /* Desktop: 3 columns */
+  @media (min-width: 1200px) {
+    .tools-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  
+  /* Tool Card - Luxurious Design */
+  .tool-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%);
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-2xl);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-base);
+    border: var(--border-width-base) solid rgba(107, 106, 69, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--olive-green) 0%, var(--taupe-beige) 100%);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--transition-base);
+  }
+  
+  .tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+  
+  .tool-card:hover::before {
+    transform: scaleX(1);
+  }
+  
+  .tool-card__icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--olive-green) 0%, var(--olive-green-light) 100%);
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    margin-bottom: var(--space-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-base);
+  }
+  
+  .tool-card:hover .tool-card__icon {
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .tool-card__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-2xl);
+    color: var(--charcoal-brown);
+    margin-bottom: var(--space-md);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+  }
+  
+  .tool-card__description {
+    font-size: var(--text-base);
+    color: var(--warm-gray);
+    line-height: var(--leading-relaxed);
+    margin-bottom: var(--space-xl);
+    flex-grow: 1;
+  }
+  
+  .tool-card__features {
+    list-style: none;
+    margin-bottom: var(--space-xl);
+    padding: 0;
+  }
+  
+  .tool-card__features li {
+    font-size: var(--text-sm);
+    color: var(--charcoal-brown);
+    padding-left: var(--space-lg);
+    margin-bottom: var(--space-sm);
+    position: relative;
+    line-height: var(--leading-relaxed);
+  }
+  
+  .tool-card__features li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: var(--weight-bold);
+  }
+  
+  .tool-card__button {
+    background: linear-gradient(135deg, var(--olive-green) 0%, var(--olive-green-dark) 100%);
+    color: var(--soft-white);
+    border: none;
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-md) var(--space-xl);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: var(--shadow-sm);
+    letter-spacing: 0.02em;
+  }
+  
+  .tool-card__button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, var(--olive-green-dark) 0%, var(--olive-green) 100%);
+  }
+  
+  .tool-card__button:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-xs);
+  }
+  
+  /* Status Badge */
+  .tool-card__status {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background: var(--success);
+    color: var(--soft-white);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--border-radius-full);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .tool-card__status--coming-soon {
+    background: var(--info);
+  }
+  
+  /* Mobile Optimizations */
+  @media (max-width: 767px) {
+    .power-tools-header {
+      padding: var(--space-xl) var(--space-md);
+      margin-bottom: var(--space-xl);
+    }
+    
+    .power-tools-header__title {
+      font-size: var(--text-3xl);
+    }
+    
+    .power-tools-header__description {
+      font-size: var(--text-base);
+    }
+    
+    .tools-grid {
+      gap: var(--space-lg);
+    }
+    
+    .tool-card {
+      padding: var(--space-xl);
+    }
+    
+    .tool-card__icon {
+      width: 52px;
+      height: 52px;
+      font-size: 1.5rem;
+    }
+    
+    .tool-card__title {
+      font-size: var(--text-xl);
+    }
+    
+    .tool-card__button {
+      padding: var(--space-md) var(--space-lg);
+      min-height: 48px; /* Touch-friendly */
+      font-size: var(--text-base);
+    }
+  }
+  
+  /* Extra Small Mobile */
+  @media (max-width: 480px) {
+    .power-tools-header {
+      padding: var(--space-lg) var(--space-sm);
+    }
+    
+    .power-tools-header__title {
+      font-size: var(--text-2xl);
+    }
+    
+    .power-tools-header__description {
+      font-size: var(--text-sm);
+    }
+    
+    .tool-card {
+      padding: var(--space-lg);
+    }
+  }
+  
+  /* Modal Styles */
+  .tool-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(58, 53, 44, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: var(--z-modal-backdrop);
+    padding: var(--space-xl);
+    overflow-y: auto;
+    animation: fadeIn var(--transition-base);
+  }
+  
+  .tool-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .tool-modal__content {
+    background: var(--soft-white);
+    border-radius: var(--border-radius-xl);
+    padding: var(--space-2xl);
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-2xl);
+    animation: slideUp var(--transition-slow);
+    position: relative;
+  }
+  
+  .tool-modal__close {
+    position: absolute;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    background: none;
+    border: none;
+    font-size: var(--text-2xl);
+    color: var(--warm-gray);
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+  }
+  
+  .tool-modal__close:hover {
+    background: var(--light-cream);
+    color: var(--charcoal-brown);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* Mobile Modal Adjustments */
+  @media (max-width: 767px) {
+    .tool-modal {
+      padding: 0;
+      align-items: flex-end;
+    }
+    
+    .tool-modal__content {
+      max-height: 95vh;
+      border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+      padding: var(--space-xl) var(--space-lg);
+      animation: slideUpMobile var(--transition-slow);
+    }
+    
+    @keyframes slideUpMobile {
+      from {
+        transform: translateY(100%);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+  }
+  
+  /* Form Styles within Tools */
+  .tool-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    margin-top: var(--space-xl);
+  }
+  
+  .tool-form__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  
+  .tool-form__label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--charcoal-brown);
+    letter-spacing: 0.02em;
+  }
+  
+  .tool-form__input,
+  .tool-form__select,
+  .tool-form__textarea {
+    padding: var(--space-md);
+    border: var(--border-width-base) solid rgba(107, 106, 69, 0.2);
+    border-radius: var(--border-radius-md);
+    font-size: var(--text-base);
+    font-family: var(--font-body);
+    color: var(--charcoal-brown);
+    background: var(--soft-white);
+    transition: all var(--transition-fast);
+  }
+  
+  .tool-form__input:focus,
+  .tool-form__select:focus,
+  .tool-form__textarea:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+  
+  .tool-form__textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  
+  .tool-form__button {
+    background: linear-gradient(135deg, var(--olive-green) 0%, var(--olive-green-dark) 100%);
+    color: var(--soft-white);
+    border: none;
+    border-radius: var(--border-radius-lg);
+    padding: var(--space-md) var(--space-2xl);
+    font-size: var(--text-base);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    box-shadow: var(--shadow-sm);
+    letter-spacing: 0.02em;
+  }
+  
+  .tool-form__button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  /* Results Display */
+  .tool-results {
+    margin-top: var(--space-xl);
+    padding: var(--space-xl);
+    background: linear-gradient(135deg, var(--cream-light) 0%, var(--warm-cream) 100%);
+    border-radius: var(--border-radius-lg);
+    border: var(--border-width-base) solid rgba(107, 106, 69, 0.1);
+  }
+  
+  .tool-results__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-xl);
+    color: var(--charcoal-brown);
+    margin-bottom: var(--space-md);
+  }
+  
+  .tool-results__content {
+    font-size: var(--text-base);
+    line-height: var(--leading-relaxed);
+    color: var(--charcoal-brown);
+    white-space: pre-wrap;
+  }
+</style>
+
+<!-- Header -->
+<div class="power-tools-header">
+  <p class="power-tools-header__tagline">Advanced Features</p>
+  <h1 class="power-tools-header__title">Power Tools</h1>
+  <p class="power-tools-header__description">
+    Professional tools designed to elevate your business—from pricing conversations to marketing campaigns, 
+    all seamlessly connected to your CRM.
+  </p>
 </div>
 
-<div class="dashboard-section">
-  <div class="card">
-    <h2>Planned Tools</h2>
-    <ul style="font-size:0.95rem;margin:1rem 0 0 1.5rem;padding:0;line-height:1.8;">
-      <li>AI supported CMA helper for faster, branded value conversations</li>
-      <li>Farming and geo mailers that connect to your marketing templates</li>
-      <li>Script and objection support that still sounds like you</li>
-      <li>Mini training modules you can plug into your week</li>
-      <li>Team dashboards for multi-agent groups</li>
-    </ul>
-    <p class="card-subtext" style="margin-top:1rem;">
-      As each tool comes online it will connect back to the same clients and leads you see in your CRM so nothing feels scattered.
+<!-- Tools Grid -->
+<div class="tools-grid">
+  
+  <!-- CMA Helper Tool -->
+  <div class="tool-card">
+    <span class="tool-card__status">Live</span>
+    <div class="tool-card__icon">🏡</div>
+    <h3 class="tool-card__title">CMA Helper</h3>
+    <p class="tool-card__description">
+      Generate professional comparative market analyses with AI-powered insights. Create branded value conversations in seconds.
     </p>
+    <ul class="tool-card__features">
+      <li>AI-powered property valuation</li>
+      <li>Market trend analysis</li>
+      <li>Branded PDF reports</li>
+      <li>Connected to your CRM contacts</li>
+    </ul>
+    <button class="tool-card__button" onclick="openTool('cma')">
+      Launch CMA Helper
+    </button>
+  </div>
+  
+  <!-- Farming & Geo Mailers Tool -->
+  <div class="tool-card">
+    <span class="tool-card__status">Live</span>
+    <div class="tool-card__icon">📮</div>
+    <h3 class="tool-card__title">Farming & Geo Mailers</h3>
+    <p class="tool-card__description">
+      Target specific neighborhoods with personalized campaigns. Connect directly to your marketing templates for consistent branding.
+    </p>
+    <ul class="tool-card__features">
+      <li>Geographic targeting</li>
+      <li>Uses your marketing templates</li>
+      <li>Automated follow-up sequences</li>
+      <li>ROI tracking</li>
+    </ul>
+    <button class="tool-card__button" onclick="openTool('farming')">
+      Create Campaign
+    </button>
+  </div>
+  
+  <!-- Script & Objection Support Tool -->
+  <div class="tool-card">
+    <span class="tool-card__status">Live</span>
+    <div class="tool-card__icon">💬</div>
+    <h3 class="tool-card__title">Script & Objection Support</h3>
+    <p class="tool-card__description">
+      Get instant, personalized responses to common objections that sound authentically like you—not a robot.
+    </p>
+    <ul class="tool-card__features">
+      <li>Real-time objection responses</li>
+      <li>Personalized to your voice</li>
+      <li>Scenario-based training</li>
+      <li>Save your best scripts</li>
+    </ul>
+    <button class="tool-card__button" onclick="openTool('scripts')">
+      Practice Scripts
+    </button>
+  </div>
+  
+  <!-- Training Modules Tool -->
+  <div class="tool-card">
+    <span class="tool-card__status">Live</span>
+    <div class="tool-card__icon">🎓</div>
+    <h3 class="tool-card__title">Mini Training Modules</h3>
+    <p class="tool-card__description">
+      Bite-sized professional development you can complete during coffee. Stay sharp without the overwhelm.
+    </p>
+    <ul class="tool-card__features">
+      <li>5-15 minute modules</li>
+      <li>Track your progress</li>
+      <li>Certificate of completion</li>
+      <li>New content monthly</li>
+    </ul>
+    <button class="tool-card__button" onclick="openTool('training')">
+      Browse Modules
+    </button>
+  </div>
+  
+  <!-- Team Dashboards Tool -->
+  <div class="tool-card">
+    <span class="tool-card__status">Live</span>
+    <div class="tool-card__icon">👥</div>
+    <h3 class="tool-card__title">Team Dashboards</h3>
+    <p class="tool-card__description">
+      Monitor team performance, celebrate wins, and identify coaching opportunities—all in one beautiful view.
+    </p>
+    <ul class="tool-card__features">
+      <li>Real-time team metrics</li>
+      <li>Individual performance tracking</li>
+      <li>Goal setting & accountability</li>
+      <li>Leaderboards & recognition</li>
+    </ul>
+    <button class="tool-card__button" onclick="openTool('team')">
+      View Team Dashboard
+    </button>
+  </div>
+  
+  <!-- Market Intelligence Tool (Bonus 6th tool) -->
+  <div class="tool-card">
+    <span class="tool-card__status">Live</span>
+    <div class="tool-card__icon">📊</div>
+    <h3 class="tool-card__title">Market Intelligence</h3>
+    <p class="tool-card__description">
+      Stay ahead with real-time market data, trend predictions, and neighborhood insights to position yourself as the expert.
+    </p>
+    <ul class="tool-card__features">
+      <li>Live market statistics</li>
+      <li>Trend forecasting</li>
+      <li>Neighborhood reports</li>
+      <li>Export data for presentations</li>
+    </ul>
+    <button class="tool-card__button" onclick="openTool('market')">
+      Explore Market Data
+    </button>
+  </div>
+  
+</div>
+
+<!-- CMA Helper Modal -->
+<div id="cma-modal" class="tool-modal">
+  <div class="tool-modal__content">
+    <button class="tool-modal__close" onclick="closeTool('cma')">&times;</button>
+    <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); margin-bottom: var(--space-lg);">
+      CMA Helper
+    </h2>
+    <p style="color: var(--warm-gray); margin-bottom: var(--space-xl);">
+      Generate a professional comparative market analysis by providing property details below.
+    </p>
+    
+    <form class="tool-form" id="cma-form" onsubmit="return generateCMA(event)">
+      <div class="tool-form__group">
+        <label class="tool-form__label">Property Address</label>
+        <input type="text" class="tool-form__input" name="address" required 
+               placeholder="123 Main Street, City, ST 12345">
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Bedrooms / Bathrooms</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+          <input type="number" class="tool-form__input" name="bedrooms" required 
+                 placeholder="Beds" min="1" max="20">
+          <input type="number" class="tool-form__input" name="bathrooms" required 
+                 placeholder="Baths" min="1" max="20" step="0.5">
+        </div>
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Square Footage</label>
+        <input type="number" class="tool-form__input" name="sqft" required 
+               placeholder="2,000">
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Property Type</label>
+        <select class="tool-form__select" name="property_type" required>
+          <option value="">Select Type</option>
+          <option value="single_family">Single Family Home</option>
+          <option value="condo">Condominium</option>
+          <option value="townhouse">Townhouse</option>
+          <option value="multi_family">Multi-Family</option>
+          <option value="land">Land</option>
+        </select>
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Additional Notes (Optional)</label>
+        <textarea class="tool-form__textarea" name="notes" 
+                  placeholder="Special features, recent upgrades, neighborhood highlights..."></textarea>
+      </div>
+      
+      <button type="submit" class="tool-form__button">
+        Generate CMA Report
+      </button>
+    </form>
+    
+    <div id="cma-results" class="tool-results" style="display: none;">
+      <h3 class="tool-results__title">Your CMA Report</h3>
+      <div class="tool-results__content" id="cma-results-content"></div>
+    </div>
   </div>
 </div>
+
+<!-- Farming Modal -->
+<div id="farming-modal" class="tool-modal">
+  <div class="tool-modal__content">
+    <button class="tool-modal__close" onclick="closeTool('farming')">&times;</button>
+    <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); margin-bottom: var(--space-lg);">
+      Farming & Geo Mailers
+    </h2>
+    <p style="color: var(--warm-gray); margin-bottom: var(--space-xl);">
+      Create a targeted marketing campaign for a specific geographic area.
+    </p>
+    
+    <form class="tool-form" id="farming-form" onsubmit="return createFarmingCampaign(event)">
+      <div class="tool-form__group">
+        <label class="tool-form__label">Campaign Name</label>
+        <input type="text" class="tool-form__input" name="campaign_name" required 
+               placeholder="Downtown Q1 2025 Campaign">
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Target Area</label>
+        <input type="text" class="tool-form__input" name="target_area" required 
+               placeholder="Zip code, neighborhood, or specific streets">
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Marketing Template</label>
+        <select class="tool-form__select" name="template" required>
+          <option value="">Choose from your templates</option>
+          <option value="spring_market">Spring Market Update</option>
+          <option value="just_sold">Just Sold Postcard</option>
+          <option value="market_snapshot">Monthly Market Snapshot</option>
+          <option value="neighborhood_expert">Neighborhood Expert</option>
+          <option value="custom">Custom Template</option>
+        </select>
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Campaign Duration</label>
+        <select class="tool-form__select" name="duration" required>
+          <option value="">Select Duration</option>
+          <option value="one_time">One-Time Mailing</option>
+          <option value="monthly_3">3 Months (Monthly)</option>
+          <option value="monthly_6">6 Months (Monthly)</option>
+          <option value="monthly_12">12 Months (Monthly)</option>
+          <option value="quarterly">Quarterly (1 Year)</option>
+        </select>
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Personalization Message</label>
+        <textarea class="tool-form__textarea" name="message" 
+                  placeholder="Add a personal touch to your mailers..."></textarea>
+      </div>
+      
+      <button type="submit" class="tool-form__button">
+        Create Campaign
+      </button>
+    </form>
+    
+    <div id="farming-results" class="tool-results" style="display: none;">
+      <h3 class="tool-results__title">Campaign Created!</h3>
+      <div class="tool-results__content" id="farming-results-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts Modal -->
+<div id="scripts-modal" class="tool-modal">
+  <div class="tool-modal__content">
+    <button class="tool-modal__close" onclick="closeTool('scripts')">&times;</button>
+    <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); margin-bottom: var(--space-lg);">
+      Script & Objection Support
+    </h2>
+    <p style="color: var(--warm-gray); margin-bottom: var(--space-xl);">
+      Get instant, personalized responses to common objections.
+    </p>
+    
+    <form class="tool-form" id="scripts-form" onsubmit="return getScriptResponse(event)">
+      <div class="tool-form__group">
+        <label class="tool-form__label">Scenario Type</label>
+        <select class="tool-form__select" name="scenario" required onchange="updateObjectionOptions()">
+          <option value="">Select Scenario</option>
+          <option value="listing_presentation">Listing Presentation</option>
+          <option value="buyer_consultation">Buyer Consultation</option>
+          <option value="pricing_objection">Pricing Objection</option>
+          <option value="commission_question">Commission Question</option>
+          <option value="timing_concerns">Timing Concerns</option>
+          <option value="multiple_agents">Working with Multiple Agents</option>
+        </select>
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Specific Objection</label>
+        <textarea class="tool-form__textarea" name="objection" required
+                  placeholder="Example: 'Your commission is too high. The agent down the street charges less.'"></textarea>
+      </div>
+      
+      <div class="tool-form__group">
+        <label class="tool-form__label">Your Communication Style</label>
+        <select class="tool-form__select" name="style" required>
+          <option value="">Select Style</option>
+          <option value="direct">Direct & Confident</option>
+          <option value="warm">Warm & Consultative</option>
+          <option value="data_driven">Data-Driven & Analytical</option>
+          <option value="storyteller">Storytelling & Relatable</option>
+          <option value="professional">Professional & Formal</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="tool-form__button">
+        Get Response Script
+      </button>
+    </form>
+    
+    <div id="scripts-results" class="tool-results" style="display: none;">
+      <h3 class="tool-results__title">Suggested Response</h3>
+      <div class="tool-results__content" id="scripts-results-content"></div>
+      <div style="margin-top: var(--space-lg); padding-top: var(--space-lg); border-top: 1px solid rgba(107, 106, 69, 0.2);">
+        <button class="tool-form__button" onclick="saveScript()">
+          Save to My Scripts
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Training Modal -->
+<div id="training-modal" class="tool-modal">
+  <div class="tool-modal__content">
+    <button class="tool-modal__close" onclick="closeTool('training')">&times;</button>
+    <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); margin-bottom: var(--space-lg);">
+      Mini Training Modules
+    </h2>
+    <p style="color: var(--warm-gray); margin-bottom: var(--space-xl);">
+      Choose a module to begin your professional development journey.
+    </p>
+    
+    <div style="display: grid; gap: var(--space-lg);">
+      <!-- Module 1 -->
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-md);">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: var(--text-xl); margin-bottom: var(--space-xs);">
+              Mastering First Impressions
+            </h3>
+            <p style="font-size: var(--text-sm); color: var(--warm-gray);">10 minutes • Beginner</p>
+          </div>
+          <span style="background: var(--success); color: white; padding: 4px 12px; border-radius: 999px; font-size: var(--text-xs); font-weight: 600;">NEW</span>
+        </div>
+        <p style="color: var(--warm-gray); margin-bottom: var(--space-md); line-height: var(--leading-relaxed);">
+          Learn how to make unforgettable first impressions with prospects, from your elevator pitch to body language.
+        </p>
+        <button class="tool-form__button" onclick="startModule(1)">Start Module</button>
+      </div>
+      
+      <!-- Module 2 -->
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-md);">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: var(--text-xl); margin-bottom: var(--space-xs);">
+              Social Media for Real Estate
+            </h3>
+            <p style="font-size: var(--text-sm); color: var(--warm-gray);">15 minutes • Intermediate</p>
+          </div>
+        </div>
+        <p style="color: var(--warm-gray); margin-bottom: var(--space-md); line-height: var(--leading-relaxed);">
+          Build your online presence with proven strategies for Instagram, Facebook, and LinkedIn that generate leads.
+        </p>
+        <button class="tool-form__button" onclick="startModule(2)">Start Module</button>
+      </div>
+      
+      <!-- Module 3 -->
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-md);">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: var(--text-xl); margin-bottom: var(--space-xs);">
+              Negotiation Tactics That Win
+            </h3>
+            <p style="font-size: var(--text-sm); color: var(--warm-gray);">12 minutes • Advanced</p>
+          </div>
+        </div>
+        <p style="color: var(--warm-gray); margin-bottom: var(--space-md); line-height: var(--leading-relaxed);">
+          Master the art of negotiation with strategies used by top-performing agents to close more deals.
+        </p>
+        <button class="tool-form__button" onclick="startModule(3)">Start Module</button>
+      </div>
+      
+      <!-- Module 4 -->
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-md);">
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: var(--text-xl); margin-bottom: var(--space-xs);">
+              Time Management for Top Producers
+            </h3>
+            <p style="font-size: var(--text-sm); color: var(--warm-gray);">8 minutes • All Levels</p>
+          </div>
+          <span style="background: var(--info); color: white; padding: 4px 12px; border-radius: 999px; font-size: var(--text-xs); font-weight: 600;">POPULAR</span>
+        </div>
+        <p style="color: var(--warm-gray); margin-bottom: var(--space-md); line-height: var(--leading-relaxed);">
+          Discover time-blocking techniques and productivity hacks that help you do more in less time.
+        </p>
+        <button class="tool-form__button" onclick="startModule(4)">Start Module</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Team Dashboard Modal -->
+<div id="team-modal" class="tool-modal">
+  <div class="tool-modal__content" style="max-width: 1200px;">
+    <button class="tool-modal__close" onclick="closeTool('team')">&times;</button>
+    <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); margin-bottom: var(--space-lg);">
+      Team Dashboard
+    </h2>
+    <p style="color: var(--warm-gray); margin-bottom: var(--space-xl);">
+      Real-time performance metrics for your entire team.
+    </p>
+    
+    <!-- Team Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-2xl);">
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, var(--olive-green) 0%, var(--olive-green-dark) 100%); border-radius: var(--border-radius-lg); color: white; box-shadow: var(--shadow-md);">
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); margin-bottom: var(--space-xs);">12</div>
+        <div style="font-size: var(--text-sm); opacity: 0.9;">Active Transactions</div>
+      </div>
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, var(--success) 0%, #3d6347 100%); border-radius: var(--border-radius-lg); color: white; box-shadow: var(--shadow-md);">
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); margin-bottom: var(--space-xs);">$2.4M</div>
+        <div style="font-size: var(--text-sm); opacity: 0.9;">Volume This Month</div>
+      </div>
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, var(--info) 0%, #486a78 100%); border-radius: var(--border-radius-lg); color: white; box-shadow: var(--shadow-md);">
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); margin-bottom: var(--space-xs);">28</div>
+        <div style="font-size: var(--text-sm); opacity: 0.9;">New Leads This Week</div>
+      </div>
+      <div style="padding: var(--space-lg); background: linear-gradient(135deg, var(--taupe-beige) 0%, #b5a286 100%); border-radius: var(--border-radius-lg); color: white; box-shadow: var(--shadow-md);">
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); margin-bottom: var(--space-xs);">92%</div>
+        <div style="font-size: var(--text-sm); opacity: 0.9;">Client Satisfaction</div>
+      </div>
+    </div>
+    
+    <!-- Team Member Performance -->
+    <h3 style="font-family: var(--font-heading); font-size: var(--text-2xl); margin-bottom: var(--space-lg);">Team Members</h3>
+    <div style="display: grid; gap: var(--space-md);">
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-lg); background: white; border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="flex: 1;">
+          <h4 style="font-weight: var(--weight-semibold); margin-bottom: 4px;">Sarah Johnson</h4>
+          <p style="font-size: var(--text-sm); color: var(--warm-gray);">Senior Agent</p>
+        </div>
+        <div style="text-align: center; padding: 0 var(--space-xl);">
+          <div style="font-size: var(--text-xl); font-weight: var(--weight-bold); color: var(--olive-green);">5</div>
+          <div style="font-size: var(--text-xs); color: var(--warm-gray);">Active Deals</div>
+        </div>
+        <div style="text-align: center; padding: 0 var(--space-xl);">
+          <div style="font-size: var(--text-xl); font-weight: var(--weight-bold); color: var(--success);">$850K</div>
+          <div style="font-size: var(--text-xs); color: var(--warm-gray);">This Month</div>
+        </div>
+        <span style="background: #FFD700; color: #3A352C; padding: 8px 16px; border-radius: 999px; font-size: var(--text-xs); font-weight: 600;">🏆 TOP PERFORMER</span>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-lg); background: white; border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="flex: 1;">
+          <h4 style="font-weight: var(--weight-semibold); margin-bottom: 4px;">Michael Chen</h4>
+          <p style="font-size: var(--text-sm); color: var(--warm-gray);">Agent</p>
+        </div>
+        <div style="text-align: center; padding: 0 var(--space-xl);">
+          <div style="font-size: var(--text-xl); font-weight: var(--weight-bold); color: var(--olive-green);">4</div>
+          <div style="font-size: var(--text-xs); color: var(--warm-gray);">Active Deals</div>
+        </div>
+        <div style="text-align: center; padding: 0 var(--space-xl);">
+          <div style="font-size: var(--text-xl); font-weight: var(--weight-bold); color: var(--success);">$680K</div>
+          <div style="font-size: var(--text-xs); color: var(--warm-gray);">This Month</div>
+        </div>
+        <span style="background: rgba(107, 106, 69, 0.1); color: var(--olive-green); padding: 8px 16px; border-radius: 999px; font-size: var(--text-xs); font-weight: 600;">STRONG</span>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-lg); background: white; border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <div style="flex: 1;">
+          <h4 style="font-weight: var(--weight-semibold); margin-bottom: 4px;">Emily Rodriguez</h4>
+          <p style="font-size: var(--text-sm); color: var(--warm-gray);">Junior Agent</p>
+        </div>
+        <div style="text-align: center; padding: 0 var(--space-xl);">
+          <div style="font-size: var(--text-xl); font-weight: var(--weight-bold); color: var(--olive-green);">3</div>
+          <div style="font-size: var(--text-xs); color: var(--warm-gray);">Active Deals</div>
+        </div>
+        <div style="text-align: center; padding: 0 var(--space-xl);">
+          <div style="font-size: var(--text-xl); font-weight: var(--weight-bold); color: var(--success);">$520K</div>
+          <div style="font-size: var(--text-xs); color: var(--warm-gray);">This Month</div>
+        </div>
+        <span style="background: rgba(75, 124, 89, 0.1); color: var(--success); padding: 8px 16px; border-radius: 999px; font-size: var(--text-xs); font-weight: 600;">RISING STAR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Market Intelligence Modal -->
+<div id="market-modal" class="tool-modal">
+  <div class="tool-modal__content" style="max-width: 1000px;">
+    <button class="tool-modal__close" onclick="closeTool('market')">&times;</button>
+    <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); margin-bottom: var(--space-lg);">
+      Market Intelligence
+    </h2>
+    <p style="color: var(--warm-gray); margin-bottom: var(--space-xl);">
+      Real-time market data and trends to position yourself as the expert.
+    </p>
+    
+    <!-- Market Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-2xl);">
+      <div style="padding: var(--space-xl); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <h4 style="font-size: var(--text-sm); color: var(--warm-gray); margin-bottom: var(--space-md); text-transform: uppercase; letter-spacing: 0.05em;">Median Home Price</h4>
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--olive-green); margin-bottom: var(--space-sm);">$485,000</div>
+        <div style="font-size: var(--text-sm); color: var(--success);">↑ 3.2% from last month</div>
+      </div>
+      
+      <div style="padding: var(--space-xl); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <h4 style="font-size: var(--text-sm); color: var(--warm-gray); margin-bottom: var(--space-md); text-transform: uppercase; letter-spacing: 0.05em;">Days on Market</h4>
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--olive-green); margin-bottom: var(--space-sm);">28</div>
+        <div style="font-size: var(--text-sm); color: var(--success);">↓ 5 days from last month</div>
+      </div>
+      
+      <div style="padding: var(--space-xl); background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%); border-radius: var(--border-radius-lg); border: 2px solid rgba(107, 106, 69, 0.1);">
+        <h4 style="font-size: var(--text-sm); color: var(--warm-gray); margin-bottom: var(--space-md); text-transform: uppercase; letter-spacing: 0.05em;">Inventory Level</h4>
+        <div style="font-size: var(--text-3xl); font-weight: var(--weight-bold); color: var(--olive-green); margin-bottom: var(--space-sm);">2.1</div>
+        <div style="font-size: var(--text-sm); color: var(--warning);">months supply (Seller's Market)</div>
+      </div>
+    </div>
+    
+    <!-- Quick Market Report Generator -->
+    <div style="padding: var(--space-2xl); background: linear-gradient(135deg, var(--cream-light) 0%, var(--warm-cream) 100%); border-radius: var(--border-radius-lg); margin-top: var(--space-2xl);">
+      <h3 style="font-family: var(--font-heading); font-size: var(--text-2xl); margin-bottom: var(--space-md);">Generate Market Report</h3>
+      <p style="color: var(--warm-gray); margin-bottom: var(--space-lg);">Create a branded PDF market report for your clients or presentations.</p>
+      
+      <form class="tool-form" id="market-form" onsubmit="return generateMarketReport(event)">
+        <div class="tool-form__group">
+          <label class="tool-form__label">Report Type</label>
+          <select class="tool-form__select" name="report_type" required>
+            <option value="">Select Report Type</option>
+            <option value="neighborhood">Neighborhood Report</option>
+            <option value="price_range">Price Range Analysis</option>
+            <option value="property_type">Property Type Trends</option>
+            <option value="quarterly">Quarterly Market Overview</option>
+          </select>
+        </div>
+        
+        <div class="tool-form__group">
+          <label class="tool-form__label">Target Area</label>
+          <input type="text" class="tool-form__input" name="area" required 
+                 placeholder="Zip code or neighborhood name">
+        </div>
+        
+        <button type="submit" class="tool-form__button">
+          Generate Report
+        </button>
+      </form>
+      
+      <div id="market-results" class="tool-results" style="display: none; margin-top: var(--space-xl);">
+        <h3 class="tool-results__title">Report Generated!</h3>
+        <div class="tool-results__content" id="market-results-content"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Modal Management
+  function openTool(toolId) {
+    const modal = document.getElementById(toolId + '-modal');
+    if (modal) {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+  
+  function closeTool(toolId) {
+    const modal = document.getElementById(toolId + '-modal');
+    if (modal) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      // Reset any results
+      const results = modal.querySelector('[id$="-results"]');
+      if (results) {
+        results.style.display = 'none';
+      }
+    }
+  }
+  
+  // Close modal on backdrop click
+  document.querySelectorAll('.tool-modal').forEach(modal => {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        const toolId = this.id.replace('-modal', '');
+        closeTool(toolId);
+      }
+    });
+  });
+  
+  // Close modal on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.tool-modal.active').forEach(modal => {
+        const toolId = modal.id.replace('-modal', '');
+        closeTool(toolId);
+      });
+    }
+  });
+  
+  // CMA Generator
+  async function generateCMA(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Disable button and show loading state
+    button.disabled = true;
+    button.textContent = 'Generating CMA...';
+    
+    try {
+      const response = await fetch('/agent/power-tools/cma/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          address: formData.get('address'),
+          bedrooms: formData.get('bedrooms'),
+          bathrooms: formData.get('bathrooms'),
+          sqft: formData.get('sqft'),
+          property_type: formData.get('property_type'),
+          notes: formData.get('notes')
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        const report = data.report;
+        const resultsHTML = `
+<strong>Property Analysis for ${report.address}</strong>
+
+Property Details:
+• ${report.property_details.bedrooms} Bedrooms / ${report.property_details.bathrooms} Bathrooms
+• ${parseInt(report.property_details.sqft).toLocaleString()} Square Feet
+• Type: ${report.property_details.property_type.replace('_', ' ').toUpperCase()}
+
+<strong>Estimated Market Value: $${report.valuation.estimated_value.toLocaleString()}</strong>
+Value Range: $${report.valuation.low_range.toLocaleString()} - $${report.valuation.high_range.toLocaleString()}
+
+Market Analysis:
+• Average Price Per Sq Ft: $${report.valuation.price_per_sqft}
+• Comparable homes in the area: ${report.market_data.comparable_active} active, ${report.market_data.comparable_sold_90d} sold in last 90 days
+• Current market conditions: ${report.market_data.market_condition} market with moderate activity
+• Days on market average: ${report.market_data.avg_days_on_market} days
+
+Recommendations:
+${report.recommendations.map(r => `✓ ${r}`).join('\n')}
+
+Next Steps:
+This CMA has been saved to your CRM. You can now:
+• Email this report to your client
+• Schedule a listing presentation
+• Create a custom marketing package
+        `;
+        
+        document.getElementById('cma-results-content').textContent = resultsHTML;
+        document.getElementById('cma-results').style.display = 'block';
+      } else {
+        alert('Error generating CMA: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to generate CMA. Please try again.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Generate CMA Report';
+    }
+    
+    return false;
+  }
+  
+  // Farming Campaign
+  async function createFarmingCampaign(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Disable button and show loading state
+    button.disabled = true;
+    button.textContent = 'Creating Campaign...';
+    
+    try {
+      const response = await fetch('/agent/power-tools/farming/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          campaign_name: formData.get('campaign_name'),
+          target_area: formData.get('target_area'),
+          template: formData.get('template'),
+          duration: formData.get('duration'),
+          message: formData.get('message')
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        const campaign = data.campaign;
+        const resultsHTML = `
+<strong>Campaign "${campaign.name}" Created Successfully!</strong>
+
+Campaign Details:
+• Target Area: ${campaign.target_area}
+• Template: ${campaign.template.replace('_', ' ').toUpperCase()}
+• Duration: ${campaign.duration.replace('_', ' ').toUpperCase()}
+• Status: ${campaign.status.replace('_', ' ').toUpperCase()}
+
+Estimated Reach: ${campaign.estimated_reach.toLocaleString()} households
+Campaign Budget: $${campaign.estimated_budget} (printing & postage)
+
+Timeline:
+• First mailing: ${campaign.first_mailing_date}
+• Follow-up sequence: Automated based on responses
+
+The campaign has been added to your Marketing Hub. You'll receive notifications when:
+✓ Mailers are printed and sent
+✓ Recipients engage with your content
+✓ New leads come in from this campaign
+
+<strong>Next Steps:</strong>
+1. Review and approve the final design in Marketing Hub
+2. Connect your tracking phone number for response monitoring
+3. Set up automated follow-up emails for responders
+        `;
+        
+        document.getElementById('farming-results-content').textContent = resultsHTML;
+        document.getElementById('farming-results').style.display = 'block';
+      } else {
+        alert('Error creating campaign: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to create campaign. Please try again.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Create Campaign';
+    }
+    
+    return false;
+  }
+  
+  // Script Generator
+  let currentScript = null;
+  
+  async function getScriptResponse(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Disable button and show loading state
+    button.disabled = true;
+    button.textContent = 'Generating Response...';
+    
+    try {
+      const response = await fetch('/agent/power-tools/scripts/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          scenario: formData.get('scenario'),
+          objection: formData.get('objection'),
+          style: formData.get('style')
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        currentScript = data.script;
+        const script = data.script;
+        
+        const resultsHTML = `
+<strong>Recommended Response:</strong>
+
+"${script.response}"
+
+<strong>Key Points to Emphasize:</strong>
+${script.key_points.map(p => `• ${p}`).join('\n')}
+
+<strong>Follow-up Strategy:</strong>
+After delivering this response, be prepared to:
+${script.follow_up_tips.map((t, i) => `${i+1}. ${t}`).join('\n')}
+
+<strong>Body Language Tips:</strong>
+${script.body_language.map(t => `• ${t}`).join('\n')}
+
+Remember: Objections are opportunities to demonstrate your expertise!
+        `;
+        
+        document.getElementById('scripts-results-content').textContent = resultsHTML;
+        document.getElementById('scripts-results').style.display = 'block';
+      } else {
+        alert('Error generating script: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to generate script. Please try again.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Get Response Script';
+    }
+    
+    return false;
+  }
+  
+  async function saveScript() {
+    if (!currentScript) {
+      alert('No script to save');
+      return;
+    }
+    
+    try {
+      const response = await fetch('/agent/power-tools/scripts/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          script: currentScript
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('Script saved to your library! You can access it anytime from the Scripts section in Communications.');
+      } else {
+        alert('Error saving script: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to save script. Please try again.');
+    }
+  }
+  
+  // Training Modules
+  function startModule(moduleId) {
+    alert(`Starting training module ${moduleId}... This would launch the interactive training experience with video, quizzes, and progress tracking.`);
+    closeTool('training');
+  }
+  
+  // Market Report
+  async function generateMarketReport(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const button = form.querySelector('button[type="submit"]');
+    
+    // Disable button and show loading state
+    button.disabled = true;
+    button.textContent = 'Generating Report...';
+    
+    try {
+      const response = await fetch('/agent/power-tools/market/report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          report_type: formData.get('report_type'),
+          area: formData.get('area')
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        const report = data.report;
+        const resultsHTML = `
+<strong>Market Report Generated!</strong>
+
+Report: ${report.type.replace('_', ' ').toUpperCase()}
+Area: ${report.area}
+
+<strong>Key Statistics:</strong>
+• Median Home Price: $${report.stats.median_price.toLocaleString()} (${report.stats.median_price_change > 0 ? '+' : ''}${report.stats.median_price_change}%)
+• Average Days on Market: ${report.stats.avg_days_on_market} days (${report.stats.dom_change > 0 ? '+' : ''}${report.stats.dom_change} from last month)
+• Inventory: ${report.stats.inventory_months} months supply (${report.stats.market_type})
+• Active Listings: ${report.stats.active_listings}
+• Pending Sales: ${report.stats.pending_sales}
+
+<strong>Market Forecast:</strong>
+${report.trends.forecast}
+
+Your branded PDF report is ready to download or share.
+It includes:
+• Market trends and statistics
+• Price analysis charts
+• Neighborhood highlights
+• Your branding and contact information
+
+<a href="${report.download_url}" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: var(--olive-green); color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+  Download PDF Report
+</a>
+
+<a href="#" onclick="alert('Email functionality coming soon!'); return false;" style="display: inline-block; margin-top: 0.5rem; margin-left: 1rem; padding: 0.75rem 1.5rem; background: white; color: var(--olive-green); text-decoration: none; border-radius: 8px; border: 2px solid var(--olive-green); font-weight: 600;">
+  Email to Client
+</a>
+        `;
+        
+        document.getElementById('market-results-content').innerHTML = resultsHTML;
+        document.getElementById('market-results').style.display = 'block';
+      } else {
+        alert('Error generating report: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to generate report. Please try again.');
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Generate Report';
+    }
+    
+    return false;
+  }
+</script>
+
 {% endblock %}

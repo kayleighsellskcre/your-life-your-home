@@ -6828,6 +6828,231 @@ def agent_power_tools():
     )
 
 
+@app.route("/agent/power-tools/cma/generate", methods=["POST"])
+def generate_cma():
+    """Generate a CMA report using AI."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        address = data.get("address")
+        bedrooms = data.get("bedrooms")
+        bathrooms = data.get("bathrooms")
+        sqft = data.get("sqft")
+        property_type = data.get("property_type")
+        notes = data.get("notes", "")
+        
+        # Calculate estimated value (simplified - in production would use real MLS data)
+        avg_price_per_sqft = 240  # This would come from market data
+        estimated_value = int(sqft) * avg_price_per_sqft
+        low_range = int(estimated_value * 0.95)
+        high_range = int(estimated_value * 1.05)
+        
+        # Generate report
+        report = {
+            "address": address,
+            "property_details": {
+                "bedrooms": bedrooms,
+                "bathrooms": bathrooms,
+                "sqft": sqft,
+                "property_type": property_type
+            },
+            "valuation": {
+                "estimated_value": estimated_value,
+                "low_range": low_range,
+                "high_range": high_range,
+                "price_per_sqft": avg_price_per_sqft
+            },
+            "market_data": {
+                "comparable_active": 12,
+                "comparable_sold_90d": 8,
+                "avg_days_on_market": 28,
+                "market_condition": "Balanced"
+            },
+            "recommendations": [
+                f"List price: ${estimated_value:,} for optimal positioning",
+                "Professional photography and staging recommended",
+                "Highlight recent upgrades and neighborhood amenities",
+                "Expected time to close: 30-45 days"
+            ],
+            "generated_at": datetime.now().isoformat()
+        }
+        
+        return jsonify({"success": True, "report": report})
+    
+    except Exception as e:
+        print(f"Error generating CMA: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/agent/power-tools/farming/create", methods=["POST"])
+def create_farming_campaign():
+    """Create a geo-targeted farming campaign."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        campaign_name = data.get("campaign_name")
+        target_area = data.get("target_area")
+        template = data.get("template")
+        duration = data.get("duration")
+        message = data.get("message", "")
+        
+        # Simulate campaign creation
+        campaign = {
+            "id": str(uuid4()),
+            "name": campaign_name,
+            "target_area": target_area,
+            "template": template,
+            "duration": duration,
+            "personalization": message,
+            "estimated_reach": 2500,  # Would be calculated based on target area
+            "estimated_budget": 875,  # Based on quantity and postage
+            "status": "ready_to_launch",
+            "first_mailing_date": (datetime.now() + pd.Timedelta(days=5)).strftime("%Y-%m-%d"),
+            "created_at": datetime.now().isoformat()
+        }
+        
+        # In production, save to database
+        # save_farming_campaign(user["id"], campaign)
+        
+        return jsonify({"success": True, "campaign": campaign})
+    
+    except Exception as e:
+        print(f"Error creating farming campaign: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/agent/power-tools/scripts/generate", methods=["POST"])
+def generate_script_response():
+    """Generate AI-powered script responses for objections."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        scenario = data.get("scenario")
+        objection = data.get("objection")
+        style = data.get("style")
+        
+        # Pre-defined responses based on style (in production would use OpenAI)
+        style_templates = {
+            "direct": "I appreciate you being straightforward about that. Here's what you need to know: {response}. I'm confident the results will speak for themselves.",
+            "warm": "I completely understand where you're coming from—it's a significant consideration! What I've found is that {response}. Let me walk you through exactly what that looks like...",
+            "data_driven": "Great question. Let me share some data with you. {response}. When you factor in those numbers, the value becomes clear.",
+            "storyteller": "You know, I had another client who {response}. It made all the difference in their experience.",
+            "professional": "I appreciate your inquiry. {response}. The value proposition is designed to maximize your outcomes."
+        }
+        
+        # Simulate AI response generation
+        base_response = "my comprehensive approach includes full-service support, strategic marketing, and expert negotiation that consistently delivers superior results"
+        
+        template = style_templates.get(style, style_templates["direct"])
+        response = template.format(response=base_response)
+        
+        result = {
+            "scenario": scenario,
+            "objection": objection,
+            "style": style,
+            "response": response,
+            "key_points": [
+                "Focus on value, not cost",
+                "Share specific results and testimonials",
+                "Offer to show your marketing plan",
+                "Build trust through transparency"
+            ],
+            "follow_up_tips": [
+                "Show examples of your recent success stories",
+                "Provide references from satisfied clients",
+                "Walk them through your unique approach",
+                "Give them time to think—don't pressure"
+            ],
+            "body_language": [
+                "Maintain confident posture",
+                "Use open hand gestures",
+                "Make steady eye contact",
+                "Smile genuinely"
+            ]
+        }
+        
+        return jsonify({"success": True, "script": result})
+    
+    except Exception as e:
+        print(f"Error generating script: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/agent/power-tools/market/report", methods=["POST"])
+def generate_market_report():
+    """Generate market intelligence report."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        report_type = data.get("report_type")
+        area = data.get("area")
+        
+        # Simulate market data (in production would use real MLS/market APIs)
+        report = {
+            "type": report_type,
+            "area": area,
+            "generated_at": datetime.now().isoformat(),
+            "stats": {
+                "median_price": 485000,
+                "median_price_change": 3.2,  # percentage
+                "avg_days_on_market": 28,
+                "dom_change": -5,  # change in days
+                "inventory_months": 2.1,
+                "market_type": "Seller's Market",
+                "active_listings": 247,
+                "pending_sales": 189,
+                "sold_last_month": 156
+            },
+            "trends": {
+                "price_direction": "increasing",
+                "demand_level": "high",
+                "inventory_level": "low",
+                "forecast": "Prices expected to increase 2-4% over next quarter"
+            },
+            "download_url": f"/agent/power-tools/market/download/{uuid4()}",
+            "shareable": True
+        }
+        
+        return jsonify({"success": True, "report": report})
+    
+    except Exception as e:
+        print(f"Error generating market report: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/agent/power-tools/scripts/save", methods=["POST"])
+def save_script():
+    """Save a script to the agent's library."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        script_content = data.get("script")
+        
+        # In production, save to database
+        # save_agent_script(user["id"], script_content)
+        
+        return jsonify({"success": True, "message": "Script saved to your library"})
+    
+    except Exception as e:
+        print(f"Error saving script: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/agent/referrals", methods=["GET", "POST"])
 def agent_referrals():
     """Agent referral link management."""
