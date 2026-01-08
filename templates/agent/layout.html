@@ -317,45 +317,35 @@
         Dashboard
       </a>
       
-      <div class="ylh-dropdown">
-        <button class="ylh-nav-button {% if request.path.startswith('/agent/crm') or request.path.startswith('/agent/transactions') %}active{% endif %}">
-          Clients & Pipeline ▾
-        </button>
-        <div class="ylh-dropdown-menu">
-          <a href="{{ url_for('agent_crm') }}" 
-             class="ylh-dropdown-item {% if request.path == url_for('agent_crm') %}active{% endif %}">
-            CRM
-          </a>
-          <a href="{{ url_for('agent_transactions') }}" 
-             class="ylh-dropdown-item {% if request.path == url_for('agent_transactions') %}active{% endif %}">
-            Transactions
-          </a>
-        </div>
-      </div>
+      <a href="{{ url_for('agent_crm') }}" 
+         class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">
+        CRM
+      </a>
       
-      <div class="ylh-dropdown">
-        <button class="ylh-nav-button {% if request.path.startswith('/agent/communications') or request.path.startswith('/agent/marketing') %}active{% endif %}">
-          Communication & Marketing ▾
-        </button>
-        <div class="ylh-dropdown-menu">
-          <a href="{{ url_for('agent_communications') }}" 
-             class="ylh-dropdown-item {% if request.path == url_for('agent_communications') %}active{% endif %}">
-            Communications
-          </a>
-          <a href="{{ url_for('agent_marketing_hub_global') }}" 
-             class="ylh-dropdown-item {% if request.path == url_for('agent_marketing_hub_global') or 'marketing-hub' in request.path %}active{% endif %}">
-            Marketing Hub
-          </a>
-          <a href="{{ url_for('agent_video_studio') }}" 
-             class="ylh-dropdown-item {% if 'video-studio' in request.path %}active{% endif %}">
-            🎬 Video Studio
-          </a>
-          <a href="{{ url_for('agent_power_tools') }}" 
-             class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
-            Power Tools
-          </a>
-        </div>
-      </div>
+      <a href="{{ url_for('agent_transactions') }}" 
+         class="ylh-nav-link {% if request.path.startswith('/agent/transactions') %}active{% endif %}">
+        Transactions
+      </a>
+      
+      <a href="{{ url_for('agent_communications') }}" 
+         class="ylh-nav-link {% if request.path.startswith('/agent/communications') %}active{% endif %}">
+        Communications
+      </a>
+      
+      <a href="{{ url_for('agent_marketing_hub_global') }}" 
+         class="ylh-nav-link {% if request.path == url_for('agent_marketing_hub_global') or 'marketing-hub' in request.path %}active{% endif %}">
+        Marketing Hub
+      </a>
+      
+      <a href="{{ url_for('agent_video_studio') }}" 
+         class="ylh-nav-link {% if 'video-studio' in request.path %}active{% endif %}">
+        Video Studio
+      </a>
+      
+      <a href="{{ url_for('agent_power_tools') }}" 
+         class="ylh-nav-link {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
+        Power Tools
+      </a>
       
       <a href="{{ url_for('agent_referrals') }}" 
          class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">
