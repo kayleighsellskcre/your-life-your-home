@@ -20,19 +20,20 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 2rem;
+    padding: 0 1rem;
     height: 60px;
   }
   
   .ylh-nav-title {
     font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: #6B6A45;
     font-weight: 400;
     letter-spacing: 0.02em;
-    margin: 0 0 0 2rem;
+    margin: 0 0 0 1rem;
     white-space: nowrap;
     transition: all 0.3s ease;
+    flex-shrink: 0;
   }
   
   .ylh-nav-title:hover {
@@ -46,7 +47,7 @@
     gap: 0;
     flex: 1;
     justify-content: flex-end;
-    margin-right: 1rem;
+    margin-right: 0.5rem;
     overflow: visible;
     position: relative;
   }
@@ -55,11 +56,11 @@
     background: transparent;
     border: none;
     color: #6B6A45;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.8rem;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.7rem;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
@@ -85,11 +86,11 @@
   
   .ylh-nav-link {
     color: #6B6A45;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.75rem;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.7rem;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     text-decoration: none;
     transition: all 0.3s ease;
     white-space: nowrap;
@@ -159,6 +160,52 @@
     background: rgba(107, 106, 69, 0.1);
     border-left-color: #6B6A45;
     font-weight: 600;
+  }
+  
+  /* Large Desktop - More Spacing */
+  @media (min-width: 1400px) {
+    .ylh-nav-link,
+    .ylh-nav-button {
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
+    }
+    
+    .ylh-nav-title {
+      font-size: 1.5rem;
+      margin: 0 0 0 2rem;
+    }
+    
+    .ylh-nav-container {
+      padding: 0 2rem;
+    }
+  }
+  
+  /* Medium Desktop - Compact but Readable */
+  @media (min-width: 1024px) and (max-width: 1399px) {
+    .ylh-nav-link,
+    .ylh-nav-button {
+      padding: 0.75rem 0.75rem;
+      font-size: 0.68rem;
+    }
+  }
+  
+  /* Small Desktop / Large Tablet - Very Compact */
+  @media (min-width: 769px) and (max-width: 1023px) {
+    .ylh-nav-link,
+    .ylh-nav-button {
+      padding: 0.75rem 0.625rem;
+      font-size: 0.65rem;
+      letter-spacing: 0.03em;
+    }
+    
+    .ylh-nav-title {
+      font-size: 1.1rem;
+      margin: 0 0 0 0.75rem;
+    }
+    
+    .ylh-nav-container {
+      padding: 0 0.75rem;
+    }
   }
   
   /* Mobile Responsive - Ultra Skinny & Luxurious */
