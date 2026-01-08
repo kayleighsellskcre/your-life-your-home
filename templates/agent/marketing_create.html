@@ -194,6 +194,28 @@
     margin: 0 0 1rem 0;
     font-weight: 600;
     text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  
+  .preview-title::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
 
   .preview-content {
@@ -593,6 +615,7 @@
             <div class="preview-divider"></div>
             <div class="preview-price" id="preview-price">${{ "{:,.0f}".format(transaction.list_price) if transaction.list_price else '799,000' }}</div>
             <div class="preview-address" id="preview-address">{{ transaction.property_address or '123 Main Street' }}</div>
+            <div class="preview-custom-text" id="preview-custom-text" style="margin-top: 2rem; font-size: 0.95rem; color: rgba(58, 53, 44, 0.85); line-height: 1.6; max-width: 80%; margin-left: auto; margin-right: auto; display: none;"></div>
             <div class="preview-divider"></div>
             <div class="preview-agent-info">
               <div class="agent-name">{{ user.name }}</div>
@@ -607,26 +630,79 @@
 
 <script>
   function updatePreview() {
-    // Update headline
+    // Update headline with smooth transition
     const headline = document.getElementById('headline-input').value || 'Just Listed';
-    document.getElementById('preview-headline').textContent = headline;
+    const headlineEl = document.getElementById('preview-headline');
+    if (headlineEl.textContent !== headline) {
+      headlineEl.style.opacity = '0.5';
+      setTimeout(() => {
+        headlineEl.textContent = headline;
+        headlineEl.style.opacity = '1';
+      }, 100);
+    }
 
-    // Update subtext
+    // Update subtext with smooth transition
     const subtext = document.getElementById('subtext-input').value || 'Luxury living awaits';
-    document.getElementById('preview-subtext').textContent = subtext;
+    const subtextEl = document.getElementById('preview-subtext');
+    if (subtextEl.textContent !== subtext) {
+      subtextEl.style.opacity = '0.5';
+      setTimeout(() => {
+        subtextEl.textContent = subtext;
+        subtextEl.style.opacity = '1';
+      }, 100);
+    }
 
-    // Update price
+    // Update price with smooth transition
     const price = document.getElementById('price-input').value || '$799,000';
-    document.getElementById('preview-price').textContent = price;
+    const priceEl = document.getElementById('preview-price');
+    if (priceEl.textContent !== price) {
+      priceEl.style.opacity = '0.5';
+      setTimeout(() => {
+        priceEl.textContent = price;
+        priceEl.style.opacity = '1';
+      }, 100);
+    }
 
-    // Update address
+    // Update address with smooth transition
     const address = document.getElementById('address-input').value || '123 Main Street';
-    document.getElementById('preview-address').textContent = address;
+    const addressEl = document.getElementById('preview-address');
+    if (addressEl.textContent !== address) {
+      addressEl.style.opacity = '0.5';
+      setTimeout(() => {
+        addressEl.textContent = address;
+        addressEl.style.opacity = '1';
+      }, 100);
+    }
+
+    // Update custom text with smooth transition
+    const customText = document.getElementById('custom-text-input').value;
+    const customTextEl = document.getElementById('preview-custom-text');
+    if (customText && customText.trim()) {
+      customTextEl.style.display = 'block';
+      if (customTextEl.textContent !== customText) {
+        customTextEl.style.opacity = '0.5';
+        setTimeout(() => {
+          customTextEl.textContent = customText;
+          customTextEl.style.opacity = '1';
+        }, 100);
+      }
+    } else {
+      customTextEl.style.display = 'none';
+    }
   }
 
   // Initialize preview on page load
   document.addEventListener('DOMContentLoaded', function() {
     updatePreview();
+    
+    // Add smooth transition CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      .preview-headline, .preview-subtext, .preview-price, .preview-address, .preview-custom-text {
+        transition: opacity 0.15s ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
   });
 
   // AI Text Refinement
