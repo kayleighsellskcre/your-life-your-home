@@ -439,6 +439,81 @@
     }
   }
   
+  /* Modal Styling */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(58, 53, 44, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  
+  .modal-content {
+    background: var(--soft-white);
+    border-radius: var(--border-radius-xl);
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(58, 53, 44, 0.4);
+    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 2rem 1rem;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+  }
+  
+  .modal-header h2 {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+  }
+  
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--warm-gray);
+    cursor: pointer;
+    transition: color 0.2s;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .modal-close:hover {
+    color: var(--charcoal-brown);
+  }
+  
+  .modal .comms-form {
+    padding: 2rem;
+  }
+  
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
   /* Animation */
   @keyframes fadeIn {
     from {
@@ -519,11 +594,11 @@
     <!-- NEW LEAD TEMPLATES -->
     <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">New Lead</h3>
     <div class="templates-grid">
-      <!-- New Lead Welcome Email -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- New Lead 1: Initial Welcome -->
+      <div class="template-card" data-channel="email">
         <div class="template-header">
           <div style="flex: 1;">
-            <div class="template-title">New Lead Welcome</div>
+            <div class="template-title">Initial Welcome</div>
             <div class="template-badges">
               <span class="template-badge badge-email">Email</span>
               <span class="template-badge badge-lead">Lead</span>
@@ -544,13 +619,140 @@ Looking forward to connecting!
 Best,
 [Your Name]</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Open House Follow-Up -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- New Lead 2: Buyer Consultation -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Buyer Consultation Invite</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-lead">Lead</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Let's find your dream home together</div>
+        <div class="template-body">Hi [Name],
+
+Thank you for your interest in working together! I'm excited to help you find the perfect home.
+
+I'd love to schedule a buyer consultation where we can:
+• Discuss your must-haves and wish list
+• Review your budget and financing options
+• Create a customized home search strategy
+• Answer any questions you have about the process
+
+Are you available this week for a 30-minute conversation? I have openings on [Day] at [Time] or [Day] at [Time].
+
+Looking forward to helping you find home!
+
+Warmly,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- New Lead 3: Quick Response Text -->
+      <div class="template-card" data-channel="sms">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Quick Lead Response</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-lead">Lead</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Hi [Name]! Thanks for reaching out. I'd love to help you with your home search. When would be a good time for a quick call this week? I have availability [Day/Time]. Looking forward to connecting!</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- New Lead 4: Listing Inquiry Response -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Listing Inquiry Response</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-lead">Lead</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Information about [Property Address]</div>
+        <div class="template-body">Hi [Name],
+
+Thank you for your interest in [Property Address]! This is a wonderful property and I'd be happy to provide you with more details.
+
+Here's some key information:
+• [Beds] bed, [Baths] bath
+• [Square Footage] sq ft
+• [Key Feature 1]
+• [Key Feature 2]
+
+Would you like to schedule a private showing? I have availability this week and would love to show you the home in person.
+
+I'm also happy to send you additional listings that match what you're looking for.
+
+Best regards,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- New Lead 5: Seller Inquiry -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Seller Consultation</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-lead">Lead</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Let's discuss selling your home</div>
+        <div class="template-body">Hi [Name],
+
+Thank you for considering me to help sell your home! I'd love to discuss how we can get you the best possible outcome.
+
+In our consultation, we'll cover:
+• Current market conditions in your area
+• A customized pricing strategy
+• My proven marketing plan
+• Expected timeline and next steps
+
+I can provide a free comparative market analysis so you know exactly what your home is worth in today's market.
+
+Are you available for a meeting this week? I'm happy to come to you at a time that works best for your schedule.
+
+Looking forward to working with you!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FOLLOW-UP TEMPLATES -->
+    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Follow-Up</h3>
+    <div class="templates-grid">
+      
+      <!-- Follow-Up 1: Open House Follow-Up -->
+      <div class="template-card" data-channel="email">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Open House Follow-Up</div>
@@ -574,13 +776,127 @@ Feel free to call or text me anytime.
 Warm regards,
 [Your Name]</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Offer Submitted Notification -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- Follow-Up 2: Showing Follow-Up -->
+      <div class="template-card" data-channel="sms">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">After Showing Check-In</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-followup">Follow-Up</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Hi [Name]! What did you think of [Address]? I'd love to hear your thoughts. Any questions or want to see it again? Let me know!</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Follow-Up 3: Monthly Nurture -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Monthly Check-In</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-followup">Follow-Up</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Checking in - how's the home search going?</div>
+        <div class="template-body">Hi [Name],
+
+I hope you're doing well! I wanted to check in and see how your home search is going.
+
+Have you seen any properties that caught your interest? Or is there anything specific you'd like me to look for?
+
+I'm here whenever you're ready to take the next step.
+
+Looking forward to hearing from you!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Follow-Up 4: New Listing Alert -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">New Listing Alert</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-followup">Follow-Up</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: New listing that matches your criteria</div>
+        <div class="template-body">Hi [Name],
+
+I just came across a property that I think you'll love!
+
+[Property Address]
+[Beds] bed, [Baths] bath | $[Price]
+[Key Feature]
+
+This one just hit the market and matches what you're looking for. Would you like to see it? I can schedule a showing as soon as today.
+
+Let me know!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Follow-Up 5: Re-engagement -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Re-engagement</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-followup">Follow-Up</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Still thinking about making a move?</div>
+        <div class="template-body">Hi [Name],
+
+I hope this message finds you well! It's been a while since we last connected, and I wanted to reach out.
+
+The market has changed quite a bit recently, and there are some great opportunities right now. If you're still thinking about [buying/selling], I'd love to catch up and share what's happening in the market.
+
+No pressure at all - just wanted you to know I'm here if you need anything.
+
+Wishing you all the best!
+
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- OFFER TEMPLATES -->
+    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Offer Stage</h3>
+    <div class="templates-grid">
+      
+      <!-- Offer 1: Offer Submitted -->
+      <div class="template-card" data-channel="sms">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Offer Submitted</div>
@@ -590,15 +906,138 @@ Warm regards,
             </div>
           </div>
         </div>
-        <div class="template-body">Hi [Name]! Great news - your offer has been submitted for [Address]. The listing agent will review and we should hear back within 24-48 hours. I'll keep you updated every step of the way! 🏡</div>
+        <div class="template-body">Hi [Name]! Great news - your offer has been submitted for [Address]. The listing agent will review and we should hear back within 24-48 hours. I'll keep you updated every step of the way!</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Under Contract Congratulations -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- Offer 2: Preparing Offer -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Preparing Your Offer</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-offer">Offer</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Next steps for [Address]</div>
+        <div class="template-body">Hi [Name],
+
+I'm excited to help you submit an offer on [Address]! Let's make this as strong as possible.
+
+To prepare your offer, I'll need:
+• Your pre-approval letter
+• Proof of funds (for earnest money deposit)
+• Your preferred closing date
+• Any contingencies you'd like to include
+
+Once I have these, I'll draft the offer and we can review it together before submission.
+
+The seller is reviewing offers by [Date/Time], so let's aim to have everything ready by [Date].
+
+Let me know if you have any questions!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Offer 3: Counter Offer Received -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Counter Offer Received</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-offer">Offer</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Counter offer on [Address]</div>
+        <div class="template-body">Hi [Name],
+
+We received a counter offer on [Address]! The sellers are interested and came back with the following terms:
+
+• Price: $[Amount]
+• Closing Date: [Date]
+• [Other Terms]
+
+This is a good sign - they're negotiating, which means they want to work with us.
+
+I'd like to discuss our options. When are you available for a call today?
+
+Talk soon,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Offer 4: Offer Accepted -->
+      <div class="template-card" data-channel="sms">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Offer Accepted!</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-offer">Offer</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">AMAZING NEWS! Your offer on [Address] has been accepted! Congratulations! Let's schedule a call to go over the next steps. When are you free today?</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Offer 5: Offer Declined -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Offer Not Accepted</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-offer">Offer</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Update on [Address]</div>
+        <div class="template-body">Hi [Name],
+
+I wanted to let you know that the seller accepted another offer on [Address].
+
+I know this is disappointing, but please don't be discouraged. This happens in real estate, and it just means this wasn't the right home for you.
+
+The good news is that I have several other properties that match your criteria, and I'm confident we'll find the perfect home.
+
+Can we schedule a time to review some new options? I have a few that just came on the market that I think you'll love.
+
+We'll find your home - I promise.
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- UNDER CONTRACT TEMPLATES -->
+    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Under Contract</h3>
+    <div class="templates-grid">
+      
+      <!-- Contract 1: Under Contract Congratulations -->
+      <div class="template-card" data-channel="email">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Under Contract Congrats</div>
@@ -624,13 +1063,13 @@ I'll be with you every step of the way to ensure a smooth closing. Let me know i
 Excited for you!
 [Your Name]</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Inspection Reminder -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- Contract 2: Inspection Reminder -->
+      <div class="template-card" data-channel="sms">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Inspection Reminder</div>
@@ -642,13 +1081,105 @@ Excited for you!
         </div>
         <div class="template-body">Hi [Name]! Reminder: Your home inspection is scheduled for [Date] at [Time] at [Address]. The inspector will be there about 2-3 hours. Feel free to attend if you'd like! Let me know if you have questions.</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Closing Day Celebration -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- Contract 3: Inspection Results -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Inspection Results</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-contract">Contract</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Your inspection report is ready</div>
+        <div class="template-body">Hi [Name],
+
+I've received your inspection report for [Address] and wanted to review the findings with you.
+
+Overall: [Brief Summary]
+
+Key items to discuss:
+• [Item 1]
+• [Item 2]
+• [Item 3]
+
+I'd like to schedule a call to go through the report in detail and discuss whether we want to request any repairs from the seller.
+
+When are you available to talk?
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Contract 4: Appraisal Update -->
+      <div class="template-card" data-channel="sms">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Appraisal Update</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-contract">Contract</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Great news [Name]! The appraisal came in at $[Amount], right at our purchase price. We're one step closer to closing! Everything is moving smoothly.</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Contract 5: Final Walkthrough Scheduled -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Final Walkthrough</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-contract">Contract</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Final walkthrough scheduled for [Address]</div>
+        <div class="template-body">Hi [Name],
+
+We're almost there! Your final walkthrough is scheduled for [Date] at [Time].
+
+This is your last chance to:
+• Verify any repairs were completed
+• Check that all systems are working
+• Confirm the home is in the agreed-upon condition
+• Make sure nothing was removed that should stay
+
+I'll meet you at the property. This should take about 30-45 minutes.
+
+After this, we close the next day!
+
+See you soon,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- CLOSING TEMPLATES -->
+    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Closing</h3>
+    <div class="templates-grid">
+      
+      <!-- Closing 1: Closing Day Message -->
+      <div class="template-card" data-channel="email">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Closing Day Message</div>
@@ -672,43 +1203,143 @@ Congratulations on your new home! This is such an exciting milestone.
 See you soon!
 [Your Name]</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Monthly Check-In -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- Closing 2: Clear to Close -->
+      <div class="template-card" data-channel="sms">
         <div class="template-header">
           <div style="flex: 1;">
-            <div class="template-title">Monthly Check-In</div>
+            <div class="template-title">Clear to Close</div>
             <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-followup">Follow-Up</span>
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-closing">Closing</span>
             </div>
           </div>
         </div>
-        <div class="template-subject">Subject: Checking in - how's the home search going?</div>
+        <div class="template-body">FANTASTIC NEWS [Name]! You're officially clear to close! The lender has approved everything and we're good to go for closing on [Date]. Almost there!</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Closing 3: Closing Instructions -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Closing Instructions</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-closing">Closing</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Your closing details for [Address]</div>
         <div class="template-body">Hi [Name],
 
-I hope you're doing well! I wanted to check in and see how your home search is going.
+Your closing is all set! Here are the details:
 
-Have you seen any properties that caught your interest? Or is there anything specific you'd like me to look for?
+Date: [Date]
+Time: [Time]
+Location: [Title Company Name and Address]
 
-I'm here whenever you're ready to take the next step.
+What to bring:
+• Government-issued photo ID
+• Cashier's check or wire confirmation for $[Amount]
+• Homeowners insurance proof
 
-Looking forward to hearing from you!
+The closing will take about 1-2 hours. You'll sign paperwork, and then the keys are yours!
+
+Please arrive 10 minutes early. I'll meet you there and walk you through everything.
+
+So excited for you!
+
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Closing 4: Congratulations Post-Closing -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Post-Closing Congrats</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-closing">Closing</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Welcome home!</div>
+        <div class="template-body">Hi [Name],
+
+CONGRATULATIONS! You are now officially a homeowner!
+
+It has been such an honor to help you through this journey. Watching you get the keys to your new home was one of the highlights of my career.
+
+A few reminders as you settle in:
+• Transfer utilities by [Date]
+• Change your mailing address
+• Save your closing documents in a safe place
+• Take lots of photos as you make it yours!
+
+If you ever need anything - contractor recommendations, questions about your home, or just want to chat - please don't hesitate to reach out.
+
+And if you know anyone else looking to buy or sell, I'd love to help them too!
+
+Congratulations again!
+
+With gratitude,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- Closing 5: Anniversary Check-In -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Home Anniversary</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-closing">Closing</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Happy 1-year home anniversary!</div>
+        <div class="template-body">Hi [Name],
+
+I can't believe it's been a year since you closed on [Address]! Time flies!
+
+I hope you've had a wonderful first year in your home and made so many great memories.
+
+How are you enjoying homeownership? I'd love to hear how things are going!
+
+If you ever need anything or know anyone looking to buy or sell, I'm always here to help.
+
+Wishing you many more happy years in your home!
 
 Best,
 [Your Name]</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
-      
-      <!-- Showing Confirmation -->
-      <div class="template-card" onclick="copyTemplate(this)">
+    </div>
+    
+    <!-- GENERAL TEMPLATES -->
+    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">General</h3>
+    <div class="templates-grid">
+      <!-- General 1: Showing Confirmation -->
+      <div class="template-card" data-channel="sms">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Showing Confirmed</div>
@@ -720,13 +1351,13 @@ Best,
         </div>
         <div class="template-body">Hi [Name]! Your showing is confirmed for [Date] at [Time] at [Address]. I'll meet you there 5 minutes early. See you soon!</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
       
-      <!-- Referral Thank You -->
-      <div class="template-card" onclick="copyTemplate(this)">
+      <!-- General 2: Referral Thank You -->
+      <div class="template-card" data-channel="email">
         <div class="template-header">
           <div style="flex: 1;">
             <div class="template-title">Referral Thank You</div>
@@ -748,8 +1379,89 @@ Your support means the world to me!
 Gratefully,
 [Your Name]</div>
         <div class="template-actions">
-          <button class="btn-template btn-use" onclick="event.stopPropagation(); useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="event.stopPropagation(); copyToClipboard(this)">Copy</button>
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- General 3: Schedule Change -->
+      <div class="template-card" data-channel="sms">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Schedule Change</div>
+            <div class="template-badges">
+              <span class="template-badge badge-text">Text</span>
+              <span class="template-badge badge-general">General</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-body">Hi [Name], I need to reschedule our [appointment/showing] originally set for [Date/Time]. Are you available [New Date] at [New Time] instead? Sorry for the change!</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- General 4: Market Update -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Market Update</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-general">General</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: [Month] market update for [Area]</div>
+        <div class="template-body">Hi [Name],
+
+I wanted to share a quick market update for [Area] this month:
+
+• Median home price: $[Amount] ([up/down] [%] from last month)
+• Average days on market: [Number] days
+• Inventory: [Number] active listings
+• Market conditions: [Buyer's/Seller's/Balanced] market
+
+What this means for you: [Brief interpretation]
+
+If you'd like to discuss how these trends might affect your plans, I'm happy to schedule a call.
+
+Stay informed!
+
+Best,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+        </div>
+      </div>
+      
+      <!-- General 5: Birthday/Holiday Greeting -->
+      <div class="template-card" data-channel="email">
+        <div class="template-header">
+          <div style="flex: 1;">
+            <div class="template-title">Special Occasion</div>
+            <div class="template-badges">
+              <span class="template-badge badge-email">Email</span>
+              <span class="template-badge badge-general">General</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-subject">Subject: Happy [Birthday/Holiday], [Name]!</div>
+        <div class="template-body">Hi [Name],
+
+Just wanted to take a moment to wish you a very happy [birthday/holiday]! I hope you have a wonderful day filled with joy and celebration.
+
+Thank you for allowing me to be part of your real estate journey. It's been a pleasure working with you.
+
+If there's anything I can do for you, please don't hesitate to reach out.
+
+Warmest wishes,
+[Your Name]</div>
+        <div class="template-actions">
+          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
         </div>
       </div>
     </div>
@@ -839,6 +1551,7 @@ Gratefully,
 </div>
 
 <script>
+// Copy template to clipboard
 function copyToClipboard(button) {
   const card = button.closest('.template-card');
   const subject = card.querySelector('.template-subject');
@@ -863,22 +1576,130 @@ function copyToClipboard(button) {
       button.style.borderColor = '';
       button.style.color = '';
     }, 2000);
+  }).catch(err => {
+    alert('Failed to copy to clipboard');
+    console.error('Copy error:', err);
   });
 }
 
+// Open send modal with template pre-filled
 function useTemplate(button) {
   const card = button.closest('.template-card');
   const subject = card.querySelector('.template-subject');
   const body = card.querySelector('.template-body');
+  const channel = card.getAttribute('data-channel') || 'email';
   
-  // This would integrate with email/SMS system
-  alert('Template ready to use! (This would open your email/SMS client)');
+  // Get the modal and form elements
+  const modal = document.getElementById('sendModal');
+  const subjectField = document.getElementById('message_subject');
+  const bodyField = document.getElementById('message_body');
+  const channelRadios = document.querySelectorAll('input[name="channel"]');
+  
+  // Set channel
+  channelRadios.forEach(radio => {
+    radio.checked = (radio.value === channel);
+  });
+  
+  // Pre-fill subject (if exists)
+  if (subject && subjectField) {
+    subjectField.value = subject.textContent.replace('Subject: ', '').trim();
+  } else if (subjectField) {
+    subjectField.value = '';
+  }
+  
+  // Pre-fill body
+  if (bodyField) {
+    bodyField.value = body.textContent.trim();
+  }
+  
+  // Toggle subject field visibility
+  toggleSubjectField();
+  
+  // Show modal
+  modal.style.display = 'flex';
+  
+  // Focus on recipient name field
+  setTimeout(() => {
+    document.getElementById('recipient_name').focus();
+  }, 100);
 }
 
-function copyTemplate(card) {
-  // Optional: Click on card to copy entire template
-  // You can enhance this based on your needs
+// Close send modal
+function closeSendModal() {
+  const modal = document.getElementById('sendModal');
+  modal.style.display = 'none';
 }
+
+// Toggle subject field based on channel
+function toggleSubjectField() {
+  const channelRadios = document.querySelectorAll('input[name="channel"]');
+  const subjectField = document.getElementById('subject-field');
+  const subjectInput = document.getElementById('message_subject');
+  
+  let selectedChannel = 'email';
+  channelRadios.forEach(radio => {
+    if (radio.checked) selectedChannel = radio.value;
+  });
+  
+  if (selectedChannel === 'sms') {
+    subjectField.style.display = 'none';
+    subjectInput.removeAttribute('required');
+  } else {
+    subjectField.style.display = 'flex';
+    subjectInput.setAttribute('required', 'required');
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('sendModal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeSendModal();
+      }
+    });
+  }
+  
+  // Handle form submission
+  const sendForm = document.getElementById('sendForm');
+  if (sendForm) {
+    sendForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Get form data
+      const formData = new FormData(sendForm);
+      const data = {
+        channel: formData.get('channel'),
+        recipient_name: formData.get('recipient_name'),
+        recipient_contact: formData.get('recipient_contact'),
+        subject: formData.get('subject'),
+        body: formData.get('body')
+      };
+      
+      // Here you would normally send this to your backend
+      // For now, we'll show a success message
+      console.log('Sending message:', data);
+      
+      // Show success message
+      alert(`Message ${data.channel === 'email' ? 'email' : 'text'} prepared for ${data.recipient_name}!\n\n(This would send via your integrated email/SMS system)`);
+      
+      // Close modal and reset form
+      closeSendModal();
+      sendForm.reset();
+    });
+  }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('sendModal');
+    if (modal && modal.style.display === 'flex') {
+      closeSendModal();
+    }
+  }
+});
 </script>
 
 {% endblock %}
