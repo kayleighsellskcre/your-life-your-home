@@ -628,16 +628,27 @@ def update_transaction(transaction_id: int, agent_id: int, **kwargs) -> bool:
         
         return True
 
-def delete_transaction(transaction_id, agent_id):
-    db = get_db()
-    # Ensure agent owns the transaction
-    tx = db.execute("SELECT * FROM transactions WHERE id = ? AND agent_id = ?", (transaction_id, agent_id)).fetchone()
-    if not tx:
-        return False
-    # Delete related documents, participants, timeline, then transaction
-    db.execute("DELETE FROM transaction_documents WHERE transaction_id = ?", (transaction_id,))
-    db.execute("DELETE FROM transaction_participants WHERE transaction_id = ?", (transaction_id,))
-    db.execute("DELETE FROM transaction_timeline WHERE transaction_id = ?", (transaction_id,))
-    db.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
-    db.commit()
-    return True
+def delete_transaction(transaction_id: int, agent_id: int) -> bool:
+    """Delete a transaction and all related data"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        # Ensure agent owns the transaction
+        cursor.execute("SELECT * FROM transactions WHERE id = ? AND agent_id = ?", (transaction_id, agent_id))
+        tx = cursor.fetchone()
+        if not tx:
+            return False
+        
+        # Delete related data first (foreign key constraints)
+        cursor.execute("DELETE FROM transaction_documents WHERE transaction_id = ?", (transaction_id,))
+        cursor.execute("DELETE FROM transaction_participants WHERE transaction_id = ?", (transaction_id,))
+        cursor.execute("DELETE FROM transaction_timeline WHERE transaction_id = ?", (transaction_id,))
+        cursor.execute("DELETE FROM transaction_stage_history WHERE transaction_id = ?", (transaction_id,))
+        
+        # Finally delete the transaction itself
+        cursor.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
+        
+        # Commit all changes
+        conn.commit()
+        
+        print(f"[DEBUG] Successfully deleted transaction {transaction_id} for agent {agent_id}")
+        return True
