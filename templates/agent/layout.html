@@ -32,6 +32,12 @@
     letter-spacing: 0.02em;
     margin: 0 0 0 2rem;
     white-space: nowrap;
+    transition: all 0.3s ease;
+  }
+  
+  .ylh-nav-title:hover {
+    color: #3A352C;
+    transform: translateX(2px);
   }
   
   .ylh-nav-items {
@@ -309,14 +315,11 @@
 
 <nav class="ylh-horizontal-nav">
   <div class="ylh-nav-container">
-    <h2 class="ylh-nav-title">Agent Dashboard</h2>
+    <a href="{{ url_for('agent_dashboard') }}" class="ylh-nav-title" style="text-decoration: none; cursor: pointer;">
+      Agent Dashboard
+    </a>
     
     <div class="ylh-nav-items">
-      <a href="{{ url_for('agent_dashboard') }}" 
-         class="ylh-nav-link {% if request.path == url_for('agent_dashboard') %}active{% endif %}">
-        Dashboard
-      </a>
-      
       <a href="{{ url_for('agent_crm') }}" 
          class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">
         CRM
