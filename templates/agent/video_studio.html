@@ -522,7 +522,7 @@
         <h2 class="card-title">Your Videos</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem;">
             {% for project in projects %}
-            <div style="border: 2px solid var(--light-cream); border-radius: var(--border-radius-xl); overflow: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; background: var(--soft-white); cursor: pointer;" onmouseover="this.style.borderColor='var(--olive-green)'; this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(107, 106, 69, 0.15)'" onmouseout="this.style.borderColor='var(--light-cream)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.06)'" onclick="window.location.href='{{ url_for('agent_video_studio_view', project_id=project.id) }}'">
+            <div class="video-project-card" data-url="{{ url_for('agent_video_studio_view', project_id=project.id) }}" style="border: 2px solid var(--light-cream); border-radius: var(--border-radius-xl); overflow: hidden; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); position: relative; background: var(--soft-white); cursor: pointer;">
                 <!-- Video Thumbnail Placeholder -->
                 <div style="background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.12) 100%); aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
                     <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);">
@@ -559,8 +559,8 @@
                     </div>
                 </div>
                 <!-- Delete Button -->
-                <form method="POST" action="{{ url_for('agent_video_studio_delete', project_id=project.id) }}" style="position: absolute; top: 12px; left: 12px; z-index: 10;" onsubmit="event.stopPropagation(); return confirm('Delete this video?');" onclick="event.stopPropagation();">
-                    <button type="submit" style="background: rgba(0, 0, 0, 0.6); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: bold; line-height: 1; padding: 0; backdrop-filter: blur(4px);" title="Delete" onmouseover="this.style.background='rgba(160, 65, 61, 0.9)'; this.style.transform='scale(1.1)'" onmouseout="this.style.background='rgba(0, 0, 0, 0.6)'; this.style.transform='scale(1)'">
+                <form method="POST" action="{{ url_for('agent_video_studio_delete', project_id=project.id) }}" class="video-delete-form" style="position: absolute; top: 12px; left: 12px; z-index: 10;">
+                    <button type="submit" class="video-delete-btn" style="background: rgba(0, 0, 0, 0.6); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); font-weight: bold; line-height: 1; padding: 0; backdrop-filter: blur(4px);" title="Delete">
                         ×
                     </button>
                 </form>
@@ -598,6 +598,9 @@
         <div class="step-content active" data-step="1">
             <div class="studio-card">
                 <h2 class="card-title">Choose Video Type</h2>
+                <p style="text-align: center; color: var(--warm-gray); font-size: 1.125rem; margin-bottom: 2rem; font-weight: 500; letter-spacing: 0.02em;">
+                    Click a card below to begin creating your video
+                </p>
                 <div class="video-type-grid">
                     <div class="video-type-card" data-type="just-listed">
                         <div class="video-type-icon">NEW</div>
@@ -738,8 +741,17 @@
         
         <div class="action-buttons">
             <button type="button" class="btn-secondary" id="prevBtn" style="display: none;">← Previous</button>
-            <button type="button" class="btn-primary" id="nextBtn">Next →</button>
-            <button type="submit" class="btn-primary" id="submitBtn" style="display: none;">Create Video</button>
+            <button type="button" class="btn-primary" id="nextBtn">
+                <span id="nextBtnText">Next →</span>
+            </button>
+            <button type="submit" class="btn-primary" id="submitBtn" style="display: none;">
+                <span style="display: flex; align-items: center; gap: 0.75rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Create Video
+                </span>
+            </button>
         </div>
     </form>
 </div>
@@ -780,12 +792,34 @@ function updateStep() {
     document.getElementById('nextBtn').style.display = currentStep < totalSteps ? 'block' : 'none';
     document.getElementById('submitBtn').style.display = currentStep === totalSteps ? 'block' : 'none';
     
+    // Reset Next button text based on step
+    const nextBtnText = document.getElementById('nextBtnText');
+    if (currentStep === 1) {
+        const videoType = document.getElementById('videoType').value;
+        if (videoType) {
+            const selectedCard = document.querySelector(`.video-type-card[data-type="${videoType}"]`);
+            if (selectedCard) {
+                const selectedType = selectedCard.querySelector('.video-type-title').textContent;
+                nextBtnText.textContent = `Continue with ${selectedType} →`;
+            }
+        } else {
+            nextBtnText.textContent = 'Next →';
+        }
+    } else {
+        nextBtnText.textContent = 'Next →';
+    }
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function validateStep(step) {
     if (step === 1 && !document.getElementById('videoType').value) {
-        alert('Please select a video type');
+        // Highlight video type cards with a pulse animation
+        document.querySelectorAll('.video-type-card').forEach(card => {
+            card.style.animation = 'shake 0.5s';
+            setTimeout(() => card.style.animation = '', 500);
+        });
+        alert('👆 Please select a video type above to continue');
         return false;
     }
     if (step === 2 && (!document.getElementById('aspectRatio').value || !document.getElementById('duration').value)) {
@@ -803,12 +837,36 @@ function validateStep(step) {
     return true;
 }
 
+// Add shake animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+`;
+document.head.appendChild(style);
+
 // Video type selection
 document.querySelectorAll('.video-type-card').forEach(card => {
     card.addEventListener('click', () => {
         document.querySelectorAll('.video-type-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
         document.getElementById('videoType').value = card.dataset.type;
+        
+        // Update button text to show selection
+        const selectedType = card.querySelector('.video-type-title').textContent;
+        document.getElementById('nextBtnText').textContent = `Continue with ${selectedType} →`;
+        
+        // Flash the Next button to draw attention
+        const nextBtn = document.getElementById('nextBtn');
+        nextBtn.style.transform = 'scale(1.05)';
+        nextBtn.style.boxShadow = '0 8px 32px rgba(107, 106, 69, 0.5)';
+        setTimeout(() => {
+            nextBtn.style.transform = '';
+            nextBtn.style.boxShadow = '';
+        }, 300);
     });
 });
 
@@ -886,6 +944,54 @@ function removeMedia(index) {
     uploadedFiles.splice(index, 1);
     mediaGrid.children[index].remove();
 }
+
+// Video project card interactions
+document.querySelectorAll('.video-project-card').forEach(card => {
+    // Click to navigate
+    card.addEventListener('click', function(e) {
+        window.location.href = this.dataset.url;
+    });
+    
+    // Hover effects
+    card.addEventListener('mouseenter', function() {
+        this.style.borderColor = 'var(--olive-green)';
+        this.style.transform = 'translateY(-4px)';
+        this.style.boxShadow = '0 8px 24px rgba(107, 106, 69, 0.15)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.borderColor = 'var(--light-cream)';
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 2px 8px rgba(58, 53, 44, 0.06)';
+    });
+});
+
+// Delete button interactions
+document.querySelectorAll('.video-delete-form').forEach(form => {
+    form.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+    
+    form.addEventListener('submit', function(e) {
+        e.stopPropagation();
+        if (!confirm('Delete this video? This cannot be undone.')) {
+            e.preventDefault();
+        }
+    });
+});
+
+// Delete button hover effects
+document.querySelectorAll('.video-delete-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', function() {
+        this.style.background = 'rgba(160, 65, 61, 0.9)';
+        this.style.transform = 'scale(1.1)';
+    });
+    
+    btn.addEventListener('mouseleave', function() {
+        this.style.background = 'rgba(0, 0, 0, 0.6)';
+        this.style.transform = 'scale(1)';
+    });
+});
 </script>
 {% endblock %}
 
