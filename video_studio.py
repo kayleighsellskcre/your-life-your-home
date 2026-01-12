@@ -343,63 +343,27 @@ class VideoRenderer:
         height: int,
         style: str
     ):
-        """Create video segment with LUXURIOUS CINEMATIC EFFECTS"""
+        """Create video segment - ULTRA SIMPLE for Windows reliability"""
         
-        # More dramatic zoom for luxury feel
-        if style == "luxury_cinematic":
-            zoom_factor = 1.25  # Increased from 1.2
-        else:
-            zoom_factor = 1.18  # Increased from 1.15
-        
-        # Smooth zoom expression - NO QUOTES for Windows compatibility
-        zoom_expr = f"min(zoom+0.0018,{zoom_factor})"  # Slightly faster zoom
-        
-        # Varied panning for visual interest
-        import random
-        pan_direction = random.choice(['left', 'right', 'center', 'up', 'down'])
-        
-        if pan_direction == 'left':
-            x_expr = "iw/2-(iw/zoom/2)+(on*2)"  # Increased from 1.5
-            y_expr = "ih/2-(ih/zoom/2)"
-        elif pan_direction == 'right':
-            x_expr = "iw/2-(iw/zoom/2)-(on*2)"
-            y_expr = "ih/2-(ih/zoom/2)"
-        elif pan_direction == 'up':
-            x_expr = "iw/2-(iw/zoom/2)"
-            y_expr = "ih/2-(ih/zoom/2)+(on*2)"
-        elif pan_direction == 'down':
-            x_expr = "iw/2-(iw/zoom/2)"
-            y_expr = "ih/2-(ih/zoom/2)-(on*2)"
-        else:  # center
-            x_expr = "iw/2-(iw/zoom/2)"
-            y_expr = "ih/2-(ih/zoom/2)"
-        
-        # LUXURIOUS filter chain with enhanced colors
-        filter_chain = [
-            f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
-            f"crop={width*2}:{height*2}",
-            f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height}",
-            # Enhanced luxury color grading - richer, more vibrant
-            f"eq=contrast=1.18:brightness=0.04:saturation=1.25:gamma=1.1",  # Increased saturation & added gamma
-            # Stronger sharpen for crystal clarity
-            "unsharp=7:7:1.3:7:7:0.0",  # Increased from 5:5:1.0
-            "format=yuv420p"
-        ]
-        
+        # SUPER SIMPLE - just scale, no fancy effects yet
+        # This WILL work, then we can add effects
         cmd = [
             'ffmpeg',
             '-loop', '1',
             '-i', image_path,
-            '-vf', ",".join(filter_chain),
+            '-vf', f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'medium',  # Changed from ultrafast for better quality
-            '-crf', '18',  # Higher quality (lower CRF)
+            '-preset', 'fast',
+            '-crf', '23',
+            '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
+        print(f"[VIDEO RENDERER] Creating segment from {image_path}...")
         subprocess.run(cmd, check=True, capture_output=True)
+        print(f"[VIDEO RENDERER] ✓ Segment created successfully!")
     
     def _create_3d_image_segment(
         self,
@@ -422,90 +386,25 @@ class VideoRenderer:
         
         import random
         
-        # 3D movement patterns for variety - NO QUOTES for Windows compatibility
-        movement_patterns = [
-            {
-                'name': 'forward_zoom',
-                'zoom': "min(zoom+0.002,1.3)",
-                'x': "iw/2-(iw/zoom/2)",
-                'y': "ih/2-(ih/zoom/2)"
-            },
-            {
-                'name': 'dolly_left',
-                'zoom': "1.15",
-                'x': "iw/2-(iw/zoom/2)+(on*2.5)",
-                'y': "ih/2-(ih/zoom/2)-(on*0.8)"
-            },
-            {
-                'name': 'dolly_right',
-                'zoom': "1.15",
-                'x': "iw/2-(iw/zoom/2)-(on*2.5)",
-                'y': "ih/2-(ih/zoom/2)-(on*0.8)"
-            },
-            {
-                'name': 'crane_up',
-                'zoom': "min(zoom+0.0012,1.2)",
-                'x': "iw/2-(iw/zoom/2)",
-                'y': "ih/2-(ih/zoom/2)+(on*3)"
-            },
-            {
-                'name': 'crane_down',
-                'zoom': "min(zoom+0.0012,1.2)",
-                'x': "iw/2-(iw/zoom/2)",
-                'y': "ih/2-(ih/zoom/2)-(on*3)"
-            },
-            {
-                'name': 'orbit_left',
-                'zoom': "1.18",
-                'x': "iw/2-(iw/zoom/2)+(on*2)",
-                'y': "ih/2-(ih/zoom/2)+(sin(on*0.1)*50)"
-            },
-            {
-                'name': 'orbit_right',
-                'zoom': "1.18",
-                'x': "iw/2-(iw/zoom/2)-(on*2)",
-                'y': "ih/2-(ih/zoom/2)+(sin(on*0.1)*50)"
-            }
-        ]
-        
-        # Pick a random 3D movement
-        movement = random.choice(movement_patterns)
-        
-        # Build LUXURIOUS 3D-style filter chain
-        filter_parts = [
-            # Scale up for premium quality
-            f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
-            f"crop={width*2}:{height*2}",
-            # Apply dramatic 3D camera movement
-            f"zoompan=z={movement['zoom']}:x={movement['x']}:y={movement['y']}:d={int(duration*30)}:s={width}x{height}",
-            # LUXURIOUS architectural color grading - rich, vibrant, premium
-            "eq=contrast=1.20:brightness=0.05:saturation=1.20:gamma=1.08",  # Enhanced
-            # Crystal-sharp clarity for 3D depth
-            "unsharp=9:9:1.5:9:9:0.0",  # Much stronger sharpening
-        ]
-        
-        # Note: Room labels temporarily disabled due to Windows FFmpeg compatibility
-        # The videos will still have amazing 3D effects and luxury styling!
-        
-        # Combine all filters
-        filter_chain = ",".join(filter_parts)
-        
+        # ULTRA SIMPLE for Windows - just basic video, no complex effects yet
+        # This WILL work, then we can add effects back
         cmd = [
             'ffmpeg',
             '-loop', '1',
             '-i', image_path,
-            '-vf', filter_chain,
+            '-vf', f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'medium',
-            '-crf', '17',  # PREMIUM quality for luxury 3D effect
+            '-preset', 'fast',
+            '-crf', '23',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
-        print(f"[VIDEO RENDERER] Creating luxurious 3D segment with {movement['name']} movement...")
+        print(f"[VIDEO RENDERER] Creating 3D tour segment from {image_path}...")
         subprocess.run(cmd, check=True, capture_output=True)
+        print(f"[VIDEO RENDERER] ✓ 3D segment created successfully!")
     
     def _process_video_segment(
         self,
