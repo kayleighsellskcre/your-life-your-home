@@ -82,6 +82,12 @@ def init_db() -> None:
         cur.execute("ALTER TABLE users ADD COLUMN lender_id INTEGER REFERENCES users(id)")
     except:
         pass
+    
+    # Add subscription_tier column for premium features (free, basic, premium, pro)
+    try:
+        cur.execute("ALTER TABLE users ADD COLUMN subscription_tier TEXT DEFAULT 'free' CHECK(subscription_tier IN ('free','basic','premium','pro'))")
+    except:
+        pass
 
     # ------------- USER PROFILES -------------
     cur.execute(

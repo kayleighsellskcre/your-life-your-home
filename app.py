@@ -7273,12 +7273,17 @@ def agent_video_studio():
         print(f"Error loading video projects: {e}")
         projects = []
     
+    # Get user subscription tier
+    subscription_tier = user.get('subscription_tier', 'free')
+    
     return render_template(
         "agent/video_studio.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         projects=projects,
-        video_studio_disabled=False
+        video_studio_disabled=False,
+        subscription_tier=subscription_tier,
+        has_premium=(subscription_tier in ['premium', 'pro'])
     )
 
 
@@ -7312,6 +7317,20 @@ def agent_video_studio_create():
         property_address = request.form.get('property_address', '')
         highlights = request.form.get('highlights', '')
         include_captions = request.form.get('include_captions') == 'on'
+        
+        # Check subscription for premium 3D tours
+        if video_type == '3d-tour':
+            user_tier = user.get('subscription_tier', 'free')
+            if user_tier not in ['premium', 'pro']:
+                flash("✨ 3D Property Tours are a Premium feature! Upgrade your subscription to unlock immersive 3D videos.", "error")
+                return redirect(url_for("agent_video_studio"))
+        
+        # Get room labels for 3D tours
+        room_labels = None
+        if video_type == '3d-tour':
+            room_labels_text = request.form.get('room_labels', '')
+            if room_labels_text:
+                room_labels = [label.strip() for label in room_labels_text.split('\n') if label.strip()]
         
         # Handle file uploads
         import time
@@ -7377,7 +7396,9 @@ def agent_video_studio_create():
             agent_phone=user.get("phone", user.get("email")),
             agent_logo=agent_profile_dict.get("brokerage_logo"),
             agent_photo=agent_profile_dict.get("professional_photo"),
-            include_captions=include_captions
+            include_captions=include_captions,
+            video_type=video_type,
+            room_labels=room_labels
         )
         
         print(f"[VIDEO CREATE] Render result: {result}")

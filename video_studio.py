@@ -77,6 +77,8 @@ class VideoRenderer:
         agent_photo: Optional[str] = None,  # base64 or path
         music_path: Optional[str] = None,
         include_captions: bool = True,
+        video_type: str = "listing",  # listing, 3d-tour
+        room_labels: Optional[List[str]] = None,  # For 3D tours
     ) -> Dict:
         """
         Generate a luxury real estate video
@@ -125,16 +127,32 @@ class VideoRenderer:
                     
                     print(f"[VIDEO RENDERER] Processing media {idx+1}/{len(media_files)}: {media_file}")
                     
+                    # Get room label if provided
+                    room_label = room_labels[idx] if room_labels and idx < len(room_labels) else None
+                    
                     if self._is_image(media_file):
-                        # Create video from image with Ken Burns effect
-                        self._create_image_segment(
-                            media_file,
-                            segment_path,
-                            duration_per_item,
-                            width,
-                            height,
-                            style
-                        )
+                        # Create video from image with appropriate effect
+                        if video_type == "3d-tour":
+                            # Use 3D-style effects for property tours
+                            self._create_3d_image_segment(
+                                media_file,
+                                segment_path,
+                                duration_per_item,
+                                width,
+                                height,
+                                style,
+                                room_label
+                            )
+                        else:
+                            # Use Ken Burns effect for regular listings
+                            self._create_image_segment(
+                                media_file,
+                                segment_path,
+                                duration_per_item,
+                                width,
+                                height,
+                                style
+                            )
                     else:
                         # Process video segment
                         self._process_video_segment(
@@ -383,6 +401,134 @@ class VideoRenderer:
         
         subprocess.run(cmd, check=True, capture_output=True)
     
+    def _create_3d_image_segment(
+        self,
+        image_path: str,
+        output_path: Path,
+        duration: float,
+        width: int,
+        height: int,
+        style: str,
+        room_label: Optional[str] = None
+    ):
+        """
+        Create video segment with 3D-STYLE EFFECTS
+        - Parallax depth effect (simulates 3D movement)
+        - Perspective zoom (creates depth illusion)
+        - Edge highlighting (architectural emphasis)
+        - Room labels with fade-in animation
+        - Professional architectural color grading
+        """
+        
+        import random
+        
+        # 3D movement patterns for variety
+        movement_patterns = [
+            {
+                'name': 'forward_zoom',
+                'zoom': "min(zoom+0.002,1.3)",
+                'x': "'iw/2-(iw/zoom/2)'",
+                'y': "'ih/2-(ih/zoom/2)'"
+            },
+            {
+                'name': 'dolly_left',
+                'zoom': "1.15",
+                'x': "'iw/2-(iw/zoom/2)+(on*2.5)'",
+                'y': "'ih/2-(ih/zoom/2)-(on*0.8)'"
+            },
+            {
+                'name': 'dolly_right',
+                'zoom': "1.15",
+                'x': "'iw/2-(iw/zoom/2)-(on*2.5)'",
+                'y': "'ih/2-(ih/zoom/2)-(on*0.8)'"
+            },
+            {
+                'name': 'crane_up',
+                'zoom': "min(zoom+0.0012,1.2)",
+                'x': "'iw/2-(iw/zoom/2)'",
+                'y': "'ih/2-(ih/zoom/2)+(on*3)'"
+            },
+            {
+                'name': 'crane_down',
+                'zoom': "min(zoom+0.0012,1.2)",
+                'x': "'iw/2-(iw/zoom/2)'",
+                'y': "'ih/2-(ih/zoom/2)-(on*3)'"
+            },
+            {
+                'name': 'orbit_left',
+                'zoom': "1.18",
+                'x': "'iw/2-(iw/zoom/2)+(on*2)'",
+                'y': "'ih/2-(ih/zoom/2)+(sin(on*0.1)*50)'"
+            },
+            {
+                'name': 'orbit_right',
+                'zoom': "1.18",
+                'x': "'iw/2-(iw/zoom/2)-(on*2)'",
+                'y': "'ih/2-(ih/zoom/2)+(sin(on*0.1)*50)'"
+            }
+        ]
+        
+        # Pick a random 3D movement
+        movement = random.choice(movement_patterns)
+        
+        # Build 3D-style filter chain with architectural enhancements
+        filter_parts = [
+            # Scale up for quality
+            f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
+            f"crop={width*2}:{height*2}",
+            # Apply 3D camera movement
+            f"zoompan=z={movement['zoom']}:x={movement['x']}:y={movement['y']}:d={int(duration*30)}:s={width}x{height}",
+            # Architectural color grading (crisp, clean, modern)
+            "eq=contrast=1.15:brightness=0.03:saturation=1.1",
+            # Sharpen for clarity (important for 3D feel)
+            "unsharp=7:7:1.2:7:7:0.0",
+            # Slight edge enhancement for depth perception
+            "edgedetect=mode=colormix:high=0.02:low=0.01",
+        ]
+        
+        # Add room label if provided
+        if room_label:
+            # Escape special characters for FFmpeg
+            label_escaped = room_label.replace("'", "\\'").replace(":", "\\:")
+            
+            # Calculate label position (top-left corner with fade-in)
+            label_x = 60
+            label_y = 80
+            
+            # Add text overlay with professional styling
+            filter_parts.append(
+                f"drawtext=text='{label_escaped}':fontsize=75:fontcolor=white@0.95:"
+                f"x={label_x}:y={label_y}:"
+                f"shadowcolor=black@0.85:shadowx=4:shadowy=4:"
+                f"enable='between(t,0.3,{duration-0.5})'"
+            )
+            
+            # Add underline accent
+            filter_parts.append(
+                f"drawbox=x={label_x}:y={label_y + 85}:w=min(text_w+20\\,400):h=5:"
+                f"color=#c89666@0.9:t=fill:"
+                f"enable='between(t,0.5,{duration-0.5})'"
+            )
+        
+        # Combine all filters
+        filter_chain = ",".join(filter_parts)
+        
+        cmd = [
+            'ffmpeg',
+            '-loop', '1',
+            '-i', image_path,
+            '-vf', filter_chain,
+            '-t', str(duration),
+            '-c:v', 'libx264',
+            '-preset', 'medium',
+            '-crf', '19',  # Higher quality for 3D effect
+            '-pix_fmt', 'yuv420p',
+            '-y',
+            str(output_path)
+        ]
+        
+        subprocess.run(cmd, check=True, capture_output=True)
+    
     def _process_video_segment(
         self,
         video_path: str,
@@ -421,7 +567,13 @@ class VideoRenderer:
     ):
         """Create simple but elegant intro card"""
         
-        bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#2c3e50"
+        # Different styles for different video types
+        if style == "3d_property_tour":
+            bg_color = "#0a0e27"  # Deep modern blue
+        elif style == "luxury_cinematic":
+            bg_color = "#1a1a2e"
+        else:
+            bg_color = "#2c3e50"
         
         # Escape text
         headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")

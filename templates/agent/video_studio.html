@@ -155,6 +155,37 @@
         line-height: 1.5;
     }
     
+    .premium-card {
+        position: relative;
+        border: 2px solid #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+    
+    .premium-card:hover {
+        border-color: #667eea;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.25);
+    }
+    
+    .premium-card.selected {
+        border-color: #667eea;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%);
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+    }
+    
+    .premium-badge {
+        position: absolute;
+        top: -12px;
+        right: 12px;
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        color: #1a1a2e;
+        padding: 0.35rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+    }
+    
     .format-selector {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -622,6 +653,12 @@
                         <div class="video-type-title">Sold</div>
                         <div class="video-type-desc">Celebrate the sale</div>
                     </div>
+                    <div class="video-type-card premium-card" data-type="3d-tour">
+                        <div class="premium-badge">✨ PREMIUM</div>
+                        <div class="video-type-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">3D</div>
+                        <div class="video-type-title">3D Property Tour</div>
+                        <div class="video-type-desc">Immersive walkthrough experience</div>
+                    </div>
                 </div>
                 <input type="hidden" name="video_type" id="videoType" required>
             </div>
@@ -689,7 +726,9 @@
         <div class="step-content" data-step="4">
             <div class="studio-card">
                 <h2 class="card-title">Choose Style Preset</h2>
-                <div class="style-grid">
+                
+                <!-- Regular Video Styles -->
+                <div class="style-grid" id="regularStyles">
                     <div class="style-card" data-style="luxury_cinematic">
                         <div style="width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; font-weight: 700;">LX</div>
                         <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--charcoal-brown);">Luxury Cinematic</div>
@@ -706,6 +745,26 @@
                         <div style="font-size: 0.9rem; color: var(--warm-gray); line-height: 1.5;">Cozy, welcoming, homey</div>
                     </div>
                 </div>
+                
+                <!-- 3D Property Tour Styles -->
+                <div class="style-grid" id="3dStyles" style="display: none;">
+                    <div class="style-card" data-style="3d_property_tour">
+                        <div style="width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; font-weight: 700;">3D</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--charcoal-brown);">Architectural 3D</div>
+                        <div style="font-size: 0.9rem; color: var(--warm-gray); line-height: 1.5;">Depth effects, parallax, immersive</div>
+                    </div>
+                    <div class="style-card" data-style="3d_modern">
+                        <div style="width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; font-weight: 700;">3M</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--charcoal-brown);">Modern 3D</div>
+                        <div style="font-size: 0.9rem; color: var(--warm-gray); line-height: 1.5;">Sleek, contemporary, dynamic</div>
+                    </div>
+                    <div class="style-card" data-style="3d_luxury">
+                        <div style="width: 56px; height: 56px; margin: 0 auto 1rem; border-radius: 50%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.25rem; font-weight: 700;">3L</div>
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--charcoal-brown);">Luxury 3D</div>
+                        <div style="font-size: 0.9rem; color: var(--warm-gray); line-height: 1.5;">Premium, cinematic, elegant</div>
+                    </div>
+                </div>
+                
                 <input type="hidden" name="style_preset" id="stylePreset" required>
             </div>
         </div>
@@ -728,6 +787,20 @@
                 <div class="form-group">
                     <label class="form-label">Key Highlights (one per line)</label>
                     <textarea name="highlights" class="form-input" rows="4" placeholder="4 Bed / 3 Bath&#10;Newly Remodeled&#10;Gourmet Kitchen&#10;Walk to Downtown"></textarea>
+                </div>
+                
+                <!-- 3D Tour Room Labels (only shown for 3D tours) -->
+                <div class="form-group" id="roomLabelsGroup" style="display: none;">
+                    <label class="form-label">
+                        Room Labels (one per photo, in order)
+                        <span style="display: block; font-size: 0.85rem; font-weight: 400; color: var(--warm-gray); margin-top: 0.25rem;">
+                            Add labels like "Living Room", "Kitchen", "Master Bedroom" - one per line
+                        </span>
+                    </label>
+                    <textarea name="room_labels" id="roomLabelsInput" class="form-input" rows="5" placeholder="Living Room&#10;Gourmet Kitchen&#10;Master Bedroom&#10;Spa Bathroom&#10;Outdoor Patio"></textarea>
+                    <div style="font-size: 0.85rem; color: var(--warm-gray); margin-top: 0.5rem;">
+                        💡 Tip: Labels will appear on each photo with a smooth fade-in effect
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -849,11 +922,27 @@ style.textContent = `
 document.head.appendChild(style);
 
 // Video type selection
+const hasPremium = {{ 'true' if has_premium else 'false' }};
+
 document.querySelectorAll('.video-type-card').forEach(card => {
     card.addEventListener('click', () => {
+        const videoType = card.dataset.type;
+        
+        // Check if 3D tour requires premium
+        if (videoType === '3d-tour' && !hasPremium) {
+            alert('✨ 3D Property Tours are a Premium feature!\n\nUpgrade your subscription to unlock:\n• Immersive 3D camera movements\n• Room labels with animations\n• Professional architectural effects\n• Multiple 3D style presets\n\nContact us to upgrade today!');
+            return;
+        }
+        
         document.querySelectorAll('.video-type-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
-        document.getElementById('videoType').value = card.dataset.type;
+        document.getElementById('videoType').value = videoType;
+        
+        // Show/hide 3D-specific options
+        const is3DTour = videoType === '3d-tour';
+        document.getElementById('regularStyles').style.display = is3DTour ? 'none' : 'grid';
+        document.getElementById('3dStyles').style.display = is3DTour ? 'grid' : 'none';
+        document.getElementById('roomLabelsGroup').style.display = is3DTour ? 'block' : 'none';
         
         // Update button text to show selection
         const selectedType = card.querySelector('.video-type-title').textContent;
