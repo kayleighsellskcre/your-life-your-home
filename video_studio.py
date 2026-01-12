@@ -351,28 +351,28 @@ class VideoRenderer:
         else:
             zoom_factor = 1.18  # Increased from 1.15
         
-        # Smooth zoom expression
-        zoom_expr = f"'min(zoom+0.0018,{zoom_factor})'"  # Slightly faster zoom
+        # Smooth zoom expression - NO QUOTES for Windows compatibility
+        zoom_expr = f"min(zoom+0.0018,{zoom_factor})"  # Slightly faster zoom
         
         # Varied panning for visual interest
         import random
         pan_direction = random.choice(['left', 'right', 'center', 'up', 'down'])
         
         if pan_direction == 'left':
-            x_expr = "'iw/2-(iw/zoom/2)+(on*2)'"  # Increased from 1.5
-            y_expr = "'ih/2-(ih/zoom/2)'"
+            x_expr = "iw/2-(iw/zoom/2)+(on*2)"  # Increased from 1.5
+            y_expr = "ih/2-(ih/zoom/2)"
         elif pan_direction == 'right':
-            x_expr = "'iw/2-(iw/zoom/2)-(on*2)'"
-            y_expr = "'ih/2-(ih/zoom/2)'"
+            x_expr = "iw/2-(iw/zoom/2)-(on*2)"
+            y_expr = "ih/2-(ih/zoom/2)"
         elif pan_direction == 'up':
-            x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)+(on*2)'"
+            x_expr = "iw/2-(iw/zoom/2)"
+            y_expr = "ih/2-(ih/zoom/2)+(on*2)"
         elif pan_direction == 'down':
-            x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)-(on*2)'"
+            x_expr = "iw/2-(iw/zoom/2)"
+            y_expr = "ih/2-(ih/zoom/2)-(on*2)"
         else:  # center
-            x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)'"
+            x_expr = "iw/2-(iw/zoom/2)"
+            y_expr = "ih/2-(ih/zoom/2)"
         
         # LUXURIOUS filter chain with enhanced colors
         filter_chain = [
@@ -422,49 +422,49 @@ class VideoRenderer:
         
         import random
         
-        # 3D movement patterns for variety
+        # 3D movement patterns for variety - NO QUOTES for Windows compatibility
         movement_patterns = [
             {
                 'name': 'forward_zoom',
                 'zoom': "min(zoom+0.002,1.3)",
-                'x': "'iw/2-(iw/zoom/2)'",
-                'y': "'ih/2-(ih/zoom/2)'"
+                'x': "iw/2-(iw/zoom/2)",
+                'y': "ih/2-(ih/zoom/2)"
             },
             {
                 'name': 'dolly_left',
                 'zoom': "1.15",
-                'x': "'iw/2-(iw/zoom/2)+(on*2.5)'",
-                'y': "'ih/2-(ih/zoom/2)-(on*0.8)'"
+                'x': "iw/2-(iw/zoom/2)+(on*2.5)",
+                'y': "ih/2-(ih/zoom/2)-(on*0.8)"
             },
             {
                 'name': 'dolly_right',
                 'zoom': "1.15",
-                'x': "'iw/2-(iw/zoom/2)-(on*2.5)'",
-                'y': "'ih/2-(ih/zoom/2)-(on*0.8)'"
+                'x': "iw/2-(iw/zoom/2)-(on*2.5)",
+                'y': "ih/2-(ih/zoom/2)-(on*0.8)"
             },
             {
                 'name': 'crane_up',
                 'zoom': "min(zoom+0.0012,1.2)",
-                'x': "'iw/2-(iw/zoom/2)'",
-                'y': "'ih/2-(ih/zoom/2)+(on*3)'"
+                'x': "iw/2-(iw/zoom/2)",
+                'y': "ih/2-(ih/zoom/2)+(on*3)"
             },
             {
                 'name': 'crane_down',
                 'zoom': "min(zoom+0.0012,1.2)",
-                'x': "'iw/2-(iw/zoom/2)'",
-                'y': "'ih/2-(ih/zoom/2)-(on*3)'"
+                'x': "iw/2-(iw/zoom/2)",
+                'y': "ih/2-(ih/zoom/2)-(on*3)"
             },
             {
                 'name': 'orbit_left',
                 'zoom': "1.18",
-                'x': "'iw/2-(iw/zoom/2)+(on*2)'",
-                'y': "'ih/2-(ih/zoom/2)+(sin(on*0.1)*50)'"
+                'x': "iw/2-(iw/zoom/2)+(on*2)",
+                'y': "ih/2-(ih/zoom/2)+(sin(on*0.1)*50)"
             },
             {
                 'name': 'orbit_right',
                 'zoom': "1.18",
-                'x': "'iw/2-(iw/zoom/2)-(on*2)'",
-                'y': "'ih/2-(ih/zoom/2)+(sin(on*0.1)*50)'"
+                'x': "iw/2-(iw/zoom/2)-(on*2)",
+                'y': "ih/2-(ih/zoom/2)+(sin(on*0.1)*50)"
             }
         ]
         
@@ -484,32 +484,8 @@ class VideoRenderer:
             "unsharp=9:9:1.5:9:9:0.0",  # Much stronger sharpening
         ]
         
-        # Add room label if provided
-        if room_label:
-            # Simple escape for FFmpeg drawtext - just escape the essential characters
-            label_escaped = room_label.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
-            
-            # Calculate label position (top-left corner with fade-in)
-            label_x = 60
-            label_y = 80
-            underline_width = 350  # Luxurious wider underline
-            
-            # Build drawtext with proper escaping
-            drawtext_filter = (
-                f"drawtext=text={label_escaped}:"
-                f"fontsize=85:fontcolor=white@0.98:"  # Larger, brighter text
-                f"x={label_x}:y={label_y}:"
-                f"shadowcolor=black@0.9:shadowx=5:shadowy=5:"  # Stronger shadow
-                f"font=Arial"  # Ensure consistent font
-            )
-            filter_parts.append(drawtext_filter)
-            
-            # Add luxurious gold underline accent
-            drawbox_filter = (
-                f"drawbox=x={label_x}:y={label_y + 95}:w={underline_width}:h=6:"
-                f"color=#d4af37@0.95:t=fill"  # Bright gold color
-            )
-            filter_parts.append(drawbox_filter)
+        # Note: Room labels temporarily disabled due to Windows FFmpeg compatibility
+        # The videos will still have amazing 3D effects and luxury styling!
         
         # Combine all filters
         filter_chain = ",".join(filter_parts)
