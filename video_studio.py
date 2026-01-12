@@ -343,46 +343,46 @@ class VideoRenderer:
         height: int,
         style: str
     ):
-        """Create video segment with CINEMATIC EFFECTS - Ken Burns + particles + lens flares"""
+        """Create video segment with LUXURIOUS CINEMATIC EFFECTS"""
         
-        # Dramatic zoom for luxury feel
+        # More dramatic zoom for luxury feel
         if style == "luxury_cinematic":
-            zoom_factor = 1.2
+            zoom_factor = 1.25  # Increased from 1.2
         else:
-            zoom_factor = 1.15
+            zoom_factor = 1.18  # Increased from 1.15
         
         # Smooth zoom expression
-        zoom_expr = f"'min(zoom+0.0015,{zoom_factor})'"
+        zoom_expr = f"'min(zoom+0.0018,{zoom_factor})'"  # Slightly faster zoom
         
         # Varied panning for visual interest
         import random
         pan_direction = random.choice(['left', 'right', 'center', 'up', 'down'])
         
         if pan_direction == 'left':
-            x_expr = "'iw/2-(iw/zoom/2)+(on*1.5)'"
+            x_expr = "'iw/2-(iw/zoom/2)+(on*2)'"  # Increased from 1.5
             y_expr = "'ih/2-(ih/zoom/2)'"
         elif pan_direction == 'right':
-            x_expr = "'iw/2-(iw/zoom/2)-(on*1.5)'"
+            x_expr = "'iw/2-(iw/zoom/2)-(on*2)'"
             y_expr = "'ih/2-(ih/zoom/2)'"
         elif pan_direction == 'up':
             x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)+(on*1.5)'"
+            y_expr = "'ih/2-(ih/zoom/2)+(on*2)'"
         elif pan_direction == 'down':
             x_expr = "'iw/2-(iw/zoom/2)'"
-            y_expr = "'ih/2-(ih/zoom/2)-(on*1.5)'"
+            y_expr = "'ih/2-(ih/zoom/2)-(on*2)'"
         else:  # center
             x_expr = "'iw/2-(iw/zoom/2)'"
             y_expr = "'ih/2-(ih/zoom/2)'"
         
-        # Build SIMPLE but BEAUTIFUL filter chain
+        # LUXURIOUS filter chain with enhanced colors
         filter_chain = [
             f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
             f"crop={width*2}:{height*2}",
             f"zoompan=z={zoom_expr}:x={x_expr}:y={y_expr}:d={int(duration*30)}:s={width}x{height}",
-            # Luxury color grading
-            f"eq=contrast=1.12:brightness=0.02:saturation=1.18",
-            # Sharpen for clarity
-            "unsharp=5:5:1.0:5:5:0.0",
+            # Enhanced luxury color grading - richer, more vibrant
+            f"eq=contrast=1.18:brightness=0.04:saturation=1.25:gamma=1.1",  # Increased saturation & added gamma
+            # Stronger sharpen for crystal clarity
+            "unsharp=7:7:1.3:7:7:0.0",  # Increased from 5:5:1.0
             "format=yuv420p"
         ]
         
@@ -393,8 +393,8 @@ class VideoRenderer:
             '-vf', ",".join(filter_chain),
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'ultrafast',
-            '-crf', '20',
+            '-preset', 'medium',  # Changed from ultrafast for better quality
+            '-crf', '18',  # Higher quality (lower CRF)
             '-y',
             str(output_path)
         ]
@@ -471,50 +471,43 @@ class VideoRenderer:
         # Pick a random 3D movement
         movement = random.choice(movement_patterns)
         
-        # Build 3D-style filter chain with architectural enhancements
+        # Build LUXURIOUS 3D-style filter chain
         filter_parts = [
-            # Scale up for quality
+            # Scale up for premium quality
             f"scale={width*2}:{height*2}:force_original_aspect_ratio=increase",
             f"crop={width*2}:{height*2}",
-            # Apply 3D camera movement
+            # Apply dramatic 3D camera movement
             f"zoompan=z={movement['zoom']}:x={movement['x']}:y={movement['y']}:d={int(duration*30)}:s={width}x{height}",
-            # Architectural color grading (crisp, clean, modern)
-            "eq=contrast=1.15:brightness=0.03:saturation=1.1",
-            # Sharpen for clarity (important for 3D feel)
-            "unsharp=7:7:1.2:7:7:0.0",
+            # LUXURIOUS architectural color grading - rich, vibrant, premium
+            "eq=contrast=1.20:brightness=0.05:saturation=1.20:gamma=1.08",  # Enhanced
+            # Crystal-sharp clarity for 3D depth
+            "unsharp=9:9:1.5:9:9:0.0",  # Much stronger sharpening
         ]
         
         # Add room label if provided
         if room_label:
-            # Escape special characters for FFmpeg drawtext
-            # Replace problematic characters
-            label_escaped = (room_label
-                .replace("\\", "\\\\")   # Escape backslashes first
-                .replace("'", "'\\\\\\''")  # Escape single quotes for FFmpeg
-                .replace(":", "\\:")      # Escape colons
-                .replace("%", "\\%")      # Escape percent
-            )
+            # Simple escape for FFmpeg drawtext - just escape the essential characters
+            label_escaped = room_label.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
             
             # Calculate label position (top-left corner with fade-in)
             label_x = 60
             label_y = 80
-            underline_width = 300  # Fixed width for underline
+            underline_width = 350  # Luxurious wider underline
             
-            # Build drawtext without single quotes around enable expression
+            # Build drawtext with proper escaping
             drawtext_filter = (
-                f"drawtext=text='{label_escaped}':"
-                f"fontsize=75:fontcolor=white@0.95:"
+                f"drawtext=text={label_escaped}:"
+                f"fontsize=85:fontcolor=white@0.98:"  # Larger, brighter text
                 f"x={label_x}:y={label_y}:"
-                f"shadowcolor=black@0.85:shadowx=4:shadowy=4:"
-                f"enable=between(t\\,0.3\\,{duration-0.5})"
+                f"shadowcolor=black@0.9:shadowx=5:shadowy=5:"  # Stronger shadow
+                f"font=Arial"  # Ensure consistent font
             )
             filter_parts.append(drawtext_filter)
             
-            # Add underline accent (fixed width) - also fix enable expression
+            # Add luxurious gold underline accent
             drawbox_filter = (
-                f"drawbox=x={label_x}:y={label_y + 85}:w={underline_width}:h=5:"
-                f"color=#c89666@0.9:t=fill:"
-                f"enable=between(t\\,0.5\\,{duration-0.5})"
+                f"drawbox=x={label_x}:y={label_y + 95}:w={underline_width}:h=6:"
+                f"color=#d4af37@0.95:t=fill"  # Bright gold color
             )
             filter_parts.append(drawbox_filter)
         
@@ -529,12 +522,13 @@ class VideoRenderer:
             '-t', str(duration),
             '-c:v', 'libx264',
             '-preset', 'medium',
-            '-crf', '19',  # Higher quality for 3D effect
+            '-crf', '17',  # PREMIUM quality for luxury 3D effect
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
+        print(f"[VIDEO RENDERER] Creating luxurious 3D segment with {movement['name']} movement...")
         subprocess.run(cmd, check=True, capture_output=True)
     
     def _process_video_segment(
@@ -583,39 +577,29 @@ class VideoRenderer:
         else:
             bg_color = "#2c3e50"
         
-        # Escape text for FFmpeg drawtext
-        headline_escaped = (headline
-            .replace("\\", "\\\\")
-            .replace("'", "'\\\\\\''")
-            .replace(":", "\\:")
-            .replace("%", "\\%")
-        )
-        address_escaped = (address
-            .replace("\\", "\\\\")
-            .replace("'", "'\\\\\\''")
-            .replace(":", "\\:")
-            .replace("%", "\\%")
-        )
+        # Simple escape - just remove problematic characters
+        headline_escaped = headline.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
+        address_escaped = address.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
         
         # Center positions (fixed values for 1080x1920 or 1920x1080)
         headline_y = height // 2 - 80
         underline_y = height // 2 - 15
         address_y = height // 2 + 60
         
-        # ULTRA SIMPLE - just fade and text, NO complex filters
+        # LUXURIOUS intro with elegant styling
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
             '-vf', (
-                f"fade=t=in:st=0:d=0.8,"
-                f"drawtext=text='{headline_escaped}':fontsize=110:fontcolor=white:x=(w-text_w)/2:y={headline_y}:shadowcolor=black@0.8:shadowx=5:shadowy=5,"
-                f"drawbox=x={width//2-300}:y={underline_y}:w=600:h=4:color=#c89666@0.9:t=fill,"
-                f"drawtext=text='{address_escaped}':fontsize=55:fontcolor=#c89666:x=(w-text_w)/2:y={address_y}:shadowcolor=black@0.7:shadowx=3:shadowy=3"
+                f"fade=t=in:st=0:d=1.0,"  # Slower, more elegant fade
+                f"drawtext=text={headline_escaped}:fontsize=120:fontcolor=white@0.98:x=(w-text_w)/2:y={headline_y}:shadowcolor=black@0.9:shadowx=6:shadowy=6:font=Arial,"  # Bigger, brighter
+                f"drawbox=x={width//2-350}:y={underline_y}:w=700:h=5:color=#d4af37@0.95:t=fill,"  # Gold underline
+                f"drawtext=text={address_escaped}:fontsize=60:fontcolor=#d4af37@0.98:x=(w-text_w)/2:y={address_y}:shadowcolor=black@0.8:shadowx=4:shadowy=4:font=Arial"  # Gold address
             ),
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
-            '-crf', '23',
+            '-crf', '20',  # Higher quality
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
@@ -639,19 +623,9 @@ class VideoRenderer:
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
-        # Escape text for FFmpeg drawtext
-        agent_name_escaped = (agent_name
-            .replace("\\", "\\\\")
-            .replace("'", "'\\\\\\''")
-            .replace(":", "\\:")
-            .replace("%", "\\%")
-        )
-        agent_phone_escaped = (agent_phone
-            .replace("\\", "\\\\")
-            .replace("'", "'\\\\\\''")
-            .replace(":", "\\:")
-            .replace("%", "\\%")
-        )
+        # Simple escape - remove problematic characters
+        agent_name_escaped = agent_name.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
+        agent_phone_escaped = agent_phone.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
         
         # Center positions (fixed values)
         name_y = height // 2 - 100
@@ -660,22 +634,22 @@ class VideoRenderer:
         line2_y = height // 2 + 65
         cta_y = height // 2 + 120
         
-        # ULTRA SIMPLE - just fade and text, NO complex filters
+        # LUXURIOUS outro with gold accents
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
             '-vf', (
-                f"fade=t=in:st=0:d=0.7,"
-                f"drawtext=text='{agent_name_escaped}':fontsize=100:fontcolor=white:x=(w-text_w)/2:y={name_y}:shadowcolor=#c89666@0.7:shadowx=3:shadowy=3,"
-                f"drawbox=x={width//2-250}:y={line1_y}:w=500:h=3:color=#c89666@0.9:t=fill,"
-                f"drawtext=text='{agent_phone_escaped}':fontsize=65:fontcolor=#c89666:x=(w-text_w)/2:y={phone_y}:shadowcolor=white@0.4:shadowx=2:shadowy=2,"
-                f"drawbox=x={width//2-250}:y={line2_y}:w=500:h=3:color=#c89666@0.9:t=fill,"
-                f"drawtext=text='CONTACT ME TODAY':fontsize=50:fontcolor=white:x=(w-text_w)/2:y={cta_y}:shadowcolor=black@0.8:shadowx=4:shadowy=4"
+                f"fade=t=in:st=0:d=0.9,"  # Slower fade
+                f"drawtext=text={agent_name_escaped}:fontsize=110:fontcolor=white@0.98:x=(w-text_w)/2:y={name_y}:shadowcolor=#d4af37@0.8:shadowx=4:shadowy=4:font=Arial,"  # Gold shadow
+                f"drawbox=x={width//2-300}:y={line1_y}:w=600:h=4:color=#d4af37@0.95:t=fill,"  # Gold line
+                f"drawtext=text={agent_phone_escaped}:fontsize=70:fontcolor=#d4af37@0.98:x=(w-text_w)/2:y={phone_y}:shadowcolor=white@0.5:shadowx=3:shadowy=3:font=Arial,"  # Bigger gold phone
+                f"drawbox=x={width//2-300}:y={line2_y}:w=600:h=4:color=#d4af37@0.95:t=fill,"  # Gold line
+                f"drawtext=text=CONTACT ME TODAY:fontsize=55:fontcolor=white@0.98:x=(w-text_w)/2:y={cta_y}:shadowcolor=black@0.9:shadowx=5:shadowy=5:font=Arial"  # Bigger CTA
             ),
             '-c:v', 'libx264',
             '-preset', 'ultrafast',
-            '-crf', '23',
+            '-crf', '20',  # Higher quality
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
