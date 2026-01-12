@@ -486,28 +486,37 @@ class VideoRenderer:
         
         # Add room label if provided
         if room_label:
-            # Escape special characters for FFmpeg
-            label_escaped = room_label.replace("'", "\\'").replace(":", "\\:")
+            # Escape special characters for FFmpeg drawtext
+            # Replace problematic characters
+            label_escaped = (room_label
+                .replace("\\", "\\\\")   # Escape backslashes first
+                .replace("'", "'\\\\\\''")  # Escape single quotes for FFmpeg
+                .replace(":", "\\:")      # Escape colons
+                .replace("%", "\\%")      # Escape percent
+            )
             
             # Calculate label position (top-left corner with fade-in)
             label_x = 60
             label_y = 80
             underline_width = 300  # Fixed width for underline
             
-            # Add text overlay with professional styling
-            filter_parts.append(
-                f"drawtext=text='{label_escaped}':fontsize=75:fontcolor=white@0.95:"
+            # Build drawtext without single quotes around enable expression
+            drawtext_filter = (
+                f"drawtext=text='{label_escaped}':"
+                f"fontsize=75:fontcolor=white@0.95:"
                 f"x={label_x}:y={label_y}:"
                 f"shadowcolor=black@0.85:shadowx=4:shadowy=4:"
-                f"enable='between(t,0.3,{duration-0.5})'"
+                f"enable=between(t\\,0.3\\,{duration-0.5})"
             )
+            filter_parts.append(drawtext_filter)
             
-            # Add underline accent (fixed width)
-            filter_parts.append(
+            # Add underline accent (fixed width) - also fix enable expression
+            drawbox_filter = (
                 f"drawbox=x={label_x}:y={label_y + 85}:w={underline_width}:h=5:"
                 f"color=#c89666@0.9:t=fill:"
-                f"enable='between(t,0.5,{duration-0.5})'"
+                f"enable=between(t\\,0.5\\,{duration-0.5})"
             )
+            filter_parts.append(drawbox_filter)
         
         # Combine all filters
         filter_chain = ",".join(filter_parts)
@@ -574,9 +583,19 @@ class VideoRenderer:
         else:
             bg_color = "#2c3e50"
         
-        # Escape text
-        headline_escaped = headline.replace("'", "\\'").replace(":", "\\:")
-        address_escaped = address.replace("'", "\\'").replace(":", "\\:")
+        # Escape text for FFmpeg drawtext
+        headline_escaped = (headline
+            .replace("\\", "\\\\")
+            .replace("'", "'\\\\\\''")
+            .replace(":", "\\:")
+            .replace("%", "\\%")
+        )
+        address_escaped = (address
+            .replace("\\", "\\\\")
+            .replace("'", "'\\\\\\''")
+            .replace(":", "\\:")
+            .replace("%", "\\%")
+        )
         
         # Center positions (fixed values for 1080x1920 or 1920x1080)
         headline_y = height // 2 - 80
@@ -620,8 +639,19 @@ class VideoRenderer:
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
-        agent_name_escaped = agent_name.replace("'", "\\'").replace(":", "\\:")
-        agent_phone_escaped = agent_phone.replace("'", "\\'").replace(":", "\\:")
+        # Escape text for FFmpeg drawtext
+        agent_name_escaped = (agent_name
+            .replace("\\", "\\\\")
+            .replace("'", "'\\\\\\''")
+            .replace(":", "\\:")
+            .replace("%", "\\%")
+        )
+        agent_phone_escaped = (agent_phone
+            .replace("\\", "\\\\")
+            .replace("'", "'\\\\\\''")
+            .replace(":", "\\:")
+            .replace("%", "\\%")
+        )
         
         # Center positions (fixed values)
         name_y = height // 2 - 100
