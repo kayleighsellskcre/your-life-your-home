@@ -407,7 +407,13 @@
         Trusted Vendors
       </a>
       
-      <a href="{{ url_for('agent_settings_profile') }}" 
+      <a href="{{ url_for('admin_settings') }}"
+         class="ylh-nav-link {% if 'admin' in request.path %}active{% endif %}"
+         style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-radius: 4px; border-bottom: 3px solid #667eea;">
+        ⚙️ Admin
+      </a>
+
+      <a href="{{ url_for('agent_settings_profile') }}"
          class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">
         Settings
       </a>

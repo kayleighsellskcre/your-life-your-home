@@ -1,0 +1,259 @@
+{% extends "agent/layout.html" %}
+
+{% block title %}Admin Settings - {{ brand_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .admin-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 3rem 2rem;
+    }
+    
+    .admin-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+        border-radius: var(--border-radius-2xl);
+    }
+    
+    .admin-header h1 {
+        font-family: var(--font-heading);
+        font-size: 2.5rem;
+        color: var(--charcoal-brown);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .admin-header p {
+        color: var(--warm-gray);
+        font-size: 1.1rem;
+    }
+    
+    .settings-card {
+        background: var(--soft-white);
+        border: 1px solid rgba(200, 180, 151, 0.2);
+        border-radius: var(--border-radius-2xl);
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
+    }
+    
+    .setting-item {
+        padding: 1.5rem;
+        border: 2px solid var(--light-cream);
+        border-radius: var(--border-radius-lg);
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .setting-item:hover {
+        border-color: var(--olive-green);
+        box-shadow: 0 4px 12px rgba(107, 106, 69, 0.1);
+    }
+    
+    .setting-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .setting-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--charcoal-brown);
+    }
+    
+    .setting-description {
+        color: var(--warm-gray);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+    }
+    
+    .tier-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-full);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .tier-free {
+        background: rgba(150, 150, 150, 0.1);
+        color: #666;
+    }
+    
+    .tier-premium {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+        color: #667eea;
+        border: 2px solid #667eea;
+    }
+    
+    .tier-pro {
+        background: linear-gradient(135deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 193, 7, 0.2) 100%);
+        color: #d4af37;
+        border: 2px solid #d4af37;
+    }
+    
+    .toggle-button {
+        padding: 0.75rem 2rem;
+        border: none;
+        border-radius: var(--border-radius-full);
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .toggle-premium {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .toggle-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    }
+    
+    .toggle-free {
+        background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+        color: white;
+    }
+    
+    .toggle-free:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(107, 106, 69, 0.4);
+    }
+    
+    .info-box {
+        background: rgba(102, 126, 234, 0.08);
+        border-left: 4px solid #667eea;
+        padding: 1.25rem;
+        border-radius: var(--border-radius-lg);
+        margin-top: 1.5rem;
+    }
+    
+    .info-box h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--charcoal-brown);
+        margin-bottom: 0.5rem;
+    }
+    
+    .info-box p {
+        color: var(--warm-gray);
+        line-height: 1.6;
+        margin: 0;
+    }
+    
+    .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0;
+    }
+    
+    .feature-list li {
+        padding: 0.5rem 0;
+        color: var(--warm-gray);
+    }
+    
+    .feature-list li::before {
+        content: "✨";
+        margin-right: 0.5rem;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>⚙️ Admin Settings</h1>
+        <p>Quick access to premium features for testing</p>
+    </div>
+    
+    <div class="settings-card">
+        <div class="setting-item">
+            <div class="setting-header">
+                <div>
+                    <div class="setting-title">Premium Features Access</div>
+                    <div style="margin-top: 0.5rem;">
+                        Current Status: 
+                        {% if user.get('subscription_tier') == 'premium' or user.get('subscription_tier') == 'pro' %}
+                            <span class="tier-badge tier-premium">✨ PREMIUM ACTIVE</span>
+                        {% else %}
+                            <span class="tier-badge tier-free">FREE TIER</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="setting-description">
+                Toggle premium features on/off for your account. Use this to test premium features like 3D Property Tours before launching subscriptions to your users.
+            </div>
+            
+            {% if user.get('subscription_tier') == 'premium' or user.get('subscription_tier') == 'pro' %}
+                <form method="POST" action="{{ url_for('admin_toggle_premium') }}" style="display: inline;">
+                    <input type="hidden" name="action" value="disable">
+                    <button type="submit" class="toggle-button toggle-free">
+                        Switch to Free Tier
+                    </button>
+                </form>
+            {% else %}
+                <form method="POST" action="{{ url_for('admin_toggle_premium') }}" style="display: inline;">
+                    <input type="hidden" name="action" value="enable">
+                    <button type="submit" class="toggle-button toggle-premium">
+                        ✨ Enable Premium Features
+                    </button>
+                </form>
+            {% endif %}
+            
+            <div class="info-box">
+                <h3>💡 What Premium Includes:</h3>
+                <ul class="feature-list">
+                    <li>3D Property Tour videos with advanced camera movements</li>
+                    <li>Room labels with fade-in animations</li>
+                    <li>3 exclusive 3D style presets (Architectural, Modern, Luxury)</li>
+                    <li>Unlimited video creation</li>
+                    <li>Professional architectural effects</li>
+                </ul>
+                <p style="margin-top: 1rem; font-size: 0.9rem;">
+                    <strong>Note:</strong> This is for your testing only. When you're ready to monetize, users will need to subscribe at $29-49/month.
+                </p>
+            </div>
+        </div>
+        
+        <div class="setting-item">
+            <div class="setting-header">
+                <div class="setting-title">Account Information</div>
+            </div>
+            <div class="setting-description">
+                <strong>Email:</strong> {{ user.get('email') }}<br>
+                <strong>Name:</strong> {{ user.get('name') }}<br>
+                <strong>Role:</strong> {{ user.get('role') }}<br>
+                <strong>Subscription Tier:</strong> {{ user.get('subscription_tier', 'free') }}
+            </div>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('agent_video_studio') }}" class="toggle-button toggle-premium">
+            🎬 Go to Video Studio
+        </a>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <script>
+            {% for category, message in messages %}
+                alert('{{ message }}');
+            {% endfor %}
+        </script>
+    {% endif %}
+{% endwith %}
+
+{% endblock %}

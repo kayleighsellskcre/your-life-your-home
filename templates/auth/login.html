@@ -94,25 +94,37 @@
   
   .password-wrapper {
     position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .password-wrapper input {
+    padding-right: 4.5rem !important; /* Make room for the button */
+    flex: 1;
   }
   
   .password-toggle {
     position: absolute;
-    right: 1rem;
+    right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
     border: none;
-    background: none;
-    font-size: 0.85rem;
+    background: transparent;
+    font-size: 0.75rem;
     color: #6B6A45;
     cursor: pointer;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
   }
   
   .password-toggle:hover {
     color: #3A352C;
+    background: rgba(107, 106, 69, 0.08);
   }
   
   .auth-options {

@@ -545,26 +545,74 @@
   {% endif %}
 </div>
 
-<!-- Search and Filters Bar -->
-<div class="card" style="margin-bottom: 2rem; padding: 1.5rem; background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light);">
-  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto auto; gap: 1rem; align-items: end;">
+<!-- Luxurious Search and Filters Bar -->
+<div class="card" style="margin-bottom: 2.5rem; padding: 2.5rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 2px solid rgba(200, 180, 151, 0.3); box-shadow: 0 8px 32px rgba(58, 53, 44, 0.08); border-radius: 16px;">
+  <!-- Search Section Header -->
+  <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(200, 180, 151, 0.25);">
+    <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; color: #3A352C; margin: 0 0 0.25rem 0; font-weight: 600; letter-spacing: -0.02em;">
+      Find Your Contacts
+    </h3>
+    <p style="font-size: 0.9rem; color: #6B6A45; margin: 0; font-style: italic;">
+      Search, filter, and organize your client relationships
+    </p>
+  </div>
+  
+  <!-- Search and Filters Grid -->
+  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; align-items: end;">
+    <!-- Search Box -->
     <div>
-      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Search Contacts</label>
-      <form method="get" style="display: flex; gap: 0.5rem;">
-        <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, address..." style="flex: 1; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+      <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+        🔍 Search Contacts
+      </label>
+      <form method="get" style="display: flex; gap: 0.75rem;">
+        <div style="flex: 1; position: relative;">
+          <input 
+            type="text" 
+            name="search" 
+            value="{{ search_query }}" 
+            placeholder="Search by name, email, phone, address..." 
+            style="width: 100%; padding: 0.875rem 1.25rem; border: 2px solid #C8B497; border-radius: 8px; background: #FFFFFF; color: #3A352C; font-size: 0.95rem; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(58, 53, 44, 0.04);"
+            onfocus="this.style.borderColor='#6B6A45'; this.style.boxShadow='0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 12px rgba(58, 53, 44, 0.08)';"
+            onblur="this.style.borderColor='#C8B497'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.04)';">
+        </div>
         {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
         {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
         {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
-        <button type="submit" class="btn btn-primary" style="padding: 0.6rem 1.5rem; background: var(--olive-green); color: var(--white); border: none; border-radius: var(--border-radius); font-weight: 600; cursor: pointer;">Search</button>
+        
+        <button 
+          type="submit" 
+          class="btn btn-primary" 
+          style="padding: 0.875rem 2rem; background: linear-gradient(135deg, #6B6A45 0%, #5A5938 100%); color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2); white-space: nowrap;"
+          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(107, 106, 69, 0.3)';"
+          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(107, 106, 69, 0.2)';">
+          Search
+        </button>
+        
         {% if search_query %}
-        <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown); padding: 0.6rem 1rem; text-decoration: none; border-radius: var(--border-radius); font-weight: 600;">Clear</a>
+        <a 
+          href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" 
+          class="btn" 
+          style="background: linear-gradient(135deg, #EFE9DC 0%, #F6F2E8 100%); color: #6B6A45; padding: 0.875rem 1.5rem; text-decoration: none; border-radius: 8px; font-weight: 600; border: 2px solid #C8B497; transition: all 0.3s ease; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.5rem;"
+          onmouseover="this.style.background='linear-gradient(135deg, #C8B497 0%, #EFE9DC 100%)'; this.style.color='#3A352C';"
+          onmouseout="this.style.background='linear-gradient(135deg, #EFE9DC 0%, #F6F2E8 100%)'; this.style.color='#6B6A45';">
+          ✕ Clear
+        </a>
         {% endif %}
       </form>
     </div>
+    
+    <!-- Sort By Dropdown -->
     <div>
-      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Sort By</label>
+      <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+        📊 Sort By
+      </label>
       <form method="get" id="sortForm" style="display: flex;">
-        <select name="sort" onchange="document.getElementById('sortForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+        <select 
+          name="sort" 
+          onchange="document.getElementById('sortForm').submit();" 
+          style="width: 100%; padding: 0.875rem 1.25rem; border: 2px solid #C8B497; border-radius: 8px; background: #FFFFFF; color: #3A352C; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(58, 53, 44, 0.04); appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3e%3cpath fill=%27%236B6A45%27 d=%27M1.41 0L6 4.58 10.59 0 12 1.42l-6 6-6-6z%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;"
+          onfocus="this.style.borderColor='#6B6A45'; this.style.boxShadow='0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 12px rgba(58, 53, 44, 0.08)';"
+          onblur="this.style.borderColor='#C8B497'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.04)';">
           <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
           <option value="stage" {% if sort_by == 'stage' %}selected{% endif %}>Stage</option>
           <option value="last_touch" {% if sort_by == 'last_touch' %}selected{% endif %}>Last Touch</option>
@@ -575,10 +623,19 @@
         {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
       </form>
     </div>
+    
+    <!-- Filter by Tag Dropdown -->
     <div>
-      <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Filter by Tag</label>
+      <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
+        🏷️ Filter by Tag
+      </label>
       <form method="get" id="tagForm" style="display: flex;">
-        <select name="tag" onchange="document.getElementById('tagForm').submit();" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+        <select 
+          name="tag" 
+          onchange="document.getElementById('tagForm').submit();" 
+          style="width: 100%; padding: 0.875rem 1.25rem; border: 2px solid #C8B497; border-radius: 8px; background: #FFFFFF; color: #3A352C; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(58, 53, 44, 0.04); appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3e%3cpath fill=%27%236B6A45%27 d=%27M1.41 0L6 4.58 10.59 0 12 1.42l-6 6-6-6z%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;"
+          onfocus="this.style.borderColor='#6B6A45'; this.style.boxShadow='0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 12px rgba(58, 53, 44, 0.08)';"
+          onblur="this.style.borderColor='#C8B497'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.04)';">
           <option value="">All Tags</option>
           {% for tag in all_tags %}
           <option value="{{ tag }}" {% if tag_filter == tag %}selected{% endif %}>{{ tag }}</option>

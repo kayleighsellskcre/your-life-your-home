@@ -7529,6 +7529,51 @@ def agent_video_studio_delete(project_id):
 
 
 # -------------------------------------------------
+# ADMIN SETTINGS ROUTES
+# -------------------------------------------------
+@app.route("/agent/admin/settings")
+def admin_settings():
+    """Admin settings page for premium feature testing"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    return render_template(
+        "agent/admin_settings.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user
+    )
+
+
+@app.route("/agent/admin/toggle-premium", methods=["POST"])
+def admin_toggle_premium():
+    """Toggle premium features on/off for testing"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    action = request.form.get("action")
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    if action == "enable":
+        # Enable premium
+        cur.execute("UPDATE users SET subscription_tier = 'premium' WHERE id = ?", (user["id"],))
+        conn.commit()
+        flash("✨ Premium features enabled! You can now create 3D Property Tours.", "success")
+    elif action == "disable":
+        # Disable premium
+        cur.execute("UPDATE users SET subscription_tier = 'free' WHERE id = ?", (user["id"],))
+        conn.commit()
+        flash("Premium features disabled. Switched to free tier.", "success")
+    
+    conn.close()
+    
+    return redirect(url_for("admin_settings"))
+
+
+# -------------------------------------------------
 # AGENT SETTINGS ROUTES
 # -------------------------------------------------
 @app.route("/agent/settings/profile", methods=["GET", "POST"])
