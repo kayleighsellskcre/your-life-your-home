@@ -482,8 +482,6 @@ class VideoRenderer:
             "eq=contrast=1.15:brightness=0.03:saturation=1.1",
             # Sharpen for clarity (important for 3D feel)
             "unsharp=7:7:1.2:7:7:0.0",
-            # Slight edge enhancement for depth perception
-            "edgedetect=mode=colormix:high=0.02:low=0.01",
         ]
         
         # Add room label if provided
@@ -494,6 +492,7 @@ class VideoRenderer:
             # Calculate label position (top-left corner with fade-in)
             label_x = 60
             label_y = 80
+            underline_width = 300  # Fixed width for underline
             
             # Add text overlay with professional styling
             filter_parts.append(
@@ -503,9 +502,9 @@ class VideoRenderer:
                 f"enable='between(t,0.3,{duration-0.5})'"
             )
             
-            # Add underline accent
+            # Add underline accent (fixed width)
             filter_parts.append(
-                f"drawbox=x={label_x}:y={label_y + 85}:w=min(text_w+20\\,400):h=5:"
+                f"drawbox=x={label_x}:y={label_y + 85}:w={underline_width}:h=5:"
                 f"color=#c89666@0.9:t=fill:"
                 f"enable='between(t,0.5,{duration-0.5})'"
             )
