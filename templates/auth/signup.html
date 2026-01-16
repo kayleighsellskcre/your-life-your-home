@@ -103,42 +103,29 @@
   }
   
   .password-wrapper input {
-    padding-right: 5.5rem !important; /* Make room for the luxurious button */
+    padding-right: 4rem !important;
     flex: 1;
   }
 
   .password-toggle {
     position: absolute;
-    right: 0.5rem;
+    right: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    border: 1.5px solid #C8B497;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%);
-    font-size: 0.7rem;
-    color: #6B6A45;
+    border: none;
+    background: none;
+    font-size: 0.75rem;
+    color: #94a3b8;
     cursor: pointer;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 0.6rem 1rem;
-    border-radius: 2px;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 500;
+    text-transform: lowercase;
+    padding: 0.25rem 0.5rem;
+    transition: color 0.2s;
     white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(58, 53, 44, 0.08);
-    font-family: 'Montserrat', -apple-system, sans-serif;
   }
 
   .password-toggle:hover {
-    color: #FFFFFF;
-    background: linear-gradient(135deg, #6B6A45 0%, #3A352C 100%);
-    border-color: #3A352C;
-    box-shadow: 0 4px 12px rgba(58, 53, 44, 0.25);
-    transform: translateY(-50%) translateY(-1px);
-  }
-  
-  .password-toggle:active {
-    transform: translateY(-50%) scale(0.98);
-    box-shadow: 0 2px 6px rgba(58, 53, 44, 0.2);
+    color: #6B6A45;
   }
   
   .role-hint {
@@ -207,7 +194,7 @@
         <div class="password-wrapper">
           <input id="password" name="password" type="password" autocomplete="new-password" required placeholder="Create a secure password" />
           <button type="button" onclick="togglePasswordSignup()" class="password-toggle">
-            Show
+            show
           </button>
         </div>
       </div>
@@ -257,10 +244,10 @@
     const btn = event.target;
     if (input.type === "password") {
       input.type = "text";
-      btn.textContent = "Hide";
+      btn.textContent = "hide";
     } else {
       input.type = "password";
-      btn.textContent = "Show";
+      btn.textContent = "show";
     }
   }
 </script>
