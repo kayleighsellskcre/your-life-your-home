@@ -9227,6 +9227,230 @@ def homebot_webhook():
         }), 500
 
 
+# ============================================================================
+# ADMIN RBAC ROUTES
+# ============================================================================
+
+@app.route("/admin")
+@app.route("/admin/dashboard")
+def admin_dashboard():
+    """Admin dashboard - Owner control panel"""
+    from rbac import has_role
+    from audit import get_audit_logs
+    
+    user = session.get('user')
+    if not user:
+        return redirect(url_for('login', role='admin'))
+    
+    # Check if user has owner or admin role
+    if not has_role(user['id'], 'owner') and not has_role(user['id'], 'admin'):
+        flash("You must be an administrator to access this page", "error")
+        return redirect(url_for('dashboard'))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Get stats
+    cur.execute("SELECT COUNT(*) as count FROM users")
+    total_users = cur.fetchone()['count']
+    
+    cur.execute("SELECT COUNT(*) as count FROM properties")
+    total_properties = cur.fetchone()['count']
+    
+    cur.execute("SELECT COUNT(*) as count FROM video_projects")
+    total_videos = cur.fetchone()['count']
+    
+    cur.execute("""
+        SELECT COUNT(*) as count FROM users 
+        WHERE DATE(last_login) = DATE('now')
+    """)
+    active_today = cur.fetchone()['count']
+    
+    # Get recent users
+    cur.execute("""
+        SELECT id, name, email, role, subscription_tier, created_at, email_verified
+        FROM users
+        ORDER BY created_at DESC
+        LIMIT 10
+    """)
+    recent_users = [dict(row) for row in cur.fetchall()]
+    
+    conn.close()
+    
+    # Get recent activity from audit logs
+    recent_activity = []
+    try:
+        logs = get_audit_logs(limit=10)
+        for log in logs:
+            # Get user name
+            conn = get_connection()
+            cur = conn.cursor()
+            if log['user_id']:
+                cur.execute("SELECT name FROM users WHERE id = ?", (log['user_id'],))
+                user_row = cur.fetchone()
+                log['user_name'] = user_row['name'] if user_row else 'Unknown'
+            else:
+                log['user_name'] = 'System'
+            conn.close()
+            recent_activity.append(log)
+    except:
+        pass
+    
+    stats = {
+        'total_users': total_users,
+        'total_properties': total_properties,
+        'total_videos': total_videos,
+        'active_today': active_today
+    }
+    
+    return render_template(
+        'admin/dashboard.html',
+        stats=stats,
+        recent_users=recent_users,
+        recent_activity=recent_activity
+    )
+
+@app.route("/admin/impersonate/<int:user_id>", methods=["POST"])
+def admin_impersonate_user(user_id):
+    """Start impersonating a user (View As feature)"""
+    from rbac import has_permission
+    from impersonation import start_impersonation
+    
+    admin = session.get('user')
+    if not admin:
+        return redirect(url_for('login'))
+    
+    # Check permission
+    if not has_permission(admin['id'], 'users.impersonate'):
+        flash("You don't have permission to impersonate users", "error")
+        return redirect(url_for('admin_dashboard'))
+    
+    # Get target user
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+    target_user = cur.fetchone()
+    conn.close()
+    
+    if not target_user:
+        flash("User not found", "error")
+        return redirect(url_for('admin_dashboard'))
+    
+    target_user = dict(target_user)
+    
+    # Start impersonation
+    reason = request.form.get('reason', 'Support assistance')
+    session_id, _ = start_impersonation(admin['id'], user_id, reason)
+    
+    # Store impersonation data in session
+    session['impersonation'] = {
+        'session_id': session_id,
+        'admin_id': admin['id'],
+        'admin_name': admin['name'],
+        'original_user': admin
+    }
+    
+    # Switch to target user
+    session['user'] = target_user
+    
+    flash(f"Support Mode: Now viewing as {target_user['name']}", "warning")
+    
+    # Redirect to appropriate dashboard based on target user's role
+    if target_user['role'] == 'homeowner':
+        return redirect(url_for('homeowner_dashboard'))
+    elif target_user['role'] == 'agent':
+        return redirect(url_for('agent_dashboard'))
+    elif target_user['role'] == 'lender':
+        return redirect(url_for('lender_dashboard'))
+    else:
+        return redirect(url_for('dashboard'))
+
+@app.route("/admin/end-impersonation", methods=["POST"])
+def admin_end_impersonation():
+    """End impersonation session"""
+    from impersonation import end_impersonation
+    
+    if 'impersonation' not in session:
+        return redirect(url_for('dashboard'))
+    
+    imp = session['impersonation']
+    
+    # End the impersonation session
+    end_impersonation(imp['session_id'], imp['admin_id'])
+    
+    # Restore admin session
+    session['user'] = imp['original_user']
+    del session['impersonation']
+    
+    flash("Exited Support Mode - Back to Admin View", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route("/admin/users")
+def admin_users_list():
+    """List all users with management options"""
+    from rbac import has_permission
+    
+    user = session.get('user')
+    if not user or not has_permission(user['id'], 'users.view'):
+        flash("Access denied", "error")
+        return redirect(url_for('dashboard'))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Get all users
+    cur.execute("""
+        SELECT id, name, email, phone, role, subscription_tier, 
+               created_at, last_login, email_verified
+        FROM users
+        ORDER BY created_at DESC
+    """)
+    users = [dict(row) for row in cur.fetchall()]
+    
+    conn.close()
+    
+    return render_template('admin/users.html', users=users)
+
+@app.route("/admin/audit-logs")
+def admin_audit_logs():
+    """View audit logs"""
+    from rbac import has_permission
+    from audit import get_audit_logs
+    
+    user = session.get('user')
+    if not user or not has_permission(user['id'], 'security.view_audit'):
+        flash("Access denied", "error")
+        return redirect(url_for('dashboard'))
+    
+    # Get filters from query params
+    action_filter = request.args.get('action')
+    user_filter = request.args.get('user_id', type=int)
+    limit = request.args.get('limit', 100, type=int)
+    
+    # Get logs
+    logs = get_audit_logs(
+        user_id=user_filter,
+        action=action_filter,
+        limit=limit
+    )
+    
+    # Enrich with user names
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    for log in logs:
+        if log['user_id']:
+            cur.execute("SELECT name FROM users WHERE id = ?", (log['user_id'],))
+            user_row = cur.fetchone()
+            log['user_name'] = user_row['name'] if user_row else 'Unknown'
+        else:
+            log['user_name'] = 'System'
+    
+    conn.close()
+    
+    return render_template('admin/audit_logs.html', logs=logs)
+
+
 # ---------------- DEVELOPMENT SERVER ----------------
 if __name__ == "__main__":
     # Only runs when executing directly with Python (not with gunicorn)

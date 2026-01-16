@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Your Life Your Home{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <!-- Impersonation Banner (if active) -->
+    {% if session.get('impersonation') %}
+    <div class="impersonation-banner">
+        <div class="impersonation-content">
+            <span class="impersonation-icon">🔍</span>
+            <strong>Support Mode Active:</strong> Viewing as {{ session.user.name }}
+            <form method="POST" action="/admin/end-impersonation" style="display: inline; margin-left: auto;">
+                <button type="submit" class="btn-exit-impersonation">Exit Support Mode</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Admin Header -->
+    <div class="admin-header">
+        <h1>👑 Admin Dashboard</h1>
+        <p class="admin-subtitle">Owner Control Panel - Full System Access</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_users }}</h3>
+                <p>Total Users</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏡</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_properties }}</h3>
+                <p>Properties</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎥</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_videos }}</h3>
+                <p>Videos Created</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <h3>{{ stats.active_today }}</h3>
+                <p>Active Today</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-section">
+        <h2>⚡ Quick Actions</h2>
+        <div class="quick-actions">
+            <a href="/admin/users" class="action-btn">
+                <span class="action-icon">👥</span>
+                <span>Manage Users</span>
+            </a>
+            <a href="/admin/roles" class="action-btn">
+                <span class="action-icon">🔐</span>
+                <span>Role Management</span>
+            </a>
+            <a href="/admin/audit-logs" class="action-btn">
+                <span class="action-icon">📋</span>
+                <span>Audit Logs</span>
+            </a>
+            <a href="/admin/settings" class="action-btn">
+                <span class="action-icon">⚙️</span>
+                <span>System Settings</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="admin-section">
+        <div class="section-header">
+            <h2>👥 Recent Users</h2>
+            <a href="/admin/users" class="view-all-link">View All →</a>
+        </div>
+        
+        <div class="users-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Subscription</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <strong>{{ user.name }}</strong>
+                                {% if user.email_verified %}
+                                <span class="badge badge-verified">✓</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            <span class="badge badge-role badge-{{ user.role }}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-tier badge-{{ user.subscription_tier }}">
+                                {{ user.subscription_tier or 'free' }}
+                            </span>
+                        </td>
+                        <td>{{ user.created_at[:10] if user.created_at else 'N/A' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <form method="POST" action="/admin/impersonate/{{ user.id }}" style="display: inline;">
+                                    <button type="submit" class="btn-icon" title="View As">
+                                        🔍
+                                    </button>
+                                </form>
+                                <a href="/admin/users/{{ user.id }}" class="btn-icon" title="Edit">
+                                    ✏️
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recent Activity (Audit Logs) -->
+    <div class="admin-section">
+        <div class="section-header">
+            <h2>📋 Recent Activity</h2>
+            <a href="/admin/audit-logs" class="view-all-link">View All →</a>
+        </div>
+        
+        <div class="activity-list">
+            {% for log in recent_activity %}
+            <div class="activity-item">
+                <div class="activity-icon activity-{{ log.action }}">
+                    {% if 'login' in log.action %}🔑
+                    {% elif 'impersonation' in log.action %}🔍
+                    {% elif 'created' in log.action %}➕
+                    {% elif 'deleted' in log.action %}🗑️
+                    {% elif 'permission' in log.action %}⚠️
+                    {% else %}📝
+                    {% endif %}
+                </div>
+                <div class="activity-content">
+                    <strong>{{ log.user_name or 'System' }}</strong>
+                    <span class="activity-action">{{ log.action.replace('_', ' ').title() }}</span>
+                    {% if log.details %}
+                    <span class="activity-details">{{ log.details }}</span>
+                    {% endif %}
+                </div>
+                <div class="activity-time">
+                    {{ log.created_at }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Impersonation Banner */
+.impersonation-banner {
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+    animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
+    50% { box-shadow: 0 4px 30px rgba(239, 68, 68, 0.5); }
+}
+
+.impersonation-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.impersonation-icon {
+    font-size: 1.5rem;
+}
+
+.btn-exit-impersonation {
+    background: white;
+    color: #ef4444;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-exit-impersonation:hover {
+    background: #fee2e2;
+    transform: scale(1.05);
+}
+
+/* Admin Header */
+.admin-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.admin-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.admin-subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    margin: 0;
+    color: #1e293b;
+}
+
+.stat-content p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Admin Sections */
+.admin-section {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.view-all-link {
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.view-all-link:hover {
+    color: #2563eb;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1e293b;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: #3b82f6;
+}
+
+.action-icon {
+    font-size: 2rem;
+}
+
+/* Users Table */
+.users-table-container {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table thead {
+    background: #f8fafc;
+}
+
+.admin-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.admin-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-verified {
+    background: #10b981;
+    color: white;
+}
+
+.badge-role {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.badge-role.badge-owner {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+}
+
+.badge-role.badge-admin {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-tier {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-tier.badge-premium,
+.badge-tier.badge-owner {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+    text-decoration: none;
+}
+
+.btn-icon:hover {
+    background: #f1f5f9;
+}
+
+/* Activity List */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+
+.activity-item:hover {
+    background: #f1f5f9;
+}
+
+.activity-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.activity-action {
+    color: #64748b;
+}
+
+.activity-details {
+    color: #94a3b8;
+    font-size: 0.9rem;
+}
+
+.activity-time {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-table {
+        font-size: 0.85rem;
+    }
+    
+    .admin-table th,
+    .admin-table td {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

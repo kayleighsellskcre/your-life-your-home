@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - Admin - Your Life Your Home{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="page-header">
+        <a href="/admin/dashboard" class="back-link">← Back to Admin</a>
+        <h1>👥 User Management</h1>
+        <p class="subtitle">Manage all platform users and their access</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="user-stats">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>{{ users|length }}</h3>
+                <p>Total Users</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">👑</div>
+            <div class="stat-content">
+                <h3>{{ users|selectattr('role', 'equalto', 'owner')|list|length }}</h3>
+                <p>Owners</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🏡</div>
+            <div class="stat-content">
+                <h3>{{ users|selectattr('role', 'equalto', 'homeowner')|list|length }}</h3>
+                <p>Homeowners</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🤝</div>
+            <div class="stat-content">
+                <h3>{{ users|selectattr('role', 'equalto', 'agent')|list|length }}</h3>
+                <p>Agents</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="users-card">
+        <div class="card-header">
+            <h2>All Users</h2>
+            <input type="text" id="searchUsers" placeholder="Search users..." class="search-input">
+        </div>
+        
+        <div class="table-container">
+            <table class="users-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Role</th>
+                        <th>Subscription</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="user-row">
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <div class="user-cell">
+                                <strong>{{ user.name }}</strong>
+                                {% if user.email_verified %}
+                                <span class="badge badge-verified" title="Email Verified">✓</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone or 'N/A' }}</td>
+                        <td>
+                            <span class="badge badge-role badge-{{ user.role }}">
+                                {% if user.role == 'owner' %}👑
+                                {% elif user.role == 'admin' %}⚙️
+                                {% elif user.role == 'agent' %}🤝
+                                {% elif user.role == 'lender' %}💰
+                                {% else %}🏡
+                                {% endif %}
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge badge-tier badge-{{ user.subscription_tier or 'free' }}">
+                                {{ user.subscription_tier or 'free' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if user.email_verified %}
+                            <span class="badge badge-active">Active</span>
+                            {% else %}
+                            <span class="badge badge-pending">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="date-cell">{{ user.created_at[:10] if user.created_at else 'N/A' }}</td>
+                        <td class="date-cell">{{ user.last_login[:10] if user.last_login else 'Never' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                {% if user.id != session.user.id %}
+                                <form method="POST" action="/admin/impersonate/{{ user.id }}" style="display: inline;">
+                                    <button type="submit" class="btn-action btn-impersonate" title="View As User">
+                                        🔍 View As
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchUsers').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('.user-row');
+    
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+</script>
+
+<style>
+.admin-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* Stats */
+.user-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    font-size: 3rem;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    margin: 0;
+    color: #1e293b;
+}
+
+.stat-content p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* Users Card */
+.users-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.search-input {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 25px;
+    font-size: 1rem;
+    min-width: 300px;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+/* Table */
+.table-container {
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.users-table thead {
+    background: #f8fafc;
+}
+
+.users-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.users-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.user-row:hover {
+    background: #f8fafc;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-cell {
+    color: #64748b;
+    font-size: 0.85rem;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.badge-verified {
+    background: #10b981;
+    color: white;
+}
+
+.badge-role {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+.badge-role.badge-owner {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+}
+
+.badge-role.badge-admin {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.badge-role.badge-agent {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-role.badge-lender {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-tier {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-tier.badge-premium,
+.badge-tier.badge-owner {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    color: white;
+}
+
+.badge-active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-pending {
+    background: #fed7aa;
+    color: #92400e;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-action {
+    background: none;
+    border: 2px solid #e2e8f0;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-impersonate {
+    border-color: #fbbf24;
+    color: #f59e0b;
+}
+
+.btn-impersonate:hover {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 1rem;
+    }
+    
+    .user-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    
+    .search-input {
+        min-width: 100%;
+    }
+    
+    .users-table {
+        font-size: 0.75rem;
+    }
+    
+    .users-table th,
+    .users-table td {
+        padding: 0.5rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

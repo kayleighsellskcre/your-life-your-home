@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Logs - Admin - Your Life Your Home{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="page-header">
+        <a href="/admin/dashboard" class="back-link">← Back to Admin</a>
+        <h1>📋 Audit Logs</h1>
+        <p class="subtitle">Complete system activity trail for security and compliance</p>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-card">
+        <form method="GET" class="filters-form">
+            <div class="filter-group">
+                <label>Action Type</label>
+                <select name="action" class="filter-select">
+                    <option value="">All Actions</option>
+                    <option value="login_success">Login Success</option>
+                    <option value="login_failed">Login Failed</option>
+                    <option value="impersonation_started">Impersonation Started</option>
+                    <option value="impersonation_ended">Impersonation Ended</option>
+                    <option value="permission_denied">Permission Denied</option>
+                    <option value="created">Created</option>
+                    <option value="updated">Updated</option>
+                    <option value="deleted">Deleted</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label>Limit</label>
+                <select name="limit" class="filter-select">
+                    <option value="50">50</option>
+                    <option value="100" selected>100</option>
+                    <option value="500">500</option>
+                    <option value="1000">1000</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-filter">Apply Filters</button>
+        </form>
+    </div>
+
+    <!-- Logs Table -->
+    <div class="logs-card">
+        <div class="logs-table-container">
+            <table class="logs-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Resource</th>
+                        <th>Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr class="log-row log-{{ log.action }}">
+                        <td class="log-time">
+                            {{ log.created_at }}
+                        </td>
+                        <td class="log-user">
+                            <strong>{{ log.user_name }}</strong>
+                            {% if log.user_id %}
+                            <span class="user-id">(ID: {{ log.user_id }})</span>
+                            {% endif %}
+                        </td>
+                        <td class="log-action">
+                            <span class="action-badge action-{{ log.action }}">
+                                {% if 'login' in log.action %}🔑
+                                {% elif 'impersonation' in log.action %}🔍
+                                {% elif 'permission' in log.action %}⚠️
+                                {% elif 'created' in log.action %}➕
+                                {% elif 'updated' in log.action %}✏️
+                                {% elif 'deleted' in log.action %}🗑️
+                                {% else %}📝
+                                {% endif %}
+                                {{ log.action.replace('_', ' ').title() }}
+                            </span>
+                        </td>
+                        <td class="log-resource">
+                            {{ log.resource or 'N/A' }}
+                            {% if log.resource_id %}
+                            <span class="resource-id">#{{ log.resource_id }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="log-details">
+                            {{ log.details or '-' }}
+                        </td>
+                        <td class="log-ip">
+                            {{ log.ip_address or '-' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    {% if not logs %}
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <p>No audit logs found</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="summary-stats">
+        <div class="stat-item">
+            <span class="stat-label">Total Entries:</span>
+            <span class="stat-value">{{ logs|length }}</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-link:hover {
+    color: #2563eb;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* Filters */
+.filters-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.filters-form {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.filter-select {
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    min-width: 200px;
+}
+
+.btn-filter {
+    padding: 0.75rem 2rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-filter:hover {
+    background: #2563eb;
+    transform: translateY(-2px);
+}
+
+/* Logs Table */
+.logs-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.logs-table-container {
+    overflow-x: auto;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.logs-table thead {
+    background: #f8fafc;
+    position: sticky;
+    top: 0;
+}
+
+.logs-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.logs-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.log-row:hover {
+    background: #f8fafc;
+}
+
+.log-time {
+    color: #64748b;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.log-user strong {
+    color: #1e293b;
+}
+
+.user-id {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+.action-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.action-badge.action-login_success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.action-badge.action-login_failed {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action-badge.action-impersonation_started,
+.action-badge.action-impersonation_ended {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.action-badge.action-permission_denied {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.resource-id {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+.log-details {
+    color: #64748b;
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.log-ip {
+    color: #94a3b8;
+    font-family: monospace;
+    font-size: 0.85rem;
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem !important;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+/* Summary Stats */
+.summary-stats {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.stat-label {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 1rem;
+    }
+    
+    .filters-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-select {
+        min-width: 100%;
+    }
+    
+    .logs-table {
+        font-size: 0.75rem;
+    }
+    
+    .logs-table th,
+    .logs-table td {
+        padding: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
