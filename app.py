@@ -7248,6 +7248,49 @@ def agent_vendors():
 # -------------------------------------------------
 # AGENT VIDEO STUDIO ROUTES
 # -------------------------------------------------
+@app.route("/agent/admin/toggle-premium", methods=["GET", "POST"])
+def admin_toggle_premium():
+    """Admin page to toggle premium features for testing"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    if request.method == "POST":
+        action = request.form.get("action")
+        conn = get_connection()
+        cur = conn.cursor()
+        
+        if action == "upgrade":
+            cur.execute(
+                "UPDATE users SET subscription_tier = ? WHERE id = ?",
+                ("premium", user["id"])
+            )
+            conn.commit()
+            conn.close()
+            flash("✨ Premium features enabled!", "success")
+        elif action == "downgrade":
+            cur.execute(
+                "UPDATE users SET subscription_tier = ? WHERE id = ?",
+                ("free", user["id"])
+            )
+            conn.commit()
+            conn.close()
+            flash("Free tier activated", "success")
+        
+        return redirect(url_for("admin_toggle_premium"))
+    
+    # Refresh user data
+    conn = get_connection()
+    user_data = conn.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone()
+    conn.close()
+    
+    return render_template(
+        "agent/admin_toggle.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=dict(user_data) if user_data else user
+    )
+
+
 @app.route("/agent/video-studio")
 def agent_video_studio():
     """Video Studio - create marketing videos"""
@@ -7348,6 +7391,12 @@ def agent_video_studio_create():
                     media_files.append(str(filepath))
         
         if not media_files:
+            # Return JSON for AJAX requests
+            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return jsonify({
+                    "success": False,
+                    "error": "Please upload at least one photo or video"
+                })
             flash("Please upload at least one photo or video", "error")
             return redirect(url_for("agent_video_studio"))
         
@@ -7414,21 +7463,50 @@ def agent_video_studio_create():
                 result["output_path"]
             )
             print(f"[VIDEO CREATE] Updated project {project_id} to complete with path: {result['output_path']}")
+            
+            # Return JSON for AJAX requests (new tab feature!)
+            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return jsonify({
+                    "success": True,
+                    "project_id": project_id,
+                    "message": "Video created successfully!"
+                })
+            
             flash("✨ Video created successfully!", "success")
             return redirect(url_for("agent_video_studio_view", project_id=project_id))
         else:
             update_video_render_status(project_id, 'failed')
             print(f"[VIDEO CREATE] Video rendering failed: {result.get('error')}")
+            
+            # Return JSON for AJAX requests
+            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+                return jsonify({
+                    "success": False,
+                    "error": result.get('error')
+                })
+            
             flash(f"Video creation failed: {result.get('error')}", "error")
             return redirect(url_for("agent_video_studio"))
         
     except ImportError as e:
         print(f"Video Studio import error: {e}")
+        # Return JSON for AJAX requests
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+            return jsonify({
+                "success": False,
+                "error": "Video Studio is temporarily unavailable"
+            })
         flash("⚠️ Video Studio is temporarily unavailable. The feature is being configured. Please try again later.", "error")
         return redirect(url_for("agent_video_studio"))
     except Exception as e:
         import traceback
         traceback.print_exc()
+        # Return JSON for AJAX requests
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            })
         flash(f"Error creating video: {str(e)}", "error")
         return redirect(url_for("agent_video_studio"))
 
@@ -7543,34 +7621,6 @@ def admin_settings():
         brand_name=FRONT_BRAND_NAME,
         user=user
     )
-
-
-@app.route("/agent/admin/toggle-premium", methods=["POST"])
-def admin_toggle_premium():
-    """Toggle premium features on/off for testing"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
-    
-    action = request.form.get("action")
-    
-    conn = get_connection()
-    cur = conn.cursor()
-    
-    if action == "enable":
-        # Enable premium
-        cur.execute("UPDATE users SET subscription_tier = 'premium' WHERE id = ?", (user["id"],))
-        conn.commit()
-        flash("✨ Premium features enabled! You can now create 3D Property Tours.", "success")
-    elif action == "disable":
-        # Disable premium
-        cur.execute("UPDATE users SET subscription_tier = 'free' WHERE id = ?", (user["id"],))
-        conn.commit()
-        flash("Premium features disabled. Switched to free tier.", "success")
-    
-    conn.close()
-    
-    return redirect(url_for("admin_settings"))
 
 
 # -------------------------------------------------

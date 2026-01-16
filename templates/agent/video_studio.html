@@ -546,6 +546,15 @@
     <div class="studio-header">
         <h1>Video Studio</h1>
         <p>Create stunning luxury real estate videos in minutes</p>
+        <div style="margin-top: 1.5rem;">
+            <a href="{{ url_for('admin_toggle_premium') }}" style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%); color: white; text-decoration: none; border-radius: var(--border-radius-full); font-weight: 600; box-shadow: 0 2px 8px rgba(107, 106, 69, 0.3); transition: all 0.3s ease;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                Toggle Premium Features
+            </a>
+        </div>
     </div>
     
     {% if projects %}
@@ -715,6 +724,7 @@
                     <div class="upload-icon" style="width: 80px; height: 80px; margin: 0 auto 1.5rem; border-radius: 50%; background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: 700;">+</div>
                     <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 0.75rem;">Drag & Drop or Click to Upload</h3>
                     <p style="color: var(--warm-gray); font-size: 0.95rem;">Photos (JPG, PNG) or Videos (MP4, MOV)</p>
+                    <p style="color: var(--olive-green); font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem;" id="uploadCount">Upload up to 30 photos</p>
                     <input type="file" id="mediaInput" name="media_files" multiple accept="image/*,video/*" style="display: none;">
                 </div>
                 
@@ -836,8 +846,13 @@ let uploadedFiles = [];
 
 // Step navigation
 document.getElementById('nextBtn').addEventListener('click', () => {
-    if (validateStep(currentStep)) {
+    console.log('Next button clicked! Current step:', currentStep);
+    console.log('Validating step...');
+    const isValid = validateStep(currentStep);
+    console.log('Validation result:', isValid);
+    if (isValid) {
         currentStep++;
+        console.log('Moving to step:', currentStep);
         updateStep();
     }
 });
@@ -911,15 +926,15 @@ function validateStep(step) {
 }
 
 // Add shake animation
-const style = document.createElement('style');
-style.textContent = `
+const shakeStyle = document.createElement('style');
+shakeStyle.textContent = `
     @keyframes shake {
         0%, 100% { transform: translateX(0); }
         25% { transform: translateX(-10px); }
         75% { transform: translateX(10px); }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(shakeStyle);
 
 // Video type selection
 const hasPremium = {{ 'true' if has_premium else 'false' }};
@@ -927,16 +942,21 @@ const hasPremium = {{ 'true' if has_premium else 'false' }};
 document.querySelectorAll('.video-type-card').forEach(card => {
     card.addEventListener('click', () => {
         const videoType = card.dataset.type;
+        console.log('Video type card clicked:', videoType);
+        console.log('Has premium:', hasPremium);
         
         // Check if 3D tour requires premium
         if (videoType === '3d-tour' && !hasPremium) {
+            console.log('Blocking 3D tour - requires premium');
             alert('✨ 3D Property Tours are a Premium feature!\n\nUpgrade your subscription to unlock:\n• Immersive 3D camera movements\n• Room labels with animations\n• Professional architectural effects\n• Multiple 3D style presets\n\nContact us to upgrade today!');
             return;
         }
         
+        console.log('Setting video type...');
         document.querySelectorAll('.video-type-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
         document.getElementById('videoType').value = videoType;
+        console.log('Video type set to:', document.getElementById('videoType').value);
         
         // Show/hide 3D-specific options
         const is3DTour = videoType === '3d-tour';
@@ -1012,7 +1032,21 @@ mediaInput.addEventListener('change', (e) => {
 });
 
 function handleFiles(files) {
-    Array.from(files).forEach(file => {
+    const MAX_FILES = 30;
+    const remainingSlots = MAX_FILES - uploadedFiles.length;
+    
+    if (uploadedFiles.length >= MAX_FILES) {
+        alert(`📸 Maximum limit reached!\n\nYou can upload up to ${MAX_FILES} photos per video.\n\nTip: Remove some photos to add new ones.`);
+        return;
+    }
+    
+    const filesToAdd = Array.from(files).slice(0, remainingSlots);
+    
+    if (files.length > remainingSlots) {
+        alert(`ℹ️ Only adding ${remainingSlots} photo(s)\n\nYou've reached the ${MAX_FILES} photo limit for this video.`);
+    }
+    
+    filesToAdd.forEach(file => {
         uploadedFiles.push(file);
         
         const reader = new FileReader();
@@ -1024,14 +1058,33 @@ function handleFiles(files) {
                 <button type="button" class="media-remove" onclick="removeMedia(${uploadedFiles.length - 1})">×</button>
             `;
             mediaGrid.appendChild(mediaItem);
+            updateUploadCount();
         };
         reader.readAsDataURL(file);
     });
 }
 
+function updateUploadCount() {
+    const countEl = document.getElementById('uploadCount');
+    const count = uploadedFiles.length;
+    const MAX_FILES = 30;
+    
+    if (count === 0) {
+        countEl.textContent = `Upload up to ${MAX_FILES} photos`;
+        countEl.style.color = 'var(--olive-green)';
+    } else if (count < MAX_FILES) {
+        countEl.textContent = `${count}/${MAX_FILES} photos uploaded`;
+        countEl.style.color = 'var(--olive-green)';
+    } else {
+        countEl.textContent = `${count}/${MAX_FILES} photos (Maximum reached)`;
+        countEl.style.color = 'var(--warning)';
+    }
+}
+
 function removeMedia(index) {
     uploadedFiles.splice(index, 1);
     mediaGrid.children[index].remove();
+    updateUploadCount();
 }
 
 // Video project card interactions
@@ -1081,6 +1134,105 @@ document.querySelectorAll('.video-delete-btn').forEach(btn => {
         this.style.transform = 'scale(1)';
     });
 });
+
+// OPEN VIDEO IN NEW TAB - Keep working while video creates!
+document.getElementById('videoForm').addEventListener('submit', function(e) {
+    // Only intercept if we're on the final step (submit button visible)
+    const submitBtn = document.getElementById('submitBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
+    // Check if submit button is actually visible (final step)
+    const submitVisible = window.getComputedStyle(submitBtn).display !== 'none';
+    if (!submitVisible || window.getComputedStyle(nextBtn).display !== 'none') {
+        return; // Let normal wizard navigation happen
+    }
+    
+    e.preventDefault(); // Stop normal form submission for final submit
+    
+    const originalContent = submitBtn.innerHTML;
+    
+    // Show creating state
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+        <span style="display: flex; align-items: center; gap: 0.75rem;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 1s linear infinite;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 6v6l4 2"></path>
+            </svg>
+            Creating Video...
+        </span>
+    `;
+    
+    // Submit form via AJAX
+    const formData = new FormData(this);
+    const videoForm = this;
+    
+    console.log('Submitting video creation via AJAX...');
+    
+    fetch('{{ url_for("agent_video_studio_create") }}', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => {
+        console.log('Response received:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.project_id) {
+            // OPEN VIDEO PAGE IN NEW TAB
+            const videoUrl = `/agent/video-studio/${data.project_id}`;
+            window.open(videoUrl, '_blank');
+            
+            // Show success message on current page
+            alert('🎬 Video is being created!\n\nOpened in new tab. You can continue working here!');
+            
+            // Reset form for next video
+            try {
+                videoForm.reset();
+                uploadedFiles = [];
+                const grid = document.getElementById('mediaGrid');
+                if (grid) grid.innerHTML = '';
+                updateUploadCount();
+                currentStep = 1;
+                updateStep();
+            } catch (resetError) {
+                console.log('Form reset skipped:', resetError);
+                // If reset fails, just reload the page
+                window.location.reload();
+            }
+            
+            // Restore button
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+        } else {
+            alert('❌ Failed to create video: ' + (data.error || 'Unknown error'));
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalContent;
+        }
+    })
+    .catch(error => {
+        alert('❌ Error creating video: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalContent;
+    });
+});
+
+// Add spin animation for loading state
+const spinStyle = document.createElement('style');
+spinStyle.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(spinStyle);
 </script>
 {% endblock %}
 

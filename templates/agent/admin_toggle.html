@@ -1,0 +1,171 @@
+{% extends "agent/layout.html" %}
+
+{% block title %}Admin Settings - {{ brand_name }}{% endblock %}
+
+{% block content %}
+<style>
+    .admin-container {
+        max-width: 800px;
+        margin: 4rem auto;
+        padding: 3rem;
+        background: var(--soft-white);
+        border-radius: var(--border-radius-2xl);
+        box-shadow: 0 4px 20px rgba(58, 53, 44, 0.1);
+    }
+    
+    .admin-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 2px solid var(--light-cream);
+    }
+    
+    .admin-header h1 {
+        font-family: var(--font-heading);
+        font-size: 2.5rem;
+        color: var(--charcoal-brown);
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-header p {
+        color: var(--warm-gray);
+        font-size: 1.1rem;
+    }
+    
+    .toggle-card {
+        background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
+        padding: 2rem;
+        border-radius: var(--border-radius-lg);
+        border: 2px solid var(--light-cream);
+        margin-bottom: 2rem;
+    }
+    
+    .toggle-card h3 {
+        font-family: var(--font-heading);
+        font-size: 1.5rem;
+        color: var(--charcoal-brown);
+        margin-bottom: 1rem;
+    }
+    
+    .toggle-card p {
+        color: var(--warm-gray);
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .current-tier {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border-radius: var(--border-radius-full);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tier-free {
+        background: var(--warm-gray);
+        color: white;
+    }
+    
+    .tier-premium {
+        background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+        color: white;
+    }
+    
+    .toggle-btn {
+        width: 100%;
+        padding: 1.25rem 2rem;
+        border-radius: var(--border-radius-full);
+        font-weight: 600;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        color: white;
+    }
+    
+    .toggle-btn-premium {
+        background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+        box-shadow: 0 4px 15px rgba(107, 106, 69, 0.3);
+    }
+    
+    .toggle-btn-premium:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(107, 106, 69, 0.4);
+    }
+    
+    .toggle-btn-free {
+        background: var(--warm-gray);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .toggle-btn-free:hover {
+        background: #7a7663;
+        transform: translateY(-2px);
+    }
+    
+    .features-list {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0;
+    }
+    
+    .features-list li {
+        padding: 0.75rem 0;
+        padding-left: 2rem;
+        position: relative;
+        color: var(--charcoal-brown);
+    }
+    
+    .features-list li:before {
+        content: "✨";
+        position: absolute;
+        left: 0;
+    }
+</style>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>⚙️ Admin Settings</h1>
+        <p>Testing & Development Controls</p>
+    </div>
+    
+    <div class="toggle-card">
+        <h3>Premium Features Toggle</h3>
+        <p>Current Subscription Tier:</p>
+        <div class="current-tier {{ 'tier-premium' if user.subscription_tier in ['premium', 'pro'] else 'tier-free' }}">
+            {{ user.subscription_tier|upper if user.subscription_tier else 'FREE' }}
+        </div>
+        
+        <p>Premium features include:</p>
+        <ul class="features-list">
+            <li>3D Property Tour videos with perspective effects</li>
+            <li>Room labels with animations</li>
+            <li>Ultra-sharp architectural rendering</li>
+            <li>Professional 3D camera movements</li>
+            <li>Vignette & depth of field effects</li>
+        </ul>
+        
+        {% if user.subscription_tier in ['premium', 'pro'] %}
+        <form method="POST" action="{{ url_for('admin_toggle_premium') }}">
+            <input type="hidden" name="action" value="downgrade">
+            <button type="submit" class="toggle-btn toggle-btn-free">
+                ⬇️ Switch to Free Tier (for testing)
+            </button>
+        </form>
+        {% else %}
+        <form method="POST" action="{{ url_for('admin_toggle_premium') }}">
+            <input type="hidden" name="action" value="upgrade">
+            <button type="submit" class="toggle-btn toggle-btn-premium">
+                ✨ Enable Premium Features
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{{ url_for('agent_video_studio') }}" style="color: var(--olive-green); text-decoration: none; font-weight: 600;">
+            ← Back to Video Studio
+        </a>
+    </div>
+</div>
+{% endblock %}

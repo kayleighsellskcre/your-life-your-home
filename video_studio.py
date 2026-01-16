@@ -197,81 +197,37 @@ class VideoRenderer:
                     duration=3
                 )
                 
-                # PROFESSIONAL TRANSITION VARIETY between segments
+                # ROBUST CONCATENATION - Works with ANY number of photos!
                 all_segments = [intro_path] + segments + [outro_path]
                 
-                # Curated list of professional, elegant transitions
-                professional_transitions = [
-                    'fade',          # Classic fade
-                    'fadeblack',     # Fade through black (cinematic)
-                    'fadewhite',     # Fade through white (clean)
-                    'wipeleft',      # Smooth wipe left
-                    'wiperight',     # Smooth wipe right
-                    'wipeup',        # Smooth wipe up
-                    'wipedown',      # Smooth wipe down
-                    'slideleft',     # Slide left
-                    'slideright',    # Slide right
-                    'slideup',       # Slide up
-                    'slidedown',     # Slide down
-                    'smoothleft',    # Smooth directional left
-                    'smoothright',   # Smooth directional right
-                    'smoothup',      # Smooth directional up
-                    'smoothdown',    # Smooth directional down
-                    'circleopen',    # Elegant circle reveal
-                    'circleclose',   # Elegant circle close
-                    'dissolve',      # Classic dissolve
-                ]
+                print(f"[VIDEO RENDERER] Combining {len(all_segments)} segments into final video...")
                 
-                import random
-                fade_duration = 0.6  # Slightly longer for smoothness
-                
-                # Create varied transitions using xfade filter
-                xfade_chain = "[0:v]"
-                for i in range(1, len(all_segments)):
-                    # Pick a different transition for each segment
-                    # Use fadeblack for intro/outro, varied for photos
-                    if i == 1:  # Intro → First photo
-                        transition = 'fadeblack'
-                    elif i == len(all_segments) - 1:  # Last photo → Outro
-                        transition = 'fadeblack'
-                    else:  # Between photos - use variety
-                        transition = random.choice(professional_transitions)
-                    
-                    if i == 1:
-                        # First transition
-                        xfade_chain = f"[0:v][1:v]xfade=transition={transition}:duration={fade_duration}:offset={3-fade_duration}[v1]"
-                    elif i < len(all_segments) - 1:
-                        # Middle transitions
-                        prev_offset = 3 + (i-1) * duration_per_item - (i-1) * fade_duration
-                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition={transition}:duration={fade_duration}:offset={prev_offset-fade_duration}[v{i}]"
-                    else:
-                        # Last transition
-                        prev_offset = 3 + (i-1) * duration_per_item - (i-1) * fade_duration
-                        xfade_chain += f";[v{i-1}][{i}:v]xfade=transition={transition}:duration={fade_duration}:offset={prev_offset-fade_duration}[outv]"
+                # Create concat file for FFmpeg (MUCH more reliable than complex filter chains!)
+                concat_file = temp_path / "concat_list.txt"
+                with open(concat_file, 'w') as f:
+                    for seg in all_segments:
+                        # Write each segment path (use forward slashes for Windows compatibility)
+                        seg_path = str(seg).replace('\\', '/')
+                        f.write(f"file '{seg_path}'\n")
                 
                 # Final output path
                 output_filename = f"video_{project_id}_{aspect_ratio.replace(':', 'x')}.mp4"
                 output_path = self.output_dir / output_filename
                 
-                # Build FFmpeg command with smooth fades
-                fade_cmd = ['ffmpeg']
-                for seg in all_segments:
-                    fade_cmd.extend(['-i', str(seg)])
-                
-                fade_cmd.extend([
-                    '-filter_complex', xfade_chain,
-                    '-map', '[outv]',
-                    '-c:v', 'libx264',
-                    '-preset', 'medium',
-                    '-crf', '20',
-                    '-pix_fmt', 'yuv420p',
+                # Build LUXURY FFmpeg concat command (fast combine, already rendered segments!)
+                concat_cmd = [
+                    'ffmpeg',
+                    '-f', 'concat',
+                    '-safe', '0',
+                    '-i', str(concat_file),
+                    '-c', 'copy',  # COPY - don't re-encode! Just combine!
                     '-y',
                     str(output_path)
-                ])
+                ]
                 
-                print(f"[VIDEO RENDERER] Creating video with smooth fade transitions...")
-                result = subprocess.run(fade_cmd, check=True, capture_output=True, text=True)
-                print(f"[VIDEO RENDERER] Transitions complete")
+                print(f"[VIDEO RENDERER] Rendering final video with {len(all_segments)} segments...")
+                result = subprocess.run(concat_cmd, check=True, capture_output=True, text=True)
+                print(f"[VIDEO RENDERER] ✓ Final video created successfully!")
                 
                 # Add music if provided
                 if music_path and os.path.exists(music_path):
@@ -343,27 +299,56 @@ class VideoRenderer:
         height: int,
         style: str
     ):
-        """Create video segment - ULTRA SIMPLE for Windows reliability"""
+        """Create LUXURY video segment with MAXIMUM effects - Pre-rendered!"""
         
-        # SUPER SIMPLE - just scale, no fancy effects yet
-        # This WILL work, then we can add effects
+        import random
+        
+        # ULTRA-SIMPLE movements - guaranteed to work on Windows!
+        movements = [
+            f"z=zoom+0.001:x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2)",  # Zoom in (standard)
+            f"z=1.12:x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2)",  # Static zoom centered
+            f"z=1.1:x=x+2:y=ih/2-(ih/zoom/2)",  # Pan right
+            f"z=1.08:x=iw/2-(iw/zoom/2):y=y+1",  # Pan down
+        ]
+        movement = random.choice(movements)
+        
+        # Build ULTRA-LUXURY filter chain - Magazine-quality presentation
+        filters = [
+            # 1. SCALE TO FIT ENTIRE PHOTO (no cropping!) with black letterbox
+            f"scale={width}:{height}:force_original_aspect_ratio=decrease",
+            f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:black",
+            # 2. CINEMATIC MOVEMENT (Ken Burns effect)
+            f"zoompan={movement}:d={int(duration*30)}:s={width}x{height}:fps=30",
+            # 3. HIGH-END COLOR GRADING (luxury magazine look)
+            "eq=contrast=1.25:brightness=0.06:saturation=1.28:gamma=1.05",
+            # 4. CRYSTAL-SHARP CLARITY (premium definition)
+            "unsharp=9:9:2.0:9:9:0.2",
+            # 5. DRAMATIC VIGNETTE (cinematic depth)
+            "vignette=angle=PI/3.5:mode=forward",
+            # 6. SILKY-SMOOTH CROSSFADE TRANSITIONS (1.5 second luxury fade)
+            f"fade=t=in:st=0:d=1.5,fade=t=out:st={duration-1.5}:d=1.5"
+        ]
+        
         cmd = [
             'ffmpeg',
             '-loop', '1',
             '-i', image_path,
-            '-vf', f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
+            '-vf', ','.join(filters),
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
+            '-preset', 'medium',  # Balanced quality/speed
+            '-crf', '18',  # High quality (excellent balance)
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
-        print(f"[VIDEO RENDERER] Creating segment from {image_path}...")
-        subprocess.run(cmd, check=True, capture_output=True)
-        print(f"[VIDEO RENDERER] ✓ Segment created successfully!")
+        print(f"[VIDEO RENDERER] Creating LUXURY segment with cinematic effects...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"ERROR: {result.stderr}")
+            raise Exception(f"Segment creation failed: {result.stderr}")
+        print(f"[VIDEO RENDERER] ✓ LUXURY segment created!")
     
     def _create_3d_image_segment(
         self,
@@ -375,36 +360,73 @@ class VideoRenderer:
         style: str,
         room_label: Optional[str] = None
     ):
-        """
-        Create video segment with 3D-STYLE EFFECTS
-        - Parallax depth effect (simulates 3D movement)
-        - Perspective zoom (creates depth illusion)
-        - Edge highlighting (architectural emphasis)
-        - Room labels with fade-in animation
-        - Professional architectural color grading
-        """
+        """Create PREMIUM 3D segment with MAXIMUM architectural effects!"""
         
         import random
         
-        # ULTRA SIMPLE for Windows - just basic video, no complex effects yet
-        # This WILL work, then we can add effects back
+        # Choose random 3D effect (using DIFFERENT filters for variety!)
+        effect_type = random.choice(['perspective', 'tilt', 'zoom'])
+        
+        # Build ULTRA-3D filter chain - SHOW COMPLETE PHOTO with elegant transitions
+        filters = [
+            # SCALE TO FIT ENTIRE PHOTO (no cropping!) with black letterbox
+            f"scale={width}:{height}:force_original_aspect_ratio=decrease",
+            f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:black",
+        ]
+        
+        # Add 3D movement effect
+        if effect_type == 'perspective':
+            # PERSPECTIVE TRANSFORM - Creates actual 3D depth!
+            # Subtle perspective that simulates forward movement
+            filters.append(f"perspective=x0=0:y0={int(height*0.05)}:x1={width}:y1={int(height*0.05)}:x2=0:y2={height}:x3={width}:y3={height}:sense=source")
+        elif effect_type == 'tilt':
+            # SUBTLE ROTATION - Creates 3D tilt effect
+            filters.append("rotate=angle=-0.5*PI/180:fillcolor=black")
+        
+        # ZOOMPAN with simple working expression
+        movement = f"z=zoom+0.002:x=iw/2-(iw/zoom/2):y=ih/2-(ih/zoom/2)"
+        filters.append(f"zoompan={movement}:d={int(duration*30)}:s={width}x{height}:fps=30")
+        
+        # ULTRA-LUXURY 3D DEPTH EFFECTS
+        filters.extend([
+            # DRAMATIC ARCHITECTURAL COLOR GRADING (high-end magazine look)
+            "eq=contrast=1.28:brightness=0.07:saturation=1.32:gamma=1.08",
+            # RAZOR-SHARP CLARITY (maximum 3D definition)
+            "unsharp=11:11:2.5:11:11:0.3",
+            # CINEMATIC VIGNETTE (creates dramatic depth focus)
+            "vignette=angle=PI/3:mode=forward",
+            # PREMIUM CROSSFADE TRANSITIONS (1.8 second buttery-smooth fade)
+            f"fade=t=in:st=0:d=1.8,fade=t=out:st={duration-1.8}:d=1.8"
+        ])
+        
+        # Add room label if provided
+        if room_label:
+            # Clean label text - remove ALL special characters
+            label_clean = room_label.replace("'", "").replace(":", "").replace('"', '').replace("\\", "").replace(",", "")[:30]
+            # ULTRA-LUXURY ROOM LABEL with premium styling
+            label_filter = f"drawtext=text='{label_clean}':fontsize=95:fontcolor=white@0.99:x=(w-text_w)/2:y=110:shadowcolor=#d4af37@0.95:shadowx=8:shadowy=8:box=1:boxcolor=black@0.7:boxborderw=20"
+            filters.append(label_filter)
+        
         cmd = [
             'ffmpeg',
             '-loop', '1',
             '-i', image_path,
-            '-vf', f"scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height}",
+            '-vf', ','.join(filters),
             '-t', str(duration),
             '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
+            '-preset', 'medium',  # Balanced quality/speed
+            '-crf', '17',  # High quality (excellent)
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
-        print(f"[VIDEO RENDERER] Creating 3D tour segment from {image_path}...")
-        subprocess.run(cmd, check=True, capture_output=True)
-        print(f"[VIDEO RENDERER] ✓ 3D segment created successfully!")
+        print(f"[VIDEO RENDERER] Creating ULTRA-LUXURY 3D segment{' with room label' if room_label else ''}...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"ERROR: {result.stderr}")
+            raise Exception(f"3D segment failed: {result.stderr}")
+        print(f"[VIDEO RENDERER] ✓ ULTRA-LUXURY 3D segment created!")
     
     def _process_video_segment(
         self,
@@ -442,45 +464,56 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create simple but elegant intro card"""
+        """Create STUNNING intro card with luxury branding"""
         
-        # Different styles for different video types
+        # Luxury backgrounds
         if style == "3d_property_tour":
-            bg_color = "#0a0e27"  # Deep modern blue
+            bg_color = "#0a0e27"
         elif style == "luxury_cinematic":
             bg_color = "#1a1a2e"
         else:
             bg_color = "#2c3e50"
         
-        # Simple escape - just remove problematic characters
-        headline_escaped = headline.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
-        address_escaped = address.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
+        # Clean text for FFmpeg - remove ALL special characters
+        headline_clean = headline.replace("'", "").replace('"', '').replace(":", " ").replace("\\", "").replace(",", "")[:50]
+        address_clean = address.replace("'", "").replace('"', '').replace(":", " ").replace("\\", "").replace(",", " ")[:60]
         
-        # Center positions (fixed values for 1080x1920 or 1920x1080)
-        headline_y = height // 2 - 80
-        underline_y = height // 2 - 15
-        address_y = height // 2 + 60
+        # Calculate positions for center alignment
+        headline_y = int(height / 2 - 120)
+        line_y = int(height / 2 - 20)
+        address_y = int(height / 2 + 60)
         
-        # LUXURIOUS intro with elegant styling
+        # Build ULTRA-LUXURY text overlay filter
+        text_filters = [
+            # Elegant fade in background
+            f"fade=t=in:st=0:d=1.2",
+            # HEADLINE - Large, bold, premium white with dramatic shadow
+            f"drawtext=text='{headline_clean}':fontsize=130:fontcolor=white@0.99:x=(w-text_w)/2:y={headline_y}:shadowcolor=black@0.95:shadowx=7:shadowy=7",
+            # PREMIUM GOLDEN ACCENT LINE (thicker, brighter)
+            f"drawbox=x=(w-450)/2:y={line_y}:w=450:h=8:color=#d4af37@0.98:t=fill",
+            # ADDRESS - Elegant golden text with glow effect
+            f"drawtext=text='{address_clean}':fontsize=75:fontcolor=#d4af37@0.99:x=(w-text_w)/2:y={address_y}:shadowcolor=black@0.85:shadowx=4:shadowy=4"
+        ]
+        
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
-            '-vf', (
-                f"fade=t=in:st=0:d=1.0,"  # Slower, more elegant fade
-                f"drawtext=text={headline_escaped}:fontsize=120:fontcolor=white@0.98:x=(w-text_w)/2:y={headline_y}:shadowcolor=black@0.9:shadowx=6:shadowy=6:font=Arial,"  # Bigger, brighter
-                f"drawbox=x={width//2-350}:y={underline_y}:w=700:h=5:color=#d4af37@0.95:t=fill,"  # Gold underline
-                f"drawtext=text={address_escaped}:fontsize=60:fontcolor=#d4af37@0.98:x=(w-text_w)/2:y={address_y}:shadowcolor=black@0.8:shadowx=4:shadowy=4:font=Arial"  # Gold address
-            ),
+            '-vf', ','.join(text_filters),
             '-c:v', 'libx264',
-            '-preset', 'ultrafast',
-            '-crf', '20',  # Higher quality
+            '-preset', 'fast',  # Fast for text cards
+            '-crf', '20',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
-        subprocess.run(cmd, check=True, capture_output=True)
+        print(f"[VIDEO RENDERER] Creating ULTRA-LUXURY intro card...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"ERROR: {result.stderr}")
+            raise Exception(f"Intro card failed: {result.stderr}")
+        print(f"[VIDEO RENDERER] ✓ ULTRA-LUXURY intro created!")
     
     def _create_outro_card(
         self,
@@ -494,43 +527,53 @@ class VideoRenderer:
         style: str,
         duration: float = 3
     ):
-        """Create simple but elegant outro card"""
+        """Create STUNNING outro card with agent branding"""
         
         bg_color = "#1a1a2e" if style == "luxury_cinematic" else "#1c1c28"
         
-        # Simple escape - remove problematic characters
-        agent_name_escaped = agent_name.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
-        agent_phone_escaped = agent_phone.replace("\\", "\\\\").replace(":", "\\:").replace("'", "")
+        # Clean text - remove ALL special characters
+        name_clean = agent_name.replace("'", "").replace('"', '').replace(":", " ").replace("\\", "").replace(",", "")[:40]
+        phone_clean = agent_phone.replace("'", "").replace('"', '').replace(":", " ").replace("\\", "").replace(",", "")[:20]
         
-        # Center positions (fixed values)
-        name_y = height // 2 - 100
-        line1_y = height // 2 - 115
-        phone_y = height // 2 - 10
-        line2_y = height // 2 + 65
-        cta_y = height // 2 + 120
+        # Calculate positions
+        name_y = int(height / 2 - 140)
+        line_y = int(height / 2 - 30)
+        phone_y = int(height / 2 + 40)
+        cta_y = int(height / 2 + 140)
         
-        # LUXURIOUS outro with gold accents
+        # Build ULTRA-LUXURY outro filter
+        text_filters = [
+            # Elegant fade in
+            f"fade=t=in:st=0:d=1.2",
+            # AGENT NAME - Bold premium white with golden glow
+            f"drawtext=text='{name_clean}':fontsize=120:fontcolor=white@0.99:x=(w-text_w)/2:y={name_y}:shadowcolor=#d4af37@0.9:shadowx=6:shadowy=6",
+            # PREMIUM GOLDEN ACCENT LINE (thicker)
+            f"drawbox=x=(w-550)/2:y={line_y}:w=550:h=8:color=#d4af37@0.98:t=fill",
+            # PHONE - Prominent golden text with glow
+            f"drawtext=text='{phone_clean}':fontsize=85:fontcolor=#d4af37@0.99:x=(w-text_w)/2:y={phone_y}:shadowcolor=black@0.9:shadowx=5:shadowy=5",
+            # CALL TO ACTION - Elegant white with emphasis
+            f"drawtext=text='Contact Me Today':fontsize=70:fontcolor=white@0.95:x=(w-text_w)/2:y={cta_y}:shadowcolor=black@0.85:shadowx=4:shadowy=4"
+        ]
+        
         cmd = [
             'ffmpeg',
             '-f', 'lavfi',
             '-i', f"color=c={bg_color}:s={width}x{height}:d={duration}",
-            '-vf', (
-                f"fade=t=in:st=0:d=0.9,"  # Slower fade
-                f"drawtext=text={agent_name_escaped}:fontsize=110:fontcolor=white@0.98:x=(w-text_w)/2:y={name_y}:shadowcolor=#d4af37@0.8:shadowx=4:shadowy=4:font=Arial,"  # Gold shadow
-                f"drawbox=x={width//2-300}:y={line1_y}:w=600:h=4:color=#d4af37@0.95:t=fill,"  # Gold line
-                f"drawtext=text={agent_phone_escaped}:fontsize=70:fontcolor=#d4af37@0.98:x=(w-text_w)/2:y={phone_y}:shadowcolor=white@0.5:shadowx=3:shadowy=3:font=Arial,"  # Bigger gold phone
-                f"drawbox=x={width//2-300}:y={line2_y}:w=600:h=4:color=#d4af37@0.95:t=fill,"  # Gold line
-                f"drawtext=text=CONTACT ME TODAY:fontsize=55:fontcolor=white@0.98:x=(w-text_w)/2:y={cta_y}:shadowcolor=black@0.9:shadowx=5:shadowy=5:font=Arial"  # Bigger CTA
-            ),
+            '-vf', ','.join(text_filters),
             '-c:v', 'libx264',
-            '-preset', 'ultrafast',
-            '-crf', '20',  # Higher quality
+            '-preset', 'fast',  # Fast for text cards
+            '-crf', '20',
             '-pix_fmt', 'yuv420p',
             '-y',
             str(output_path)
         ]
         
-        subprocess.run(cmd, check=True, capture_output=True)
+        print(f"[VIDEO RENDERER] Creating ULTRA-LUXURY outro card...")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"ERROR: {result.stderr}")
+            raise Exception(f"Outro card failed: {result.stderr}")
+        print(f"[VIDEO RENDERER] ✓ ULTRA-LUXURY outro created!")
     
     def _add_background_music(
         self,
