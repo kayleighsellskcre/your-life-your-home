@@ -99,25 +99,25 @@
   }
   
   .password-wrapper input {
-    padding-right: 4rem !important;
+    padding-right: 2.75rem !important;
     flex: 1;
   }
   
   .password-toggle {
     position: absolute;
-    right: 1rem;
+    right: 0.75rem;
     top: 50%;
     transform: translateY(-50%);
     border: none;
     background: none;
-    font-size: 0.75rem;
+    font-size: 1.1rem;
     color: #94a3b8;
     cursor: pointer;
-    font-weight: 500;
-    text-transform: lowercase;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem;
     transition: color 0.2s;
-    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .password-toggle:hover {
@@ -213,8 +213,8 @@
         <label for="password">Password</label>
         <div class="password-wrapper">
           <input id="password" name="password" type="password" autocomplete="current-password" required />
-          <button type="button" onclick="togglePassword()" class="password-toggle">
-            show
+          <button type="button" onclick="togglePassword()" class="password-toggle" title="Show password">
+            👁️
           </button>
         </div>
       </div>
@@ -273,10 +273,12 @@
     const btn = event.target;
     if (input.type === "password") {
       input.type = "text";
-      btn.textContent = "hide";
+      btn.textContent = "🙈";
+      btn.title = "Hide password";
     } else {
       input.type = "password";
-      btn.textContent = "show";
+      btn.textContent = "👁️";
+      btn.title = "Show password";
     }
   }
 </script>
