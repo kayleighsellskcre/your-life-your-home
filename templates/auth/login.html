@@ -99,32 +99,42 @@
   }
   
   .password-wrapper input {
-    padding-right: 4.5rem !important; /* Make room for the button */
+    padding-right: 5.5rem !important; /* Make room for the luxurious button */
     flex: 1;
   }
   
   .password-toggle {
     position: absolute;
-    right: 0.75rem;
+    right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    font-size: 0.75rem;
+    border: 1.5px solid #C8B497;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%);
+    font-size: 0.7rem;
     color: #6B6A45;
     cursor: pointer;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    padding: 0.5rem 0.75rem;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    letter-spacing: 0.08em;
+    padding: 0.6rem 1rem;
+    border-radius: 2px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(58, 53, 44, 0.08);
+    font-family: 'Montserrat', -apple-system, sans-serif;
   }
   
   .password-toggle:hover {
-    color: #3A352C;
-    background: rgba(107, 106, 69, 0.08);
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #6B6A45 0%, #3A352C 100%);
+    border-color: #3A352C;
+    box-shadow: 0 4px 12px rgba(58, 53, 44, 0.25);
+    transform: translateY(-50%) translateY(-1px);
+  }
+  
+  .password-toggle:active {
+    transform: translateY(-50%) scale(0.98);
+    box-shadow: 0 2px 6px rgba(58, 53, 44, 0.2);
   }
   
   .auth-options {
