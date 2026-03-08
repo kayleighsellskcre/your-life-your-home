@@ -1,0 +1,70 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .update-container { max-width: 700px; margin: 0 auto; }
+  .update-card {
+    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-medium);
+    border: var(--border-light);
+    margin-bottom: 2rem;
+  }
+  .upload-area {
+    border: 3px dashed var(--taupe-beige);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    background: var(--white);
+    cursor: pointer;
+  }
+  .upload-area:hover { border-color: var(--olive-green); background: var(--warm-cream); }
+  .file-input { display: none; }
+  .mapping-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+  .mapping-row label { min-width: 100px; font-weight: 600; color: var(--olive-green); }
+  .mapping-row select { flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px; }
+  .highlight { background: #e8f5e9; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+</style>
+
+<div class="dashboard-main__header">
+  <p class="dashboard-tagline">Add missing address data</p>
+  <h1>Update Addresses from Excel</h1>
+  <p>Upload your Excel file to add City, State, and ZIP to existing contacts. We'll match by name.</p>
+</div>
+
+<div class="update-container">
+  <div class="update-card">
+    <form method="post" enctype="multipart/form-data">
+      <input type="hidden" name="action" value="upload">
+      <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📁</div>
+        <strong>Click to upload Excel or CSV</strong>
+        <input type="file" name="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv" required>
+        <div id="fileName" style="font-weight: 600; color: var(--olive-green); margin-top: 0.5rem; display: none;"></div>
+      </div>
+      <div style="margin-top: 1.5rem; text-align: center;">
+        <button type="submit" class="btn btn-primary">Continue to Mapping →</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="highlight">
+    <strong>✓ How it works:</strong> Upload your Excel file, map the columns (Name, City, State, Zip), then we'll update your existing contacts. Names are matched flexibly (e.g. "Carr, Michael" matches "Carr, Michael & Megan").
+  </div>
+
+  <div style="text-align: center;">
+    <a href="{{ url_for('agent_crm') }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">← Back to CRM</a>
+  </div>
+</div>
+
+<script>
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const f = e.target.files[0];
+  if (f) {
+    document.getElementById('fileName').textContent = 'Selected: ' + f.name;
+    document.getElementById('fileName').style.display = 'block';
+  }
+});
+</script>
+{% endblock %}

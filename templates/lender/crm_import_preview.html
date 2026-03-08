@@ -90,7 +90,17 @@
           <select name="map_name" required>
             <option value="">-- Select Column --</option>
             {% for col in columns %}
-            <option value="{{ col }}" {% if 'name' in col.lower() or 'borrower' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% set col_lower = col.lower() %}
+            <option value="{{ col }}" {% if ('full' in col_lower and 'name' in col_lower) or col_lower in ['name', 'borrower', 'contact name', 'client name'] %}selected{% elif ('first' in col_lower and 'name' in col_lower) or col_lower == 'first' %}selected{% elif ('name' in col_lower or 'borrower' in col_lower or 'contact' in col_lower) and 'last' not in col_lower %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mapping-item">
+          <label>Last Name (optional – combine with Name)</label>
+          <select name="map_last_name">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if ('last' in col.lower() and 'name' in col.lower()) or col.lower() == 'last' %}selected{% endif %}>{{ col }}</option>
             {% endfor %}
           </select>
         </div>

@@ -2,1962 +2,906 @@
 
 {% block agent_content %}
 <style>
-  /* ============================================
-     MOBILE-FIRST RESPONSIVE LAYOUT SYSTEM
-     Matches Agent Dashboard Design
-     ============================================ */
-  
-  /* Base Container - Mobile First */
-  .crm-wrapper {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-  
-  .crm-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-top: 0;
-  }
-  .crm-sidebar {
-    background: var(--gradient-warm);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-light);
-    height: fit-content;
-    position: sticky;
-    top: 2rem;
-    border: var(--border-light);
-  }
-  .crm-main {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .filter-buttons {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
-  .filter-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--olive-green);
-    background: var(--white);
-    color: var(--olive-green);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition-base);
-    text-decoration: none;
-    text-align: center;
-    display: block;
-    font-size: 0.85rem;
-  }
-  .filter-btn:hover, .filter-btn.active {
-    background: var(--olive-green);
-    color: var(--white);
-  }
-  .contact-card {
-    background: var(--gradient-warm);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-light);
-    margin-bottom: 1rem;
-    transition: var(--transition-base);
-    border: var(--border-light);
-  }
-  .contact-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-  .stat-card-clickable:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-    background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-cream) 100%);
-  }
-  .contact-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
-  }
-  .contact-name {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--charcoal-brown);
-    margin: 0;
-  }
-  .contact-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--border-radius);
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
-  .badge-new { background: rgba(200, 180, 151, 0.3); color: var(--charcoal-brown); }
-  .badge-nurture { background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); }
-  .badge-active { background: rgba(107, 106, 69, 0.3); color: var(--charcoal-brown); }
-  .badge-past { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
-  .badge-sphere { background: rgba(200, 180, 151, 0.25); color: var(--charcoal-brown); }
-  .contact-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  .info-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    font-size: 0.9rem;
-  }
-  .info-item strong {
-    color: var(--charcoal-brown);
-    min-width: 120px;
-    font-weight: 600;
-  }
-  .info-item a {
-    color: var(--olive-green);
-    text-decoration: none;
-  }
-  .info-item a:hover {
-    text-decoration: underline;
-  }
-  .auto-email-badges {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-  }
-  .auto-badge {
-    padding: 0.3rem 0.7rem;
-    border-radius: var(--border-radius);
-    font-size: 0.75rem;
-    background: rgba(107, 106, 69, 0.15);
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-  .contact-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: var(--border-light);
-  }
-  .btn-small {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(58, 53, 44, 0.6);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal.active {
-    display: flex;
-  }
-  .modal-content {
-    background: var(--white);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-premium);
-    border: var(--border-light);
-  }
-  .modal-content h2 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-  }
-  .modal-content h3 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-  }
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  .form-full {
-    grid-column: 1 / -1;
-  }
-  .form-grid label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--olive-green);
-    margin-bottom: 0.5rem;
-  }
-  .form-grid input[type="text"],
-  .form-grid input[type="email"],
-  .form-grid input[type="tel"],
-  .form-grid input[type="number"],
-  .form-grid select,
-  .form-grid textarea {
-    width: 100%;
-    padding: 0.6rem;
-    border: var(--border-light);
-    border-radius: var(--border-radius);
-    background: var(--white);
-    color: var(--charcoal-brown);
-    font-size: 0.9rem;
-    transition: var(--transition-base);
-  }
-  .form-grid input:focus,
-  .form-grid select:focus,
-  .form-grid textarea:focus {
-    outline: none;
-    border-color: var(--olive-green);
-    box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
-  }
-  .toggle-switch {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .toggle-switch label {
-    color: var(--charcoal-brown);
-    font-weight: 400;
-    margin: 0;
-  }
-  .toggle-switch input[type="checkbox"] {
-    width: 40px;
-    height: 20px;
-    appearance: none;
-    background: var(--taupe-beige);
-    border-radius: 10px;
-    position: relative;
-    cursor: pointer;
-    transition: var(--transition-base);
-  }
-  .toggle-switch input[type="checkbox"]:checked {
-    background: var(--olive-green);
-  }
-  .toggle-switch input[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--white);
-    top: 2px;
-    left: 2px;
-    transition: var(--transition-base);
-  }
-  .toggle-switch input[type="checkbox"]:checked::before {
-    left: 22px;
-  }
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    border-radius: var(--border-radius);
-    border: var(--border-light);
-  }
-  .empty-state h3 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-  }
-  
-  /* ============================================
-     TABLET BREAKPOINT (768px+)
-     ============================================ */
-  @media (min-width: 768px) {
-    .crm-wrapper {
-      padding: 2rem;
-    }
-    
-    /* Stats: 2 columns on tablet */
-    div[style*="grid-template-columns: repeat(2, 1fr)"] {
-      gap: 1.25rem;
-    }
-    
-    /* Contact actions: wrap better */
-    .contact-actions {
-      flex-wrap: wrap;
-    }
-    
-    .btn-small {
-      padding: 0.625rem 1rem;
-      min-height: 44px;
-    }
-  }
-  
-  /* ============================================
-     DESKTOP BREAKPOINT (1024px+)
-     ============================================ */
-  @media (min-width: 1024px) {
-    .crm-wrapper {
-      padding: 3rem 2rem;
-    }
-    
-    .crm-container {
-      grid-template-columns: 320px 1fr;
-      gap: 2rem;
-    }
-    
-    .crm-sidebar {
-      position: sticky;
-      top: 2rem;
-    }
-    
-    /* Stats: 3 columns on desktop */
-    div[style*="grid-template-columns: repeat(2, 1fr)"]:first-of-type {
-      grid-template-columns: repeat(3, 1fr) !important;
-    }
-  }
-  
-  /* ============================================
-     MOBILE OPTIMIZATIONS (Portrait Mode)
-     ============================================ */
-  @media (max-width: 767px) and (orientation: portrait) {
-    .crm-wrapper {
-      padding: 1rem 0.875rem;
-    }
-    
-    .dashboard-main__header {
-      padding: 1.25rem 1rem !important;
-      margin-bottom: 1.5rem !important;
-    }
-    
-    .dashboard-main__header h1 {
-      font-size: 1.75rem !important;
-    }
-    
-    .dashboard-main__header p {
-      font-size: 0.9375rem !important;
-    }
-    
-    /* Stats cards: full width on mobile */
-    div[style*="grid-template-columns: repeat(2, 1fr)"] {
-      grid-template-columns: 1fr !important;
-      gap: 0.875rem !important;
-    }
-    
-    .stat-card-clickable {
-      padding: 1rem !important;
-    }
-    
-    .stat-card-clickable h3 {
-      font-size: 0.8125rem !important;
-    }
-    
-    .stat-card-clickable div[style*="font-size: 1.75rem"] {
-      font-size: 2rem !important;
-    }
-    
-    /* Search bar: stack on mobile */
-    .card[style*="grid-template-columns: 2fr 1fr 1fr auto auto"] > div {
-      grid-template-columns: 1fr !important;
-      gap: 1rem !important;
-    }
-    
-    /* Sidebar: full width on mobile */
-    .crm-sidebar {
-      position: static !important;
-      padding: 1.25rem 1rem !important;
-    }
-    
-    .crm-container {
-      gap: 1.5rem !important;
-    }
-    
-    /* Contact cards */
-    .contact-card {
-      padding: 1.25rem 1rem !important;
-    }
-    
-    .contact-name {
-      font-size: 1.25rem !important;
-    }
-    
-    .contact-header {
-      flex-direction: column !important;
-      gap: 1rem !important;
-    }
-    
-    .contact-header > div:last-child {
-      width: 100%;
-    }
-    
-    .contact-header button {
-      width: 100% !important;
-      min-height: 48px !important;
-    }
-    
-    /* Contact info: stack on mobile */
-    .contact-info {
-      grid-template-columns: 1fr !important;
-      gap: 0.875rem !important;
-    }
-    
-    /* Contact actions: stack on mobile */
-    .contact-actions {
-      flex-direction: column !important;
-      gap: 0.75rem !important;
-    }
-    
-    .contact-actions .btn-small,
-    .contact-actions a {
-      width: 100% !important;
-      min-height: 48px !important;
-      padding: 0.875rem 1.25rem !important;
-      font-size: 0.9375rem !important;
-      justify-content: center !important;
-      display: flex !important;
-      align-items: center !important;
-    }
-    
-    /* Filter buttons: full width */
-    .filter-btn {
-      min-height: 48px !important;
-      padding: 0.875rem 1.25rem !important;
-      font-size: 0.9375rem !important;
-    }
-    
-    /* Forms: full width inputs */
-    .form-grid {
-      grid-template-columns: 1fr !important;
-    }
-    
-    /* Prevent iOS zoom */
-    input, select, textarea, button {
-      font-size: 16px !important;
-    }
-    
-    /* Modals: full screen on mobile */
-    .modal-content {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      padding: 1.5rem 1rem !important;
-      border-radius: 12px 12px 0 0 !important;
-      max-height: 95vh !important;
-    }
-    
-    /* Empty state */
-    .empty-state {
-      padding: 3rem 1.5rem !important;
-    }
-    
-    .empty-state h3 {
-      font-size: 1.25rem !important;
-    }
-  }
-  
-  /* Touch-friendly buttons everywhere */
-  @media (max-width: 1023px) {
-    .btn, button, a[class*="btn"], .filter-btn {
-      min-height: 44px;
-      padding: 0.75rem 1.25rem;
-    }
-  }
+/* ─────────────────────────────────────────────
+   CRM  ·  DAINTY LUXURY LIST VIEW
+   All info visible · Zero waste · Elegant rows
+   ───────────────────────────────────────────── */
+
+/* Hard reset — ID beats every global !important */
+#crm,#crm *{box-sizing:border-box;}
+#crm button,#crm a,#crm input,#crm select,#crm textarea,#crm form,
+#crm label{
+  width:auto!important;min-height:unset!important;max-width:none!important;
+  margin:0!important;padding:0!important;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif!important;
+  border-radius:0!important;letter-spacing:normal!important;
+  white-space:nowrap!important;word-wrap:normal!important;
+  font-weight:normal!important;text-transform:none!important;
+}
+#crm input[type=text],#crm input[type=email],#crm input[type=tel],
+#crm input[type=number],#crm input[type=date],#crm select,#crm textarea{
+  width:100%!important;
+}
+
+/* PAGE */
+#crm{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  color:#3A352C;background:#F8F5F0;
+  padding:0;margin:0;
+}
+
+/* ── TOP BAR ──────────────────────────────── */
+.top-bar{
+  background:linear-gradient(135deg,#F6F2E8 0%,#EDE8DC 100%);
+  border-bottom:1px solid rgba(107,106,69,.18);
+  padding:.625rem 1.25rem;
+  display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;
+}
+.top-bar__title{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:1.25rem;font-weight:500;color:#3A352C;
+  letter-spacing:-.02em;margin-right:.25rem;
+}
+.top-bar__count{
+  font-size:.7rem;color:#9A9472;font-weight:600;
+  background:rgba(107,106,69,.1);border-radius:10px;
+  padding:.1rem .45rem;
+}
+.top-bar__spacer{flex:1;}
+.top-bar__btns{display:flex;gap:.4rem;flex-wrap:wrap;}
+
+.t-btn{
+  display:inline-flex!important;align-items:center!important;gap:.25rem!important;
+  height:28px!important;padding:0 .75rem!important;border-radius:5px!important;
+  font-size:.7rem!important;font-weight:600!important;letter-spacing:.03em!important;
+  cursor:pointer!important;text-decoration:none!important;
+  border:1px solid!important;transition:all .15s!important;flex-shrink:0!important;
+}
+.t-btn--solid{background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;}
+.t-btn--solid:hover{background:#5A5938!important;color:#fff!important;}
+.t-btn--ghost{background:#fff!important;color:#6B6A45!important;border-color:rgba(107,106,69,.28)!important;}
+.t-btn--ghost:hover{background:#F6F2E8!important;border-color:#6B6A45!important;}
+
+/* ── FLASH ────────────────────────────────── */
+.flash-bar{padding:.5rem 1.25rem;}
+.flash-item{padding:.45rem .875rem;border-radius:5px;font-size:.75rem;border-left:3px solid;margin-bottom:.25rem;}
+.flash-item--success{background:rgba(76,175,80,.08);border-color:#4caf50;color:#2e7d32;}
+.flash-item--error{background:rgba(244,67,54,.08);border-color:#f44336;color:#c62828;}
+.flash-item--info{background:rgba(107,106,69,.08);border-color:#6B6A45;color:#3A352C;}
+
+/* ── STATS STRIP ─────────────────────────── */
+.stats-strip{
+  background:#fff;border-bottom:1px solid rgba(200,180,151,.2);
+  display:flex;overflow-x:auto;
+}
+.stats-strip::-webkit-scrollbar{display:none;}
+.s-stat{
+  display:flex;flex-direction:column;align-items:center;
+  padding:.5rem 1.25rem;border-right:1px solid rgba(200,180,151,.18);
+  text-decoration:none;color:#3A352C;cursor:pointer;transition:background .12s;
+  flex-shrink:0;min-width:70px;
+}
+.s-stat:last-child{border-right:none;}
+.s-stat:hover{background:#F9F7F3;}
+.s-num{font-size:1.125rem;font-weight:700;color:#6B6A45;line-height:1.1;}
+.s-num--r{color:#c0392b;}
+.s-lbl{font-size:.55rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9A9472;margin-top:.15rem;}
+
+/* ── TOOLBAR (search + sort + pills) ─────── */
+.toolbar{
+  background:#FDFBF7;border-bottom:1px solid rgba(200,180,151,.15);
+  padding:.5rem 1.25rem;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;
+}
+.toolbar-search{display:flex!important;gap:.375rem!important;flex:1!important;min-width:180px!important;}
+.t-inp{
+  height:30px!important;padding:0 .65rem!important;
+  border:1px solid rgba(200,180,151,.42)!important;border-radius:5px!important;
+  font-size:.775rem!important;color:#3A352C!important;background:#fff!important;
+  outline:none!important;flex:1!important;min-width:120px!important;
+}
+.t-inp:focus{border-color:#6B6A45!important;box-shadow:0 0 0 2px rgba(107,106,69,.1)!important;}
+.t-sel{
+  height:30px!important;padding:0 .45rem!important;
+  border:1px solid rgba(200,180,151,.42)!important;border-radius:5px!important;
+  font-size:.73rem!important;color:#3A352C!important;background:#fff!important;
+  cursor:pointer!important;outline:none!important;flex-shrink:0!important;
+}
+.t-sel:focus{border-color:#6B6A45!important;}
+.t-go{
+  height:30px!important;padding:0 .875rem!important;
+  background:#6B6A45!important;color:#fff!important;border:none!important;
+  border-radius:5px!important;font-size:.73rem!important;font-weight:700!important;
+  cursor:pointer!important;flex-shrink:0!important;
+}
+.t-go:hover{background:#5A5938!important;}
+
+.filter-chip{
+  display:inline-flex!important;align-items:center!important;gap:.2rem!important;
+  background:#6B6A45!important;color:#fff!important;border-radius:20px!important;
+  padding:.12rem .5rem .12rem .65rem!important;font-size:.66rem!important;
+  font-weight:600!important;flex-shrink:0!important;text-decoration:none!important;
+}
+.filter-chip-x{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:14px!important;height:14px!important;background:rgba(255,255,255,.25)!important;
+  border:none!important;border-radius:50%!important;color:#fff!important;
+  cursor:pointer!important;font-size:.65rem!important;line-height:1!important;
+}
+.filter-chip-x:hover{background:rgba(255,255,255,.45)!important;}
+
+/* ── STAGE PILLS ─────────────────────────── */
+.pills-bar{
+  background:#FDFBF7;border-bottom:1px solid rgba(200,180,151,.12);
+  padding:.4rem 1.25rem;display:flex;gap:.3rem;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;align-items:center;
+}
+.pills-bar::-webkit-scrollbar{display:none;}
+.stg-pill{
+  display:inline-flex!important;align-items:center!important;gap:.2rem!important;
+  height:24px!important;padding:0 .65rem!important;border-radius:12px!important;
+  border:1px solid rgba(200,180,151,.38)!important;
+  font-size:.63rem!important;font-weight:700!important;letter-spacing:.04em!important;
+  text-transform:uppercase!important;color:#6B6A45!important;
+  text-decoration:none!important;transition:all .12s!important;
+  background:#fff!important;white-space:nowrap!important;flex-shrink:0!important;cursor:pointer!important;
+}
+.stg-pill:hover{background:rgba(107,106,69,.08)!important;border-color:#6B6A45!important;}
+.stg-pill--on{background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;}
+.stg-pill-x{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:13px!important;height:13px!important;background:rgba(255,255,255,.28)!important;
+  border-radius:50%!important;font-size:.62rem!important;cursor:pointer!important;
+  color:#fff!important;line-height:1!important;text-decoration:none!important;
+  flex-shrink:0!important;
+}
+.stg-pill--on .stg-pill-x:hover{background:rgba(255,255,255,.55)!important;}
+
+/* ── MAIN LAYOUT ─────────────────────────── */
+.main-layout{
+  display:grid;
+  grid-template-columns:190px 1fr;
+  min-height:calc(100vh - 200px);
+}
+
+/* ── QUICK-ADD SIDEBAR ───────────────────── */
+.qa-panel{
+  background:#FDFBF7;
+  border-right:1px solid rgba(200,180,151,.18);
+  padding:1rem .875rem;
+  overflow-y:auto;
+}
+.qa-panel::-webkit-scrollbar{width:3px;}
+.qa-panel::-webkit-scrollbar-thumb{background:rgba(200,180,151,.4);}
+.qa-h{
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:.875rem;font-weight:600;color:#3A352C;
+  margin:0 0 .75rem;display:block;
+}
+.qa-f{margin-bottom:.4rem;}
+.qa-f label{
+  display:block!important;font-size:.58rem!important;font-weight:700!important;
+  text-transform:uppercase!important;letter-spacing:.07em!important;
+  color:#6B6A45!important;margin-bottom:.15rem!important;
+}
+.qa-f input,.qa-f select{
+  width:100%!important;height:28px!important;padding:0 .55rem!important;
+  border:1px solid rgba(200,180,151,.42)!important;border-radius:4px!important;
+  font-size:.775rem!important;color:#3A352C!important;background:#fff!important;
+  outline:none!important;
+}
+.qa-f input:focus,.qa-f select:focus{border-color:#6B6A45!important;}
+.qa-submit{
+  display:block!important;width:100%!important;height:30px!important;
+  background:#6B6A45!important;color:#fff!important;border:none!important;
+  border-radius:4px!important;font-size:.7rem!important;font-weight:700!important;
+  text-transform:uppercase!important;letter-spacing:.04em!important;
+  cursor:pointer!important;margin-top:.375rem!important;transition:background .12s!important;
+}
+.qa-submit:hover{background:#5A5938!important;}
+.qa-hr{height:1px;background:rgba(200,180,151,.2);margin:.75rem 0;}
+.qa-link{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  height:27px!important;background:#fff!important;
+  border:1px solid rgba(107,106,69,.22)!important;border-radius:4px!important;
+  color:#6B6A45!important;font-size:.67rem!important;font-weight:600!important;
+  text-decoration:none!important;transition:all .12s!important;width:100%!important;
+}
+.qa-link:hover{background:#F6F2E8!important;border-color:#6B6A45!important;}
+
+/* ── CONTACT LIST ────────────────────────── */
+.list-area{overflow-x:auto;overflow-y:auto;min-width:0;}
+.list-area::-webkit-scrollbar{height:5px;width:5px;}
+.list-area::-webkit-scrollbar-thumb{background:rgba(200,180,151,.45);border-radius:3px;}
+.list-area::-webkit-scrollbar-track{background:#F0EDE5;}
+
+.c-table{min-width:1020px;width:100%;border-collapse:collapse;}
+
+/* column widths */
+.c-table colgroup col:nth-child(1){width:22px;}  /* check */
+.c-table colgroup col:nth-child(2){width:195px;} /* name */
+.c-table colgroup col:nth-child(3){width:80px;}  /* stage */
+.c-table colgroup col:nth-child(4){width:185px;} /* email */
+.c-table colgroup col:nth-child(5){width:120px;} /* phone */
+.c-table colgroup col:nth-child(6){width:185px;} /* address */
+.c-table colgroup col:nth-child(7){width:72px;}  /* birthday */
+.c-table colgroup col:nth-child(8){width:105px;} /* last touch */
+.c-table colgroup col:nth-child(9){width:108px;} /* actions */
+
+.c-table thead th{
+  padding:.425rem .5rem;font-size:.58rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;color:#9A9472;
+  background:#F0EDE5;border-bottom:1.5px solid rgba(107,106,69,.15);
+  white-space:nowrap;text-align:left;position:sticky;top:0;z-index:5;
+}
+.c-table thead th:first-child{padding-left:.75rem;text-align:center;}
+.c-table thead th:last-child{text-align:right;padding-right:.625rem;}
+
+/* data rows */
+.c-row{border-bottom:1px solid rgba(200,180,151,.12);cursor:pointer;transition:background .1s;}
+.c-row:hover{background:#FDFBF7;}
+.c-row--odd{background:#FCFAF7;}
+.c-row--odd:hover{background:#F7F4EF;}
+.c-row--open{background:#F5F2EB!important;}
+
+.c-td{
+  padding:.45rem .5rem;font-size:.775rem;color:#3A352C;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  vertical-align:middle;
+}
+.c-td:first-child{padding-left:.75rem;text-align:center;}
+.c-td--name{font-weight:600;color:#3A352C;max-width:195px;}
+.c-td--muted{color:#9A9472;}
+.c-td a{color:#6B6A45;text-decoration:none;font-size:.75rem;}
+.c-td a:hover{text-decoration:underline;}
+
+/* inline last-touch editor */
+.lt-wrap{display:flex;align-items:center;gap:3px;min-width:0;}
+.lt-display{cursor:text;border-bottom:1px dashed transparent;transition:border-color .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:96px;font-size:.72rem;color:#9A9472;}
+.lt-display:hover{border-bottom-color:#6B6A45;color:#6B6A45;}
+.lt-inp{
+  display:none;width:90px;padding:1px 5px;font-size:.72rem;
+  border:1px solid #6B6A45!important;border-radius:3px!important;
+  background:#fff!important;color:#2C2C2C!important;font-family:inherit!important;
+  outline:none!important;
+}
+
+/* checkbox */
+.c-chk{
+  width:13px!important;height:13px!important;
+  accent-color:#6B6A45;cursor:pointer;
+  vertical-align:middle;
+}
+
+/* stage badge */
+.s-badge{
+  display:inline-block;padding:.1rem .4rem;border-radius:9px;
+  font-size:.56rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+}
+.s-badge--new     {background:rgba(200,180,151,.22);color:#5A5938;}
+.s-badge--nurture {background:rgba(184,134,11,.12);color:#8B6914;}
+.s-badge--active  {background:rgba(107,106,69,.14);color:#3A352C;}
+.s-badge--past    {background:rgba(58,53,44,.1);color:#3A352C;}
+.s-badge--sphere  {background:rgba(200,180,151,.2);color:#5A5938;}
+.s-badge--hold    {background:rgba(91,124,141,.12);color:#3A5A6B;}
+.s-badge--closed  {background:rgba(58,53,44,.12);color:#3A352C;}
+
+/* action icons */
+.c-actions{display:flex;gap:.2rem;justify-content:flex-end;padding-right:.5rem;}
+.c-act{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  height:22px!important;padding:0 .45rem!important;border-radius:3px!important;
+  border:1px solid rgba(200,180,151,.35)!important;background:#fff!important;
+  color:#6B6A45!important;font-size:.65rem!important;font-weight:600!important;
+  cursor:pointer!important;text-decoration:none!important;
+  transition:all .12s!important;flex-shrink:0!important;white-space:nowrap!important;
+}
+.c-act:hover{background:#F6F2E8!important;border-color:#6B6A45!important;color:#3A352C!important;}
+
+/* ── EXPANDED ROW ─────────────────────────── */
+.exp-row{display:none;background:#F5F2EB;border-bottom:2px solid rgba(107,106,69,.12);}
+.exp-row.open{display:table-row;}
+.exp-cell{padding:.625rem .75rem .75rem 2.25rem!important;}
+
+.exp-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+  gap:.3rem .875rem;font-size:.72rem;color:#3A352C;
+  margin-bottom:.5rem;
+}
+.exp-field{display:flex;gap:.3rem;align-items:baseline;}
+.exp-key{
+  font-size:.6rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.06em;color:#9A9472;white-space:nowrap;flex-shrink:0;
+}
+
+.exp-notes{
+  font-size:.7rem;color:#5A5938;font-style:italic;
+  background:rgba(246,242,232,.65);border-left:2px solid #C8B497;
+  padding:.25rem .55rem;border-radius:0 3px 3px 0;margin-bottom:.5rem;
+  white-space:normal;line-height:1.4;
+}
+
+.exp-tags{display:flex;gap:.25rem;flex-wrap:wrap;margin-bottom:.5rem;}
+.exp-tag{
+  background:rgba(107,106,69,.1);color:#3A352C;border-radius:9px;
+  padding:.07rem .4rem;font-size:.6rem;font-weight:500;text-decoration:none;
+}
+.exp-tag:hover{background:rgba(107,106,69,.2);}
+
+.exp-btns{display:flex;gap:.3rem;flex-wrap:wrap;}
+.x-btn{
+  display:inline-flex!important;align-items:center!important;gap:.2rem!important;
+  height:24px!important;padding:0 .55rem!important;border-radius:4px!important;
+  border:1px solid!important;font-size:.67rem!important;font-weight:600!important;
+  cursor:pointer!important;text-decoration:none!important;
+  transition:all .12s!important;white-space:nowrap!important;flex-shrink:0!important;
+}
+.x-btn--log{background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;}
+.x-btn--log:hover{background:#5A5938!important;}
+.x-btn--task{background:#ffc107!important;color:#3A352C!important;border-color:#e0a800!important;}
+.x-btn--task:hover{background:#e0a800!important;}
+.x-btn--tx{background:#4caf50!important;color:#fff!important;border-color:#45a049!important;}
+.x-btn--tx:hover{background:#45a049!important;}
+.x-btn--def{background:#fff!important;color:#6B6A45!important;border-color:rgba(107,106,69,.28)!important;}
+.x-btn--def:hover{background:#F6F2E8!important;border-color:#6B6A45!important;}
+
+/* ── EMPTY ───────────────────────────────── */
+.c-empty{text-align:center;padding:4rem 1rem;color:#9A9472;min-width:1020px;}
+.c-empty p{font-size:.875rem;margin:.5rem 0 1.25rem;}
+
+/* ── MODAL ───────────────────────────────── */
+.cmod{
+  display:none;position:fixed;inset:0;
+  background:rgba(58,53,44,.5);backdrop-filter:blur(4px);
+  z-index:6000;align-items:center;justify-content:center;padding:1rem;
+}
+.cmod.open{display:flex;}
+.cmod-box{
+  background:#fff;border-radius:12px;padding:1.625rem;
+  width:100%;max-width:620px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 24px 64px rgba(58,53,44,.2);
+}
+.cmod-box--lg{max-width:740px;}
+.cmod-head{
+  font-family:'Playfair Display',Georgia,serif;font-size:1.125rem;
+  color:#3A352C;margin:0 0 1.25rem;font-weight:600;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cmod-x{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  width:28px!important;height:28px!important;background:#F6F2E8!important;
+  border:none!important;border-radius:50%!important;cursor:pointer!important;
+  font-size:1.1rem!important;color:#7B7766!important;flex-shrink:0!important;
+  transition:all .12s!important;
+}
+.cmod-x:hover{background:rgba(107,106,69,.15)!important;color:#3A352C!important;}
+
+.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;}
+.mgrid-full{grid-column:1/-1;}
+.mf{display:flex;flex-direction:column;}
+.mf label{
+  display:block!important;font-size:.6rem!important;font-weight:700!important;
+  text-transform:uppercase!important;letter-spacing:.06em!important;
+  color:#6B6A45!important;margin-bottom:.18rem!important;
+}
+.mf input,.mf select,.mf textarea{
+  width:100%!important;padding:.42rem .6rem!important;
+  border:1px solid rgba(200,180,151,.4)!important;border-radius:5px!important;
+  font-size:.8rem!important;color:#3A352C!important;background:#fff!important;
+  outline:none!important;
+}
+.mf input:focus,.mf select:focus,.mf textarea:focus{
+  border-color:#6B6A45!important;box-shadow:0 0 0 2px rgba(107,106,69,.1)!important;
+}
+.mf textarea{resize:vertical;min-height:62px!important;white-space:normal!important;}
+.msec{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6B6A45;margin:.875rem 0 .45rem;}
+.mchk{display:flex!important;align-items:center!important;gap:.35rem!important;font-size:.78rem!important;color:#3A352C!important;cursor:pointer!important;}
+.mchk input[type=checkbox]{width:13px!important;height:13px!important;accent-color:#6B6A45!important;cursor:pointer!important;}
+.mfoot{display:flex!important;gap:.45rem!important;margin-top:1.125rem!important;justify-content:space-between!important;flex-wrap:wrap!important;}
+.mfoot-l{display:flex!important;gap:.45rem!important;}
+.mbtn{
+  display:inline-flex!important;align-items:center!important;
+  height:32px!important;padding:0 1rem!important;border-radius:5px!important;
+  font-size:.75rem!important;font-weight:700!important;cursor:pointer!important;
+  border:1px solid!important;white-space:nowrap!important;flex-shrink:0!important;
+  transition:all .13s!important;
+}
+.mbtn--p{background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;}
+.mbtn--p:hover{background:#5A5938!important;}
+.mbtn--s{background:#fff!important;color:#6B6A45!important;border-color:rgba(107,106,69,.35)!important;}
+.mbtn--s:hover{background:#F6F2E8!important;}
+.mbtn--d{background:#fff!important;color:#c0392b!important;border-color:rgba(192,57,43,.3)!important;}
+.mbtn--d:hover{background:#c0392b!important;color:#fff!important;border-color:#c0392b!important;}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media(max-width:768px){
+  .main-layout{grid-template-columns:1fr;}
+  .qa-panel{display:none;border-right:none;border-bottom:1px solid rgba(200,180,151,.2);}
+  .qa-panel.open{display:block;}
+  .mgrid{grid-template-columns:1fr;}
+  .mgrid-full{grid-column:1;}
+}
 </style>
 
-<div class="crm-wrapper">
-  <div class="dashboard-main__header">
-    <p class="dashboard-tagline">Nurture relationships</p>
-    <h1>CRM & Lead Management</h1>
-    <p>Your complete contact management system with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
-  </div>
+<div id="crm">
 
-<!-- Flash Messages -->
+<!-- ── TOP BAR ──────────────────────────────── -->
+<div class="top-bar">
+  <span class="top-bar__title">Contacts</span>
+  <span class="top-bar__count">{{ stats.total }}</span>
+  <div class="top-bar__spacer"></div>
+  <div class="top-bar__btns">
+    <button class="t-btn t-btn--solid" id="qaToggle" onclick="toggleQA()">+ Add</button>
+    <a href="{{ url_for('agent_crm_import') }}" class="t-btn t-btn--ghost">↑ Import</a>
+    <button class="t-btn t-btn--ghost" onclick="doExport()">↓ Export</button>
+    <a href="{{ url_for('agent_address_labels') }}" class="t-btn t-btn--ghost">🏷 Labels</a>
+  </div>
+</div>
+
+<!-- ── FLASH ─────────────────────────────────── -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
-    <div style="margin-bottom: 2rem;">
-      {% for category, message in messages %}
-        <div class="flash-message flash-{{ category }}" style="padding: 1rem; margin-bottom: 1rem; border-radius: var(--border-radius-lg); border: var(--border-light); box-shadow: var(--shadow-light); {% if category == 'success' %}background: rgba(76, 175, 80, 0.1); border-left: 4px solid #4caf50; color: #2e7d32;{% elif category == 'error' %}background: rgba(244, 67, 54, 0.1); border-left: 4px solid #f44336; color: #c62828;{% else %}background: var(--light-cream); border-left: 4px solid var(--olive-green); color: var(--charcoal-brown);{% endif %}">
-          <strong>{% if category == 'success' %}✓{% elif category == 'error' %}✗{% else %}ℹ{% endif %}</strong> {{ message }}
-        </div>
-      {% endfor %}
-    </div>
+  <div class="flash-bar">
+    {% for cat,msg in messages %}
+    <div class="flash-item flash-item--{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
   {% endif %}
 {% endwith %}
 
-<!-- Stats Cards - 2 Columns, 3 boxes each -->
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
-  <!-- Column 1 -->
-  <div class="stat-card-clickable" onclick="openStatModal('total')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Total Contacts</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">All contacts in your CRM</p>
-  </div>
-  
-  <div class="stat-card-clickable" onclick="openStatModal('active')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Active Pipeline</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.active }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Active buyers & sellers</p>
-  </div>
-  
-  <div class="stat-card-clickable" onclick="openStatModal('new')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">New Leads</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.new }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Waiting for first contact</p>
-  </div>
-  
-  <!-- Column 2 -->
-  <div class="stat-card-clickable" onclick="openStatModal('tasks')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Pending Tasks</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.pending_tasks|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Follow-ups & reminders</p>
-  </div>
-  
-  <div class="stat-card-clickable" onclick="openStatModal('followup')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base); position: relative;">
-    <div style="position: absolute; top: 0.5rem; right: 0.5rem;">
-      <button onclick="event.stopPropagation(); openFollowupSettings();" style="background: transparent; border: none; color: var(--olive-green); cursor: pointer; font-size: 0.8rem; padding: 0.25rem 0.5rem; z-index: 10;" title="Settings">⚙</button>
-    </div>
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Needs Follow-up</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: {% if stats.needs_followup|default(0) > 0 %}#c0392b{% else %}var(--olive-green){% endif %}; margin-bottom: 0.1rem;">{{ stats.needs_followup|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">No contact in {{ stats.follow_up_days|default(30) }}+ days</p>
-  </div>
-  
-  {% if stats.total_equity > 0 %}
-  <div class="stat-card-clickable" onclick="openStatModal('equity')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Total Equity</h3>
-    <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">${{ "{:,.0f}".format(stats.total_equity) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Tracked across all contacts</p>
-  </div>
-  {% elif stats.total_deals|default(0) > 0 %}
-  <div class="stat-card-clickable" onclick="openStatModal('deals')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Active Deals</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total_deals }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">${{ "{:,.0f}".format(stats.pipeline_value|default(0)) }} pipeline</p>
-  </div>
-  {% else %}
-  <div class="stat-card-clickable" onclick="openStatModal('automation')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">Automation</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.with_automation }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Contacts with auto-emails</p>
-  </div>
+<!-- ── STATS ──────────────────────────────────── -->
+<div class="stats-strip">
+  <a href="?" class="s-stat"><span class="s-num">{{ stats.total }}</span><span class="s-lbl">Total</span></a>
+  <a href="?stage=active" class="s-stat"><span class="s-num">{{ stats.active }}</span><span class="s-lbl">Pipeline</span></a>
+  <a href="?stage=new" class="s-stat"><span class="s-num">{{ stats.new }}</span><span class="s-lbl">New</span></a>
+  <a href="?" class="s-stat"><span class="s-num {% if stats.needs_followup|default(0) > 0 %}s-num--r{% endif %}">{{ stats.needs_followup|default(0) }}</span><span class="s-lbl">Follow-up</span></a>
+  {% if stats.pending_tasks|default(0) > 0 %}<a href="?" class="s-stat"><span class="s-num">{{ stats.pending_tasks }}</span><span class="s-lbl">Tasks</span></a>{% endif %}
+  {% if stats.total_equity > 0 %}<span class="s-stat"><span class="s-num">${{ "{:,.0f}".format(stats.total_equity/1000) }}K</span><span class="s-lbl">Equity</span></span>{% endif %}
+</div>
+
+<!-- ── TOOLBAR ────────────────────────────────── -->
+<div class="toolbar">
+  <form method="get" class="toolbar-search">
+    <input type="text" name="search" value="{{ search_query }}" placeholder="Search name, email, phone, address…" class="t-inp">
+    {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+    {% if tag_filter   %}<input type="hidden" name="tag"   value="{{ tag_filter }}">{% endif %}
+    {% if sort_by      %}<input type="hidden" name="sort"  value="{{ sort_by }}">{% endif %}
+    <button type="submit" class="t-go">Go</button>
+  </form>
+  <form method="get" id="sortForm">
+    {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+    {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+    {% if tag_filter   %}<input type="hidden" name="tag"   value="{{ tag_filter }}">{% endif %}
+    <select name="sort" class="t-sel" onchange="this.form.submit()">
+      <option value="name"       {% if sort_by=='name'       %}selected{% endif %}>A–Z Name</option>
+      <option value="stage"      {% if sort_by=='stage'      %}selected{% endif %}>By Stage</option>
+      <option value="last_touch" {% if sort_by=='last_touch' %}selected{% endif %}>Last Touch</option>
+      <option value="created_at" {% if sort_by=='created_at' %}selected{% endif %}>Newest</option>
+    </select>
+  </form>
+  {% if all_tags %}
+  <form method="get" id="tagForm">
+    {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+    {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+    {% if sort_by      %}<input type="hidden" name="sort"  value="{{ sort_by }}">{% endif %}
+    <select name="tag" class="t-sel" onchange="this.form.submit()">
+      <option value="">All Tags</option>
+      {% for tag in all_tags %}<option value="{{ tag }}" {% if tag_filter==tag %}selected{% endif %}>{{ tag }}</option>{% endfor %}
+    </select>
+  </form>
+  {% endif %}
+  {% if search_query %}
+  <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="filter-chip">
+    "{{ search_query }}" <span class="filter-chip-x">×</span>
+  </a>
+  {% endif %}
+  {% if tag_filter %}
+  <a href="?stage={{ stage_filter or '' }}&search={{ search_query or '' }}&sort={{ sort_by }}" class="filter-chip">
+    {{ tag_filter }} <span class="filter-chip-x">×</span>
+  </a>
   {% endif %}
 </div>
 
-<!-- Luxurious Search and Filters Bar -->
-<div class="card" style="margin-bottom: 2.5rem; padding: 2.5rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 2px solid rgba(200, 180, 151, 0.3); box-shadow: 0 8px 32px rgba(58, 53, 44, 0.08); border-radius: 16px;">
-  <!-- Search Section Header -->
-  <div style="margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(200, 180, 151, 0.25);">
-    <h3 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; color: #3A352C; margin: 0 0 0.25rem 0; font-weight: 600; letter-spacing: -0.02em;">
-      Find Your Contacts
-    </h3>
-    <p style="font-size: 0.9rem; color: #6B6A45; margin: 0; font-style: italic;">
-      Search, filter, and organize your client relationships
-    </p>
-  </div>
-  
-  <!-- Search and Filters Grid -->
-  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem; align-items: end;">
-    <!-- Search Box -->
-    <div>
-      <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-        🔍 Search Contacts
-      </label>
-      <form method="get" style="display: flex; gap: 0.75rem;">
-        <div style="flex: 1; position: relative;">
-          <input 
-            type="text" 
-            name="search" 
-            value="{{ search_query }}" 
-            placeholder="Search by name, email, phone, address..." 
-            style="width: 100%; padding: 0.875rem 1.25rem; border: 2px solid #C8B497; border-radius: 8px; background: #FFFFFF; color: #3A352C; font-size: 0.95rem; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(58, 53, 44, 0.04);"
-            onfocus="this.style.borderColor='#6B6A45'; this.style.boxShadow='0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 12px rgba(58, 53, 44, 0.08)';"
-            onblur="this.style.borderColor='#C8B497'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.04)';">
-        </div>
-        {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
-        {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
-        {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
-        
-        <button 
-          type="submit" 
-          class="btn btn-primary" 
-          style="padding: 0.875rem 2rem; background: linear-gradient(135deg, #6B6A45 0%, #5A5938 100%); color: #FFFFFF; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2); white-space: nowrap;"
-          onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(107, 106, 69, 0.3)';"
-          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(107, 106, 69, 0.2)';">
-          Search
-        </button>
-        
-        {% if search_query %}
-        <a 
-          href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" 
-          class="btn" 
-          style="background: linear-gradient(135deg, #EFE9DC 0%, #F6F2E8 100%); color: #6B6A45; padding: 0.875rem 1.5rem; text-decoration: none; border-radius: 8px; font-weight: 600; border: 2px solid #C8B497; transition: all 0.3s ease; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.5rem;"
-          onmouseover="this.style.background='linear-gradient(135deg, #C8B497 0%, #EFE9DC 100%)'; this.style.color='#3A352C';"
-          onmouseout="this.style.background='linear-gradient(135deg, #EFE9DC 0%, #F6F2E8 100%)'; this.style.color='#6B6A45';">
-          ✕ Clear
-        </a>
-        {% endif %}
-      </form>
-    </div>
-    
-    <!-- Sort By Dropdown -->
-    <div>
-      <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-        📊 Sort By
-      </label>
-      <form method="get" id="sortForm" style="display: flex;">
-        <select 
-          name="sort" 
-          onchange="document.getElementById('sortForm').submit();" 
-          style="width: 100%; padding: 0.875rem 1.25rem; border: 2px solid #C8B497; border-radius: 8px; background: #FFFFFF; color: #3A352C; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(58, 53, 44, 0.04); appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3e%3cpath fill=%27%236B6A45%27 d=%27M1.41 0L6 4.58 10.59 0 12 1.42l-6 6-6-6z%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;"
-          onfocus="this.style.borderColor='#6B6A45'; this.style.boxShadow='0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 12px rgba(58, 53, 44, 0.08)';"
-          onblur="this.style.borderColor='#C8B497'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.04)';">
-          <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Name (A-Z)</option>
-          <option value="stage" {% if sort_by == 'stage' %}selected{% endif %}>Stage</option>
-          <option value="last_touch" {% if sort_by == 'last_touch' %}selected{% endif %}>Last Touch</option>
-          <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Newest First</option>
-        </select>
-        {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
-        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
-        {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
-      </form>
-    </div>
-    
-    <!-- Filter by Tag Dropdown -->
-    <div>
-      <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #6B6A45; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em;">
-        🏷️ Filter by Tag
-      </label>
-      <form method="get" id="tagForm" style="display: flex;">
-        <select 
-          name="tag" 
-          onchange="document.getElementById('tagForm').submit();" 
-          style="width: 100%; padding: 0.875rem 1.25rem; border: 2px solid #C8B497; border-radius: 8px; background: #FFFFFF; color: #3A352C; font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(58, 53, 44, 0.04); appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3e%3cpath fill=%27%236B6A45%27 d=%27M1.41 0L6 4.58 10.59 0 12 1.42l-6 6-6-6z%27/%3e%3c/svg%3e'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;"
-          onfocus="this.style.borderColor='#6B6A45'; this.style.boxShadow='0 0 0 3px rgba(107, 106, 69, 0.1), 0 4px 12px rgba(58, 53, 44, 0.08)';"
-          onblur="this.style.borderColor='#C8B497'; this.style.boxShadow='0 2px 8px rgba(58, 53, 44, 0.04)';">
-          <option value="">All Tags</option>
-          {% for tag in all_tags %}
-          <option value="{{ tag }}" {% if tag_filter == tag %}selected{% endif %}>{{ tag }}</option>
-          {% endfor %}
-        </select>
-        {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
-        {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
-        {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
-      </form>
-    </div>
-  </div>
+<!-- ── STAGE PILLS ────────────────────────────── -->
+<div class="pills-bar">
+  <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill {% if not stage_filter %}stg-pill--on{% endif %}">All</a>
+  {% for slug,lbl in [('new','New'),('nurture','Nurture'),('active','Active'),('past','Past Clients'),('sphere','Sphere'),('closed','Closed'),('hold','Hold')] %}
+    {% if stage_filter==slug %}
+    <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill stg-pill--on">{{ lbl }}&nbsp;<span class="stg-pill-x" title="Clear filter">×</span></a>
+    {% else %}
+    <a href="?stage={{ slug }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}&sort={{ sort_by }}" class="stg-pill">{{ lbl }}</a>
+    {% endif %}
+  {% endfor %}
 </div>
 
-<div class="crm-container">
-  <!-- Sidebar: Add Contact & Filters -->
-  <div class="crm-sidebar">
-    <div style="margin-bottom: 1.5rem;">
-      <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none; margin-bottom: 1rem;">
-        Import from Excel/CSV
-      </a>
-    </div>
-    <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
-    <form method="post" id="addContactForm" action="{{ url_for('agent_crm') }}" onsubmit="return validateAddContactForm(event);">
+<!-- ── MAIN ───────────────────────────────────── -->
+<div class="main-layout">
+
+  <!-- Quick-Add Sidebar -->
+  <aside class="qa-panel open" id="qaPanel">
+    <span class="qa-h">Quick Add</span>
+    <form method="post" id="qaForm">
       <input type="hidden" name="action" value="add">
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
-          <input type="text" name="name" id="add_contact_name" required style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
-          <input type="email" name="email" id="add_contact_email" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
-          <input type="tel" name="phone" id="add_contact_phone" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Stage</label>
-          <select name="stage" id="add_contact_stage" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-            <option value="new">New Lead</option>
-            <option value="nurture">Nurture</option>
-            <option value="active">Active Buyer/Seller</option>
-            <option value="past">Past Client</option>
-            <option value="sphere">Sphere</option>
-          </select>
-        </div>
-        <button type="submit" class="btn btn-primary" id="addContactBtn" style="width: 100%; padding: 0.75rem; cursor: pointer; pointer-events: auto;">Add Contact</button>
+      <div class="qa-f"><label>Name *</label><input type="text" name="name" id="qaName" required placeholder="Full name"></div>
+      <div class="qa-f"><label>Email</label><input type="email" name="email" placeholder="email@example.com"></div>
+      <div class="qa-f"><label>Phone</label><input type="tel" name="phone" placeholder="555-555-5555"></div>
+      <div class="qa-f"><label>Stage</label>
+        <select name="stage">
+          <option value="new">New Lead</option>
+          <option value="nurture">Nurture</option>
+          <option value="active">Active</option>
+          <option value="past">Past Client</option>
+          <option value="sphere">Sphere</option>
+          <option value="closed">Closed</option>
+          <option value="hold">Hold</option>
+        </select>
       </div>
+      <button type="submit" class="qa-submit">Add Contact</button>
     </form>
+    <div class="qa-hr"></div>
+    <a href="{{ url_for('agent_crm_import') }}" class="qa-link">↑ Import from Excel</a>
+  </aside>
 
-    <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
-      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Quick Stats</h3>
-      <div style="display: grid; gap: 0.75rem; margin-bottom: 1.5rem;">
-        <div style="padding: 0.75rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-          <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Total Contacts</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green);">{{ stats.total }}</div>
-        </div>
-        <div style="padding: 0.75rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-          <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Active Pipeline</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green);">{{ stats.active }}</div>
-        </div>
-        <div style="padding: 0.75rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-          <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">New Leads</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: var(--olive-green);">{{ stats.new }}</div>
-        </div>
-      </div>
-    </div>
-
-    <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
-      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Stage</h3>
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <a href="?stage={% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if not stage_filter %}active{% endif %}">All Contacts</a>
-        <a href="?stage=new{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'new' %}active{% endif %}">New Leads</a>
-        <a href="?stage=nurture{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'nurture' %}active{% endif %}">Nurture</a>
-        <a href="?stage=active{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'active' %}active{% endif %}">Active</a>
-        <a href="?stage=past{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'past' %}active{% endif %}">Past Clients</a>
-        <a href="?stage=sphere{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="filter-btn {% if stage_filter == 'sphere' %}active{% endif %}">Sphere</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main: Contact List -->
-  <div class="crm-main">
+  <!-- Contact List -->
+  <div class="list-area">
     {% if contacts %}
-      <div style="margin-bottom: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <input type="checkbox" id="selectAll" onchange="toggleAllContacts(this.checked)" style="margin-right: 0.5rem; width: 18px; height: 18px; cursor: pointer;">
-          <label for="selectAll" style="font-weight: 600; color: var(--charcoal-brown); cursor: pointer;">Select All</label>
-        </div>
-        <button onclick="openBulkActionModal(getSelectedContactIds())" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;" id="bulkActionBtn" disabled>Bulk Actions</button>
-      </div>
+    <table class="c-table">
+      <colgroup>
+        <col><col><col><col><col><col><col><col><col>
+      </colgroup>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Name</th>
+          <th>Stage</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Birthday</th>
+          <th>Last Touch</th>
+          <th style="text-align:right;padding-right:.625rem;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
       {% for contact in contacts %}
-        <div class="contact-card" style="position: relative;">
-          <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
-            <input type="checkbox" class="contact-checkbox" value="{{ contact.id }}" onchange="updateBulkActionButton()" style="width: 18px; height: 18px; cursor: pointer;">
-          </div>
-          <div class="contact-header">
-            <div>
-              <h3 class="contact-name">{{ contact.name }}</h3>
-              <span class="contact-badge badge-{{ contact.stage }}">{{ contact.stage|capitalize }}</span>
+        <tr class="c-row {% if loop.index is odd %}c-row--odd{% endif %}" id="row-{{ contact.id }}" onclick="toggleRow({{ contact.id }},event)">
+          <td class="c-td" onclick="event.stopPropagation()">
+            <input type="checkbox" class="c-chk contact-checkbox" value="{{ contact.id }}">
+          </td>
+          <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}</td>
+          <td class="c-td"><span class="s-badge s-badge--{{ contact.stage }}">{{ contact.stage }}</span></td>
+          <td class="c-td">
+            {% if contact.email %}<a href="mailto:{{ contact.email }}" onclick="event.stopPropagation()" title="{{ contact.email }}">{{ contact.email }}</a>{% else %}<span class="c-td--muted">—</span>{% endif %}
+          </td>
+          <td class="c-td">
+            {% if contact.phone %}<a href="tel:{{ contact.phone }}" onclick="event.stopPropagation()">{{ contact.phone }}</a>{% else %}<span class="c-td--muted">—</span>{% endif %}
+          </td>
+          <td class="c-td c-td--muted" title="{% if contact.address %}{{ contact.address }}{% if contact.city %}, {{ contact.city }}{% endif %}{% if contact.state %} {{ contact.state }}{% endif %}{% if contact.zip_code %} {{ contact.zip_code }}{% endif %}{% endif %}">
+            {% if contact.address or contact.city %}
+              {{ contact.address or '' }}{% if contact.city %}, {{ contact.city }}{% endif %}{% if contact.state %} {{ contact.state }}{% endif %}{% if contact.zip_code %} {{ contact.zip_code }}{% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td class="c-td c-td--muted">{{ contact.birthday or '—' }}</td>
+          <td class="c-td" onclick="event.stopPropagation()" title="Click to edit last touch">
+            <div class="lt-wrap">
+              <span class="lt-display" id="lt-disp-{{ contact.id }}" onclick="startLtEdit({{ contact.id }})">{{ contact.last_touch or '—' }}</span>
+              <input type="text" class="lt-inp" id="lt-inp-{{ contact.id }}"
+                value="{{ contact.last_touch or '' }}" placeholder="e.g. 01/15/2026"
+                onblur="saveLt({{ contact.id }})"
+                onkeydown="if(event.key==='Enter'){this.blur();}if(event.key==='Escape'){cancelLt({{ contact.id }});}">
             </div>
-            <button onclick="openEditModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Edit</button>
-          </div>
-
-          <div class="contact-info">
-            {% if contact.email %}
-              <div class="info-item">
-                <strong>Email:</strong>
-                <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
-              </div>
-            {% endif %}
-            {% if contact.phone %}
-              <div class="info-item">
-                <strong>Phone:</strong>
-                <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>
-              </div>
-            {% endif %}
-            {% if contact.birthday %}
-              <div class="info-item">
-                <strong>Birthday:</strong>
-                <span>{{ contact.birthday }}</span>
-              </div>
-            {% endif %}
-            {% if contact.home_anniversary %}
-              <div class="info-item">
-                <strong>Home Anniversary:</strong>
-                <span>{{ contact.home_anniversary }}</span>
-              </div>
-            {% endif %}
-            {% if contact.property_address %}
-              <div class="info-item">
-                <strong>Property:</strong>
-                <span>{{ contact.property_address }}</span>
-              </div>
-            {% endif %}
-            {% if contact.property_value is not none and contact.property_value %}
-              <div class="info-item">
-                <strong>Property Value:</strong>
-                <span>${{ "{:,.0f}".format(contact.property_value) }}</span>
-              </div>
-            {% endif %}
-            {% if contact.equity_estimate is not none and contact.equity_estimate %}
-              <div class="info-item">
-                <strong>Equity:</strong>
-                <span style="color: var(--olive-green); font-weight: 600;">${{ "{:,.0f}".format(contact.equity_estimate) }}</span>
-              </div>
-            {% endif %}
-            {% if contact.last_touch %}
-              <div class="info-item">
-                <strong>Last Touch:</strong>
-                <span>{{ contact.last_touch }}</span>
-              </div>
-            {% endif %}
-          </div>
-
-          {% if contact.notes %}
-            <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
-              <strong style="color: var(--charcoal-brown);">Notes:</strong>
-              <p style="margin: 0.5rem 0 0 0; color: var(--charcoal-brown); opacity: 0.8; white-space: pre-wrap;">{{ contact.notes }}</p>
+          </td>
+          <td class="c-td" onclick="event.stopPropagation()">
+            <div class="c-actions">
+              <button class="c-act" onclick="openEdit({{ contact.id }})" title="Edit">Edit</button>
+              <button class="c-act" onclick="openLog({{ contact.id }})"  title="Log">Log</button>
+              <button class="c-act" onclick="openTask({{ contact.id }})" title="Task">Task</button>
             </div>
-          {% endif %}
-
-          {% if contact.tags %}
-            <div style="margin: 0.5rem 0;">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
-              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                {% for tag in contact.tags.split(',') if tag.strip() %}
-                <a href="?tag={{ tag.strip() }}{% if stage_filter %}&stage={{ stage_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" 
-                   style="padding: 0.2rem 0.6rem; background: rgba(107, 106, 69, 0.1); color: var(--charcoal-brown); border-radius: var(--border-radius); text-decoration: none; font-size: 0.75rem; font-weight: 500;">
-                  {{ tag.strip() }}
-                </a>
-                {% endfor %}
-              </div>
+          </td>
+        </tr>
+        <!-- Expanded row -->
+        <tr class="exp-row" id="exp-{{ contact.id }}">
+          <td class="c-td exp-cell" colspan="9">
+            <div class="exp-grid">
+              {% if contact.property_address %}<div class="exp-field"><span class="exp-key">Property</span>{{ contact.property_address }}</div>{% endif %}
+              {% if contact.property_value %}<div class="exp-field"><span class="exp-key">Value</span>${{ "{:,.0f}".format(contact.property_value) }}</div>{% endif %}
+              {% if contact.equity_estimate %}<div class="exp-field"><span class="exp-key">Equity</span><span style="color:#4A7C59;font-weight:700;">${{ "{:,.0f}".format(contact.equity_estimate) }}</span></div>{% endif %}
+              {% if contact.zip_code %}<div class="exp-field"><span class="exp-key">ZIP</span>{{ contact.zip_code }}</div>{% endif %}
+              {% if contact.home_anniversary %}<div class="exp-field"><span class="exp-key">Anniversary</span>{{ contact.home_anniversary }}</div>{% endif %}
+              {% if contact.interaction_count > 0 %}<div class="exp-field"><span class="exp-key">Interactions</span>{{ contact.interaction_count }}</div>{% endif %}
             </div>
-          {% endif %}
-
-          {% if contact.recent_interactions %}
-            <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                Recent Activity ({{ contact.interaction_count }} total)
-              </strong>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                {% for interaction in contact.recent_interactions %}
-                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius); border-left: 3px solid var(--olive-green);">
-                  <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;">
-                    <span style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">
-                      {{ interaction.interaction_type|replace('_', ' ')|title }}
-                    </span>
-                    <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">
-                      {{ interaction.interaction_date or interaction.created_at[:10] }}
-                    </span>
-                  </div>
-                  {% if interaction.subject %}
-                  <div style="font-size: 0.8rem; color: var(--charcoal-brown); opacity: 0.9; margin-bottom: 0.25rem;">
-                    <strong>{{ interaction.subject }}</strong>
-                  </div>
-                  {% endif %}
-                  {% if interaction.notes %}
-                  <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.8;">
-                    {{ interaction.notes[:100] }}{% if interaction.notes|length > 100 %}...{% endif %}
-                  </div>
-                  {% endif %}
-                </div>
-                {% endfor %}
-              </div>
+            {% if contact.notes %}<div class="exp-notes">{{ contact.notes }}</div>{% endif %}
+            {% if contact.tags %}
+            <div class="exp-tags">
+              {% for tag in contact.tags.split(',') if tag.strip() %}
+              <a href="?tag={{ tag.strip() }}{% if stage_filter %}&stage={{ stage_filter }}{% endif %}" class="exp-tag">{{ tag.strip() }}</a>
+              {% endfor %}
             </div>
-          {% endif %}
-
-          <div class="auto-email-badges">
-            {% if contact.auto_birthday %}
-              <span class="auto-badge">Birthday Emails</span>
             {% endif %}
-            {% if contact.auto_anniversary %}
-              <span class="auto-badge">Home Anniversary</span>
-            {% endif %}
-            {% if contact.auto_seasonal %}
-              <span class="auto-badge">Seasonal Checklists</span>
-            {% endif %}
-            {% if contact.auto_equity %}
-              <span class="auto-badge">Equity Updates ({{ contact.equity_frequency }})</span>
-            {% endif %}
-            {% if contact.auto_holidays %}
-              <span class="auto-badge">Holiday Greetings</span>
-            {% endif %}
-          </div>
-
-          {% if contact.pending_tasks|default([])|length > 0 %}
-            <div style="margin: 1rem 0; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                Pending Tasks ({{ contact.task_count|default(0) }})
-              </strong>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                {% for task in contact.pending_tasks[:3] %}
-                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
-                  <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
-                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ task.title }}</div>
-                      {% if task.due_date %}
-                      <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Due: {{ task.due_date[:10] }}</div>
-                      {% endif %}
-                    </div>
-                    <span style="padding: 0.2rem 0.5rem; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">{{ task.priority }}</span>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-              {% if contact.task_count|default(0) > 3 %}
-              <button onclick="openTasksModal({{ contact.id }})" class="btn btn-small" style="margin-top: 0.5rem; width: 100%; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none; font-size: 0.8rem;">View All Tasks</button>
-              {% endif %}
+            <div class="exp-btns">
+              <button onclick="openLog({{ contact.id }})"  class="x-btn x-btn--log">💬 Log</button>
+              <button onclick="openTask({{ contact.id }})" class="x-btn x-btn--task">✓ Task</button>
+              <a href="{{ url_for('agent_transactions') }}?contact_id={{ contact.id }}" class="x-btn x-btn--tx">+ Transaction</a>
+              {% if contact.email %}<a href="mailto:{{ contact.email }}" class="x-btn x-btn--def">✉ Email</a>{% endif %}
+              {% if contact.phone %}<a href="tel:{{ contact.phone }}" class="x-btn x-btn--def">📞 Call</a>{% endif %}
+              {% if contact.interaction_count > 0 %}<button onclick="openHist({{ contact.id }})" class="x-btn x-btn--def">History ({{ contact.interaction_count }})</button>{% endif %}
+              <button onclick="openEdit({{ contact.id }})" class="x-btn x-btn--def">✏ Edit</button>
             </div>
-          {% endif %}
-
-          {% if contact.deals|default([])|length > 0 %}
-            <div style="margin: 1rem 0; padding: 1rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                Active Deals ({{ contact.deal_count|default(0) }})
-              </strong>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                {% for deal in contact.deals[:2] %}
-                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
-                  <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
-                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ deal.deal_name }}</div>
-                      {% if deal.deal_value %}
-                      <div style="font-size: 0.75rem; color: var(--olive-green); font-weight: 600;">${{ "{:,.0f}".format(deal.deal_value) }}</div>
-                      {% endif %}
-                      {% if deal.expected_close_date %}
-                      <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Close: {{ deal.expected_close_date[:10] }}</div>
-                      {% endif %}
-                    </div>
-                    <span style="padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">{{ deal.stage|replace('_', ' ') }}</span>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-              {% if contact.deal_count|default(0) > 2 %}
-              <button onclick="openDealsModal({{ contact.id }})" class="btn btn-small" style="margin-top: 0.5rem; width: 100%; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border: none; font-size: 0.8rem;">View All Deals</button>
-              {% endif %}
-            </div>
-          {% endif %}
-
-          <div class="contact-actions">
-            <button onclick="openInteractionModal({{ contact.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Log Interaction</button>
-            <button onclick="openTaskModal({{ contact.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;">Add Task</button>
-            <a href="{{ url_for('agent_transactions') }}?contact_id={{ contact.id }}" class="btn btn-small" style="background: #4caf50; color: var(--white); text-decoration: none; border: none; display: inline-block;">Add Transaction</a>
-            {% if contact.email %}
-            <a href="mailto:{{ contact.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">Email</a>
-            {% endif %}
-            {% if contact.phone %}
-              <a href="tel:{{ contact.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">Call</a>
-            {% endif %}
-            {% if contact.interaction_count > 0 %}
-            <button onclick="openHistoryModal({{ contact.id }})" class="btn btn-small" style="background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none;">History ({{ contact.interaction_count }})</button>
-            {% endif %}
-          </div>
-        </div>
+          </td>
+        </tr>
       {% endfor %}
+      </tbody>
+    </table>
+
     {% else %}
-      <div class="empty-state">
-        <div style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--olive-green);">—</div>
-        <h3>{% if search_query or tag_filter %}No Contacts Found{% else %}No Contacts Yet{% endif %}</h3>
-        <p style="color: var(--charcoal-brown); opacity: 0.8;">
-          {% if search_query or tag_filter %}
-            Try adjusting your search or filters to find contacts.
-          {% else %}
-            Start building your network by adding your first contact!
-          {% endif %}
-        </p>
-        {% if search_query or tag_filter %}
-        <a href="{{ url_for('agent_crm') }}" class="btn btn-primary" style="margin-top: 1rem;">View All Contacts</a>
-        {% endif %}
-      </div>
-    {% endif %}
-    
-    {% if contacts %}
-    <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center; display: flex; gap: 1rem; justify-content: center;">
-      <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="text-decoration: none;">
-        Import from Excel/CSV
-      </a>
-      <button onclick="exportContacts()" class="btn" style="background: var(--olive-green); color: var(--white);">
-        Export to CSV
-      </button>
-    </div>
-    {% else %}
-    <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
-      <a href="{{ url_for('agent_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
-        Import Your Contacts from Excel/CSV
-      </a>
+    <div class="c-empty">
+      <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;">—</div>
+      <p>{% if search_query or stage_filter or tag_filter %}No contacts match your filters.{% else %}No contacts yet — add your first using the panel on the left.{% endif %}</p>
+      {% if search_query or stage_filter or tag_filter %}
+      <a href="{{ url_for('agent_crm') }}" class="t-btn t-btn--solid" style="display:inline-flex;margin:0 auto;">Clear Filters</a>
+      {% endif %}
     </div>
     {% endif %}
   </div>
-</div>
 
-<!-- Edit Contact Modal -->
-<div id="editModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Edit Contact</h2>
-    <form method="post" id="editContactForm">
+</div><!-- /main-layout -->
+</div><!-- /crm -->
+
+<!-- ══ EDIT MODAL ═══════════════════════════════ -->
+<div id="editModal" class="cmod">
+  <div class="cmod-box cmod-box--lg">
+    <div class="cmod-head">Edit Contact <button class="cmod-x" onclick="closeEdit()">×</button></div>
+    <form method="post" id="editForm">
       <input type="hidden" name="action" value="update">
-      <input type="hidden" name="contact_id" id="edit_contact_id">
-      
-      <div class="form-grid">
-        <div>
-          <label>Name *</label>
-          <input type="text" name="name" id="edit_name" required>
-        </div>
-        <div>
-          <label>Email</label>
-          <input type="email" name="email" id="edit_email">
-        </div>
-        <div>
-          <label>Phone</label>
-          <input type="tel" name="phone" id="edit_phone">
-        </div>
-        <div>
-          <label>Stage</label>
-          <select name="stage" id="edit_stage">
+      <input type="hidden" name="contact_id" id="e_id">
+      <div class="mgrid">
+        <div class="mf"><label>Name *</label><input type="text" name="name" id="e_name" required></div>
+        <div class="mf"><label>Email</label><input type="email" name="email" id="e_email"></div>
+        <div class="mf"><label>Phone</label><input type="tel" name="phone" id="e_phone"></div>
+        <div class="mf"><label>Stage</label>
+          <select name="stage" id="e_stage">
             <option value="new">New Lead</option>
             <option value="nurture">Nurture</option>
             <option value="active">Active Buyer/Seller</option>
             <option value="past">Past Client</option>
             <option value="sphere">Sphere</option>
+            <option value="closed">Closed</option>
+            <option value="hold">Hold</option>
           </select>
         </div>
-        <div>
-          <label>Birthday (MM/DD)</label>
-          <input type="text" name="birthday" id="edit_birthday" placeholder="12/25">
-        </div>
-        <div>
-          <label>Home Anniversary (MM/DD/YYYY)</label>
-          <input type="text" name="home_anniversary" id="edit_home_anniversary" placeholder="01/15/2020">
-        </div>
-        <div class="form-full">
-          <label>Address</label>
-          <input type="text" name="address" id="edit_address">
-        </div>
-        <div class="form-full">
-          <label>Property Address</label>
-          <input type="text" name="property_address" id="edit_property_address">
-        </div>
-        <div>
-          <label>Property Value</label>
-          <input type="number" name="property_value" id="edit_property_value" step="1000">
-        </div>
-        <div>
-          <label>Equity Estimate</label>
-          <input type="number" name="equity_estimate" id="edit_equity_estimate" step="1000">
-        </div>
-        <div>
-          <label>Equity Update Frequency</label>
-          <select name="equity_frequency" id="edit_equity_frequency">
-            <option value="monthly">Monthly</option>
-            <option value="bimonthly">Every 2 Months</option>
-            <option value="quarterly">Quarterly</option>
-          </select>
-        </div>
-        <div class="form-full">
-          <label>Tags (comma-separated)</label>
-          <input type="text" name="tags" id="edit_tags" placeholder="VIP, Referral, Investor">
-        </div>
-        <div class="form-full">
-          <label>Notes</label>
-          <textarea name="notes" id="edit_notes" rows="4"></textarea>
-        </div>
+        <div class="mf"><label>Birthday (MM/DD)</label><input type="text" name="birthday" id="e_bday" placeholder="12/25"></div>
+        <div class="mf"><label>Home Anniversary</label><input type="text" name="home_anniversary" id="e_anniv" placeholder="01/15/2020"></div>
+        <div class="mf mgrid-full"><label>Street Address</label><input type="text" name="address" id="e_addr" placeholder="123 Main St"></div>
+        <div class="mf"><label>City</label><input type="text" name="city" id="e_city"></div>
+        <div class="mf"><label>State</label><input type="text" name="state" id="e_state" placeholder="WA" maxlength="2"></div>
+        <div class="mf"><label>ZIP</label><input type="text" name="zip_code" id="e_zip" placeholder="98101"></div>
+        <div class="mf"><label>Property Value ($)</label><input type="number" name="property_value" id="e_pval" step="1000"></div>
+        <div class="mf mgrid-full"><label>Property Address (if different)</label><input type="text" name="property_address" id="e_paddr"></div>
+        <div class="mf"><label>Equity Estimate ($)</label><input type="number" name="equity_estimate" id="e_equity" step="1000"></div>
+        <div class="mf"><label>Tags (comma-separated)</label><input type="text" name="tags" id="e_tags" placeholder="VIP, Referral"></div>
+        <div class="mf mgrid-full"><label>Notes</label><textarea name="notes" id="e_notes" rows="3" style="white-space:normal!important;"></textarea></div>
       </div>
-
-      <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Automated Emails</h3>
-      <div class="form-grid">
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_birthday" id="edit_auto_birthday" value="1">
-          <label for="edit_auto_birthday">Send Birthday Emails</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_anniversary" id="edit_auto_anniversary" value="1">
-          <label for="edit_auto_anniversary">Send Home Anniversary Emails</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_seasonal" id="edit_auto_seasonal" value="1">
-          <label for="edit_auto_seasonal">Send Seasonal Checklists</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_equity" id="edit_auto_equity" value="1">
-          <label for="edit_auto_equity">Send Equity Updates</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_holidays" id="edit_auto_holidays" value="1">
-          <label for="edit_auto_holidays">Send Holiday Greetings</label>
-        </div>
+      <div class="msec">Automated Emails</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:.35rem .875rem;">
+        <label class="mchk"><input type="checkbox" name="auto_birthday"    id="e_ab" value="1"> Birthday Emails</label>
+        <label class="mchk"><input type="checkbox" name="auto_anniversary" id="e_aa" value="1"> Home Anniversary</label>
+        <label class="mchk"><input type="checkbox" name="auto_seasonal"    id="e_as" value="1"> Seasonal Checklists</label>
+        <label class="mchk"><input type="checkbox" name="auto_equity"      id="e_ae" value="1"> Equity Updates</label>
+        <label class="mchk"><input type="checkbox" name="auto_holidays"    id="e_ah" value="1"> Holiday Greetings</label>
       </div>
-
-      <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <button type="button" onclick="closeEditModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+      <div class="mfoot">
+        <div class="mfoot-l">
+          <button type="submit" class="mbtn mbtn--p">Save Changes</button>
+          <button type="button" onclick="closeEdit()" class="mbtn mbtn--s">Cancel</button>
+        </div>
+        <button type="button" onclick="doDelete()" class="mbtn mbtn--d">Delete</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Log Interaction Modal -->
-<div id="interactionModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Log Interaction</h2>
+<!-- ══ LOG MODAL ════════════════════════════════ -->
+<div id="logModal" class="cmod">
+  <div class="cmod-box">
+    <div class="cmod-head">Log Interaction <button class="cmod-x" onclick="closeLog()">×</button></div>
     <form method="post">
       <input type="hidden" name="action" value="add_interaction">
-      <input type="hidden" name="contact_id" id="interaction_contact_id">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label>Interaction Type *</label>
+      <input type="hidden" name="contact_id" id="log_cid">
+      <div style="display:grid;gap:.7rem;">
+        <div class="mf"><label>Type *</label>
           <select name="interaction_type" required>
-            <option value="email">Email</option>
-            <option value="call">Phone Call</option>
-            <option value="meeting">Meeting</option>
-            <option value="text">Text Message</option>
+            <option value="email">Email</option><option value="call">Phone Call</option>
+            <option value="meeting">Meeting</option><option value="text">Text Message</option>
             <option value="note">Note</option>
           </select>
         </div>
-        <div>
-          <label>Channel</label>
-          <select name="channel">
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-            <option value="in-person">In Person</option>
-            <option value="text">Text</option>
-          </select>
-        </div>
-        <div>
-          <label>Subject</label>
-          <input type="text" name="subject" placeholder="Brief subject line...">
-        </div>
-        <div>
-          <label>Notes *</label>
-          <textarea name="notes" rows="4" required placeholder="Details about this interaction..."></textarea>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Log Interaction</button>
-          <button type="button" onclick="closeInteractionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+        <div class="mf"><label>Subject</label><input type="text" name="subject" placeholder="Brief subject…"></div>
+        <div class="mf"><label>Notes *</label><textarea name="notes" rows="4" required placeholder="Details…" style="white-space:normal!important;"></textarea></div>
+        <div style="display:flex;gap:.45rem;">
+          <button type="submit" class="mbtn mbtn--p">Save</button>
+          <button type="button" onclick="closeLog()" class="mbtn mbtn--s">Cancel</button>
         </div>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Interaction History Modal -->
-<div id="historyModal" class="modal">
-  <div class="modal-content" style="max-width: 800px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Interaction History</h2>
-    <div id="historyContent" style="max-height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading history...</p>
-    </div>
-    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-      <button type="button" onclick="closeHistoryModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Task Modal -->
-<div id="taskModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Task / Follow-up</h2>
+<!-- ══ TASK MODAL ═══════════════════════════════ -->
+<div id="taskModal" class="cmod">
+  <div class="cmod-box">
+    <div class="cmod-head">Add Task <button class="cmod-x" onclick="closeTask()">×</button></div>
     <form method="post">
       <input type="hidden" name="action" value="add_task">
-      <input type="hidden" name="contact_id" id="task_contact_id">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label>Task Title *</label>
-          <input type="text" name="title" required placeholder="e.g., Follow up on property viewing">
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea name="description" rows="3" placeholder="Additional details..."></textarea>
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Due Date</label>
-            <input type="date" name="due_date">
-          </div>
-          <div>
-            <label>Priority</label>
-            <select name="priority">
-              <option value="low">Low</option>
-              <option value="medium" selected>Medium</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
-            </select>
+      <input type="hidden" name="contact_id" id="task_cid">
+      <div style="display:grid;gap:.7rem;">
+        <div class="mf"><label>Task Title *</label><input type="text" name="title" required placeholder="e.g., Follow up on showing"></div>
+        <div class="mf"><label>Description</label><textarea name="description" rows="2" placeholder="Additional details…" style="white-space:normal!important;"></textarea></div>
+        <div class="mgrid">
+          <div class="mf"><label>Due Date</label><input type="date" name="due_date"></div>
+          <div class="mf"><label>Priority</label>
+            <select name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
           </div>
         </div>
-        <div>
-          <label>Reminder Date (optional)</label>
-          <input type="datetime-local" name="reminder_date">
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Add Task</button>
-          <button type="button" onclick="closeTaskModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+        <div style="display:flex;gap:.45rem;">
+          <button type="submit" class="mbtn mbtn--p">Add Task</button>
+          <button type="button" onclick="closeTask()" class="mbtn mbtn--s">Cancel</button>
         </div>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Tasks List Modal -->
-<div id="tasksModal" class="modal">
-  <div class="modal-content" style="max-width: 800px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">All Tasks</h2>
-    <div id="tasksContent" style="max-height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading tasks...</p>
+<!-- ══ HISTORY MODAL ════════════════════════════ -->
+<div id="histModal" class="cmod">
+  <div class="cmod-box cmod-box--lg">
+    <div class="cmod-head">Interaction History <button class="cmod-x" onclick="closeHist()">×</button></div>
+    <div id="histContent" style="max-height:55vh;overflow-y:auto;"></div>
+    <div style="margin-top:1rem;display:flex;justify-content:flex-end;">
+      <button class="mbtn mbtn--s" onclick="closeHist()">Close</button>
     </div>
-    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-      <button type="button" onclick="closeTasksModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Deal Modal -->
-<div id="dealModal" class="modal">
-  <div class="modal-content" style="max-width: 700px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Deal</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="add_deal">
-      <input type="hidden" name="contact_id" id="deal_contact_id">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label>Deal Name *</label>
-          <input type="text" name="deal_name" required placeholder="e.g., 123 Main St Purchase">
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Deal Type</label>
-            <select name="deal_type">
-              <option value="sale">Sale</option>
-              <option value="purchase">Purchase</option>
-              <option value="listing">Listing</option>
-              <option value="refinance">Refinance</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label>Stage</label>
-            <select name="stage">
-              <option value="prospect">Prospect</option>
-              <option value="qualified">Qualified</option>
-              <option value="offer">Offer</option>
-              <option value="under_contract">Under Contract</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label>Property Address</label>
-          <input type="text" name="property_address" placeholder="123 Main St, City, State">
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Deal Value ($)</label>
-            <input type="number" name="deal_value" step="1000" placeholder="500000">
-          </div>
-          <div>
-            <label>Commission Rate (%)</label>
-            <input type="number" name="commission_rate" step="0.1" placeholder="3.0">
-          </div>
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Probability (%)</label>
-            <input type="number" name="probability" min="0" max="100" value="50">
-          </div>
-          <div>
-            <label>Expected Close Date</label>
-            <input type="date" name="expected_close_date">
-          </div>
-        </div>
-        <div>
-          <label>Notes</label>
-          <textarea name="notes" rows="3" placeholder="Additional deal details..."></textarea>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Add Deal</button>
-          <button type="button" onclick="closeDealModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Deals List Modal -->
-<div id="dealsModal" class="modal">
-  <div class="modal-content" style="max-width: 800px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">All Deals</h2>
-    <div id="dealsContent" style="max-height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading deals...</p>
-    </div>
-    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-      <button type="button" onclick="closeDealsModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Stat Details Modal -->
-<div id="statModal" class="modal">
-  <div class="modal-content" style="max-width: 800px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);" id="statModalTitle">Stat Details</h2>
-    <div id="statModalContent" style="max-height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading...</p>
-    </div>
-    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-      <button type="button" onclick="closeStatModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- Follow-up Settings Modal -->
-<div id="followupSettingsModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Follow-up Reminder Settings</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="update_followup_days">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Days Without Contact</label>
-          <input type="number" name="follow_up_days" min="1" max="365" value="{{ stats.follow_up_days|default(30) }}" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;" required>
-          <p style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-top: 0.5rem;">Contacts without communication in this many days will appear in "Needs Follow-up"</p>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Save Settings</button>
-          <button type="button" onclick="closeFollowupSettings()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Bulk Actions Modal -->
-<div id="bulkActionModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Bulk Actions</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="bulk_action">
-      <div id="bulkContactIds"></div>
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Action</label>
-          <select name="bulk_action_type" id="bulkActionType" onchange="updateBulkActionFields()" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
-            <option value="">Select an action...</option>
-            <option value="add_tag">Add Tag</option>
-            <option value="change_stage">Change Stage</option>
-          </select>
-        </div>
-        <div id="bulkTagField" style="display: none;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Tag to Add</label>
-          <input type="text" name="bulk_tag" placeholder="e.g., VIP, Referral" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
-        </div>
-        <div id="bulkStageField" style="display: none;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">New Stage</label>
-          <select name="bulk_stage" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
-            <option value="new">New Lead</option>
-            <option value="nurture">Nurture</option>
-            <option value="active">Active</option>
-            <option value="past">Past Client</option>
-            <option value="sphere">Sphere</option>
-          </select>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Apply to Selected</button>
-          <button type="button" onclick="closeBulkActionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
   </div>
 </div>
 
 <script>
-var contactsData = {{ contacts|tojson|default('[]') }};
-const contacts = contactsData;
+var CD = {{ contacts|tojson|default('[]') }};
+var openId = null;
 
-function validateAddContactForm(event) {
-  const nameField = document.getElementById('add_contact_name');
-  if (!nameField || !nameField.value.trim()) {
-    event.preventDefault();
-    alert('Please enter a name for the contact.');
-    if (nameField) nameField.focus();
-    return false;
+function toggleQA(){
+  var p=document.getElementById('qaPanel'),b=document.getElementById('qaToggle');
+  p.classList.toggle('open');
+  b.textContent=p.classList.contains('open')?'✕ Close':'+ Add';
+}
+
+/* ── Inline Last-Touch Edit ── */
+function startLtEdit(id){
+  document.getElementById('lt-disp-'+id).style.display='none';
+  var inp=document.getElementById('lt-inp-'+id);
+  inp.style.display='inline-block';
+  inp.focus();inp.select();
+}
+function cancelLt(id){
+  document.getElementById('lt-inp-'+id).style.display='none';
+  document.getElementById('lt-disp-'+id).style.display='';
+}
+function saveLt(id){
+  var inp=document.getElementById('lt-inp-'+id);
+  var val=inp.value.trim();
+  var disp=document.getElementById('lt-disp-'+id);
+  inp.style.display='none';
+  disp.style.display='';
+  disp.textContent=val||'—';
+  var body='contact_id='+encodeURIComponent(id)+'&field=last_touch&value='+encodeURIComponent(val);
+  fetch('/agent/crm/quick-update',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){if(!r.ok)disp.style.color='#c00';else disp.style.color='';});
+}
+
+function toggleRow(id,e){
+  if(e&&(e.target.tagName==='A'||e.target.tagName==='INPUT'||e.target.tagName==='BUTTON'))return;
+  var exp=document.getElementById('exp-'+id);
+  var row=document.getElementById('row-'+id);
+  if(!exp)return;
+  if(openId&&openId!==id){
+    var pe=document.getElementById('exp-'+openId);
+    var pr=document.getElementById('row-'+openId);
+    if(pe)pe.classList.remove('open');
+    if(pr)pr.classList.remove('c-row--open');
   }
-  console.log('Form submitting with name:', nameField.value);
-  return true;
+  var isOpen=exp.classList.contains('open');
+  exp.classList.toggle('open');
+  row.classList.toggle('c-row--open');
+  openId=isOpen?null:id;
 }
 
-// Ensure form submission works
-document.addEventListener('DOMContentLoaded', function() {
-  const addContactForm = document.getElementById('addContactForm');
-  const addContactBtn = document.getElementById('addContactBtn');
-  
-  console.log('DOM loaded. Checking form...');
-  console.log('Form element:', addContactForm);
-  console.log('Button element:', addContactBtn);
-  
-  if (addContactForm) {
-    console.log('Add contact form found');
-    
-    // Remove onsubmit attribute and use addEventListener instead
-    addContactForm.removeAttribute('onsubmit');
-    
-    addContactForm.addEventListener('submit', function(e) {
-      console.log('Form submit event triggered');
-      const name = document.getElementById('add_contact_name')?.value;
-      console.log('Name value:', name);
-      
-      if (!name || !name.trim()) {
-        e.preventDefault();
-        alert('Please enter a name for the contact.');
-        return false;
-      }
-      
-      console.log('Form is valid. Allowing submission...');
-      console.log('Form action:', addContactForm.action);
-      console.log('Form method:', addContactForm.method);
-      
-      // Show loading state
-      if (addContactBtn) {
-        addContactBtn.disabled = true;
-        addContactBtn.textContent = 'Adding...';
-      }
-      
-      return true;
-    }, false);
-  } else {
-    console.error('ERROR: Add contact form not found!');
-  }
-  
-  if (addContactBtn) {
-    console.log('Add contact button found');
-    addContactBtn.disabled = false;
-    addContactBtn.style.pointerEvents = 'auto';
-    addContactBtn.style.cursor = 'pointer';
-    
-    addContactBtn.addEventListener('click', function(e) {
-      console.log('Button clicked');
-      const form = document.getElementById('addContactForm');
-      if (form) {
-        const name = document.getElementById('add_contact_name')?.value;
-        console.log('Button click - Name:', name);
-        if (!name || !name.trim()) {
-          e.preventDefault();
-          alert('Please enter a name for the contact.');
-          return false;
-        }
-        console.log('Button click - Form will submit');
-      }
-    });
-  } else {
-    console.error('ERROR: Add contact button not found!');
-  }
-});
-
-function openEditModal(contactId) {
-  const contact = contacts.find(c => c.id === contactId);
-  if (!contact) return;
-  
-  document.getElementById('edit_contact_id').value = contact.id;
-  document.getElementById('edit_name').value = contact.name || '';
-  document.getElementById('edit_email').value = contact.email || '';
-  document.getElementById('edit_phone').value = contact.phone || '';
-  document.getElementById('edit_stage').value = contact.stage || 'new';
-  document.getElementById('edit_birthday').value = contact.birthday || '';
-  document.getElementById('edit_home_anniversary').value = contact.home_anniversary || '';
-  document.getElementById('edit_address').value = contact.address || '';
-  document.getElementById('edit_property_address').value = contact.property_address || '';
-  document.getElementById('edit_property_value').value = contact.property_value || '';
-  document.getElementById('edit_equity_estimate').value = contact.equity_estimate || '';
-  document.getElementById('edit_equity_frequency').value = contact.equity_frequency || 'monthly';
-  document.getElementById('edit_tags').value = contact.tags || '';
-  document.getElementById('edit_notes').value = contact.notes || '';
-  document.getElementById('edit_auto_birthday').checked = contact.auto_birthday == 1;
-  document.getElementById('edit_auto_anniversary').checked = contact.auto_anniversary == 1;
-  document.getElementById('edit_auto_seasonal').checked = contact.auto_seasonal == 1;
-  document.getElementById('edit_auto_equity').checked = contact.auto_equity == 1;
-  document.getElementById('edit_auto_holidays').checked = contact.auto_holidays == 1;
-  
-  document.getElementById('editModal').classList.add('active');
+function openEdit(id){
+  var c=CD.find(function(x){return x.id===id;}); if(!c)return;
+  document.getElementById('e_id').value=c.id;
+  document.getElementById('e_name').value=c.name||'';
+  document.getElementById('e_email').value=c.email||'';
+  document.getElementById('e_phone').value=c.phone||'';
+  document.getElementById('e_stage').value=c.stage||'new';
+  document.getElementById('e_bday').value=c.birthday||'';
+  document.getElementById('e_anniv').value=c.home_anniversary||'';
+  document.getElementById('e_addr').value=c.address||'';
+  document.getElementById('e_city').value=c.city||'';
+  document.getElementById('e_state').value=c.state||'';
+  document.getElementById('e_zip').value=c.zip_code||'';
+  document.getElementById('e_paddr').value=c.property_address||'';
+  document.getElementById('e_pval').value=c.property_value||'';
+  document.getElementById('e_equity').value=c.equity_estimate||'';
+  document.getElementById('e_tags').value=c.tags||'';
+  document.getElementById('e_notes').value=c.notes||'';
+  document.getElementById('e_ab').checked=c.auto_birthday==1;
+  document.getElementById('e_aa').checked=c.auto_anniversary==1;
+  document.getElementById('e_as').checked=c.auto_seasonal==1;
+  document.getElementById('e_ae').checked=c.auto_equity==1;
+  document.getElementById('e_ah').checked=c.auto_holidays==1;
+  document.getElementById('editModal').classList.add('open');
 }
+function closeEdit(){document.getElementById('editModal').classList.remove('open');}
 
-function closeEditModal() {
-  document.getElementById('editModal').classList.remove('active');
-}
-
-function openInteractionModal(contactId) {
-  document.getElementById('interaction_contact_id').value = contactId;
-  document.getElementById('interactionModal').classList.add('active');
-}
-
-function closeInteractionModal() {
-  document.getElementById('interactionModal').classList.remove('active');
-}
-
-function openHistoryModal(contactId) {
-  const contact = contacts.find(c => c.id === contactId);
-  if (!contact) return;
-  
-  const historyContent = document.getElementById('historyContent');
-  const interactions = contact.all_interactions || contact.recent_interactions || [];
-  
-  if (interactions.length > 0) {
-    let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-      <strong style="color: var(--charcoal-brown);">Total Interactions: ${contact.interaction_count || interactions.length}</strong>
-    </div>`;
-    html += '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-    interactions.forEach(interaction => {
-      html += `
-        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid var(--olive-green);">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-            <div>
-              <span style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">
-                ${interaction.interaction_type ? interaction.interaction_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Interaction'}
-              </span>
-              <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-left: 0.5rem;">
-                via ${interaction.channel || 'N/A'}
-              </span>
-            </div>
-            <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">
-              ${interaction.interaction_date || (interaction.created_at ? interaction.created_at.substring(0, 10) : '')}
-            </span>
-          </div>
-          ${interaction.subject ? `<div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">${interaction.subject}</div>` : ''}
-          ${interaction.notes ? `<div style="font-size: 0.9rem; color: var(--charcoal-brown); opacity: 0.9; white-space: pre-wrap;">${interaction.notes}</div>` : ''}
-        </div>
-      `;
-    });
-    html += '</div>';
-    historyContent.innerHTML = html;
-  } else {
-    historyContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No interactions recorded yet.</p>';
-  }
-  
-  document.getElementById('historyModal').classList.add('active');
-}
-
-function closeHistoryModal() {
-  document.getElementById('historyModal').classList.remove('active');
-}
-
-// Close modals on outside click
-document.getElementById('editModal').addEventListener('click', function(e) {
-  if (e.target === this) closeEditModal();
-});
-document.getElementById('interactionModal').addEventListener('click', function(e) {
-  if (e.target === this) closeInteractionModal();
-});
-document.getElementById('historyModal').addEventListener('click', function(e) {
-  if (e.target === this) closeHistoryModal();
-});
-
-// Export contacts to CSV
-function exportContacts() {
-  if (!contacts || contacts.length === 0) {
-    alert('No contacts to export');
-    return;
-  }
-  
-  // Create CSV header
-  let csv = 'Name,Email,Phone,Stage,Birthday,Home Anniversary,Property Address,Property Value,Equity,Last Touch,Tags,Notes\n';
-  
-  // Add contact data
-  contacts.forEach(contact => {
-    const row = [
-      `"${(contact.name || '').replace(/"/g, '""')}"`,
-      `"${(contact.email || '').replace(/"/g, '""')}"`,
-      `"${(contact.phone || '').replace(/"/g, '""')}"`,
-      `"${(contact.stage || '').replace(/"/g, '""')}"`,
-      `"${(contact.birthday || '').replace(/"/g, '""')}"`,
-      `"${(contact.home_anniversary || '').replace(/"/g, '""')}"`,
-      `"${(contact.property_address || '').replace(/"/g, '""')}"`,
-      contact.property_value || '',
-      contact.equity_estimate || '',
-      `"${(contact.last_touch || '').replace(/"/g, '""')}"`,
-      `"${(contact.tags || '').replace(/"/g, '""')}"`,
-      `"${(contact.notes || '').replace(/"/g, '""')}"`
-    ];
-    csv += row.join(',') + '\n';
+function doDelete(){
+  var id=document.getElementById('e_id').value;
+  var name=document.getElementById('e_name').value;
+  if(!confirm('Delete '+name+'? This cannot be undone.'))return;
+  var f=document.createElement('form');f.method='POST';f.action='/agent/crm';
+  [['action','delete'],['contact_id',id]].forEach(function(p){
+    var i=document.createElement('input');i.type='hidden';i.name=p[0];i.value=p[1];f.appendChild(i);
   });
-  
-  // Create download link
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', `crm_contacts_${new Date().toISOString().split('T')[0]}.csv`);
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  document.body.appendChild(f);f.submit();
 }
 
-// Task Modal Functions
-function openTaskModal(contactId) {
-  document.getElementById('task_contact_id').value = contactId;
-  document.getElementById('taskModal').classList.add('active');
-}
+function openLog(id){document.getElementById('log_cid').value=id;document.getElementById('logModal').classList.add('open');}
+function closeLog(){document.getElementById('logModal').classList.remove('open');}
 
-function closeTaskModal() {
-  document.getElementById('taskModal').classList.remove('active');
-}
+function openTask(id){document.getElementById('task_cid').value=id;document.getElementById('taskModal').classList.add('open');}
+function closeTask(){document.getElementById('taskModal').classList.remove('open');}
 
-function openTasksModal(contactId) {
-  const contact = contacts.find(c => c.id === contactId);
-  if (!contact) return;
-  
-  const tasksContent = document.getElementById('tasksContent');
-  const tasks = contact.pending_tasks || [];
-  
-  if (tasks.length > 0) {
-    let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-    tasks.forEach(task => {
-      html += `
-        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-            <div style="flex: 1;">
-              <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">${task.title || 'Untitled Task'}</div>
-              ${task.description ? `<div style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8; margin-top: 0.25rem;">${task.description}</div>` : ''}
-            </div>
-            <span style="padding: 0.2rem 0.5rem; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">${task.priority || 'medium'}</span>
-          </div>
-          ${task.due_date ? `<div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Due: ${task.due_date.substring(0, 10)}</div>` : ''}
-        </div>
-      `;
-    });
-    html += '</div>';
-    tasksContent.innerHTML = html;
-  } else {
-    tasksContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No tasks found.</p>';
-  }
-  
-  document.getElementById('tasksModal').classList.add('active');
+function openHist(id){
+  var c=CD.find(function(x){return x.id===id;}); if(!c)return;
+  var list=c.all_interactions||c.recent_interactions||[];
+  var box=document.getElementById('histContent');
+  if(!list.length){box.innerHTML='<p style="text-align:center;padding:2rem;opacity:.5;font-size:.85rem;">No interactions yet.</p>';return;}
+  box.innerHTML=list.map(function(i){
+    return '<div style="padding:.6rem .8rem;background:#F9F7F4;border-radius:6px;border-left:3px solid #6B6A45;margin-bottom:.4rem;">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:.15rem;">'
+      +'<strong style="font-size:.78rem;">'+(i.interaction_type||'').replace(/_/g,' ').replace(/\b\w/g,function(l){return l.toUpperCase();})+'</strong>'
+      +'<span style="font-size:.68rem;opacity:.55;">'+(i.interaction_date||(i.created_at||'').substring(0,10))+'</span></div>'
+      +(i.subject?'<div style="font-size:.73rem;font-weight:600;margin-bottom:.12rem;">'+i.subject+'</div>':'')
+      +(i.notes?'<div style="font-size:.7rem;opacity:.85;white-space:pre-wrap;">'+i.notes+'</div>':'')
+      +'</div>';
+  }).join('');
+  document.getElementById('histModal').classList.add('open');
 }
+function closeHist(){document.getElementById('histModal').classList.remove('open');}
 
-function closeTasksModal() {
-  document.getElementById('tasksModal').classList.remove('active');
-}
-
-// Deal Modal Functions
-function openDealModal(contactId) {
-  document.getElementById('deal_contact_id').value = contactId;
-  document.getElementById('dealModal').classList.add('active');
-}
-
-function closeDealModal() {
-  document.getElementById('dealModal').classList.remove('active');
-}
-
-function openDealsModal(contactId) {
-  const contact = contacts.find(c => c.id === contactId);
-  if (!contact) return;
-  
-  const dealsContent = document.getElementById('dealsContent');
-  const deals = contact.deals || [];
-  
-  if (deals.length > 0) {
-    let html = '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-    deals.forEach(deal => {
-      html += `
-        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-            <div style="flex: 1;">
-              <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">${deal.deal_name || 'Untitled Deal'}</div>
-              ${deal.property_address ? `<div style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8; margin-top: 0.25rem;">${deal.property_address}</div>` : ''}
-              ${deal.deal_value ? `<div style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; margin-top: 0.25rem;">$${deal.deal_value.toLocaleString()}</div>` : ''}
-            </div>
-            <span style="padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">${(deal.stage || 'prospect').replace('_', ' ')}</span>
-          </div>
-          ${deal.expected_close_date ? `<div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Expected Close: ${deal.expected_close_date.substring(0, 10)}</div>` : ''}
-          ${deal.probability ? `<div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Probability: ${deal.probability}%</div>` : ''}
-        </div>
-      `;
-    });
-    html += '</div>';
-    dealsContent.innerHTML = html;
-  } else {
-    dealsContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No deals found.</p>';
-  }
-  
-  document.getElementById('dealsModal').classList.add('active');
-}
-
-function closeDealsModal() {
-  document.getElementById('dealsModal').classList.remove('active');
-}
-
-// Bulk Actions
-function openBulkActionModal(selectedIds) {
-  const bulkContactIds = document.getElementById('bulkContactIds');
-  bulkContactIds.innerHTML = '';
-  selectedIds.forEach(id => {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'contact_ids';
-    input.value = id;
-    bulkContactIds.appendChild(input);
-  });
-  document.getElementById('bulkActionModal').classList.add('active');
-}
-
-function closeBulkActionModal() {
-  document.getElementById('bulkActionModal').classList.remove('active');
-}
-
-function updateBulkActionFields() {
-  const actionType = document.getElementById('bulkActionType').value;
-  document.getElementById('bulkTagField').style.display = actionType === 'add_tag' ? 'block' : 'none';
-  document.getElementById('bulkStageField').style.display = actionType === 'change_stage' ? 'block' : 'none';
-}
-
-function openFollowupSettings() {
-  document.getElementById('followupSettingsModal').classList.add('active');
-}
-
-function closeFollowupSettings() {
-  document.getElementById('followupSettingsModal').classList.remove('active');
-}
-
-function openStatModal(statType) {
-  const modal = document.getElementById('statModal');
-  const title = document.getElementById('statModalTitle');
-  const content = document.getElementById('statModalContent');
-  
-  let titleText = '';
-  let html = '';
-  
-  switch(statType) {
-    case 'total':
-      titleText = 'All Contacts';
-      const allContacts = contacts.filter(c => true);
-      html = generateContactsList(allContacts, 'All contacts in your CRM');
-      break;
-    case 'active':
-      titleText = 'Active Pipeline';
-      const activeContacts = contacts.filter(c => c.stage === 'active');
-      html = generateContactsList(activeContacts, 'Active buyers & sellers');
-      break;
-    case 'new':
-      titleText = 'New Leads';
-      const newContacts = contacts.filter(c => c.stage === 'new');
-      html = generateContactsList(newContacts, 'New leads waiting for first contact');
-      break;
-    case 'tasks':
-      titleText = 'Pending Tasks';
-      html = generateTasksList();
-      break;
-    case 'followup':
-      titleText = 'Needs Follow-up';
-      html = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading contacts needing follow-up...</p>';
-      // Will be populated via AJAX or filter
-      const followupContacts = contacts.filter(c => {
-        // This is a simplified check - actual logic is in backend
-        return true; // Will be filtered properly
-      });
-      html = generateContactsList(followupContacts, 'Contacts needing follow-up');
-      break;
-    case 'equity':
-      titleText = 'Total Equity';
-      const equityContacts = contacts.filter(c => c.equity_estimate && c.equity_estimate > 0);
-      html = generateEquityList(equityContacts);
-      break;
-    case 'deals':
-      titleText = 'Active Deals';
-      html = generateDealsList();
-      break;
-    case 'automation':
-      titleText = 'Automation';
-      const autoContacts = contacts.filter(c => 
-        c.auto_birthday || c.auto_anniversary || c.auto_seasonal || 
-        c.auto_equity || c.auto_holidays
-      );
-      html = generateContactsList(autoContacts, 'Contacts with automated emails enabled');
-      break;
-    default:
-      titleText = 'Stat Details';
-      html = '<p>No information available.</p>';
-  }
-  
-  title.textContent = titleText;
-  content.innerHTML = html;
-  modal.classList.add('active');
-}
-
-function closeStatModal() {
-  document.getElementById('statModal').classList.remove('active');
-}
-
-function generateContactsList(contactsList, description) {
-  if (contactsList.length === 0) {
-    return `<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No contacts found. ${description}</p>`;
-  }
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total: ${contactsList.length}</strong>
-    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${description}</p>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  contactsList.forEach(contact => {
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${contact.name || 'Unnamed'}</h4>
-          <span class="badge-${contact.stage || 'new'}" style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600;">
-            ${(contact.stage || 'new').charAt(0).toUpperCase() + (contact.stage || 'new').slice(1)}
-          </span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">
-          ${contact.email ? `<div>${contact.email}</div>` : ''}
-          ${contact.phone ? `<div>${contact.phone}</div>` : ''}
-          ${contact.property_address ? `<div>${contact.property_address}</div>` : ''}
-        </div>
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
-}
-
-function generateTasksList() {
-  // Get all tasks from contacts
-  let allTasks = [];
-  contacts.forEach(contact => {
-    if (contact.pending_tasks && contact.pending_tasks.length > 0) {
-      contact.pending_tasks.forEach(task => {
-        allTasks.push({...task, contact_name: contact.name, contact_id: contact.id});
-      });
-    }
-  });
-  
-  if (allTasks.length === 0) {
-    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No pending tasks found.</p>';
-  }
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total Pending Tasks: ${allTasks.length}</strong>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  allTasks.forEach(task => {
-    const priorityColors = {high: '#c0392b', medium: '#f39c12', low: '#27ae60'};
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${task.title || 'Untitled Task'}</h4>
-          <span style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600; background: ${priorityColors[task.priority] || '#95a5a6'}20; color: ${priorityColors[task.priority] || '#95a5a6'};">
-            ${(task.priority || 'medium').charAt(0).toUpperCase() + (task.priority || 'medium').slice(1)}
-          </span>
-        </div>
-        <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Contact: ${task.contact_name || 'Unknown'}</p>
-        ${task.due_date ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Due: ${task.due_date}</p>` : ''}
-        ${task.description ? `<p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${task.description}</p>` : ''}
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
-}
-
-function generateEquityList(contactsList) {
-  if (contactsList.length === 0) {
-    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No contacts with equity tracked.</p>';
-  }
-  
-  const totalEquity = contactsList.reduce((sum, c) => sum + (c.equity_estimate || 0), 0);
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total Equity: $${totalEquity.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
-    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Across ${contactsList.length} contact(s)</p>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  contactsList.sort((a, b) => (b.equity_estimate || 0) - (a.equity_estimate || 0));
-  
-  contactsList.forEach(contact => {
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${contact.name || 'Unnamed'}</h4>
-          <strong style="color: var(--olive-green); font-size: 1.1rem;">$${(contact.equity_estimate || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
-        </div>
-        ${contact.property_address ? `<p style="margin: 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">${contact.property_address}</p>` : ''}
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
-}
-
-function generateDealsList() {
-  let allDeals = [];
-  contacts.forEach(contact => {
-    if (contact.deals && contact.deals.length > 0) {
-      contact.deals.forEach(deal => {
-        allDeals.push({...deal, contact_name: contact.name, contact_id: contact.id});
-      });
-    }
-  });
-  
-  if (allDeals.length === 0) {
-    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No active deals found.</p>';
-  }
-  
-  const totalValue = allDeals.reduce((sum, d) => sum + (d.deal_value || 0), 0);
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total Pipeline Value: $${totalValue.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
-    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${allDeals.length} active deal(s)</p>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  allDeals.forEach(deal => {
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${deal.deal_name || 'Untitled Deal'}</h4>
-          ${deal.deal_value ? `<strong style="color: var(--olive-green);">$${(deal.deal_value || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>` : ''}
-        </div>
-        <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Contact: ${deal.contact_name || 'Unknown'}</p>
-        ${deal.property_address ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">${deal.property_address}</p>` : ''}
-        ${deal.stage ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Stage: ${deal.stage}</p>` : ''}
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
-}
-
-function toggleAllContacts(checked) {
-  const checkboxes = document.querySelectorAll('.contact-checkbox');
-  checkboxes.forEach(cb => cb.checked = checked);
-  updateBulkActionButton();
-}
-
-function getSelectedContactIds() {
-  const checkboxes = document.querySelectorAll('.contact-checkbox:checked');
-  return Array.from(checkboxes).map(cb => parseInt(cb.value));
-}
-
-function updateBulkActionButton() {
-  const selected = getSelectedContactIds();
-  const btn = document.getElementById('bulkActionBtn');
-  if (btn) {
-    btn.disabled = selected.length === 0;
-    if (selected.length > 0) {
-      btn.textContent = `Bulk Actions (${selected.length})`;
-    } else {
-      btn.textContent = 'Bulk Actions';
-    }
-  }
-}
-
-// Close modals on outside click
-document.getElementById('taskModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeTaskModal();
+['editModal','logModal','taskModal','histModal'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 });
-document.getElementById('tasksModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeTasksModal();
+
+function doExport(){
+  if(!CD.length){alert('No contacts to export');return;}
+  var csv='Name,Email,Phone,Stage,Birthday,Anniversary,Address,City,State,ZIP,Property,Equity,Tags,Notes\n';
+  CD.forEach(function(c){
+    csv+=[c.name,c.email,c.phone,c.stage,c.birthday,c.home_anniversary,c.address,c.city,c.state,c.zip_code,c.property_address,c.equity_estimate||'',c.tags,c.notes]
+      .map(function(v){return'"'+(v||'').toString().replace(/"/g,'""')+'"';})
+      .join(',') +'\n';
+  });
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='contacts_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+document.getElementById('qaForm').addEventListener('submit',function(e){
+  if(!document.getElementById('qaName').value.trim()){e.preventDefault();alert('Please enter a name.');}
 });
-document.getElementById('dealModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeDealModal();
-});
-document.getElementById('dealsModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeDealsModal();
-});
-document.getElementById('bulkActionModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeBulkActionModal();
-});
-document.getElementById('followupSettingsModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeFollowupSettings();
-});
-document.getElementById('statModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeStatModal();
-});
+
+/* Auto-open edit modal if ?edit=ID is in URL (from address labels page) */
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var editId = parseInt(params.get('edit'));
+  if(editId) { setTimeout(function(){ openEdit(editId); }, 300); }
+})();
 </script>
-</div> <!-- .crm-wrapper -->
 {% endblock %}

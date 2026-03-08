@@ -71,8 +71,8 @@
 
 <div class="dashboard-main__header">
   <p class="dashboard-tagline">Map your columns</p>
-  <h1>Import Preview</h1>
-  <p>Map your Excel/CSV columns to CRM fields. Preview shows first 10 rows of {{ total_rows }} total.</p>
+  <h1>Map Your Columns</h1>
+  <p>Match your Excel columns to CRM fields. We auto-detect common names. Existing contacts = updated. New = added.</p>
 </div>
 
 <div class="preview-container">
@@ -87,10 +87,20 @@
       <div class="mapping-grid">
         <div class="mapping-item">
           <label>Name * (Required)</label>
-          <select name="map_name" required>
+          <select name="map_name" id="map_name" required>
             <option value="">-- Select Column --</option>
             {% for col in columns %}
-            <option value="{{ col }}" {% if 'name' in col.lower() or 'contact' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% set col_lower = col.lower() %}
+            <option value="{{ col }}" {% if ('full' in col_lower and 'name' in col_lower) or col_lower in ['name', 'contact name', 'client name', 'customer name'] %}selected{% elif ('first' in col_lower and 'name' in col_lower) or col_lower == 'first' %}selected{% elif ('name' in col_lower or 'contact' in col_lower) and 'last' not in col_lower %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mapping-item">
+          <label>Last Name (optional – combine with Name)</label>
+          <select name="map_last_name">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if ('last' in col.lower() and 'name' in col.lower()) or col.lower() == 'last' %}selected{% endif %}>{{ col }}</option>
             {% endfor %}
           </select>
         </div>
@@ -100,7 +110,7 @@
           <select name="map_email">
             <option value="">-- Skip --</option>
             {% for col in columns %}
-            <option value="{{ col }}" {% if 'email' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            <option value="{{ col }}" {% if 'email' in col.lower() or 'e-mail' in col.lower() %}selected{% endif %}>{{ col }}</option>
             {% endfor %}
           </select>
         </div>
@@ -110,7 +120,7 @@
           <select name="map_phone">
             <option value="">-- Skip --</option>
             {% for col in columns %}
-            <option value="{{ col }}" {% if 'phone' in col.lower() or 'tel' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            <option value="{{ col }}" {% if 'phone' in col.lower() or 'tel' in col.lower() or 'cell' in col.lower() or 'mobile' in col.lower() %}selected{% endif %}>{{ col }}</option>
             {% endfor %}
           </select>
         </div>
@@ -146,11 +156,12 @@
         </div>
         
         <div class="mapping-item">
-          <label>Address</label>
+          <label>Street / Address</label>
           <select name="map_address">
             <option value="">-- Skip --</option>
             {% for col in columns %}
-            <option value="{{ col }}" {% if 'address' in col.lower() and 'property' not in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% set c = col.lower() %}
+            <option value="{{ col }}" {% if ('address' in c or 'street' in c or 'addr' in c or 'mailing' in c) and 'property' not in c and 'city' not in c and 'state' not in c %}selected{% endif %}>{{ col }}</option>
             {% endfor %}
           </select>
         </div>
@@ -160,7 +171,36 @@
           <select name="map_property_address">
             <option value="">-- Skip --</option>
             {% for col in columns %}
-            <option value="{{ col }}" {% if 'property' in col.lower() or 'home' in col.lower() and 'address' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            <option value="{{ col }}" {% if 'property' in col.lower() or ('home' in col.lower() and 'address' in col.lower()) %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <div class="mapping-item">
+          <label>City</label>
+          <select name="map_city">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'city' in col.lower() or 'municipality' in col.lower() or 'town' in col.lower() or 'locality' in col.lower() %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mapping-item">
+          <label>State</label>
+          <select name="map_state">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            {% set c = col.lower() %}
+            <option value="{{ col }}" {% if ('state' in c or 'province' in c or 'region' in c) and 'address' not in c %}selected{% endif %}>{{ col }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mapping-item">
+          <label>ZIP / Postal</label>
+          <select name="map_zip">
+            <option value="">-- Skip --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" {% if 'zip' in col.lower() or 'postal' in col.lower() or 'postcode' in col.lower() %}selected{% endif %}>{{ col }}</option>
             {% endfor %}
           </select>
         </div>
@@ -209,42 +249,18 @@
 
     <div class="settings-card">
       <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 1rem;">
-        Import Settings
+        Default Stage
       </h3>
-      
-      <div style="margin-bottom: 1rem;">
-        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">
-          Default Stage (for contacts without stage)
-        </label>
-        <select name="default_stage" style="padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); width: 100%; max-width: 300px;">
-          <option value="new">New Lead</option>
-          <option value="nurture">Nurture</option>
-          <option value="active">Active Buyer/Seller</option>
-          <option value="past">Past Client</option>
-          <option value="sphere">Sphere</option>
-        </select>
-      </div>
-      
-      <div style="margin-bottom: 1rem;">
-        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-          <input type="checkbox" name="skip_duplicates" checked style="width: 20px; height: 20px;">
-          <span style="font-weight: 600; color: var(--charcoal-brown);">Skip duplicate contacts</span>
-        </label>
-        <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8; margin-top: 0.25rem; margin-left: 1.75rem;">
-          Don't import contacts that already exist in your CRM
-        </p>
-      </div>
-      
-      <div>
-        <label style="display: block; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">
-          Duplicate Check Method
-        </label>
-        <select name="duplicate_check" style="padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); width: 100%; max-width: 300px;">
-          <option value="email">Match by Email</option>
-          <option value="phone">Match by Phone</option>
-          <option value="name">Match by Name</option>
-        </select>
-      </div>
+      <p style="font-size: 0.9rem; color: var(--charcoal-brown); opacity: 0.9; margin-bottom: 0.75rem;">
+        For new contacts without a stage column
+      </p>
+      <select name="default_stage" style="padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); width: 100%; max-width: 300px;">
+        <option value="new">New Lead</option>
+        <option value="nurture">Nurture</option>
+        <option value="active">Active Buyer/Seller</option>
+        <option value="past">Past Client</option>
+        <option value="sphere">Sphere</option>
+      </select>
     </div>
 
     <div class="preview-card">
@@ -281,7 +297,7 @@
         ← Back
       </a>
       <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
-        ✅ Import {{ total_rows }} Contacts
+        ✅ Sync {{ total_rows }} Rows
       </button>
     </div>
   </form>

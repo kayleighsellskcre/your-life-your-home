@@ -1,0 +1,164 @@
+{% extends "agent/layout.html" %}
+
+{% block title %}Concierge Leads{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h3 mb-2">AI Concierge Leads</h1>
+            <p class="text-muted">Qualified homeowner leads from your AI concierge</p>
+        </div>
+        <div class="col-auto">
+            <a href="{{ url_for('agent_concierge_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label for="urgency" class="form-label">Urgency</label>
+                    <select class="form-select" id="urgency" name="urgency" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        <option value="ready_now" {% if urgency_filter == 'ready_now' %}selected{% endif %}>🔥 Ready Now</option>
+                        <option value="exploring" {% if urgency_filter == 'exploring' %}selected{% endif %}>🟡 Exploring</option>
+                        <option value="future" {% if urgency_filter == 'future' %}selected{% endif %}>🧊 Future</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        <option value="new" {% if status_filter == 'new' %}selected{% endif %}>New</option>
+                        <option value="sent_to_vendor" {% if status_filter == 'sent_to_vendor' %}selected{% endif %}>Sent to Vendor</option>
+                        <option value="contacted" {% if status_filter == 'contacted' %}selected{% endif %}>Contacted</option>
+                        <option value="closed" {% if status_filter == 'closed' %}selected{% endif %}>Closed</option>
+                        <option value="lost" {% if status_filter == 'lost' %}selected{% endif %}>Lost</option>
+                    </select>
+                </div>
+
+                <div class="col-auto">
+                    {% if urgency_filter or status_filter %}
+                    <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Leads Table -->
+    {% if leads %}
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Homeowner</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Urgency</th>
+                        <th>Location</th>
+                        <th>Vendor</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lead in leads %}
+                    <tr>
+                        <td>
+                            <div>
+                                <strong>{{ lead.homeowner_name or 'Anonymous' }}</strong>
+                                {% if lead.homeowner_email %}
+                                <br><small class="text-muted">{{ lead.homeowner_email }}</small>
+                                {% endif %}
+                                {% if lead.homeowner_phone %}
+                                <br><small class="text-muted">{{ lead.homeowner_phone }}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">{{ lead.category }}</span>
+                        </td>
+                        <td>
+                            <small>{{ lead.description[:100] if lead.description else '-' }}</small>
+                        </td>
+                        <td>
+                            {% if lead.urgency == 'ready_now' %}
+                            <span class="badge bg-danger">🔥 Ready Now</span>
+                            {% if lead.timeline_weeks %}
+                            <br><small class="text-muted">{{ lead.timeline_weeks }} weeks</small>
+                            {% endif %}
+                            {% elif lead.urgency == 'exploring' %}
+                            <span class="badge bg-warning text-dark">🟡 Exploring</span>
+                            {% else %}
+                            <span class="badge bg-info">🧊 Future</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lead.zip_code %}
+                            <small class="text-muted">{{ lead.zip_code }}</small>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lead.vendor_name %}
+                            <div>
+                                <strong>{{ lead.vendor_name }}</strong>
+                                {% if lead.vendor_contact %}
+                                <br><small class="text-muted">{{ lead.vendor_contact }}</small>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if lead.status == 'new' %}
+                            <span class="badge bg-primary">New</span>
+                            {% elif lead.status == 'sent_to_vendor' %}
+                            <span class="badge bg-info">Sent to Vendor</span>
+                            {% elif lead.status == 'contacted' %}
+                            <span class="badge bg-warning text-dark">Contacted</span>
+                            {% elif lead.status == 'closed' %}
+                            <span class="badge bg-success">Closed</span>
+                            {% elif lead.status == 'lost' %}
+                            <span class="badge bg-secondary">Lost</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ lead.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ lead.routed_at[:10] if lead.routed_at else '-' }}</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center py-5">
+            <i class="fas fa-inbox fa-4x mb-3 text-muted opacity-25"></i>
+            <h5>No Leads Found</h5>
+            <p class="text-muted">
+                {% if urgency_filter or status_filter %}
+                Try adjusting your filters.
+                {% else %}
+                Share your concierge URL to start receiving qualified leads.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -92,40 +92,50 @@
     box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
   }
   
-  .password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
+  /* Password field wrapper - MUST override base.html mobile styles */
+  .auth-form .password-wrapper {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
   }
   
-  .password-wrapper input {
+  /* Password input - ensure full width but leave room for icon */
+  .auth-form .password-wrapper input[type="password"],
+  .auth-form .password-wrapper input[type="text"] {
+    width: 100% !important;
     padding-right: 3rem !important;
-    flex: 1;
+    padding-left: 1.25rem !important;
+    box-sizing: border-box !important;
   }
   
-  .password-toggle {
+  /* Eye icon button - position inside input on the right */
+  .auth-form .password-wrapper .password-toggle {
     position: absolute !important;
-    right: 0.5rem !important;
+    right: 1rem !important;
     top: 50% !important;
     transform: translateY(-50%) !important;
     border: none !important;
-    background: none !important;
+    background: transparent !important;
     cursor: pointer !important;
-    padding: 0.25rem !important;
-    transition: opacity 0.2s !important;
+    padding: 0.5rem !important;
+    margin: 0 !important;
+    transition: opacity 0.2s ease !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    opacity: 0.4 !important;
-    width: 20px !important;
-    height: 20px !important;
+    opacity: 0.5 !important;
+    width: 24px !important;
+    height: 24px !important;
+    z-index: 10 !important;
+    pointer-events: all !important;
+    min-height: unset !important;
   }
   
-  .password-toggle:hover {
+  .auth-form .password-wrapper .password-toggle:hover {
     opacity: 0.7 !important;
   }
   
-  .password-toggle svg {
+  .auth-form .password-wrapper .password-toggle svg {
     width: 100% !important;
     height: 100% !important;
     stroke: #3A352C !important;
@@ -224,8 +234,8 @@
         <label for="password">Password</label>
         <div class="password-wrapper">
           <input id="password" name="password" type="password" autocomplete="current-password" required />
-          <button type="button" onclick="togglePassword()" class="password-toggle" title="Show password" id="passwordToggleBtn" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; padding: 0.25rem; opacity: 0.4; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 100%; height: 100%; stroke: #3A352C; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;">
+          <button type="button" onclick="togglePassword()" class="password-toggle" title="Show password" id="passwordToggleBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>

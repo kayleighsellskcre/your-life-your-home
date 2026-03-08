@@ -29,6 +29,11 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='css/variable-bridge.css') }}"
     />
+    <!-- Responsive Grid System (NEW - Mobile-First) -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/responsive-grid.css') }}"
+    />
     <!-- Custom Styles -->
     <link
       rel="stylesheet"
@@ -38,6 +43,11 @@
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/platform-enhancements.css') }}"
+    />
+    <!-- Compact / Dainty Styling -->
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/compact-dainty.css') }}"
     />
     <!-- Form Enhancements -->
     <link
@@ -299,13 +309,25 @@
         }
         
         /* All Buttons - Full Width on Mobile - Professional Touch Targets */
-        button:not(.btn-remove):not(.btn-refine),
-        .btn,
+        /* Exclude ALL CRM-wrap descendants from this override */
+        .crm-wrap button,
+        .crm-wrap a,
+        .crm-wrap input[type="submit"] {
+          width: auto !important;
+          min-height: unset !important;
+          margin: 0 !important;
+          padding: unset !important;
+          font-size: unset !important;
+          white-space: nowrap !important;
+        }
+
+        button:not(.btn-remove):not(.btn-refine):not(.crm-abtn):not(.crm-act):not(.crm-xbtn):not(.crm-cbtn):not(.crm-sf-submit):not(.mbtn):not(.crm-pill):not(.crm-modal-close),
+        .btn:not([class*="crm-"]),
         .btn-premium,
-        .btn-secondary,
-        .btn-primary,
-        a[class*="btn"],
-        input[type="submit"],
+        .btn-secondary:not([class*="crm-"]),
+        .btn-primary:not([class*="crm-"]),
+        a.btn:not([class*="crm-"]),
+        input[type="submit"]:not(.crm-sf-submit),
         input[type="button"] {
           width: 100% !important;
           padding: 1rem 1.25rem !important;
@@ -336,8 +358,8 @@
           width: 100% !important;
         }
         
-        /* All Forms - Full Width */
-        form {
+        /* All Forms - Full Width (CRM forms excluded via their parent) */
+        form:not(.crm-topbar__actions form):not(.crm-bar form):not(.crm-stages form) {
           width: 100% !important;
         }
         

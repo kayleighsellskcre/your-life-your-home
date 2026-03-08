@@ -1,0 +1,191 @@
+<!-- 
+  EXAMPLE: Agent CRM Page with Full Responsive Design
+  This shows how to convert the Agent CRM page to use the new responsive grid system
+-->
+
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+
+<!-- RESPONSIVE CONTAINER -->
+<div class="ylh-container">
+  
+  <!-- PAGE HEADER SECTION -->
+  <section class="ylh-section">
+    <p class="ylh-text-small" style="text-transform: uppercase; letter-spacing: 0.1em; color: var(--olive-green); font-weight: 600; margin-bottom: 0.5rem;">
+      Nurture relationships
+    </p>
+    <h1 class="ylh-h1">CRM & Lead Management</h1>
+    <p class="ylh-text">
+      Your complete contact management system with automated birthday wishes, home anniversaries, 
+      seasonal checklists, equity updates, and holiday greetings.
+    </p>
+  </section>
+
+  <!-- STATS GRID - 4 columns on desktop, 2 on tablet, 1 on mobile -->
+  <div class="ylh-grid ylh-grid-4" style="margin-bottom: 3rem;">
+    <div class="ylh-stat-card">
+      <div class="ylh-stat-value">{{ total_contacts }}</div>
+      <div class="ylh-stat-label">Total Contacts</div>
+    </div>
+    
+    <div class="ylh-stat-card">
+      <div class="ylh-stat-value">{{ new_contacts_count }}</div>
+      <div class="ylh-stat-label">New Contacts</div>
+    </div>
+    
+    <div class="ylh-stat-card">
+      <div class="ylh-stat-value">{{ nurture_contacts_count }}</div>
+      <div class="ylh-stat-label">Nurture Pipeline</div>
+    </div>
+    
+    <div class="ylh-stat-card">
+      <div class="ylh-stat-value">{{ active_contacts_count }}</div>
+      <div class="ylh-stat-label">Active Deals</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT GRID - Sidebar + Main on desktop, stacked on mobile -->
+  <div class="ylh-grid ylh-grid-sidebar-left">
+    
+    <!-- SIDEBAR -->
+    <aside class="ylh-card">
+      <h3 class="ylh-h3" style="margin-bottom: 1.5rem;">Filters & Actions</h3>
+      
+      <!-- Filter Buttons -->
+      <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 2rem;">
+        <a href="{{ url_for('agent_crm') }}" class="ylh-btn ylh-btn-secondary" style="justify-content: flex-start;">
+          All Contacts
+        </a>
+        <a href="{{ url_for('agent_crm') }}?filter=new" class="ylh-btn ylh-btn-secondary" style="justify-content: flex-start;">
+          New Leads
+        </a>
+        <a href="{{ url_for('agent_crm') }}?filter=nurture" class="ylh-btn ylh-btn-secondary" style="justify-content: flex-start;">
+          Nurture Pipeline
+        </a>
+        <a href="{{ url_for('agent_crm') }}?filter=active" class="ylh-btn ylh-btn-secondary" style="justify-content: flex-start;">
+          Active Deals
+        </a>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div style="padding-top: 1.5rem; border-top: 1px solid #EFE9DC;">
+        <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6B6A45; margin-bottom: 1rem;">Quick Actions</h4>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+          <a href="{{ url_for('agent_crm_add') }}" class="ylh-btn ylh-btn-primary">
+            + Add Contact
+          </a>
+          <a href="{{ url_for('agent_crm_import') }}" class="ylh-btn ylh-btn-secondary">
+            Import Contacts
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main>
+      <!-- Search & Sort Bar -->
+      <div class="ylh-card" style="margin-bottom: 1.5rem;">
+        <form method="get" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <input 
+            type="text" 
+            name="search" 
+            placeholder="Search contacts..." 
+            class="ylh-form-input"
+            style="flex: 1 1 250px;"
+            value="{{ request.args.get('search', '') }}"
+          />
+          
+          <select name="sort" class="ylh-form-select" style="flex: 0 1 200px;">
+            <option value="name_asc">Name (A-Z)</option>
+            <option value="name_desc">Name (Z-A)</option>
+            <option value="date_added_desc">Newest First</option>
+            <option value="date_added_asc">Oldest First</option>
+          </select>
+          
+          <button type="submit" class="ylh-btn ylh-btn-primary" style="flex: 0 1 auto;">
+            Apply
+          </button>
+        </form>
+      </div>
+
+      <!-- CONTACTS LIST -->
+      {% if contacts %}
+        {% for contact in contacts %}
+        <div class="ylh-card" style="margin-bottom: 1.5rem;">
+          <!-- Contact Header -->
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 500; color: #3A352C; margin: 0 0 0.5rem 0;">
+                {{ contact.name }}
+              </h2>
+              <span style="display: inline-block; padding: 0.25rem 0.75rem; border-radius: 2px; font-size: 0.8rem; font-weight: 600; background: rgba(200, 180, 151, 0.3); color: #3A352C;">
+                {{ contact.category|title }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Contact Info Grid - Responsive -->
+          <div class="ylh-grid ylh-grid-2" style="margin-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: #3A352C; opacity: 0.8; font-size: 0.9rem;">
+              <strong style="min-width: 120px; font-weight: 600;">Email:</strong>
+              <a href="mailto:{{ contact.email }}" style="color: #6B6A45; text-decoration: none;">
+                {{ contact.email }}
+              </a>
+            </div>
+            
+            {% if contact.phone %}
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: #3A352C; opacity: 0.8; font-size: 0.9rem;">
+              <strong style="min-width: 120px; font-weight: 600;">Phone:</strong>
+              <a href="tel:{{ contact.phone }}" style="color: #6B6A45; text-decoration: none;">
+                {{ contact.phone }}
+              </a>
+            </div>
+            {% endif %}
+            
+            {% if contact.birthday %}
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: #3A352C; opacity: 0.8; font-size: 0.9rem;">
+              <strong style="min-width: 120px; font-weight: 600;">Birthday:</strong>
+              {{ contact.birthday }}
+            </div>
+            {% endif %}
+            
+            {% if contact.home_anniversary %}
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: #3A352C; opacity: 0.8; font-size: 0.9rem;">
+              <strong style="min-width: 120px; font-weight: 600;">Home Anniversary:</strong>
+              {{ contact.home_anniversary }}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Action Buttons - Responsive (stacks on mobile) -->
+          <div class="ylh-btn-group-mobile-stack" style="padding-top: 1rem; border-top: 1px solid #EFE9DC;">
+            <a href="{{ url_for('agent_crm_contact_detail', contact_id=contact.id) }}" class="ylh-btn ylh-btn-secondary">
+              View Details
+            </a>
+            <a href="{{ url_for('agent_crm_edit', contact_id=contact.id) }}" class="ylh-btn ylh-btn-secondary">
+              Edit
+            </a>
+            <a href="mailto:{{ contact.email }}" class="ylh-btn ylh-btn-secondary">
+              Email
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Empty State -->
+        <div class="ylh-card" style="text-align: center; padding: 4rem 2rem; background: linear-gradient(135deg, #F6F2E8 0%, #EFE9DC 100%);">
+          <h3 class="ylh-h3">No contacts yet</h3>
+          <p class="ylh-text">Start building your network by adding your first contact.</p>
+          <a href="{{ url_for('agent_crm_add') }}" class="ylh-btn ylh-btn-primary" style="display: inline-flex; margin-top: 1.5rem;">
+            + Add Your First Contact
+          </a>
+        </div>
+      {% endif %}
+    </main>
+
+  </div>
+</div>
+
+{% endblock %}

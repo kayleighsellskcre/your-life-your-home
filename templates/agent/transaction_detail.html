@@ -2,60 +2,55 @@
 
 {% block agent_content %}
 <style>
+  /* ============================================
+     TRANSACTION DETAIL PAGE - LUXURY REDESIGN
+     Clean, elegant, fully responsive
+     ============================================ */
+  
+  :root {
+    --txd-spacing-xs: 0.5rem;
+    --txd-spacing-sm: 1rem;
+    --txd-spacing-md: 1.5rem;
+    --txd-spacing-lg: 2rem;
+    --txd-spacing-xl: 3rem;
+  }
+
+  /* Main Wrapper */
+  .transaction-detail-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--txd-spacing-md);
+  }
+
   /* Transaction Header */
-  .transaction-header {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
-    padding: 0;
+  .tx-header {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
     border-radius: 16px;
-    margin-bottom: 2rem;
+    padding: var(--txd-spacing-lg);
+    margin-bottom: var(--txd-spacing-lg);
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.08);
   }
-  
-  .transaction-header::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(107,106,69,0.05) 0%, rgba(200,180,151,0.05) 100%);
-  }
-  
-  .transaction-header-content {
-    position: relative;
-    z-index: 2;
-  }
-  
-  .property-address {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--charcoal-brown);
-    margin: 0;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    line-height: 1.3;
-  }
-  
-  .transaction-meta {
+
+  .tx-header__top {
     display: flex;
-    gap: 1rem;
+    justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    justify-content: center;
+    margin-bottom: var(--txd-spacing-md);
+    gap: var(--txd-spacing-md);
   }
-  
-  .meta-item {
+
+  .tx-header__left {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--charcoal-brown);
-    font-size: 0.9rem;
-    opacity: 0.8;
+    gap: var(--txd-spacing-md);
+    flex: 1;
   }
-  
-  .stage-badge {
-    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
-    color: var(--white);
+
+  .tx-header__stage-badge {
+    background: linear-gradient(135deg, var(--olive-green), #5A5938);
+    color: #FFFFFF;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-weight: 600;
@@ -63,21 +58,155 @@
     text-transform: uppercase;
     letter-spacing: 0.1em;
     box-shadow: 0 2px 10px rgba(107, 106, 69, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
     white-space: nowrap;
   }
-  
-  /* Progress Bar */
-  .progress-section {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 242, 232, 0.95) 100%);
-    padding: 1.25rem 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.06);
-    backdrop-filter: blur(10px);
+
+  .tx-header__address {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
-  
+
+  .tx-header__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .tx-action-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.813rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    border: none;
+  }
+
+  .tx-action-btn--primary {
+    background: linear-gradient(135deg, var(--olive-green), #5A5938);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.2);
+  }
+
+  .tx-action-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+  }
+
+  .tx-action-btn--danger {
+    background: rgba(198, 107, 61, 0.9);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(198, 107, 61, 0.2);
+  }
+
+  .tx-action-btn--danger:hover {
+    background: #C66B3D;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(198, 107, 61, 0.3);
+  }
+
+  .tx-header__grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--txd-spacing-lg);
+  }
+
+  .tx-clients {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .tx-client-card {
+    padding: var(--txd-spacing-sm);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  }
+
+  .tx-client-card__label {
+    font-weight: 600;
+    color: var(--olive-green);
+    font-size: 0.7rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .tx-client-card__name {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .tx-client-card__contact {
+    font-size: 0.85rem;
+    color: rgba(58, 53, 44, 0.7);
+    line-height: 1.5;
+  }
+
+  .tx-details-card {
+    padding: var(--txd-spacing-sm);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  }
+
+  .tx-detail-row {
+    margin-bottom: var(--txd-spacing-sm);
+  }
+
+  .tx-detail-row:last-child {
+    margin-bottom: 0;
+  }
+
+  .tx-detail-row__label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+  }
+
+  .tx-detail-row__value {
+    font-size: 0.95rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+  }
+
+  .tx-detail-row__value--large {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  /* Progress Section */
+  .progress-section {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    padding: var(--txd-spacing-md);
+    border-radius: 12px;
+    margin-bottom: var(--txd-spacing-md);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  }
+
+  .progress-section__title {
+    margin: 0 0 0.75rem 0;
+    color: var(--charcoal-brown);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
   .progress-bar-container {
     height: 8px;
     background: rgba(200, 180, 151, 0.15);
@@ -86,7 +215,7 @@
     margin: 0.75rem 0;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  
+
   .progress-bar-fill {
     height: 100%;
     background: linear-gradient(90deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.85) 100%);
@@ -94,25 +223,80 @@
     box-shadow: 0 1px 4px rgba(107, 106, 69, 0.3);
     border-radius: 10px;
   }
-  
+
   .progress-text {
     text-align: center;
     color: var(--charcoal-brown);
     font-size: 0.875rem;
     margin-top: 0.5rem;
     font-weight: 500;
-    letter-spacing: 0.01em;
   }
-  
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: var(--txd-spacing-lg);
+  }
+
+  .action-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .action-btn--primary {
+    background: linear-gradient(135deg, var(--olive-green), #5A5938);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.25);
+  }
+
+  .action-btn--primary:hover {
+    background: linear-gradient(135deg, #5A5938, var(--olive-green));
+    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .action-btn--secondary {
+    background: #FFFFFF;
+    color: var(--olive-green);
+    border: 1.5px solid rgba(107, 106, 69, 0.3);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .action-btn--secondary:hover {
+    background: rgba(107, 106, 69, 0.05);
+    border-color: var(--olive-green);
+    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.15);
+    transform: translateY(-1px);
+  }
+
   /* Tabs */
   .tabs {
     display: flex;
     gap: 0.5rem;
     border-bottom: 1.5px solid rgba(200, 180, 151, 0.2);
-    margin-bottom: 2rem;
-    padding: 0 0.5rem;
+    margin-bottom: var(--txd-spacing-lg);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
-  
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
   .tab {
     padding: 0.875rem 1.5rem;
     background: transparent;
@@ -121,40 +305,75 @@
     font-weight: 600;
     cursor: pointer;
     border-bottom: 2.5px solid transparent;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     font-size: 0.875rem;
-    letter-spacing: 0.02em;
-    position: relative;
+    white-space: nowrap;
   }
-  
+
   .tab.active {
     color: var(--olive-green);
     border-bottom-color: var(--olive-green);
   }
-  
+
   .tab:hover {
     color: var(--olive-green);
     background: rgba(107, 106, 69, 0.03);
   }
-  
-  .tab.active:hover {
-    background: transparent;
+
+  /* Tab Content */
+  .tab-content {
+    display: none;
   }
-  
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .tab-content__title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--charcoal-brown);
+    text-align: center;
+    margin: 0 0 var(--txd-spacing-lg) 0;
+    font-weight: 700;
+  }
+
+  .tab-content__grid {
+    display: flex;
+    gap: var(--txd-spacing-xl);
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  .tab-content__column {
+    flex: 1;
+    max-width: 520px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    padding: var(--txd-spacing-lg);
+  }
+
+  .tab-content__column-title {
+    margin: 0 0 1.2rem 0;
+    color: var(--olive-green);
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
   /* Document Checklist */
   .checklist-item {
-    background: var(--white);
-    padding: 1rem;
-    border-radius: var(--border-radius);
+    background: #FFFFFF;
+    padding: var(--txd-spacing-sm);
+    border-radius: 8px;
     margin-bottom: 0.5rem;
-    border: var(--border-light);
+    border: 1px solid rgba(200, 180, 151, 0.2);
     transition: all 0.3s ease;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 48px;
   }
-  
+
   .checklist-item.completed {
     background: rgba(76, 175, 80, 0.1);
     border-color: #4CAF50;
@@ -163,307 +382,259 @@
   .checklist-item.pending {
     background: rgba(255, 193, 7, 0.1);
     border-color: #ffc107;
-    opacity: 0.9;
   }
 
-  .checklist-item.active {
-    background: rgba(255, 193, 7, 0.15);
-    border-color: #ffc107;
-  }
-  
   .checklist-item:hover {
-    border-color: #6B6A45;
+    border-color: var(--olive-green);
     transform: translateX(4px);
   }
-  
-  .checklist-item-info {
+
+  .checklist-item__info {
     flex: 1;
   }
-  
-  .checklist-item-title {
+
+  .checklist-item__title {
     font-weight: 600;
-    color: #3A352C;
+    color: var(--charcoal-brown);
     margin-bottom: 0.1rem;
-    font-size: 0.98rem;
+    font-size: 0.95rem;
   }
-  
-  .checklist-item-desc {
+
+  .checklist-item__desc {
     color: #666;
     font-size: 0.8rem;
-    margin-bottom: 0;
   }
-  
-  .checklist-item-status {
+
+  /* Timeline */
+  .timeline {
+    position: relative;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 0.5rem;
   }
-  
-  .status-icon {
-    font-size: 1.2rem;
-    margin-right: 0.2rem;
+
+  .timeline-item {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    position: relative;
   }
-  
-  .upload-btn {
-    padding: 0.6rem 1.2rem;
-    background: var(--olive-green);
-    color: var(--white);
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
+
+  .timeline-status {
+    width: 110px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 0.875rem;
+  }
+
+  .timeline-status--done {
+    color: #4CAF50;
+  }
+
+  .timeline-status--in-progress {
+    color: #FFD600;
+  }
+
+  .timeline-status--next {
+    color: #AAA;
+  }
+
+  .timeline-name {
+    flex: 1;
     font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
+    padding-left: 1.2rem;
   }
-  
-  .upload-btn:hover {
-    background: rgba(107, 106, 69, 0.9);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
+
+  .timeline-dot-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 32px;
   }
-  
+
+  .timeline-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #FFFFFF;
+    border: 3px solid #E5E5E5;
+    z-index: 1;
+  }
+
+  .timeline-dot--done {
+    border-color: #4CAF50;
+  }
+
+  .timeline-dot--in-progress {
+    border-color: #FFD600;
+  }
+
+  .timeline-line {
+    position: absolute;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 100%;
+    background: #E5E5E5;
+    z-index: 0;
+  }
+
   /* Participants */
+  .participant-list {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
   .participant-card {
     background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1rem;
-    border: var(--border-light);
+    padding: var(--txd-spacing-md);
+    border-radius: 8px;
+    margin-bottom: var(--txd-spacing-sm);
+    border: 1px solid rgba(200, 180, 151, 0.2);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  
+
   .participant-info {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--txd-spacing-sm);
   }
-  
+
   .participant-avatar {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: #6B6A45;
-    color: white;
+    background: var(--olive-green);
+    color: #FFFFFF;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
     font-size: 1.2rem;
   }
-  
+
   .participant-details h4 {
     margin: 0 0 0.25rem 0;
-    color: #3A352C;
+    color: var(--charcoal-brown);
   }
-  
+
   .participant-details p {
     margin: 0;
     color: #666;
     font-size: 0.85rem;
   }
-  
+
   .participant-badge {
     background: var(--warm-cream);
     padding: 0.3rem 0.75rem;
-    border-radius: var(--border-radius);
+    border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 600;
     color: var(--olive-green);
   }
-  
-  /* Timeline */
-  .timeline {
-    position: relative;
-    padding-left: 2rem;
-  }
-  
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--border-light);
-  }
-  
-  .timeline-item {
-    position: relative;
-    padding-bottom: 2rem;
-  }
-  
-  .timeline-dot {
-    position: absolute;
-    left: -2rem;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--white);
-    border: 3px solid var(--olive-green);
-  }
-  
-  .timeline-content {
-    background: var(--white);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    border: var(--border-light);
-  }
-  
-  .timeline-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
-  
-  .timeline-title {
-    font-weight: 600;
-    color: #3A352C;
-  }
-  
-  .timeline-time {
-    color: #888;
-    font-size: 0.85rem;
-  }
-  
-  .timeline-description {
-    color: #666;
-    font-size: 0.9rem;
-  }
-  
-  /* Action Buttons */
 
-  .action-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
-  .action-btn {
-    height: 44px;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 140px;
-    font-weight: 600;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-    letter-spacing: 0.02em;
-    border: none;
-  }
-
-  .action-btn.primary {
-    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.25);
-  }
-
-  .action-btn.primary:hover {
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.95) 0%, var(--olive-green) 100%);
-    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.35);
-    transform: translateY(-1px);
-  }
-
-  .action-btn.secondary {
-    background: white;
-    color: var(--olive-green);
-    border: 1.5px solid rgba(107, 106, 69, 0.3);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  }
-
-  .action-btn.secondary:hover {
-    background: rgba(107, 106, 69, 0.05);
-    border-color: var(--olive-green);
-    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.15);
-    transform: translateY(-1px);
-  }
-
-  .action-btn.secondary.alt {
-    background: #C66B3D;
-    color: white;
-    border: none;
-    opacity: 0.85;
-  }
-  
-  .primary-btn {
-    padding: 1rem 2rem;
-    background: #6B6A45;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .primary-btn:hover {
-    background: #5A6D47;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
-  }
-  
-  .secondary-btn {
-    padding: 1rem 2rem;
-    background: white;
-    color: #6B6A45;
-    border: 2px solid #6B6A45;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .secondary-btn:hover {
-    background: #6B6A45;
-    color: white;
-  }
-  
   /* Modal */
   .modal {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 9999;
     align-items: center;
     justify-content: center;
     padding: 2rem;
   }
-  
+
+  .modal.active {
+    display: flex;
+  }
+
   .modal-content {
-    background: white;
+    background: #FFFFFF;
     border-radius: 12px;
-    padding: 3rem;
+    padding: 2rem;
     max-width: 600px;
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   }
-  
+
   .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
+    margin-bottom: var(--txd-spacing-lg);
   }
-  
+
+  .modal-title {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0;
+    font-weight: 600;
+  }
+
   .modal-close {
     background: transparent;
     border: none;
     font-size: 2rem;
     cursor: pointer;
     color: #888;
+    line-height: 1;
+    padding: 0;
   }
-  
-  /* Drag & Drop Zone */
+
+  .modal-close:hover {
+    color: var(--charcoal-brown);
+  }
+
+  /* Form */
+  .modal-form {
+    display: grid;
+    gap: var(--txd-spacing-md);
+  }
+
+  .modal-form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--olive-green);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .modal-form-input,
+  .modal-form-select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(200, 180, 151, 0.4);
+    border-radius: 6px;
+    font-size: 1rem;
+  }
+
+  .modal-form-input:focus,
+  .modal-form-select:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+
+  .modal-form-buttons {
+    display: flex;
+    gap: var(--txd-spacing-sm);
+    margin-top: var(--txd-spacing-sm);
+  }
+
+  /* Drop Zone */
   .drop-zone {
     border: 3px dashed #E5E5E5;
     border-radius: 12px;
@@ -473,503 +644,330 @@
     transition: all 0.3s ease;
     background: #F9F9F9;
   }
-  
-  .drop-zone:hover {
-    border-color: #6B6A45;
-    background: #F6F2E8;
-  }
-  
+
+  .drop-zone:hover,
   .drop-zone.dragover {
-    border-color: #6B6A45;
+    border-color: var(--olive-green);
     background: #F6F2E8;
   }
-  
-  /* Premium Edit & Delete Buttons */
-  .btn-premium-edit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.3);
+
+  .drop-zone h3 {
+    margin: 0 0 0.5rem 0;
+    color: var(--charcoal-brown);
   }
-  
-  .btn-premium-delete:hover {
-    transform: translateY(-2px);
-    background: rgba(198, 107, 61, 1) !important;
-    box-shadow: 0 6px 20px rgba(198, 107, 61, 0.3);
+
+  .drop-zone p {
+    margin: 0;
+    color: #666;
   }
-  
-  .btn-premium-edit:active,
-  .btn-premium-delete:active {
-    transform: translateY(0);
-  }
-  
-  /* Desktop Two-Column Optimization */
-  @media (min-width: 769px) {
-    #documents-tab > div:nth-of-type(2) {
-      max-width: 1200px;
-      margin: 0 auto;
+
+  /* ============================================
+     RESPONSIVE BREAKPOINTS
+     ============================================ */
+
+  /* Desktop (1024px+) */
+  @media (min-width: 1024px) {
+    .transaction-detail-page {
+      padding: var(--txd-spacing-xl) var(--txd-spacing-lg);
     }
   }
-  
-  /* Mobile Responsive - Ultra Luxurious Portrait */
-  @media (max-width: 768px) and (orientation: portrait) {
-    /* Stack 2-column layout into single column */
-    #documents-tab > div:nth-of-type(2) {
-      flex-direction: column !important;
-      gap: 1.5rem !important;
+
+  /* Mobile Optimizations */
+  @media (max-width: 767px) {
+    .transaction-detail-page {
+      padding: 1rem 0.875rem;
     }
-    
-    #documents-tab > div:nth-of-type(2) > div {
-      max-width: 100% !important;
-      width: 100% !important;
+
+    .tx-header {
+      padding: var(--txd-spacing-md) var(--txd-spacing-sm);
     }
-    
-    /* Transaction Header - Ultra Compact */
-    .transaction-header {
-      margin-bottom: 1.25rem !important;
-      border-radius: 12px !important;
+
+    .tx-header__top {
+      flex-direction: column;
+      align-items: stretch;
     }
-    
-    .transaction-header-content {
-      padding: 1rem 0.875rem !important;
+
+    .tx-header__left {
+      flex-direction: column;
+      align-items: flex-start;
     }
-    
-    /* Property Address */
-    .property-address {
-      font-size: 1.25rem !important;
-      line-height: 1.4 !important;
-      margin-bottom: 0.75rem !important;
+
+    .tx-header__address {
+      font-size: 1.25rem;
     }
-    
-    /* Stage Badge */
-    .stage-badge {
-      font-size: 0.7rem !important;
-      padding: 0.5rem 0.875rem !important;
+
+    .tx-header__actions {
+      width: 100%;
+      flex-direction: column;
     }
-    
-    /* Action Buttons Row */
-    .transaction-header-content > div:first-child {
-      flex-direction: column !important;
-      gap: 0.75rem !important;
-      align-items: stretch !important;
+
+    .tx-action-btn {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      min-height: 44px;
+      justify-content: center;
     }
-    
-    .transaction-header-content > div:first-child > div:first-child {
-      width: 100% !important;
+
+    .tx-header__grid {
+      grid-template-columns: 1fr;
     }
-    
-    .btn-premium-edit,
-    .btn-premium-delete {
-      width: 100% !important;
-      padding: 0.875rem 1.25rem !important;
-      min-height: 48px !important;
-      font-size: 0.9rem !important;
-      justify-content: center !important;
-    }
-    
-    /* Transaction Details Grid - Stack */
-    .transaction-header-content > div:nth-child(2) {
-      grid-template-columns: 1fr !important;
-      gap: 1.25rem !important;
-      padding: 0 !important;
-    }
-    
-    /* Full width on mobile */
-    .transaction-header-content > div:nth-child(2) > div {
-      width: 100% !important;
-    }
-    
-    /* Client Cards */
-    .transaction-header-content > div:nth-child(2) > div:first-child > div > div {
-      padding: 1rem 0.875rem !important;
-      margin-bottom: 0.75rem !important;
-    }
-    
-    /* Transaction Meta */
-    .transaction-meta {
-      flex-direction: column !important;
-      gap: 0.75rem !important;
-      align-items: flex-start !important;
-    }
-    
-    .meta-item {
-      font-size: 0.85rem !important;
-      line-height: 1.5 !important;
-    }
-    
-    /* Progress Section */
+
     .progress-section {
-      padding: 1rem 0.875rem !important;
-      margin-bottom: 1.25rem !important;
-      width: 100% !important;
-      max-width: 100% !important;
+      padding: var(--txd-spacing-sm);
     }
-    
-    .progress-section h3 {
-      font-size: 0.95rem !important;
-    }
-    
-    .progress-text {
-      font-size: 0.85rem !important;
-    }
-    
-    /* Action Buttons Wrapper */
-    .action-buttons-wrapper {
-      padding: 0 0.875rem !important;
-    }
-    
-    /* Tabs - Horizontal Scroll */
-    .tabs {
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch !important;
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
-      padding: 0 0.875rem !important;
-    }
-    
-    .tabs::-webkit-scrollbar {
-      display: none !important;
-    }
-    
-    .tab-button {
-      flex-shrink: 0 !important;
-      padding: 0.75rem 1rem !important;
-      font-size: 0.85rem !important;
-      min-height: 44px !important;
-    }
-    
-    /* Tab Content */
-    .tab-content {
-      padding: 1rem 0.875rem !important;
-    }
-    
-    /* Action Buttons */
+
     .action-buttons {
-      flex-direction: column !important;
-      gap: 0.75rem !important;
-      width: 100% !important;
+      flex-direction: column;
+      width: 100%;
     }
-    
-    .action-buttons button,
-    .action-buttons a {
-      width: 100% !important;
-      padding: 0.875rem 1.25rem !important;
-      min-height: 48px !important;
-      font-size: 0.9rem !important;
-      justify-content: center !important;
+
+    .action-btn {
+      width: 100%;
+      min-height: 48px;
     }
-    
-    /* Client/Participant Cards */
-    .client-card,
-    .participant-card {
-      padding: 1rem 0.875rem !important;
-      margin-bottom: 0.75rem !important;
+
+    .tab {
+      flex-shrink: 0;
+      padding: 0.75rem 1rem;
+      font-size: 0.85rem;
     }
-    
-    /* Timeline */
-    .timeline {
-      padding: 0.875rem !important;
+
+    .tab-content__grid {
+      flex-direction: column;
+      gap: var(--txd-spacing-md);
     }
-    
-    .timeline-item {
-      padding: 0.875rem !important;
-      margin-bottom: 0.75rem !important;
+
+    .tab-content__column {
+      max-width: 100%;
     }
-    
-    /* Document List */
-    .document-list {
-      padding: 0.875rem !important;
+
+    .tab-content__title {
+      font-size: 1.5rem;
     }
-    
-    .document-item {
-      padding: 0.875rem !important;
-      margin-bottom: 0.75rem !important;
-    }
-    
-    /* Details Tab - Stack Grid */
-    #details-tab div[style*="grid-template-columns: 1fr 1fr"] {
-      grid-template-columns: 1fr !important;
-    }
-    
-    /* Tabs Max Width */
-    .tabs {
-      max-width: 100% !important;
-    }
-    
-    /* Tab Content Titles */
-    #documents-tab > div:first-child,
-    #participants-tab > div > h2,
-    #details-tab > div > h2 {
-      padding: 0 0.875rem !important;
-    }
-    
-    #documents-tab > div:first-child h2 {
-      font-size: 1.5rem !important;
-    }
-    
-    /* Modals */
+
     .modal-content {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      padding: 1.25rem 0.875rem !important;
-      border-radius: 12px 12px 0 0 !important;
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 1.5rem 1rem;
+      border-radius: 12px 12px 0 0;
+      max-height: 95vh;
     }
-  }
-  
-  @media (max-width: 768px) {
-    .property-address {
-      font-size: 1.25rem !important;
-    }
-    
-    .transaction-meta {
+
+    .modal-form-buttons {
       flex-direction: column;
-      gap: 1rem;
     }
-    
-    .tabs {
-      overflow-x: auto;
+
+    .modal-form-buttons button,
+    .modal-form-buttons a {
+      width: 100%;
     }
-    
-    .action-buttons {
-      flex-direction: column;
+
+    /* Prevent iOS zoom on inputs */
+    input, select, textarea, button {
+      font-size: 16px !important;
     }
   }
 </style>
 
 <!-- Transaction Header -->
-<div class="transaction-header">
-  <div class="transaction-header-content" style="padding: 1.5rem 2rem;">
-    <!-- Top Row: Stage Badge, Property Address, Action Buttons -->
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem;">
-      <div style="display: flex; align-items: center; gap: 1rem; flex: 1;">
-        <div class="stage-badge">{{ (transaction.current_stage or transaction.get('current_stage', 'unknown'))|replace('_', ' ')|title }}</div>
-        <h1 class="property-address" style="font-size: 1.6rem; margin: 0; font-weight: 600; letter-spacing: -0.02em; line-height: 1.3;">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</h1>
+<div class="transaction-detail-page">
+  <div class="tx-header">
+    <div class="tx-header__top">
+      <div class="tx-header__left">
+        <div class="tx-header__stage-badge">{{ (transaction.current_stage or transaction.get('current_stage', 'unknown'))|replace('_', ' ')|title }}</div>
+        <h1 class="tx-header__address">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</h1>
       </div>
-      <div style="display: flex; gap: 0.5rem; align-items: center;">
-        <a href="{{ url_for('agent_transaction_edit', tx_id=transaction.id or transaction.get('id')) }}" class="btn-premium-edit" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: var(--gradient-olive); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; text-decoration: none; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(107, 106, 69, 0.2); border: none; cursor: pointer;">
+      <div class="tx-header__actions">
+        <a href="{{ url_for('agent_transaction_edit', tx_id=transaction.id or transaction.get('id')) }}" class="tx-action-btn tx-action-btn--primary">
           Edit
         </a>
         <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=transaction.id or transaction.get('id')) }}" onsubmit="return confirm('Are you sure you want to delete this transaction? This cannot be undone.')" style="margin: 0;">
-          <button type="submit" class="btn-premium-delete" style="display: inline-flex; align-items: center; padding: 0.5rem 1rem; background: rgba(198, 107, 61, 0.9); color: white; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(198, 107, 61, 0.2);">
+          <button type="submit" class="tx-action-btn tx-action-btn--danger">
             Delete
           </button>
         </form>
       </div>
     </div>
     
-    <!-- Second Row: Transaction Details Grid -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 1.5rem;">
-      <!-- Left: Clients -->
-      <div>
-        <h3 style="margin: 0 0 1rem 0; font-size: 0.75rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.1em;">Clients</h3>
-        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-          <!-- Primary Client -->
-          <div style="padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 10px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
-            <div style="font-weight: 600; color: var(--olive-green); font-size: 0.7rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Primary Client</div>
-            <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 1rem; margin-bottom: 0.5rem; letter-spacing: -0.01em;">{{ transaction.client_name or transaction.get('client_name', 'N/A') }}</div>
-            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-              {% if transaction.client_email or transaction.get('client_email') %}
-                <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ transaction.client_email or transaction.get('client_email') }}</div>
-              {% endif %}
-              {% if transaction.client_phone or transaction.get('client_phone') %}
-                <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ transaction.client_phone or transaction.get('client_phone') }}</div>
-              {% endif %}
-            </div>
-          </div>
-          
-          <!-- Additional Clients -->
-          {% if participants %}
-            {% for participant in participants %}
-              {% set participant_dict = participant if participant is mapping else dict(participant) %}
-              {% if participant_dict.get('participant_type') == 'client' and participant_dict.get('status') != 'removed' %}
-                <div style="padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 10px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
-                  <div style="font-weight: 600; color: var(--olive-green); font-size: 0.7rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em;">Additional Client</div>
-                  <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 1rem; margin-bottom: 0.5rem; letter-spacing: -0.01em;">{{ participant_dict.get('name', 'N/A') }}</div>
-                  <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-                    {% if participant_dict.get('email') %}
-                      <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ participant_dict.get('email') }}</div>
-                    {% endif %}
-                    {% if participant_dict.get('phone') %}
-                      <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7); line-height: 1.5;">{{ participant_dict.get('phone') }}</div>
-                    {% endif %}
-                  </div>
-                </div>
-              {% endif %}
-            {% endfor %}
+    <div class="tx-header__grid">
+      <div class="tx-clients">
+        <div class="tx-client-card">
+          <div class="tx-client-card__label">Primary Client</div>
+          <div class="tx-client-card__name">{{ transaction.client_name or transaction.get('client_name', 'N/A') }}</div>
+          {% if transaction.client_email or transaction.get('client_email') %}
+            <div class="tx-client-card__contact">{{ transaction.client_email or transaction.get('client_email') }}</div>
           {% endif %}
+          {% if transaction.client_phone or transaction.get('client_phone') %}
+            <div class="tx-client-card__contact">{{ transaction.client_phone or transaction.get('client_phone') }}</div>
+          {% endif %}
+        </div>
+        
+        {% if participants %}
+          {% for participant in participants %}
+            {% set participant_dict = participant if participant is mapping else dict(participant) %}
+            {% if participant_dict.get('participant_type') == 'client' and participant_dict.get('status') != 'removed' %}
+              <div class="tx-client-card">
+                <div class="tx-client-card__label">Additional Client</div>
+                <div class="tx-client-card__name">{{ participant_dict.get('name', 'N/A') }}</div>
+                {% if participant_dict.get('email') %}
+                  <div class="tx-client-card__contact">{{ participant_dict.get('email') }}</div>
+                {% endif %}
+                {% if participant_dict.get('phone') %}
+                  <div class="tx-client-card__contact">{{ participant_dict.get('phone') }}</div>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      
+      <div class="tx-details-card">
+        <div class="tx-detail-row">
+          <div class="tx-detail-row__label">Side</div>
+          <div class="tx-detail-row__value">{{ (transaction.side or transaction.get('side', 'N/A'))|capitalize }}</div>
+        </div>
+        <div class="tx-detail-row">
+          <div class="tx-detail-row__label">Purchase Price</div>
+          <div class="tx-detail-row__value tx-detail-row__value--large">${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}</div>
+        </div>
+        <div class="tx-detail-row">
+          <div class="tx-detail-row__label">Target Close Date</div>
+          <div class="tx-detail-row__value">{{ transaction.target_close_date or transaction.get('target_close_date', 'Not set') }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress Section -->
+  <div class="progress-section">
+    <h3 class="progress-section__title">Transaction Progress</h3>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" style="width: {{ doc_status.progress_percentage|round(0) }}%;"></div>
+    </div>
+    <div class="progress-text">
+      <strong>{{ doc_status.progress_percentage|round(0) }}% Complete</strong> • {{ doc_status.completed }} of {{ doc_status.total }} documents uploaded
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-buttons">
+    <button class="action-btn action-btn--primary" onclick="document.getElementById('share-modal').style.display='flex'">
+      Share with Client
+    </button>
+    <button class="action-btn action-btn--primary" onclick="document.getElementById('add-participant-modal').style.display='flex'">
+      Add Participant
+    </button>
+    <button class="action-btn action-btn--secondary" onclick="document.getElementById('change-stage-modal').style.display='flex'">
+      Change Stage
+    </button>
+    <a href="{{ url_for('agent_feature_spotlight_cards', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn action-btn--primary">
+      Feature Spotlight Cards
+    </a>
+    <a href="{{ url_for('agent_marketing_hub', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn action-btn--primary" style="background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);">
+      Marketing Hub
+    </a>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('documents')">Documents</button>
+    <button class="tab" onclick="showTab('participants')">Participants</button>
+    <button class="tab" onclick="showTab('details')">Details</button>
+  </div>
+
+  <!-- Documents Tab -->
+  <div id="documents-tab" class="tab-content active">
+    <h2 class="tab-content__title">Transaction Overview</h2>
+    <div class="tab-content__grid">
+      <div class="tab-content__column">
+        <h3 class="tab-content__column-title">Documents</h3>
+        <button class="action-btn action-btn--primary" style="margin-bottom: 1.2rem; width: 100%;" onclick="document.getElementById('upload-modal').style.display='flex'">
+          Upload Document
+        </button>
+        <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+          {% for item in doc_status.checklist %}
+            <div class="checklist-item{% if item.completed %} completed{% elif item.status == 'pending' %} pending{% endif %}">
+              <div class="checklist-item__info">
+                <div class="checklist-item__title">{{ item.document_name }}</div>
+                <div class="checklist-item__desc">
+                  {{ item.description }}
+                  {% if item.required %} • <strong>Required</strong>{% endif %}
+                  {% if item.triggers_stage_change %} • <strong>Auto-advances stage</strong>{% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
         </div>
       </div>
       
-      <!-- Right: Transaction Details -->
-      <div>
-        <h3 style="margin: 0 0 1rem 0; font-size: 0.75rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.1em;">Transaction Details</h3>
-        <div style="padding: 1rem; background: rgba(255, 255, 255, 0.95); border-radius: 10px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div>
-              <div style="font-size: 0.7rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Side</div>
-              <div style="font-size: 0.95rem; color: var(--charcoal-brown); font-weight: 500;">{{ (transaction.side or transaction.get('side', 'N/A'))|capitalize }}</div>
+      <div class="tab-content__column">
+        <h3 class="tab-content__column-title">Activity Timeline</h3>
+        <div class="timeline">
+          {% set current_stage_db = (transaction.current_stage or transaction.get('current_stage', 'pre_contract'))|lower %}
+          {% set display_stages = [
+            ('Summary', 'pre_contract', 0),
+            ('Showings', 'pre_contract', 1),
+            ('Under Contract', 'under_contract', 2),
+            ('EMD', 'under_contract', 3),
+            ('Inspections', 'in_escrow', 4),
+            ('Appraisal', 'in_escrow', 5),
+            ('Final Walkthrough', 'clear_to_close', 6),
+            ('Closing', 'closed', 7)
+          ] %}
+          {% set stage_order = {
+            'pre_contract': 0,
+            'under_contract': 2,
+            'in_escrow': 4,
+            'clear_to_close': 6,
+            'closed': 7,
+            'cancelled': -1
+          } %}
+          {% set current_stage_order = stage_order.get(current_stage_db, 0) %}
+          {% for stage_name, stage_db, stage_index in display_stages %}
+            {% set status = 'next' %}
+            {% set stage_order_value = stage_order.get(stage_db, 999) %}
+            {% if current_stage_order >= 0 %}
+              {% if stage_order_value < current_stage_order %}
+                {% set status = 'done' %}
+              {% elif stage_order_value == current_stage_order and stage_index == 0 %}
+                {% set status = 'in_progress' %}
+              {% endif %}
+            {% endif %}
+            <div class="timeline-item">
+              <div class="timeline-status timeline-status--{{ status.replace('_', '-') }}">
+                {% if status == 'done' %}
+                  <span style="display: flex; align-items: center;"><span style="font-size: 1.2rem;">✔️</span> <span style="margin-left: 0.4rem;">Done</span></span>
+                {% elif status == 'in_progress' %}
+                  In Progress
+                {% else %}
+                  Next
+                {% endif %}
+              </div>
+              <div class="timeline-name" style="color: {% if status == 'done' %}#4CAF50{% elif status == 'in_progress' %}#FFD600{% else %}#AAA{% endif %};">
+                {{ stage_name }}
+              </div>
+              <div class="timeline-dot-wrapper">
+                {% if not loop.last %}
+                  <div class="timeline-line"></div>
+                {% endif %}
+                <div class="timeline-dot {% if status == 'done' %}timeline-dot--done{% elif status == 'in_progress' %}timeline-dot--in-progress{% endif %}"></div>
+              </div>
             </div>
-            <div>
-              <div style="font-size: 0.7rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Purchase Price</div>
-              <div style="font-size: 1.1rem; color: var(--charcoal-brown); font-weight: 600;">${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}</div>
-            </div>
-            <div>
-              <div style="font-size: 0.7rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem;">Target Close Date</div>
-              <div style="font-size: 0.95rem; color: var(--charcoal-brown); font-weight: 500;">{{ transaction.target_close_date or transaction.get('target_close_date', 'Not set') }}</div>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
-</div>
 
-
-<!-- Progress Section -->
-<div class="progress-section" style="width: 1100px; max-width: 99vw; min-width: 220px; margin: 0 auto 1.25rem auto; display: flex; flex-direction: column; align-items: center;">
-  <h3 style="margin: 0 0 0.75rem 0; color: #3A352C; font-size: 1rem; font-weight: 600; letter-spacing: 0.02em;">Transaction Progress</h3>
-  <div class="progress-bar-container" style="width: 100%; margin: 0.5rem 0;">
-    <div class="progress-bar-fill" style="width: {{ doc_status.progress_percentage|round(0) }}%;"></div>
-  </div>
-  <div class="progress-text">
-    <strong style="font-weight: 600;">{{ doc_status.progress_percentage|round(0) }}% Complete</strong> <span style="color: rgba(58, 53, 44, 0.6);">•</span> {{ doc_status.completed }} of {{ doc_status.total }} documents uploaded
-  </div>
-</div>
-<!-- Action Buttons Centered Below Progress Bar -->
-<div class="action-buttons-wrapper" style="display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; max-width: 1200px; margin-left: auto; margin-right: auto;">
-  <button class="action-btn primary" onclick="document.getElementById('share-modal').style.display='flex'">
-    Share with Client
-  </button>
-  <button class="action-btn primary" onclick="document.getElementById('add-participant-modal').style.display='flex'">
-    Add Participant
-  </button>
-  <button class="action-btn secondary" style="min-width: 130px;" onclick="document.getElementById('change-stage-modal').style.display='flex'">
-    Change Stage
-  </button>
-  <a href="{{ url_for('agent_feature_spotlight_cards', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn primary" style="min-width: 180px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center;">
-    Feature Spotlight Cards
-  </a>
-  <a href="{{ url_for('agent_marketing_hub', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn primary" style="min-width: 180px; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%); position: relative; overflow: hidden;">
-    <span style="position: relative; z-index: 2;">Marketing Hub</span>
-    <span style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%); opacity: 0; transition: opacity 0.3s ease;"></span>
-  </a>
-</div>
-
-<!-- Tabs -->
-<div class="tabs" style="max-width: 1200px; margin: 0 auto;">
-  <button class="tab active" onclick="showTab('documents')">Documents</button>
-  <button class="tab" onclick="showTab('participants')">Participants</button>
-  <button class="tab" onclick="showTab('details')">Details</button>
-</div>
-
-<!-- Documents Tab -->
-<div id="documents-tab" class="tab-content">
-  <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 2rem; padding: 0 1rem;">
-    <h2 style="margin: 0; color: #3A352C; text-align: center; font-size:2rem; font-weight:700; letter-spacing:0.02em;">Transaction Overview</h2>
-  </div>
-  <div style="display: flex; flex-direction: row; gap: 3rem; justify-content: center; align-items: flex-start; padding: 0 1rem;">
-    <div style="flex: 1; max-width: 520px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
-      <h3 style="margin: 0 0 1.2rem 0; color: #6B6A45; font-size:1.15rem; font-weight:600;">Documents</h3>
-      <button class="primary-btn" style="margin-bottom: 1.2rem; width:100%;" onclick="document.getElementById('upload-modal').style.display='flex'">
-        Upload Document
-      </button>
-      <div style="display: flex; flex-direction: column; gap: 0.7rem;">
-        {% for item in doc_status.checklist %}
-          <div class="checklist-item
-            {% if item.completed %} completed
-            {% elif item.status == 'pending' %} pending
-            {% elif item.status == 'active' %} active
-            {% endif %}"
-            style="width: 100%; height: 44px; margin-left: 0;">
-            <div class="checklist-item-info">
-              <div class="checklist-item-title" style="font-size:0.97rem;">
-                {{ item.document_name }}
-              </div>
-              <div class="checklist-item-desc" style="font-size:0.8rem;">
-                {{ item.description }}
-                {% if item.required %} • <strong>Required</strong>{% endif %}
-                {% if item.triggers_stage_change %} • <strong>Auto-advances stage</strong>{% endif %}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    <div style="flex: 1; max-width: 520px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 2rem 1.5rem; margin-bottom: 2rem;">
-      <h3 style="margin: 0 0 1.2rem 0; color: #6B6A45; font-size:1.15rem; font-weight:600;">Activity Timeline</h3>
-      <div class="timeline" style="display: flex; flex-direction: column; gap: 0.5rem; position: relative;">
-        {% set current_stage_db = (transaction.current_stage or transaction.get('current_stage', 'pre_contract'))|lower %}
-        {% set display_stages = [
-          ('Summary', 'pre_contract', 0),
-          ('Showings', 'pre_contract', 1),
-          ('Under Contract', 'under_contract', 2),
-          ('EMD', 'under_contract', 3),
-          ('Inspections', 'in_escrow', 4),
-          ('Appraisal', 'in_escrow', 5),
-          ('Final Walkthrough', 'clear_to_close', 6),
-          ('Closing', 'closed', 7)
-        ] %}
-        {% set stage_order = {
-          'pre_contract': 0,
-          'under_contract': 2,
-          'in_escrow': 4,
-          'clear_to_close': 6,
-          'closed': 7,
-          'cancelled': -1
-        } %}
-        {% set current_stage_order = stage_order.get(current_stage_db, 0) %}
-        {% for stage_name, stage_db, stage_index in display_stages %}
-          {% set status = 'next' %}
-          {% set stage_order_value = stage_order.get(stage_db, 999) %}
-          {% if current_stage_order >= 0 %}
-            {% if stage_order_value < current_stage_order %}
-              {% set status = 'done' %}
-            {% elif stage_order_value == current_stage_order %}
-              {# Only mark the first stage (Summary) as in_progress when in pre_contract #}
-              {% if stage_index == 0 %}
-                {% set status = 'in_progress' %}
-              {% endif %}
-            {% endif %}
-          {% endif %}
-          <div style="display: flex; align-items: center; min-height: 48px;">
-            <!-- Status on far left -->
-            <div style="width: 110px; text-align: left;">
-              {% if status == 'done' %}
-                <span style="color: #4CAF50; font-weight: bold; display: flex; align-items: center;"><span style="font-size:1.2rem;">✔️</span> <span style="margin-left:0.4rem;">Done</span></span>
-              {% elif status == 'in_progress' %}
-                <span style="color: #FFD600; font-weight: bold;">In Progress</span>
-              {% else %}
-                <span style="color: #aaa; font-weight: bold;">Next</span>
-              {% endif %}
-            </div>
-            <!-- Stage name -->
-            <div style="flex: 1; font-weight: 600; padding-left: 1.2rem;
-              color: {% if status == 'done' %}#4CAF50{% elif status == 'in_progress' %}#FFD600{% else %}#AAA{% endif %};">
-              {{ stage_name }}
-            </div>
-            <!-- Timeline dot/line on far right -->
-            <div style="display: flex; flex-direction: column; align-items: center; position: relative; width: 32px;">
-              {% if not loop.last %}
-                <div style="position: absolute; top: 24px; left: 50%; transform: translateX(-50%); width: 4px; height: 100%; background: #E5E5E5; z-index: 0;"></div>
-              {% endif %}
-              <div style="width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid {% if status == 'done' %}#4CAF50{% elif status == 'in_progress' %}#FFD600{% else %}#E5E5E5{% endif %}; z-index: 1;"></div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-</div>
-
-</div>
-<!-- Participants Tab -->
-<div id="participants-tab" class="tab-content" style="display: none;">
-  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
-    <h2 style="margin: 0 0 2rem 0; color: #3A352C; text-align: center;">Transaction Participants</h2>
-    <div style="max-width: 800px; margin: 0 auto;">
+  <!-- Participants Tab -->
+  <div id="participants-tab" class="tab-content">
+    <h2 class="tab-content__title">Transaction Participants</h2>
+    <div class="participant-list">
       {% for p in participants %}
         <div class="participant-card">
           <div class="participant-info">
-            <div class="participant-avatar" style="background: #6B6A45;">
+            <div class="participant-avatar">
               {{ p.name[:2]|upper }}
             </div>
             <div class="participant-details">
@@ -982,70 +980,39 @@
       {% endfor %}
     </div>
   </div>
-</div>
 
-</div>
-<!-- Timeline Tab -->
-<div id="timeline-tab" class="tab-content" style="display: none;">
-  <h2 style="margin: 0 0 2rem 0; color: #3A352C;">Activity Timeline</h2>
-  <div class="timeline">
-    {% for event in timeline %}
-      <div class="timeline-item">
-        <div class="timeline-dot"></div>
-        <div class="timeline-content">
-          <div class="timeline-header">
-            <div class="timeline-title">{{ event.event_type|title }}</div>
-            <div class="timeline-time">{{ event.created_at }}</div>
-          </div>
-          <div class="timeline-description">
-            {{ event.description }}
-          </div>
-        </div>
-      </div>
-    {% endfor %}
-  </div>
-</div>
-
-<!-- Details Tab -->
-<div id="details-tab" class="tab-content" style="display: none;">
-  <div style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
-    <h2 style="margin: 0 0 2rem 0; color: #3A352C; text-align: center;">Transaction Details</h2>
-    
-    <div style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; border: 1px solid #E5E5E5;">
+  <!-- Details Tab -->
+  <div id="details-tab" class="tab-content">
+    <h2 class="tab-content__title">Transaction Details</h2>
+    <div style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.2);">
       <div style="display: grid; gap: 1.5rem;">
         <div>
-          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Property Address</label>
-          <input type="text" value="123 Main Street" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Property Address</label>
+          <input type="text" value="{{ transaction.property_address or transaction.get('property_address', 'N/A') }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div>
-            <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Purchase Price</label>
-            <input type="text" value="$450,000" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+            <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Purchase Price</label>
+            <input type="text" value="${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
           </div>
           <div>
-            <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Side</label>
-            <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
-              <option>Buyer</option>
-              <option>Seller</option>
-              <option>Both</option>
-            </select>
+            <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Side</label>
+            <input type="text" value="{{ (transaction.side or transaction.get('side', 'N/A'))|capitalize }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
           </div>
         </div>
         
         <div>
-          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Target Close Date</label>
-          <input type="date" value="2025-01-15" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+          <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Target Close Date</label>
+          <input type="text" value="{{ transaction.target_close_date or transaction.get('target_close_date', 'Not set') }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
         </div>
         
+        {% if transaction.notes or transaction.get('notes') %}
         <div>
-          <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Notes</label>
-          <textarea rows="4" placeholder="Add any notes about this transaction..." style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;"></textarea>
+          <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Notes</label>
+          <textarea readonly rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9; resize: vertical;">{{ transaction.notes or transaction.get('notes', '') }}</textarea>
         </div>
-        
-        <button class="primary-btn">
-          Save Changes
-        </button>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -1055,14 +1022,14 @@
 <div id="upload-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Upload Document</h2>
+      <h2 class="modal-title">Upload Document</h2>
       <button class="modal-close" onclick="document.getElementById('upload-modal').style.display='none'">&times;</button>
     </div>
     
-    <form style="display: grid; gap: 1.5rem;">
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Document Type</label>
-        <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+    <form class="modal-form">
+      <div class="modal-form-group">
+        <label class="modal-form-label">Document Type</label>
+        <select class="modal-form-select">
           <option>Purchase Agreement</option>
           <option>Earnest Money Receipt</option>
           <option>Seller Disclosures</option>
@@ -1074,14 +1041,19 @@
       </div>
       
       <div class="drop-zone" onclick="document.getElementById('file-input').click()">
-        <h3 style="margin: 0 0 0.5rem 0; color: #3A352C;">Drag & Drop or Click to Upload</h3>
-        <p style="margin: 0; color: #666;">Supports PDF, DOC, DOCX, JPG, PNG</p>
+        <h3>Drag & Drop or Click to Upload</h3>
+        <p>Supports PDF, DOC, DOCX, JPG, PNG</p>
         <input type="file" id="file-input" style="display: none;">
       </div>
       
-      <button type="submit" class="primary-btn" style="width: 100%; justify-content: center;">
-        Upload Document
-      </button>
+      <div class="modal-form-buttons">
+        <button type="submit" class="action-btn action-btn--primary" style="flex: 1;">
+          Upload Document
+        </button>
+        <button type="button" class="action-btn action-btn--secondary" onclick="document.getElementById('upload-modal').style.display='none'" style="flex: 1;">
+          Cancel
+        </button>
+      </div>
     </form>
   </div>
 </div>
@@ -1090,25 +1062,16 @@
 <div id="share-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Share with Client</h2>
+      <h2 class="modal-title">Share with Client</h2>
       <button class="modal-close" onclick="document.getElementById('share-modal').style.display='none'">&times;</button>
     </div>
     
     <div style="background: #F6F2E8; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
-      <p style="margin: 0 0 1rem 0; color: #666;">Your client will receive a secure link to view this transaction. They can see documents, timeline, and progress without needing an account.</p>
+      <p style="margin: 0 0 1rem 0; color: #666;">Your client will receive a secure link to view this transaction.</p>
       <div style="display: flex; gap: 1rem;">
-        <input type="email" placeholder="client@email.com" value="john.smith@email.com" style="flex: 1; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
-        <button class="primary-btn">
-          Send Invite
-        </button>
+        <input type="email" placeholder="client@email.com" style="flex: 1; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+        <button class="action-btn action-btn--primary">Send Invite</button>
       </div>
-    </div>
-    
-    <p style="margin: 1rem 0; color: #666; text-align: center;">OR</p>
-    
-    <div style="background: white; padding: 1rem; border: 1px solid #E5E5E5; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-      <code style="color: #6B6A45; font-size: 0.85rem;">https://itsyourlifeyourhome.com/transaction/abc123xyz</code>
-      <button class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Copy Link</button>
     </div>
   </div>
 </div>
@@ -1117,14 +1080,14 @@
 <div id="add-participant-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Add Participant</h2>
+      <h2 class="modal-title">Add Participant</h2>
       <button class="modal-close" onclick="document.getElementById('add-participant-modal').style.display='none'">&times;</button>
     </div>
     
-    <form style="display: grid; gap: 1.5rem;">
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Participant Type</label>
-        <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+    <form class="modal-form">
+      <div class="modal-form-group">
+        <label class="modal-form-label">Participant Type</label>
+        <select class="modal-form-select">
           <option>Lender</option>
           <option>Title Company</option>
           <option>Inspector</option>
@@ -1134,28 +1097,24 @@
         </select>
       </div>
       
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Name</label>
-        <input type="text" placeholder="Full Name" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+      <div class="modal-form-group">
+        <label class="modal-form-label">Name</label>
+        <input type="text" placeholder="Full Name" class="modal-form-input">
       </div>
       
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Email</label>
-        <input type="email" placeholder="email@company.com" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
+      <div class="modal-form-group">
+        <label class="modal-form-label">Email</label>
+        <input type="email" placeholder="email@company.com" class="modal-form-input">
       </div>
       
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Permissions</label>
-        <select style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
-          <option>View Only</option>
-          <option>Upload Documents</option>
-          <option>Full Access</option>
-        </select>
+      <div class="modal-form-buttons">
+        <button type="submit" class="action-btn action-btn--primary" style="flex: 1;">
+          Add Participant
+        </button>
+        <button type="button" class="action-btn action-btn--secondary" onclick="document.getElementById('add-participant-modal').style.display='none'" style="flex: 1;">
+          Cancel
+        </button>
       </div>
-      
-      <button type="submit" class="primary-btn" style="width: 100%; justify-content: center;">
-        Add Participant
-      </button>
     </form>
   </div>
 </div>
@@ -1164,27 +1123,27 @@
 <div id="change-stage-modal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 style="margin: 0; font-family: var(--font-heading); color: #3A352C;">Change Transaction Stage</h2>
+      <h2 class="modal-title">Change Transaction Stage</h2>
       <button class="modal-close" onclick="document.getElementById('change-stage-modal').style.display='none'">&times;</button>
     </div>
     
-    <form method="POST" action="{{ url_for('agent_transaction_change_stage', tx_id=transaction.id or transaction.get('id')) }}" style="display: grid; gap: 1.5rem;">
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">Current Stage</label>
+    <form method="POST" action="{{ url_for('agent_transaction_change_stage', tx_id=transaction.id or transaction.get('id')) }}" class="modal-form">
+      <div class="modal-form-group">
+        <label class="modal-form-label">Current Stage</label>
         {% set current_stage_display = (transaction.current_stage or transaction.get('current_stage', 'unknown'))|lower %}
         {% if current_stage_display == 'pre_contract' %}
           {% set current_stage_display = 'Summary' %}
         {% else %}
           {% set current_stage_display = current_stage_display|replace('_', ' ')|title %}
         {% endif %}
-        <div style="padding: 0.75rem; background: #F6F2E8; border-radius: 6px; color: #3A352C;">
+        <div style="padding: 0.75rem; background: #F6F2E8; border-radius: 6px; color: var(--charcoal-brown);">
           {{ current_stage_display }}
         </div>
       </div>
       
-      <div>
-        <label style="display: block; font-weight: 600; color: #6B6A45; margin-bottom: 0.5rem;">New Stage</label>
-        <select name="new_stage" id="new_stage_select" required style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; font-size: 1rem;">
+      <div class="modal-form-group">
+        <label class="modal-form-label">New Stage</label>
+        <select name="new_stage" id="new_stage_select" required class="modal-form-select">
           <option value="pre_contract:summary">Summary</option>
           <option value="pre_contract:showings">Showings</option>
           <option value="under_contract">Under Contract</option>
@@ -1196,11 +1155,11 @@
         <input type="hidden" name="sub_stage" id="sub_stage_input" value="">
       </div>
       
-      <div style="display: flex; gap: 1rem;">
-        <button type="submit" class="primary-btn" style="flex: 1; justify-content: center;">
+      <div class="modal-form-buttons">
+        <button type="submit" class="action-btn action-btn--primary" style="flex: 1;">
           Update Stage
         </button>
-        <button type="button" class="secondary-btn" onclick="document.getElementById('change-stage-modal').style.display='none'" style="flex: 1; justify-content: center;">
+        <button type="button" class="action-btn action-btn--secondary" onclick="document.getElementById('change-stage-modal').style.display='none'" style="flex: 1;">
           Cancel
         </button>
       </div>
@@ -1208,43 +1167,40 @@
   </div>
 </div>
 
-
 <script>
   function showTab(tabName) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(tab => {
-      tab.style.display = 'none';
+      tab.classList.remove('active');
     });
     // Remove active class from all tab buttons
     document.querySelectorAll('.tab').forEach(btn => {
       btn.classList.remove('active');
     });
     // Show selected tab
-    document.getElementById(tabName + '-tab').style.display = 'block';
+    document.getElementById(tabName + '-tab').classList.add('active');
     // Add active class to clicked button
     event.target.classList.add('active');
   }
 
-  // Handle stage selection change to extract sub-stage
+  // Handle stage selection change
   document.addEventListener('DOMContentLoaded', function() {
     const stageSelect = document.getElementById('new_stage_select');
     const subStageInput = document.getElementById('sub_stage_input');
     const changeStageForm = stageSelect ? stageSelect.closest('form') : null;
     
     if (stageSelect && subStageInput && changeStageForm) {
-      // Set initial value based on current stage
       const currentStage = '{{ (transaction.current_stage or transaction.get("current_stage", ""))|lower }}';
       if (currentStage === 'pre_contract') {
         stageSelect.value = 'pre_contract:summary';
       }
       
-      // Handle form submission to parse the value
       changeStageForm.addEventListener('submit', function(e) {
         const value = stageSelect.value;
         if (value.includes(':')) {
           const parts = value.split(':');
-          stageSelect.value = parts[0]; // Set main stage (pre_contract)
-          subStageInput.value = parts[1]; // Store sub-stage
+          stageSelect.value = parts[0];
+          subStageInput.value = parts[1];
         }
       });
     }

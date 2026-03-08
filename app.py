@@ -67,7 +67,7 @@ def remove_white_background(image_path):
         # Save as PNG
         img.save(image_path, "PNG", optimize=True)
 
-        print(f"✓ Processed fixture: {Path(image_path).name}")
+        print(f"[OK] Processed fixture: {Path(image_path).name}")
         return True
 
     except Exception as e:
@@ -129,29 +129,36 @@ def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", r
         return None
 
 
-def preserve_existing_profile_media(user_id: int, professional_photo: Optional[str] = None, 
+def preserve_existing_profile_media(user_id: int, professional_photo: Optional[str] = None,
                                      brokerage_logo: Optional[str] = None):
     """
     Preserve existing profile photos/logos if new ones aren't being uploaded.
+    Always reads the latest DB values so a transient lookup failure never
+    causes previously-saved media to be lost.
     Returns tuple: (final_photo, final_logo)
     """
     from database import get_user_profile
-    
-    existing_profile = get_user_profile(user_id)
-    if existing_profile:
-        # Convert Row to dict if needed
-        if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
-            existing_profile = dict(existing_profile)
-        elif not isinstance(existing_profile, dict):
-            existing_profile = {}
-        
-        # Preserve existing photos if not uploading new ones
-        final_photo = professional_photo if professional_photo else existing_profile.get("professional_photo")
-        final_logo = brokerage_logo if brokerage_logo else existing_profile.get("brokerage_logo")
-        
-        return final_photo, final_logo
-    
-    return professional_photo, brokerage_logo
+    try:
+        existing_profile = get_user_profile(user_id)
+        if existing_profile:
+            if hasattr(existing_profile, 'keys') and not isinstance(existing_profile, dict):
+                existing_profile = dict(existing_profile)
+            elif not isinstance(existing_profile, dict):
+                existing_profile = {}
+            existing_photo = existing_profile.get("professional_photo") or None
+            existing_logo  = existing_profile.get("brokerage_logo") or None
+        else:
+            existing_photo = None
+            existing_logo  = None
+    except Exception as e:
+        print(f"[PRESERVE MEDIA] Warning: could not read existing profile for user {user_id}: {e}")
+        existing_photo = None
+        existing_logo  = None
+
+    # Only replace when a genuinely new file was uploaded
+    final_photo = professional_photo if (professional_photo and professional_photo != "") else existing_photo
+    final_logo  = brokerage_logo  if (brokerage_logo  and brokerage_logo  != "") else existing_logo
+    return final_photo, final_logo
 
 
 # ---------------- YOUR PLATFORM DATABASES ----------------
@@ -175,6 +182,8 @@ from database import (
     delete_homeowner_project,
     get_homeowner_note_by_id,
     update_homeowner_note,
+    row_to_dict,
+    rows_to_dicts,
     delete_homeowner_note,
     upsert_next_move_plan,
     get_next_move_plan,
@@ -260,19 +269,6 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
-
-# Check if Video Studio is available
-try:
-    import video_studio
-    import video_database
-    VIDEO_STUDIO_ENABLED = True
-    print("[VIDEO STUDIO] Modules loaded successfully")
-except ImportError as e:
-    VIDEO_STUDIO_ENABLED = False
-    print(f"[VIDEO STUDIO] Disabled - import error: {e}")
-except Exception as e:
-    VIDEO_STUDIO_ENABLED = False
-    print(f"[VIDEO STUDIO] Disabled - error: {e}")
 
 # Context processor to make professionals available to all homeowner templates
 def hex_to_color_name(hex_code):
@@ -897,7 +893,7 @@ EMAIL_PASS = os.environ.get("EMAIL_PASS")
 def send_reminder_email(to_email, subject, body):
     """Send a reminder email using SMTP."""
     if not EMAIL_USER or not EMAIL_PASS:
-        print(f"⚠ Email not configured - cannot send to {to_email}")
+        print(f"[WARNING] Email not configured - cannot send to {to_email}")
         return False
     
     msg = MIMEMultipart()
@@ -910,7 +906,7 @@ def send_reminder_email(to_email, subject, body):
             server.starttls()
             server.login(EMAIL_USER, EMAIL_PASS)
             server.sendmail(EMAIL_USER, to_email, msg.as_string())
-        print(f"✓ Email sent to {to_email}")
+        print(f"[OK] Email sent to {to_email}")
         return True
     except Exception as e:
         print(f"✗ Failed to send email to {to_email}: {e}")
@@ -920,7 +916,7 @@ def send_reminder_email(to_email, subject, body):
 def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referral_token=None, signup_timestamp=None):
     """Send email notification to agent when a new lead signs up."""
     if not EMAIL_USER or not EMAIL_PASS:
-        print(f"⚠ Email not configured - cannot send lead notification")
+        print(f"[WARNING] Email not configured - cannot send lead notification")
         return False
     
     try:
@@ -929,7 +925,7 @@ def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referr
         # Get agent information
         agent_user = get_user_by_id(agent_id)
         if not agent_user:
-            print(f"⚠ Agent {agent_id} not found - cannot send notification")
+            print(f"[WARNING] Agent {agent_id} not found - cannot send notification")
             return False
         
         agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') and not isinstance(agent_user, dict) else agent_user
@@ -937,7 +933,7 @@ def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referr
         agent_name = agent_dict.get('name', 'Agent')
         
         if not agent_email:
-            print(f"⚠ Agent {agent_id} has no email - cannot send notification")
+            print(f"[WARNING] Agent {agent_id} has no email - cannot send notification")
             return False
         
         # Get agent profile for additional info
@@ -983,15 +979,15 @@ This is an automated notification from Your Life • Your Home.
         success = send_reminder_email(agent_email, subject, body)
         
         if success:
-            print(f"✓ New lead notification sent to {agent_name} ({agent_email})")
+            print(f"[OK] New lead notification sent to {agent_name} ({agent_email})")
             # Log the email in the database
             try:
                 from database import log_automated_email
                 # We need the contact_id, but we don't have it here
                 # For now, just log that we sent the notification
-                print(f"✓ Lead notification logged for agent {agent_id}")
+                print(f"[OK] Lead notification logged for agent {agent_id}")
             except Exception as log_error:
-                print(f"⚠ Could not log email notification: {log_error}")
+                print(f"[WARNING] Could not log email notification: {log_error}")
         
         return success
         
@@ -1530,7 +1526,7 @@ def update_home_values_daily():
                 )
                 updated_count += 1
         
-        print(f"✓ Daily value update: {updated_count} properties updated")
+        print(f"[OK] Daily value update: {updated_count} properties updated")
     except Exception as e:
         print(f"Error in daily value update: {e}")
 
@@ -1549,16 +1545,16 @@ def start_scheduler():
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.start()
-        print("✓ Reminder scheduler started with CRM automation and daily value updates.")
+        print("[OK] Reminder scheduler started with CRM automation and daily value updates.")
     except Exception as e:
-        print(f"⚠ Scheduler error: {e}")(f"⚠ Scheduler could not start (non-critical): {e}")
+        print(f"[WARNING] Scheduler could not start (non-critical): {e}")
 
 
 # Start scheduler when app starts (non-blocking)
 try:
     start_scheduler()
 except Exception as e:
-    print(f"⚠ Scheduler initialization failed (non-critical): {e}")
+    print(f"[WARNING] Scheduler initialization failed (non-critical): {e}")
 
 
 # -------------------------------------------------
@@ -4876,7 +4872,7 @@ def agent_crm():
             name = request.form.get("name", "").strip()
             email = request.form.get("email", "").strip()
             phone = request.form.get("phone", "").strip()
-            stage = request.form.get("stage", "new").strip()
+            stage = request.form.get("stage", "new").strip().lower()
             birthday = request.form.get("birthday", "").strip()
             home_anniversary = request.form.get("home_anniversary", "").strip()
             address = request.form.get("address", "").strip()
@@ -4897,6 +4893,18 @@ def agent_crm():
                 return redirect(url_for("agent_crm"))
             else:
                 try:
+                    # Prevent duplicates: check if contact already exists (by email, phone, or name)
+                    existing = list_agent_contacts(user["id"])
+                    for ex in existing:
+                        if email and ex.get("email") and str(ex["email"]).strip().lower() == email.lower():
+                            flash(f"Contact with email {email} already exists. Use Edit to update.", "error")
+                            return redirect(url_for("agent_crm"))
+                        if phone and ex.get("phone") and _normalize_phone(str(ex.get("phone") or "")) == _normalize_phone(phone):
+                            flash(f"Contact with phone {phone} already exists. Use Edit to update.", "error")
+                            return redirect(url_for("agent_crm"))
+                        if _names_match(name, ex.get("name") or ""):
+                            flash(f"Contact '{name}' already exists. Use Edit to update.", "error")
+                            return redirect(url_for("agent_crm"))
                     prop_val = float(property_value) if property_value else None
                     equity_val = float(equity_estimate) if equity_estimate else None
                     print(f"Calling add_agent_contact with user_id={user['id']}, name='{name}'")
@@ -4940,6 +4948,7 @@ def agent_crm():
                 for field in ['name', 'email', 'phone', 'stage', 'birthday', 
                             'home_anniversary', 'address', 'notes', 'tags',
                             'property_address', 'property_value', 'equity_estimate',
+                            'city', 'state', 'zip_code',
                             'auto_birthday', 'auto_anniversary',
                             'auto_seasonal', 'auto_equity', 'auto_holidays',
                             'equity_frequency']:
@@ -4954,6 +4963,8 @@ def agent_crm():
                                 updates[field] = float(val) if val else None
                             except:
                                 pass
+                        elif field == 'stage':
+                            updates[field] = val.lower() if val else None
                         else:
                             updates[field] = val if val else None
                 
@@ -5081,6 +5092,28 @@ def agent_crm():
                     flash("Deal deleted successfully!", "success")
                 except Exception as e:
                     flash(f"Error deleting deal: {e}", "error")
+        
+        elif action == "remove_duplicates":
+            try:
+                from database import remove_duplicate_agent_contacts
+                removed = remove_duplicate_agent_contacts(user["id"])
+                flash(f"Removed {removed} duplicate contact(s).", "success")
+            except Exception as e:
+                flash(f"Error removing duplicates: {str(e)}", "error")
+            return redirect(url_for("agent_crm"))
+        
+        elif action == "delete":
+            contact_id = request.form.get("contact_id")
+            if contact_id:
+                try:
+                    from database import delete_agent_contact
+                    if delete_agent_contact(int(contact_id), user["id"]):
+                        flash("Contact deleted successfully!", "success")
+                    else:
+                        flash("Contact not found or could not be deleted.", "error")
+                except Exception as e:
+                    flash(f"Error deleting contact: {e}", "error")
+            return redirect(url_for("agent_crm"))
         
         elif action == "add_relationship":
             contact_id_1 = request.form.get("contact_id_1")
@@ -5416,6 +5449,164 @@ def agent_crm():
         return f"Template Error: {e}<br><pre>{error_msg}</pre>", 500
 
 
+def _parse_address_city_state_zip(addr_str):
+    """Parse 'Street, City, ST 12345' format when city/state/zip are missing from DB."""
+    import re
+    if not addr_str or not addr_str.strip():
+        return None, None, None, None
+    s = addr_str.strip()
+    # Match ", City, ST 12345" or ", City, ST 12345-6789" at end
+    m = re.search(r',\s*([^,]+),\s*([A-Za-z]{2})\s+(\d{5}(?:-\d{4})?)\s*$', s)
+    if m:
+        city = m.group(1).strip()
+        state = m.group(2).strip().upper()
+        zip_code = m.group(3).strip()
+        street = s[:m.start()].strip().rstrip(',')
+        return street, city, state, zip_code
+    return None, None, None, None
+
+
+def _build_full_address(c):
+    """Build full address string with street, city, state, zip."""
+    street = (c.get("address") or c.get("property_address") or "").strip()
+    city = (c.get("city") or "").strip()
+    state = (c.get("state") or "").strip()
+    # Normalize zip: strip float suffix (.0) if stored that way
+    raw_zip = str(c.get("zip_code") or "").strip()
+    if raw_zip.endswith(".0") and raw_zip[:-2].isdigit():
+        raw_zip = raw_zip[:-2]
+    zip_code = raw_zip
+    # If city/state/zip empty but address has "Street, City, ST 12345" format, parse it
+    if not (city or state or zip_code) and street:
+        parsed_street, parsed_city, parsed_state, parsed_zip = _parse_address_city_state_zip(street)
+        if parsed_city:
+            street = parsed_street or street
+            city, state, zip_code = parsed_city, parsed_state, parsed_zip
+    parts = []
+    if street:
+        parts.append(street)
+    if city or state or zip_code:
+        csz = ", ".join(filter(None, [city, " ".join(filter(None, [state, zip_code]))]))
+        if csz:
+            parts.append(csz.strip().rstrip(","))
+    return "\n".join(parts) if parts else ""
+
+
+@app.route("/agent/crm/address-labels")
+def agent_address_labels():
+    """Print address labels for agent CRM contacts (30 per page, 3x10 grid)."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    contact_id = request.args.get("contact_id", type=int)
+    single_sheet = request.args.get("single_sheet") == "1"
+    contacts = list_agent_contacts(user["id"], stage_filter=None)
+    labels = []
+    if single_sheet and contact_id:
+        c = next((x for x in contacts if x.get("id") == contact_id), None)
+        if c:
+            name = (c.get("name") or "").strip()
+            addr = _build_full_address(c) or "(No address on file)"
+            city = (c.get("city") or "").strip()
+            state = (c.get("state") or "").strip()
+            street = (c.get("address") or "").strip()
+            missing_csz = bool(street and not (city and state))
+            labels = [{"id": c.get("id"), "name": name, "address": addr, "missing_csz": missing_csz}] * 30
+    if not labels:
+        for c in contacts:
+            name = (c.get("name") or "").strip()
+            addr = _build_full_address(c)
+            street = (c.get("address") or "").strip()
+            city = (c.get("city") or "").strip()
+            state = (c.get("state") or "").strip()
+            missing_csz = bool(street and not (city and state))
+            if name and addr:
+                labels.append({"id": c.get("id"), "name": name, "address": addr, "missing_csz": missing_csz})
+            elif name:
+                labels.append({"id": c.get("id"), "name": name, "address": "(No address on file)", "missing_csz": True})
+    if not labels:
+        labels = [{"name": "", "address": ""}] * 30
+    return render_template(
+        "shared/address_labels.html",
+        labels=labels,
+        back_url=url_for("agent_crm"),
+        back_label="Back to CRM",
+        role="agent",
+        contacts=contacts,
+        single_sheet=bool(single_sheet and contact_id),
+        labels_base_url=url_for("agent_address_labels"),
+    )
+
+
+def _normalize_phone(s):
+    """Normalize phone for duplicate check: digits only, last 10 for US."""
+    if not s:
+        return ""
+    digits = "".join(c for c in str(s) if c.isdigit())
+    return digits[-10:] if len(digits) >= 10 else digits
+
+
+def _normalize_name_for_match(s):
+    """Normalize name for flexible matching."""
+    if not s:
+        return ""
+    s = str(s).strip().lower()
+    s = " ".join(s.split())  # collapse spaces
+    s = s.replace("&", " ").replace(" and ", " ")
+    return " ".join(s.split())
+
+
+def _names_match(excel_name, db_name):
+    """Flexible name matching: exact, or one contains the other."""
+    a = _normalize_name_for_match(excel_name)
+    b = _normalize_name_for_match(db_name)
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    if a in b or b in a:
+        return True
+    # Try matching first/last parts (e.g. "Carr, Michael" vs "Carr, Michael & Megan")
+    a_parts = set(p for p in a.split() if len(p) > 1)
+    b_parts = set(p for p in b.split() if len(p) > 1)
+    overlap = a_parts & b_parts
+    if len(overlap) >= 2:  # at least 2 words match (e.g. first + last name)
+        return True
+    return False
+
+
+@app.route("/agent/crm/update-addresses", methods=["GET"], endpoint="agent_update_addresses")
+def agent_crm_update_addresses():
+    """Redirect to unified import - no longer a separate flow."""
+    return redirect(url_for("agent_crm_import"))
+
+
+@app.route("/agent/crm/quick-update", methods=["POST"])
+def agent_crm_quick_update():
+    """Inline quick-save for CRM fields (e.g. last_touch)."""
+    from database import get_connection as _gc
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    contact_id = request.form.get("contact_id", "").strip()
+    field = request.form.get("field", "").strip()
+    value = request.form.get("value", "").strip()
+    allowed = {"last_touch"}
+    if field not in allowed:
+        return jsonify({"error": "Field not editable here"}), 400
+    if not contact_id:
+        return jsonify({"error": "Missing contact_id"}), 400
+    conn = _gc()
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE agent_contacts SET {field} = ? WHERE id = ? AND agent_user_id = ?",
+        (value, contact_id, user["id"])
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "value": value})
+
+
 @app.route("/agent/crm/import", methods=["GET", "POST"])
 def agent_crm_import():
     """Agent CRM bulk import from Excel/CSV."""
@@ -5480,6 +5671,10 @@ def agent_crm_import():
         
         elif action == "import":
             # Actually import the data
+            print("\n" + "="*60, flush=True)
+            print("IMPORT ACTION TRIGGERED", flush=True)
+            print("="*60, flush=True)
+            
             import_data_json = session.get('crm_import_data')
             if not import_data_json:
                 flash("No import data found. Please upload a file again.", "error")
@@ -5491,6 +5686,7 @@ def agent_crm_import():
                 # Get column mappings from form
                 mappings = {
                     'name': request.form.get('map_name', '').strip(),
+                    'last_name': request.form.get('map_last_name', '').strip(),
                     'email': request.form.get('map_email', '').strip(),
                     'phone': request.form.get('map_phone', '').strip(),
                     'stage': request.form.get('map_stage', '').strip(),
@@ -5498,81 +5694,163 @@ def agent_crm_import():
                     'home_anniversary': request.form.get('map_anniversary', '').strip(),
                     'address': request.form.get('map_address', '').strip(),
                     'property_address': request.form.get('map_property_address', '').strip(),
+                    'city': request.form.get('map_city', '').strip(),
+                    'state': request.form.get('map_state', '').strip(),
+                    'zip_code': request.form.get('map_zip', '').strip(),
                     'property_value': request.form.get('map_property_value', '').strip(),
                     'equity_estimate': request.form.get('map_equity', '').strip(),
                     'notes': request.form.get('map_notes', '').strip(),
                     'tags': request.form.get('map_tags', '').strip(),
                 }
                 
+                print(f"\n=== IMPORT DEBUG ===", flush=True)
+                print(f"Mappings: {mappings}", flush=True)
+                print(f"First row sample: {data[0] if data else 'No data'}", flush=True)
+                print(f"First row keys: {list(data[0].keys()) if data else 'No data'}", flush=True)
+                
                 # Default stage if not mapped
                 default_stage = request.form.get('default_stage', 'new').strip()
                 
-                # Import settings
-                skip_duplicates = request.form.get('skip_duplicates') == 'on'
-                duplicate_check = request.form.get('duplicate_check', 'email').strip()
-                
+                # Smart sync: match → update, no match → add. No duplicates.
                 imported = 0
-                skipped = 0
+                updated = 0
                 errors = []
+                existing_contacts_cache = []
+                
+                # Helper function to safely get and convert values, handling NaN (defined once)
+                def safe_get(value):
+                    if value is None:
+                        return ''
+                    val_str = str(value).strip()
+                    # Check for various NaN representations
+                    if val_str.lower() in ['nan', 'none', 'null', '']:
+                        return ''
+                    return val_str
                 
                 for idx, row in enumerate(data):
                     try:
-                        # Map columns to fields
-                        name = str(row.get(mappings['name'], '')).strip() if mappings['name'] else ''
-                        email = str(row.get(mappings['email'], '')).strip() if mappings['email'] else ''
-                        phone = str(row.get(mappings['phone'], '')).strip() if mappings['phone'] else ''
-                        stage = str(row.get(mappings['stage'], default_stage)).strip() if mappings['stage'] else default_stage
-                        birthday = str(row.get(mappings['birthday'], '')).strip() if mappings['birthday'] else ''
-                        home_anniversary = str(row.get(mappings['home_anniversary'], '')).strip() if mappings['home_anniversary'] else ''
-                        address = str(row.get(mappings['address'], '')).strip() if mappings['address'] else ''
-                        property_address = str(row.get(mappings['property_address'], '')).strip() if mappings['property_address'] else ''
-                        notes = str(row.get(mappings['notes'], '')).strip() if mappings['notes'] else ''
-                        tags = str(row.get(mappings['tags'], '')).strip() if mappings['tags'] else ''
+                        # Debug first row
+                        if idx == 0:
+                            print(f"\nFirst row processing:")
+                            print(f"  Name column mapped to: '{mappings['name']}'")
+                            print(f"  Raw value: {repr(row.get(mappings['name']))}")
+                            print(f"  After safe_get: '{safe_get(row.get(mappings['name'], ''))}'")
+                        
+                        # Map columns to fields using the column names from mappings
+                        first_part = safe_get(row.get(mappings['name'])) if mappings['name'] else ''
+                        last_part = safe_get(row.get(mappings['last_name'])) if mappings.get('last_name') else ''
+                        name = f"{first_part} {last_part}".strip() if (first_part or last_part) else ''
+                        email = safe_get(row.get(mappings['email'])) if mappings['email'] else ''
+                        phone = safe_get(row.get(mappings['phone'])) if mappings['phone'] else ''
+                        stage_value = safe_get(row.get(mappings['stage'])) if mappings['stage'] else ''
+                        stage = (stage_value if stage_value else default_stage).strip().lower()
+                        birthday = safe_get(row.get(mappings['birthday'])) if mappings['birthday'] else ''
+                        home_anniversary = safe_get(row.get(mappings['home_anniversary'])) if mappings['home_anniversary'] else ''
+                        address = safe_get(row.get(mappings['address'])) if mappings['address'] else ''
+                        property_address = safe_get(row.get(mappings['property_address'])) if mappings['property_address'] else ''
+                        city = safe_get(row.get(mappings['city'])) if mappings.get('city') else ''
+                        state = safe_get(row.get(mappings['state'])) if mappings.get('state') else ''
+                        zip_code = safe_get(row.get(mappings['zip_code'])) if mappings.get('zip_code') else ''
+                        # If address has "Street, City, ST 12345" but city/state/zip unmapped, parse it
+                        if not (city or state or zip_code) and (address or property_address):
+                            addr_str = address or property_address
+                            pstreet, pc, ps, pz = _parse_address_city_state_zip(addr_str)
+                            if pc:
+                                if address:
+                                    address = pstreet or address
+                                else:
+                                    property_address = pstreet or property_address
+                                city, state, zip_code = pc, ps or state, pz or zip_code
+                        notes = safe_get(row.get(mappings['notes'])) if mappings['notes'] else ''
+                        tags = safe_get(row.get(mappings['tags'])) if mappings['tags'] else ''
                         
                         # Parse numeric values
-                        try:
-                            property_value = float(row.get(mappings['property_value'], 0)) if mappings['property_value'] and str(row.get(mappings['property_value'], '')).strip() else None
-                        except:
-                            property_value = None
+                        property_value = None
+                        if mappings['property_value']:
+                            prop_val_str = safe_get(row.get(mappings['property_value']))
+                            if prop_val_str:
+                                try:
+                                    property_value = float(prop_val_str.replace(',', '').replace('$', ''))
+                                except:
+                                    property_value = None
                         
-                        try:
-                            equity_estimate = float(row.get(mappings['equity_estimate'], 0)) if mappings['equity_estimate'] and str(row.get(mappings['equity_estimate'], '')).strip() else None
-                        except:
-                            equity_estimate = None
+                        equity_estimate = None
+                        if mappings['equity_estimate']:
+                            equity_str = safe_get(row.get(mappings['equity_estimate']))
+                            if equity_str:
+                                try:
+                                    equity_estimate = float(equity_str.replace(',', '').replace('$', ''))
+                                except:
+                                    equity_estimate = None
                         
                         if not name:
                             errors.append(f"Row {idx + 1}: Missing name")
                             continue
                         
-                        # Check for duplicates if enabled
-                        if skip_duplicates:
-                            existing_contacts = list_agent_contacts(user["id"])
-                            is_duplicate = False
-                            for existing in existing_contacts:
-                                if duplicate_check == 'email' and email:
-                                    if existing.get('email') and existing['email'].lower() == email.lower():
-                                        is_duplicate = True
-                                        break
-                                elif duplicate_check == 'phone' and phone:
-                                    if existing.get('phone') and existing['phone'] == phone:
-                                        is_duplicate = True
-                                        break
-                                elif duplicate_check == 'name' and name:
-                                    if existing.get('name') and existing['name'].lower() == name.lower():
-                                        is_duplicate = True
-                                        break
-                            
-                            if is_duplicate:
-                                skipped += 1
-                                continue
+                        # Find existing contact: email > phone > name (flexible)
+                        if not existing_contacts_cache:
+                            existing_contacts_cache = list_agent_contacts(user["id"])
+                        existing_contacts = existing_contacts_cache
+                        matched_existing = None
+                        for existing in existing_contacts:
+                            if email and existing.get('email') and existing['email'].lower() == email.lower():
+                                matched_existing = existing
+                                break
+                            if phone and existing.get('phone') and str(existing['phone']).strip() == str(phone).strip():
+                                matched_existing = existing
+                                break
+                            if name and _names_match(name, existing.get("name") or ""):
+                                matched_existing = existing
+                                break
+                        
+                        if matched_existing:
+                            # Update existing contact with all mapped fields (only when we have values)
+                            updates = {}
+                            if name:
+                                updates["name"] = name
+                            if email:
+                                updates["email"] = email
+                            if phone:
+                                updates["phone"] = phone
+                            if stage:
+                                updates["stage"] = stage
+                            if birthday:
+                                updates["birthday"] = birthday
+                            if home_anniversary:
+                                updates["home_anniversary"] = home_anniversary
+                            if address:
+                                updates["address"] = address
+                            if property_address:
+                                updates["property_address"] = property_address
+                            if city:
+                                updates["city"] = city
+                            if state:
+                                updates["state"] = state
+                            if zip_code:
+                                updates["zip_code"] = zip_code
+                            if notes:
+                                updates["notes"] = notes
+                            if tags:
+                                updates["tags"] = tags
+                            if property_value is not None:
+                                updates["property_value"] = property_value
+                            if equity_estimate is not None:
+                                updates["equity_estimate"] = equity_estimate
+                            if updates:
+                                update_agent_contact(matched_existing["id"], user["id"], **updates)
+                                updated += 1
+                            continue
                         
                         # Add contact
                         add_agent_contact(
                             user["id"], name, email, phone, stage, email or phone, "",
                             birthday, home_anniversary, address, notes, tags,
-                            property_address, property_value, equity_estimate
+                            property_address, property_value, equity_estimate,
+                            city=city, state=state, zip_code=zip_code
                         )
                         imported += 1
+                        # Refresh cache so next rows can match this contact (prevent same-file duplicates)
+                        existing_contacts_cache = list_agent_contacts(user["id"])
                     except Exception as e:
                         errors.append(f"Row {idx + 1}: {str(e)}")
                 
@@ -5580,7 +5858,11 @@ def agent_crm_import():
                 session.pop('crm_import_data', None)
                 session.pop('crm_import_columns', None)
                 
-                flash(f"Import complete! {imported} contacts imported, {skipped} skipped, {len(errors)} errors.", "success")
+                msg = f"Sync complete: {imported} added, {updated} updated"
+                if errors:
+                    msg += f", {len(errors)} errors"
+                msg += "."
+                flash(msg, "success")
                 if errors:
                     flash(f"Errors: {', '.join(errors[:5])}{'...' if len(errors) > 5 else ''}", "error")
                 
@@ -6349,7 +6631,7 @@ def agent_feature_spotlight_cards_generate(tx_id):
             transaction.get('property_address', ''),
             features
         )
-        print(f"✓ Card set '{set_name}' saved successfully for user {user['id']}, tx {tx_id}")
+        print(f"[OK] Card set '{set_name}' saved successfully for user {user['id']}, tx {tx_id}")
     except Exception as e:
         print(f"✗ Error saving card set: {e}")
         import traceback
@@ -6828,6 +7110,514 @@ def agent_power_tools():
     )
 
 
+# ─────────────────────────────────────────────
+#  INVOICE ROUTES
+# ─────────────────────────────────────────────
+@app.route("/agent/invoices", methods=["GET"])
+def agent_invoices():
+    """Invoice dashboard — list all invoices."""
+    from database import list_invoices, list_agent_contacts
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    status_filter = request.args.get("status", "").strip()
+    invoices = list_invoices(user["id"], status_filter if status_filter else None)
+    # totals summary
+    all_inv = list_invoices(user["id"])
+    total_outstanding = sum(i["total"] for i in all_inv if i["status"] in ("sent", "overdue"))
+    total_paid = sum((i["paid_amount"] or i["total"]) for i in all_inv if i["status"] == "paid")
+    total_draft = sum(i["total"] for i in all_inv if i["status"] == "draft")
+    contacts = list_agent_contacts(user["id"])
+    return render_template(
+        "agent/invoices.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        invoices=invoices,
+        status_filter=status_filter,
+        total_outstanding=total_outstanding,
+        total_paid=total_paid,
+        total_draft=total_draft,
+        contacts=contacts,
+    )
+
+
+@app.route("/agent/invoices/new", methods=["GET", "POST"])
+def agent_invoice_new():
+    """Create a new invoice."""
+    from database import (create_invoice, set_invoice_items, update_invoice,
+                          list_agent_contacts, get_invoice, get_invoice_items)
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+
+    contacts = list_agent_contacts(user["id"])
+    prefill_contact_id = request.args.get("contact_id", type=int)
+    prefill_contact = None
+    if prefill_contact_id:
+        prefill_contact = next((c for c in contacts if c["id"] == prefill_contact_id), None)
+
+    if request.method == "POST":
+        # Gather client info
+        contact_id = request.form.get("contact_id", "").strip() or None
+        client_name = request.form.get("client_name", "").strip()
+        client_email = request.form.get("client_email", "").strip()
+        client_address = request.form.get("client_address", "").strip()
+        client_city = request.form.get("client_city", "").strip()
+        client_state = request.form.get("client_state", "").strip()
+        client_zip = request.form.get("client_zip", "").strip()
+        issue_date = request.form.get("issue_date", "").strip()
+        due_date = request.form.get("due_date", "").strip()
+        notes = request.form.get("notes", "").strip()
+        terms = request.form.get("terms", "Payment due within 30 days of invoice date.").strip()
+        tax_rate = float(request.form.get("tax_rate", "0") or 0)
+        discount_amount = float(request.form.get("discount_amount", "0") or 0)
+
+        # Line items
+        descs = request.form.getlist("item_desc[]")
+        qtys = request.form.getlist("item_qty[]")
+        prices = request.form.getlist("item_price[]")
+        items = []
+        for desc, qty, price in zip(descs, qtys, prices):
+            desc = desc.strip()
+            if not desc:
+                continue
+            try:
+                qty_f = float(qty or 1)
+                price_f = float(price or 0)
+            except ValueError:
+                qty_f, price_f = 1.0, 0.0
+            items.append({"description": desc, "quantity": qty_f, "unit_price": price_f})
+
+        subtotal = sum(i["quantity"] * i["unit_price"] for i in items)
+        tax_amount = round(subtotal * (tax_rate / 100), 2)
+        total = round(subtotal + tax_amount - discount_amount, 2)
+
+        inv_id = create_invoice(
+            user["id"],
+            contact_id=int(contact_id) if contact_id else None,
+            client_name=client_name, client_email=client_email,
+            client_address=client_address, client_city=client_city,
+            client_state=client_state, client_zip=client_zip,
+            issue_date=issue_date, due_date=due_date,
+            notes=notes, terms=terms,
+            status="draft",
+            subtotal=round(subtotal, 2),
+            tax_rate=tax_rate, tax_amount=tax_amount,
+            discount_amount=discount_amount, total=total,
+        )
+        if items:
+            set_invoice_items(inv_id, items)
+
+        action = request.form.get("save_action", "save")
+        if action == "send":
+            update_invoice(inv_id, user["id"], status="sent")
+            flash("Invoice created and marked as Sent!", "success")
+        else:
+            flash("Invoice saved as Draft!", "success")
+        return redirect(url_for("agent_invoices"))
+
+    from datetime import date, timedelta
+    today = date.today().isoformat()
+    due = (date.today() + timedelta(days=30)).isoformat()
+    return render_template(
+        "agent/invoice_form.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        contacts=contacts,
+        prefill_contact=prefill_contact,
+        invoice=None,
+        items=[],
+        today=today,
+        due_date_default=due,
+        mode="new",
+    )
+
+
+@app.route("/agent/invoices/<int:inv_id>/edit", methods=["GET", "POST"])
+def agent_invoice_edit(inv_id):
+    """Edit an existing invoice."""
+    from database import (get_invoice, get_invoice_items, update_invoice,
+                          set_invoice_items, list_agent_contacts)
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    invoice = get_invoice(inv_id, user["id"])
+    if not invoice:
+        flash("Invoice not found.", "error")
+        return redirect(url_for("agent_invoices"))
+
+    contacts = list_agent_contacts(user["id"])
+
+    if request.method == "POST":
+        contact_id = request.form.get("contact_id", "").strip() or None
+        client_name = request.form.get("client_name", "").strip()
+        client_email = request.form.get("client_email", "").strip()
+        client_address = request.form.get("client_address", "").strip()
+        client_city = request.form.get("client_city", "").strip()
+        client_state = request.form.get("client_state", "").strip()
+        client_zip = request.form.get("client_zip", "").strip()
+        issue_date = request.form.get("issue_date", "").strip()
+        due_date = request.form.get("due_date", "").strip()
+        notes = request.form.get("notes", "").strip()
+        terms = request.form.get("terms", "").strip()
+        tax_rate = float(request.form.get("tax_rate", "0") or 0)
+        discount_amount = float(request.form.get("discount_amount", "0") or 0)
+
+        descs = request.form.getlist("item_desc[]")
+        qtys = request.form.getlist("item_qty[]")
+        prices = request.form.getlist("item_price[]")
+        items = []
+        for desc, qty, price in zip(descs, qtys, prices):
+            desc = desc.strip()
+            if not desc:
+                continue
+            try:
+                qty_f = float(qty or 1)
+                price_f = float(price or 0)
+            except ValueError:
+                qty_f, price_f = 1.0, 0.0
+            items.append({"description": desc, "quantity": qty_f, "unit_price": price_f})
+
+        subtotal = sum(i["quantity"] * i["unit_price"] for i in items)
+        tax_amount = round(subtotal * (tax_rate / 100), 2)
+        total = round(subtotal + tax_amount - discount_amount, 2)
+
+        update_invoice(
+            inv_id, user["id"],
+            contact_id=int(contact_id) if contact_id else None,
+            client_name=client_name, client_email=client_email,
+            client_address=client_address, client_city=client_city,
+            client_state=client_state, client_zip=client_zip,
+            issue_date=issue_date, due_date=due_date,
+            notes=notes, terms=terms,
+            subtotal=round(subtotal, 2), tax_rate=tax_rate,
+            tax_amount=tax_amount, discount_amount=discount_amount, total=total,
+        )
+        set_invoice_items(inv_id, items)
+
+        action = request.form.get("save_action", "save")
+        if action == "send":
+            update_invoice(inv_id, user["id"], status="sent")
+            flash("Invoice updated and marked as Sent!", "success")
+        elif action == "paid":
+            update_invoice(inv_id, user["id"], status="paid",
+                           paid_date=__import__("datetime").date.today().isoformat(),
+                           paid_amount=total)
+            flash("Invoice marked as Paid!", "success")
+        else:
+            flash("Invoice updated!", "success")
+        return redirect(url_for("agent_invoices"))
+
+    items = get_invoice_items(inv_id)
+    from datetime import date, timedelta
+    today = date.today().isoformat()
+    return render_template(
+        "agent/invoice_form.html",
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        contacts=contacts,
+        prefill_contact=None,
+        invoice=invoice,
+        items=items,
+        today=today,
+        due_date_default=invoice.get("due_date") or today,
+        mode="edit",
+    )
+
+
+@app.route("/agent/invoices/<int:inv_id>/status", methods=["POST"])
+def agent_invoice_status(inv_id):
+    """Quick-update invoice status."""
+    from database import update_invoice
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify({"error": "Unauthorized"}), 401
+    new_status = request.form.get("status", "").strip()
+    if new_status not in ("draft", "sent", "paid", "overdue"):
+        return jsonify({"error": "Invalid status"}), 400
+    kwargs = {"status": new_status}
+    if new_status == "paid":
+        from database import get_invoice
+        inv = get_invoice(inv_id, user["id"])
+        if inv:
+            kwargs["paid_amount"] = inv["total"]
+            kwargs["paid_date"] = __import__("datetime").date.today().isoformat()
+    update_invoice(inv_id, user["id"], **kwargs)
+    return jsonify({"success": True, "status": new_status})
+
+
+@app.route("/agent/invoices/<int:inv_id>/delete", methods=["POST"])
+def agent_invoice_delete(inv_id):
+    """Delete an invoice."""
+    from database import delete_invoice
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    delete_invoice(inv_id, user["id"])
+    flash("Invoice deleted.", "success")
+    return redirect(url_for("agent_invoices"))
+
+
+@app.route("/agent/invoices/<int:inv_id>/print")
+def agent_invoice_print(inv_id):
+    """Print-ready invoice view."""
+    from database import get_invoice, get_invoice_items
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    invoice = get_invoice(inv_id, user["id"])
+    if not invoice:
+        flash("Invoice not found.", "error")
+        return redirect(url_for("agent_invoices"))
+    items = get_invoice_items(inv_id)
+    return render_template(
+        "agent/invoice_print.html",
+        invoice=invoice,
+        items=items,
+        user=user,
+    )
+
+
+# ─────────────────────────────────────────────
+#  SEASONAL CHECKLISTS
+# ─────────────────────────────────────────────
+
+def _get_checklist_data(season: str, role: str) -> dict:
+    """Return homeowner seasonal checklist content."""
+    palette = {
+        "spring": {"accent": "#6B8F5E", "light": "#EEF4EB", "icon": "🌸", "label": "Spring"},
+        "summer": {"accent": "#8B7A2F", "light": "#F7F3E3", "icon": "☀️", "label": "Summer"},
+        "fall":   {"accent": "#8B5A2B", "light": "#F5EDE3", "icon": "🍂", "label": "Fall"},
+        "winter": {"accent": "#4A6580", "light": "#E8EFF5", "icon": "❄️", "label": "Winter"},
+    }
+    p = palette.get(season, palette["spring"])
+
+    # Year-round homeowner maintenance plan — balanced so no task is overdone or missed.
+    # Key system lifecycles woven throughout:
+    #   Irrigation: Spring (start up) → Summer (adjust) → Fall (drain & shut off)
+    #   HVAC: Spring (tune-up + filter) → Summer (monthly filter check) → Fall (furnace + filter) → Winter (monthly filter check)
+    #   Roof/Gutters: Spring (winter damage) → Fall (pre-winter)
+    #   Smoke/CO: Spring (annual battery + test) → Winter (mid-season test)
+    #   Caulking/Sealing: Spring (repair freeze damage) → Fall (prep for winter cold)
+    #   Deck/Fence: Summer (UV re-seal, one time per year)
+    #   Lawn: Summer (grubs/weeds) → Fall (aerate, overseed, fertilize)
+    homeowner = {
+        "spring": {
+            "title": "Spring Home Refresh",
+            "subtitle": "Wake your home up right after winter",
+            "tagline": "Spring is your reset season. Undo winter's damage, restart your systems and set your home up for a smooth, worry-free summer.",
+            "sections": [
+                {
+                    "heading": "Exterior & Curb Appeal",
+                    "items": [
+                        "Inspect roof for winter damage — missing shingles, lifted flashing, damaged gutters",
+                        "Clean gutters and downspouts of winter debris — check for sagging or separation",
+                        "Power wash siding, driveway, walkways and patio surfaces",
+                        "Inspect foundation and basement walls for new cracks or moisture intrusion",
+                        "Repair any caulking around windows, doors and exterior trim damaged by freeze-thaw",
+                        "Fill and repair driveway and walkway cracks opened by winter frost heaving",
+                        "Freshen landscaping — edge beds, add fresh mulch and plant seasonal color",
+                        "Inspect fences, gates and retaining walls for winter heaving or damage",
+                        "Start up the irrigation system — test each zone, check heads and connections",
+                        "Trim tree branches back from the roofline and any overhead power lines",
+                        "Touch up exterior paint and wood stain on trim, siding and decks",
+                    ],
+                },
+                {
+                    "heading": "Interior & Home Systems",
+                    "items": [
+                        "Schedule a professional AC tune-up before the first heat wave hits",
+                        "Replace HVAC filters — set a monthly reminder through the summer",
+                        "Test every smoke detector and CO alarm — replace all batteries annually",
+                        "Test the sump pump before spring rains — pour water in the pit to confirm it activates",
+                        "Flush sediment from the water heater and test the pressure relief valve",
+                        "Deep clean behind the refrigerator (coils), stove and dryer — clear the dryer vent fully",
+                        "Inspect plumbing under all sinks and around toilets for slow leaks or corrosion",
+                        "Inspect crawl space and attic for moisture, pest activity or winter damage",
+                        "Wash windows inside and out — check seals for fogging or failure",
+                        "Test GFCI outlets in kitchen, bathrooms, garage and all outdoor locations",
+                        "Schedule a professional pest inspection before warm weather opens the door for them",
+                    ],
+                },
+            ],
+        },
+        "summer": {
+            "title": "Summer Home Care",
+            "subtitle": "Maintain, enjoy and keep cool all season",
+            "tagline": "Summer heat tests your home's systems daily. These are the tasks that keep everything running smoothly while you enjoy the season.",
+            "sections": [
+                {
+                    "heading": "Cooling & Indoor Comfort",
+                    "items": [
+                        "Check and replace HVAC filters monthly — heavy use means faster buildup",
+                        "Keep the AC condenser unit clear of grass clippings, weeds and debris",
+                        "Program your thermostat with away schedules to save energy all season",
+                        "Check attic ventilation — proper airflow reduces cooling costs noticeably",
+                        "Set ceiling fans to spin counterclockwise for a cooling downward breeze",
+                        "Add window film or thermal curtains to west and south-facing windows",
+                        "Check window AC units for proper drainage and clean their filters",
+                        "Clean bathroom and kitchen exhaust fans — they help pull heat from the home",
+                    ],
+                },
+                {
+                    "heading": "Exterior & Outdoor Living",
+                    "items": [
+                        "Inspect and re-seal deck, patio and wood fence — UV and moisture cause real damage",
+                        "Check deck boards and railings for rot, looseness or splinters — repair promptly",
+                        "Clean and inspect the outdoor grill — replace worn parts before peak grilling",
+                        "Adjust irrigation schedules for peak summer — water deeply 2–3x per week, not daily",
+                        "Inspect outdoor hoses, faucets and sprinkler heads for leaks or low-pressure clogs",
+                        "Treat the lawn for grubs and summer weeds before they take hold",
+                        "Check pool filter, balance chemicals and inspect all equipment on a weekly schedule",
+                        "Confirm ground around your foundation slopes away from the home — never toward it",
+                        "Repair or replace damaged window and door screens to keep pests out",
+                        "Check outdoor light fixtures — clean lenses and replace any burned-out bulbs",
+                    ],
+                },
+            ],
+        },
+        "fall": {
+            "title": "Fall Home Prep",
+            "subtitle": "Winterize everything before the cold arrives",
+            "tagline": "Fall is your last clear window to protect your home before winter. Every task you complete now is one less emergency you deal with in January.",
+            "sections": [
+                {
+                    "heading": "Heating & Weatherproofing",
+                    "items": [
+                        "Schedule a furnace or boiler inspection and cleaning before first use of the season",
+                        "Replace HVAC filters and stock up on extras — heating season means heavy monthly use",
+                        "Have chimney and fireplace professionally cleaned and inspected — fire safety first",
+                        "Replace worn weatherstripping on all exterior doors — test the seal with a dollar bill",
+                        "Re-caulk around windows, pipes and exterior penetrations to prevent winter heat loss",
+                        "Insulate any exposed pipes in unheated areas — garage, crawlspace, basement, attic",
+                        "Drain all outdoor faucets, hose bibs and irrigation lines completely — prevent pipe bursts",
+                        "Check attic insulation depth — if you can see the floor joists, add more before winter",
+                        "Upgrade to a smart thermostat if you haven't — the energy savings pay for it quickly",
+                        "Stock up on ice melt, sand and snow removal tools before the first freeze",
+                    ],
+                },
+                {
+                    "heading": "Exterior & Lawn",
+                    "items": [
+                        "Clean gutters and downspouts once all leaves have fallen — prevents dangerous ice dams",
+                        "Inspect roof flashing, valleys and penetrations one final time before winter arrives",
+                        "Remove dead or weak tree branches that could fall on your home in a winter storm",
+                        "Rake leaves from the lawn before they mat down and suffocate the grass",
+                        "Aerate and overseed the lawn — fall is the best time for recovery and thickening",
+                        "Apply a slow-release winterizing fertilizer to your lawn and all garden beds",
+                        "Plant spring bulbs now — tulips, daffodils and hyacinths need time to root before spring",
+                        "Drain garden hoses, outdoor fountains and potted irrigation lines — store them indoors",
+                        "Store patio furniture indoors or cover with weatherproof covers before hard frost",
+                        "Seal driveway and walkway cracks before freeze-thaw cycles turn small cracks into big ones",
+                        "Test outdoor lighting and improve coverage — days shorten fast and safety matters",
+                    ],
+                },
+            ],
+        },
+        "winter": {
+            "title": "Winter Home Watch",
+            "subtitle": "Protect, monitor and plan through the cold",
+            "tagline": "Winter asks a lot of your home. Stay ahead with these protection and planning tasks — and use the quiet season to set yourself up for a strong spring.",
+            "sections": [
+                {
+                    "heading": "Safety & Warmth",
+                    "items": [
+                        "Know exactly where your main water shut-off valve is — burst pipes demand immediate action",
+                        "Open cabinet doors under sinks when outdoor temps drop below 20°F",
+                        "Let exposed faucets drip slightly during extreme cold snaps to prevent freezing",
+                        "Keep a fire extinguisher accessible — holiday candles, fireplaces and cooking raise the risk",
+                        "Restock your emergency kit — flashlights, batteries, blankets, bottled water, first aid",
+                        "Run a whole-home humidifier to protect wood floors, furniture and your comfort",
+                        "Monitor your water heater — cold inlet water puts extra stress on older units",
+                        "Replace HVAC filters monthly throughout the heating season — don't skip",
+                        "Keep the thermostat no lower than 55°F even while away for holidays or travel",
+                        "Keep the garage door closed as much as possible — cold garages put pipes at risk",
+                    ],
+                },
+                {
+                    "heading": "Cold-Weather Exterior & Planning",
+                    "items": [
+                        "Clear snow and ice from all walkways and steps promptly — prevent dangerous falls",
+                        "Use calcium chloride or sand near landscaping and concrete — rock salt causes damage",
+                        "After heavy snowfall, safely remove buildup from the roof with a roof rake",
+                        "Watch for ice dams forming at roof eaves — they signal an attic heat loss issue",
+                        "Check the attic after major snow events for frost or moisture buildup",
+                        "Test smoke and CO alarms mid-season — winter heating and cooking raise the stakes",
+                        "Document all home improvements and repairs from this year for taxes and insurance",
+                        "Review your homeowner's insurance policy — confirm coverage reflects your home's current value",
+                        "Book spring contractors now (HVAC, landscaping, roofing, painters) before their schedules fill",
+                        "Plan and budget your spring home improvement projects — the quiet season is perfect for it",
+                    ],
+                },
+            ],
+        },
+    }
+
+    season_data = homeowner.get(season, homeowner["spring"])
+    return {**season_data, **p, "season": season, "role": role}
+
+
+SEASONS = ["spring", "summer", "fall", "winter"]
+
+
+@app.route("/agent/seasonal-checklists")
+def agent_seasonal_checklists():
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    previews = [_get_checklist_data(s, "agent") for s in SEASONS]
+    return render_template("shared/seasonal_checklists.html",
+                           brand_name=FRONT_BRAND_NAME, user=user,
+                           role="agent", previews=previews,
+                           back_url=url_for("agent_power_tools"))
+
+
+@app.route("/agent/seasonal-checklists/<season>")
+def agent_checklist_print(season):
+    if season not in SEASONS:
+        return redirect(url_for("agent_seasonal_checklists"))
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    from database import get_user_profile
+    profile = get_user_profile(user["id"]) or {}
+    data = _get_checklist_data(season, "agent")
+    is_kayleigh = user.get("email", "").lower() == "kayleighsellskcre@gmail.com"
+    return render_template("shared/checklist_print.html",
+                           checklist=data, user=user, profile=profile,
+                           is_kayleigh=is_kayleigh,
+                           back_url=url_for("agent_seasonal_checklists"))
+
+
+@app.route("/lender/seasonal-checklists")
+def lender_seasonal_checklists():
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    previews = [_get_checklist_data(s, "lender") for s in SEASONS]
+    return render_template("shared/seasonal_checklists.html",
+                           brand_name=FRONT_BRAND_NAME, user=user,
+                           role="lender", previews=previews,
+                           back_url=url_for("lender_power_suite"))
+
+
+@app.route("/lender/seasonal-checklists/<season>")
+def lender_checklist_print(season):
+    if season not in SEASONS:
+        return redirect(url_for("lender_seasonal_checklists"))
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    from database import get_user_profile
+    profile = get_user_profile(user["id"]) or {}
+    data = _get_checklist_data(season, "lender")
+    is_kayleigh = user.get("email", "").lower() == "kayleighsellskcre@gmail.com"
+    return render_template("shared/checklist_print.html",
+                           checklist=data, user=user, profile=profile,
+                           is_kayleigh=is_kayleigh,
+                           back_url=url_for("lender_seasonal_checklists"))
+
+
 @app.route("/agent/power-tools/cma/generate", methods=["POST"])
 def generate_cma():
     """Generate a CMA report using AI."""
@@ -7291,321 +8081,6 @@ def admin_toggle_premium():
     )
 
 
-@app.route("/agent/video-studio")
-def agent_video_studio():
-    """Video Studio - create marketing videos"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
-    
-    # Check if Video Studio is enabled
-    if not VIDEO_STUDIO_ENABLED:
-        return render_template(
-            "agent/video_studio.html",
-            brand_name=FRONT_BRAND_NAME,
-            user=user,
-            projects=[],
-            video_studio_disabled=True,
-            error_message="Video Studio is temporarily unavailable. The feature is being configured on Railway."
-        )
-    
-    try:
-        from video_database import get_user_video_projects
-        projects = get_user_video_projects(user["id"])
-    except Exception as e:
-        print(f"Error loading video projects: {e}")
-        projects = []
-    
-    # Get user subscription tier
-    subscription_tier = user.get('subscription_tier', 'free')
-    
-    return render_template(
-        "agent/video_studio.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-        projects=projects,
-        video_studio_disabled=False,
-        subscription_tier=subscription_tier,
-        has_premium=(subscription_tier in ['premium', 'pro'])
-    )
-
-
-@app.route("/agent/video-studio/create", methods=["POST"])
-def agent_video_studio_create():
-    """Create a new video project"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
-    
-    # Check if Video Studio is enabled
-    if not VIDEO_STUDIO_ENABLED:
-        flash("⚠️ Video Studio is temporarily unavailable. The feature is being configured on Railway. Please try again later.", "error")
-        return redirect(url_for("agent_video_studio"))
-    
-    # Check if FFmpeg is available
-    try:
-        import subprocess
-        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True, timeout=5)
-    except (FileNotFoundError, subprocess.SubprocessError, Exception) as e:
-        flash("⚠️ Video Studio is not yet available. FFmpeg is being installed on Railway. Please try again in 5 minutes after the next deployment.", "error")
-        return redirect(url_for("agent_video_studio"))
-    
-    try:
-        # Get form data
-        video_type = request.form.get('video_type')
-        aspect_ratio = request.form.get('aspect_ratio')
-        duration = int(request.form.get('duration', 30))
-        style_preset = request.form.get('style_preset')
-        headline = request.form.get('headline', '')
-        property_address = request.form.get('property_address', '')
-        highlights = request.form.get('highlights', '')
-        include_captions = request.form.get('include_captions') == 'on'
-        
-        # Check subscription for premium 3D tours
-        if video_type == '3d-tour':
-            user_tier = user.get('subscription_tier', 'free')
-            if user_tier not in ['premium', 'pro']:
-                flash("✨ 3D Property Tours are a Premium feature! Upgrade your subscription to unlock immersive 3D videos.", "error")
-                return redirect(url_for("agent_video_studio"))
-        
-        # Get room labels for 3D tours
-        room_labels = None
-        if video_type == '3d-tour':
-            room_labels_text = request.form.get('room_labels', '')
-            if room_labels_text:
-                room_labels = [label.strip() for label in room_labels_text.split('\n') if label.strip()]
-        
-        # Handle file uploads
-        import time
-        media_files = []
-        if 'media_files' in request.files:
-            files = request.files.getlist('media_files')
-            upload_dir = Path("uploads/video_media")
-            upload_dir.mkdir(parents=True, exist_ok=True)
-            
-            for file in files:
-                if file and file.filename:
-                    filename = secure_filename(file.filename)
-                    filepath = upload_dir / f"{user['id']}_{int(time.time())}_{filename}"
-                    file.save(filepath)
-                    media_files.append(str(filepath))
-        
-        if not media_files:
-            # Return JSON for AJAX requests
-            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-                return jsonify({
-                    "success": False,
-                    "error": "Please upload at least one photo or video"
-                })
-            flash("Please upload at least one photo or video", "error")
-            return redirect(url_for("agent_video_studio"))
-        
-        # Create project in database
-        from video_database import create_video_project, update_video_render_status
-        from database import get_user_profile
-        
-        project_id = create_video_project(
-            user_id=user["id"],
-            video_type=video_type,
-            aspect_ratio=aspect_ratio,
-            duration=duration,
-            style_preset=style_preset,
-            headline=headline,
-            property_address=property_address,
-            highlights=highlights,
-            media_files=media_files,
-            include_captions=include_captions
-        )
-        
-        # Update status to rendering
-        update_video_render_status(project_id, 'rendering')
-        
-        # Get agent branding
-        agent_profile = get_user_profile(user["id"])
-        agent_profile_dict = dict(agent_profile) if agent_profile and hasattr(agent_profile, 'keys') else {}
-        
-        # Render video
-        from video_studio import VideoRenderer
-        
-        # Set up output directory
-        output_dir = Path("generated_videos")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        renderer = VideoRenderer(output_dir=str(output_dir))
-        
-        result = renderer.create_listing_video(
-            project_id=project_id,
-            media_files=media_files,
-            style=style_preset,
-            aspect_ratio=aspect_ratio,
-            duration=duration,
-            headline=headline,
-            property_address=property_address,
-            agent_name=user["name"],
-            agent_phone=user.get("phone", user.get("email")),
-            agent_logo=agent_profile_dict.get("brokerage_logo"),
-            agent_photo=agent_profile_dict.get("professional_photo"),
-            include_captions=include_captions,
-            video_type=video_type,
-            room_labels=room_labels
-        )
-        
-        print(f"[VIDEO CREATE] Render result: {result}")
-        print(f"[VIDEO CREATE] Success: {result.get('success')}")
-        print(f"[VIDEO CREATE] Output path: {result.get('output_path')}")
-        print(f"[VIDEO CREATE] Error: {result.get('error')}")
-        
-        if result["success"]:
-            # Update status to complete
-            update_video_render_status(
-                project_id,
-                'complete',
-                result["output_path"]
-            )
-            print(f"[VIDEO CREATE] Updated project {project_id} to complete with path: {result['output_path']}")
-            
-            # Return JSON for AJAX requests (new tab feature!)
-            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-                return jsonify({
-                    "success": True,
-                    "project_id": project_id,
-                    "message": "Video created successfully!"
-                })
-            
-            flash("✨ Video created successfully!", "success")
-            return redirect(url_for("agent_video_studio_view", project_id=project_id))
-        else:
-            update_video_render_status(project_id, 'failed')
-            print(f"[VIDEO CREATE] Video rendering failed: {result.get('error')}")
-            
-            # Return JSON for AJAX requests
-            if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-                return jsonify({
-                    "success": False,
-                    "error": result.get('error')
-                })
-            
-            flash(f"Video creation failed: {result.get('error')}", "error")
-            return redirect(url_for("agent_video_studio"))
-        
-    except ImportError as e:
-        print(f"Video Studio import error: {e}")
-        # Return JSON for AJAX requests
-        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-            return jsonify({
-                "success": False,
-                "error": "Video Studio is temporarily unavailable"
-            })
-        flash("⚠️ Video Studio is temporarily unavailable. The feature is being configured. Please try again later.", "error")
-        return redirect(url_for("agent_video_studio"))
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        # Return JSON for AJAX requests
-        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or 'application/json' in request.headers.get('Accept', ''):
-            return jsonify({
-                "success": False,
-                "error": str(e)
-            })
-        flash(f"Error creating video: {str(e)}", "error")
-        return redirect(url_for("agent_video_studio"))
-
-
-@app.route("/agent/video-studio/<int:project_id>")
-def agent_video_studio_view(project_id):
-    """View a completed video project"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
-    
-    if not VIDEO_STUDIO_ENABLED:
-        flash("Video Studio is not available", "error")
-        return redirect(url_for("agent_video_studio"))
-    
-    try:
-        from video_database import get_video_project
-        project = get_video_project(project_id)
-        
-        if not project or project["user_id"] != user["id"]:
-            flash("Video project not found", "error")
-            return redirect(url_for("agent_video_studio"))
-        
-        return render_template(
-            "agent/video_studio_view.html",
-            brand_name=FRONT_BRAND_NAME,
-            user=user,
-            project=project
-        )
-    except Exception as e:
-        print(f"Error viewing video project: {e}")
-        flash("Error loading video project", "error")
-        return redirect(url_for("agent_video_studio"))
-
-
-@app.route("/agent/video-studio/serve/<int:project_id>")
-def agent_video_studio_serve(project_id):
-    """Serve the video file for a project"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        print(f"[VIDEO SERVE] Access denied - no user or wrong role")
-        return abort(403)
-    
-    try:
-        from video_database import get_video_project
-        project = get_video_project(project_id)
-        
-        print(f"[VIDEO SERVE] Project {project_id}: {project}")
-        
-        if not project or project["user_id"] != user["id"]:
-            print(f"[VIDEO SERVE] Project not found or user mismatch")
-            return abort(404)
-        
-        if not project.get("output_path"):
-            print(f"[VIDEO SERVE] No output_path in project")
-            return abort(404)
-        
-        # Serve the video file
-        video_path = Path(project["output_path"])
-        print(f"[VIDEO SERVE] Video path: {video_path}")
-        print(f"[VIDEO SERVE] Video exists: {video_path.exists()}")
-        print(f"[VIDEO SERVE] Absolute path: {video_path.absolute()}")
-        
-        if not video_path.exists():
-            print(f"[VIDEO SERVE] Video file does not exist!")
-            return abort(404)
-        
-        directory = str(video_path.parent.absolute())
-        filename = video_path.name
-        
-        print(f"[VIDEO SERVE] Serving from directory: {directory}")
-        print(f"[VIDEO SERVE] Filename: {filename}")
-        
-        return send_from_directory(directory, filename, mimetype='video/mp4')
-        
-    except Exception as e:
-        import traceback
-        print(f"[VIDEO SERVE] Error: {e}")
-        print(traceback.format_exc())
-        return abort(500)
-
-
-@app.route("/agent/video-studio/<int:project_id>/delete", methods=["POST"])
-def agent_video_studio_delete(project_id):
-    """Delete a video project"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return redirect(url_for("login", role="agent"))
-    
-    from video_database import delete_video_project
-    
-    if delete_video_project(project_id, user["id"]):
-        flash("Video project deleted", "success")
-    else:
-        flash("Could not delete video project", "error")
-    
-    return redirect(url_for("agent_video_studio"))
-
-
 # -------------------------------------------------
 # ADMIN SETTINGS ROUTES
 # -------------------------------------------------
@@ -7707,9 +8182,9 @@ def agent_settings_profile():
             # Success message with specific photo/logo confirmation
             success_parts = ["Profile updated successfully!"]
             if professional_photo:
-                success_parts.append("✓ Professional photo saved")
+                success_parts.append("[OK] Professional photo saved")
             if brokerage_logo:
-                success_parts.append("✓ Brokerage logo saved")
+                success_parts.append("[OK] Brokerage logo saved")
             
             print(f"AGENT PROFILE: Profile saved successfully with ID {profile_id}")
             print(f"{'='*60}\n")
@@ -8083,6 +8558,32 @@ def lender_crm():
     )
 
 
+@app.route("/lender/crm/address-labels")
+def lender_address_labels():
+    """Print address labels for lender CRM borrowers (30 per page, 3x10 grid)."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    borrowers = list_lender_borrowers(user["id"], status_filter=None)
+    labels = []
+    for b in borrowers:
+        name = (b.get("name") or "").strip()
+        addr = (b.get("address") or b.get("property_address") or "").strip()
+        if name and addr:
+            labels.append({"name": name, "address": addr})
+        elif name:
+            labels.append({"name": name, "address": "(No address on file)"})
+    if not labels:
+        labels = [{"name": "", "address": ""}] * 30
+    return render_template(
+        "shared/address_labels.html",
+        labels=labels,
+        back_url=url_for("lender_crm"),
+        back_label="Back to CRM",
+        role="lender",
+    )
+
+
 @app.route("/lender/crm/import", methods=["GET", "POST"])
 def lender_crm_import():
     """Lender CRM bulk import from Excel/CSV."""
@@ -8158,6 +8659,7 @@ def lender_crm_import():
                 # Get column mappings from form
                 mappings = {
                     'name': request.form.get('map_name', '').strip(),
+                    'last_name': request.form.get('map_last_name', '').strip(),
                     'email': request.form.get('map_email', '').strip(),
                     'phone': request.form.get('map_phone', '').strip(),
                     'status': request.form.get('map_status', '').strip(),
@@ -8184,11 +8686,21 @@ def lender_crm_import():
                 skipped = 0
                 errors = []
                 
+                def safe_get(val):
+                    if val is None:
+                        return ''
+                    s = str(val).strip()
+                    if s.lower() in ('nan', 'none', 'null', ''):
+                        return ''
+                    return s
+
                 for idx, row in enumerate(data):
                     try:
                         # Map columns to fields
-                        name = str(row.get(mappings['name'], '')).strip() if mappings['name'] else ''
-                        email = str(row.get(mappings['email'], '')).strip() if mappings['email'] else ''
+                        first_part = safe_get(row.get(mappings['name'], '')) if mappings['name'] else ''
+                        last_part = safe_get(row.get(mappings['last_name'], '')) if mappings.get('last_name') else ''
+                        name = f"{first_part} {last_part}".strip() if (first_part or last_part) else ''
+                        email = safe_get(row.get(mappings['email'], '')) if mappings['email'] else ''
                         phone = str(row.get(mappings['phone'], '')).strip() if mappings['phone'] else ''
                         status = str(row.get(mappings['status'], default_status)).strip() if mappings['status'] else default_status
                         loan_type = str(row.get(mappings['loan_type'], '')).strip() if mappings['loan_type'] else ''
@@ -9449,6 +9961,397 @@ def admin_audit_logs():
     conn.close()
     
     return render_template('admin/audit_logs.html', logs=logs)
+
+
+# -------------------------------------------------
+# AI CONCIERGE ROUTES
+# -------------------------------------------------
+
+# Public-facing homeowner concierge chat
+@app.route("/concierge/<agent_token>")
+def concierge_landing(agent_token):
+    """
+    Public landing page for homeowner AI concierge.
+    Branded per agent, luxury feel.
+    """
+    # Get agent from token (could be username, custom slug, or ID)
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Try to find agent by token (for now, use agent ID)
+    try:
+        agent_id = int(agent_token)
+        cur.execute("SELECT id, name FROM users WHERE id = ? AND role = 'agent'", (agent_id,))
+        agent = row_to_dict(cur.fetchone())
+    except:
+        agent = None
+    
+    if not agent:
+        conn.close()
+        abort(404, "Concierge not found")
+    
+    # Get concierge settings
+    cur.execute("SELECT * FROM concierge_settings WHERE agent_id = ?", (agent['id'],))
+    settings = row_to_dict(cur.fetchone())
+    conn.close()
+    
+    # Use defaults if no settings
+    if not settings:
+        settings = {
+            'branding_name': 'Your Home Concierge',
+            'branding_tagline': 'Answers, guidance, and trusted local connections',
+            'primary_color': '#1a1a1a',
+            'secondary_color': '#f5f5f5',
+            'welcome_message': 'How can I help you with your home today?'
+        }
+    
+    return render_template(
+        'concierge/landing.html',
+        agent=agent,
+        settings=settings,
+        agent_token=agent_token
+    )
+
+
+@app.route("/concierge/<agent_token>/chat", methods=["POST"])
+def concierge_chat(agent_token):
+    """
+    AI chat endpoint - processes homeowner messages.
+    Returns JSON with AI response.
+    """
+    from ai_concierge import ConciergeAI
+    
+    # Get agent
+    try:
+        agent_id = int(agent_token)
+    except:
+        return jsonify({"error": "Invalid agent"}), 404
+    
+    # Get message and session
+    data = request.get_json()
+    user_message = data.get('message', '').strip()
+    session_id = data.get('session_id')
+    
+    if not user_message:
+        return jsonify({"error": "Message required"}), 400
+    
+    if not session_id:
+        # Generate new session ID
+        import uuid
+        session_id = str(uuid.uuid4())
+    
+    # Get visitor IP
+    visitor_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    
+    # Process with AI
+    ai = ConciergeAI(agent_id)
+    response_text, metadata = ai.chat(session_id, user_message, visitor_ip)
+    
+    return jsonify({
+        "response": response_text,
+        "session_id": session_id,
+        "metadata": metadata
+    })
+
+
+# Agent dashboard for AI concierge
+@app.route("/agent/concierge")
+def agent_concierge_dashboard():
+    """Agent's AI concierge control panel"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from ai_concierge import get_concierge_stats, get_recent_leads
+    
+    stats = get_concierge_stats(user['id'])
+    recent_leads = get_recent_leads(user['id'], limit=10)
+    
+    # Get agent's concierge URL
+    concierge_url = request.host_url.rstrip('/') + url_for('concierge_landing', agent_token=user['id'])
+    
+    return render_template(
+        'agent/concierge_dashboard.html',
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        stats=stats,
+        recent_leads=recent_leads,
+        concierge_url=concierge_url
+    )
+
+
+@app.route("/agent/concierge/settings", methods=["GET", "POST"])
+def agent_concierge_settings():
+    """Configure AI concierge branding and settings"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    if request.method == "POST":
+        # Save settings
+        branding_name = request.form.get('branding_name', 'Your Home Concierge')
+        branding_tagline = request.form.get('branding_tagline', '')
+        primary_color = request.form.get('primary_color', '#1a1a1a')
+        secondary_color = request.form.get('secondary_color', '#f5f5f5')
+        welcome_message = request.form.get('welcome_message', '')
+        openai_api_key = request.form.get('openai_api_key', '')
+        is_active = 1 if request.form.get('is_active') == 'on' else 0
+        
+        # Upsert settings
+        cur.execute(
+            """INSERT INTO concierge_settings 
+            (agent_id, branding_name, branding_tagline, primary_color, 
+             secondary_color, welcome_message, openai_api_key, is_active, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(agent_id) DO UPDATE SET
+                branding_name = excluded.branding_name,
+                branding_tagline = excluded.branding_tagline,
+                primary_color = excluded.primary_color,
+                secondary_color = excluded.secondary_color,
+                welcome_message = excluded.welcome_message,
+                openai_api_key = excluded.openai_api_key,
+                is_active = excluded.is_active,
+                updated_at = excluded.updated_at
+            """,
+            (user['id'], branding_name, branding_tagline, primary_color,
+             secondary_color, welcome_message, openai_api_key, is_active,
+             datetime.now().isoformat())
+        )
+        conn.commit()
+        flash("Concierge settings saved successfully!", "success")
+        return redirect(url_for('agent_concierge_settings'))
+    
+    # GET - load current settings
+    cur.execute("SELECT * FROM concierge_settings WHERE agent_id = ?", (user['id'],))
+    settings = row_to_dict(cur.fetchone())
+    conn.close()
+    
+    return render_template(
+        'agent/concierge_settings.html',
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        settings=settings or {}
+    )
+
+
+@app.route("/agent/concierge/vendors", methods=["GET", "POST"])
+def agent_concierge_vendors():
+    """Manage subscription-based vendors for AI concierge"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    if request.method == "POST":
+        # Add new vendor
+        name = request.form.get('name', '').strip()
+        category = request.form.get('category', '').strip()
+        contact_name = request.form.get('contact_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        email = request.form.get('email', '').strip()
+        website = request.form.get('website', '').strip()
+        address = request.form.get('address', '').strip()
+        service_area_zips = request.form.get('service_area_zips', '').strip()
+        monthly_fee = float(request.form.get('monthly_fee', 400))
+        is_exclusive = 1 if request.form.get('is_exclusive') == 'on' else 0
+        notes = request.form.get('notes', '').strip()
+        
+        if name and category and contact_name and phone and email:
+            cur.execute(
+                """INSERT INTO concierge_vendors
+                (agent_id, name, category, contact_name, phone, email, website,
+                 address, service_area_zips, monthly_fee, is_exclusive, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (user['id'], name, category, contact_name, phone, email, website,
+                 address, service_area_zips, monthly_fee, is_exclusive, notes)
+            )
+            conn.commit()
+            flash(f"Vendor {name} added successfully!", "success")
+        else:
+            flash("Please fill in all required fields", "error")
+        
+        return redirect(url_for('agent_concierge_vendors'))
+    
+    # GET - load vendors
+    from ai_concierge import get_vendor_performance
+    vendors = get_vendor_performance(user['id'])
+    conn.close()
+    
+    # Available categories
+    categories = [
+        'HVAC', 'Plumbing', 'Electrical', 'Roofing', 'Landscaping',
+        'Painting', 'Flooring', 'Remodeling', 'Cleaning', 'Pest Control',
+        'Windows & Doors', 'Appliance Repair', 'Pool & Spa', 'Other'
+    ]
+    
+    return render_template(
+        'agent/concierge_vendors.html',
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        vendors=vendors,
+        categories=categories
+    )
+
+
+@app.route("/agent/concierge/vendors/<int:vendor_id>/update", methods=["POST"])
+def agent_concierge_vendor_update(vendor_id):
+    """Update vendor subscription status"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Verify vendor belongs to this agent
+    cur.execute("SELECT id FROM concierge_vendors WHERE id = ? AND agent_id = ?", 
+                (vendor_id, user['id']))
+    if not cur.fetchone():
+        conn.close()
+        abort(404)
+    
+    # Update status
+    new_status = request.form.get('status')
+    if new_status in ['active', 'paused', 'cancelled']:
+        cur.execute(
+            "UPDATE concierge_vendors SET subscription_status = ? WHERE id = ?",
+            (new_status, vendor_id)
+        )
+        conn.commit()
+        flash("Vendor status updated", "success")
+    
+    conn.close()
+    return redirect(url_for('agent_concierge_vendors'))
+
+
+@app.route("/agent/concierge/leads")
+def agent_concierge_leads():
+    """View all leads from AI concierge"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from ai_concierge import get_recent_leads
+    
+    # Get filter
+    urgency_filter = request.args.get('urgency')
+    status_filter = request.args.get('status')
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    query = """
+        SELECT 
+            l.*,
+            h.name as homeowner_name,
+            h.email as homeowner_email,
+            h.phone as homeowner_phone,
+            v.name as vendor_name,
+            v.contact_name as vendor_contact
+        FROM concierge_leads l
+        LEFT JOIN concierge_homeowners h ON l.homeowner_id = h.id
+        LEFT JOIN concierge_vendors v ON l.vendor_id = v.id
+        WHERE l.agent_id = ?
+    """
+    params = [user['id']]
+    
+    if urgency_filter:
+        query += " AND l.urgency = ?"
+        params.append(urgency_filter)
+    
+    if status_filter:
+        query += " AND l.status = ?"
+        params.append(status_filter)
+    
+    query += " ORDER BY l.routed_at DESC LIMIT 100"
+    
+    cur.execute(query, params)
+    leads = rows_to_dicts(cur.fetchall())
+    conn.close()
+    
+    return render_template(
+        'agent/concierge_leads.html',
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        leads=leads,
+        urgency_filter=urgency_filter,
+        status_filter=status_filter
+    )
+
+
+@app.route("/agent/concierge/conversations")
+def agent_concierge_conversations():
+    """View all AI concierge conversations"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    cur.execute(
+        """SELECT c.*, h.name as homeowner_name, h.email as homeowner_email
+        FROM concierge_conversations c
+        LEFT JOIN concierge_homeowners h ON c.homeowner_id = h.id
+        WHERE c.agent_id = ?
+        ORDER BY c.last_message_at DESC
+        LIMIT 50""",
+        (user['id'],)
+    )
+    conversations = rows_to_dicts(cur.fetchall())
+    conn.close()
+    
+    return render_template(
+        'agent/concierge_conversations.html',
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        conversations=conversations
+    )
+
+
+@app.route("/agent/concierge/conversations/<int:conversation_id>")
+def agent_concierge_conversation_detail(conversation_id):
+    """View conversation transcript"""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from ai_concierge import ConciergeAI
+    
+    conn = get_connection()
+    cur = conn.cursor()
+    
+    # Get conversation
+    cur.execute(
+        """SELECT c.*, h.name as homeowner_name, h.email as homeowner_email
+        FROM concierge_conversations c
+        LEFT JOIN concierge_homeowners h ON c.homeowner_id = h.id
+        WHERE c.id = ? AND c.agent_id = ?""",
+        (conversation_id, user['id'])
+    )
+    conversation = row_to_dict(cur.fetchone())
+    
+    if not conversation:
+        conn.close()
+        abort(404)
+    
+    # Get messages
+    ai = ConciergeAI(user['id'])
+    messages = ai.get_conversation_history(conversation_id, limit=100)
+    conn.close()
+    
+    return render_template(
+        'agent/concierge_conversation_detail.html',
+        brand_name=FRONT_BRAND_NAME,
+        user=user,
+        conversation=conversation,
+        messages=messages
+    )
 
 
 # ---------------- DEVELOPMENT SERVER ----------------

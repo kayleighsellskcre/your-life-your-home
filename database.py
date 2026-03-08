@@ -48,6 +48,16 @@ def get_connection() -> sqlite3.Connection:
     return conn
 
 
+def row_to_dict(row: Optional[sqlite3.Row]) -> Optional[Dict]:
+    """Convert a sqlite3.Row object to a dictionary."""
+    return dict(row) if row else None
+
+
+def rows_to_dicts(rows: List[sqlite3.Row]) -> List[Dict]:
+    """Convert a list of sqlite3.Row objects to a list of dictionaries."""
+    return [dict(row) for row in rows]
+
+
 def init_db() -> None:
     conn = get_connection()
     cur = conn.cursor()
@@ -172,33 +182,6 @@ def init_db() -> None:
     except:
         pass
 
-    # ---------------- VIDEO STUDIO ----------------
-    # Table for video projects
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS video_projects (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            transaction_id INTEGER,
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            video_type TEXT NOT NULL,
-            aspect_ratio TEXT NOT NULL,
-            duration INTEGER NOT NULL,
-            style_preset TEXT NOT NULL,
-            headline TEXT,
-            property_address TEXT,
-            highlights TEXT,
-            media_files TEXT,
-            include_lender INTEGER DEFAULT 0,
-            include_captions INTEGER DEFAULT 1,
-            render_status TEXT DEFAULT 'draft',
-            output_path TEXT,
-            thumbnail_path TEXT,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (transaction_id) REFERENCES agent_transactions (id)
-        )
-    """)
-
     # ------------- CLIENT RELATIONSHIPS -------------
     cur.execute(
         """
@@ -279,6 +262,184 @@ def init_db() -> None:
     try:
         cur.execute("CREATE INDEX IF NOT EXISTS idx_trusted_vendors_agent_id ON trusted_vendors(agent_id)")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_trusted_vendors_category ON trusted_vendors(category)")
+    except:
+        pass
+
+    # ------------- AI CONCIERGE VENDORS (Subscription-based) -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concierge_vendors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            contact_name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            email TEXT NOT NULL,
+            website TEXT,
+            address TEXT,
+            service_area_zips TEXT,
+            monthly_fee REAL DEFAULT 400,
+            subscription_status TEXT DEFAULT 'active' CHECK(subscription_status IN ('active','paused','cancelled')),
+            seats_limit INTEGER DEFAULT 1,
+            is_exclusive INTEGER DEFAULT 0,
+            onboarded_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            last_payment_date TEXT,
+            next_payment_date TEXT,
+            notes TEXT,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create indexes
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_vendors_agent_id ON concierge_vendors(agent_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_vendors_category ON concierge_vendors(category)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_vendors_status ON concierge_vendors(subscription_status)")
+    except:
+        pass
+
+    # ------------- AI CONCIERGE HOMEOWNERS (Lead Tracking) -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concierge_homeowners (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL,
+            name TEXT,
+            email TEXT,
+            phone TEXT,
+            address TEXT,
+            zip_code TEXT,
+            is_homeowner INTEGER DEFAULT 1,
+            ownership_length_years INTEGER,
+            property_type TEXT,
+            lead_score TEXT DEFAULT 'cold' CHECK(lead_score IN ('hot','warm','cold')),
+            lead_source TEXT DEFAULT 'concierge',
+            first_contact_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            last_contact_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            notes TEXT,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create indexes
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_homeowners_agent_id ON concierge_homeowners(agent_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_homeowners_lead_score ON concierge_homeowners(lead_score)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_homeowners_zip ON concierge_homeowners(zip_code)")
+    except:
+        pass
+
+    # ------------- AI CONCIERGE CONVERSATIONS -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concierge_conversations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL,
+            homeowner_id INTEGER,
+            session_id TEXT UNIQUE NOT NULL,
+            visitor_ip TEXT,
+            started_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            last_message_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'active' CHECK(status IN ('active','completed','abandoned')),
+            lead_captured INTEGER DEFAULT 0,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (homeowner_id) REFERENCES concierge_homeowners(id) ON DELETE SET NULL
+        )
+        """
+    )
+    
+    # Create indexes
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_conversations_session ON concierge_conversations(session_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_conversations_agent ON concierge_conversations(agent_id)")
+    except:
+        pass
+
+    # ------------- AI CONCIERGE MESSAGES -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concierge_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            conversation_id INTEGER NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('user','assistant','system')),
+            content TEXT NOT NULL,
+            metadata TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (conversation_id) REFERENCES concierge_conversations(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create index
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_messages_conversation ON concierge_messages(conversation_id)")
+    except:
+        pass
+
+    # ------------- AI CONCIERGE LEADS (Qualified & Routed) -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concierge_leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL,
+            homeowner_id INTEGER NOT NULL,
+            conversation_id INTEGER,
+            vendor_id INTEGER,
+            category TEXT NOT NULL,
+            urgency TEXT DEFAULT 'exploring' CHECK(urgency IN ('ready_now','exploring','future')),
+            budget_confirmed INTEGER DEFAULT 0,
+            timeline_weeks INTEGER,
+            description TEXT,
+            zip_code TEXT,
+            status TEXT DEFAULT 'new' CHECK(status IN ('new','sent_to_vendor','contacted','closed','lost')),
+            routed_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            contacted_at TEXT,
+            closed_at TEXT,
+            notes TEXT,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (homeowner_id) REFERENCES concierge_homeowners(id) ON DELETE CASCADE,
+            FOREIGN KEY (conversation_id) REFERENCES concierge_conversations(id) ON DELETE SET NULL,
+            FOREIGN KEY (vendor_id) REFERENCES concierge_vendors(id) ON DELETE SET NULL
+        )
+        """
+    )
+    
+    # Create indexes
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_leads_agent ON concierge_leads(agent_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_leads_vendor ON concierge_leads(vendor_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_leads_urgency ON concierge_leads(urgency)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_leads_status ON concierge_leads(status)")
+    except:
+        pass
+
+    # ------------- AI CONCIERGE SETTINGS (White-label Configuration) -------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concierge_settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_id INTEGER NOT NULL UNIQUE,
+            branding_name TEXT DEFAULT 'Your Home Concierge',
+            branding_tagline TEXT DEFAULT 'Answers, guidance, and trusted local connections',
+            primary_color TEXT DEFAULT '#1a1a1a',
+            secondary_color TEXT DEFAULT '#f5f5f5',
+            logo_url TEXT,
+            welcome_message TEXT,
+            is_active INTEGER DEFAULT 1,
+            openai_api_key TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (agent_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    
+    # Create index
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_concierge_settings_agent ON concierge_settings(agent_id)")
     except:
         pass
 
@@ -603,7 +764,8 @@ def init_db() -> None:
     for col in ['birthday', 'home_anniversary', 'address', 'notes', 'tags', 
                 'property_address', 'property_value', 'equity_estimate',
                 'auto_birthday', 'auto_anniversary', 'auto_seasonal', 
-                'auto_equity', 'auto_holidays', 'equity_frequency']:
+                'auto_equity', 'auto_holidays', 'equity_frequency',
+                'city', 'state', 'zip_code']:
         try:
             if col in ['auto_birthday', 'auto_anniversary', 'auto_seasonal', 
                       'auto_equity', 'auto_holidays']:
@@ -956,7 +1118,55 @@ def init_db() -> None:
         """
     )
     
-    print("[DATABASE] ✓ All tables created/verified including spotlight_card_sets")
+    print("[DATABASE] All tables created/verified including spotlight_card_sets")
+
+    # ---------------- INVOICES ----------------
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS invoices (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            invoice_number TEXT NOT NULL,
+            contact_id INTEGER,
+            client_name TEXT,
+            client_email TEXT,
+            client_address TEXT,
+            client_city TEXT,
+            client_state TEXT,
+            client_zip TEXT,
+            status TEXT DEFAULT 'draft',
+            issue_date TEXT,
+            due_date TEXT,
+            subtotal REAL DEFAULT 0,
+            tax_rate REAL DEFAULT 0,
+            tax_amount REAL DEFAULT 0,
+            discount_amount REAL DEFAULT 0,
+            total REAL DEFAULT 0,
+            notes TEXT,
+            terms TEXT DEFAULT 'Payment due within 30 days of invoice date.',
+            paid_date TEXT,
+            paid_amount REAL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS invoice_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            invoice_id INTEGER NOT NULL,
+            description TEXT NOT NULL,
+            quantity REAL DEFAULT 1,
+            unit_price REAL DEFAULT 0,
+            amount REAL DEFAULT 0,
+            sort_order INTEGER DEFAULT 0,
+            FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+        )
+        """
+    )
+    print("[DATABASE] Invoice tables created/verified")
 
     conn.commit()
     conn.close()
@@ -1014,7 +1224,7 @@ def create_user(name: str, email: str, password_hash: str, role: str, agent_id: 
                 pass
 
 
-def get_user_by_email(email: str) -> Optional[sqlite3.Row]:
+def get_user_by_email(email: str) -> Optional[Dict]:
     """
     Get user by email address.
     Uses proper error handling to ensure connections are always closed.
@@ -1028,7 +1238,7 @@ def get_user_by_email(email: str) -> Optional[sqlite3.Row]:
             (email.lower().strip(),),
         )
         row = cur.fetchone()
-        return row
+        return row_to_dict(row)
     except Exception as e:
         # Re-raise exceptions so callers can handle retries
         raise
@@ -1093,7 +1303,7 @@ def update_user_password(user_id: int, password_hash: str, name: str = None, rol
                 pass
 
 
-def find_incomplete_accounts() -> List[sqlite3.Row]:
+def find_incomplete_accounts() -> List[Dict]:
     """
     Find all accounts that have an email but no password_hash.
     These are incomplete accounts that need to be cleaned up or completed.
@@ -1106,7 +1316,7 @@ def find_incomplete_accounts() -> List[sqlite3.Row]:
             "SELECT * FROM users WHERE email IS NOT NULL AND (password_hash IS NULL OR password_hash = '')"
         )
         rows = cur.fetchall()
-        return rows
+        return rows_to_dicts(rows)
     except Exception as e:
         raise
     finally:
@@ -1152,7 +1362,7 @@ def delete_incomplete_account(user_id: int) -> bool:
                 pass
 
 
-def get_user_by_id(user_id: int) -> Optional[sqlite3.Row]:
+def get_user_by_id(user_id: int) -> Optional[Dict]:
     """
     Get user by ID.
     Uses proper error handling to ensure connections are always closed.
@@ -1163,7 +1373,7 @@ def get_user_by_id(user_id: int) -> Optional[sqlite3.Row]:
         cur = conn.cursor()
         cur.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         row = cur.fetchone()
-        return row
+        return row_to_dict(row)
     except Exception as e:
         # Re-raise exceptions so callers can handle them
         raise
@@ -1446,7 +1656,7 @@ def add_homeowner_note(
                 pass
 
 
-def list_homeowner_notes(user_id: int) -> List[sqlite3.Row]:
+def list_homeowner_notes(user_id: int) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -1463,7 +1673,7 @@ def list_homeowner_notes(user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def add_homeowner_document(
@@ -1521,7 +1731,7 @@ def add_warranty_log_item(
     return item_id
 
 
-def list_warranty_log_items(user_id: int) -> List[sqlite3.Row]:
+def list_warranty_log_items(user_id: int) -> List[Dict]:
     """List all warranty log items for a user."""
     conn = get_connection()
     cur = conn.cursor()
@@ -1533,7 +1743,7 @@ def list_warranty_log_items(user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def delete_warranty_log_item(item_id: int, user_id: int) -> bool:
@@ -1551,7 +1761,7 @@ def delete_warranty_log_item(item_id: int, user_id: int) -> bool:
     return success
 
 
-def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
+def list_homeowner_documents(user_id: int) -> List[Dict]:
     """List all documents for a homeowner. Handles schema migration if needed."""
     conn = get_connection()
     cur = conn.cursor()
@@ -1604,7 +1814,7 @@ def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
         
         rows = cur.fetchall()
         conn.close()
-        return rows
+        return rows_to_dicts(rows)
     except Exception as e:
         print(f"[DB ERROR] Error listing homeowner documents: {str(e)}")
         import traceback
@@ -1622,7 +1832,7 @@ def list_homeowner_documents(user_id: int) -> List[sqlite3.Row]:
             )
             rows = cur.fetchall()
             conn.close()
-            return rows
+            return rows_to_dicts(rows)
         except:
             conn.close()
             return []
@@ -1651,7 +1861,7 @@ def add_homeowner_project(
     return project_id
 
 
-def list_homeowner_projects(user_id: int) -> List[sqlite3.Row]:
+def list_homeowner_projects(user_id: int) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -1665,10 +1875,10 @@ def list_homeowner_projects(user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
-def get_homeowner_project(project_id: int, user_id: int) -> Optional[sqlite3.Row]:
+def get_homeowner_project(project_id: int, user_id: int) -> Optional[Dict]:
     """Get a single project by ID, ensuring it belongs to the user."""
     conn = get_connection()
     cur = conn.cursor()
@@ -1682,7 +1892,7 @@ def get_homeowner_project(project_id: int, user_id: int) -> Optional[sqlite3.Row
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 def update_homeowner_project(
@@ -1795,13 +2005,13 @@ def upsert_next_move_plan(
     conn.close()
 
 
-def get_next_move_plan(user_id: int) -> Optional[sqlite3.Row]:
+def get_next_move_plan(user_id: int) -> Optional[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM next_move_plans WHERE user_id = ?", (user_id,))
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 def add_homeowner_question(
@@ -1849,6 +2059,9 @@ def add_agent_contact(
     auto_equity: int = 1,
     auto_holidays: int = 1,
     equity_frequency: str = "monthly",
+    city: str = "",
+    state: str = "",
+    zip_code: str = "",
 ) -> int:
     conn = get_connection()
     cur = conn.cursor()
@@ -1858,14 +2071,16 @@ def add_agent_contact(
             agent_user_id, name, email, phone, stage, best_contact, last_touch,
             birthday, home_anniversary, address, notes, tags, property_address,
             property_value, equity_estimate, auto_birthday, auto_anniversary,
-            auto_seasonal, auto_equity, auto_holidays, equity_frequency
+            auto_seasonal, auto_equity, auto_holidays, equity_frequency,
+            city, state, zip_code
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (agent_user_id, name, email, phone, stage, best_contact, last_touch,
          birthday, home_anniversary, address, notes, tags, property_address,
          property_value, equity_estimate, auto_birthday, auto_anniversary,
-         auto_seasonal, auto_equity, auto_holidays, equity_frequency),
+         auto_seasonal, auto_equity, auto_holidays, equity_frequency,
+         city, state, zip_code),
     )
     contact_id = cur.lastrowid
     conn.commit()
@@ -1873,29 +2088,31 @@ def add_agent_contact(
     return contact_id
 
 
-def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[sqlite3.Row]:
+def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[dict]:
     conn = get_connection()
     cur = conn.cursor()
     query = """
         SELECT id, created_at, name, email, phone, stage, best_contact, last_touch,
                birthday, home_anniversary, address, notes, tags, property_address,
                property_value, equity_estimate, auto_birthday, auto_anniversary,
-               auto_seasonal, auto_equity, auto_holidays, equity_frequency
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency,
+               city, state, zip_code
         FROM agent_contacts
         WHERE agent_user_id = ?
     """
     params = [agent_user_id]
     if stage_filter:
-        query += " AND stage = ?"
+        query += " AND LOWER(TRIM(stage)) = LOWER(TRIM(?))"
         params.append(stage_filter)
-    query += " ORDER BY created_at DESC"
+    query += " ORDER BY LOWER(TRIM(COALESCE(name,''))) ASC, id ASC"
     cur.execute(query, tuple(params))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    # Convert Row objects to dictionaries
+    return [dict(row) for row in rows]
 
 
-def get_contacts_needing_followup(agent_user_id: int, days_threshold: int = 30) -> List[sqlite3.Row]:
+def get_contacts_needing_followup(agent_user_id: int, days_threshold: int = 30) -> List[dict]:
     """Get contacts that haven't been communicated with in X days"""
     conn = get_connection()
     cur = conn.cursor()
@@ -1944,10 +2161,11 @@ def get_contacts_needing_followup(agent_user_id: int, days_threshold: int = 30) 
     cur.execute(query, (agent_user_id, cutoff_iso))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    # Convert Row objects to dictionaries
+    return [dict(row) for row in rows]
 
 
-def get_agent_contact(contact_id: int, agent_user_id: int) -> Optional[sqlite3.Row]:
+def get_agent_contact(contact_id: int, agent_user_id: int) -> Optional[dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -1955,7 +2173,8 @@ def get_agent_contact(contact_id: int, agent_user_id: int) -> Optional[sqlite3.R
         SELECT id, created_at, name, email, phone, stage, best_contact, last_touch,
                birthday, home_anniversary, address, notes, tags, property_address,
                property_value, equity_estimate, auto_birthday, auto_anniversary,
-               auto_seasonal, auto_equity, auto_holidays, equity_frequency
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency,
+               city, state, zip_code
         FROM agent_contacts
         WHERE id = ? AND agent_user_id = ?
         """,
@@ -1963,7 +2182,8 @@ def get_agent_contact(contact_id: int, agent_user_id: int) -> Optional[sqlite3.R
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    # Convert Row object to dictionary
+    return dict(row) if row else None
 
 
 def update_agent_contact(
@@ -1994,6 +2214,50 @@ def update_agent_contact(
     conn.close()
 
 
+def delete_agent_contact(contact_id: int, agent_user_id: int) -> bool:
+    """Delete an agent contact. Returns True if successful."""
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "DELETE FROM agent_contacts WHERE id = ? AND agent_user_id = ?",
+            (contact_id, agent_user_id)
+        )
+        conn.commit()
+        deleted = cur.rowcount > 0
+        conn.close()
+        return deleted
+    except Exception as e:
+        print(f"Error deleting contact: {e}")
+        return False
+
+
+def remove_duplicate_agent_contacts(agent_user_id: int) -> int:
+    """Remove duplicate contacts (same name). Keeps the one with lowest id. Returns count removed."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, name FROM agent_contacts
+        WHERE agent_user_id = ?
+        ORDER BY name, id
+    """, (agent_user_id,))
+    rows = cur.fetchall()
+    seen_names = set()
+    ids_to_delete = []
+    for row in rows:
+        name_key = (row["name"] or "").strip().lower()
+        if name_key in seen_names:
+            ids_to_delete.append(row["id"])
+        else:
+            seen_names.add(name_key)
+    for cid in ids_to_delete:
+        cur.execute("DELETE FROM agent_contacts WHERE id = ? AND agent_user_id = ?", (cid, agent_user_id))
+    deleted = len(ids_to_delete)
+    conn.commit()
+    conn.close()
+    return deleted
+
+
 def add_agent_transaction(
     agent_user_id: int,
     property_address: str,
@@ -2017,7 +2281,7 @@ def add_agent_transaction(
     conn.close()
 
 
-def list_agent_transactions(agent_user_id: int) -> List[sqlite3.Row]:
+def list_agent_transactions(agent_user_id: int) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2031,13 +2295,13 @@ def list_agent_transactions(agent_user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def get_agent_transaction(
     agent_user_id: int,
     tx_id: int,
-) -> Optional[sqlite3.Row]:
+) -> Optional[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2050,7 +2314,7 @@ def get_agent_transaction(
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 # =========================
@@ -2105,7 +2369,7 @@ def add_lender_borrower(
     return borrower_id
 
 
-def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> List[sqlite3.Row]:
+def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> List[dict]:
     conn = get_connection()
     cur = conn.cursor()
     query = """
@@ -2124,10 +2388,11 @@ def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> Lis
     cur.execute(query, tuple(params))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    # Convert Row objects to dictionaries
+    return [dict(row) for row in rows]
 
 
-def get_lender_borrower(borrower_id: int, lender_user_id: int) -> Optional[sqlite3.Row]:
+def get_lender_borrower(borrower_id: int, lender_user_id: int) -> Optional[dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2143,7 +2408,8 @@ def get_lender_borrower(borrower_id: int, lender_user_id: int) -> Optional[sqlit
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    # Convert Row object to dictionary
+    return dict(row) if row else None
 
 
 def update_lender_borrower(
@@ -2198,7 +2464,7 @@ def add_lender_loan(
     conn.close()
 
 
-def list_lender_loans(lender_user_id: int) -> List[sqlite3.Row]:
+def list_lender_loans(lender_user_id: int) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2212,7 +2478,7 @@ def list_lender_loans(lender_user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 # =========================
@@ -2247,7 +2513,7 @@ def add_message_template(
 def list_message_templates(
     role: str,
     owner_user_id: Optional[int] = None,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     if owner_user_id:
@@ -2272,7 +2538,7 @@ def list_message_templates(
         )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def add_marketing_template(
@@ -2301,7 +2567,7 @@ def add_marketing_template(
 def list_marketing_templates(
     role: str,
     owner_user_id: Optional[int] = None,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     if owner_user_id:
@@ -2326,7 +2592,7 @@ def list_marketing_templates(
         )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 # =========================
@@ -2371,7 +2637,7 @@ def update_homeowner_document_file(
     conn.close()
 
 
-def get_homeowner_document_for_user(doc_id: int, user_id: int) -> Optional[sqlite3.Row]:
+def get_homeowner_document_for_user(doc_id: int, user_id: int) -> Optional[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2380,7 +2646,7 @@ def get_homeowner_document_for_user(doc_id: int, user_id: int) -> Optional[sqlit
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 # =========================
@@ -2414,7 +2680,7 @@ def add_timeline_event(
     return event_id
 
 
-def list_timeline_events(user_id: int) -> List[sqlite3.Row]:
+def list_timeline_events(user_id: int) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2428,7 +2694,7 @@ def list_timeline_events(user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def delete_timeline_event(event_id: int, user_id: int) -> None:
@@ -2457,7 +2723,7 @@ def add_simple_note(user_id: int, content: str) -> int:
     return note_id
 
 
-def list_simple_notes(user_id: int) -> List[sqlite3.Row]:
+def list_simple_notes(user_id: int) -> List[Dict]:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
@@ -2466,7 +2732,7 @@ def list_simple_notes(user_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def delete_simple_note(note_id: int, user_id: int) -> None:
@@ -2558,7 +2824,7 @@ def get_design_boards_for_user(user_id: int) -> Dict[str, Any]:
             conn.close()
 
 
-def get_design_board_details(user_id: int, project_name: str) -> List[sqlite3.Row]:
+def get_design_board_details(user_id: int, project_name: str) -> List[Dict]:
     """Get all notes for a specific design board."""
     conn = get_connection()
     cur = conn.cursor()
@@ -2576,7 +2842,7 @@ def get_design_board_details(user_id: int, project_name: str) -> List[sqlite3.Ro
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def delete_design_board(user_id: int, project_name: str) -> None:
@@ -2666,7 +2932,7 @@ def remove_fixtures_from_board(user_id: int, project_name: str, fixtures_to_remo
     conn.close()
 
 
-def get_homeowner_note_by_id(note_id: int, user_id: int) -> Optional[sqlite3.Row]:
+def get_homeowner_note_by_id(note_id: int, user_id: int) -> Optional[Dict]:
     """Get a single note by ID, ensuring it belongs to the user."""
     conn = get_connection()
     cur = conn.cursor()
@@ -2683,7 +2949,7 @@ def get_homeowner_note_by_id(note_id: int, user_id: int) -> Optional[sqlite3.Row
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 def update_homeowner_note(
@@ -3125,7 +3391,7 @@ def list_crm_interactions(
     contact_type: str,
     professional_user_id: int,
     limit: int = 50,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     """List interactions for a contact."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3141,7 +3407,7 @@ def list_crm_interactions(
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 # ====================== CRM TASKS ======================
@@ -3182,7 +3448,7 @@ def list_crm_tasks(
     contact_type: str = None,
     status: str = None,
     include_overdue: bool = True,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     """List tasks for contacts."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3208,7 +3474,7 @@ def list_crm_tasks(
     cur.execute(query, tuple(params))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def update_crm_task(
@@ -3298,7 +3564,7 @@ def list_crm_deals(
     contact_id: int = None,
     contact_type: str = None,
     stage: str = None,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     """List deals for contacts."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3323,7 +3589,7 @@ def list_crm_deals(
     cur.execute(query, tuple(params))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def update_crm_deal(
@@ -3422,7 +3688,7 @@ def list_crm_relationships(
     contact_id: int,
     contact_type: str,
     professional_user_id: int,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     """List relationships for a contact."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3437,7 +3703,7 @@ def list_crm_relationships(
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def delete_crm_relationship(relationship_id: int, professional_user_id: int) -> None:
@@ -3490,7 +3756,7 @@ def add_crm_saved_view(
 def list_crm_saved_views(
     professional_user_id: int,
     role: str,
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     """List saved views for a user."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3505,7 +3771,7 @@ def list_crm_saved_views(
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def delete_crm_saved_view(view_id: int, professional_user_id: int) -> None:
@@ -3554,7 +3820,7 @@ def get_contacts_for_automated_email(
     professional_user_id: int,
     email_type: str,
     contact_type: str = "agent_contact",
-) -> List[sqlite3.Row]:
+) -> List[Dict]:
     """Get contacts that should receive automated emails of a specific type."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3602,18 +3868,18 @@ def get_contacts_for_automated_email(
     cur.execute(query, (professional_user_id,))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 # ------------- USER PROFILES -------------
-def get_user_profile(user_id: int) -> Optional[sqlite3.Row]:
+def get_user_profile(user_id: int) -> Optional[Dict]:
     """Get user profile by user_id."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM user_profiles WHERE user_id = ?", (user_id,))
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 def create_or_update_user_profile(
@@ -3659,75 +3925,108 @@ def create_or_update_user_profile(
     existing = cur.fetchone()
     
     if existing:
-        # Check if referral code exists, generate if not
-        cur.execute("SELECT referral_code FROM user_profiles WHERE user_id = ?", (user_id,))
-        ref_row = cur.fetchone()
-        referral_code = ref_row[0] if ref_row and ref_row[0] else None
-        
+        # ── Load ALL existing values up front ──────────────────────────────
+        # This is the single source of truth for "preserve if not provided".
+        cur.execute("SELECT * FROM user_profiles WHERE user_id = ?", (user_id,))
+        ex_row = cur.fetchone()
+        ex = dict(ex_row) if ex_row else {}
+
+        # Helper: use the new value only when it is explicitly provided
+        # (not None). Empty string ("") is treated as an intentional clear.
+        # None means "caller did not supply this field — keep whatever is in DB."
+        def _keep(new_val, key):
+            return new_val if new_val is not None else ex.get(key)
+
+        # Referral code: never overwrite an existing one
+        referral_code = ex.get("referral_code") or None
         if not referral_code:
             from database import generate_referral_code
             referral_code = generate_referral_code(user_id, role)
-        
-        # Get existing values to preserve if None is passed
-        cur.execute("SELECT professional_photo, brokerage_logo FROM user_profiles WHERE user_id = ?", (user_id,))
-        existing_media = cur.fetchone()
-        existing_photo = existing_media[0] if existing_media and existing_media[0] else None
-        existing_logo = existing_media[1] if existing_media and existing_media[1] else None
-        
-        # Use provided values, or preserve existing if None or empty string
-        # CRITICAL: Empty string means "don't update", None means "use existing"
-        final_photo = professional_photo if (professional_photo is not None and professional_photo != "") else existing_photo
-        final_logo = brokerage_logo if (brokerage_logo is not None and brokerage_logo != "") else existing_logo
-        
-        print(f"[PROFILE UPDATE] user_id={user_id}, provided_photo={professional_photo}, existing_photo={existing_photo}, final_photo={final_photo}")
-        print(f"[PROFILE UPDATE] provided_logo={brokerage_logo}, existing_logo={existing_logo}, final_logo={final_logo}")
-        
-        # Update existing profile
+
+        # Photos / logos: also protected by _keep, plus explicit logging
+        final_photo = _keep(
+            professional_photo if (professional_photo is not None and professional_photo != "") else None,
+            "professional_photo"
+        )
+        final_logo = _keep(
+            brokerage_logo if (brokerage_logo is not None and brokerage_logo != "") else None,
+            "brokerage_logo"
+        )
+
+        print(f"[PROFILE UPDATE] user_id={user_id} | photo={'new' if professional_photo else 'kept'} | logo={'new' if brokerage_logo else 'kept'}")
+
+        # Update — every field falls back to its existing DB value when None
         query = """
             UPDATE user_profiles SET
-                role = ?,
-                referral_code = COALESCE(referral_code, ?),
-                professional_photo = ?,
-                brokerage_logo = ?,
-                team_name = ?,
-                brokerage_name = ?,
-                website_url = ?,
-                facebook_url = ?,
-                instagram_url = ?,
-                linkedin_url = ?,
-                twitter_url = ?,
-                youtube_url = ?,
-                phone = ?,
-                call_button_enabled = ?,
-                schedule_button_enabled = ?,
-                schedule_url = ?,
-                application_url = ?,
-                bio = ?,
-                specialties = ?,
-                years_experience = ?,
-                languages = ?,
-                service_areas = ?,
-                nmls_number = ?,
-                license_number = ?,
-                company_address = ?,
-                company_city = ?,
-                company_state = ?,
-                company_zip = ?,
-                homebot_widget_id = ?,
-                va_rate_30yr = COALESCE(?, va_rate_30yr),
-                fha_rate_30yr = COALESCE(?, fha_rate_30yr),
-                conventional_rate_30yr = COALESCE(?, conventional_rate_30yr),
-                updated_at = CURRENT_TIMESTAMP
+                role                   = ?,
+                referral_code          = COALESCE(referral_code, ?),
+                professional_photo     = ?,
+                brokerage_logo         = ?,
+                team_name              = ?,
+                brokerage_name         = ?,
+                website_url            = ?,
+                facebook_url           = ?,
+                instagram_url          = ?,
+                linkedin_url           = ?,
+                twitter_url            = ?,
+                youtube_url            = ?,
+                phone                  = ?,
+                call_button_enabled    = ?,
+                schedule_button_enabled= ?,
+                schedule_url           = ?,
+                application_url        = ?,
+                bio                    = ?,
+                specialties            = ?,
+                years_experience       = ?,
+                languages              = ?,
+                service_areas          = ?,
+                nmls_number            = ?,
+                license_number         = ?,
+                company_address        = ?,
+                company_city           = ?,
+                company_state          = ?,
+                company_zip            = ?,
+                homebot_widget_id      = ?,
+                va_rate_30yr           = ?,
+                fha_rate_30yr          = ?,
+                conventional_rate_30yr = ?,
+                updated_at             = CURRENT_TIMESTAMP
             WHERE user_id = ?
         """
         cur.execute(query, (
-            role, referral_code, final_photo, final_logo, team_name, brokerage_name,
-            website_url, facebook_url, instagram_url, linkedin_url, twitter_url,
-            youtube_url, phone, call_button_enabled, schedule_button_enabled,
-            schedule_url, application_url, bio, specialties, years_experience, languages,
-            service_areas, nmls_number, license_number, company_address,
-            company_city, company_state, company_zip, homebot_widget_id,
-            va_rate_30yr, fha_rate_30yr, conventional_rate_30yr, user_id
+            role,
+            referral_code,
+            final_photo,
+            final_logo,
+            _keep(team_name,              "team_name"),
+            _keep(brokerage_name,         "brokerage_name"),
+            _keep(website_url,            "website_url"),
+            _keep(facebook_url,           "facebook_url"),
+            _keep(instagram_url,          "instagram_url"),
+            _keep(linkedin_url,           "linkedin_url"),
+            _keep(twitter_url,            "twitter_url"),
+            _keep(youtube_url,            "youtube_url"),
+            _keep(phone,                  "phone"),
+            _keep(call_button_enabled,      "call_button_enabled"),
+            _keep(schedule_button_enabled,  "schedule_button_enabled"),
+            _keep(schedule_url,           "schedule_url"),
+            _keep(application_url,        "application_url"),
+            _keep(bio,                    "bio"),
+            _keep(specialties,            "specialties"),
+            _keep(years_experience,       "years_experience"),
+            _keep(languages,              "languages"),
+            _keep(service_areas,          "service_areas"),
+            _keep(nmls_number,            "nmls_number"),
+            _keep(license_number,         "license_number"),
+            _keep(company_address,        "company_address"),
+            _keep(company_city,           "company_city"),
+            _keep(company_state,          "company_state"),
+            _keep(company_zip,            "company_zip"),
+            _keep(homebot_widget_id,      "homebot_widget_id"),
+            _keep(va_rate_30yr,           "va_rate_30yr"),
+            _keep(fha_rate_30yr,          "fha_rate_30yr"),
+            _keep(conventional_rate_30yr, "conventional_rate_30yr"),
+            user_id,
         ))
         profile_id = existing[0]
     else:
@@ -3914,7 +4213,7 @@ def get_or_create_referral_code(user_id: int, role: str) -> str:
         return f"{role[:1].upper()}-{user_id:06d}"
 
 
-def get_professional_by_referral_code(referral_code: str) -> Optional[sqlite3.Row]:
+def get_professional_by_referral_code(referral_code: str) -> Optional[Dict]:
     """Get professional (agent or lender) by their referral code."""
     conn = get_connection()
     cur = conn.cursor()
@@ -3936,7 +4235,7 @@ def get_professional_by_referral_code(referral_code: str) -> Optional[sqlite3.Ro
     """, (referral_code,))
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 def create_client_relationship(
@@ -3989,7 +4288,7 @@ def create_client_relationship(
     return relationship_id
 
 
-def get_homeowner_professionals(homeowner_id: int) -> List[sqlite3.Row]:
+def get_homeowner_professionals(homeowner_id: int) -> List[Dict]:
     """Get all professionals (agents and lenders) associated with a homeowner."""
     conn = get_connection()
     cur = conn.cursor()
@@ -4015,7 +4314,7 @@ def get_homeowner_professionals(homeowner_id: int) -> List[sqlite3.Row]:
     """, (homeowner_id,))
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def get_referral_stats(professional_id: int) -> Dict[str, Any]:
@@ -4107,7 +4406,7 @@ def create_referral_link(agent_id: Optional[int] = None, lender_id: Optional[int
     return token
 
 
-def get_referral_link_by_token(token: str) -> Optional[sqlite3.Row]:
+def get_referral_link_by_token(token: str) -> Optional[Dict]:
     """Get a referral link by its token. Returns None if not found or inactive."""
     conn = get_connection()
     cur = conn.cursor()
@@ -4118,10 +4417,10 @@ def get_referral_link_by_token(token: str) -> Optional[sqlite3.Row]:
     )
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
-def get_referral_links_for_agent(agent_id: int) -> List[sqlite3.Row]:
+def get_referral_links_for_agent(agent_id: int) -> List[Dict]:
     """Get all active referral links for an agent."""
     conn = get_connection()
     cur = conn.cursor()
@@ -4133,10 +4432,10 @@ def get_referral_links_for_agent(agent_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
-def get_referral_links_for_lender(lender_id: int) -> List[sqlite3.Row]:
+def get_referral_links_for_lender(lender_id: int) -> List[Dict]:
     """Get all active referral links for a lender."""
     conn = get_connection()
     cur = conn.cursor()
@@ -4148,7 +4447,7 @@ def get_referral_links_for_lender(lender_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def deactivate_referral_link(token: str) -> bool:
@@ -4388,7 +4687,7 @@ def create_trusted_vendor(
     return vendor_id
 
 
-def get_trusted_vendors(agent_id: int, category: Optional[str] = None) -> List[sqlite3.Row]:
+def get_trusted_vendors(agent_id: int, category: Optional[str] = None) -> List[Dict]:
     """Get all trusted vendors for an agent, optionally filtered by category."""
     conn = get_connection()
     cur = conn.cursor()
@@ -4408,17 +4707,17 @@ def get_trusted_vendors(agent_id: int, category: Optional[str] = None) -> List[s
         )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
-def get_trusted_vendor_by_id(vendor_id: int) -> Optional[sqlite3.Row]:
+def get_trusted_vendor_by_id(vendor_id: int) -> Optional[Dict]:
     """Get a specific trusted vendor by ID."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("SELECT * FROM trusted_vendors WHERE id = ?", (vendor_id,))
     row = cur.fetchone()
     conn.close()
-    return row
+    return row_to_dict(row)
 
 
 def update_trusted_vendor(
@@ -4513,7 +4812,7 @@ def link_vendor_to_transaction(transaction_id: int, vendor_id: int) -> bool:
         return False
 
 
-def get_transaction_vendors(transaction_id: int) -> List[sqlite3.Row]:
+def get_transaction_vendors(transaction_id: int) -> List[Dict]:
     """Get all vendors linked to a transaction."""
     conn = get_connection()
     cur = conn.cursor()
@@ -4526,7 +4825,7 @@ def get_transaction_vendors(transaction_id: int) -> List[sqlite3.Row]:
     )
     rows = cur.fetchall()
     conn.close()
-    return rows
+    return rows_to_dicts(rows)
 
 
 def unlink_vendor_from_transaction(transaction_id: int, vendor_id: int) -> bool:
@@ -4598,3 +4897,149 @@ def get_or_create_default_agent() -> int:
     
     print(f"Created default agent: {DEFAULT_AGENT_NAME} (ID: {agent_id})")
     return agent_id
+
+
+# =========================
+# INVOICE MANAGEMENT
+# =========================
+
+def _next_invoice_number(agent_user_id: int) -> str:
+    """Generate next sequential invoice number starting at INV-0217."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT COUNT(*) FROM invoices WHERE agent_user_id = ?", (agent_user_id,)
+    )
+    count = cur.fetchone()[0]
+    conn.close()
+    return f"INV-{(count + 217):04d}"
+
+
+def create_invoice(agent_user_id: int, **kwargs) -> int:
+    """Create a new invoice. Returns new invoice id."""
+    conn = get_connection()
+    cur = conn.cursor()
+    inv_number = kwargs.pop("invoice_number", None) or _next_invoice_number(agent_user_id)
+    fields = ["agent_user_id", "invoice_number"]
+    values = [agent_user_id, inv_number]
+    allowed = [
+        "contact_id", "client_name", "client_email", "client_address",
+        "client_city", "client_state", "client_zip",
+        "status", "issue_date", "due_date",
+        "subtotal", "tax_rate", "tax_amount", "discount_amount", "total",
+        "notes", "terms", "paid_date", "paid_amount",
+    ]
+    for k in allowed:
+        if k in kwargs:
+            fields.append(k)
+            values.append(kwargs[k])
+    placeholders = ",".join(["?"] * len(values))
+    cur.execute(
+        f"INSERT INTO invoices ({','.join(fields)}) VALUES ({placeholders})",
+        tuple(values),
+    )
+    new_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+    return new_id
+
+
+def update_invoice(invoice_id: int, agent_user_id: int, **kwargs) -> None:
+    """Update invoice fields."""
+    if not kwargs:
+        return
+    conn = get_connection()
+    cur = conn.cursor()
+    allowed = [
+        "contact_id", "client_name", "client_email", "client_address",
+        "client_city", "client_state", "client_zip",
+        "status", "issue_date", "due_date",
+        "subtotal", "tax_rate", "tax_amount", "discount_amount", "total",
+        "notes", "terms", "paid_date", "paid_amount",
+    ]
+    sets, vals = [], []
+    for k, v in kwargs.items():
+        if k in allowed:
+            sets.append(f"{k} = ?")
+            vals.append(v)
+    if not sets:
+        conn.close()
+        return
+    sets.append("updated_at = CURRENT_TIMESTAMP")
+    vals.extend([invoice_id, agent_user_id])
+    cur.execute(
+        f"UPDATE invoices SET {', '.join(sets)} WHERE id = ? AND agent_user_id = ?",
+        tuple(vals),
+    )
+    conn.commit()
+    conn.close()
+
+
+def delete_invoice(invoice_id: int, agent_user_id: int) -> bool:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM invoices WHERE id = ? AND agent_user_id = ?",
+        (invoice_id, agent_user_id),
+    )
+    ok = cur.rowcount > 0
+    conn.commit()
+    conn.close()
+    return ok
+
+
+def get_invoice(invoice_id: int, agent_user_id: int) -> Optional[Dict]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM invoices WHERE id = ? AND agent_user_id = ?",
+        (invoice_id, agent_user_id),
+    )
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def list_invoices(agent_user_id: int, status: str = None) -> List[Dict]:
+    conn = get_connection()
+    cur = conn.cursor()
+    q = "SELECT * FROM invoices WHERE agent_user_id = ?"
+    params = [agent_user_id]
+    if status:
+        q += " AND status = ?"
+        params.append(status)
+    q += " ORDER BY created_at DESC"
+    cur.execute(q, tuple(params))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def set_invoice_items(invoice_id: int, items: list) -> None:
+    """Replace all line items for an invoice."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM invoice_items WHERE invoice_id = ?", (invoice_id,))
+    for i, item in enumerate(items):
+        qty = float(item.get("quantity", 1) or 1)
+        price = float(item.get("unit_price", 0) or 0)
+        amount = round(qty * price, 2)
+        cur.execute(
+            """INSERT INTO invoice_items (invoice_id, description, quantity, unit_price, amount, sort_order)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (invoice_id, item.get("description", ""), qty, price, amount, i),
+        )
+    conn.commit()
+    conn.close()
+
+
+def get_invoice_items(invoice_id: int) -> List[Dict]:
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY sort_order ASC, id ASC",
+        (invoice_id,),
+    )
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(r) for r in rows]

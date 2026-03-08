@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice {{ invoice.invoice_number }} – Kayleigh Biggs Custom Cabinetry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --olive:   #6B6A45;
+      --olive-dk:#5A5938;
+      --cream:   #F9F7F2;
+      --ivory:   #FFFDF9;
+      --brown:   #3A352C;
+      --tan:     rgba(200,180,151,.25);
+      --gold:    #8B6914;
+      --muted:   #9A9472;
+      --green:   #4A7C59;
+    }
+
+    body {
+      font-family: 'Lato', sans-serif;
+      background: #e8e4da;
+      color: var(--brown);
+      padding: 2rem;
+    }
+
+    /* ── SCREEN-ONLY ACTIONS ── */
+    @media screen {
+      .inv-actions {
+        max-width: 820px;
+        margin: 0 auto 1.25rem;
+        display: flex;
+        gap: .6rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .inv-actions a, .inv-actions button {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .45rem 1rem;
+        border-radius: 6px;
+        font-size: .8rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        text-decoration: none;
+        transition: background .12s;
+        font-family: 'Lato', sans-serif;
+      }
+      .btn-back    { background: #fff; color: var(--olive); border: 1px solid var(--tan); }
+      .btn-back:hover { background: var(--cream); }
+      .btn-edit    { background: var(--olive); color: #fff; }
+      .btn-edit:hover { background: var(--olive-dk); }
+      .btn-print   { background: var(--brown); color: #fff; }
+      .btn-print:hover { background: #2a251e; }
+      .status-badge-action {
+        margin-left: auto;
+        font-size: .73rem;
+        color: var(--muted);
+      }
+    }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .inv-actions { display: none !important; }
+    }
+
+    /* ── INVOICE PAPER ── */
+    .invoice-paper {
+      background: var(--ivory);
+      max-width: 820px;
+      margin: 0 auto;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,.14);
+    }
+    @media print {
+      .invoice-paper {
+        max-width: 100%;
+        box-shadow: none;
+        border-radius: 0;
+      }
+    }
+
+    /* ── HEADER ── */
+    .inv-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+      padding: 2.25rem 2.5rem 1.75rem;
+      background: var(--ivory);
+      border-bottom: 3px solid var(--olive);
+    }
+
+    .brand-block {}
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem;
+      font-weight: 500;
+      color: var(--olive-dk);
+      letter-spacing: .02em;
+      line-height: 1.2;
+      margin-bottom: .2rem;
+    }
+    .brand-tagline {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .brand-quote {
+      margin-top: .65rem;
+      font-size: .74rem;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 340px;
+      font-style: italic;
+      letter-spacing: .01em;
+    }
+
+    .inv-meta {
+      text-align: right;
+      min-width: 220px;
+    }
+    .inv-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      font-weight: 400;
+      color: var(--olive);
+      letter-spacing: .04em;
+    }
+    .inv-label {
+      font-size: .58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: .18rem;
+    }
+    .inv-meta-row {
+      margin-bottom: .55rem;
+    }
+    .inv-meta-val {
+      font-size: .83rem;
+      color: var(--brown);
+      font-weight: 600;
+    }
+
+    /* STATUS STAMP */
+    .inv-stamp {
+      display: inline-block;
+      margin-top: .5rem;
+      padding: .3rem .85rem;
+      border-radius: 4px;
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      border: 2px solid currentColor;
+    }
+    .stamp-draft   { color: var(--muted);  border-color: var(--muted);  opacity:.7; }
+    .stamp-sent    { color: var(--olive);  border-color: var(--olive); }
+    .stamp-paid    { color: var(--green);  border-color: var(--green); }
+    .stamp-overdue { color: #b94040;       border-color: #b94040; }
+
+    /* ── BILL TO / BILL FROM STRIP ── */
+    .inv-parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      background: var(--cream);
+      border-bottom: 1px solid var(--tan);
+    }
+    .inv-party {
+      padding: 1.25rem 2.5rem;
+    }
+    .inv-party:first-child {
+      border-right: 1px solid var(--tan);
+    }
+    .party-label {
+      font-size: .58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: .5rem;
+    }
+    .party-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--brown);
+      margin-bottom: .25rem;
+    }
+    .party-detail {
+      font-size: .75rem;
+      color: var(--brown);
+      line-height: 1.65;
+    }
+    .party-detail a { color: var(--olive); text-decoration: none; }
+
+    /* ── LINE ITEMS ── */
+    .inv-items {
+      padding: 1.75rem 2.5rem 0;
+    }
+    .items-section-title {
+      font-size: .6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--muted);
+      margin-bottom: .75rem;
+    }
+    .items-tbl {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .items-tbl thead th {
+      font-size: .62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      padding: .5rem .65rem;
+      border-bottom: 2px solid var(--tan);
+      text-align: left;
+    }
+    .items-tbl thead th:not(:first-child) { text-align: right; }
+    .items-tbl tbody td {
+      padding: .85rem .65rem;
+      font-size: .83rem;
+      color: var(--brown);
+      border-bottom: 1px solid var(--tan);
+      vertical-align: top;
+    }
+    .items-tbl tbody td:not(:first-child) { text-align: right; }
+    .items-tbl tbody tr:last-child td { border-bottom: none; }
+    .item-desc { font-weight: 400; }
+    .item-desc-note { font-size: .7rem; color: var(--muted); margin-top: .12rem; }
+    .item-qty, .item-rate { color: var(--muted); }
+    .item-amount { font-weight: 600; color: var(--brown); }
+
+    /* ── TOTALS ── */
+    .inv-totals {
+      padding: 0 2.5rem 1.75rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .totals-box {
+      min-width: 260px;
+      border: 1px solid var(--tan);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .tot-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      padding: .5rem .85rem;
+      font-size: .78rem;
+      border-bottom: 1px solid var(--tan);
+    }
+    .tot-row:last-child { border-bottom: none; }
+    .tot-row--total {
+      background: var(--olive);
+      color: #fff;
+      padding: .7rem .85rem;
+    }
+    .tot-label { color: var(--muted); }
+    .tot-row--total .tot-label { color: rgba(255,255,255,.8); font-size: .65rem; letter-spacing: .06em; text-transform: uppercase; }
+    .tot-val { font-weight: 600; text-align: right; min-width: 80px; }
+    .tot-row--total .tot-val { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 400; color: #fff; }
+
+    /* ── FOOTER ── */
+    .inv-footer {
+      padding: 1.25rem 2.5rem 2rem;
+      border-top: 1px solid var(--tan);
+      background: var(--cream);
+    }
+    .inv-footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      .inv-footer-grid { grid-template-columns: 1fr; }
+    }
+    .pay-row {
+      display: flex;
+      align-items: baseline;
+      gap: .4rem;
+      margin-bottom: .42rem;
+      font-size: .74rem;
+      line-height: 1.4;
+    }
+    .pay-method {
+      font-weight: 700;
+      color: var(--olive-dk);
+      white-space: nowrap;
+      font-size: .7rem;
+    }
+    .pay-detail { color: var(--brown); }
+    .pay-note   { font-size: .64rem; color: var(--muted); display: block; margin-left: .05rem; }
+    .footer-section-label {
+      font-size: .58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--muted);
+      margin-bottom: .4rem;
+    }
+    .footer-text {
+      font-size: .75rem;
+      color: var(--brown);
+      line-height: 1.6;
+    }
+
+    /* ── PAID WATERMARK ── */
+    {% if invoice.status == 'paid' %}
+    .invoice-paper::after {
+      content: "PAID";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-family: 'Playfair Display', serif;
+      font-size: 9rem;
+      font-weight: 600;
+      color: rgba(74,124,89,.08);
+      pointer-events: none;
+      z-index: 0;
+      letter-spacing: .2em;
+    }
+    {% endif %}
+    {% if invoice.status == 'overdue' %}
+    .invoice-paper::after {
+      content: "OVERDUE";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-family: 'Playfair Display', serif;
+      font-size: 6rem;
+      font-weight: 600;
+      color: rgba(185,64,64,.07);
+      pointer-events: none;
+      z-index: 0;
+      letter-spacing: .15em;
+    }
+    {% endif %}
+
+    @media print {
+      @page { margin: 0.5in; size: letter; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SCREEN ACTIONS -->
+  <div class="inv-actions">
+    <a href="{{ url_for('agent_invoices') }}" class="btn-back">← Invoices</a>
+    <a href="{{ url_for('agent_invoice_edit', inv_id=invoice.id) }}" class="btn-edit">✏ Edit</a>
+    <button onclick="window.print()" class="btn-print">🖨 Print / Save PDF</button>
+    <span class="status-badge-action">
+      Status: <strong>{{ invoice.status|title }}</strong>
+      {% if invoice.status != 'paid' %}
+      &nbsp;·&nbsp;
+      <a href="#" style="color:var(--green);font-weight:600;" onclick="markPaidNow(event)">Mark Paid</a>
+      {% endif %}
+    </span>
+  </div>
+
+  <!-- INVOICE PAPER -->
+  <div class="invoice-paper">
+
+    <!-- HEADER -->
+    <div class="inv-header">
+      <div class="brand-block">
+        <div class="brand-name">Kayleigh Biggs</div>
+        <div class="brand-tagline">Custom Cabinetry &amp; Visual Layouts</div>
+        <div class="brand-quote">
+          Each design is carefully curated with intention, balancing seamless functionality and refined aesthetics. We take pride in delivering cabinetry and layouts that reflect exceptional care, detail, and timeless beauty!
+        </div>
+      </div>
+      <div class="inv-meta">
+        <div class="inv-label">Invoice</div>
+        <div class="inv-number">{{ invoice.invoice_number }}</div>
+        <div style="margin-top:.75rem;">
+          <div class="inv-meta-row">
+            <div class="inv-label">Issue Date</div>
+            <div class="inv-meta-val">{{ invoice.issue_date or '—' }}</div>
+          </div>
+          <div class="inv-meta-row">
+            <div class="inv-label">Due Date</div>
+            <div class="inv-meta-val" style="{% if invoice.status == 'overdue' %}color:#b94040{% endif %}">{{ invoice.due_date or '—' }}</div>
+          </div>
+          {% if invoice.paid_date %}
+          <div class="inv-meta-row">
+            <div class="inv-label">Paid Date</div>
+            <div class="inv-meta-val" style="color:var(--green)">{{ invoice.paid_date }}</div>
+          </div>
+          {% endif %}
+        </div>
+        <div>
+          <span class="inv-stamp stamp-{{ invoice.status }}">{{ invoice.status }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BILL TO / FROM -->
+    <div class="inv-parties">
+      <div class="inv-party">
+        <div class="party-label">Bill To</div>
+        <div class="party-name">{{ invoice.client_name or 'Client' }}</div>
+        <div class="party-detail">
+          {% if invoice.client_email %}<a href="mailto:{{ invoice.client_email }}">{{ invoice.client_email }}</a><br>{% endif %}
+          {% if invoice.client_address %}{{ invoice.client_address }}<br>{% endif %}
+          {% if invoice.client_city or invoice.client_state %}
+            {{ invoice.client_city }}{% if invoice.client_city and invoice.client_state %}, {% endif %}{{ invoice.client_state }}{% if invoice.client_zip %} {{ invoice.client_zip }}{% endif %}
+          {% endif %}
+        </div>
+      </div>
+      <div class="inv-party">
+        <div class="party-label">Bill From</div>
+        <div class="party-name">Kayleigh Biggs</div>
+        <div class="party-detail">
+          Custom Cabinetry &amp; Visual Layouts<br>
+          <a href="tel:7852491464">785.249.1464</a><br>
+          <a href="mailto:kayleighsellskcre@gmail.com">kayleighsellskcre@gmail.com</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LINE ITEMS -->
+    <div class="inv-items">
+      <div class="items-section-title">Services &amp; Items</div>
+      <table class="items-tbl">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="width:80px">Qty</th>
+            <th style="width:110px">Unit Price</th>
+            <th style="width:110px">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td class="item-desc">{{ item.description }}</td>
+            <td class="item-qty">{{ item.quantity|int if item.quantity == item.quantity|int else item.quantity }}</td>
+            <td class="item-rate">${{ "{:,.2f}".format(item.unit_price or 0) }}</td>
+            <td class="item-amount">${{ "{:,.2f}".format(item.amount or 0) }}</td>
+          </tr>
+          {% endfor %}
+          {% if not items %}
+          <tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--muted);font-style:italic;">No items</td></tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- TOTALS -->
+    <div class="inv-totals">
+      <div class="totals-box">
+        <div class="tot-row">
+          <span class="tot-label">Subtotal</span>
+          <span class="tot-val">${{ "{:,.2f}".format(invoice.subtotal or 0) }}</span>
+        </div>
+        {% if invoice.tax_rate %}
+        <div class="tot-row">
+          <span class="tot-label">Tax ({{ invoice.tax_rate }}%)</span>
+          <span class="tot-val">${{ "{:,.2f}".format(invoice.tax_amount or 0) }}</span>
+        </div>
+        {% endif %}
+        {% if invoice.discount_amount %}
+        <div class="tot-row">
+          <span class="tot-label">Discount</span>
+          <span class="tot-val" style="color:var(--green)">–${{ "{:,.2f}".format(invoice.discount_amount or 0) }}</span>
+        </div>
+        {% endif %}
+        <div class="tot-row tot-row--total">
+          <span class="tot-label">Total Due</span>
+          <span class="tot-val">${{ "{:,.2f}".format(invoice.total or 0) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER: NOTES & TERMS -->
+    <div class="inv-footer">
+      <div class="inv-footer-grid">
+
+        <!-- Notes -->
+        <div>
+          {% if invoice.notes %}
+          <div class="footer-section-label">Notes</div>
+          <div class="footer-text">{{ invoice.notes }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Payment Options -->
+        <div>
+          <div class="footer-section-label">Payment Options</div>
+          <div class="pay-row">
+            <span class="pay-method">Venmo</span>
+            <span class="pay-detail">@Kayleigh-Biggs-1<span class="pay-note">PIN: last 4 of phone (1464)</span></span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-method">PayPal</span>
+            <span class="pay-detail">kayleighsellskcre@gmail.com<span class="pay-note">Select "Friends &amp; Family"</span></span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-method">Apple Pay</span>
+            <span class="pay-detail">785-249-1464</span>
+          </div>
+          <div class="pay-row">
+            <span class="pay-method">Check / Cash</span>
+            <span class="pay-detail">Made out to Kayleigh Biggs</span>
+          </div>
+        </div>
+
+        <!-- Terms -->
+        <div>
+          <div class="footer-section-label">Payment Terms</div>
+          <div class="footer-text">{{ invoice.terms or 'Payment due within 30 days of invoice date.' }}</div>
+          {% if invoice.status == 'paid' and invoice.paid_date %}
+          <div style="margin-top:.5rem;font-size:.73rem;color:var(--green);font-weight:600;">✓ Paid in full on {{ invoice.paid_date }}</div>
+          {% endif %}
+        </div>
+
+      </div>
+      <div style="text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--tan);">
+        <div style="font-family:'Playfair Display',serif;font-size:.85rem;color:var(--muted);letter-spacing:.08em;">
+          Thank you for choosing Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts
+        </div>
+        <div style="margin-top:.35rem;font-size:.7rem;color:var(--muted);">
+          785.249.1464 &nbsp;·&nbsp; <a href="mailto:kayleighsellskcre@gmail.com" style="color:var(--muted);text-decoration:none;">kayleighsellskcre@gmail.com</a>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /invoice-paper -->
+
+<script>
+function markPaidNow(e){
+  e.preventDefault();
+  if(!confirm('Mark this invoice as Paid?')) return;
+  var fd = new FormData();
+  fd.append('status','paid');
+  fetch('/agent/invoices/{{ invoice.id }}/status',{method:'POST',body:fd})
+    .then(function(r){return r.json();})
+    .then(function(d){ if(d.success) window.location.reload(); });
+}
+</script>
+</body>
+</html>

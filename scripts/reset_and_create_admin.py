@@ -5,6 +5,13 @@ DANGER: This deletes ALL users and creates a fresh admin account
 
 import sys
 import os
+
+# Fix encoding for Windows
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database import get_connection
@@ -40,7 +47,7 @@ def create_super_admin():
     
     name = input("Your full name: ").strip()
     email = input("Your email: ").strip()
-    phone = input("Your phone: ").strip()
+    phone = input("Your phone (optional): ").strip()
     password = getpass.getpass("Password: ")
     password_confirm = getpass.getpass("Confirm password: ")
     
@@ -58,31 +65,45 @@ def create_super_admin():
     # Create super admin with special role
     hashed_pw = generate_password_hash(password)
     
+    # Insert into users table (no phone column - it's in user_profiles)
     cur.execute("""
         INSERT INTO users (
-            name, email, phone, password, 
-            role, subscription_tier, email_verified,
+            name, email, password_hash, 
+            role, subscription_tier,
             created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        ) VALUES (?, ?, ?, ?, ?, datetime('now'))
     """, (
         name,
         email,
-        phone,
         hashed_pw,
-        'owner',  # Super admin role
-        'owner',  # Owner tier (highest)
-        1  # Auto-verified
+        'agent',  # Agent role for super admin
+        'pro'  # Highest subscription tier
     ))
     
     conn.commit()
     user_id = cur.lastrowid
     
+    # Create user profile with phone if provided
+    if phone:
+        cur.execute("""
+            INSERT INTO user_profiles (
+                user_id, role, phone,
+                created_at, updated_at
+            ) VALUES (?, ?, ?, datetime('now'), datetime('now'))
+        """, (
+            user_id,
+            'agent',
+            phone
+        ))
+        conn.commit()
+    
     print(f"\n✅ Super Admin Created!")
     print(f"ID: {user_id}")
     print(f"Name: {name}")
     print(f"Email: {email}")
-    print(f"Role: OWNER (Super Admin)")
-    print(f"\n🔐 You can now login at: /login/admin")
+    print(f"Role: AGENT (Super Admin)")
+    print(f"Subscription: PRO")
+    print(f"\n🔐 You can now login at: /login?role=agent")
     
     conn.close()
     return True

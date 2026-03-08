@@ -2,51 +2,203 @@
 
 {% block agent_content %}
 <style>
-  .transactions-container {
-    max-width: 1600px;
-    margin: 0 auto;
+  /* ============================================
+     TRANSACTIONS PAGE - LUXURY REDESIGN
+     Clean, elegant, fully responsive
+     ============================================ */
+  
+  :root {
+    --tx-spacing-xs: 0.5rem;
+    --tx-spacing-sm: 1rem;
+    --tx-spacing-md: 1.5rem;
+    --tx-spacing-lg: 2rem;
+    --tx-spacing-xl: 3rem;
   }
 
+  /* Main Wrapper */
+  .transactions-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: var(--tx-spacing-md);
+  }
+
+  /* Page Header */
+  .transactions-header {
+    margin-bottom: var(--tx-spacing-xl);
+    text-align: center;
+  }
+
+  .transactions-header__tagline {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--olive-green);
+    font-weight: 600;
+    margin-bottom: var(--tx-spacing-xs);
+  }
+
+  .transactions-header__title {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    font-weight: 500;
+    margin: 0 0 var(--tx-spacing-sm) 0;
+    letter-spacing: -0.02em;
+  }
+
+  .transactions-header__description {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.75;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Add Transaction Form */
+  .add-transaction-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 16px;
+    padding: var(--tx-spacing-xl);
+    margin-bottom: var(--tx-spacing-xl);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .add-transaction-card__title {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    text-align: center;
+    margin: 0 0 var(--tx-spacing-lg) 0;
+    font-weight: 600;
+  }
+
+  .transaction-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--tx-spacing-md);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group--full {
+    grid-column: 1 / -1;
+  }
+
+  .form-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--olive-green);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-input,
+  .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(200, 180, 151, 0.4);
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: var(--charcoal-brown);
+    font-size: 0.938rem;
+    transition: all 0.2s ease;
+  }
+
+  .form-input:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: var(--olive-green);
+    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
+  }
+
+  .form-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233A352C' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+
+  .form-btn {
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.938rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .form-btn--primary {
+    background: linear-gradient(135deg, var(--olive-green), #5A5938);
+    color: #FFFFFF;
+    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2);
+  }
+
+  .form-btn--primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.3);
+  }
+
+  /* Transactions List */
+  .transactions-section {
+    margin-top: var(--tx-spacing-xl);
+  }
+
+  .transactions-section__title {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    color: var(--charcoal-brown);
+    text-align: center;
+    margin: 0 0 var(--tx-spacing-lg) 0;
+    font-weight: 600;
+  }
+
+  .transactions-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--tx-spacing-md);
+  }
+
+  /* Transaction Card */
   .transaction-card {
-    background: var(--white);
-    border: 2px solid var(--taupe-beige);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    margin-bottom: 1.5rem;
+    background: #FFFFFF;
+    border: 1px solid rgba(200, 180, 151, 0.2);
+    border-radius: 12px;
+    padding: var(--tx-spacing-lg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    box-shadow: var(--shadow-premium);
-  }
-  
-  .transaction-card::after {
-    content: '→';
-    position: absolute;
-    top: 50%;
-    right: 2rem;
-    transform: translateY(-50%);
-    font-size: 1.5rem;
-    color: var(--olive-green);
-    opacity: 0;
-    transition: all 0.3s ease;
-    font-weight: bold;
   }
 
   .transaction-card::before {
     content: '';
     position: absolute;
-    top: 0;
     left: 0;
+    top: 0;
+    bottom: 0;
     width: 4px;
-    height: 100%;
     background: var(--taupe-beige);
     transition: all 0.3s ease;
   }
 
   .transaction-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-premium-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.12);
     border-color: var(--olive-green);
   }
 
@@ -54,156 +206,151 @@
     background: var(--olive-green);
     width: 6px;
   }
-  
-  .transaction-card:hover::after {
-    opacity: 1;
-    transform: translateY(-50%) translateX(5px);
-  }
 
-  .transaction-header {
+  .transaction-card__header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.5rem;
-    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: var(--tx-spacing-md);
+    padding-bottom: var(--tx-spacing-md);
+    border-bottom: 1px solid rgba(200, 180, 151, 0.15);
   }
 
-  .transaction-main-info {
+  .transaction-card__main {
     flex: 1;
-    min-width: 0;
   }
 
-  .transaction-property {
-    font-size: 1.3rem;
+  .transaction-card__address {
+    font-family: var(--font-heading);
+    font-size: 1.375rem;
     font-weight: 600;
     color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    margin: 0 0 0.5rem 0;
+    letter-spacing: -0.01em;
   }
 
-  .transaction-client {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 0.75rem;
+  .transaction-card__client {
+    font-size: 0.938rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    margin-bottom: var(--tx-spacing-sm);
   }
 
-  .transaction-badges {
+  .transaction-card__badges {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
   }
 
-  .status-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
+  .transaction-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
   }
 
-  .status-badge.summary { background: var(--light-cream); color: var(--charcoal-brown); }
-  .status-badge.showings { background: #E3F2FD; color: #1565C0; }
-  .status-badge.under_contract { background: #FFF3E0; color: #E65100; }
-  .status-badge.earnest_money { background: #F3E5F5; color: #6A1B9A; }
-  .status-badge.inspection { background: #E8F5E9; color: #2E7D32; }
-  .status-badge.appraisal { background: #E0F2F1; color: #00695C; }
-  .status-badge.loan_commitment { background: #E1F5FE; color: #0277BD; }
-  .status-badge.final_walkthrough { background: #FFF9C4; color: #F57F17; }
-  .status-badge.closing { background: #C8E6C9; color: #1B5E20; }
-
-  .side-badge {
-    padding: 0.4rem 0.9rem;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: var(--taupe-beige);
+  .transaction-badge--stage {
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.15), rgba(107, 106, 69, 0.1));
     color: var(--charcoal-brown);
   }
 
-  .side-badge.buyer { background: #E3F2FD; color: #1565C0; }
-  .side-badge.seller { background: #FFE0B2; color: #E65100; }
-  .side-badge.both { background: #F3E5F5; color: #6A1B9A; }
-
-  .transaction-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--taupe-beige);
+  .transaction-badge--side-buyer {
+    background: rgba(33, 150, 243, 0.15);
+    color: #1565C0;
   }
 
-  .detail-item {
+  .transaction-badge--side-seller {
+    background: rgba(255, 152, 0, 0.15);
+    color: #E65100;
+  }
+
+  .transaction-badge--side-both {
+    background: rgba(156, 39, 176, 0.15);
+    color: #6A1B9A;
+  }
+
+  .transaction-card__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .transaction-action-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.813rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .transaction-action-btn--delete {
+    background: rgba(198, 107, 61, 0.1);
+    color: #C66B3D;
+    border: 1px solid #C66B3D;
+  }
+
+  .transaction-action-btn--delete:hover {
+    background: #C66B3D;
+    color: #FFFFFF;
+    transform: translateY(-2px);
+  }
+
+  .transaction-card__details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--tx-spacing-md);
+  }
+
+  .transaction-detail {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .detail-label {
+  .transaction-detail__label {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #999;
+    color: var(--charcoal-brown);
+    opacity: 0.6;
     font-weight: 600;
   }
 
-  .detail-value {
-    font-size: 1rem;
+  .transaction-detail__value {
+    font-size: 0.938rem;
     color: var(--charcoal-brown);
     font-weight: 500;
   }
 
-  .transaction-actions {
-    display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
+  .transaction-card__cta {
+    margin-top: var(--tx-spacing-sm);
+    padding-top: var(--tx-spacing-sm);
+    border-top: 1px solid rgba(200, 180, 151, 0.15);
+    font-size: 0.813rem;
+    color: var(--olive-green);
+    font-weight: 600;
+    text-align: center;
   }
 
-  .action-btn-small {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-  }
-
-  .action-btn-small.delete {
-    background: rgba(192, 57, 43, 0.1);
-    color: #c0392b;
-    border: 1px solid #c0392b;
-  }
-
-  .action-btn-small.delete:hover {
-    background: #c0392b;
-    color: white;
-    transform: translateY(-2px);
-  }
-
+  /* Empty State */
   .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%);
-    border-radius: var(--border-radius-lg);
-    border: 2px dashed var(--taupe-beige);
-    box-shadow: var(--shadow-premium);
+    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(200, 180, 151, 0.2);
     max-width: 600px;
     margin: 0 auto;
   }
 
-  .empty-state-icon {
+  .empty-state__icon {
     width: 80px;
     height: 80px;
-    margin: 0 auto 1rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1), rgba(200, 180, 151, 0.1));
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -212,535 +359,240 @@
     color: var(--olive-green);
   }
 
-  .empty-state h3 {
-    color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
+  .empty-state__title {
     font-family: var(--font-heading);
     font-size: 1.5rem;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.5rem 0;
   }
 
-  .empty-state p {
-    color: rgba(58, 53, 44, 0.7);
-    max-width: 500px;
-    margin: 0 auto;
-    font-size: 1rem;
+  .empty-state__text {
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    margin: 0;
     line-height: 1.6;
+  }
+
+  /* ============================================
+     RESPONSIVE BREAKPOINTS
+     ============================================ */
+
+  /* Tablet (768px - 1024px) */
+  @media (min-width: 768px) {
+    .transactions-page {
+      padding: var(--tx-spacing-lg);
+    }
+  }
+
+  /* Desktop (1024px+) */
+  @media (min-width: 1024px) {
+    .transactions-page {
+      padding: var(--tx-spacing-xl) var(--tx-spacing-lg);
+    }
+  }
+
+  /* Mobile Optimizations */
+  @media (max-width: 767px) {
+    .transactions-page {
+      padding: 1rem 0.875rem;
+    }
+
+    .transactions-header__title {
+      font-size: 1.75rem;
+    }
+
+    .transactions-header__description {
+      font-size: 0.875rem;
+    }
+
+    .add-transaction-card {
+      padding: var(--tx-spacing-lg) var(--tx-spacing-md);
+    }
+
+    .transaction-form {
+      grid-template-columns: 1fr;
+      gap: var(--tx-spacing-sm);
+    }
+
+    .transaction-card {
+      padding: var(--tx-spacing-md);
+    }
+
+    .transaction-card__header {
+      flex-direction: column;
+      gap: var(--tx-spacing-sm);
+    }
+
+    .transaction-card__address {
+      font-size: 1.125rem;
+    }
+
+    .transaction-card__actions {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .transaction-action-btn {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      min-height: 44px;
+      justify-content: center;
+    }
+
+    .transaction-card__details {
+      grid-template-columns: 1fr;
+    }
+
+    .form-btn {
+      width: 100%;
+      min-height: 48px;
+    }
+
+    /* Prevent iOS zoom on inputs */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
   }
 </style>
 
-<!-- Premium Header -->
-<div class="premium-header animate-in" style="margin-bottom: 3rem; display: block !important; text-align: center !important; justify-content: center !important;">
-  <div style="text-align: center; width: 100%;">
-    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center; font-family: var(--font-heading); color: var(--charcoal-brown);">AI Transaction Coordinator</h1>
-    <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Track every deal with ease — All your files, stages, and clients in one beautiful, interactive dashboard</span>
+<div class="transactions-page">
+  <!-- Header -->
+  <div class="transactions-header">
+    <div class="transactions-header__tagline">Transaction Management</div>
+    <h1 class="transactions-header__title">AI Transaction Coordinator</h1>
+    <p class="transactions-header__description">
+      Track every deal with ease—all your files, stages, and clients in one beautiful dashboard
+    </p>
   </div>
-</div>
 
-<div class="transactions-container">
-  <!-- Premium Add Transaction Form -->
-  <div class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; margin-bottom: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige); max-width: 800px; margin-left: auto; margin-right: auto;">
-    <div style="text-align: center; margin-bottom: 2.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 2.25rem; color: var(--charcoal-brown); margin-bottom: 0.5rem; position: relative; padding-bottom: 1rem;">
-        <span style="display: inline-block; position: relative;">
-          Add a Transaction
-          <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
-        </span>
-      </h2>
-    </div>
+  <!-- Add Transaction Form -->
+  <div class="add-transaction-card">
+    <h2 class="add-transaction-card__title">Add a Transaction</h2>
     
-    <form method="post" class="transaction-form-premium">
-      <div class="premium-form-grid">
-        <div class="premium-form-group">
-          <label for="property_address" class="premium-form-label">
-            <span>Property Address</span>
-          </label>
-          <input 
-            id="property_address" 
-            name="property_address" 
-            type="text"
-            required 
-            placeholder="123 Main St, City, State" 
-            class="premium-input"
-          />
-        </div>
-        
-        <div class="premium-form-group">
-          <label for="client_name" class="premium-form-label">
-            <span>Client Name</span>
-          </label>
-          <input 
-            id="client_name" 
-            name="client_name" 
-            type="text"
-            required 
-            placeholder="Jane Doe" 
-            class="premium-input"
-          />
-        </div>
-        
-        <div class="premium-form-group">
-          <label for="side" class="premium-form-label">
-            <span>Side</span>
-          </label>
-          <select id="side" name="side" class="premium-select">
-            <option value="buyer">Buyer</option>
-            <option value="seller">Seller</option>
-            <option value="both">Both</option>
-          </select>
-        </div>
-        
-        <div class="premium-form-group">
-          <label for="stage" class="premium-form-label">
-            <span>Stage</span>
-          </label>
-          <select id="stage" name="stage" class="premium-select">
-            <option value="summary">Summary</option>
-            <option value="showings">Showings</option>
-            <option value="under_contract">Under Contract</option>
-            <option value="earnest_money">Earnest Money</option>
-            <option value="inspection">Inspection</option>
-            <option value="appraisal">Appraisal</option>
-            <option value="loan_commitment">Loan Commitment</option>
-            <option value="final_walkthrough">Final Walkthrough</option>
-            <option value="closing">Closing</option>
-          </select>
-        </div>
-        
-        <div class="premium-form-group premium-form-full">
-          <label for="close_date" class="premium-form-label">
-            <span>Target Close Date <span style="font-weight: normal; font-size: 0.85em; color: rgba(58, 53, 44, 0.6); font-style: italic;">(Optional - can be added later)</span></span>
-          </label>
-          <input 
-            type="date" 
-            id="close_date" 
-            name="close_date" 
-            class="premium-input"
-          />
-        </div>
+    <form method="post" class="transaction-form">
+      <div class="form-group">
+        <label for="property_address" class="form-label">Property Address</label>
+        <input 
+          id="property_address" 
+          name="property_address" 
+          type="text"
+          required 
+          placeholder="123 Main St, City, State" 
+          class="form-input"
+        />
       </div>
       
-      <button class="btn-premium" type="submit" style="margin-top: 2rem; width: 100%; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-olive);">
-        Start Transaction
-      </button>
+      <div class="form-group">
+        <label for="client_name" class="form-label">Client Name</label>
+        <input 
+          id="client_name" 
+          name="client_name" 
+          type="text"
+          required 
+          placeholder="Jane Doe" 
+          class="form-input"
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="side" class="form-label">Side</label>
+        <select id="side" name="side" class="form-select">
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="stage" class="form-label">Stage</label>
+        <select id="stage" name="stage" class="form-select">
+          <option value="summary">Summary</option>
+          <option value="showings">Showings</option>
+          <option value="under_contract">Under Contract</option>
+          <option value="earnest_money">Earnest Money</option>
+          <option value="inspection">Inspection</option>
+          <option value="appraisal">Appraisal</option>
+          <option value="loan_commitment">Loan Commitment</option>
+          <option value="final_walkthrough">Final Walkthrough</option>
+          <option value="closing">Closing</option>
+        </select>
+      </div>
+      
+      <div class="form-group form-group--full">
+        <label for="close_date" class="form-label">Target Close Date <span style="font-weight: normal; font-size: 0.85em; color: rgba(58, 53, 44, 0.6); font-style: italic; text-transform: none;">(Optional - can be added later)</span></label>
+        <input 
+          type="date" 
+          id="close_date" 
+          name="close_date" 
+          class="form-input"
+        />
+      </div>
+      
+      <div class="form-group form-group--full">
+        <button class="form-btn form-btn--primary" type="submit" style="margin-top: 1rem;">
+          Start Transaction
+        </button>
+      </div>
     </form>
   </div>
 
   <!-- Transactions List -->
   {% if transactions %}
-    <div style="max-width: 1600px; margin: 0 auto;">
-      <h2 style="margin-bottom: 2rem; font-family: var(--font-heading); color: var(--charcoal-brown); font-size: 2rem; text-align: center; position: relative; padding-bottom: 1rem;">
-        <span style="display: inline-block; position: relative;">
-          Your Transactions
-          <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 100px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
-        </span>
-      </h2>
+    <div class="transactions-section">
+      <h2 class="transactions-section__title">Your Transactions</h2>
     
-    {% for tx in transactions %}
-      <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'" title="Click to open AI Transaction Coordinator">
-        <div class="transaction-header">
-          <div class="transaction-main-info">
-            <div class="transaction-property">
-              <span>{{ tx.property_address }}</span>
+      <div class="transactions-list">
+        {% for tx in transactions %}
+          <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'" title="Click to open AI Transaction Coordinator">
+            <div class="transaction-card__header">
+              <div class="transaction-card__main">
+                <h3 class="transaction-card__address">{{ tx.property_address }}</h3>
+                <div class="transaction-card__client">
+                  <strong>Client:</strong> {{ tx.client_name }}
+                </div>
+                <div class="transaction-card__badges">
+                  <span class="transaction-badge transaction-badge--stage">
+                    {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
+                  </span>
+                  <span class="transaction-badge transaction-badge--side-{{ tx.side or 'buyer' }}">
+                    {{ (tx.side or 'buyer')|capitalize }}
+                  </span>
+                </div>
+              </div>
+              <div class="transaction-card__actions" onclick="event.stopPropagation();">
+                <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display: inline;">
+                  <button type="submit" class="transaction-action-btn transaction-action-btn--delete" onclick="return confirm('Delete this transaction? This cannot be undone.')">
+                    Delete
+                  </button>
+                </form>
+              </div>
             </div>
-            <div class="transaction-client">
-              <strong>Client:</strong> {{ tx.client_name }}
+            
+            <div class="transaction-card__details">
+              <div class="transaction-detail">
+                <span class="transaction-detail__label">Close Date</span>
+                <span class="transaction-detail__value">{{ tx.target_close_date or 'Not set' }}</span>
+              </div>
+              <div class="transaction-detail">
+                <span class="transaction-detail__label">Created</span>
+                <span class="transaction-detail__value">{{ tx.created_at[:10] if tx.created_at else '—' }}</span>
+              </div>
             </div>
-            <div class="transaction-badges">
-              <span class="status-badge {{ tx.current_stage or 'summary' }}">
-                {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
-              </span>
-              <span class="side-badge {{ tx.side or 'buyer' }}">
-                {{ (tx.side or 'buyer')|capitalize }}
-              </span>
-            </div>
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--taupe-beige); font-size: 0.85rem; color: var(--olive-green); font-weight: 600;">
+
+            <div class="transaction-card__cta">
               Click anywhere on this card to access the full AI Transaction Coordinator
             </div>
           </div>
-          <div class="transaction-actions" onclick="event.stopPropagation();">
-            <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display: inline;">
-              <button type="submit" class="action-btn-small delete" onclick="return confirm('Delete this transaction? This cannot be undone.')">
-                Delete
-              </button>
-            </form>
-          </div>
-        </div>
-        
-        <div class="transaction-details">
-          <div class="detail-item">
-            <span class="detail-label">Close Date</span>
-            <span class="detail-value">{{ tx.target_close_date or 'Not set' }}</span>
-          </div>
-          <div class="detail-item">
-            <span class="detail-label">Created</span>
-            <span class="detail-value">{{ tx.created_at[:10] if tx.created_at else '—' }}</span>
-          </div>
-        </div>
+        {% endfor %}
       </div>
-    {% endfor %}
     </div>
   {% else %}
-    <div class="empty-state animate-in" style="animation-delay: 0.2s;">
-      <div class="empty-state-icon">—</div>
-      <h3 style="font-family: var(--font-heading);">No Transactions Yet</h3>
-      <p>Once you add a transaction, you will be able to track stages here.</p>
+    <div class="empty-state">
+      <div class="empty-state__icon">—</div>
+      <h3 class="empty-state__title">No Transactions Yet</h3>
+      <p class="empty-state__text">Once you add a transaction, you will be able to track stages here.</p>
     </div>
   {% endif %}
 </div>
-
-<style>
-/* Premium Form Styling */
-.transaction-form-premium {
-  width: 100%;
-}
-
-.premium-form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.premium-form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.premium-form-full {
-  grid-column: 1 / -1;
-}
-
-.premium-form-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-  color: var(--olive-green);
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-
-.premium-input,
-.premium-select {
-  width: 100%;
-  padding: 1rem 1.25rem;
-  border: 2px solid var(--taupe-beige);
-  border-radius: 8px;
-  font-family: var(--font-body);
-  font-size: 1rem;
-  color: var(--charcoal-brown);
-  background: var(--white);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.05);
-}
-
-.premium-input:hover,
-.premium-select:hover {
-  border-color: var(--olive-green);
-  box-shadow: 0 4px 12px rgba(107, 106, 69, 0.1);
-}
-
-.premium-input:focus,
-.premium-select:focus {
-  outline: none;
-  border-color: var(--olive-green);
-  box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.15), 0 4px 16px rgba(58, 53, 44, 0.1);
-  transform: translateY(-1px);
-}
-
-.premium-select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233A352C' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 1rem center;
-  padding-right: 2.5rem;
-}
-
-.premium-input::placeholder {
-  color: rgba(58, 53, 44, 0.4);
-  font-style: italic;
-}
-
-/* Premium Button Styling */
-.btn-premium {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 8px;
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--white);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 16px rgba(58, 53, 44, 0.15);
-  text-decoration: none;
-}
-
-.btn-premium:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(58, 53, 44, 0.2);
-}
-
-.btn-premium:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(58, 53, 44, 0.15);
-}
-
-
-/* Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-in {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-/* ============================================
-   TABLET BREAKPOINT (768px+)
-   ============================================ */
-@media (min-width: 768px) {
-  .transactions-container {
-    padding: 2rem;
-  }
-  
-  .premium-form-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-  }
-  
-  .transaction-card {
-    padding: 2rem;
-  }
-  
-  .card-premium {
-    padding: 2.5rem;
-  }
-}
-
-/* ============================================
-   DESKTOP BREAKPOINT (1024px+)
-   ============================================ */
-@media (min-width: 1024px) {
-  .transactions-container {
-    padding: 3rem 2rem;
-  }
-  
-  .premium-header {
-    margin-bottom: 4rem;
-  }
-  
-  .card-premium {
-    padding: 3rem;
-    max-width: 900px;
-  }
-}
-
-/* ============================================
-   MOBILE OPTIMIZATIONS (Portrait Mode)
-   ============================================ */
-@media (max-width: 767px) and (orientation: portrait) {
-  /* Container */
-  .transactions-container {
-    padding: 0.875rem !important;
-    max-width: 100% !important;
-  }
-  
-  /* Premium Header - Ultra Compact */
-  .premium-header {
-    padding: 0.75rem 0.875rem !important;
-    margin-bottom: 1.25rem !important;
-    text-align: center !important;
-  }
-  
-  .premium-header h1 {
-    font-size: 1.5rem !important;
-    line-height: 1.3 !important;
-    margin: 0.25rem 0 0.5rem 0 !important;
-  }
-  
-  .premium-header p {
-    font-size: 0.9rem !important;
-    margin: 0.25rem 0 !important;
-    line-height: 1.6 !important;
-  }
-  
-  /* Cards - Luxurious Spacing */
-  .card-premium {
-    padding: 1.5rem 1rem !important;
-    margin-bottom: 1.25rem !important;
-    border-radius: 12px !important;
-  }
-  
-  /* Transaction Cards */
-  .transaction-card {
-    padding: 1.25rem 1rem !important;
-    margin-bottom: 1rem !important;
-    border-radius: 12px !important;
-  }
-  
-  .transaction-header {
-    flex-direction: column !important;
-    gap: 1rem !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  .transaction-main-info {
-    width: 100% !important;
-  }
-  
-  .transaction-property {
-    font-size: 1.1rem !important;
-    line-height: 1.4 !important;
-    margin-bottom: 0.5rem !important;
-  }
-  
-  .transaction-client {
-    font-size: 0.9rem !important;
-    margin-bottom: 0.75rem !important;
-    line-height: 1.5 !important;
-  }
-  
-  .transaction-badges {
-    gap: 0.5rem !important;
-    margin-top: 0.75rem !important;
-  }
-  
-  .status-badge {
-    padding: 0.5rem 0.875rem !important;
-    font-size: 0.8rem !important;
-  }
-  
-  /* Form Grid - Single Column */
-  .premium-form-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1.25rem !important;
-  }
-  
-  /* Form Labels */
-  .premium-form-label {
-    font-size: 0.85rem !important;
-    margin-bottom: 0.625rem !important;
-  }
-  
-  /* Form Inputs - Touch Friendly */
-  .premium-input,
-  .premium-select {
-    padding: 0.875rem 1rem !important;
-    font-size: 1rem !important;
-    min-height: 48px !important;
-    border-radius: 8px !important;
-  }
-  
-  /* Buttons - Full Width */
-  .btn-premium {
-    width: 100% !important;
-    padding: 1rem 1.5rem !important;
-    font-size: 1rem !important;
-    min-height: 52px !important;
-    justify-content: center !important;
-    margin: 0.75rem 0 !important;
-  }
-  
-  /* Transaction Actions */
-  .transaction-actions {
-    flex-direction: column !important;
-    gap: 0.75rem !important;
-    width: 100% !important;
-  }
-  
-  .transaction-actions button,
-  .transaction-actions a {
-    width: 100% !important;
-    padding: 0.875rem 1.25rem !important;
-    min-height: 48px !important;
-  }
-  
-  /* Transaction Details - Stack on Mobile */
-  .transaction-details {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
-    padding-top: 1rem !important;
-    margin-top: 1rem !important;
-  }
-  
-  .detail-item {
-    padding: 0.75rem;
-    background: rgba(107, 106, 69, 0.05);
-    border-radius: 8px;
-  }
-  
-  /* Empty State Mobile */
-  .empty-state {
-    padding: 3rem 1.5rem !important;
-  }
-  
-  .empty-state h3 {
-    font-size: 1.25rem !important;
-  }
-  
-  .empty-state p {
-    font-size: 0.9375rem !important;
-  }
-}
-
-/* Touch-Friendly for All Mobile/Tablet Sizes */
-@media (max-width: 1023px) {
-  .premium-input,
-  .premium-select,
-  .btn-premium,
-  .action-btn-small {
-    min-height: 44px;
-  }
-  
-  .transaction-card::after {
-    display: none; /* Hide arrow on mobile for cleaner look */
-  }
-}
-
-@media (max-width: 768px) {
-  .premium-form-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .premium-header h1 {
-    font-size: 2rem !important;
-  }
-  
-  .premium-header .tagline {
-    font-size: 1rem !important;
-  }
-  
-  .card-premium {
-    padding: 1.5rem 1rem !important;
-  }
-  
-  .transaction-header {
-    flex-direction: column;
-  }
-  
-  .transaction-actions {
-    width: 100%;
-  }
-  
-  .action-btn-small {
-    width: 100%;
-  }
-}
-</style>
 
 {% endblock %}
