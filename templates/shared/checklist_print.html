@@ -382,75 +382,124 @@
         width: 0%;
       }
     }
-    /* ── ONE-PAGE PRINT: elegant and readable ── */
+    /* ── FULL-PAGE PRINT LAYOUT ── */
     @media print {
-      @page { margin: 0.45in; size: letter portrait; }
+      /* Let @page handle the margins — body gets 0 so dimensions are predictable */
+      @page { size: letter portrait; margin: 0.42in; }
 
-      body { background: #fff !important; padding: 0 !important; }
+      body {
+        background: #fff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
 
+      .cl-actions       { display: none !important; }
       .cl-progress-wrap { display: none !important; }
 
-      /* header */
-      .cl-header { padding: 1rem 1.75rem 0.85rem !important; }
-      .cl-header::before { font-size: 5rem !important; right: 1.5rem !important; }
-      .cl-header__season { font-size: 7pt !important; margin-bottom: .35rem !important; }
-      .cl-header__title  { font-size: 22pt !important; margin-bottom: .3rem !important; }
-      .cl-header__subtitle { font-size: 9.5pt !important; }
+      /* Paper = full printable area of a US Letter sheet (11in − 2×0.42in margins) */
+      .checklist-paper {
+        box-shadow:     none !important;
+        border-radius:  0    !important;
+        max-width:      100% !important;
+        width:          100% !important;
+        height:         10.16in !important;
+        display:        flex !important;
+        flex-direction: column !important;
+        overflow:       hidden !important;
+      }
 
-      /* tagline */
-      .cl-tagline { padding: .55rem 1.75rem !important; font-size: 8.5pt !important; line-height: 1.5 !important; }
+      /* ── header ── */
+      .cl-header { padding: 1.4rem 1.9rem 1.1rem !important; }
+      .cl-header::before { font-size: 5.5rem !important; right: 1.6rem !important; }
+      .cl-header__season   { font-size: 7pt  !important; margin-bottom: .35rem !important; }
+      .cl-header__title    { font-size: 25pt !important; margin-bottom: .3rem  !important; }
+      .cl-header__subtitle { font-size: 9pt  !important; }
 
-      /* two-column body */
-      .cl-body { grid-template-columns: 1fr 1fr !important; }
-      .cl-section { padding: .85rem 1.4rem !important; }
+      /* ── tagline ── */
+      .cl-tagline {
+        padding:     .8rem 1.9rem !important;
+        font-size:   8.5pt        !important;
+        line-height: 1.55         !important;
+      }
+
+      /* ── body: flex:1 takes all remaining height;
+         align-content:stretch makes the single grid row fill it;
+         sections become flex columns so items can be space-between ── */
+      .cl-body {
+        flex:                  1        !important;
+        display:               grid     !important;
+        grid-template-columns: 1fr 1fr  !important;
+        align-content:         stretch  !important;
+        align-items:           stretch  !important;
+      }
+      .cl-section {
+        padding:        1.1rem 1.5rem !important;
+        display:        flex          !important;
+        flex-direction: column        !important;
+      }
       .cl-section__heading {
-        font-size: 10.5pt !important;
-        margin-bottom: .55rem !important;
-        padding-bottom: .3rem !important;
+        font-size:      11pt   !important;
+        margin-bottom:  .65rem !important;
+        padding-bottom: .35rem !important;
+        flex-shrink:    0      !important;
       }
       .cl-section__heading::before { width: 7px !important; height: 7px !important; }
 
-      /* checklist items — comfortable, readable */
-      .cl-items { gap: .28rem !important; }
-      .cl-item  { gap: .45rem !important; }
-      .cl-item label { font-size: 8.5pt !important; line-height: 1.38 !important; color: #3A352C !important; }
+      /* Items fill the column height evenly — no wasted space */
+      .cl-items {
+        flex:             1               !important;
+        display:          flex            !important;
+        flex-direction:   column          !important;
+        justify-content:  space-between   !important;
+        gap:              0               !important;
+      }
+      .cl-item  { gap: .5rem !important; }
+      .cl-item label {
+        font-size:   9.5pt  !important;
+        line-height: 1.4    !important;
+        color:       #3A352C !important;
+      }
       .cl-item input[type="checkbox"] { display: none !important; }
       .cl-box {
-        display: block !important;
-        width: 11px !important;
-        height: 11px !important;
-        margin-top: .1rem !important;
-        flex-shrink: 0 !important;
-        border: 1.5px solid var(--accent) !important;
-        border-radius: 2px !important;
-        background: #fff !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        display:       block  !important;
+        width:         11px   !important;
+        height:        11px   !important;
+        margin-top:    .1rem  !important;
+        flex-shrink:   0      !important;
+        border:        1.5px solid var(--accent) !important;
+        border-radius: 3px    !important;
+        background:    #fff   !important;
       }
 
-      /* brand strip */
+      /* ── brand strip ── */
       .cl-brand-strip {
-        padding: .75rem 1.75rem !important;
-        gap: .85rem !important;
-        break-inside: avoid !important;
+        padding:       .9rem 1.9rem !important;
+        gap:           .9rem        !important;
+        break-inside:  avoid        !important;
+        flex-shrink:   0            !important;
         -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        print-color-adjust:         exact !important;
       }
       .cl-brand-photo,
-      .cl-brand-photo-placeholder { width: 52px !important; height: 52px !important; }
+      .cl-brand-photo-placeholder { width: 56px !important; height: 56px !important; }
       .cl-brand-name    { font-size: 10pt !important; }
       .cl-brand-title   { font-size: 7.5pt !important; }
       .cl-brand-contact { font-size: 7.5pt !important; margin-top: .1rem !important; }
-      .cl-brand-license { font-size: 7pt !important; }
-      .cl-brand-logo    { max-height: 26px !important; }
-      .cl-brand-qr img  { width: 56px !important; height: 56px !important; }
-      .cl-brand-qr-label { font-size: 6pt !important; }
+      .cl-brand-license { font-size: 7pt   !important; }
+      .cl-brand-logo    { max-height: 28px !important; }
+      .cl-brand-qr img  { width: 58px !important; height: 58px !important; }
+      .cl-brand-qr-label{ font-size: 6pt   !important; }
 
-      /* footer */
-      .cl-footer { padding: .4rem 1.75rem !important; }
-      .cl-footer__brand   { font-size: 8pt !important; }
-      .cl-footer__tagline { font-size: 7pt !important; }
-      .cl-footer__season  { font-size: 7pt !important; }
+      /* ── footer ── */
+      .cl-footer {
+        padding:    .45rem 1.9rem !important;
+        flex-shrink: 0            !important;
+      }
+      .cl-footer__brand   { font-size: 8.5pt !important; }
+      .cl-footer__tagline { font-size: 7pt   !important; }
+      .cl-footer__season  { font-size: 7pt   !important; }
     }
   </style>
 </head>
