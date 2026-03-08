@@ -549,6 +549,9 @@ def inject_professionals():
         # If it's already a full URL, return it
         if photo_path.startswith('http://') or photo_path.startswith('https://'):
             return photo_path
+        # If it's a base64 data URL, return it directly (never try to use it as a file path)
+        if photo_path.startswith('data:'):
+            return photo_path
         # Check if file exists in static folder
         from pathlib import Path
         import os
