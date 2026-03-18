@@ -2372,6 +2372,8 @@ def login():
 @app.route("/debug/check-account/<email>")
 def debug_check_account(email):
     """Debug route to check account details - REMOVE IN PRODUCTION"""
+    if not session.get("user_id") or session.get("role") != "admin":
+        return jsonify({"error": "Admin access required"}), 403
     try:
         user_row = get_user_by_email(email.lower().strip())
         if not user_row:
@@ -2417,9 +2419,24 @@ def debug_check_account(email):
         return jsonify({"error": str(e), "email": email})
 
 
+# ── URL Alias Redirects ─────────────────────────────────────────────────────
+@app.route("/agent/trusted-vendors")
+def agent_trusted_vendors_redirect():
+    """Redirect legacy/wrong URL to correct vendors page."""
+    return redirect(url_for("agent_vendors"), 301)
+
+@app.route("/agent/admin")
+def agent_admin_redirect():
+    """Redirect /agent/admin to the actual admin settings page."""
+    return redirect(url_for("admin_settings"), 301)
+# ── End URL Alias Redirects ──────────────────────────────────────────────────
+
+
 @app.route("/debug/sync-homeowner-to-crm/<int:homeowner_id>")
 def debug_sync_homeowner_to_crm(homeowner_id):
     """Sync an existing homeowner to their agent's CRM - REMOVE IN PRODUCTION"""
+    if not session.get("user_id") or session.get("role") != "admin":
+        return jsonify({"error": "Admin access required"}), 403
     try:
         from database import get_user_by_id, list_agent_contacts, add_agent_contact, get_homeowner_professionals
         
@@ -2491,6 +2508,8 @@ def debug_sync_homeowner_to_crm(homeowner_id):
 @app.route("/debug/check-crm-contacts/<int:agent_id>")
 def debug_check_crm_contacts(agent_id):
     """Debug route to check all contacts for an agent - REMOVE IN PRODUCTION"""
+    if not session.get("user_id") or session.get("role") != "admin":
+        return jsonify({"error": "Admin access required"}), 403
     try:
         from database import list_agent_contacts, get_user_by_id, get_connection
         
@@ -2540,6 +2559,8 @@ def debug_check_crm_contacts(agent_id):
 @app.route("/debug/sync-all-homeowners-to-crm")
 def debug_sync_all_homeowners_to_crm():
     """Sync ALL existing homeowners to their agents' CRMs - REMOVE IN PRODUCTION"""
+    if not session.get("user_id") or session.get("role") != "admin":
+        return jsonify({"error": "Admin access required"}), 403
     try:
         from database import get_connection, list_agent_contacts, add_agent_contact, get_homeowner_professionals
         
@@ -8038,6 +8059,17 @@ def agent_vendors():
     )
 
 
+@app.route("/agent/booking")
+def agent_booking():
+    """Calendar and booking integration page."""
+    if "user_id" not in session or session.get("role") != "agent":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    if not user:
+        return redirect(url_for("login"))
+    return render_template("agent/booking.html", user=user)
+
+
 # -------------------------------------------------
 # AGENT VIDEO STUDIO ROUTES
 # -------------------------------------------------
@@ -8099,6 +8131,21 @@ def admin_settings():
         brand_name=FRONT_BRAND_NAME,
         user=user
     )
+
+
+@app.route("/agent/subscription")
+def agent_subscription():
+    """Subscription tier management page."""
+    if "user_id" not in session or session.get("role") != "agent":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    if not user:
+        return redirect(url_for("login"))
+    user_dict = dict(user) if hasattr(user, 'keys') and not isinstance(user, dict) else user
+    from database import get_user_profile
+    profile = get_user_profile(session["user_id"])
+    current_tier = user_dict.get("subscription_tier", "free")
+    return render_template("agent/subscription.html", user=user_dict, profile=profile, current_tier=current_tier)
 
 
 # -------------------------------------------------
@@ -8812,6 +8859,17 @@ def lender_loans():
         user=user,
         loans=loans,
     )
+
+
+@app.route("/lender/booking")
+def lender_booking():
+    """Calendar and booking integration for lenders."""
+    if "user_id" not in session or session.get("role") != "lender":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    if not user:
+        return redirect(url_for("login"))
+    return render_template("lender/booking.html", user=user)
 
 
 @app.route("/lender/marketing", methods=["GET"])

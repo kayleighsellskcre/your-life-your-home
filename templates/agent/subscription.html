@@ -1,0 +1,462 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .subscription-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .subscription-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .subscription-hero h1 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+
+  .subscription-hero p {
+    font-size: 1.2rem;
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+  }
+
+  .current-plan-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #b8973a 0%, #a6823e 100%);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .tier-card {
+    background: var(--white);
+    border: 2px solid rgba(74, 82, 64, 0.1);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem 2rem;
+    transition: all var(--transition-base);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tier-card:hover {
+    transform: translateY(-4px);
+    border-color: #b8973a;
+    box-shadow: 0 12px 24px rgba(184, 151, 58, 0.15);
+  }
+
+  .tier-card.active {
+    border-color: #b8973a;
+    background: linear-gradient(135deg, rgba(184, 151, 58, 0.05) 0%, rgba(74, 82, 64, 0.05) 100%);
+    box-shadow: 0 8px 24px rgba(74, 82, 64, 0.1);
+  }
+
+  .tier-card.active::before {
+    content: "Current Plan";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    background: #b8973a;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .tier-header {
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid rgba(74, 82, 64, 0.1);
+    padding-bottom: 1.5rem;
+  }
+
+  .tier-name {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: #4a5240;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+
+  .tier-price {
+    font-size: 2.5rem;
+    color: #b8973a;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+  }
+
+  .tier-price small {
+    font-size: 1rem;
+    color: var(--charcoal-brown);
+    opacity: 0.7;
+    font-weight: 400;
+  }
+
+  .tier-description {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .tier-features {
+    flex: 1;
+    margin: 2rem 0;
+  }
+
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .feature-list li {
+    padding: 0.75rem 0;
+    color: var(--charcoal-brown);
+    opacity: 0.85;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(74, 82, 64, 0.05);
+  }
+
+  .feature-list li:last-child {
+    border-bottom: none;
+  }
+
+  .feature-check {
+    color: #4a5240;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .feature-text {
+    line-height: 1.5;
+  }
+
+  .tier-action {
+    margin-top: auto;
+  }
+
+  .btn-upgrade {
+    width: 100%;
+    background: #4a5240;
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .btn-upgrade:hover {
+    background: #3a3f31;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 82, 64, 0.2);
+  }
+
+  .btn-upgrade:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-upgrade.current {
+    background: #b8973a;
+  }
+
+  .btn-upgrade.current:hover {
+    background: #a6823e;
+  }
+
+  .coming-soon-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border: 2px solid rgba(102, 126, 234, 0.3);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .coming-soon-section h3 {
+    color: #667eea;
+    font-size: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-family: var(--font-heading);
+  }
+
+  .coming-soon-section p {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .faq-section {
+    background: var(--white);
+    border: var(--border-light);
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    margin-top: 3rem;
+  }
+
+  .faq-section h3 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: #4a5240;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #b8973a;
+  }
+
+  .faq-item {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(74, 82, 64, 0.1);
+    padding-bottom: 1.5rem;
+  }
+
+  .faq-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .faq-question {
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    font-size: 1.05rem;
+  }
+
+  .faq-answer {
+    color: var(--charcoal-brown);
+    opacity: 0.8;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 768px) {
+    .subscription-hero h1 {
+      font-size: 2rem;
+    }
+
+    .tier-price {
+      font-size: 2rem;
+    }
+
+    .tiers-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="subscription-container">
+  <div class="subscription-hero">
+    <h1>✨ Upgrade Your Plan</h1>
+    {% if current_tier == 'free' %}
+      <div class="current-plan-badge">Currently on Starter (Free)</div>
+    {% elif current_tier == 'professional' %}
+      <div class="current-plan-badge">Currently on Professional</div>
+    {% elif current_tier == 'elite' %}
+      <div class="current-plan-badge">Currently on Elite</div>
+    {% endif %}
+    <p>Choose the plan that best fits your business needs</p>
+  </div>
+
+  <div class="tiers-grid">
+    <!-- Starter Plan -->
+    <div class="tier-card {% if current_tier == 'free' %}active{% endif %}">
+      <div class="tier-header">
+        <div class="tier-name">Starter</div>
+        <div class="tier-price">Free<small>/month</small></div>
+        <p class="tier-description">Perfect for getting started</p>
+      </div>
+
+      <ul class="feature-list tier-features">
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">CRM up to 50 contacts</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">5 active transactions</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Basic email templates</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Mobile app access</span>
+        </li>
+      </ul>
+
+      <div class="tier-action">
+        {% if current_tier == 'free' %}
+          <button class="btn-upgrade current" disabled>Your Current Plan</button>
+        {% else %}
+          <button class="btn-upgrade" onclick="alert('Downgrade feature coming soon')">Downgrade Plan</button>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Professional Plan -->
+    <div class="tier-card {% if current_tier == 'professional' %}active{% endif %}">
+      <div class="tier-header">
+        <div class="tier-name">Professional</div>
+        <div class="tier-price">$29<small>/month</small></div>
+        <p class="tier-description">Most popular choice</p>
+      </div>
+
+      <ul class="feature-list tier-features">
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Unlimited CRM contacts</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Unlimited active transactions</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">AI Concierge (white-label)</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Advanced email templates</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Marketing Hub</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">All Power Tools</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Priority email support</span>
+        </li>
+      </ul>
+
+      <div class="tier-action">
+        {% if current_tier == 'professional' %}
+          <button class="btn-upgrade current" disabled>Your Current Plan</button>
+        {% else %}
+          <button class="btn-upgrade" onclick="alert('Stripe integration coming soon. Contact us for early access!')">Upgrade Now</button>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Elite Plan -->
+    <div class="tier-card {% if current_tier == 'elite' %}active{% endif %}">
+      <div class="tier-header">
+        <div class="tier-name">Elite</div>
+        <div class="tier-price">$79<small>/month</small></div>
+        <p class="tier-description">For serious agents</p>
+      </div>
+
+      <ul class="feature-list tier-features">
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Everything in Professional</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">24/7 Phone support</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Custom branding & white-label</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Lender partnership integrations</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Early access to new features</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Dedicated account manager</span>
+        </li>
+        <li>
+          <span class="feature-check">✓</span>
+          <span class="feature-text">Advanced analytics</span>
+        </li>
+      </ul>
+
+      <div class="tier-action">
+        {% if current_tier == 'elite' %}
+          <button class="btn-upgrade current" disabled>Your Current Plan</button>
+        {% else %}
+          <button class="btn-upgrade" onclick="alert('Stripe integration coming soon. Contact us for early access!')">Upgrade Now</button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Coming Soon Banner -->
+  <div class="coming-soon-section">
+    <h3>🚀 Payment Integration Coming Soon</h3>
+    <p>We're integrating Stripe to make upgrades seamless and instant. In the meantime, contact our sales team at support@yourlifeyourhome.com for early access or questions about our plans.</p>
+  </div>
+
+  <!-- FAQ Section -->
+  <div class="faq-section">
+    <h3>Frequently Asked Questions</h3>
+
+    <div class="faq-item">
+      <div class="faq-question">Can I change plans anytime?</div>
+      <div class="faq-answer">Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Is there a long-term contract?</div>
+      <div class="faq-answer">No contracts required. All our plans are month-to-month and you can cancel anytime.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What payment methods do you accept?</div>
+      <div class="faq-answer">We accept all major credit cards (Visa, Mastercard, American Express) via Stripe, which is launching soon.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Is there a free trial?</div>
+      <div class="faq-answer">All features in the Starter plan are completely free forever. Try Professional with full access by contacting our team.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">Do you offer discounts for annual billing?</div>
+      <div class="faq-answer">We're planning volume discounts and annual billing options. Contact us for details!</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-question">What about team members?</div>
+      <div class="faq-answer">Team features are in development. Elite plan subscribers will get early access to team collaboration tools.</div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

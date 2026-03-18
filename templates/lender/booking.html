@@ -1,0 +1,282 @@
+{% extends "lender/layout.html" %}
+
+{% block content %}
+<style>
+  .lender-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .booking-hero {
+    background: linear-gradient(135deg, rgba(74, 82, 64, 0.08) 0%, rgba(184, 151, 58, 0.08) 100%);
+    border: 1px solid rgba(74, 82, 64, 0.15);
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .booking-hero h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.5rem;
+    color: #4a5240;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .booking-hero p {
+    font-size: 1.2rem;
+    color: #4a5240;
+    opacity: 0.8;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .booking-section {
+    background: white;
+    border: 1px solid rgba(74, 82, 64, 0.1);
+    border-radius: 12px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .booking-section h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 1.5rem;
+    color: #4a5240;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #b8973a;
+  }
+
+  .setup-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .setup-steps li {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+  }
+
+  .setup-steps li:last-child {
+    margin-bottom: 0;
+  }
+
+  .step-number {
+    background: #b8973a;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .step-content h3 {
+    font-weight: 600;
+    color: #4a5240;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-content p {
+    color: #4a5240;
+    opacity: 0.8;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .embed-example {
+    background: #f5f0e8;
+    border: 1px solid rgba(74, 82, 64, 0.1);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    color: #4a5240;
+  }
+
+  .info-box {
+    background: linear-gradient(135deg, rgba(184, 151, 58, 0.1) 0%, rgba(184, 151, 58, 0.05) 100%);
+    border-left: 4px solid #b8973a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .info-box h4 {
+    color: #4a5240;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .info-box p {
+    color: #4a5240;
+    opacity: 0.9;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .widget-preview {
+    background: #f9f7f3;
+    border: 1px solid rgba(74, 82, 64, 0.1);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .widget-preview p {
+    color: #4a5240;
+    opacity: 0.6;
+    margin: 0;
+  }
+
+  .btn-primary {
+    background: #4a5240;
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 1.5rem;
+  }
+
+  .btn-primary:hover {
+    background: #3a3f31;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 82, 64, 0.2);
+  }
+
+  .coming-soon {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .coming-soon h3 {
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .coming-soon p {
+    color: #4a5240;
+    opacity: 0.8;
+    margin: 0;
+  }
+</style>
+
+<div class="lender-content">
+  <div class="booking-hero">
+    <h1>📅 Booking & Calendar</h1>
+    <p>Let borrowers self-schedule consultations — your calendar, your rules</p>
+  </div>
+
+  <!-- Calendly Integration Section -->
+  <div class="booking-section">
+    <h2>Getting Started with Calendly</h2>
+
+    <div class="info-box">
+      <h4>What is Calendly?</h4>
+      <p>Calendly is the leading scheduling platform that eliminates the back-and-forth of finding a meeting time. Share your calendar link and let borrowers book directly into your availability.</p>
+    </div>
+
+    <h3 style="color: #4a5240; font-size: 1.2rem; margin-top: 2rem; margin-bottom: 1rem;">Setup in 3 Steps</h3>
+
+    <ol class="setup-steps">
+      <li>
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Create a Calendly Account</h3>
+          <p>Visit <a href="https://calendly.com" target="_blank" style="color: #b8973a; text-decoration: none;">calendly.com</a> and create a free account. You can sign up with your email, Google, or Outlook account.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Configure Your Availability</h3>
+          <p>Set your working hours, timezone, and meeting types. Create different meeting types for loan consultations, pre-approvals, and follow-ups. Connect your calendar to prevent double-bookings.</p>
+        </div>
+      </li>
+      <li>
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>Share Your Link</h3>
+          <p>Get your unique Calendly link and share it via email, text, your website, or agent partners. Borrowers will see your availability and book directly.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- Embed Code Section -->
+  <div class="booking-section">
+    <h2>Embed on Your Website</h2>
+
+    <p style="color: #4a5240; opacity: 0.8; margin-bottom: 1.5rem;">Once you have your Calendly account set up, you can embed your calendar directly into your lender profile page or website using this code:</p>
+
+    <div class="embed-example">
+      <code>&lt;div class="calendly-inline-widget" data-url="https://calendly.com/your-username" style="min-width:320px;height:630px;"&gt;&lt;/div&gt;<br/>&lt;script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async&gt;&lt;/script&gt;</code>
+    </div>
+
+    <div class="info-box" style="margin-top: 1.5rem;">
+      <h4>How to customize:</h4>
+      <p>Replace "your-username" with your actual Calendly username. You can adjust the height and width to fit your page layout. For more customization options, check the Calendly documentation.</p>
+    </div>
+  </div>
+
+  <!-- Widget Preview Section -->
+  <div class="booking-section">
+    <h2>Live Calendar Preview</h2>
+
+    <p style="color: #4a5240; opacity: 0.8; margin-bottom: 1.5rem;">Once you've set up Calendly and added your username below, your calendar will display here:</p>
+
+    <form method="POST" style="margin-bottom: 1.5rem;">
+      <div style="display: flex; gap: 1rem; align-items: flex-end;">
+        <div style="flex: 1;">
+          <label for="calendly_username" style="display: block; color: #4a5240; font-weight: 600; margin-bottom: 0.5rem;">Your Calendly Username</label>
+          <input type="text" id="calendly_username" name="calendly_username"
+                 placeholder="e.g., your-name"
+                 style="width: 100%; padding: 0.75rem 1rem; border: 1px solid rgba(74, 82, 64, 0.2); border-radius: 8px; font-size: 1rem;">
+          <small style="color: #4a5240; opacity: 0.7;">Found in your Calendly URL: calendly.com/your-username</small>
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top: 0;">Save & Embed</button>
+      </div>
+    </form>
+
+    <div class="widget-preview">
+      <p>Your Calendly widget will appear here after setup</p>
+    </div>
+  </div>
+
+  <!-- Coming Soon Section -->
+  <div class="coming-soon">
+    <h3>Advanced Scheduling Coming Soon</h3>
+    <p>We're working on direct integration with Calendly, Google Calendar, and Outlook to make scheduling even easier. Team scheduling, automatic reminders, and borrower notification templates launching soon!</p>
+  </div>
+</div>
+
+{% endblock %}
