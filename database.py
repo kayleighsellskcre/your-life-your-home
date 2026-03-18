@@ -5104,3 +5104,122 @@ def ensure_stripe_columns():
 
         if migrations:
             conn.commit()
+
+
+def ensure_promo_codes_table():
+    """Create promo_codes table if it doesn't exist."""
+    with get_connection() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS promo_codes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code TEXT UNIQUE NOT NULL,
+                tier_granted TEXT NOT NULL DEFAULT 'professional',
+                max_uses INTEGER NOT NULL DEFAULT 1,
+                times_used INTEGER NOT NULL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                note TEXT
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS promo_code_uses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                code_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (code_id) REFERENCES promo_codes(id),
+                UNIQUE(code_id, user_id)
+            )
+        """)
+        conn.commit()
+
+
+def seed_promo_codes(codes):
+    """Insert promo codes if they don't already exist. codes = list of (code, note) tuples."""
+    with get_connection() as conn:
+        for code, note in codes:
+            try:
+                conn.execute(
+                    "INSERT OR IGNORE INTO promo_codes (code, tier_granted, max_uses, note) VALUES (?, 'professional', 1, ?)",
+                    (code, note)
+                )
+            except Exception as e:
+                print(f"[Promo] Could not insert code {code}: {e}")
+        conn.commit()
+
+
+def get_promo_code(code):
+    """Look up a promo code. Returns dict or None."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM promo_codes WHERE code = ?", (code.upper().strip(),)
+        ).fetchone()
+        return dict(row) if row else None
+
+
+def redeem_promo_code(code, user_id):
+    """
+    Attempt to redeem a promo code for a user.
+    Returns (success: bool, message: str, tier: str or None)
+    """
+    with get_connection() as conn:
+        # Get code
+        row = conn.execute(
+            "SELECT * FROM promo_codes WHERE code = ?", (code.upper().strip(),)
+        ).fetchone()
+
+        if not row:
+            return False, "That code isn't valid. Please check and try again.", None
+
+        promo = dict(row)
+
+        # Check if already used by this user
+        already_used = conn.execute(
+            "SELECT 1 FROM promo_code_uses WHERE code_id = ? AND user_id = ?",
+            (promo["id"], user_id)
+        ).fetchone()
+
+        if already_used:
+            return False, "You've already used this code.", None
+
+        # Check if code has remaining uses
+        if promo["times_used"] >= promo["max_uses"]:
+            return False, "This code has already been used.", None
+
+        # Apply the code
+        tier = promo["tier_granted"]
+
+        # Record the use
+        conn.execute(
+            "INSERT INTO promo_code_uses (code_id, user_id) VALUES (?, ?)",
+            (promo["id"], user_id)
+        )
+
+        # Increment times_used
+        conn.execute(
+            "UPDATE promo_codes SET times_used = times_used + 1 WHERE id = ?",
+            (promo["id"],)
+        )
+
+        # Upgrade the user's tier
+        conn.execute(
+            "UPDATE users SET subscription_tier = ?, subscription_status = 'promo' WHERE id = ?",
+            (tier, user_id)
+        )
+
+        conn.commit()
+        return True, f"Code applied! Your account has been upgraded to {tier.title()}.", tier
+
+
+def list_promo_codes():
+    """List all promo codes with usage info (for admin view)."""
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT p.*,
+                   u.email as used_by_email,
+                   pu.used_at
+            FROM promo_codes p
+            LEFT JOIN promo_code_uses pu ON pu.code_id = p.id
+            LEFT JOIN users u ON u.id = pu.user_id
+            ORDER BY p.id ASC
+        """).fetchall()
+        return [dict(r) for r in rows]

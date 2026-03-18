@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width: 900px; margin: 3rem auto; padding: 0 1.5rem;">
+  <h1 style="font-family: serif; color: #1B3A5C; margin-bottom: 0.5rem;">Promo Codes</h1>
+  <p style="color: #666; margin-bottom: 2rem;">VIP launch codes — each is one-time use only.</p>
+
+  <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+    <thead>
+      <tr style="background: #4a5240; color: white;">
+        <th style="padding: 1rem; text-align: left; font-weight: 600;">Code</th>
+        <th style="padding: 1rem; text-align: left; font-weight: 600;">Tier</th>
+        <th style="padding: 1rem; text-align: left; font-weight: 600;">Status</th>
+        <th style="padding: 1rem; text-align: left; font-weight: 600;">Used By</th>
+        <th style="padding: 1rem; text-align: left; font-weight: 600;">Used At</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for code in codes %}
+      <tr style="border-bottom: 1px solid #f0ebe0;">
+        <td style="padding: 0.875rem 1rem; font-family: monospace; font-size: 0.95rem; font-weight: 600; color: #4a5240; letter-spacing: 1px;">{{ code.code }}</td>
+        <td style="padding: 0.875rem 1rem; text-transform: capitalize; color: #333;">{{ code.tier_granted }}</td>
+        <td style="padding: 0.875rem 1rem;">
+          {% if code.times_used >= code.max_uses %}
+            <span style="background: #fce8e8; color: #c0392b; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Used</span>
+          {% else %}
+            <span style="background: #e8f5e8; color: #27ae60; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Available</span>
+          {% endif %}
+        </td>
+        <td style="padding: 0.875rem 1rem; color: #555; font-size: 0.9rem;">{{ code.used_by_email or '—' }}</td>
+        <td style="padding: 0.875rem 1rem; color: #888; font-size: 0.85rem;">{{ code.used_at or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="margin-top: 2rem;">
+    <a href="{{ url_for('admin_dashboard') }}" style="color: #4a5240; text-decoration: none; font-size: 0.9rem;">← Back to Admin</a>
+  </div>
+</div>
+{% endblock %}

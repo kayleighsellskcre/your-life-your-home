@@ -283,6 +283,20 @@ try:
 except Exception as e:
     print(f"[Startup] Stripe migration warning: {e}")
 
+# Initialize promo codes table and seed launch codes
+try:
+    from database import ensure_promo_codes_table, seed_promo_codes
+    ensure_promo_codes_table()
+    seed_promo_codes([
+        ("YLH-GOLD-LAUNCH1", "VIP Launch Code 1"),
+        ("YLH-GOLD-LAUNCH2", "VIP Launch Code 2"),
+        ("YLH-GOLD-LAUNCH3", "VIP Launch Code 3"),
+        ("YLH-GOLD-LAUNCH4", "VIP Launch Code 4"),
+        ("YLH-GOLD-LAUNCH5", "VIP Launch Code 5"),
+    ])
+except Exception as e:
+    print(f"[Startup] Promo code init warning: {e}")
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -8383,6 +8397,51 @@ def lender_subscription_portal():
         return redirect(url_for("lender_subscription"))
 
     return redirect(portal_url)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  PROMO CODE REDEMPTION ROUTES
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.route("/redeem-promo", methods=["POST"])
+def redeem_promo():
+    """Redeem a promo code to upgrade subscription tier."""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    code = request.form.get("promo_code", "").strip()
+    if not code:
+        flash("Please enter a promo code.", "error")
+        # Redirect back to wherever they came from
+        role = session.get("role", "agent")
+        if role == "lender":
+            return redirect(url_for("lender_subscription"))
+        return redirect(url_for("agent_subscription"))
+
+    from database import redeem_promo_code
+    success, message, tier = redeem_promo_code(code, session["user_id"])
+
+    if success:
+        flash(message, "success")
+        # Update session with new tier
+        session["subscription_tier"] = tier
+    else:
+        flash(message, "error")
+
+    role = session.get("role", "agent")
+    if role == "lender":
+        return redirect(url_for("lender_subscription"))
+    return redirect(url_for("agent_subscription"))
+
+
+@app.route("/admin/promo-codes")
+def admin_promo_codes():
+    """Admin view of all promo codes and usage."""
+    if "user_id" not in session or session.get("role") != "admin":
+        return redirect(url_for("login"))
+    from database import list_promo_codes
+    codes = list_promo_codes()
+    return render_template("admin/promo_codes.html", codes=codes)
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  END STRIPE SUBSCRIPTION ROUTES

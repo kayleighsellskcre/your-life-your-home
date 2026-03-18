@@ -488,6 +488,22 @@
       <div class="faq-answer">Team features are in development. Elite plan subscribers will get early access to team collaboration tools.</div>
     </div>
   </div>
+
+  <!-- Promo Code Section -->
+  <div style="max-width: 500px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 16px; border: 2px solid rgba(184, 151, 58, 0.3); text-align: center;">
+    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎁</div>
+    <h3 style="font-family: serif; color: #4a5240; margin: 0 0 0.25rem 0; font-size: 1.2rem;">Have a Promo Code?</h3>
+    <p style="color: #7a7a6a; font-size: 0.9rem; margin: 0 0 1.25rem 0;">Enter your VIP launch code for free Professional access.</p>
+    <form method="POST" action="{{ url_for('redeem_promo') }}" style="display: flex; gap: 0.5rem; justify-content: center;">
+      <input type="text" name="promo_code" placeholder="YLH-GOLD-LAUNCH1"
+             style="padding: 0.6rem 1rem; border: 1.5px solid #d4c9b0; border-radius: 8px; font-size: 0.95rem; width: 200px; text-transform: uppercase; letter-spacing: 1px; outline: none; font-family: monospace;"
+             maxlength="30" autocomplete="off">
+      <button type="submit"
+              style="padding: 0.6rem 1.25rem; background: #4a5240; color: white; border: none; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 600; white-space: nowrap;">
+        Apply Code
+      </button>
+    </form>
+  </div>
 </div>
 
 {% endblock %}
