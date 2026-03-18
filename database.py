@@ -5043,3 +5043,64 @@ def get_invoice_items(invoice_id: int) -> List[Dict]:
     rows = cur.fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  STRIPE SUBSCRIPTION FUNCTIONS
+# ═══════════════════════════════════════════════════════════════════════════
+
+def update_user_subscription(user_id, tier, stripe_customer_id=None, stripe_subscription_id=None):
+    """Update user's subscription tier and Stripe IDs."""
+    with get_connection() as conn:
+        conn.execute(
+            """UPDATE users
+               SET subscription_tier = ?,
+                   stripe_customer_id = COALESCE(?, stripe_customer_id),
+                   stripe_subscription_id = COALESCE(?, stripe_subscription_id),
+                   subscription_status = 'active'
+               WHERE id = ?""",
+            (tier, stripe_customer_id, stripe_subscription_id, user_id)
+        )
+        conn.commit()
+
+
+def downgrade_user_subscription_by_stripe_id(stripe_subscription_id):
+    """Downgrade user to free tier when subscription is cancelled in Stripe."""
+    with get_connection() as conn:
+        conn.execute(
+            """UPDATE users
+               SET subscription_tier = 'free',
+                   subscription_status = 'cancelled',
+                   stripe_subscription_id = NULL
+               WHERE stripe_subscription_id = ?""",
+            (stripe_subscription_id,)
+        )
+        conn.commit()
+
+
+def ensure_stripe_columns():
+    """Add Stripe columns to users table if they don't exist (safe migration)."""
+    with get_connection() as conn:
+        # Check existing columns
+        cursor = conn.execute("PRAGMA table_info(users)")
+        existing = {row[1] for row in cursor.fetchall()}
+
+        migrations = []
+        if "stripe_customer_id" not in existing:
+            migrations.append("ALTER TABLE users ADD COLUMN stripe_customer_id TEXT")
+        if "stripe_subscription_id" not in existing:
+            migrations.append("ALTER TABLE users ADD COLUMN stripe_subscription_id TEXT")
+        if "subscription_status" not in existing:
+            migrations.append("ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT 'free'")
+        if "subscription_tier" not in existing:
+            migrations.append("ALTER TABLE users ADD COLUMN subscription_tier TEXT DEFAULT 'free'")
+
+        for sql in migrations:
+            try:
+                conn.execute(sql)
+                print(f"[DB Migration] Applied: {sql}")
+            except Exception as e:
+                print(f"[DB Migration] Skipped (likely already exists): {e}")
+
+        if migrations:
+            conn.commit()

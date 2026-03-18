@@ -40,6 +40,17 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
+# Stripe integration
+try:
+    from stripe_payments import (
+        create_checkout_session, create_customer_portal_session,
+        handle_checkout_completed, handle_subscription_deleted,
+        verify_webhook, SUBSCRIPTION_TIERS
+    )
+except ImportError:
+    print("[WARNING] stripe_payments module not found. Stripe features will not work.")
+    SUBSCRIPTION_TIERS = {}
+
 # ---------------- R2 STORAGE CLIENT ----------------
 R2_CLIENT = None
 if all(
@@ -264,6 +275,13 @@ from r2_storage import (
 
 # Initialize DBs so platform loads with no manual trigger
 init_db()
+
+# Run Stripe column migration safely
+try:
+    from database import ensure_stripe_columns
+    ensure_stripe_columns()
+except Exception as e:
+    print(f"[Startup] Stripe migration warning: {e}")
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
@@ -8135,17 +8153,240 @@ def admin_settings():
 
 @app.route("/agent/subscription")
 def agent_subscription():
-    """Subscription tier management page."""
+    """Agent subscription management page."""
     if "user_id" not in session or session.get("role") != "agent":
         return redirect(url_for("login"))
     user = get_user_by_id(session["user_id"])
     if not user:
         return redirect(url_for("login"))
-    user_dict = dict(user) if hasattr(user, 'keys') and not isinstance(user, dict) else user
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
     from database import get_user_profile
     profile = get_user_profile(session["user_id"])
-    current_tier = user_dict.get("subscription_tier", "free")
-    return render_template("agent/subscription.html", user=user_dict, profile=profile, current_tier=current_tier)
+    current_tier = user_dict.get("subscription_tier", "free") or "free"
+    stripe_configured = bool(os.environ.get("STRIPE_SECRET_KEY"))
+    return render_template(
+        "agent/subscription.html",
+        user=user_dict,
+        profile=profile,
+        current_tier=current_tier,
+        tiers=SUBSCRIPTION_TIERS,
+        stripe_configured=stripe_configured,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  STRIPE SUBSCRIPTION ROUTES
+# ═══════════════════════════════════════════════════════════════════════════
+
+@app.route("/stripe/webhook", methods=["POST"])
+def stripe_webhook():
+    """Handle Stripe webhook events."""
+    from database import update_user_subscription, downgrade_user_subscription_by_stripe_id
+
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get("Stripe-Signature", "")
+
+    event, error = verify_webhook(payload, sig_header)
+    if error:
+        print(f"[Stripe Webhook] Error: {error}")
+        return jsonify({"error": error}), 400
+
+    event_type = event.get("type")
+    print(f"[Stripe Webhook] Received: {event_type}")
+
+    if event_type == "checkout.session.completed":
+        session_data = event["data"]["object"]
+        handle_checkout_completed(
+            session_data,
+            lambda uid, tier, cid, sid: update_user_subscription(uid, tier, cid, sid)
+        )
+
+    elif event_type in ("customer.subscription.deleted", "customer.subscription.canceled"):
+        sub_data = event["data"]["object"]
+        handle_subscription_deleted(
+            sub_data,
+            lambda sid: downgrade_user_subscription_by_stripe_id(sid)
+        )
+
+    elif event_type == "customer.subscription.updated":
+        sub_data = event["data"]["object"]
+        # Handle plan changes
+        metadata = sub_data.get("metadata", {})
+        user_id = metadata.get("user_id")
+        tier = metadata.get("tier")
+        if user_id and tier:
+            try:
+                update_user_subscription(int(user_id), tier)
+                print(f"[Stripe] Updated subscription for user {user_id} to {tier}")
+            except Exception as e:
+                print(f"[Stripe] Error updating subscription: {e}")
+
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route("/agent/subscription/checkout/<tier>", methods=["POST"])
+def agent_subscription_checkout(tier):
+    """Start Stripe checkout for agent subscription."""
+    if "user_id" not in session or session.get("role") != "agent":
+        return redirect(url_for("login"))
+    if tier not in ("professional", "elite"):
+        flash("Invalid subscription tier.", "error")
+        return redirect(url_for("agent_subscription"))
+
+    user = get_user_by_id(session["user_id"])
+    if not user:
+        return redirect(url_for("login"))
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+
+    base_url = request.host_url.rstrip("/")
+    checkout_url, error = create_checkout_session(
+        user_id=user_dict["id"],
+        user_email=user_dict["email"],
+        user_name=user_dict.get("name", ""),
+        tier=tier,
+        role="agent",
+        success_url=f"{base_url}/agent/subscription/success",
+        cancel_url=f"{base_url}/agent/subscription",
+    )
+
+    if error:
+        flash(f"Could not start checkout: {error}", "error")
+        return redirect(url_for("agent_subscription"))
+
+    return redirect(checkout_url)
+
+
+@app.route("/agent/subscription/success")
+def agent_subscription_success():
+    """Subscription success landing page for agents."""
+    if "user_id" not in session or session.get("role") != "agent":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+    return render_template("shared/subscription_success.html", user=user_dict, role="agent",
+                           dashboard_url=url_for("agent_dashboard"))
+
+
+@app.route("/agent/subscription/portal", methods=["POST"])
+def agent_subscription_portal():
+    """Redirect agent to Stripe customer portal to manage billing."""
+    if "user_id" not in session or session.get("role") != "agent":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+
+    stripe_customer_id = user_dict.get("stripe_customer_id")
+    if not stripe_customer_id:
+        flash("No active subscription found. Please subscribe first.", "error")
+        return redirect(url_for("agent_subscription"))
+
+    base_url = request.host_url.rstrip("/")
+    portal_url, error = create_customer_portal_session(
+        stripe_customer_id,
+        return_url=f"{base_url}/agent/subscription"
+    )
+
+    if error:
+        flash(f"Could not open billing portal: {error}", "error")
+        return redirect(url_for("agent_subscription"))
+
+    return redirect(portal_url)
+
+
+@app.route("/lender/subscription")
+def lender_subscription():
+    """Lender subscription management page."""
+    if "user_id" not in session or session.get("role") != "lender":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    if not user:
+        return redirect(url_for("login"))
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+    from database import get_user_profile
+    profile = get_user_profile(session["user_id"])
+    current_tier = user_dict.get("subscription_tier", "free") or "free"
+    stripe_configured = bool(os.environ.get("STRIPE_SECRET_KEY"))
+    return render_template(
+        "lender/subscription.html",
+        user=user_dict,
+        profile=profile,
+        current_tier=current_tier,
+        tiers=SUBSCRIPTION_TIERS,
+        stripe_configured=stripe_configured,
+    )
+
+
+@app.route("/lender/subscription/checkout/<tier>", methods=["POST"])
+def lender_subscription_checkout(tier):
+    """Start Stripe checkout for lender subscription."""
+    if "user_id" not in session or session.get("role") != "lender":
+        return redirect(url_for("login"))
+    if tier not in ("professional", "elite"):
+        flash("Invalid subscription tier.", "error")
+        return redirect(url_for("lender_subscription"))
+
+    user = get_user_by_id(session["user_id"])
+    if not user:
+        return redirect(url_for("login"))
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+
+    base_url = request.host_url.rstrip("/")
+    checkout_url, error = create_checkout_session(
+        user_id=user_dict["id"],
+        user_email=user_dict["email"],
+        user_name=user_dict.get("name", ""),
+        tier=tier,
+        role="lender",
+        success_url=f"{base_url}/lender/subscription/success",
+        cancel_url=f"{base_url}/lender/subscription",
+    )
+
+    if error:
+        flash(f"Could not start checkout: {error}", "error")
+        return redirect(url_for("lender_subscription"))
+
+    return redirect(checkout_url)
+
+
+@app.route("/lender/subscription/success")
+def lender_subscription_success():
+    """Subscription success landing page for lenders."""
+    if "user_id" not in session or session.get("role") != "lender":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+    return render_template("shared/subscription_success.html", user=user_dict, role="lender",
+                           dashboard_url=url_for("lender_dashboard"))
+
+
+@app.route("/lender/subscription/portal", methods=["POST"])
+def lender_subscription_portal():
+    """Redirect lender to Stripe customer portal to manage billing."""
+    if "user_id" not in session or session.get("role") != "lender":
+        return redirect(url_for("login"))
+    user = get_user_by_id(session["user_id"])
+    user_dict = dict(user) if hasattr(user, "keys") and not isinstance(user, dict) else user
+
+    stripe_customer_id = user_dict.get("stripe_customer_id")
+    if not stripe_customer_id:
+        flash("No active subscription found. Please subscribe first.", "error")
+        return redirect(url_for("lender_subscription"))
+
+    base_url = request.host_url.rstrip("/")
+    portal_url, error = create_customer_portal_session(
+        stripe_customer_id,
+        return_url=f"{base_url}/lender/subscription"
+    )
+
+    if error:
+        flash(f"Could not open billing portal: {error}", "error")
+        return redirect(url_for("lender_subscription"))
+
+    return redirect(portal_url)
+
+# ═══════════════════════════════════════════════════════════════════════════
+#  END STRIPE SUBSCRIPTION ROUTES
+# ═══════════════════════════════════════════════════════════════════════════
 
 
 # -------------------------------------------------

@@ -1,6 +1,6 @@
-{% extends "agent/layout.html" %}
+{% extends "lender/layout.html" %}
 
-{% block agent_content %}
+{% block lender_content %}
 <style>
   .subscription-container {
     max-width: 1200px;
@@ -295,11 +295,11 @@
       <ul class="feature-list tier-features">
         <li>
           <span class="feature-check">✓</span>
-          <span class="feature-text">CRM up to 50 contacts</span>
+          <span class="feature-text">CRM up to 50 borrowers</span>
         </li>
         <li>
           <span class="feature-check">✓</span>
-          <span class="feature-text">5 active transactions</span>
+          <span class="feature-text">5 active loan products</span>
         </li>
         <li>
           <span class="feature-check">✓</span>
@@ -331,11 +331,11 @@
       <ul class="feature-list tier-features">
         <li>
           <span class="feature-check">✓</span>
-          <span class="feature-text">Unlimited CRM contacts</span>
+          <span class="feature-text">Unlimited CRM borrowers</span>
         </li>
         <li>
           <span class="feature-check">✓</span>
-          <span class="feature-text">Unlimited active transactions</span>
+          <span class="feature-text">Unlimited loan products</span>
         </li>
         <li>
           <span class="feature-check">✓</span>
@@ -364,7 +364,7 @@
           <button class="btn-upgrade current" disabled>Your Current Plan</button>
         {% else %}
           {% if stripe_configured %}
-            <form method="POST" action="{{ url_for('agent_subscription_checkout', tier='professional') }}" style="display: inline; width: 100%;">
+            <form method="POST" action="{{ url_for('lender_subscription_checkout', tier='professional') }}" style="display: inline; width: 100%;">
               <button type="submit" class="btn-upgrade">Upgrade Now</button>
             </form>
           {% else %}
@@ -379,7 +379,7 @@
       <div class="tier-header">
         <div class="tier-name">Elite</div>
         <div class="tier-price">$79<small>/month</small></div>
-        <p class="tier-description">For serious agents</p>
+        <p class="tier-description">For serious lenders</p>
       </div>
 
       <ul class="feature-list tier-features">
@@ -397,7 +397,7 @@
         </li>
         <li>
           <span class="feature-check">✓</span>
-          <span class="feature-text">Lender partnership integrations</span>
+          <span class="feature-text">Agent partnership integrations</span>
         </li>
         <li>
           <span class="feature-check">✓</span>
@@ -418,7 +418,7 @@
           <button class="btn-upgrade current" disabled>Your Current Plan</button>
         {% else %}
           {% if stripe_configured %}
-            <form method="POST" action="{{ url_for('agent_subscription_checkout', tier='elite') }}" style="display: inline; width: 100%;">
+            <form method="POST" action="{{ url_for('lender_subscription_checkout', tier='elite') }}" style="display: inline; width: 100%;">
               <button type="submit" class="btn-upgrade">Upgrade Now</button>
             </form>
           {% else %}
@@ -432,7 +432,7 @@
   {% if stripe_configured and current_tier != 'free' %}
   <!-- Manage Billing Button for Paid Plans -->
   <div style="text-align: center; margin-bottom: 2rem;">
-    <form method="POST" action="{{ url_for('agent_subscription_portal') }}" style="display: inline;">
+    <form method="POST" action="{{ url_for('lender_subscription_portal') }}" style="display: inline;">
       <button type="submit" class="btn-upgrade" style="background: #b8973a; max-width: 300px;">
         💳 Manage Billing & Payment Method
       </button>
@@ -442,8 +442,8 @@
 
   <!-- Partnership Callout -->
   <div style="background: linear-gradient(135deg, rgba(74, 82, 64, 0.08) 0%, rgba(184, 151, 58, 0.08) 100%); border: 2px solid #4a5240; border-radius: var(--border-radius-lg); padding: 2rem; margin-bottom: 2rem; text-align: center;">
-    <h3 style="color: #4a5240; font-family: var(--font-heading); margin-top: 0;">🤝 Partner with Lenders</h3>
-    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 0;">Subscribe to Professional or Elite to unlock powerful partnership features that let you collaborate with subscribed lenders on the platform.</p>
+    <h3 style="color: #4a5240; font-family: var(--font-heading); margin-top: 0;">🤝 Partner with Agents</h3>
+    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 0;">Subscribe to Professional or Elite to unlock powerful partnership features that let you collaborate with subscribed agents on the platform.</p>
   </div>
 
   {% if not stripe_configured %}
