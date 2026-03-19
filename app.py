@@ -604,6 +604,14 @@ def inject_professionals():
     
     return dict(professionals=professionals, hex_to_color_name=hex_to_color_name, get_professional_photo_url=get_professional_photo_url)
 
+
+@app.context_processor
+def inject_current_user():
+    """Inject current_user into every template so layouts can check role."""
+    user = get_current_user()
+    return dict(current_user=user)
+
+
 # ---------------- AJAX PLANNER ROUTE ----------------
 @app.route("/homeowner/reno/planner/ajax-add", methods=["POST"])
 def homeowner_reno_planner_ajax_add():

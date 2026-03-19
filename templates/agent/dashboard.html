@@ -436,7 +436,23 @@
     <h1>Agent Dashboard</h1>
     <p>Here is what is happening with your business today.</p>
   </div>
-  
+
+  <!-- AI Morning Briefing -->
+  <div id="ai-briefing-bar" style="
+    background:linear-gradient(135deg,#F8F5F0 0%,#FDFBF7 100%);
+    border:1px solid rgba(107,106,69,.18);border-radius:10px;
+    padding:.6rem 1rem;margin-bottom:.875rem;
+    display:flex;align-items:center;gap:.625rem;
+    font-size:.82rem;color:#3A352C;line-height:1.45;
+  ">
+    <span style="font-size:1rem;flex-shrink:0;opacity:.7;">✨</span>
+    <span id="ai-briefing-text" style="flex:1;font-style:italic;opacity:.6;">Loading your morning briefing…</span>
+    <button onclick="loadBriefing()" id="ai-briefing-refresh"
+      style="flex-shrink:0;background:none;border:none;font-size:.8rem;color:#6B6A45;cursor:pointer;opacity:.6;padding:0;">
+      ↺
+    </button>
+  </div>
+
   <!-- Metrics Cards -->
   <div class="metrics-grid">
     <div class="metric-card">
@@ -542,4 +558,29 @@
     </div>
   </div>
 </div>
+
+<script>
+function loadBriefing(){
+  var el=document.getElementById('ai-briefing-text');
+  var btn=document.getElementById('ai-briefing-refresh');
+  if(!el)return;
+  el.textContent='Thinking…';
+  el.style.opacity='.5';
+  if(btn)btn.style.opacity='.3';
+  fetch('/api/ai/dashboard-briefing',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      el.style.fontStyle='normal';
+      el.style.opacity='1';
+      el.textContent=d.briefing||'Have a great day!';
+      if(btn)btn.style.opacity='.5';
+    })
+    .catch(function(){
+      el.textContent='Have a great day — your pipeline is ready for you.';
+      el.style.opacity='.7';
+      if(btn)btn.style.opacity='.5';
+    });
+}
+document.addEventListener('DOMContentLoaded',function(){ loadBriefing(); });
+</script>
 {% endblock %}
