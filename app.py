@@ -6421,6 +6421,34 @@ def agent_transaction_change_stage(tx_id):
             if sub_stage and new_stage == 'pre_contract':
                 pass
             flash("Transaction stage updated successfully.", "success")
+            # AI: Auto-generate recommended tasks for the new stage (background thread)
+            try:
+                import threading as _thr
+                _tx_snap = dict(transaction)
+                _uid = user["id"]
+                def _ai_gen_tasks():
+                    try:
+                        from ai_platform import ai_transaction_tasks
+                        from database import add_task, get_connection as _gc3
+                        tasks = ai_transaction_tasks(
+                            property_address=_tx_snap.get("property_address",""),
+                            client_name=_tx_snap.get("client_name",""),
+                            side=_tx_snap.get("transaction_type","buyer"),
+                            stage=new_stage,
+                            close_date=str(_tx_snap.get("target_close_date",""))
+                        )
+                        for t in tasks:
+                            try:
+                                add_task(_uid, title=t, related_transaction_id=tx_id,
+                                         status="pending", priority="medium")
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+                _thr.Thread(target=_ai_gen_tasks, daemon=True).start()
+                flash("✨ AI is generating recommended tasks for this stage.", "info")
+            except Exception:
+                pass
             # When a transaction closes, schedule a review request
             if new_stage == 'closed':
                 try:
@@ -10940,6 +10968,269 @@ def agent_concierge_conversation_detail(conversation_id):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# PLATFORM-WIDE AI ENDPOINTS
+# All AI features across the platform route through here.
+# Powered by ai_platform.py — one module, one key, one model standard.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route("/api/ai/dashboard-briefing", methods=["POST"])
+def ai_dashboard_briefing_endpoint():
+    """Return a personalized morning briefing for the agent dashboard."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    from ai_platform import ai_dashboard_briefing
+    from database import get_user_profile, get_contacts_needing_followup
+    profile = get_user_profile(user["id"]) or {}
+    profile_d = dict(profile) if profile else {}
+    agent_name = (profile_d.get("full_name") or user.get("name") or "there").split()[0]
+    metrics = get_agent_dashboard_metrics(user["id"]) if user.get("role") == "agent" else {}
+    followup_contacts = get_contacts_needing_followup(user["id"], days_threshold=14)
+    followup_names = [c.get("name","") for c in followup_contacts[:5] if c.get("name")]
+    briefing = ai_dashboard_briefing(agent_name, metrics, followup_names, [])
+    return jsonify({"briefing": briefing})
+
+
+@app.route("/api/ai/crm/draft-email", methods=["POST"])
+def ai_crm_draft_email():
+    """Draft a personalized email for a CRM contact."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    contact_id = data.get("contact_id")
+    context = data.get("context", "")
+    if not contact_id:
+        return jsonify({"error": "contact_id required"}), 400
+    from database import get_agent_contact, get_user_profile, list_crm_interactions
+    contact = get_agent_contact(int(contact_id), user["id"])
+    if not contact:
+        return jsonify({"error": "Contact not found"}), 404
+    contact = dict(contact)
+    interactions = list_crm_interactions(int(contact_id), "agent_contact", user["id"], limit=5)
+    contact["all_interactions"] = [dict(i) for i in interactions]
+    profile = get_user_profile(user["id"]) or {}
+    profile_d = dict(profile) if profile else {}
+    agent_name = profile_d.get("full_name") or user.get("name") or "Your Agent"
+    agent_phone = profile_d.get("phone") or ""
+    from ai_platform import ai_draft_email
+    draft = ai_draft_email(
+        contact_name=contact.get("name",""),
+        contact_stage=contact.get("stage","new"),
+        contact_notes=contact.get("notes",""),
+        recent_interactions=contact.get("all_interactions") or [],
+        agent_name=agent_name,
+        agent_phone=agent_phone,
+        context=context
+    )
+    return jsonify({"draft": draft})
+
+
+@app.route("/api/ai/crm/next-action", methods=["POST"])
+def ai_crm_next_action():
+    """Suggest the best next action for a CRM contact."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    contact_id = data.get("contact_id")
+    if not contact_id:
+        return jsonify({"error": "contact_id required"}), 400
+    from database import get_agent_contact, list_crm_interactions
+    from datetime import date, datetime as _dt
+    contact = get_agent_contact(int(contact_id), user["id"])
+    if not contact:
+        return jsonify({"error": "Contact not found"}), 404
+    contact = dict(contact)
+    interactions = list_crm_interactions(int(contact_id), "agent_contact", user["id"], limit=5)
+    interactions_list = [dict(i) for i in interactions]
+    last_touch = contact.get("last_touch") or contact.get("created_at","")
+    days_since = 30
+    if last_touch:
+        try:
+            lt = _dt.fromisoformat(str(last_touch)[:10])
+            days_since = (date.today() - lt.date()).days
+        except:
+            pass
+    from ai_platform import ai_next_action
+    result = ai_next_action(
+        contact_name=contact.get("name",""),
+        contact_stage=contact.get("stage","new"),
+        contact_notes=contact.get("notes",""),
+        recent_interactions=interactions_list,
+        days_since_contact=days_since
+    )
+    return jsonify(result)
+
+
+@app.route("/api/ai/crm/lead-score", methods=["POST"])
+def ai_crm_lead_score():
+    """Score a lead and explain the reasoning."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    contact_id = data.get("contact_id")
+    if not contact_id:
+        return jsonify({"error": "contact_id required"}), 400
+    from database import get_agent_contact, list_crm_interactions
+    from datetime import date, datetime as _dt
+    contact = get_agent_contact(int(contact_id), user["id"])
+    if not contact:
+        return jsonify({"error": "Contact not found"}), 404
+    contact = dict(contact)
+    interactions = list_crm_interactions(int(contact_id), "agent_contact", user["id"], limit=20)
+    created = contact.get("created_at","")
+    days_since = 0
+    if created:
+        try:
+            days_since = (date.today() - _dt.fromisoformat(str(created)[:10]).date()).days
+        except:
+            pass
+    from ai_platform import ai_lead_score
+    result = ai_lead_score(
+        contact_name=contact.get("name",""),
+        contact_stage=contact.get("stage","new"),
+        lead_source=contact.get("lead_source",""),
+        days_since_added=days_since,
+        interaction_count=len(interactions),
+        has_email=bool(contact.get("email")),
+        has_phone=bool(contact.get("phone")),
+        notes=contact.get("notes","")
+    )
+    return jsonify(result)
+
+
+@app.route("/api/ai/communications/personalize", methods=["POST"])
+def ai_communications_personalize():
+    """Personalize a communication template for a specific contact."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    template_text = data.get("template_text","")
+    contact_name = data.get("contact_name","")
+    contact_stage = data.get("contact_stage","new")
+    context = data.get("context","")
+    if not template_text:
+        return jsonify({"error": "template_text required"}), 400
+    from database import get_user_profile
+    profile = get_user_profile(user["id"]) or {}
+    agent_name = dict(profile).get("full_name") or user.get("name") or "Your Agent"
+    from ai_platform import ai_personalize_template
+    result = ai_personalize_template(template_text, contact_name, contact_stage, agent_name, context)
+    return jsonify({"personalized": result})
+
+
+@app.route("/api/ai/transaction/suggest-tasks", methods=["POST"])
+def ai_transaction_suggest_tasks():
+    """Suggest tasks for a transaction at its current stage."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    tx_id = data.get("transaction_id")
+    if not tx_id:
+        return jsonify({"error": "transaction_id required"}), 400
+    tx = get_transaction_detail(int(tx_id))
+    if not tx or tx.get("agent_id") != user["id"]:
+        return jsonify({"error": "Transaction not found"}), 404
+    from ai_platform import ai_transaction_tasks
+    tasks = ai_transaction_tasks(
+        property_address=tx.get("property_address",""),
+        client_name=tx.get("client_name",""),
+        side=tx.get("side","buyer"),
+        stage=tx.get("current_stage","pre_contract"),
+        close_date=str(tx.get("target_close_date",""))
+    )
+    return jsonify({"tasks": tasks})
+
+
+@app.route("/api/ai/marketing/listing-description", methods=["POST"])
+def ai_marketing_listing_description():
+    """Generate a listing description from property details."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    from ai_platform import ai_listing_description
+    description = ai_listing_description(
+        address=data.get("address",""),
+        bedrooms=int(data.get("bedrooms",0) or 0),
+        bathrooms=float(data.get("bathrooms",0) or 0),
+        sqft=int(data.get("sqft",0) or 0),
+        highlights=data.get("highlights",""),
+        price=float(data.get("price",0)) if data.get("price") else 0,
+        neighborhood=data.get("neighborhood","")
+    )
+    return jsonify({"description": description})
+
+
+@app.route("/api/ai/homeowner/equity-insight", methods=["POST"])
+def ai_homeowner_equity_insight_endpoint():
+    """Generate a personalized equity insight for a homeowner.
+    Auto-loads the homeowner's snapshot from DB when body is empty."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    from ai_platform import ai_homeowner_equity_insight
+
+    home_value     = float(data.get("home_value") or 0)
+    original_price = float(data.get("original_price") or 0)
+    loan_balance   = float(data.get("loan_balance") or 0)
+    equity         = float(data.get("equity") or 0)
+    appreciation   = float(data.get("appreciation_pct") or 0)
+    owner_name     = data.get("owner_name") or (
+        (user.get("first_name","") + " " + user.get("last_name","")).strip()
+        or user.get("name","Homeowner")
+    )
+    agent_name = data.get("agent_name") or "your agent"
+
+    if not home_value:
+        try:
+            snap = get_homeowner_snapshot_for_user(user["id"])
+            if snap:
+                home_value     = float(snap.get("value_estimate") or 0)
+                original_price = float(snap.get("original_price") or 0)
+                loan_balance   = float(snap.get("loan_balance") or 0)
+                equity_raw     = snap.get("equity_estimate") or (
+                    home_value - loan_balance if home_value and loan_balance else 0)
+                equity = float(equity_raw or 0)
+                if home_value and original_price:
+                    appreciation = round((home_value - original_price) / original_price * 100, 1)
+        except Exception:
+            pass
+
+    insight = ai_homeowner_equity_insight(
+        home_value=home_value,
+        original_price=original_price,
+        loan_balance=loan_balance,
+        equity=equity,
+        appreciation_pct=appreciation,
+        owner_name=owner_name,
+        agent_name=agent_name
+    )
+    return jsonify({"insight": insight})
+
+
+@app.route("/api/ai/transaction/vendor-recommendation", methods=["POST"])
+def ai_transaction_vendor_recommendation():
+    """Suggest vendor types for the current transaction stage."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    data = request.get_json() or {}
+    from ai_platform import ai_vendor_recommendation
+    suggestion = ai_vendor_recommendation(
+        transaction_stage=data.get("stage","pre_contract"),
+        property_type=data.get("property_type","residential"),
+        side=data.get("side","buyer")
+    )
+    return jsonify({"suggestion": suggestion})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # LEAD INTAKE WEBHOOK
 # Kayleigh can POST leads here from her website contact form or Zapier.
 # URL: POST /api/lead-intake/<agent_token>
@@ -11017,6 +11308,36 @@ def lead_intake_webhook(agent_token):
                 schedule_new_lead_drip(agent_id, contact_id, email)
             except Exception:
                 pass
+        # AI lead score — run in background thread so webhook responds instantly
+        try:
+            import threading
+            def _ai_score():
+                try:
+                    from ai_platform import ai_lead_score
+                    from database import get_connection as _gc2
+                    result = ai_lead_score(
+                        contact_name=name or email,
+                        contact_stage="new",
+                        lead_source=source,
+                        days_since_added=0,
+                        interaction_count=0,
+                        has_email=bool(email),
+                        has_phone=bool(phone),
+                        notes=notes
+                    )
+                    # Store score in contact notes as a tag line
+                    if result and result.get("score"):
+                        _c = _gc2()
+                        _cr = _c.cursor()
+                        score_note = f"[AI Score: {result['score']}/10 {result.get('label','')}] {result.get('reason','')}"
+                        _cr.execute("UPDATE agent_contacts SET notes = notes || ? WHERE id = ?",
+                                    ("\n" + score_note, contact_id))
+                        _c.commit(); _c.close()
+                except Exception:
+                    pass
+            threading.Thread(target=_ai_score, daemon=True).start()
+        except Exception:
+            pass
         # Notify agent by email
         try:
             from database import get_connection as _gc

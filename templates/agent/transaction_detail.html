@@ -867,6 +867,18 @@
     <a href="{{ url_for('agent_marketing_hub', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn action-btn--primary" style="background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);">
       Marketing Hub
     </a>
+    <button class="action-btn action-btn--primary" onclick="aiSuggestTasks()" style="background:linear-gradient(135deg,#6B6A45 0%,#5A5938 100%);">
+      ✨ AI: Suggest Tasks
+    </button>
+  </div>
+
+  <!-- AI Task Suggestions Panel -->
+  <div id="ai-task-panel" style="display:none;background:linear-gradient(135deg,rgba(107,106,69,.07) 0%,rgba(107,106,69,.03) 100%);border:1px solid rgba(107,106,69,.2);border-radius:8px;padding:1rem 1.25rem;margin-bottom:1rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
+      <span style="font-size:.8rem;font-weight:700;color:#6B6A45;text-transform:uppercase;letter-spacing:.06em;">✨ AI Recommended Tasks</span>
+      <button onclick="document.getElementById('ai-task-panel').style.display='none'" style="background:none;border:none;font-size:1rem;color:#9A9472;cursor:pointer;">×</button>
+    </div>
+    <div id="ai-task-list" style="font-size:.82rem;color:#3A352C;line-height:1.7;"></div>
   </div>
 
   <!-- Tabs -->
@@ -1234,6 +1246,29 @@
         alert('File ready to upload: ' + files[0].name);
       }
     }
+  }
+
+  /* ─── AI TASK SUGGESTIONS ─────────────────────── */
+  function aiSuggestTasks() {
+    var panel = document.getElementById('ai-task-panel');
+    var list  = document.getElementById('ai-task-list');
+    panel.style.display = 'block';
+    list.innerHTML = '<span style="opacity:.55;font-style:italic;">✨ Analyzing your transaction…</span>';
+    fetch('/api/ai/transaction/suggest-tasks', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({tx_id: {{ transaction.id or transaction.get('id') }} })
+    }).then(function(r){ return r.json(); }).then(function(d) {
+      var tasks = d.tasks || [];
+      if (!tasks.length) { list.innerHTML = '<span style="opacity:.5;">No suggestions available.</span>'; return; }
+      list.innerHTML = tasks.map(function(t,i){
+        return '<div style="display:flex;align-items:flex-start;gap:.5rem;padding:.3rem 0;border-bottom:1px solid rgba(107,106,69,.08);">'
+          + '<span style="min-width:18px;height:18px;border:1.5px solid #6B6A45;border-radius:3px;display:inline-block;flex-shrink:0;margin-top:.15rem;"></span>'
+          + '<span>'+t+'</span></div>';
+      }).join('');
+    }).catch(function(){
+      list.innerHTML = '<span style="opacity:.5;">AI unavailable. Please try again.</span>';
+    });
   }
 </script>
 

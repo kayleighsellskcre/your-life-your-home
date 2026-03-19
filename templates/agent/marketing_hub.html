@@ -296,6 +296,18 @@
     </div>
   </div>
 
+  <!-- AI Listing Description -->
+  <div style="background:linear-gradient(135deg,rgba(107,106,69,.08) 0%,rgba(107,106,69,.03) 100%);border:1px solid rgba(107,106,69,.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+      <div>
+        <div style="font-size:.9rem;font-weight:700;color:#3A352C;margin-bottom:.15rem;">✨ AI Listing Description Generator</div>
+        <div style="font-size:.78rem;color:#9A9472;">Generate a compelling, professional MLS description in seconds.</div>
+      </div>
+      <button onclick="document.getElementById('aiListingModal').style.display='flex'" style="display:inline-flex;align-items:center;gap:.35rem;background:#6B6A45;color:#fff;border:none;border-radius:6px;padding:.45rem 1rem;font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.02em;white-space:nowrap;">✨ Generate Description</button>
+    </div>
+    <div id="ai-listing-result" style="display:none;margin-top:.75rem;background:#fff;border:1px solid rgba(107,106,69,.18);border-radius:6px;padding:.75rem 1rem;font-size:.82rem;color:#3A352C;line-height:1.7;white-space:pre-wrap;"></div>
+  </div>
+
   <!-- Marketing Categories -->
   <div id="categories-section">
     <div class="categories-grid">
@@ -448,7 +460,104 @@
     const txId = {{ tx_id }};
     window.location.href = `/agent/transactions/${txId}/marketing-hub/create?category=${currentCategory}&type=${assetType}`;
   }
+
+  /* ─── AI LISTING DESCRIPTION ──────────────────── */
+  document.getElementById('aiListingModal').addEventListener('click', function(e){
+    if(e.target===this) this.style.display='none';
+  });
+
+  document.getElementById('aiListingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('aiListingSubmitBtn');
+    var resultDiv = document.getElementById('ai-listing-result');
+    btn.textContent = '✨ Writing…'; btn.disabled = true;
+    var fd = new FormData(this);
+    fetch('/api/ai/marketing/listing-description', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        address:      fd.get('address'),
+        bedrooms:     parseInt(fd.get('bedrooms')) || 0,
+        bathrooms:    parseFloat(fd.get('bathrooms')) || 0,
+        sqft:         parseInt(fd.get('sqft')) || 0,
+        highlights:   fd.get('highlights'),
+        price:        parseFloat(fd.get('price')) || 0,
+        neighborhood: fd.get('neighborhood')
+      })
+    }).then(function(r){return r.json();}).then(function(d){
+      btn.textContent = '✨ Generate'; btn.disabled = false;
+      if(d.description){
+        resultDiv.textContent = d.description;
+        resultDiv.style.display = 'block';
+        var copyBtn = document.getElementById('aiListingCopyBtn');
+        copyBtn.style.display = 'inline-flex';
+        document.getElementById('aiListingModal').style.display = 'none';
+      } else {
+        alert('AI could not generate a description. Please try again.');
+      }
+    }).catch(function(){
+      btn.textContent = '✨ Generate'; btn.disabled = false;
+      alert('AI unavailable. Please try again.');
+    });
+  });
+
+  document.getElementById('aiListingCopyBtn').addEventListener('click', function(){
+    var text = document.getElementById('ai-listing-result').textContent;
+    navigator.clipboard.writeText(text).then(function(){
+      var btn = document.getElementById('aiListingCopyBtn');
+      btn.textContent = 'Copied!';
+      setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+    });
+  });
 </script>
+
+<!-- AI Listing Description Modal -->
+<div id="aiListingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:10px;padding:1.5rem;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+      <span style="font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;font-weight:500;color:#3A352C;">✨ AI Listing Description</span>
+      <button onclick="document.getElementById('aiListingModal').style.display='none'" style="background:none;border:none;font-size:1.2rem;color:#9A9472;cursor:pointer;">×</button>
+    </div>
+    <form id="aiListingForm">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;">
+        <div style="grid-column:1/-1;">
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">Property Address</label>
+          <input name="address" value="{{ transaction.property_address or '' }}" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;" required>
+        </div>
+        <div>
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">Bedrooms</label>
+          <input name="bedrooms" type="number" min="0" max="20" step="1" placeholder="4" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;">
+        </div>
+        <div>
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">Bathrooms</label>
+          <input name="bathrooms" type="number" min="0" max="20" step="0.5" placeholder="2.5" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;">
+        </div>
+        <div>
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">Sq Ft</label>
+          <input name="sqft" type="number" min="0" placeholder="2200" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;">
+        </div>
+        <div>
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">List Price</label>
+          <input name="price" type="number" min="0" value="{{ transaction.list_price or '' }}" placeholder="450000" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">Neighborhood / Area</label>
+          <input name="neighborhood" value="{{ transaction.property_city or '' }}" placeholder="e.g. Brookside, Leawood, Overland Park" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;">
+        </div>
+        <div style="grid-column:1/-1;">
+          <label style="display:block;font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.2rem;">Key Highlights <span style="font-weight:400;color:#9A9472;">(renovated kitchen, pool, new roof, etc.)</span></label>
+          <textarea name="highlights" rows="3" placeholder="Updated kitchen, hardwood floors, large backyard, 3-car garage…" style="width:100%;padding:.45rem .65rem;border:1px solid rgba(200,180,151,.42);border-radius:5px;font-size:.82rem;resize:vertical;" required></textarea>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:.875rem;">
+        <button type="button" onclick="document.getElementById('aiListingModal').style.display='none'" style="background:#fff;border:1px solid rgba(200,180,151,.42);border-radius:5px;padding:.4rem .875rem;font-size:.78rem;cursor:pointer;color:#3A352C;">Cancel</button>
+        <button type="submit" id="aiListingSubmitBtn" style="background:#6B6A45;color:#fff;border:none;border-radius:5px;padding:.4rem 1rem;font-size:.78rem;font-weight:600;cursor:pointer;">✨ Generate</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<button id="aiListingCopyBtn" style="display:none;background:#fff;border:1px solid rgba(107,106,69,.28);border-radius:5px;padding:.3rem .7rem;font-size:.75rem;color:#6B6A45;cursor:pointer;margin-top:.4rem;">Copy</button>
 
 {% endblock %}
 

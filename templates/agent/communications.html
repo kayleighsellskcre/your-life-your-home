@@ -557,9 +557,13 @@
         
         <div class="form-group full-width">
           <label for="message_body" class="form-label">Message</label>
+          <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;">
+            <button type="button" onclick="aiWriteForMe()" style="display:inline-flex;align-items:center;gap:.3rem;background:#6B6A45;color:#fff;border:none;border-radius:5px;padding:.3rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer;letter-spacing:.02em;">✨ AI Draft for Me</button>
+            <span id="ai-comms-status" style="font-size:.72rem;color:#9A9472;font-style:italic;"></span>
+          </div>
           <textarea id="message_body" name="body" class="form-textarea" rows="10" required></textarea>
         </div>
-        
+
         <div class="form-group full-width">
           <button class="btn-primary" type="submit">Send Message</button>
         </div>
@@ -1681,6 +1685,75 @@ document.addEventListener('keydown', function(e) {
     }
   }
 });
+
+/* ─── AI FEATURES ─────────────────────────────── */
+
+// Add "✨ AI Personalize" button to every template card
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.template-card').forEach(function(card) {
+    var actions = card.querySelector('.template-actions');
+    if (!actions) return;
+    var btn = document.createElement('button');
+    btn.className = 'btn-template';
+    btn.style.cssText = 'background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;';
+    btn.textContent = '✨ Personalize';
+    btn.onclick = function(){ aiPersonalizeCard(card, btn); };
+    actions.appendChild(btn);
+  });
+});
+
+function aiPersonalizeCard(card, btn) {
+  var bodyEl = card.querySelector('.template-body');
+  if (!bodyEl) return;
+  var templateText = bodyEl.textContent.trim();
+  var recipientName = document.getElementById('recipient_name') ? document.getElementById('recipient_name').value.trim() : '';
+  var contactName = recipientName || prompt('Personalize for which contact? (Enter their name)');
+  if (!contactName) return;
+  var origText = btn.textContent;
+  btn.textContent = '…thinking';
+  btn.disabled = true;
+  fetch('/api/ai/communications/personalize', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({template_text: templateText, contact_name: contactName, context: ''})
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    if (d.personalized) {
+      bodyEl.textContent = d.personalized;
+      btn.textContent = '✓ Done';
+      setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
+    } else {
+      btn.textContent = origText; btn.disabled = false;
+      alert('AI could not personalize this template right now.');
+    }
+  }).catch(function(){
+    btn.textContent = origText; btn.disabled = false;
+    alert('AI unavailable. Please try again.');
+  });
+}
+
+function aiWriteForMe() {
+  var recipientName = (document.getElementById('recipient_name') || {}).value || '';
+  if (!recipientName.trim()) {
+    document.getElementById('recipient_name').focus();
+    document.getElementById('ai-comms-status').textContent = 'Enter recipient name first.';
+    return;
+  }
+  var statusEl = document.getElementById('ai-comms-status');
+  statusEl.textContent = '✨ Drafting…';
+  fetch('/api/ai/crm/draft-email', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({contact_name: recipientName, contact_stage: 'contacted', notes: '', context: 'general outreach'})
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    var body = document.getElementById('message_body');
+    if (body) body.value = d.email || d.error || '';
+    statusEl.textContent = d.email ? '✓ Draft ready — review and edit before sending.' : 'Could not draft.';
+    setTimeout(function(){ statusEl.textContent = ''; }, 6000);
+  }).catch(function(){
+    statusEl.textContent = 'AI unavailable.';
+    setTimeout(function(){ statusEl.textContent = ''; }, 4000);
+  });
+}
 </script>
 
 {% endblock %}

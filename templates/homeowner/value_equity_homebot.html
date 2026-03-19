@@ -747,6 +747,29 @@
   </div>
   {% endif %}
   
+  <!-- AI Equity Insight Bar -->
+  {% if snapshot %}
+  <div id="ai-equity-bar" style="background:linear-gradient(135deg,rgba(107,106,69,.07) 0%,rgba(107,106,69,.03) 100%);border:1px solid rgba(107,106,69,.18);border-radius:8px;padding:.85rem 1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+    <span style="font-size:1.1rem;">✨</span>
+    <span id="ai-equity-text" style="flex:1;font-size:.82rem;color:#3A352C;line-height:1.6;font-style:italic;opacity:.6;">Loading your personalized equity insight…</span>
+    <button onclick="loadEquityInsight()" style="background:none;border:none;color:#6B6A45;font-size:.75rem;cursor:pointer;font-weight:600;text-decoration:underline;white-space:nowrap;">Refresh ↺</button>
+  </div>
+  <script>
+  function loadEquityInsight(){
+    var el=document.getElementById('ai-equity-text');
+    el.textContent='✨ Thinking…';el.style.opacity='.6';el.style.fontStyle='italic';
+    fetch('/api/ai/homeowner/equity-insight',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({})
+    }).then(function(r){return r.json();}).then(function(d){
+      el.textContent=d.insight||'Have a great day!';
+      el.style.opacity='1';el.style.fontStyle='normal';
+    }).catch(function(){el.textContent='Insight unavailable.';el.style.opacity='.5';});
+  }
+  document.addEventListener('DOMContentLoaded',loadEquityInsight);
+  </script>
+  {% endif %}
+
   <!-- Financial Snapshot Cards - INTERACTIVE -->
   <div class="snapshot-grid">
     <!-- Home Value -->

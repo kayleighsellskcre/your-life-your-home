@@ -574,6 +574,7 @@
               {% endfor %}
             </div>
             {% endif %}
+            <div id="ai-strip-{{ contact.id }}" style="display:none;background:linear-gradient(135deg,rgba(107,106,69,.07) 0%,rgba(107,106,69,.03) 100%);border:1px solid rgba(107,106,69,.18);border-radius:6px;padding:.55rem .75rem;margin-bottom:.4rem;font-size:.78rem;color:#3A352C;line-height:1.5;"></div>
             <div class="exp-btns">
               <button onclick="openLog({{ contact.id }})"  class="x-btn x-btn--log">💬 Log</button>
               <button onclick="openTask({{ contact.id }})" class="x-btn x-btn--task">✓ Task</button>
@@ -582,6 +583,8 @@
               {% if contact.phone %}<a href="tel:{{ contact.phone }}" class="x-btn x-btn--def">📞 Call</a>{% endif %}
               {% if contact.interaction_count > 0 %}<button onclick="openHist({{ contact.id }})" class="x-btn x-btn--def">History ({{ contact.interaction_count }})</button>{% endif %}
               <button onclick="openEdit({{ contact.id }})" class="x-btn x-btn--def">✏ Edit</button>
+              <button onclick="aiDraftEmail({{ contact.id }})" class="x-btn" style="background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;">✨ Draft Email</button>
+              <button onclick="aiNextAction({{ contact.id }})" class="x-btn" style="background:rgba(107,106,69,.12)!important;color:#6B6A45!important;border-color:rgba(107,106,69,.28)!important;">AI: What's Next?</button>
             </div>
           </td>
         </tr>
@@ -602,6 +605,26 @@
 
 </div><!-- /main-layout -->
 </div><!-- /crm -->
+
+<!-- ══ AI DRAFT EMAIL MODAL ═════════════════════ -->
+<div id="aiEmailModal" class="cmod">
+  <div class="cmod-box" style="max-width:560px;">
+    <div class="cmod-head">
+      ✨ AI Draft Email
+      <button class="cmod-x" onclick="document.getElementById('aiEmailModal').classList.remove('open')">×</button>
+    </div>
+    <div style="padding:1rem 1.25rem;">
+      <p style="font-size:.75rem;color:#9A9472;margin-bottom:.75rem;">AI-generated draft based on this contact's stage, notes, and history. Edit before sending.</p>
+      <div id="aiEmailContact" style="font-size:.72rem;font-weight:600;color:#6B6A45;margin-bottom:.5rem;"></div>
+      <div id="aiEmailLoading" style="display:none;text-align:center;padding:1.5rem;font-size:.82rem;color:#9A9472;">Drafting your email…</div>
+      <textarea id="aiEmailBody" rows="10" style="width:100%!important;padding:.6rem .75rem!important;border:1px solid rgba(200,180,151,.42)!important;border-radius:6px!important;font-size:.82rem!important;color:#3A352C!important;resize:vertical!important;font-family:inherit!important;line-height:1.6!important;background:#FDFBF7!important;"></textarea>
+      <div style="display:flex;gap:.5rem;margin-top:.75rem;justify-content:flex-end;">
+        <button onclick="copyEmailDraft()" class="t-btn t-btn--ghost" style="display:inline-flex!important;height:30px!important;padding:0 .875rem!important;font-size:.72rem!important;">Copy</button>
+        <button onclick="document.getElementById('aiEmailModal').classList.remove('open')" class="t-btn t-btn--solid" style="display:inline-flex!important;height:30px!important;padding:0 .875rem!important;font-size:.72rem!important;">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══ QUICK-ADD MODAL ══════════════════════════ -->
 <div id="addModal" class="cmod">
@@ -956,6 +979,66 @@ function doExport(){
 
 document.getElementById('qaForm').addEventListener('submit',function(e){
   if(!document.getElementById('qaName').value.trim()){e.preventDefault();alert('Please enter a name.');}
+});
+
+/* ─── AI FEATURES ─────────────────────────────── */
+function aiDraftEmail(id){
+  var c=CD.find(function(x){return x.id===id;}); if(!c)return;
+  var modal=document.getElementById('aiEmailModal');
+  var body=document.getElementById('aiEmailBody');
+  var loading=document.getElementById('aiEmailLoading');
+  var label=document.getElementById('aiEmailContact');
+  label.textContent=c.name+' · '+((c.stage||'').replace(/_/g,' '));
+  body.value='';body.style.display='none';loading.style.display='block';
+  modal.classList.add('open');
+  fetch('/api/ai/crm/draft-email',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contact_id:c.id,context:''})
+  }).then(function(r){return r.json();}).then(function(d){
+    loading.style.display='none';body.style.display='block';
+    body.value=d.email||d.error||'Unable to draft email.';
+  }).catch(function(){
+    loading.style.display='none';body.style.display='block';
+    body.value='Could not reach AI. Please try again.';
+  });
+}
+
+function aiNextAction(id){
+  var c=CD.find(function(x){return x.id===id;}); if(!c)return;
+  var strip=document.getElementById('ai-strip-'+id);
+  if(!strip)return;
+  strip.style.display='block';
+  strip.innerHTML='<span style="opacity:.55;font-style:italic;">✨ Thinking…</span>';
+  fetch('/api/ai/crm/next-action',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contact_id:c.id})
+  }).then(function(r){return r.json();}).then(function(d){
+    var urgencyColor={'low':'#4caf50','medium':'#ff9800','high':'#f44336'};
+    var u=d.urgency||'medium';
+    strip.innerHTML=
+      '<span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:'+
+      (urgencyColor[u]||'#6B6A45')+';margin-right:.4rem;">'+u.toUpperCase()+'</span>'+
+      '<strong>'+escHtml(d.action||'')+'</strong>'+
+      (d.reason?'<span style="opacity:.65;margin-left:.4rem;">— '+escHtml(d.reason)+'</span>':'');
+  }).catch(function(){
+    strip.innerHTML='<span style="opacity:.5;">AI unavailable.</span>';
+  });
+}
+
+function copyEmailDraft(){
+  var ta=document.getElementById('aiEmailBody');
+  ta.select();document.execCommand('copy');
+  var btn=event.target;btn.textContent='Copied!';
+  setTimeout(function(){btn.textContent='Copy';},1500);
+}
+
+function escHtml(s){
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+['aiEmailModal'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el)el.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
 });
 
 /* Auto-open edit modal if ?edit=ID is in URL (from address labels page) */

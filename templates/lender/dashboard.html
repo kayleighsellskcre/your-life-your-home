@@ -458,6 +458,13 @@
     <p>Here is what is happening with your pipeline today.</p>
   </div>
   
+  <!-- AI Morning Briefing -->
+  <div id="ai-briefing-bar" style="background:linear-gradient(135deg,rgba(107,106,69,.08) 0%,rgba(107,106,69,.03) 100%);border:1px solid rgba(107,106,69,.18);border-radius:8px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;">
+    <span style="font-size:1rem;">✨</span>
+    <span id="ai-briefing-text" style="flex:1;font-size:.82rem;color:#3A352C;line-height:1.5;font-style:italic;opacity:.6;">Loading your morning briefing…</span>
+    <button onclick="loadBriefing()" title="Refresh" style="background:none;border:none;color:#6B6A45;font-size:.8rem;cursor:pointer;font-weight:600;">↺</button>
+  </div>
+
   <!-- Metrics Cards -->
   <div class="metrics-grid">
     <div class="metric-card">
@@ -572,4 +579,17 @@
     </div>
   </div>
 </div>
+
+<script>
+function loadBriefing(){
+  var el=document.getElementById('ai-briefing-text');
+  el.textContent='✨ Loading…';el.style.opacity='.6';el.style.fontStyle='italic';
+  fetch('/api/ai/dashboard-briefing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
+    .then(function(r){return r.json();}).then(function(d){
+      el.textContent=d.briefing||'Have a great day — go close some loans!';
+      el.style.opacity='1';el.style.fontStyle='normal';
+    }).catch(function(){el.textContent='Have a great day!';el.style.opacity='.7';el.style.fontStyle='normal';});
+}
+document.addEventListener('DOMContentLoaded',loadBriefing);
+</script>
 {% endblock %}
