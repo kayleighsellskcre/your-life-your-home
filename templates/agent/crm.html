@@ -159,54 +159,12 @@
 /* ── MAIN LAYOUT ─────────────────────────── */
 .main-layout{
   display:grid;
-  grid-template-columns:190px 1fr;
+  grid-template-columns:1fr;
   min-height:calc(100vh - 200px);
 }
 
-/* ── QUICK-ADD SIDEBAR ───────────────────── */
-.qa-panel{
-  background:#FDFBF7;
-  border-right:1px solid rgba(200,180,151,.18);
-  padding:1rem .875rem;
-  overflow-y:auto;
-}
-.qa-panel::-webkit-scrollbar{width:3px;}
-.qa-panel::-webkit-scrollbar-thumb{background:rgba(200,180,151,.4);}
-.qa-h{
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:.875rem;font-weight:600;color:#3A352C;
-  margin:0 0 .75rem;display:block;
-}
-.qa-f{margin-bottom:.4rem;}
-.qa-f label{
-  display:block!important;font-size:.58rem!important;font-weight:700!important;
-  text-transform:uppercase!important;letter-spacing:.07em!important;
-  color:#6B6A45!important;margin-bottom:.15rem!important;
-}
-.qa-f input,.qa-f select{
-  width:100%!important;height:28px!important;padding:0 .55rem!important;
-  border:1px solid rgba(200,180,151,.42)!important;border-radius:4px!important;
-  font-size:.775rem!important;color:#3A352C!important;background:#fff!important;
-  outline:none!important;
-}
-.qa-f input:focus,.qa-f select:focus{border-color:#6B6A45!important;}
-.qa-submit{
-  display:block!important;width:100%!important;height:30px!important;
-  background:#6B6A45!important;color:#fff!important;border:none!important;
-  border-radius:4px!important;font-size:.7rem!important;font-weight:700!important;
-  text-transform:uppercase!important;letter-spacing:.04em!important;
-  cursor:pointer!important;margin-top:.375rem!important;transition:background .12s!important;
-}
-.qa-submit:hover{background:#5A5938!important;}
-.qa-hr{height:1px;background:rgba(200,180,151,.2);margin:.75rem 0;}
-.qa-link{
-  display:flex!important;align-items:center!important;justify-content:center!important;
-  height:27px!important;background:#fff!important;
-  border:1px solid rgba(107,106,69,.22)!important;border-radius:4px!important;
-  color:#6B6A45!important;font-size:.67rem!important;font-weight:600!important;
-  text-decoration:none!important;transition:all .12s!important;width:100%!important;
-}
-.qa-link:hover{background:#F6F2E8!important;border-color:#6B6A45!important;}
+/* ── QUICK-ADD SIDEBAR (hidden — now a modal) ─ */
+.qa-panel{ display:none!important; }
 
 /* ── CONTACT LIST ────────────────────────── */
 .list-area{overflow-x:auto;overflow-y:auto;min-width:0;}
@@ -416,8 +374,6 @@
 /* ── RESPONSIVE ──────────────────────────── */
 @media(max-width:768px){
   .main-layout{grid-template-columns:1fr;}
-  .qa-panel{display:none;border-right:none;border-bottom:1px solid rgba(200,180,151,.2);}
-  .qa-panel.open{display:block;}
   .mgrid{grid-template-columns:1fr;}
   .mgrid-full{grid-column:1;}
 }
@@ -431,7 +387,7 @@
   <span class="top-bar__count">{{ stats.total }}</span>
   <div class="top-bar__spacer"></div>
   <div class="top-bar__btns">
-    <button class="t-btn t-btn--solid" id="qaToggle" onclick="toggleQA()">+ Add</button>
+    <button class="t-btn t-btn--solid" id="qaToggle" onclick="openAddModal()">+ Add</button>
     <a href="{{ url_for('agent_crm_import') }}" class="t-btn t-btn--ghost">↑ Import</a>
     <button class="t-btn t-btn--ghost" onclick="doExport()">↓ Export</button>
     <a href="{{ url_for('agent_address_labels') }}" class="t-btn t-btn--ghost">🏷 Labels</a>
@@ -636,7 +592,7 @@
     {% else %}
     <div class="c-empty">
       <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;">—</div>
-      <p>{% if search_query or stage_filter or tag_filter %}No contacts match your filters.{% else %}No contacts yet — add your first using the panel on the left.{% endif %}</p>
+      <p>{% if search_query or stage_filter or tag_filter %}No contacts match your filters.{% else %}No contacts yet — click <strong>+ Add</strong> to add your first contact.{% endif %}</p>
       {% if search_query or stage_filter or tag_filter %}
       <a href="{{ url_for('agent_crm') }}" class="t-btn t-btn--solid" style="display:inline-flex;margin:0 auto;">Clear Filters</a>
       {% endif %}
@@ -646,6 +602,52 @@
 
 </div><!-- /main-layout -->
 </div><!-- /crm -->
+
+<!-- ══ QUICK-ADD MODAL ══════════════════════════ -->
+<div id="addModal" class="cmod">
+  <div class="cmod-box">
+    <div class="cmod-head">
+      Add New Contact
+      <button class="cmod-x" onclick="closeAddModal()">×</button>
+    </div>
+    <form method="post" id="qaForm">
+      <input type="hidden" name="action" value="add">
+      <div class="mgrid">
+        <div class="mf">
+          <label>Name *</label>
+          <input type="text" name="name" id="qaName" required placeholder="Full name">
+        </div>
+        <div class="mf">
+          <label>Stage</label>
+          <select name="stage">
+            <option value="new">New Lead</option>
+            <option value="nurture">Nurture</option>
+            <option value="active">Active</option>
+            <option value="past">Past Client</option>
+            <option value="sphere">Sphere</option>
+            <option value="closed">Closed</option>
+            <option value="hold">Hold</option>
+          </select>
+        </div>
+        <div class="mf">
+          <label>Email</label>
+          <input type="email" name="email" placeholder="email@example.com">
+        </div>
+        <div class="mf">
+          <label>Phone</label>
+          <input type="tel" name="phone" placeholder="555-555-5555">
+        </div>
+      </div>
+      <div class="mfoot">
+        <div class="mfoot-l">
+          <button type="submit" class="mbtn mbtn--p">Add Contact</button>
+          <button type="button" class="mbtn mbtn--s" onclick="closeAddModal()">Cancel</button>
+        </div>
+        <a href="{{ url_for('agent_crm_import') }}" class="mbtn mbtn--s">↑ Import from Excel</a>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- ══ EDIT MODAL ═══════════════════════════════ -->
 <div id="editModal" class="cmod">
@@ -766,11 +768,16 @@
 var CD = {{ contacts|tojson|default('[]') }};
 var openId = null;
 
-function toggleQA(){
-  var p=document.getElementById('qaPanel'),b=document.getElementById('qaToggle');
-  p.classList.toggle('open');
-  b.textContent=p.classList.contains('open')?'✕ Close':'+ Add';
+function openAddModal(){
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('qaName').focus(); }, 80);
 }
+function closeAddModal(){
+  document.getElementById('addModal').classList.remove('open');
+}
+document.getElementById('addModal').addEventListener('click', function(e){
+  if(e.target===this) closeAddModal();
+});
 
 /* ── Inline Last-Touch Edit ── */
 function startLtEdit(id){
