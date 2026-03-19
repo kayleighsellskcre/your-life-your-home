@@ -2361,7 +2361,8 @@ def signup():
                                     tags="referral",
                                     property_address="",
                                     property_value=None,
-                                    equity_estimate=None
+                                    equity_estimate=None,
+                                    user_id=user_id,
                                 )
                                 crm_contacts_created.append(f"CRM contact (ID: {contact_id})")
                                 print(f"SIGNUP SUCCESS: Created CRM contact {contact_id} for agent {agent_id}")
@@ -2395,8 +2396,21 @@ def signup():
                                     print(f"SIGNUP WARNING: Could not send email notification - {str(email_error)}")
                                     # Don't fail signup if email fails
                             else:
+                                # Contact already existed — link user_id so CRM ↔ portal are bridged
                                 print(f"SIGNUP: CRM contact already exists (ID: {existing_contact_id}), skipping creation")
                                 crm_contacts_created.append(f"CRM contact (ID: {existing_contact_id}, already existed)")
+                                if existing_contact_id:
+                                    try:
+                                        from database import get_connection as _gc
+                                        _conn = _gc()
+                                        _conn.execute(
+                                            "UPDATE agent_contacts SET user_id = ? WHERE id = ? AND user_id IS NULL",
+                                            (user_id, existing_contact_id)
+                                        )
+                                        _conn.commit()
+                                        _conn.close()
+                                    except Exception as _link_err:
+                                        print(f"SIGNUP: Could not link existing CRM contact user_id - {_link_err}")
                         except Exception as crm_error:
                             print(f"SIGNUP ERROR: Failed to create CRM contact - {str(crm_error)}")
                             import traceback
@@ -2419,6 +2433,43 @@ def signup():
                     )
                     relationships_created.append(f"lender relationship (ID: {relationship_id})")
                     print(f"SIGNUP SUCCESS: Created client relationship - homeowner {user_id} -> lender {lender_id}")
+                    
+                    # Create lender CRM borrower record linked to the homeowner's account
+                    from database import add_lender_borrower, list_lender_borrowers
+                    try:
+                        existing_borrowers = list_lender_borrowers(lender_id)
+                        borrower_exists = any(
+                            (b.get("email") or "").lower() == email.lower()
+                            for b in existing_borrowers
+                        )
+                        if not borrower_exists:
+                            borrower_id = add_lender_borrower(
+                                lender_user_id=lender_id,
+                                name=name,
+                                email=email,
+                                status="prospect",
+                                notes=f"Signed up via referral link on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                                tags="referral",
+                                user_id=user_id,
+                            )
+                            relationships_created.append(f"lender CRM borrower (ID: {borrower_id})")
+                            print(f"SIGNUP SUCCESS: Created lender CRM borrower {borrower_id} for lender {lender_id}")
+                        else:
+                            # Link existing borrower record to this user account
+                            try:
+                                from database import get_connection as _gc2
+                                _conn2 = _gc2()
+                                _conn2.execute(
+                                    "UPDATE lender_borrowers SET user_id = ? WHERE lender_user_id = ? AND LOWER(email) = LOWER(?) AND user_id IS NULL",
+                                    (user_id, lender_id, email)
+                                )
+                                _conn2.commit()
+                                _conn2.close()
+                            except Exception as _lb_err:
+                                print(f"SIGNUP: Could not link existing lender borrower user_id - {_lb_err}")
+                    except Exception as lb_error:
+                        print(f"SIGNUP WARNING: Could not create lender CRM borrower - {str(lb_error)}")
+
                 except Exception as lender_error:
                     print(f"SIGNUP ERROR: Failed to create lender relationship - {str(lender_error)}")
                     import traceback
@@ -8142,6 +8193,87 @@ def save_script():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/agent/clients")
+def agent_clients():
+    """Agent client portal — list of all linked homeowner clients with live data."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from database import get_agent_clients
+    clients = get_agent_clients(user["id"])
+    
+    return render_template("agent/clients.html", clients=clients)
+
+
+@app.route("/agent/clients/<int:homeowner_id>")
+def agent_client_detail(homeowner_id):
+    """Agent view of a specific homeowner client's full portal data."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    
+    from database import (
+        can_access_homeowner, get_user_by_id, get_homeowner_full_profile,
+        get_homeowner_recent_activity, get_homeowner_professionals
+    )
+    
+    if not can_access_homeowner(user["id"], "agent", homeowner_id):
+        flash("You don't have access to this client's data.", "error")
+        return redirect(url_for("agent_clients"))
+    
+    homeowner = get_user_by_id(homeowner_id)
+    if not homeowner or homeowner.get("role") != "homeowner":
+        flash("Client not found.", "error")
+        return redirect(url_for("agent_clients"))
+    
+    profile = get_homeowner_full_profile(homeowner_id)
+    recent_activity = get_homeowner_recent_activity(homeowner_id, limit=15)
+    professionals = get_homeowner_professionals(homeowner_id)
+    
+    # Load homeowner documents
+    from database import get_connection as _gc
+    _conn = _gc()
+    docs = [dict(r) for r in _conn.execute(
+        "SELECT id, name, category, created_at FROM homeowner_documents WHERE user_id = ? ORDER BY created_at DESC LIMIT 10",
+        (homeowner_id,)
+    ).fetchall()]
+    projects = [dict(r) for r in _conn.execute(
+        "SELECT id, name, category, status, budget FROM homeowner_projects WHERE user_id = ? ORDER BY created_at DESC LIMIT 10",
+        (homeowner_id,)
+    ).fetchall()]
+    warranties = [dict(r) for r in _conn.execute(
+        "SELECT id, item_name, category, warranty_expiry FROM homeowner_warranty_log WHERE user_id = ? ORDER BY warranty_expiry ASC LIMIT 10",
+        (homeowner_id,)
+    ).fetchall()]
+    snapshot_history = [dict(r) for r in _conn.execute(
+        "SELECT snapshot_date, value_estimate, equity_estimate, loan_balance FROM homeowner_snapshot_history WHERE user_id = ? ORDER BY snapshot_date DESC LIMIT 12",
+        (homeowner_id,)
+    ).fetchall()]
+    _conn.close()
+    
+    # Find this agent's CRM contact for this homeowner
+    from database import list_agent_contacts
+    crm_contact = None
+    for c in list_agent_contacts(user["id"]):
+        if c.get("user_id") == homeowner_id or (c.get("email") and homeowner and c.get("email").lower() == dict(homeowner).get("email", "").lower()):
+            crm_contact = c
+            break
+    
+    return render_template(
+        "agent/client_detail.html",
+        homeowner=dict(homeowner),
+        profile=profile,
+        recent_activity=recent_activity,
+        professionals=professionals,
+        docs=docs,
+        projects=projects,
+        warranties=warranties,
+        snapshot_history=snapshot_history,
+        crm_contact=crm_contact,
+    )
+
+
 @app.route("/agent/referrals", methods=["GET", "POST"])
 def agent_referrals():
     """Agent referral link management."""
@@ -9761,6 +9893,92 @@ def lender_power_suite():
         "lender/power_suite.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
+    )
+
+
+@app.route("/lender/clients")
+def lender_clients():
+    """Lender client portal — list of all linked homeowner clients with live data."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    
+    from database import get_lender_clients
+    clients = get_lender_clients(user["id"])
+    
+    return render_template("lender/clients.html", clients=clients)
+
+
+@app.route("/lender/clients/<int:homeowner_id>")
+def lender_client_detail(homeowner_id):
+    """Lender view of a specific homeowner client's full portal data."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    
+    from database import (
+        can_access_homeowner, get_user_by_id, get_homeowner_full_profile,
+        get_homeowner_recent_activity, get_homeowner_professionals
+    )
+    
+    if not can_access_homeowner(user["id"], "lender", homeowner_id):
+        flash("You don't have access to this client's data.", "error")
+        return redirect(url_for("lender_clients"))
+    
+    homeowner = get_user_by_id(homeowner_id)
+    if not homeowner or homeowner.get("role") != "homeowner":
+        flash("Client not found.", "error")
+        return redirect(url_for("lender_clients"))
+    
+    profile = get_homeowner_full_profile(homeowner_id)
+    recent_activity = get_homeowner_recent_activity(homeowner_id, limit=15)
+    professionals = get_homeowner_professionals(homeowner_id)
+    
+    from database import get_connection as _gc
+    _conn = _gc()
+    docs = [dict(r) for r in _conn.execute(
+        "SELECT id, name, category, created_at FROM homeowner_documents WHERE user_id = ? ORDER BY created_at DESC LIMIT 10",
+        (homeowner_id,)
+    ).fetchall()]
+    projects = [dict(r) for r in _conn.execute(
+        "SELECT id, name, category, status, budget FROM homeowner_projects WHERE user_id = ? ORDER BY created_at DESC LIMIT 10",
+        (homeowner_id,)
+    ).fetchall()]
+    snapshot_history = [dict(r) for r in _conn.execute(
+        "SELECT snapshot_date, value_estimate, equity_estimate, loan_balance, loan_rate FROM homeowner_snapshot_history WHERE user_id = ? ORDER BY snapshot_date DESC LIMIT 12",
+        (homeowner_id,)
+    ).fetchall()]
+    # Load any transactions where this lender is attached
+    transactions = [dict(r) for r in _conn.execute(
+        """SELECT t.id, t.property_address, t.client_name, t.current_stage, 
+                  t.purchase_price, t.target_close_date, t.status,
+                  u.name as agent_name
+           FROM transactions t
+           LEFT JOIN users u ON u.id = t.agent_id
+           WHERE t.lender_user_id = ? OR t.homeowner_user_id = ?
+           ORDER BY t.created_at DESC LIMIT 10""",
+        (user["id"], homeowner_id)
+    ).fetchall()]
+    _conn.close()
+    
+    from database import list_lender_borrowers
+    crm_borrower = None
+    for b in list_lender_borrowers(user["id"]):
+        if b.get("user_id") == homeowner_id or (b.get("email") and homeowner and b.get("email").lower() == dict(homeowner).get("email", "").lower()):
+            crm_borrower = b
+            break
+    
+    return render_template(
+        "lender/client_detail.html",
+        homeowner=dict(homeowner),
+        profile=profile,
+        recent_activity=recent_activity,
+        professionals=professionals,
+        docs=docs,
+        projects=projects,
+        snapshot_history=snapshot_history,
+        transactions=transactions,
+        crm_borrower=crm_borrower,
     )
 
 

@@ -371,6 +371,12 @@
          class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">
         CRM
       </a>
+
+      <a href="{{ url_for('agent_clients') }}"
+         class="ylh-nav-link {% if request.path.startswith('/agent/clients') %}active{% endif %}"
+         style="{% if request.path.startswith('/agent/clients') %}{% else %}position:relative{% endif %}">
+        Clients
+      </a>
       
       <a href="{{ url_for('agent_transactions') }}" 
          class="ylh-nav-link {% if request.path.startswith('/agent/transactions') %}active{% endif %}">

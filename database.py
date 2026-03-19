@@ -791,6 +791,12 @@ def init_db() -> None:
         except:
             pass
 
+    # Link CRM contact to actual homeowner user account
+    try:
+        cur.execute("ALTER TABLE agent_contacts ADD COLUMN user_id INTEGER REFERENCES users(id)")
+    except:
+        pass
+
     # --- Drip / follow-up sequence tracking ---
     try:
         cur.execute("""
@@ -881,6 +887,12 @@ def init_db() -> None:
         except:
             pass
 
+    # Link lender CRM borrower to actual homeowner user account
+    try:
+        cur.execute("ALTER TABLE lender_borrowers ADD COLUMN user_id INTEGER REFERENCES users(id)")
+    except:
+        pass
+
     # ------------- AGENT TRANSACTIONS -------------
     cur.execute(
         """
@@ -947,6 +959,113 @@ def init_db() -> None:
     except Exception as e:
         print(f"Note: Could not migrate transaction_participants table: {e}")
         pass
+
+    # ------------- FULL TRANSACTIONS TABLE (coordinator) -------------
+    # Create if not exists (was previously created manually)
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_id INTEGER REFERENCES users(id),
+                property_address TEXT,
+                client_name TEXT,
+                client_email TEXT,
+                client_phone TEXT,
+                side TEXT,
+                current_stage TEXT,
+                purchase_price REAL,
+                target_close_date TEXT,
+                notes TEXT,
+                status TEXT DEFAULT 'active',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    except Exception as e:
+        print(f"Note: Could not create transactions table: {e}")
+
+    # Link transactions to homeowner user account and lender
+    try:
+        cur.execute("ALTER TABLE transactions ADD COLUMN homeowner_user_id INTEGER REFERENCES users(id)")
+    except:
+        pass
+    try:
+        cur.execute("ALTER TABLE transactions ADD COLUMN lender_user_id INTEGER REFERENCES users(id)")
+    except:
+        pass
+
+    # Create transaction_participants if not exists
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS transaction_participants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                transaction_id INTEGER REFERENCES transactions(id) ON DELETE CASCADE,
+                participant_type TEXT,
+                user_id INTEGER REFERENCES users(id),
+                name TEXT,
+                email TEXT,
+                phone TEXT,
+                company TEXT,
+                permissions TEXT,
+                invitation_token TEXT UNIQUE,
+                invitation_sent_at TIMESTAMP,
+                invitation_accepted_at TIMESTAMP,
+                status TEXT DEFAULT 'pending',
+                added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    except Exception as e:
+        print(f"Note: Could not create transaction_participants table: {e}")
+
+    # Create transaction_documents if not exists
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS transaction_documents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                transaction_id INTEGER REFERENCES transactions(id) ON DELETE CASCADE,
+                document_type TEXT,
+                document_name TEXT,
+                file_path TEXT,
+                file_size INTEGER,
+                uploaded_by INTEGER REFERENCES users(id),
+                triggers_stage_change INTEGER DEFAULT 0,
+                uploaded_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    except Exception as e:
+        print(f"Note: Could not create transaction_documents table: {e}")
+
+    # Create transaction_timeline if not exists
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS transaction_timeline (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                transaction_id INTEGER REFERENCES transactions(id) ON DELETE CASCADE,
+                event_type TEXT,
+                description TEXT,
+                created_by INTEGER REFERENCES users(id),
+                metadata TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    except Exception as e:
+        print(f"Note: Could not create transaction_timeline table: {e}")
+
+    # Create document_checklists if not exists
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS document_checklists (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                stage TEXT,
+                document_type TEXT,
+                display_name TEXT,
+                is_required INTEGER DEFAULT 0,
+                triggers_stage_change INTEGER DEFAULT 0,
+                display_order INTEGER DEFAULT 0
+            )
+        """)
+    except Exception as e:
+        print(f"Note: Could not create document_checklists table: {e}")
 
     # ------------- LENDER LOANS -------------
     cur.execute(
@@ -1169,6 +1288,57 @@ def init_db() -> None:
         """
     )
     
+    # Back-fill user_id on agent_contacts where email matches a homeowner account
+    try:
+        cur.execute("""
+            UPDATE agent_contacts
+            SET user_id = (
+                SELECT u.id FROM users u
+                WHERE u.role = 'homeowner'
+                  AND LOWER(TRIM(u.email)) = LOWER(TRIM(agent_contacts.email))
+                LIMIT 1
+            )
+            WHERE user_id IS NULL
+              AND email IS NOT NULL
+              AND email != ''
+        """)
+    except Exception as e:
+        print(f"Note: Could not backfill agent_contacts.user_id: {e}")
+
+    # Back-fill user_id on lender_borrowers where email matches a homeowner account
+    try:
+        cur.execute("""
+            UPDATE lender_borrowers
+            SET user_id = (
+                SELECT u.id FROM users u
+                WHERE u.role = 'homeowner'
+                  AND LOWER(TRIM(u.email)) = LOWER(TRIM(lender_borrowers.email))
+                LIMIT 1
+            )
+            WHERE user_id IS NULL
+              AND email IS NOT NULL
+              AND email != ''
+        """)
+    except Exception as e:
+        print(f"Note: Could not backfill lender_borrowers.user_id: {e}")
+
+    # Back-fill transactions.homeowner_user_id where client_email matches a homeowner account
+    try:
+        cur.execute("""
+            UPDATE transactions
+            SET homeowner_user_id = (
+                SELECT u.id FROM users u
+                WHERE u.role = 'homeowner'
+                  AND LOWER(TRIM(u.email)) = LOWER(TRIM(transactions.client_email))
+                LIMIT 1
+            )
+            WHERE homeowner_user_id IS NULL
+              AND client_email IS NOT NULL
+              AND client_email != ''
+        """)
+    except Exception as e:
+        print(f"Note: Could not backfill transactions.homeowner_user_id: {e}")
+
     print("[DATABASE] All tables created/verified including spotlight_card_sets")
 
     # ---------------- INVOICES ----------------
@@ -2116,6 +2286,7 @@ def add_agent_contact(
     lead_source: str = "",
     next_action_date: str = "",
     next_action_note: str = "",
+    user_id: int = None,
 ) -> int:
     conn = get_connection()
     cur = conn.cursor()
@@ -2126,15 +2297,17 @@ def add_agent_contact(
             birthday, home_anniversary, address, notes, tags, property_address,
             property_value, equity_estimate, auto_birthday, auto_anniversary,
             auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-            city, state, zip_code, lead_source, next_action_date, next_action_note
+            city, state, zip_code, lead_source, next_action_date, next_action_note,
+            user_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (agent_user_id, name, email, phone, stage, best_contact, last_touch,
          birthday, home_anniversary, address, notes, tags, property_address,
          property_value, equity_estimate, auto_birthday, auto_anniversary,
          auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-         city, state, zip_code, lead_source, next_action_date, next_action_note),
+         city, state, zip_code, lead_source, next_action_date, next_action_note,
+         user_id),
     )
     contact_id = cur.lastrowid
     conn.commit()
@@ -2153,7 +2326,8 @@ def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[di
                city, state, zip_code,
                COALESCE(lead_source, '') as lead_source,
                COALESCE(next_action_date, '') as next_action_date,
-               COALESCE(next_action_note, '') as next_action_note
+               COALESCE(next_action_note, '') as next_action_note,
+               user_id
         FROM agent_contacts
         WHERE agent_user_id = ?
     """
@@ -2402,6 +2576,7 @@ def add_lender_borrower(
     auto_equity: int = 1,
     auto_holidays: int = 1,
     equity_frequency: str = "monthly",
+    user_id: int = None,
 ) -> int:
     conn = get_connection()
     cur = conn.cursor()
@@ -2411,14 +2586,14 @@ def add_lender_borrower(
             lender_user_id, name, status, loan_type, target_payment, last_touch,
             email, phone, birthday, home_anniversary, address, notes, tags,
             property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
-            auto_seasonal, auto_equity, auto_holidays, equity_frequency
+            auto_seasonal, auto_equity, auto_holidays, equity_frequency, user_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (lender_user_id, name, status, loan_type, target_payment, last_touch,
          email, phone, birthday, home_anniversary, address, notes, tags,
          property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
-         auto_seasonal, auto_equity, auto_holidays, equity_frequency),
+         auto_seasonal, auto_equity, auto_holidays, equity_frequency, user_id),
     )
     borrower_id = cur.lastrowid
     conn.commit()
@@ -2433,7 +2608,8 @@ def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> Lis
         SELECT id, created_at, name, status, loan_type, target_payment, last_touch,
                email, phone, birthday, home_anniversary, address, notes, tags,
                property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
-               auto_seasonal, auto_equity, auto_holidays, equity_frequency
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency,
+               user_id
         FROM lender_borrowers
         WHERE lender_user_id = ?
     """
@@ -4380,6 +4556,134 @@ def get_homeowner_professionals(homeowner_id: int) -> List[Dict]:
     return rows_to_dicts(rows)
 
 
+def get_agent_clients(agent_user_id: int) -> List[Dict]:
+    """
+    Return all homeowner clients linked to an agent — combining users.agent_id
+    and client_relationships — enriched with their latest homeowner snapshot data.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT u.id, u.name, u.email, u.created_at,
+               hs.value_estimate, hs.equity_estimate, hs.loan_balance,
+               hs.loan_rate, hs.loan_payment,
+               p.address as property_address,
+               (SELECT COUNT(*) FROM homeowner_documents hd WHERE hd.user_id = u.id) as doc_count,
+               (SELECT COUNT(*) FROM homeowner_projects hp WHERE hp.user_id = u.id) as project_count,
+               (SELECT COUNT(*) FROM homeowner_warranty_log hw WHERE hw.user_id = u.id) as warranty_count,
+               ac.id as crm_contact_id, ac.stage as crm_stage, ac.last_touch,
+               ac.next_action_date, ac.next_action_note
+        FROM users u
+        LEFT JOIN properties p ON p.user_id = u.id AND p.is_primary = 1
+        LEFT JOIN homeowner_snapshots hs ON hs.user_id = u.id
+            AND hs.property_id = p.id
+        LEFT JOIN agent_contacts ac ON ac.user_id = u.id AND ac.agent_user_id = ?
+        WHERE u.role = 'homeowner'
+          AND (
+              u.agent_id = ?
+              OR EXISTS (
+                  SELECT 1 FROM client_relationships cr
+                  WHERE cr.homeowner_id = u.id AND cr.professional_id = ?
+                  AND cr.professional_role = 'agent' AND cr.status = 'active'
+              )
+          )
+        ORDER BY u.name ASC
+    """, (agent_user_id, agent_user_id, agent_user_id))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_lender_clients(lender_user_id: int) -> List[Dict]:
+    """
+    Return all homeowner clients linked to a lender — combining users.lender_id
+    and client_relationships — enriched with their latest homeowner snapshot data.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT DISTINCT u.id, u.name, u.email, u.created_at,
+               hs.value_estimate, hs.equity_estimate, hs.loan_balance,
+               hs.loan_rate, hs.loan_payment,
+               p.address as property_address,
+               lb.id as crm_borrower_id, lb.status as crm_status,
+               lb.loan_type, lb.last_touch,
+               agent.name as agent_name, agent.id as agent_id
+        FROM users u
+        LEFT JOIN properties p ON p.user_id = u.id AND p.is_primary = 1
+        LEFT JOIN homeowner_snapshots hs ON hs.user_id = u.id
+            AND hs.property_id = p.id
+        LEFT JOIN lender_borrowers lb ON lb.user_id = u.id AND lb.lender_user_id = ?
+        LEFT JOIN users agent ON agent.id = u.agent_id
+        WHERE u.role = 'homeowner'
+          AND (
+              u.lender_id = ?
+              OR EXISTS (
+                  SELECT 1 FROM client_relationships cr
+                  WHERE cr.homeowner_id = u.id AND cr.professional_id = ?
+                  AND cr.professional_role = 'lender' AND cr.status = 'active'
+              )
+          )
+        ORDER BY u.name ASC
+    """, (lender_user_id, lender_user_id, lender_user_id))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
+def get_homeowner_full_profile(homeowner_id: int) -> Dict:
+    """
+    Return a homeowner's complete profile for professional viewing:
+    user record + primary property + snapshot + document/project/warranty counts
+    + their linked professionals.
+    """
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT u.id, u.name, u.email, u.created_at,
+               p.id as property_id, p.address as property_address,
+               p.estimated_value, p.property_type,
+               hs.value_estimate, hs.equity_estimate, hs.loan_balance,
+               hs.loan_rate, hs.loan_payment, hs.loan_term_years,
+               hs.last_value_refresh,
+               (SELECT COUNT(*) FROM homeowner_documents hd WHERE hd.user_id = u.id) as doc_count,
+               (SELECT COUNT(*) FROM homeowner_projects hp WHERE hp.user_id = u.id) as project_count,
+               (SELECT COUNT(*) FROM homeowner_warranty_log hw WHERE hw.user_id = u.id) as warranty_count,
+               (SELECT COUNT(*) FROM homeowner_notes hn WHERE hn.user_id = u.id) as board_count
+        FROM users u
+        LEFT JOIN properties p ON p.user_id = u.id AND p.is_primary = 1
+        LEFT JOIN homeowner_snapshots hs ON hs.user_id = u.id AND hs.property_id = p.id
+        WHERE u.id = ? AND u.role = 'homeowner'
+    """, (homeowner_id,))
+    row = cur.fetchone()
+    conn.close()
+    return dict(row) if row else {}
+
+
+def get_homeowner_recent_activity(homeowner_id: int, limit: int = 10) -> List[Dict]:
+    """Return recent activity events for a homeowner (for professional view)."""
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT 'document' as type, name as title, created_at
+        FROM homeowner_documents WHERE user_id = ?
+        UNION ALL
+        SELECT 'project' as type, name as title, created_at
+        FROM homeowner_projects WHERE user_id = ?
+        UNION ALL
+        SELECT 'warranty' as type, item_name as title, created_at
+        FROM homeowner_warranty_log WHERE user_id = ?
+        UNION ALL
+        SELECT 'timeline' as type, title, created_at
+        FROM homeowner_timeline_events WHERE user_id = ?
+        ORDER BY created_at DESC
+        LIMIT ?
+    """, (homeowner_id, homeowner_id, homeowner_id, homeowner_id, limit))
+    rows = cur.fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+
 def get_referral_stats(professional_id: int) -> Dict[str, Any]:
     """Get referral statistics for a professional."""
     conn = get_connection()
@@ -4665,8 +4969,8 @@ def can_access_homeowner(current_user_id: int, current_user_role: str, homeowner
     """
     Check if a user can access a homeowner's data.
     - Homeowners can only access their own data
-    - Agents can only access homeowners where homeowner.agent_id = agent.id
-    - Lenders can only access homeowners where homeowner.lender_id = lender.id
+    - Agents can access homeowners linked via users.agent_id OR client_relationships
+    - Lenders can access homeowners linked via users.lender_id OR client_relationships
     """
     if current_user_role == 'homeowner':
         return current_user_id == homeowner_id
@@ -4674,22 +4978,42 @@ def can_access_homeowner(current_user_id: int, current_user_role: str, homeowner
     if current_user_role == 'agent':
         conn = get_connection()
         cur = conn.cursor()
+        # Check direct FK on users table
         cur.execute(
             "SELECT id FROM users WHERE id = ? AND agent_id = ?",
             (homeowner_id, current_user_id)
         )
         can_access = cur.fetchone() is not None
+        # Also check client_relationships table
+        if not can_access:
+            cur.execute(
+                """SELECT id FROM client_relationships 
+                   WHERE homeowner_id = ? AND professional_id = ? 
+                   AND professional_role = 'agent' AND status = 'active'""",
+                (homeowner_id, current_user_id)
+            )
+            can_access = cur.fetchone() is not None
         conn.close()
         return can_access
     
     if current_user_role == 'lender':
         conn = get_connection()
         cur = conn.cursor()
+        # Check direct FK on users table
         cur.execute(
             "SELECT id FROM users WHERE id = ? AND lender_id = ?",
             (homeowner_id, current_user_id)
         )
         can_access = cur.fetchone() is not None
+        # Also check client_relationships table
+        if not can_access:
+            cur.execute(
+                """SELECT id FROM client_relationships 
+                   WHERE homeowner_id = ? AND professional_id = ? 
+                   AND professional_role = 'lender' AND status = 'active'""",
+                (homeowner_id, current_user_id)
+            )
+            can_access = cur.fetchone() is not None
         conn.close()
         return can_access
     
@@ -4699,6 +5023,7 @@ def can_access_homeowner(current_user_id: int, current_user_role: str, homeowner
 def get_accessible_homeowners(user_id: int, user_role: str) -> List[int]:
     """
     Get list of homeowner IDs that a user can access.
+    Checks both users.agent_id/lender_id AND client_relationships for complete coverage.
     Returns empty list for homeowners (they only access themselves).
     """
     if user_role == 'homeowner':
@@ -4706,18 +5031,32 @@ def get_accessible_homeowners(user_id: int, user_role: str) -> List[int]:
     
     conn = get_connection()
     cur = conn.cursor()
+    ids = set()
     
     if user_role == 'agent':
         cur.execute("SELECT id FROM users WHERE role = 'homeowner' AND agent_id = ?", (user_id,))
+        ids.update(row[0] for row in cur.fetchall())
+        cur.execute(
+            """SELECT homeowner_id FROM client_relationships 
+               WHERE professional_id = ? AND professional_role = 'agent' AND status = 'active'""",
+            (user_id,)
+        )
+        ids.update(row[0] for row in cur.fetchall())
     elif user_role == 'lender':
         cur.execute("SELECT id FROM users WHERE role = 'homeowner' AND lender_id = ?", (user_id,))
+        ids.update(row[0] for row in cur.fetchall())
+        cur.execute(
+            """SELECT homeowner_id FROM client_relationships 
+               WHERE professional_id = ? AND professional_role = 'lender' AND status = 'active'""",
+            (user_id,)
+        )
+        ids.update(row[0] for row in cur.fetchall())
     else:
         conn.close()
         return []
     
-    homeowner_ids = [row[0] for row in cur.fetchall()]
     conn.close()
-    return homeowner_ids
+    return list(ids)
 
 
 # =========================

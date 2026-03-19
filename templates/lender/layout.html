@@ -21,6 +21,7 @@
       or path.startswith('/lender/loans')
       or path.startswith('/lender/roles')
       or path.startswith('/lender/documents')
+      or path.startswith('/lender/clients')
     %}
     {% set open_growth = path.startswith('/lender/messages')
       or path.startswith('/lender/marketing')
@@ -107,6 +108,15 @@
         style="display: {{ 'block' if open_borrowers else 'none' }};"
       >
         <ul class="ylh-submenu-list">
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_clients') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/clients') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              My Clients
+            </a>
+          </li>
           <li class="ylh-submenu-item">
             <a
               href="{{ url_for('lender_crm') }}"
