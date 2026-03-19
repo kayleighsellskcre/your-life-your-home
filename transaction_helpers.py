@@ -9,8 +9,15 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 
 def get_db():
-    """Get database connection"""
-    conn = sqlite3.connect('ylh.db', check_same_thread=False, timeout=5)
+    """Get database connection — uses same Railway persistent volume path as database.py"""
+    import os
+    from pathlib import Path
+    volume_path = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+    if volume_path:
+        db_path = str(Path(volume_path) / "ylh.db")
+    else:
+        db_path = str(Path(__file__).parent / "ylh.db")
+    conn = sqlite3.connect(db_path, check_same_thread=False, timeout=10)
     conn.row_factory = sqlite3.Row
     return conn
 
