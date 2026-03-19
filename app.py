@@ -1756,6 +1756,7 @@ def start_scheduler():
         scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
+        scheduler.add_job(send_contest_invites_scheduled, "cron", hour=9, minute=30)  # 9:30 AM daily — bracket contest invites
         scheduler.start()
         print("[OK] Reminder scheduler started with CRM automation and daily value updates.")
     except Exception as e:
@@ -11643,4 +11644,239 @@ if __name__ == "__main__":
         debug=True,  # Enable debug mode for development
         use_reloader=False,  # Disable reloader on Windows to avoid import issues
     )
+
+
+# =============================================================
+# CLIENT CONTESTS (Bracket Contests — NFL Playoffs & NCAA)
+# =============================================================
+
+def _get_db_contest(contest_id, agent_user_id):
+    """Fetch a single contest, verifying ownership."""
+    conn = get_db_connection()
+    row = conn.execute(
+        "SELECT * FROM agent_contests WHERE id=? AND agent_user_id=?",
+        (contest_id, agent_user_id)
+    ).fetchone()
+    conn.close()
+    return dict(row) if row else None
+
+
+def _list_db_contests(agent_user_id):
+    conn = get_db_connection()
+    rows = conn.execute(
+        "SELECT * FROM agent_contests WHERE agent_user_id=? ORDER BY season_year DESC, contest_type",
+        (agent_user_id,)
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+@app.route("/agent/contests", methods=["GET"])
+def agent_contests():
+    """List all bracket contests for this agent."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    contests = _list_db_contests(user["id"])
+    return render_template("agent/contests.html", contests=contests)
+
+
+@app.route("/agent/contests/new", methods=["GET", "POST"])
+def agent_contest_new():
+    """Create a new bracket contest."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    if request.method == "POST":
+        import datetime
+        conn = get_db_connection()
+        conn.execute(
+            """INSERT INTO agent_contests
+               (agent_user_id, contest_type, season_year, contest_name,
+                cbs_group_link, cbs_group_code, prize_description,
+                invite_date, deadline_date, notes)
+               VALUES (?,?,?,?,?,?,?,?,?,?)""",
+            (
+                user["id"],
+                request.form.get("contest_type", "ncaa_tournament"),
+                int(request.form.get("season_year", datetime.date.today().year)),
+                request.form.get("contest_name", "").strip(),
+                request.form.get("cbs_group_link", "").strip(),
+                request.form.get("cbs_group_code", "").strip(),
+                request.form.get("prize_description", "$25 Amazon Gift Card").strip(),
+                request.form.get("invite_date", "").strip(),
+                request.form.get("deadline_date", "").strip(),
+                request.form.get("notes", "").strip(),
+            )
+        )
+        conn.commit()
+        conn.close()
+        flash("Contest created! Invites will go out automatically on your invite date.", "success")
+        return redirect(url_for("agent_contests"))
+    import datetime
+    return render_template("agent/contest_new.html", today_year=datetime.date.today().year)
+
+
+@app.route("/agent/contests/<int:cid>/edit", methods=["GET", "POST"])
+def agent_contest_edit(cid):
+    """Edit a contest."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    contest = _get_db_contest(cid, user["id"])
+    if not contest:
+        flash("Contest not found.", "error")
+        return redirect(url_for("agent_contests"))
+    if request.method == "POST":
+        conn = get_db_connection()
+        conn.execute(
+            """UPDATE agent_contests SET
+               contest_type=?, season_year=?, contest_name=?,
+               cbs_group_link=?, cbs_group_code=?, prize_description=?,
+               invite_date=?, deadline_date=?, notes=?
+               WHERE id=? AND agent_user_id=?""",
+            (
+                request.form.get("contest_type"),
+                int(request.form.get("season_year", contest["season_year"])),
+                request.form.get("contest_name", "").strip(),
+                request.form.get("cbs_group_link", "").strip(),
+                request.form.get("cbs_group_code", "").strip(),
+                request.form.get("prize_description", "$25 Amazon Gift Card").strip(),
+                request.form.get("invite_date", "").strip(),
+                request.form.get("deadline_date", "").strip(),
+                request.form.get("notes", "").strip(),
+                cid, user["id"]
+            )
+        )
+        conn.commit()
+        conn.close()
+        flash("Contest updated.", "success")
+        return redirect(url_for("agent_contests"))
+    return render_template("agent/contest_new.html", contest=contest, today_year=contest["season_year"])
+
+
+@app.route("/agent/contests/<int:cid>/delete", methods=["POST"])
+def agent_contest_delete(cid):
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM agent_contests WHERE id=? AND agent_user_id=?", (cid, user["id"]))
+    conn.commit()
+    conn.close()
+    flash("Contest deleted.", "success")
+    return redirect(url_for("agent_contests"))
+
+
+@app.route("/agent/contests/<int:cid>/send-invites", methods=["POST"])
+def agent_contest_send_invites(cid):
+    """Manually send invite emails to all CRM contacts right now."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    contest = _get_db_contest(cid, user["id"])
+    if not contest:
+        flash("Contest not found.", "error")
+        return redirect(url_for("agent_contests"))
+    count = _send_contest_invites_for(contest, user)
+    flash(f"✅ Invites sent to {count} clients!", "success")
+    return redirect(url_for("agent_contests"))
+
+
+@app.route("/agent/contests/<int:cid>/reset-invites", methods=["POST"])
+def agent_contest_reset_invites(cid):
+    """Clear invite_sent_at so invites can be resent."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    conn = get_db_connection()
+    conn.execute(
+        "UPDATE agent_contests SET invite_sent_at=NULL WHERE id=? AND agent_user_id=?",
+        (cid, user["id"])
+    )
+    conn.commit()
+    conn.close()
+    flash("Invite status reset — you can now resend invites.", "success")
+    return redirect(url_for("agent_contests"))
+
+
+def _send_contest_invites_for(contest, agent_user):
+    """Send bracket contest invite emails to all CRM contacts with emails. Returns count sent."""
+    from database import list_agent_contacts
+    import datetime
+    if not EMAIL_USER or not EMAIL_PASS:
+        return 0
+    contacts = list_agent_contacts(agent_user["id"])
+    type_label = "NFL Playoffs" if contest["contest_type"] == "nfl_playoffs" else "NCAA March Madness"
+    type_emoji = "🏈" if contest["contest_type"] == "nfl_playoffs" else "🏀"
+    agent_name = agent_user.get("name", "Your Agent")
+    count = 0
+    for c in contacts:
+        email = c.get("email", "").strip()
+        if not email:
+            continue
+        client_name = c.get("name", "Friend").split()[0]
+        cbs_line = ""
+        if contest.get("cbs_group_link"):
+            cbs_line = f"\n🔗 Join the group here: {contest['cbs_group_link']}"
+        if contest.get("cbs_group_code"):
+            cbs_line += f"\n🔑 Group Code: {contest['cbs_group_code']}"
+        deadline_line = ""
+        if contest.get("deadline_date"):
+            deadline_line = f"\n⏰ Bracket deadline: {contest['deadline_date']}"
+        subject = f"{type_emoji} {contest['contest_name']} — You're Invited!"
+        body = f"""Hi {client_name}!
+
+It's that time of year again — and I'm doing something fun for my clients!
+
+{type_emoji} {contest['contest_name']}
+
+I'm hosting a FREE bracket contest for my clients this year, and I'd love for you to join!
+
+🏆 Prize: {contest.get('prize_description', '$25 Amazon Gift Card')} for the winner{cbs_line}{deadline_line}
+
+How to join:
+1. Download the CBS Sports app (free on iPhone or Android)
+2. Go to "Bracket Games" and search for my group
+3. Fill out your bracket — no sports knowledge required, just have fun!
+
+{contest.get('notes', '').strip() + chr(10) if contest.get('notes') else ''}This is just my small way of having some fun with the people I care about. Thanks for being such a great client — I'm grateful for you!
+
+Good luck! 🤞
+
+{agent_name}
+"""
+        if send_reminder_email(email, subject, body):
+            count += 1
+    # Mark as sent
+    conn = get_db_connection()
+    conn.execute(
+        "UPDATE agent_contests SET invite_sent_at=? WHERE id=?",
+        (datetime.datetime.now().isoformat(), contest["id"])
+    )
+    conn.commit()
+    conn.close()
+    return count
+
+
+def send_contest_invites_scheduled():
+    """Scheduler job: daily check — send invites for any contest whose invite_date is today."""
+    import datetime
+    today = datetime.date.today().isoformat()
+    conn = get_db_connection()
+    due = conn.execute(
+        "SELECT * FROM agent_contests WHERE invite_date=? AND (invite_sent_at IS NULL OR invite_sent_at='')",
+        (today,)
+    ).fetchall()
+    conn.close()
+    for row in due:
+        contest = dict(row)
+        # Get the agent user
+        agent_conn = get_db_connection()
+        agent_row = agent_conn.execute("SELECT * FROM users WHERE id=?", (contest["agent_user_id"],)).fetchone()
+        agent_conn.close()
+        if agent_row:
+            agent_user = dict(agent_row)
+            count = _send_contest_invites_for(contest, agent_user)
+            print(f"[CONTESTS] Sent {count} invites for contest '{contest['contest_name']}' (agent {agent_user.get('name')})")
 

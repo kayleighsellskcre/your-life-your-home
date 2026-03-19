@@ -1389,6 +1389,30 @@ def init_db() -> None:
     )
     print("[DATABASE] Invoice tables created/verified")
 
+    # --- Client Contest / Bracket Tables ---
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS agent_contests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            contest_type TEXT NOT NULL DEFAULT 'ncaa_tournament',
+            season_year INTEGER NOT NULL,
+            contest_name TEXT NOT NULL,
+            cbs_group_link TEXT DEFAULT '',
+            cbs_group_code TEXT DEFAULT '',
+            prize_description TEXT DEFAULT '$25 Amazon Gift Card',
+            invite_date TEXT DEFAULT '',
+            deadline_date TEXT DEFAULT '',
+            notes TEXT DEFAULT '',
+            invite_sent_at TEXT DEFAULT NULL,
+            leaderboard_json TEXT DEFAULT '[]',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """
+    )
+    print("[DATABASE] Contest tables created/verified")
+
     conn.commit()
     conn.close()
 

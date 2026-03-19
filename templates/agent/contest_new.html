@@ -1,0 +1,184 @@
+{% extends "agent/layout.html" %}
+
+{% block agent_content %}
+<style>
+  .form-wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 1rem 1.25rem 2rem;
+  }
+  .form-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid rgba(200,180,151,.25);
+  }
+  .form-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    color: #3A352C;
+    margin: 0 0 .2rem;
+    font-weight: 700;
+  }
+  .form-header p { color: rgba(58,53,44,.6); font-size: .85rem; margin: 0; }
+  .form-card {
+    background: #fff;
+    border: 1px solid rgba(200,180,151,.3);
+    border-radius: 14px;
+    padding: 1.5rem;
+  }
+  .form-group { margin-bottom: 1.1rem; }
+  .form-group label {
+    display: block;
+    font-size: .82rem;
+    font-weight: 700;
+    color: #3A352C;
+    margin-bottom: .35rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    border: 1px solid rgba(107,106,69,.3);
+    border-radius: 8px;
+    padding: .55rem .8rem;
+    font-size: .88rem;
+    color: #3A352C;
+    background: #FDFBF7;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color .15s;
+    font-family: inherit;
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus { border-color: #6B6A45; background: #fff; }
+  .form-group .hint { font-size: .75rem; color: rgba(58,53,44,.5); margin-top: .3rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; }
+  .form-actions {
+    display: flex;
+    gap: .75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(200,180,151,.2);
+  }
+  .btn-primary {
+    background: #6B6A45; color: #fff; border: none;
+    border-radius: 8px; padding: .6rem 1.3rem;
+    font-size: .88rem; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:hover { background: #5a593a; }
+  .btn-ghost {
+    background: none; color: #6B6A45;
+    border: 1px solid rgba(107,106,69,.35);
+    border-radius: 8px; padding: .6rem 1.1rem;
+    font-size: .88rem; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center;
+  }
+  .section-label {
+    font-size: .7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: #6B6A45;
+    margin: 1.25rem 0 .75rem;
+    padding-bottom: .35rem;
+    border-bottom: 1px solid rgba(107,106,69,.15);
+  }
+  @media(max-width:500px) { .form-row { grid-template-columns: 1fr; } }
+</style>
+
+<div class="form-wrap">
+  <div class="form-header">
+    <h1>{{ '✏️ Edit Contest' if contest else '🏆 New Contest' }}</h1>
+    <p>{{ 'Update your contest details.' if contest else 'Set it up once — the platform handles the annual invites automatically.' }}</p>
+  </div>
+
+  <form method="POST" action="{{ url_for('agent_contest_edit', cid=contest.id) if contest else url_for('agent_contest_new') }}">
+    <div class="form-card">
+
+      <!-- Contest Type & Year -->
+      <div class="section-label">Contest Info</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Contest Type</label>
+          <select name="contest_type" required>
+            <option value="ncaa_tournament" {% if contest and contest.contest_type=='ncaa_tournament' %}selected{% endif %}>🏀 NCAA March Madness</option>
+            <option value="nfl_playoffs" {% if contest and contest.contest_type=='nfl_playoffs' %}selected{% endif %}>🏈 NFL Playoffs</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Season Year</label>
+          <input type="number" name="season_year" min="2024" max="2040"
+            value="{{ contest.season_year if contest else today_year }}" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Contest Name</label>
+        <input type="text" name="contest_name" placeholder="e.g. 2026 March Madness Bracket Challenge"
+          value="{{ contest.contest_name if contest else '' }}" required>
+        <div class="hint">This shows up in the invite email subject line.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Prize 🏆</label>
+        <input type="text" name="prize_description" placeholder="e.g. $25 Amazon Gift Card"
+          value="{{ contest.prize_description if contest else '$25 Amazon Gift Card' }}">
+      </div>
+
+      <!-- CBS Sports -->
+      <div class="section-label">CBS Sports Group (fill in after you create the group)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>CBS Group Link</label>
+          <input type="url" name="cbs_group_link" placeholder="https://cbssports.com/..."
+            value="{{ contest.cbs_group_link if contest else '' }}">
+          <div class="hint">Paste the join link from CBS Sports.</div>
+        </div>
+        <div class="form-group">
+          <label>Group Code (optional)</label>
+          <input type="text" name="cbs_group_code" placeholder="e.g. ABC123"
+            value="{{ contest.cbs_group_code if contest else '' }}">
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="section-label">Automation Dates</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Auto-Invite Date 📬</label>
+          <input type="date" name="invite_date"
+            value="{{ contest.invite_date if contest else '' }}">
+          <div class="hint">Platform emails ALL your CRM clients on this date. NFL → ~Jan 3 · NCAA → ~Mar 14.</div>
+        </div>
+        <div class="form-group">
+          <label>Bracket Deadline ⏰</label>
+          <input type="date" name="deadline_date"
+            value="{{ contest.deadline_date if contest else '' }}">
+          <div class="hint">Shown in the invite email so clients know when to submit.</div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="section-label">Extra Details</div>
+      <div class="form-group">
+        <label>Notes / Custom Message (optional)</label>
+        <textarea name="notes" rows="3"
+          placeholder="Anything extra you want included in the invite email...">{{ contest.notes if contest else '' }}</textarea>
+        <div class="hint">This will appear as an extra paragraph in the invite email.</div>
+      </div>
+
+    </div><!-- /form-card -->
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        {{ '💾 Save Changes' if contest else '🚀 Create Contest' }}
+      </button>
+      <a href="{{ url_for('agent_contests') }}" class="btn-ghost">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

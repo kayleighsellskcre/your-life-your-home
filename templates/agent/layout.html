@@ -408,6 +408,11 @@
         📅 Booking
       </a>
 
+      <a href="{{ url_for('agent_contests') }}"
+         class="ylh-nav-link {% if request.path.startswith('/agent/contests') %}active{% endif %}">
+        🏆 Contests
+      </a>
+
       <!-- Tools dropdown: Power Tools + AI Concierge -->
       <div class="ylh-dropdown" style="display:inline-block;position:relative;">
         <a href="#" class="ylh-nav-link {% if request.path == url_for('agent_power_tools') or request.path.startswith('/agent/concierge') %}active{% endif %}"
