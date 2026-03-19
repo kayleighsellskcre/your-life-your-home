@@ -2,508 +2,483 @@
 
 {% block lender_content %}
 <style>
-  .subscription-container {
-    max-width: 1200px;
+  /* ─── Base Container ─── */
+  .sub-wrap {
+    max-width: 1100px;
     margin: 0 auto;
+    padding: 0 1rem 3rem;
   }
 
-  .subscription-hero {
+  /* ─── Hero ─── */
+  .sub-hero {
     text-align: center;
-    margin-bottom: 3rem;
+    padding: 2.5rem 1rem 2rem;
   }
-
-  .subscription-hero h1 {
+  .sub-hero h1 {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 1rem;
-    font-weight: 500;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    color: #2c3320;
+    margin: 0 0 0.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
   }
-
-  .subscription-hero p {
-    font-size: 1.2rem;
-    color: var(--charcoal-brown);
-    opacity: 0.8;
+  .sub-hero p {
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    color: #5a5a4a;
+    margin: 0 0 1.25rem;
   }
-
-  .current-plan-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #b8973a 0%, #a6823e 100%);
-    color: white;
-    padding: 0.75rem 1.5rem;
+  .current-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: linear-gradient(135deg, #b8973a, #a6823e);
+    color: #fff;
+    padding: 0.5rem 1.25rem;
     border-radius: 50px;
+    font-size: 0.88rem;
     font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .tiers-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
-  }
-
-  .tier-card {
-    background: var(--white);
-    border: 2px solid rgba(74, 82, 64, 0.1);
-    border-radius: var(--border-radius-lg);
-    padding: 2.5rem 2rem;
-    transition: all var(--transition-base);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tier-card:hover {
-    transform: translateY(-4px);
-    border-color: #b8973a;
-    box-shadow: 0 12px 24px rgba(184, 151, 58, 0.15);
-  }
-
-  .tier-card.active {
-    border-color: #b8973a;
-    background: linear-gradient(135deg, rgba(184, 151, 58, 0.05) 0%, rgba(74, 82, 64, 0.05) 100%);
-    box-shadow: 0 8px 24px rgba(74, 82, 64, 0.1);
-  }
-
-  .tier-card.active::before {
-    content: "Current Plan";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    background: #b8973a;
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 600;
-  }
-
-  .tier-header {
-    margin-bottom: 1.5rem;
-    border-bottom: 2px solid rgba(74, 82, 64, 0.1);
-    padding-bottom: 1.5rem;
-  }
-
-  .tier-name {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: #4a5240;
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-  }
-
-  .tier-price {
-    font-size: 2.5rem;
-    color: #b8973a;
-    font-weight: 700;
+    letter-spacing: 0.03em;
     margin-bottom: 0.25rem;
   }
 
-  .tier-price small {
-    font-size: 1rem;
-    color: var(--charcoal-brown);
-    opacity: 0.7;
-    font-weight: 400;
+  /* ─── Grid ─── */
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    align-items: stretch;
   }
 
-  .tier-description {
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    font-size: 0.95rem;
-    line-height: 1.6;
+  /* ─── Card ─── */
+  .tier-card {
+    background: #fff;
+    border: 2px solid #e8e2d6;
+    border-radius: 20px;
+    padding: 2rem 1.75rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .tier-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 40px rgba(74, 82, 64, 0.13);
+  }
+  .tier-card.featured {
+    border-color: #b8973a;
+    background: linear-gradient(160deg, #fffdf5 0%, #fff 100%);
+    box-shadow: 0 8px 32px rgba(184, 151, 58, 0.18);
+  }
+  .tier-card.active {
+    border-color: #4a5240;
+  }
+  .tier-card.coming-soon-card {
+    opacity: 0.75;
+    border-style: dashed;
+  }
+  .tier-card.coming-soon-card:hover {
+    transform: none;
+    box-shadow: none;
   }
 
-  .tier-features {
-    flex: 1;
-    margin: 2rem 0;
+  /* ─── Card Badge ─── */
+  .card-badge {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
   }
+  .card-badge.popular { background: linear-gradient(135deg, #b8973a, #d4a843); color: #fff; }
+  .card-badge.current { background: #4a5240; color: #fff; }
+  .card-badge.soon { background: #e0dbd0; color: #7a7260; }
 
-  .feature-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  /* ─── Tier Header ─── */
+  .tier-name {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    color: #2c3320;
+    font-weight: 600;
+    margin: 0.75rem 0 0.5rem;
   }
+  .tier-price {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    color: #b8973a;
+    font-weight: 800;
+    line-height: 1;
+    margin: 0.25rem 0;
+  }
+  .tier-price .mo { font-size: 1rem; color: #7a7260; font-weight: 400; }
+  .tier-price .free-text { color: #4a5240; }
+  .tier-tagline { font-size: 0.9rem; color: #7a7260; margin: 0.25rem 0 1.25rem; }
+  .tier-divider { height: 1px; background: #ede8df; margin-bottom: 1.25rem; }
 
+  /* ─── Features ─── */
+  .feature-list { list-style: none; padding: 0; margin: 0; flex: 1; }
   .feature-list li {
-    padding: 0.75rem 0;
-    color: var(--charcoal-brown);
-    opacity: 0.85;
     display: flex;
     align-items: flex-start;
-    gap: 0.75rem;
-    border-bottom: 1px solid rgba(74, 82, 64, 0.05);
+    gap: 0.6rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(74, 82, 64, 0.06);
+    font-size: 0.92rem;
+    color: #3a3a2a;
+    line-height: 1.45;
   }
+  .feature-list li:last-child { border-bottom: none; }
+  .check { color: #4a5240; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; margin-top: 0.15rem; }
+  .check.dim { color: #b0a890; }
 
-  .feature-list li:last-child {
-    border-bottom: none;
-  }
-
-  .feature-check {
-    color: #4a5240;
-    font-weight: 600;
-    flex-shrink: 0;
-    margin-top: 0.1rem;
-  }
-
-  .feature-text {
-    line-height: 1.5;
-  }
-
-  .tier-action {
-    margin-top: auto;
-  }
-
-  .btn-upgrade {
+  /* ─── Buttons ─── */
+  .tier-action { margin-top: 1.5rem; }
+  .btn-plan {
+    display: block;
     width: 100%;
-    background: #4a5240;
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    font-weight: 600;
-    font-size: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.97rem;
     cursor: pointer;
-    transition: all var(--transition-base);
-  }
-
-  .btn-upgrade:hover {
-    background: #3a3f31;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(74, 82, 64, 0.2);
-  }
-
-  .btn-upgrade:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .btn-upgrade.current {
-    background: #b8973a;
-  }
-
-  .btn-upgrade.current:hover {
-    background: #a6823e;
-  }
-
-  .coming-soon-section {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-    border: 2px solid rgba(102, 126, 234, 0.3);
-    border-radius: var(--border-radius-lg);
-    padding: 2.5rem;
+    border: 2px solid transparent;
     text-align: center;
+    transition: all 0.2s ease;
+    line-height: 1.2;
+  }
+  .btn-plan.primary { background: #4a5240; color: #fff; }
+  .btn-plan.primary:hover { background: #3a3f31; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(74,82,64,0.25); }
+  .btn-plan.gold { background: linear-gradient(135deg, #b8973a, #d4a843); color: #fff; }
+  .btn-plan.gold:hover { background: linear-gradient(135deg, #a6823e, #c49530); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(184,151,58,0.35); }
+  .btn-plan.outline { background: transparent; color: #4a5240; border-color: #4a5240; }
+  .btn-plan.outline:hover { background: #4a5240; color: #fff; }
+  .btn-plan.active-plan { background: #f5f0e8; color: #b8973a; border-color: #b8973a; cursor: default; font-weight: 700; }
+  .btn-plan.disabled { background: #f0ede8; color: #b0a890; border-color: #e0dbd0; cursor: not-allowed; }
+  .btn-plan-form { display: block; width: 100%; }
+  .btn-plan-form .btn-plan { margin: 0; }
+
+  /* ─── Manage Billing ─── */
+  .billing-section { text-align: center; margin: 0 0 2rem; }
+  .btn-billing {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 2rem;
+    background: linear-gradient(135deg, #b8973a, #a6823e);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.97rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-billing:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(184,151,58,0.35); color: #fff; }
+
+  /* ─── Partner Callout ─── */
+  .partner-callout {
+    background: linear-gradient(135deg, rgba(74,82,64,0.06) 0%, rgba(184,151,58,0.08) 100%);
+    border: 2px solid rgba(74, 82, 64, 0.2);
+    border-radius: 20px;
+    padding: 1.75rem 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .partner-callout h3 { font-family: var(--font-heading); color: #2c3320; font-size: 1.2rem; margin: 0 0 0.5rem; }
+  .partner-callout p { color: #5a5a4a; margin: 0; font-size: 0.93rem; line-height: 1.6; }
+
+  /* ─── Promo Code ─── */
+  .promo-section {
+    max-width: 480px;
+    margin: 0 auto 2rem;
+    background: #fff;
+    border: 2px solid rgba(184, 151, 58, 0.3);
+    border-radius: 20px;
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+  }
+  .promo-section .promo-icon { font-size: 1.75rem; margin-bottom: 0.4rem; }
+  .promo-section h3 { font-family: var(--font-heading); color: #2c3320; font-size: 1.1rem; margin: 0 0 0.25rem; }
+  .promo-section p { color: #7a7260; font-size: 0.88rem; margin: 0 0 1rem; }
+  .promo-form { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+  .promo-input {
+    flex: 1;
+    min-width: 160px;
+    max-width: 240px;
+    padding: 0.65rem 1rem;
+    border: 1.5px solid #d4c9b0;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: monospace;
+    outline: none;
+    color: #2c3320;
+    transition: border-color 0.2s;
+  }
+  .promo-input:focus { border-color: #b8973a; }
+  .promo-btn {
+    padding: 0.65rem 1.25rem;
+    background: #4a5240;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .promo-btn:hover { background: #3a3f31; transform: translateY(-1px); }
+
+  /* ─── FAQ ─── */
+  .faq-section {
+    background: #fff;
+    border: 1px solid #e8e2d6;
+    border-radius: 20px;
+    padding: 2rem;
     margin-bottom: 2rem;
   }
-
-  .coming-soon-section h3 {
-    color: #667eea;
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-family: var(--font-heading);
-  }
-
-  .coming-soon-section p {
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  .faq-section {
-    background: var(--white);
-    border: var(--border-light);
-    border-radius: var(--border-radius-lg);
-    padding: 2.5rem;
-    margin-top: 3rem;
-  }
-
   .faq-section h3 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: #4a5240;
-    margin-bottom: 2rem;
+    font-size: 1.3rem;
+    color: #2c3320;
+    margin: 0 0 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid #b8973a;
   }
-
-  .faq-item {
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid rgba(74, 82, 64, 0.1);
-    padding-bottom: 1.5rem;
-  }
-
-  .faq-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-  }
-
-  .faq-question {
+  .faq-item { padding: 1rem 0; border-bottom: 1px solid #f0ede8; cursor: pointer; }
+  .faq-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .faq-q {
     font-weight: 600;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
-    cursor: pointer;
-    font-size: 1.05rem;
+    color: #2c3320;
+    font-size: 0.97rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    user-select: none;
   }
+  .faq-q .faq-arrow { font-size: 0.75rem; color: #b8973a; transition: transform 0.25s; flex-shrink: 0; }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-a { display: none; color: #5a5a4a; font-size: 0.92rem; line-height: 1.7; padding-top: 0.65rem; }
+  .faq-item.open .faq-a { display: block; }
 
-  .faq-answer {
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    line-height: 1.7;
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .tiers-grid { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .tier-card:nth-child(3) { grid-column: 1 / -1; max-width: 420px; margin: 0 auto; width: 100%; }
   }
-
-  @media (max-width: 768px) {
-    .subscription-hero h1 {
-      font-size: 2rem;
-    }
-
-    .tier-price {
-      font-size: 2rem;
-    }
-
-    .tiers-grid {
-      grid-template-columns: 1fr;
-    }
+  @media (max-width: 640px) {
+    .sub-wrap { padding: 0 0.75rem 2.5rem; }
+    .sub-hero { padding: 1.75rem 0.5rem 1.5rem; }
+    .tiers-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .tier-card:nth-child(3) { grid-column: auto; max-width: none; }
+    .tier-card { padding: 1.75rem 1.25rem 1.5rem; }
+    .faq-section { padding: 1.5rem 1.25rem; }
+    .partner-callout { padding: 1.25rem 1rem; }
+    .promo-section { padding: 1.5rem 1rem; }
+  }
+  @media (max-width: 420px) {
+    .tier-card { padding: 1.5rem 1rem; }
+    .btn-plan { padding: 0.85rem 0.75rem; font-size: 0.93rem; }
+    .faq-section { padding: 1.25rem 1rem; }
+    .promo-form { flex-direction: column; align-items: stretch; }
+    .promo-input { max-width: 100%; }
+    .promo-btn { width: 100%; }
+  }
+  @media (max-width: 768px) and (orientation: landscape) {
+    .tiers-grid { grid-template-columns: repeat(3, 1fr); gap: 0.9rem; }
+    .tier-card:nth-child(3) { grid-column: auto; max-width: none; }
+    .tier-card { padding: 1.25rem 1rem; }
+    .tier-price { font-size: 1.9rem; }
+    .sub-hero { padding: 1rem 0.5rem 1rem; }
+    .sub-hero h1 { font-size: 1.6rem; }
+    .feature-list li { padding: 0.4rem 0; font-size: 0.87rem; }
   }
 </style>
 
-<div class="subscription-container">
-  <div class="subscription-hero">
+<div class="sub-wrap">
+
+  <!-- Hero -->
+  <div class="sub-hero">
     <h1>✨ Upgrade Your Plan</h1>
     {% if current_tier == 'free' %}
-      <div class="current-plan-badge">Currently on Starter (Free)</div>
+      <div class="current-badge">⭐ Currently on Starter (Free)</div>
     {% elif current_tier == 'professional' %}
-      <div class="current-plan-badge">Currently on Professional</div>
+      <div class="current-badge">⭐ Currently on Professional</div>
     {% elif current_tier == 'elite' %}
-      <div class="current-plan-badge">Currently on Elite</div>
+      <div class="current-badge">⭐ Currently on Elite</div>
     {% endif %}
-    <p>Choose the plan that best fits your business needs</p>
+    <p>Choose the plan that best fits your lending business</p>
   </div>
 
+  <!-- Pricing Cards -->
   <div class="tiers-grid">
-    <!-- Starter Plan -->
+
+    <!-- ── Starter ── -->
     <div class="tier-card {% if current_tier == 'free' %}active{% endif %}">
-      <div class="tier-header">
-        <div class="tier-name">Starter</div>
-        <div class="tier-price">Free<small>/month</small></div>
-        <p class="tier-description">Perfect for getting started</p>
-      </div>
-
-      <ul class="feature-list tier-features">
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">CRM up to 50 borrowers</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">5 active loan products</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Basic email templates</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Mobile app access</span>
-        </li>
+      {% if current_tier == 'free' %}<div class="card-badge current">Current Plan</div>{% endif %}
+      <div class="tier-name">Starter</div>
+      <div class="tier-price"><span class="free-text">Free</span><span class="mo">/month</span></div>
+      <p class="tier-tagline">Perfect for getting started</p>
+      <div class="tier-divider"></div>
+      <ul class="feature-list">
+        <li><span class="check">✓</span>CRM up to 50 borrowers</li>
+        <li><span class="check">✓</span>5 active loan files</li>
+        <li><span class="check">✓</span>Basic email templates</li>
+        <li><span class="check">✓</span>Referral link page</li>
+        <li><span class="check">✓</span>Mobile app access</li>
+        <li><span class="check dim">–</span>Marketing Hub</li>
+        <li><span class="check dim">–</span>Power Suite</li>
+        <li><span class="check dim">–</span>Agent partnership features</li>
       </ul>
-
       <div class="tier-action">
         {% if current_tier == 'free' %}
-          <button class="btn-upgrade current" disabled>Your Current Plan</button>
+          <button class="btn-plan active-plan" disabled>✓ Your Current Plan</button>
         {% else %}
-          <button class="btn-upgrade" onclick="alert('Downgrade feature coming soon')">Downgrade Plan</button>
+          <button class="btn-plan outline" onclick="alert('To downgrade, manage your billing below.')">Downgrade to Free</button>
         {% endif %}
       </div>
     </div>
 
-    <!-- Professional Plan -->
-    <div class="tier-card {% if current_tier == 'professional' %}active{% endif %}">
-      <div class="tier-header">
-        <div class="tier-name">Professional</div>
-        <div class="tier-price">$29<small>/month</small></div>
-        <p class="tier-description">Most popular choice</p>
-      </div>
-
-      <ul class="feature-list tier-features">
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Unlimited CRM borrowers</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Unlimited loan products</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">AI Concierge (white-label)</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Advanced email templates</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Marketing Hub</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">All Power Tools</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Priority email support</span>
-        </li>
+    <!-- ── Professional ── -->
+    <div class="tier-card featured {% if current_tier == 'professional' %}active{% endif %}">
+      {% if current_tier == 'professional' %}
+        <div class="card-badge current">Current Plan</div>
+      {% else %}
+        <div class="card-badge popular">⭐ Most Popular</div>
+      {% endif %}
+      <div class="tier-name">Professional</div>
+      <div class="tier-price">$29<span class="mo">/month</span></div>
+      <p class="tier-tagline">Everything you need to grow</p>
+      <div class="tier-divider"></div>
+      <ul class="feature-list">
+        <li><span class="check">✓</span>Unlimited CRM borrowers</li>
+        <li><span class="check">✓</span>Unlimited loan files</li>
+        <li><span class="check">✓</span>Full Marketing Hub</li>
+        <li><span class="check">✓</span>Power Suite tools</li>
+        <li><span class="check">✓</span>Advanced email templates</li>
+        <li><span class="check">✓</span>Agent partnership features</li>
+        <li><span class="check">✓</span>Co-branded homeowner pages</li>
+        <li><span class="check">✓</span>Priority email support</li>
       </ul>
-
       <div class="tier-action">
         {% if current_tier == 'professional' %}
-          <button class="btn-upgrade current" disabled>Your Current Plan</button>
+          <button class="btn-plan active-plan" disabled>✓ Your Current Plan</button>
         {% else %}
           {% if stripe_configured %}
-            <form method="POST" action="{{ url_for('lender_subscription_checkout', tier='professional') }}" style="display: inline; width: 100%;">
-              <button type="submit" class="btn-upgrade">Upgrade Now</button>
+            <form class="btn-plan-form" method="POST" action="{{ url_for('lender_subscription_checkout', tier='professional') }}">
+              <button type="submit" class="btn-plan gold">Upgrade Now — $29/mo</button>
             </form>
           {% else %}
-            <button class="btn-upgrade" disabled>Coming Soon</button>
+            <button class="btn-plan disabled" disabled>Coming Soon</button>
           {% endif %}
         {% endif %}
       </div>
     </div>
 
-    <!-- Elite Plan -->
-    <div class="tier-card {% if current_tier == 'elite' %}active{% endif %}">
-      <div class="tier-header">
-        <div class="tier-name">Elite</div>
-        <div class="tier-price">$79<small>/month</small></div>
-        <p class="tier-description">For serious lenders</p>
-      </div>
-
-      <ul class="feature-list tier-features">
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Everything in Professional</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">24/7 Phone support</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Custom branding & white-label</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Agent partnership integrations</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Early access to new features</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Dedicated account manager</span>
-        </li>
-        <li>
-          <span class="feature-check">✓</span>
-          <span class="feature-text">Advanced analytics</span>
-        </li>
+    <!-- ── Elite ── -->
+    <div class="tier-card coming-soon-card {% if current_tier == 'elite' %}active{% endif %}">
+      <div class="card-badge soon">Coming Soon</div>
+      <div class="tier-name">Elite</div>
+      <div class="tier-price">$79<span class="mo">/month</span></div>
+      <p class="tier-tagline">For top-producing lenders</p>
+      <div class="tier-divider"></div>
+      <ul class="feature-list">
+        <li><span class="check">✓</span>Everything in Professional</li>
+        <li><span class="check">✓</span>24/7 Phone support</li>
+        <li><span class="check">✓</span>Custom branding & white-label</li>
+        <li><span class="check">✓</span>Deep agent integrations</li>
+        <li><span class="check">✓</span>Early access to new features</li>
+        <li><span class="check">✓</span>Dedicated account manager</li>
+        <li><span class="check">✓</span>Advanced analytics dashboard</li>
+        <li><span class="check">✓</span>Team collaboration tools</li>
       </ul>
-
       <div class="tier-action">
-        {% if current_tier == 'elite' %}
-          <button class="btn-upgrade current" disabled>Your Current Plan</button>
-        {% else %}
-          {% if stripe_configured %}
-            <form method="POST" action="{{ url_for('lender_subscription_checkout', tier='elite') }}" style="display: inline; width: 100%;">
-              <button type="submit" class="btn-upgrade">Upgrade Now</button>
-            </form>
-          {% else %}
-            <button class="btn-upgrade" disabled>Coming Soon</button>
-          {% endif %}
-        {% endif %}
+        <button class="btn-plan disabled" disabled>Coming Soon</button>
       </div>
     </div>
+
   </div>
 
+  <!-- Manage Billing -->
   {% if stripe_configured and current_tier != 'free' %}
-  <!-- Manage Billing Button for Paid Plans -->
-  <div style="text-align: center; margin-bottom: 2rem;">
-    <form method="POST" action="{{ url_for('lender_subscription_portal') }}" style="display: inline;">
-      <button type="submit" class="btn-upgrade" style="background: #b8973a; max-width: 300px;">
-        💳 Manage Billing & Payment Method
-      </button>
+  <div class="billing-section">
+    <form method="POST" action="{{ url_for('lender_subscription_portal') }}" style="display:inline;">
+      <button type="submit" class="btn-billing">💳 Manage Billing &amp; Payment Method</button>
     </form>
   </div>
   {% endif %}
 
-  <!-- Partnership Callout -->
-  <div style="background: linear-gradient(135deg, rgba(74, 82, 64, 0.08) 0%, rgba(184, 151, 58, 0.08) 100%); border: 2px solid #4a5240; border-radius: var(--border-radius-lg); padding: 2rem; margin-bottom: 2rem; text-align: center;">
-    <h3 style="color: #4a5240; font-family: var(--font-heading); margin-top: 0;">🤝 Partner with Agents</h3>
-    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 0;">Subscribe to Professional or Elite to unlock powerful partnership features that let you collaborate with subscribed agents on the platform.</p>
+  <!-- Partner Callout -->
+  <div class="partner-callout">
+    <h3>🤝 Partner with Agents</h3>
+    <p>Subscribe to Professional or Elite to unlock co-branded pages, shared referral tools, and collaboration features with real estate agents on the platform.</p>
   </div>
 
-  {% if not stripe_configured %}
-  <!-- Coming Soon Banner -->
-  <div class="coming-soon-section">
-    <h3>🚀 Payment Integration Coming Soon</h3>
-    <p>We're integrating Stripe to make upgrades seamless and instant. In the meantime, contact our sales team at support@yourlifeyourhome.com for early access or questions about our plans.</p>
+  <!-- Promo Code -->
+  <div class="promo-section">
+    <div class="promo-icon">🎁</div>
+    <h3>Have a Promo Code?</h3>
+    <p>Enter your VIP launch code for free Professional access.</p>
+    <form class="promo-form" method="POST" action="{{ url_for('redeem_promo') }}">
+      <input class="promo-input" type="text" name="promo_code"
+             placeholder="YLH-GOLD-LAUNCH1"
+             maxlength="30" autocomplete="off">
+      <button class="promo-btn" type="submit">Apply Code</button>
+    </form>
   </div>
-  {% endif %}
 
-  <!-- FAQ Section -->
+  <!-- FAQ -->
   <div class="faq-section">
     <h3>Frequently Asked Questions</h3>
 
     <div class="faq-item">
-      <div class="faq-question">Can I change plans anytime?</div>
-      <div class="faq-answer">Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges.</div>
+      <div class="faq-q">Can I change plans anytime? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Yes! Upgrade or downgrade at any time. Changes take effect immediately and unused time is prorated automatically.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-question">Is there a long-term contract?</div>
-      <div class="faq-answer">No contracts required. All our plans are month-to-month and you can cancel anytime.</div>
+      <div class="faq-q">Is there a long-term contract? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">No contracts, ever. All plans are month-to-month and you can cancel from your billing portal at any time with no fees.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-question">What payment methods do you accept?</div>
-      <div class="faq-answer">We accept all major credit cards (Visa, Mastercard, American Express) via Stripe, which is launching soon.</div>
+      <div class="faq-q">What payment methods do you accept? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">We accept all major credit and debit cards — Visa, Mastercard, American Express, and Discover — securely processed through Stripe.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-question">Is there a free trial?</div>
-      <div class="faq-answer">All features in the Starter plan are completely free forever. Try Professional with full access by contacting our team.</div>
+      <div class="faq-q">Is there a free trial? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">The Starter plan is free forever with no credit card required. Want to try Professional? Use a VIP launch code above or contact us.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-question">Do you offer discounts for annual billing?</div>
-      <div class="faq-answer">We're planning volume discounts and annual billing options. Contact us for details!</div>
+      <div class="faq-q">How do I cancel? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Click "Manage Billing &amp; Payment Method" above to access your Stripe billing portal where you can cancel, update your card, or download invoices.</div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-question">What about team members?</div>
-      <div class="faq-answer">Team features are in development. Elite plan subscribers will get early access to team collaboration tools.</div>
+      <div class="faq-q">Do you offer annual billing discounts? <span class="faq-arrow">▼</span></div>
+      <div class="faq-a">Annual billing with a discount is coming soon! Contact us to be first in line when it launches.</div>
     </div>
+
   </div>
 
-  <!-- Promo Code Section -->
-  <div style="max-width: 500px; margin: 3rem auto; padding: 2rem; background: white; border-radius: 16px; border: 2px solid rgba(184, 151, 58, 0.3); text-align: center;">
-    <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎁</div>
-    <h3 style="font-family: serif; color: #4a5240; margin: 0 0 0.25rem 0; font-size: 1.2rem;">Have a Promo Code?</h3>
-    <p style="color: #7a7a6a; font-size: 0.9rem; margin: 0 0 1.25rem 0;">Enter your VIP launch code for free Professional access.</p>
-    <form method="POST" action="{{ url_for('redeem_promo') }}" style="display: flex; gap: 0.5rem; justify-content: center;">
-      <input type="text" name="promo_code" placeholder="YLH-GOLD-LAUNCH1"
-             style="padding: 0.6rem 1rem; border: 1.5px solid #d4c9b0; border-radius: 8px; font-size: 0.95rem; width: 200px; text-transform: uppercase; letter-spacing: 1px; outline: none; font-family: monospace;"
-             maxlength="30" autocomplete="off">
-      <button type="submit"
-              style="padding: 0.6rem 1.25rem; background: #4a5240; color: white; border: none; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 600; white-space: nowrap;">
-        Apply Code
-      </button>
-    </form>
-  </div>
 </div>
+
+<script>
+  document.querySelectorAll('.faq-item').forEach(function(item) {
+    item.querySelector('.faq-q').addEventListener('click', function() {
+      item.classList.toggle('open');
+    });
+  });
+</script>
 
 {% endblock %}
