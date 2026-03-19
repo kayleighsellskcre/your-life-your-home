@@ -10141,56 +10141,103 @@ def homeowner_care_energy_savings():
 
 @app.route("/homeowner/support/ask-question", methods=["GET", "POST"])
 def homeowner_support_ask_question():
-    """Ask a question."""
+    """Ask a question. GET redirects to unified Get Help page; POST saves question."""
     user = get_current_user()
     if request.method == "POST":
         topic = request.form.get("topic", "").strip() or None
         question = request.form.get("question", "").strip()
+        redirect_to = request.form.get("_redirect_to") or url_for("homeowner_support_get_help") + "?tab=ask&sent=1"
         if question and user:
             add_homeowner_question(user["id"], topic or "General", question)
             flash("Question submitted! We'll get back to you soon.", "success")
-            return redirect(url_for("homeowner_support_ask_question"))
+            return redirect(redirect_to)
         elif not question:
             flash("Please enter your question.", "error")
-
-    return render_template(
-        "homeowner/support_ask_question.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
+        return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
+    # GET: redirect to unified page
+    return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
 
 
 @app.route("/homeowner/support/chat-human", methods=["GET"])
 def homeowner_support_chat_human():
-    """Chat with human support."""
-    return render_template(
-        "homeowner/support_chat_human.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
+    """Redirects to unified Get Help page — Contact tab."""
+    return redirect(url_for("homeowner_support_get_help") + "?tab=contact")
 
 
 @app.route("/homeowner/support/schedule-chat", methods=["GET"])
 def homeowner_support_schedule_chat():
-    """Schedule a chat."""
-    return render_template(
-        "homeowner/support_schedule_chat.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
+    """Redirects to unified Get Help page — Schedule tab."""
+    return redirect(url_for("homeowner_support_get_help") + "?tab=schedule")
 
 
 @app.route("/homeowner/support/resources", methods=["GET"])
 def homeowner_support_resources():
-    """Support resources."""
-    return render_template(
-        "homeowner/support_resources.html",
-        brand_name=FRONT_BRAND_NAME,
-    )
+    """Redirects to unified Get Help page — Resources tab."""
+    return redirect(url_for("homeowner_support_get_help") + "?tab=resources")
 
 
 @app.route("/homeowner/support/meet-team", methods=["GET"])
 def homeowner_support_meet_team():
-    """Meet the team."""
+    """Meet the team — redirects to unified Get Help page."""
+    return redirect(url_for("homeowner_support_get_help") + "?tab=team")
+
+
+# ── UNIFIED SUPPORT: GET HELP ──────────────────────────────────────────────
+@app.route("/homeowner/support/get-help", methods=["GET"])
+@app.route("/homeowner/support", methods=["GET"])
+def homeowner_support_get_help():
+    """Unified Get Help page — replaces the 5 separate support sub-pages."""
+    user = get_current_user()
+    if not user:
+        return redirect(url_for("login"))
+    professionals = []
+    try:
+        professionals = get_professionals_for_homeowner(user["id"])
+    except Exception:
+        pass
+    question_submitted = request.args.get("sent") == "1"
     return render_template(
-        "homeowner/support_meet_team.html",
+        "homeowner/support_get_help.html",
+        professionals=professionals,
+        question_submitted=question_submitted,
+        brand_name=FRONT_BRAND_NAME,
+    )
+
+
+# Redirect old individual support URLs → unified page
+@app.route("/homeowner/support/ask-question-old")
+def homeowner_support_ask_question_legacy():
+    return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
+
+@app.route("/homeowner/support/resources-old")
+def homeowner_support_resources_legacy():
+    return redirect(url_for("homeowner_support_get_help") + "?tab=resources")
+
+@app.route("/homeowner/support/chat-human-old")
+def homeowner_support_chat_human_legacy():
+    return redirect(url_for("homeowner_support_get_help") + "?tab=contact")
+
+@app.route("/homeowner/support/schedule-chat-old")
+def homeowner_support_schedule_chat_legacy():
+    return redirect(url_for("homeowner_support_get_help") + "?tab=schedule")
+
+
+# ── NEXT HOME HUB ──────────────────────────────────────────────────────────
+@app.route("/homeowner/next", methods=["GET"])
+@app.route("/homeowner/next/", methods=["GET"])
+def homeowner_next_home_hub():
+    """Hub landing page for the Next Home section."""
+    user = get_current_user()
+    if not user:
+        return redirect(url_for("login"))
+    professionals = []
+    try:
+        professionals = get_professionals_for_homeowner(user["id"])
+    except Exception:
+        pass
+    return render_template(
+        "homeowner/next_home_hub.html",
+        professionals=professionals,
         brand_name=FRONT_BRAND_NAME,
     )
 

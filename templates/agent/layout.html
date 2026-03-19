@@ -387,19 +387,14 @@
         Marketing Hub
       </a>
       
-      <a href="{{ url_for('agent_power_tools') }}" 
-         class="ylh-nav-link {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
-        Power Tools
-      </a>
-      
-      <a href="{{ url_for('agent_referrals') }}" 
+      <a href="{{ url_for('agent_referrals') }}"
          class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">
         Referrals
       </a>
-      
+
       <a href="{{ url_for('agent_vendors') }}"
          class="ylh-nav-link {% if request.path.startswith('/agent/vendors') %}active{% endif %}">
-        Trusted Vendors
+        Vendors
       </a>
 
       <a href="{{ url_for('agent_booking') }}"
@@ -407,11 +402,22 @@
         📅 Booking
       </a>
 
-      <a href="{{ url_for('agent_concierge_dashboard') }}" 
-         class="ylh-nav-link {% if request.path.startswith('/agent/concierge') %}active{% endif %}"
-         style="background: linear-gradient(135deg, rgba(44, 95, 45, 0.12) 0%, rgba(107, 106, 69, 0.12) 100%); border-radius: 4px;">
-        🤖 AI Concierge
-      </a>
+      <!-- Tools dropdown: Power Tools + AI Concierge -->
+      <div class="ylh-dropdown" style="display:inline-block;position:relative;">
+        <a href="#" class="ylh-nav-link {% if request.path == url_for('agent_power_tools') or request.path.startswith('/agent/concierge') %}active{% endif %}"
+           onclick="event.preventDefault();this.parentElement.classList.toggle('active-drop');"
+           style="user-select:none;">
+          🛠 Tools ▾
+        </a>
+        <div class="ylh-dropdown-menu" style="right:0;left:auto;min-width:200px;">
+          <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
+            ⚡ Power Tools
+          </a>
+          <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">
+            🤖 AI Concierge
+          </a>
+        </div>
+      </div>
       
       <a href="{{ url_for('admin_settings') }}"
          class="ylh-nav-link {% if 'admin' in request.path %}active{% endif %}"
@@ -432,6 +438,19 @@
     </div>
   </div>
 </nav>
+
+<script>
+/* Close Tools dropdown when clicking outside */
+document.addEventListener('click', function(e) {
+  document.querySelectorAll('.ylh-dropdown.active-drop').forEach(function(d) {
+    if (!d.contains(e.target)) d.classList.remove('active-drop');
+  });
+});
+/* Show dropdown menu when active-drop */
+document.querySelectorAll('.ylh-dropdown').forEach(function(d) {
+  d.addEventListener('mouseleave', function(){ d.classList.remove('active-drop'); });
+});
+</script>
 
 <div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;" class="agent-content-wrapper">
   {% block agent_content %}

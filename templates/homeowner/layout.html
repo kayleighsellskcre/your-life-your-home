@@ -365,7 +365,7 @@
     {% set is_home_base = path == '/homeowner' or path == '/homeowner/' %}
     {% set is_value = path.startswith('/homeowner/value') %}
     {% set is_reno = path.startswith('/homeowner/reno/') or path.startswith('/homeowner/saved-notes') or path.startswith('/homeowner/design-boards') %}
-    {% set is_next = path.startswith('/homeowner/next/') %}
+    {% set is_next = path.startswith('/homeowner/next') %}
     {% set is_care = path.startswith('/homeowner/care/') or path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}
     {% set is_support = path.startswith('/homeowner/support/') %}
     
@@ -395,74 +395,33 @@
         </div>
       </div>
       
-      <div class="ylh-dropdown">
-        <button type="button" class="ylh-nav-button {% if is_next %}active{% endif %}" onclick="toggleDropdown(this, event)">
-          Next Home ▾
-        </button>
-        <div class="ylh-dropdown-menu">
-          <a href="{{ url_for('homeowner_next_plan_move') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/plan-my-move') %}active{% endif %}">
-            Plan My Move
-          </a>
-          <a href="{{ url_for('homeowner_next_buy_sell_guidance') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/buy-sell-guidance') %}active{% endif %}">
-            Buy & Sell Guidance
-          </a>
-          <a href="{{ url_for('homeowner_next_loan_paths') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/loan-paths') %}active{% endif %}">
-            Loan Paths
-          </a>
-          <a href="{{ url_for('homeowner_next_affordability') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/next/affordability') %}active{% endif %}">
-            Affordability
-          </a>
-        </div>
-      </div>
+      <a href="{{ url_for('homeowner_next_home_hub') }}" class="ylh-nav-button {% if is_next %}active{% endif %}">
+        Next Home
+      </a>
       
       <div class="ylh-dropdown">
         <button type="button" class="ylh-nav-button {% if is_care %}active{% endif %}" onclick="toggleDropdown(this, event)">
-          Care ▾
+          Home Care ▾
         </button>
         <div class="ylh-dropdown-menu">
           <a href="{{ url_for('homeowner_upload_documents') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/upload-documents') or path.startswith('/homeowner/home-timeline') %}active{% endif %}">
-            Documents & Timeline
+            📁 Documents & Timeline
           </a>
           <a href="{{ url_for('homeowner_care_maintenance_guide') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/maintenance-guide') %}active{% endif %}">
-            Maintenance Guide
+            🔧 Maintenance Guide
           </a>
           <a href="{{ url_for('homeowner_care_seasonal_checklists') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/seasonal-checklists') %}active{% endif %}">
-            Seasonal Checklists
-          </a>
-          <a href="{{ url_for('homeowner_care_home_protection') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/home-protection') %}active{% endif %}">
-            Home Protection
+            🍂 Seasonal Checklists
           </a>
           <a href="{{ url_for('homeowner_care_warranty_log') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/warranty-log') %}active{% endif %}">
-            Warranty Log
-          </a>
-          <a href="{{ url_for('homeowner_care_energy_savings') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/care/energy-savings') %}active{% endif %}">
-            Energy Savings
+            🛡 Warranties & Protection
           </a>
         </div>
       </div>
       
-      <div class="ylh-dropdown">
-        <button type="button" class="ylh-nav-button {% if is_support %}active{% endif %}" onclick="toggleDropdown(this, event)">
-          Support ▾
-        </button>
-        <div class="ylh-dropdown-menu">
-          <a href="{{ url_for('homeowner_support_ask_question') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/ask-question') %}active{% endif %}">
-            Ask a Question
-          </a>
-          <a href="{{ url_for('homeowner_support_chat_human') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/chat-human') %}active{% endif %}">
-            Chat with Human
-          </a>
-          <a href="{{ url_for('homeowner_support_schedule_chat') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/schedule-chat') %}active{% endif %}">
-            Schedule Chat
-          </a>
-          <a href="{{ url_for('homeowner_support_resources') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/resources') %}active{% endif %}">
-            Resources
-          </a>
-          <a href="{{ url_for('homeowner_support_meet_team') }}" class="ylh-dropdown-item {% if path.startswith('/homeowner/support/meet-team') %}active{% endif %}">
-            Meet Team
-          </a>
-        </div>
-      </div>
+      <a href="{{ url_for('homeowner_support_get_help') }}" class="ylh-nav-button {% if is_support %}active{% endif %}">
+        Get Help
+      </a>
     </div>
     
     <!-- Agent/Lender Info -->
