@@ -3120,10 +3120,40 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
     
     # Use the professionals_list we loaded earlier, or fallback to empty list
     professionals = professionals_list if professionals_list else []
-    
+
     # Final verification before rendering
     if homeowner_id and not professionals:
         print(f"HOMEOWNER DASHBOARD FINAL WARNING: No professionals found for homeowner {homeowner_id} - dashboard will show empty team section")
+
+    # Load active transaction for this homeowner (from agent_transactions linked by homeowner_user_id or email)
+    active_transaction = None
+    if homeowner_id and homeowner_user:
+        try:
+            hw_email = (homeowner_user.get("email") or "").lower().strip()
+            conn_tx = get_db_connection()
+            tx_row = conn_tx.execute(
+                """SELECT * FROM agent_transactions
+                   WHERE homeowner_user_id = ?
+                     AND (stage IS NULL OR stage NOT IN ('closed','cancelled'))
+                   ORDER BY created_at DESC LIMIT 1""",
+                (homeowner_id,)
+            ).fetchone()
+            if not tx_row and hw_email:
+                # Fallback: match by client_name field containing email, or by participants table
+                tx_row = conn_tx.execute(
+                    """SELECT t.* FROM agent_transactions t
+                       LEFT JOIN transaction_participants tp
+                         ON tp.transaction_id = t.id AND LOWER(tp.email) = ?
+                       WHERE (LOWER(t.client_name) LIKE ? OR tp.id IS NOT NULL)
+                         AND (t.stage IS NULL OR t.stage NOT IN ('closed','cancelled'))
+                       ORDER BY t.created_at DESC LIMIT 1""",
+                    (hw_email, f"%{hw_email}%")
+                ).fetchone()
+            conn_tx.close()
+            if tx_row:
+                active_transaction = dict(tx_row)
+        except Exception as tx_err:
+            print(f"[Overview] Could not load homeowner transaction: {tx_err}")
 
     return render_template(
         "homeowner/overview.html",
@@ -3135,6 +3165,7 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
         viewing_as_professional=viewing_as_professional,
         current_user=user,
         is_guest=is_guest,
+        active_transaction=active_transaction,
     )
 
 
@@ -5608,7 +5639,24 @@ def agent_crm():
                 except Exception as e:
                     print(f"Error fetching relationships for contact {contact_dict.get('id')}: {e}")
                     contact_dict['relationships'] = []
-                
+
+                # Check if contact has a homeowner portal account
+                try:
+                    contact_email = (contact_dict.get('email') or '').lower().strip()
+                    if contact_email:
+                        portal_row = get_db_connection().execute(
+                            "SELECT id FROM users WHERE LOWER(email)=? AND role='homeowner'",
+                            (contact_email,)
+                        ).fetchone()
+                        contact_dict['has_portal'] = portal_row is not None
+                        contact_dict['portal_user_id'] = portal_row['id'] if portal_row else None
+                    else:
+                        contact_dict['has_portal'] = False
+                        contact_dict['portal_user_id'] = None
+                except Exception:
+                    contact_dict['has_portal'] = False
+                    contact_dict['portal_user_id'] = None
+
                 contacts_list.append(contact_dict)
             except Exception as e:
                 import traceback
@@ -5911,6 +5959,59 @@ def agent_crm_quick_update():
     conn.commit()
     conn.close()
     return jsonify({"success": True, "value": value})
+
+
+@app.route("/agent/crm/<int:contact_id>/invite-to-portal", methods=["POST"])
+def agent_crm_invite_to_portal(contact_id):
+    """Send a homeowner portal invite email to a CRM contact."""
+    from database import get_agent_contact, get_referral_links_for_agent, create_referral_link
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    contact = get_agent_contact(contact_id, user["id"])
+    if not contact:
+        flash("Contact not found.", "error")
+        return redirect(url_for("agent_crm"))
+    email = contact.get("email", "").strip()
+    if not email:
+        flash("This contact has no email address on file.", "error")
+        return redirect(url_for("agent_crm"))
+    # Get or create referral link for this agent
+    links = get_referral_links_for_agent(user["id"])
+    if links:
+        token = links[0]["token"]
+    else:
+        token = create_referral_link(agent_id=user["id"])
+    referral_url = url_for("referral_landing", referral_code=token, _external=True)
+    agent_name = user.get("name", "Your Agent")
+    client_first = contact.get("name", "").split()[0] if contact.get("name") else "there"
+    subject = f"🏠 {agent_name} invited you to your free homeowner portal"
+    body = f"""Hi {client_first},
+
+{agent_name} has set up a personal homeowner portal for you through Your Life, Your Home — and it's completely free.
+
+Your portal gives you:
+• 📊 Real-time home value & equity tracking
+• 🏠 Home care reminders & seasonal checklists
+• 📄 Secure document storage
+• 💡 AI-powered insights about your home's finances
+• 🔗 Direct connection with {agent_name}
+
+Click the link below to create your account — it only takes 2 minutes:
+
+{referral_url}
+
+This link is personalized for you and automatically connects your account to {agent_name}.
+
+Looking forward to supporting you,
+
+{agent_name}
+"""
+    if send_reminder_email(email, subject, body):
+        flash(f"✅ Portal invite sent to {email}!", "success")
+    else:
+        flash(f"⚠️ Could not send email — please check your email settings.", "error")
+    return redirect(url_for("agent_crm"))
 
 
 @app.route("/agent/crm/import", methods=["GET", "POST"])

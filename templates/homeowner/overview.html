@@ -3,121 +3,177 @@
 
 {% block homeowner_content %}
 
-<!-- Welcome Section - Calm and Refined -->
-<div class="section section-sm" style="background: linear-gradient(135deg, rgba(246, 242, 232, 0.5) 0%, rgba(239, 233, 220, 0.3) 100%);">
+<!-- Welcome Section -->
+<div class="section section-sm" style="background: linear-gradient(135deg, rgba(246,242,232,0.5) 0%, rgba(239,233,220,0.3) 100%);">
   <div class="container">
-    <div style="text-align: center; max-width: 800px; margin: 0 auto;">
-      <h1 style="font-family: var(--font-heading); font-size: var(--text-4xl); color: var(--charcoal-brown); margin-bottom: var(--space-lg);">
-        Welcome Home, 
-        <span style="color: var(--olive-green);">
-          {% if homeowner and homeowner.name %}
-            {{ homeowner.name.split()[0] }}
-          {% else %}
-            Friend
-          {% endif %}
+    <div style="text-align:center;max-width:800px;margin:0 auto;">
+      <h1 style="font-family:var(--font-heading);font-size:var(--text-4xl);color:var(--charcoal-brown);margin-bottom:var(--space-lg);">
+        Welcome Home,
+        <span style="color:var(--olive-green);">
+          {% if homeowner and homeowner.name %}{{ homeowner.name.split()[0] }}{% else %}Friend{% endif %}
         </span>
       </h1>
-      <p style="font-size: var(--text-lg); color: var(--warm-gray); line-height: var(--leading-relaxed); margin-bottom: 0;">
+      <p style="font-size:var(--text-lg);color:var(--warm-gray);line-height:var(--leading-relaxed);margin-bottom:0;">
         Your personal homeownership dashboard. Everything you need to manage, maintain, and grow your most valuable asset.
       </p>
     </div>
   </div>
 </div>
 
+<!-- My Team + My Transaction (live connection panel) -->
+{% if professionals or active_transaction %}
+<div class="section section-sm">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:{% if professionals and active_transaction %}1fr 1fr{% else %}1fr{% endif %};gap:1.25rem;max-width:900px;margin:0 auto;">
+
+      <!-- MY PROFESSIONAL TEAM -->
+      {% if professionals %}
+      <div style="background:linear-gradient(135deg,#FFFFFF 0%,#F9F7F4 100%);border:1px solid rgba(200,180,151,.3);border-radius:14px;padding:1.25rem 1.4rem;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6B6A45;margin-bottom:.85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(107,106,69,.12);">
+          🤝 My Professional Team
+        </div>
+        {% for prof in professionals %}
+        {% set role = prof.get('professional_role') or prof.get('professional_type','agent') %}
+        <div style="display:flex;align-items:center;gap:.85rem;{% if not loop.last %}margin-bottom:.9rem;padding-bottom:.9rem;border-bottom:1px solid rgba(107,106,69,.08);{% endif %}">
+          <div style="width:46px;height:46px;border-radius:50%;flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,#6B6A45,#8B8A5A);display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;font-weight:700;">
+            {% if prof.get('professional_photo') %}
+              <img src="{{ prof.professional_photo }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+            {% else %}
+              {{ (prof.get('name') or '?')[0].upper() }}
+            {% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:.88rem;font-weight:700;color:#3A352C;">{{ prof.get('name','—') }}</div>
+            <div style="font-size:.74rem;color:#6B6A45;text-transform:capitalize;font-weight:600;margin:.08rem 0 .3rem;">
+              {{ '🏡 Your Agent' if role == 'agent' else '💰 Your Lender' }}{% if prof.get('brokerage_name') %} · {{ prof.brokerage_name }}{% endif %}
+            </div>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+              {% if prof.get('email') %}<a href="mailto:{{ prof.email }}" style="font-size:.72rem;color:#6B6A45;text-decoration:none;padding:.18rem .45rem;background:rgba(107,106,69,.1);border-radius:4px;">✉ Email</a>{% endif %}
+              {% if prof.get('phone') %}<a href="tel:{{ prof.phone }}" style="font-size:.72rem;color:#6B6A45;text-decoration:none;padding:.18rem .45rem;background:rgba(107,106,69,.1);border-radius:4px;">📞 Call</a>{% endif %}
+              {% if prof.get('website_url') %}<a href="{{ prof.website_url }}" target="_blank" style="font-size:.72rem;color:#6B6A45;text-decoration:none;padding:.18rem .45rem;background:rgba(107,106,69,.1);border-radius:4px;">🌐 Web</a>{% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- MY ACTIVE TRANSACTION -->
+      {% if active_transaction %}
+      {% set tx = active_transaction %}
+      {% set stage_labels = {
+        'pre_contract':'Pre-Contract',
+        'under_contract':'Under Contract',
+        'inspection':'Inspection',
+        'appraisal':'Appraisal',
+        'clear_to_close':'Clear to Close',
+        'closing':'Closing Day',
+        'closed':'Closed',
+        'cancelled':'Cancelled'
+      } %}
+      {% set stage_colors = {
+        'pre_contract':'#6B6A45',
+        'under_contract':'#1D4ED8',
+        'inspection':'#D97706',
+        'appraisal':'#7C3AED',
+        'clear_to_close':'#059669',
+        'closing':'#059669',
+        'closed':'#15803d',
+        'cancelled':'#9CA3AF'
+      } %}
+      {% set stages_list = ['pre_contract','under_contract','inspection','appraisal','clear_to_close','closing','closed'] %}
+      {% set tx_stage = tx.get('stage') or 'pre_contract' %}
+      {% set stage_idx = stages_list.index(tx_stage) if tx_stage in stages_list else 0 %}
+      <div style="background:linear-gradient(135deg,#FFFFFF 0%,#F9F7F4 100%);border:1px solid rgba(200,180,151,.3);border-radius:14px;padding:1.25rem 1.4rem;">
+        <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6B6A45;margin-bottom:.85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(107,106,69,.12);">
+          🏠 My Active Transaction
+        </div>
+        <div style="font-size:1rem;font-weight:700;color:#3A352C;margin-bottom:.25rem;">{{ tx.get('property_address','—') }}</div>
+        <div style="font-size:.78rem;color:rgba(58,53,44,.6);margin-bottom:.8rem;">
+          {% if tx.get('side') %}{{ tx.side | capitalize }}{% endif %}{% if tx.get('close_date') %} · Closing {{ tx.close_date }}{% endif %}
+        </div>
+        <!-- Progress bar -->
+        <div style="margin-bottom:.7rem;">
+          <div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(58,53,44,.45);margin-bottom:.3rem;">
+            <span>Start</span>
+            <span style="font-weight:700;color:{{ stage_colors.get(tx_stage,'#6B6A45') }};">{{ stage_labels.get(tx_stage, tx_stage) }}</span>
+            <span>Closed</span>
+          </div>
+          <div style="height:7px;background:rgba(107,106,69,.12);border-radius:4px;overflow:hidden;">
+            <div style="height:100%;width:{{ ((stage_idx + 1) / 7 * 100) | int }}%;background:linear-gradient(90deg,#6B6A45,#C8B497);border-radius:4px;"></div>
+          </div>
+        </div>
+        <span style="display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;color:{{ stage_colors.get(tx_stage,'#6B6A45') }};background:rgba(107,106,69,.08);padding:.28rem .6rem;border-radius:12px;">
+          <span style="width:6px;height:6px;border-radius:50%;background:{{ stage_colors.get(tx_stage,'#6B6A45') }};flex-shrink:0;"></span>
+          {{ stage_labels.get(tx_stage, tx_stage) }}
+        </span>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
 <!-- Financial Snapshot -->
 <div class="section">
   <div class="container">
-    <div style="margin-bottom: var(--space-2xl);">
-      <h2 style="font-family: var(--font-heading); font-size: var(--text-3xl); text-align: center; margin-bottom: var(--space-sm);">Your Financial Snapshot</h2>
-      <p style="text-align: center; color: var(--warm-gray); font-size: var(--text-lg);">Real-time insights into your home's value and equity</p>
+    <div style="margin-bottom:var(--space-2xl);">
+      <h2 style="font-family:var(--font-heading);font-size:var(--text-3xl);text-align:center;margin-bottom:var(--space-sm);">Your Financial Snapshot</h2>
+      <p style="text-align:center;color:var(--warm-gray);font-size:var(--text-lg);">Real-time insights into your home's value and equity</p>
     </div>
 
-    <!-- Stats Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-3xl);">
-      
-      <!-- Home Value -->
-      <div class="card" style="text-align: center;">
-        <div style="font-size: var(--text-3xl); font-family: var(--font-heading); color: var(--olive-green); margin-bottom: var(--space-sm);">
-          {% if snapshot and snapshot.get('value_estimate') %}
-            ${{ "{:,.0f}".format(snapshot.get('value_estimate')) }}
-          {% else %}
-            —
-          {% endif %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:var(--space-lg);margin-bottom:var(--space-3xl);">
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
+          {% if snapshot and snapshot.get('value_estimate') %}${{ "{:,.0f}".format(snapshot.get('value_estimate')) }}{% else %}—{% endif %}
         </div>
-        <div style="font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--warm-gray); font-weight: var(--weight-medium);">
-          Current Home Value
-        </div>
+        <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Current Home Value</div>
       </div>
 
-      <!-- Total Equity -->
-      <div class="card" style="text-align: center;">
-        <div style="font-size: var(--text-3xl); font-family: var(--font-heading); color: var(--olive-green); margin-bottom: var(--space-sm);">
-          {% if snapshot and snapshot.get('equity_estimate') %}
-            ${{ "{:,.0f}".format(snapshot.get('equity_estimate')) }}
-          {% else %}
-            —
-          {% endif %}
+      <div class="card" style="text-align:center;">
+        <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
+          {% if snapshot and snapshot.get('equity_estimate') %}${{ "{:,.0f}".format(snapshot.get('equity_estimate')) }}{% else %}—{% endif %}
         </div>
-        <div style="font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--warm-gray); font-weight: var(--weight-medium);">
-          Total Equity
-        </div>
+        <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Total Equity</div>
         {% if snapshot and snapshot.get('value_estimate') and snapshot.get('equity_estimate') %}
-        <div style="margin-top: var(--space-sm); padding: 0.375rem 0.75rem; background: rgba(74, 124, 89, 0.1); color: #4A7C59; border-radius: var(--border-radius-md); display: inline-block; font-size: var(--text-xs); font-weight: var(--weight-medium);">
+        <div style="margin-top:var(--space-sm);padding:0.375rem 0.75rem;background:rgba(74,124,89,0.1);color:#4A7C59;border-radius:var(--border-radius-md);display:inline-block;font-size:var(--text-xs);font-weight:var(--weight-medium);">
           {{ "{:.1f}".format((snapshot.get('equity_estimate') / snapshot.get('value_estimate') * 100)) }}% ownership
         </div>
         {% endif %}
       </div>
 
-      <!-- Monthly Payment -->
-      <div class="card" style="text-align: center;">
-        <div style="font-size: var(--text-3xl); font-family: var(--font-heading); color: var(--olive-green); margin-bottom: var(--space-sm);">
-          {% if snapshot and snapshot.get('loan_payment') %}
-            ${{ "{:,.0f}".format(snapshot.get('loan_payment')) }}
-          {% else %}
-            —
-          {% endif %}
+      <div class="card" style="text-align:center;">
+        <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
+          {% if snapshot and snapshot.get('loan_payment') %}${{ "{:,.0f}".format(snapshot.get('loan_payment')) }}{% else %}—{% endif %}
         </div>
-        <div style="font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--warm-gray); font-weight: var(--weight-medium);">
-          Monthly Payment
-        </div>
+        <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Monthly Payment</div>
       </div>
 
-      <!-- Interest Rate -->
-      <div class="card" style="text-align: center;">
-        <div style="font-size: var(--text-3xl); font-family: var(--font-heading); color: var(--olive-green); margin-bottom: var(--space-sm);">
-          {% if snapshot and snapshot.get('loan_rate') %}
-            {{ "{:.2f}".format(snapshot.get('loan_rate')) }}%
-          {% else %}
-            —
-          {% endif %}
+      <div class="card" style="text-align:center;">
+        <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
+          {% if snapshot and snapshot.get('loan_rate') %}{{ "{:.2f}".format(snapshot.get('loan_rate')) }}%{% else %}—{% endif %}
         </div>
-        <div style="font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.1em; color: var(--warm-gray); font-weight: var(--weight-medium);">
-          Interest Rate
-        </div>
+        <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Interest Rate</div>
       </div>
 
     </div>
 
-    <!-- Quick Actions -->
-    <div style="display: flex; justify-content: center; gap: var(--space-md); flex-wrap: wrap;">
-      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="btn btn-primary">
-        View Home Value
-      </a>
-      <a href="{{ url_for('homeowner_care_maintenance_guide') }}" class="btn btn-secondary">
-        Home Care Guide
-      </a>
+    <div style="display:flex;justify-content:center;gap:var(--space-md);flex-wrap:wrap;">
+      <a href="{{ url_for('homeowner_value_equity_overview') }}" class="btn btn-primary">View Home Value</a>
+      <a href="{{ url_for('homeowner_care_maintenance_guide') }}" class="btn btn-secondary">Home Care Guide</a>
     </div>
-
   </div>
 </div>
 
-<!-- Empty State (if no data) -->
+<!-- Empty State -->
 {% if not snapshot or not snapshot.get('value_estimate') %}
 <div class="section">
   <div class="container">
-    <div style="text-align: center; padding: var(--space-4xl) var(--space-xl); background: linear-gradient(135deg, rgba(246, 242, 232, 0.5) 0%, rgba(239, 233, 220, 0.3) 100%); border-radius: var(--border-radius-2xl); border: 2px dashed rgba(107, 106, 69, 0.2);">
-      <h3 style="font-family: var(--font-heading); font-size: var(--text-2xl); margin-bottom: var(--space-md);">Let's Get Started</h3>
-      <p style="color: var(--warm-gray); font-size: var(--text-lg); max-width: 600px; margin: 0 auto var(--space-xl);">
+    <div style="text-align:center;padding:var(--space-4xl) var(--space-xl);background:linear-gradient(135deg,rgba(246,242,232,0.5) 0%,rgba(239,233,220,0.3) 100%);border-radius:var(--border-radius-2xl);border:2px dashed rgba(107,106,69,0.2);">
+      <h3 style="font-family:var(--font-heading);font-size:var(--text-2xl);margin-bottom:var(--space-md);">Let's Get Started</h3>
+      <p style="color:var(--warm-gray);font-size:var(--text-lg);max-width:600px;margin:0 auto var(--space-xl);">
         Add your property information to unlock personalized insights, track your home's value, and access all the tools you need.
       </p>
       <a href="{{ url_for('homeowner_value_equity_overview') }}" class="btn btn-primary btn-lg">Add Property Details</a>
@@ -127,4 +183,3 @@
 {% endif %}
 
 {% endblock %}
-

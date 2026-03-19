@@ -910,6 +910,29 @@ def init_db() -> None:
         """
     )
     
+    # Migrate agent_transactions: add homeowner_user_id and lender_user_id for unified system
+    try:
+        cur.execute("PRAGMA table_info(agent_transactions)")
+        atx_cols = [col[1] for col in cur.fetchall()]
+        if 'homeowner_user_id' not in atx_cols:
+            cur.execute("ALTER TABLE agent_transactions ADD COLUMN homeowner_user_id INTEGER REFERENCES users(id)")
+        if 'lender_user_id' not in atx_cols:
+            cur.execute("ALTER TABLE agent_transactions ADD COLUMN lender_user_id INTEGER REFERENCES users(id)")
+        if 'price' not in atx_cols:
+            cur.execute("ALTER TABLE agent_transactions ADD COLUMN price REAL")
+        # Auto-link: backfill homeowner_user_id where client email matches a homeowner account
+        cur.execute("""
+            UPDATE agent_transactions
+            SET homeowner_user_id = (
+                SELECT u.id FROM users u
+                WHERE LOWER(TRIM(u.email)) = LOWER(TRIM(agent_transactions.client_name))
+                  AND u.role = 'homeowner' LIMIT 1
+            )
+            WHERE homeowner_user_id IS NULL
+        """)
+    except Exception as e:
+        print(f"[DB] Note: agent_transactions migration: {e}")
+
     # Migrate transaction_participants table to new schema if needed
     try:
         cur.execute("PRAGMA table_info(transaction_participants)")
@@ -2520,20 +2543,36 @@ def add_agent_transaction(
     side: str,
     stage: str,
     close_date: str,
-) -> None:
+    homeowner_user_id: int = None,
+    lender_user_id: int = None,
+    price: float = None,
+) -> int:
+    """Insert a new agent transaction. Auto-links homeowner if their email is in client_name or provided explicitly."""
     conn = get_connection()
     cur = conn.cursor()
+    # Auto-link homeowner by email if not explicitly provided
+    if not homeowner_user_id and client_name and '@' in client_name:
+        row = conn.execute(
+            "SELECT id FROM users WHERE LOWER(email)=LOWER(?) AND role='homeowner'",
+            (client_name.strip(),)
+        ).fetchone()
+        if row:
+            homeowner_user_id = row[0]
     cur.execute(
         """
         INSERT INTO agent_transactions (
-            agent_user_id, property_address, client_name, side, stage, close_date
+            agent_user_id, property_address, client_name, side, stage, close_date,
+            homeowner_user_id, lender_user_id, price
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (agent_user_id, property_address, client_name, side, stage, close_date),
+        (agent_user_id, property_address, client_name, side, stage, close_date,
+         homeowner_user_id, lender_user_id, price),
     )
+    new_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return new_id
 
 
 def list_agent_transactions(agent_user_id: int) -> List[Dict]:

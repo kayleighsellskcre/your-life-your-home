@@ -585,6 +585,14 @@
               <button onclick="openEdit({{ contact.id }})" class="x-btn x-btn--def">✏ Edit</button>
               <button onclick="aiDraftEmail({{ contact.id }})" class="x-btn" style="background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;">✨ Draft Email</button>
               <button onclick="aiNextAction({{ contact.id }})" class="x-btn" style="background:rgba(107,106,69,.12)!important;color:#6B6A45!important;border-color:rgba(107,106,69,.28)!important;">AI: What's Next?</button>
+              {% if contact.email and not contact.has_portal %}
+              <form method="POST" action="{{ url_for('agent_crm_invite_to_portal', contact_id=contact.id) }}" style="display:inline;"
+                    onsubmit="return confirm('Send {{ contact.name }} a personal invite to create their free homeowner portal?')">
+                <button type="submit" class="x-btn" style="background:rgba(34,197,94,.12)!important;color:#15803d!important;border-color:rgba(34,197,94,.3)!important;">🏠 Invite to Portal</button>
+              </form>
+              {% elif contact.has_portal %}
+              <a href="{{ url_for('agent_client_detail', homeowner_id=contact.portal_user_id) }}" class="x-btn" style="background:rgba(34,197,94,.12)!important;color:#15803d!important;border-color:rgba(34,197,94,.3)!important;">✅ View Portal</a>
+              {% endif %}
             </div>
           </td>
         </tr>
