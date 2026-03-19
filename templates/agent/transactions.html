@@ -252,11 +252,18 @@
   text-decoration: none;
   transition: all .12s;
   white-space: nowrap;
+  /* Reset button defaults so <button> matches <a> */
+  font-family: inherit;
+  line-height: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  vertical-align: middle;
 }
 .tx-act:hover { background: #F6F2E8; border-color: #6B6A45; color: #3A352C; }
-.tx-act--del  { color: #c0392b; border-color: rgba(192,57,43,.25); }
-.tx-act--del:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
-.tx-actions   { display: flex; gap: .2rem; justify-content: flex-end; }
+.tx-act--del  { color: #c0392b; border-color: rgba(192,57,43,.25); background: #fff; }
+.tx-act--del:hover { background: rgba(192,57,43,.08); color: #c0392b; border-color: rgba(192,57,43,.5); }
+.tx-actions   { display: flex; gap: .35rem; justify-content: flex-end; align-items: center; }
 
 /* ─── Empty state ─── */
 .tx-empty {
@@ -461,7 +468,7 @@
             <a href="{{ url_for('agent_transaction_edit', tx_id=tx.id) }}" class="tx-act">Edit</a>
             <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;">
               <button type="submit" class="tx-act tx-act--del"
-                onclick="return confirm('Delete this transaction? This cannot be undone.')">Del</button>
+                onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
             </form>
           </div>
         </td>

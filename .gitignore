@@ -28,12 +28,20 @@ wheels/
 .installed.cfg
 *.egg
 
-# Database files
+# Database files — NEVER commit these (causes phantom data on redeploy)
 *.db
 *.sqlite
 *.sqlite3
 ylh.db
 homeowner_data.db
+scripts/*.db
+data/
+
+# Compiled Python — never commit these
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
 
 # IDE
 .vscode/
