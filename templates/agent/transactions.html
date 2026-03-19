@@ -2,597 +2,565 @@
 
 {% block agent_content %}
 <style>
-  /* ============================================
-     TRANSACTIONS PAGE - LUXURY REDESIGN
-     Clean, elegant, fully responsive
-     ============================================ */
-  
-  :root {
-    --tx-spacing-xs: 0.5rem;
-    --tx-spacing-sm: 1rem;
-    --tx-spacing-md: 1.5rem;
-    --tx-spacing-lg: 2rem;
-    --tx-spacing-xl: 3rem;
-  }
+/* ─── Reset inside tx page ─── */
+#txpage, #txpage * { box-sizing: border-box; }
 
-  /* Main Wrapper */
-  .transactions-page {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: var(--tx-spacing-md);
-  }
+/* ─── Page wrapper ─── */
+#txpage {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #3A352C;
+  background: #F8F5F0;
+  padding: 0;
+  margin: 0;
+}
 
-  /* Page Header */
-  .transactions-header {
-    margin-bottom: var(--tx-spacing-xl);
-    text-align: center;
-  }
+/* ─── Top bar ─── */
+.tx-bar {
+  background: linear-gradient(135deg, #F6F2E8 0%, #EDE8DC 100%);
+  border-bottom: 1px solid rgba(107,106,69,.18);
+  padding: .625rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+.tx-bar__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #3A352C;
+  letter-spacing: -.02em;
+}
+.tx-bar__count {
+  font-size: .7rem;
+  color: #9A9472;
+  font-weight: 600;
+  background: rgba(107,106,69,.1);
+  border-radius: 10px;
+  padding: .1rem .45rem;
+}
+.tx-bar__spacer { flex: 1; }
+.tx-bar__btns { display: flex; gap: .4rem; flex-wrap: wrap; }
 
-  .transactions-header__tagline {
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--olive-green);
-    font-weight: 600;
-    margin-bottom: var(--tx-spacing-xs);
-  }
+/* ─── Top-bar buttons ─── */
+.t-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  height: 28px;
+  padding: 0 .75rem;
+  border-radius: 5px;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all .12s;
+}
+.t-btn--solid {
+  background: #6B6A45;
+  color: #fff;
+  border-color: #6B6A45;
+}
+.t-btn--solid:hover { background: #5A5938; }
+.t-btn--ghost {
+  background: #fff;
+  color: #6B6A45;
+  border-color: rgba(107,106,69,.3);
+}
+.t-btn--ghost:hover { background: #F6F2E8; border-color: #6B6A45; }
 
-  .transactions-header__title {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-    margin: 0 0 var(--tx-spacing-sm) 0;
-    letter-spacing: -0.02em;
-  }
+/* ─── Flash ─── */
+.flash-bar { padding: .5rem 1.25rem; }
+.flash-item {
+  padding: .5rem .875rem;
+  border-radius: 6px;
+  font-size: .8rem;
+  font-weight: 500;
+  margin-bottom: .25rem;
+}
+.flash-item--success { background: #e8f5e9; color: #2e7d32; }
+.flash-item--error   { background: #fdecea; color: #c62828; }
+.flash-item--warning { background: #fff8e1; color: #f57f17; }
+.flash-item--info    { background: #e3f2fd; color: #1565c0; }
 
-  .transactions-header__description {
-    font-size: 1rem;
-    color: var(--charcoal-brown);
-    opacity: 0.75;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
+/* ─── Stage summary strip ─── */
+.stage-strip {
+  display: flex;
+  gap: .375rem;
+  padding: .625rem 1.25rem;
+  overflow-x: auto;
+  background: #FDFBF7;
+  border-bottom: 1px solid rgba(200,180,151,.2);
+  scrollbar-width: none;
+}
+.stage-strip::-webkit-scrollbar { display: none; }
+.stage-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  height: 24px;
+  padding: 0 .65rem;
+  border-radius: 12px;
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid rgba(107,106,69,.18);
+  background: #fff;
+  color: #6B6A45;
+  transition: all .12s;
+}
+.stage-pill:hover, .stage-pill--on {
+  background: #6B6A45;
+  color: #fff;
+  border-color: #6B6A45;
+}
+.stage-pill__n {
+  background: rgba(255,255,255,.3);
+  border-radius: 8px;
+  padding: 0 .3rem;
+  font-size: .6rem;
+  min-width: 16px;
+  text-align: center;
+}
+.stage-pill--on .stage-pill__n { background: rgba(255,255,255,.25); }
 
-  /* Add Transaction Form */
-  .add-transaction-card {
-    background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: 16px;
-    padding: var(--tx-spacing-xl);
-    margin-bottom: var(--tx-spacing-xl);
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+/* ─── Table area ─── */
+.tx-table-wrap {
+  overflow-x: auto;
+  overflow-y: auto;
+}
+.tx-table-wrap::-webkit-scrollbar { height: 5px; width: 5px; }
+.tx-table-wrap::-webkit-scrollbar-thumb { background: rgba(200,180,151,.45); border-radius: 3px; }
 
-  .add-transaction-card__title {
-    font-family: var(--font-heading);
-    font-size: 1.75rem;
-    color: var(--charcoal-brown);
-    text-align: center;
-    margin: 0 0 var(--tx-spacing-lg) 0;
-    font-weight: 600;
-  }
+.tx-table {
+  min-width: 860px;
+  width: 100%;
+  border-collapse: collapse;
+}
 
-  .transaction-form {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--tx-spacing-md);
-  }
+/* column widths */
+.tx-table colgroup col:nth-child(1) { width: 220px; } /* address */
+.tx-table colgroup col:nth-child(2) { width: 160px; } /* client */
+.tx-table colgroup col:nth-child(3) { width: 130px; } /* stage */
+.tx-table colgroup col:nth-child(4) { width: 70px;  } /* side */
+.tx-table colgroup col:nth-child(5) { width: 105px; } /* close date */
+.tx-table colgroup col:nth-child(6) { width: 95px;  } /* created */
+.tx-table colgroup col:nth-child(7) { width: 130px; } /* actions */
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
+.tx-table thead th {
+  padding: .425rem .625rem;
+  font-size: .58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #9A9472;
+  background: #F0EDE5;
+  border-bottom: 1.5px solid rgba(107,106,69,.15);
+  white-space: nowrap;
+  text-align: left;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.tx-table thead th:last-child { text-align: right; padding-right: .875rem; }
 
-  .form-group--full {
-    grid-column: 1 / -1;
-  }
+/* data rows */
+.tx-row {
+  border-bottom: 1px solid rgba(200,180,151,.12);
+  cursor: pointer;
+  transition: background .1s;
+}
+.tx-row:hover { background: #FDFBF7; }
+.tx-row--odd  { background: #FCFAF7; }
+.tx-row--odd:hover { background: #F7F4EF; }
 
-  .form-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--olive-green);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.5rem;
-  }
+.tx-td {
+  padding: .5rem .625rem;
+  font-size: .78rem;
+  color: #3A352C;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.tx-td--addr {
+  font-weight: 600;
+  color: #2c3320;
+  max-width: 220px;
+}
+.tx-td--muted { color: #9A9472; }
+.tx-td--actions {
+  text-align: right;
+  padding-right: .75rem;
+}
 
-  .form-input,
-  .form-select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid rgba(200, 180, 151, 0.4);
-    border-radius: 8px;
-    background: #FFFFFF;
-    color: var(--charcoal-brown);
-    font-size: 0.938rem;
-    transition: all 0.2s ease;
-  }
+/* ─── Stage badge ─── */
+.stg {
+  display: inline-block;
+  padding: .1rem .45rem;
+  border-radius: 9px;
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.stg--summary        { background: rgba(200,180,151,.22); color: #5A5938; }
+.stg--showings       { background: rgba(33,150,243,.12);  color: #1565C0; }
+.stg--under_contract { background: rgba(255,152,0,.14);   color: #E65100; }
+.stg--earnest_money  { background: rgba(156,39,176,.12);  color: #6A1B9A; }
+.stg--inspection     { background: rgba(244,67,54,.12);   color: #B71C1C; }
+.stg--appraisal      { background: rgba(0,150,136,.12);   color: #00695C; }
+.stg--loan_commitment{ background: rgba(63,81,181,.12);   color: #283593; }
+.stg--final_walkthrough{background:rgba(139,195,74,.14);  color: #33691E; }
+.stg--closing        { background: rgba(76,175,80,.14);   color: #2E7D32; }
 
-  .form-input:focus,
-  .form-select:focus {
-    outline: none;
-    border-color: var(--olive-green);
-    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
-  }
+/* ─── Side badge ─── */
+.side-b {
+  display: inline-block;
+  padding: .08rem .35rem;
+  border-radius: 8px;
+  font-size: .56rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.side-b--buyer  { background: rgba(33,150,243,.12); color: #1565C0; }
+.side-b--seller { background: rgba(255,152,0,.14);  color: #E65100; }
+.side-b--both   { background: rgba(156,39,176,.12); color: #6A1B9A; }
 
-  .form-select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%233A352C' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    padding-right: 2.5rem;
-  }
+/* ─── Action buttons ─── */
+.tx-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+  padding: 0 .55rem;
+  border-radius: 4px;
+  border: 1px solid rgba(200,180,151,.35);
+  background: #fff;
+  color: #6B6A45;
+  font-size: .65rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .12s;
+  white-space: nowrap;
+}
+.tx-act:hover { background: #F6F2E8; border-color: #6B6A45; color: #3A352C; }
+.tx-act--del  { color: #c0392b; border-color: rgba(192,57,43,.25); }
+.tx-act--del:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
+.tx-actions   { display: flex; gap: .2rem; justify-content: flex-end; }
 
-  .form-btn {
-    padding: 0.875rem 1.5rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.938rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
+/* ─── Empty state ─── */
+.tx-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #9A9472;
+}
+.tx-empty p { font-size: .875rem; margin: .5rem 0 1.25rem; }
 
-  .form-btn--primary {
-    background: linear-gradient(135deg, var(--olive-green), #5A5938);
-    color: #FFFFFF;
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.2);
-  }
+/* ─── Add modal ─── */
+.txmod {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(58,53,44,.5);
+  backdrop-filter: blur(4px);
+  z-index: 6000;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.txmod.open { display: flex; }
+.txmod-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(58,53,44,.2);
+}
+.txmod-head {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.15rem;
+  color: #3A352C;
+  margin: 0 0 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.txmod-x {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #F6F2E8;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #7B7766;
+  flex-shrink: 0;
+  transition: all .12s;
+}
+.txmod-x:hover { background: rgba(107,106,69,.15); color: #3A352C; }
+.txgrid { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }
+.txgrid-full { grid-column: 1 / -1; }
+.txf { display: flex; flex-direction: column; }
+.txf label {
+  display: block;
+  font-size: .6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #6B6A45;
+  margin-bottom: .18rem;
+}
+.txf input, .txf select {
+  width: 100%;
+  padding: .42rem .6rem;
+  border: 1px solid rgba(200,180,151,.4);
+  border-radius: 5px;
+  font-size: .8rem;
+  color: #3A352C;
+  background: #fff;
+  outline: none;
+}
+.txf input:focus, .txf select:focus {
+  border-color: #6B6A45;
+  box-shadow: 0 0 0 2px rgba(107,106,69,.1);
+}
+.txfoot {
+  display: flex;
+  gap: .45rem;
+  margin-top: 1.125rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.txbtn {
+  display: inline-flex;
+  align-items: center;
+  height: 34px;
+  padding: 0 1.1rem;
+  border-radius: 5px;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid;
+  white-space: nowrap;
+  transition: all .13s;
+}
+.txbtn--p { background: #6B6A45; color: #fff; border-color: #6B6A45; }
+.txbtn--p:hover { background: #5A5938; }
+.txbtn--s { background: #fff; color: #6B6A45; border-color: rgba(107,106,69,.35); }
+.txbtn--s:hover { background: #F6F2E8; }
 
-  .form-btn--primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(107, 106, 69, 0.3);
-  }
-
-  /* Transactions List */
-  .transactions-section {
-    margin-top: var(--tx-spacing-xl);
-  }
-
-  .transactions-section__title {
-    font-family: var(--font-heading);
-    font-size: 1.75rem;
-    color: var(--charcoal-brown);
-    text-align: center;
-    margin: 0 0 var(--tx-spacing-lg) 0;
-    font-weight: 600;
-  }
-
-  .transactions-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--tx-spacing-md);
-  }
-
-  /* Transaction Card */
-  .transaction-card {
-    background: #FFFFFF;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: 12px;
-    padding: var(--tx-spacing-lg);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .transaction-card::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--taupe-beige);
-    transition: all 0.3s ease;
-  }
-
-  .transaction-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.12);
-    border-color: var(--olive-green);
-  }
-
-  .transaction-card:hover::before {
-    background: var(--olive-green);
-    width: 6px;
-  }
-
-  .transaction-card__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: var(--tx-spacing-md);
-    padding-bottom: var(--tx-spacing-md);
-    border-bottom: 1px solid rgba(200, 180, 151, 0.15);
-  }
-
-  .transaction-card__main {
-    flex: 1;
-  }
-
-  .transaction-card__address {
-    font-family: var(--font-heading);
-    font-size: 1.375rem;
-    font-weight: 600;
-    color: var(--charcoal-brown);
-    margin: 0 0 0.5rem 0;
-    letter-spacing: -0.01em;
-  }
-
-  .transaction-card__client {
-    font-size: 0.938rem;
-    color: var(--charcoal-brown);
-    opacity: 0.7;
-    margin-bottom: var(--tx-spacing-sm);
-  }
-
-  .transaction-card__badges {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .transaction-badge {
-    padding: 0.375rem 0.875rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .transaction-badge--stage {
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.15), rgba(107, 106, 69, 0.1));
-    color: var(--charcoal-brown);
-  }
-
-  .transaction-badge--side-buyer {
-    background: rgba(33, 150, 243, 0.15);
-    color: #1565C0;
-  }
-
-  .transaction-badge--side-seller {
-    background: rgba(255, 152, 0, 0.15);
-    color: #E65100;
-  }
-
-  .transaction-badge--side-both {
-    background: rgba(156, 39, 176, 0.15);
-    color: #6A1B9A;
-  }
-
-  .transaction-card__actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .transaction-action-btn {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 0.813rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .transaction-action-btn--delete {
-    background: rgba(198, 107, 61, 0.1);
-    color: #C66B3D;
-    border: 1px solid #C66B3D;
-  }
-
-  .transaction-action-btn--delete:hover {
-    background: #C66B3D;
-    color: #FFFFFF;
-    transform: translateY(-2px);
-  }
-
-  .transaction-card__details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--tx-spacing-md);
-  }
-
-  .transaction-detail {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .transaction-detail__label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--charcoal-brown);
-    opacity: 0.6;
-    font-weight: 600;
-  }
-
-  .transaction-detail__value {
-    font-size: 0.938rem;
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-
-  .transaction-card__cta {
-    margin-top: var(--tx-spacing-sm);
-    padding-top: var(--tx-spacing-sm);
-    border-top: 1px solid rgba(200, 180, 151, 0.15);
-    font-size: 0.813rem;
-    color: var(--olive-green);
-    font-weight: 600;
-    text-align: center;
-  }
-
-  /* Empty State */
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
-    border-radius: 16px;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .empty-state__icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1), rgba(200, 180, 151, 0.1));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: var(--olive-green);
-  }
-
-  .empty-state__title {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--charcoal-brown);
-    margin: 0 0 0.5rem 0;
-  }
-
-  .empty-state__text {
-    color: var(--charcoal-brown);
-    opacity: 0.7;
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  /* ============================================
-     RESPONSIVE BREAKPOINTS
-     ============================================ */
-
-  /* Tablet (768px - 1024px) */
-  @media (min-width: 768px) {
-    .transactions-page {
-      padding: var(--tx-spacing-lg);
-    }
-  }
-
-  /* Desktop (1024px+) */
-  @media (min-width: 1024px) {
-    .transactions-page {
-      padding: var(--tx-spacing-xl) var(--tx-spacing-lg);
-    }
-  }
-
-  /* Mobile Optimizations */
-  @media (max-width: 767px) {
-    .transactions-page {
-      padding: 1rem 0.875rem;
-    }
-
-    .transactions-header__title {
-      font-size: 1.75rem;
-    }
-
-    .transactions-header__description {
-      font-size: 0.875rem;
-    }
-
-    .add-transaction-card {
-      padding: var(--tx-spacing-lg) var(--tx-spacing-md);
-    }
-
-    .transaction-form {
-      grid-template-columns: 1fr;
-      gap: var(--tx-spacing-sm);
-    }
-
-    .transaction-card {
-      padding: var(--tx-spacing-md);
-    }
-
-    .transaction-card__header {
-      flex-direction: column;
-      gap: var(--tx-spacing-sm);
-    }
-
-    .transaction-card__address {
-      font-size: 1.125rem;
-    }
-
-    .transaction-card__actions {
-      width: 100%;
-      flex-direction: column;
-    }
-
-    .transaction-action-btn {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      min-height: 44px;
-      justify-content: center;
-    }
-
-    .transaction-card__details {
-      grid-template-columns: 1fr;
-    }
-
-    .form-btn {
-      width: 100%;
-      min-height: 48px;
-    }
-
-    /* Prevent iOS zoom on inputs */
-    input, select, textarea {
-      font-size: 16px !important;
-    }
-  }
+/* ─── Responsive ─── */
+@media (max-width: 600px) {
+  .txgrid { grid-template-columns: 1fr; }
+  .txgrid-full { grid-column: 1; }
+  .stage-strip { padding: .5rem .75rem; }
+  .tx-bar { padding: .5rem .75rem; }
+}
 </style>
 
-<div class="transactions-page">
-  <!-- Header -->
-  <div class="transactions-header">
-    <div class="transactions-header__tagline">Transaction Management</div>
-    <h1 class="transactions-header__title">AI Transaction Coordinator</h1>
-    <p class="transactions-header__description">
-      Track every deal with ease—all your files, stages, and clients in one beautiful dashboard
-    </p>
-  </div>
+<div id="txpage">
 
-  <!-- Add Transaction Form -->
-  <div class="add-transaction-card">
-    <h2 class="add-transaction-card__title">Add a Transaction</h2>
-    
-    <form method="post" class="transaction-form">
-      <div class="form-group">
-        <label for="property_address" class="form-label">Property Address</label>
-        <input 
-          id="property_address" 
-          name="property_address" 
-          type="text"
-          required 
-          placeholder="123 Main St, City, State" 
-          class="form-input"
-        />
+<!-- ── TOP BAR ─────────────────────────────────── -->
+<div class="tx-bar">
+  <span class="tx-bar__title">Transactions</span>
+  <span class="tx-bar__count">{{ transactions|length if transactions else 0 }}</span>
+  <div class="tx-bar__spacer"></div>
+  <div class="tx-bar__btns">
+    <button class="t-btn t-btn--solid" onclick="openAddTx()">+ New Transaction</button>
+  </div>
+</div>
+
+<!-- ── FLASH ────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-bar">
+    {% for cat, msg in messages %}
+      <div class="flash-item flash-item--{{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── STAGE FILTER PILLS (client-side) ─────────── -->
+{% if transactions %}
+<div class="stage-strip" id="stagePills">
+  <button class="stage-pill stage-pill--on" onclick="filterStage(this,'all')">
+    All <span class="stage-pill__n" id="pill-count-all">{{ transactions|length }}</span>
+  </button>
+  {% set stages_seen = [] %}
+  {% for tx in transactions %}
+    {% set s = tx.current_stage or 'pre_contract' %}
+    {% if s not in stages_seen %}
+      {{ stages_seen.append(s) or '' }}
+      <button class="stage-pill" onclick="filterStage(this,'{{ s }}')">
+        {{ s|replace('_',' ')|title }}
+        <span class="stage-pill__n" id="pill-count-{{ s }}">
+          {{ transactions|selectattr('current_stage','equalto',s)|list|length }}
+        </span>
+      </button>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- ── TRANSACTIONS TABLE ────────────────────────── -->
+<div class="tx-table-wrap">
+  {% if transactions %}
+  <table class="tx-table">
+    <colgroup><col><col><col><col><col><col><col></colgroup>
+    <thead>
+      <tr>
+        <th>Property Address</th>
+        <th>Client</th>
+        <th>Stage</th>
+        <th>Side</th>
+        <th>Close Date</th>
+        <th>Created</th>
+        <th style="text-align:right;padding-right:.875rem;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for tx in transactions %}
+      <tr class="tx-row {% if loop.index is odd %}tx-row--odd{% endif %}"
+          onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'"
+          title="Open AI Transaction Coordinator">
+        <td class="tx-td tx-td--addr" title="{{ tx.property_address }}">{{ tx.property_address }}</td>
+        <td class="tx-td" title="{{ tx.client_name }}">{{ tx.client_name }}</td>
+        <td class="tx-td">
+          <span class="stg stg--{{ tx.current_stage or 'summary' }}">
+            {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
+          </span>
+        </td>
+        <td class="tx-td">
+          <span class="side-b side-b--{{ tx.side or 'buyer' }}">
+            {{ (tx.side or 'buyer')|capitalize }}
+          </span>
+        </td>
+        <td class="tx-td tx-td--muted">{{ tx.target_close_date or '—' }}</td>
+        <td class="tx-td tx-td--muted">{{ tx.created_at[:10] if tx.created_at else '—' }}</td>
+        <td class="tx-td tx-td--actions" onclick="event.stopPropagation()">
+          <div class="tx-actions">
+            <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-act">Open</a>
+            <a href="{{ url_for('agent_transaction_edit', tx_id=tx.id) }}" class="tx-act">Edit</a>
+            <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;">
+              <button type="submit" class="tx-act tx-act--del"
+                onclick="return confirm('Delete this transaction? This cannot be undone.')">Del</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="tx-empty">
+    <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;">—</div>
+    <p>No transactions yet — click <strong>+ New Transaction</strong> to get started.</p>
+  </div>
+  {% endif %}
+</div>
+
+</div><!-- /txpage -->
+
+<!-- ══ ADD TRANSACTION MODAL ══════════════════════ -->
+<div id="addTxModal" class="txmod">
+  <div class="txmod-box">
+    <div class="txmod-head">
+      New Transaction
+      <button class="txmod-x" onclick="closeAddTx()">×</button>
+    </div>
+    <form method="post" action="{{ url_for('agent_transactions') }}">
+      <div class="txgrid">
+        <div class="txf txgrid-full">
+          <label>Property Address *</label>
+          <input type="text" name="property_address" required placeholder="123 Main St, City, State" id="txAddr">
+        </div>
+        <div class="txf">
+          <label>Client Name *</label>
+          <input type="text" name="client_name" required placeholder="Jane Doe">
+        </div>
+        <div class="txf">
+          <label>Side</label>
+          <select name="side">
+            <option value="buyer">Buyer</option>
+            <option value="seller">Seller</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+        <div class="txf">
+          <label>Stage</label>
+          <select name="stage">
+            <option value="summary">Summary</option>
+            <option value="showings">Showings</option>
+            <option value="under_contract">Under Contract</option>
+            <option value="earnest_money">Earnest Money</option>
+            <option value="inspection">Inspection</option>
+            <option value="appraisal">Appraisal</option>
+            <option value="loan_commitment">Loan Commitment</option>
+            <option value="final_walkthrough">Final Walkthrough</option>
+            <option value="closing">Closing</option>
+          </select>
+        </div>
+        <div class="txf">
+          <label>Target Close Date <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(optional)</span></label>
+          <input type="date" name="close_date">
+        </div>
       </div>
-      
-      <div class="form-group">
-        <label for="client_name" class="form-label">Client Name</label>
-        <input 
-          id="client_name" 
-          name="client_name" 
-          type="text"
-          required 
-          placeholder="Jane Doe" 
-          class="form-input"
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="side" class="form-label">Side</label>
-        <select id="side" name="side" class="form-select">
-          <option value="buyer">Buyer</option>
-          <option value="seller">Seller</option>
-          <option value="both">Both</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="stage" class="form-label">Stage</label>
-        <select id="stage" name="stage" class="form-select">
-          <option value="summary">Summary</option>
-          <option value="showings">Showings</option>
-          <option value="under_contract">Under Contract</option>
-          <option value="earnest_money">Earnest Money</option>
-          <option value="inspection">Inspection</option>
-          <option value="appraisal">Appraisal</option>
-          <option value="loan_commitment">Loan Commitment</option>
-          <option value="final_walkthrough">Final Walkthrough</option>
-          <option value="closing">Closing</option>
-        </select>
-      </div>
-      
-      <div class="form-group form-group--full">
-        <label for="close_date" class="form-label">Target Close Date <span style="font-weight: normal; font-size: 0.85em; color: rgba(58, 53, 44, 0.6); font-style: italic; text-transform: none;">(Optional - can be added later)</span></label>
-        <input 
-          type="date" 
-          id="close_date" 
-          name="close_date" 
-          class="form-input"
-        />
-      </div>
-      
-      <div class="form-group form-group--full">
-        <button class="form-btn form-btn--primary" type="submit" style="margin-top: 1rem;">
-          Start Transaction
-        </button>
+      <div class="txfoot">
+        <button type="button" class="txbtn txbtn--s" onclick="closeAddTx()">Cancel</button>
+        <button type="submit" class="txbtn txbtn--p">Start Transaction</button>
       </div>
     </form>
   </div>
-
-  <!-- Transactions List -->
-  {% if transactions %}
-    <div class="transactions-section">
-      <h2 class="transactions-section__title">Your Transactions</h2>
-    
-      <div class="transactions-list">
-        {% for tx in transactions %}
-          <div class="transaction-card" onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'" title="Click to open AI Transaction Coordinator">
-            <div class="transaction-card__header">
-              <div class="transaction-card__main">
-                <h3 class="transaction-card__address">{{ tx.property_address }}</h3>
-                <div class="transaction-card__client">
-                  <strong>Client:</strong> {{ tx.client_name }}
-                </div>
-                <div class="transaction-card__badges">
-                  <span class="transaction-badge transaction-badge--stage">
-                    {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
-                  </span>
-                  <span class="transaction-badge transaction-badge--side-{{ tx.side or 'buyer' }}">
-                    {{ (tx.side or 'buyer')|capitalize }}
-                  </span>
-                </div>
-              </div>
-              <div class="transaction-card__actions" onclick="event.stopPropagation();">
-                <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display: inline;">
-                  <button type="submit" class="transaction-action-btn transaction-action-btn--delete" onclick="return confirm('Delete this transaction? This cannot be undone.')">
-                    Delete
-                  </button>
-                </form>
-              </div>
-            </div>
-            
-            <div class="transaction-card__details">
-              <div class="transaction-detail">
-                <span class="transaction-detail__label">Close Date</span>
-                <span class="transaction-detail__value">{{ tx.target_close_date or 'Not set' }}</span>
-              </div>
-              <div class="transaction-detail">
-                <span class="transaction-detail__label">Created</span>
-                <span class="transaction-detail__value">{{ tx.created_at[:10] if tx.created_at else '—' }}</span>
-              </div>
-            </div>
-
-            <div class="transaction-card__cta">
-              Click anywhere on this card to access the full AI Transaction Coordinator
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-state__icon">—</div>
-      <h3 class="empty-state__title">No Transactions Yet</h3>
-      <p class="empty-state__text">Once you add a transaction, you will be able to track stages here.</p>
-    </div>
-  {% endif %}
 </div>
+
+<script>
+function openAddTx() {
+  document.getElementById('addTxModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('txAddr').focus(); }, 80);
+}
+function closeAddTx() {
+  document.getElementById('addTxModal').classList.remove('open');
+}
+document.getElementById('addTxModal').addEventListener('click', function(e){
+  if(e.target === this) closeAddTx();
+});
+
+// Check URL param to auto-open modal
+if(new URLSearchParams(window.location.search).get('add') === '1') openAddTx();
+
+// Client-side stage filtering
+function filterStage(btn, stage) {
+  document.querySelectorAll('.stage-pill').forEach(function(p){ p.classList.remove('stage-pill--on'); });
+  btn.classList.add('stage-pill--on');
+  var rows = document.querySelectorAll('.tx-row');
+  rows.forEach(function(row) {
+    if(stage === 'all') {
+      row.style.display = '';
+    } else {
+      var stgCell = row.querySelector('.stg');
+      var rowStage = stgCell ? stgCell.className.replace(/.*stg--/,'').split(' ')[0] : '';
+      row.style.display = (rowStage === stage) ? '' : 'none';
+    }
+  });
+}
+</script>
 
 {% endblock %}
