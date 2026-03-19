@@ -182,6 +182,17 @@ def init_db() -> None:
     except:
         pass
 
+    # New profile fields: Calendly URL, Google review link, webhook token
+    for _col, _type in [
+        ("calendly_url", "TEXT"),
+        ("google_review_link", "TEXT"),
+        ("webhook_token", "TEXT"),
+    ]:
+        try:
+            cur.execute(f"ALTER TABLE user_profiles ADD COLUMN {_col} {_type}")
+        except:
+            pass
+
     # ------------- CLIENT RELATIONSHIPS -------------
     cur.execute(
         """
@@ -761,13 +772,14 @@ def init_db() -> None:
     )
     
     # Add new columns to existing table (migration)
-    for col in ['birthday', 'home_anniversary', 'address', 'notes', 'tags', 
+    for col in ['birthday', 'home_anniversary', 'address', 'notes', 'tags',
                 'property_address', 'property_value', 'equity_estimate',
-                'auto_birthday', 'auto_anniversary', 'auto_seasonal', 
+                'auto_birthday', 'auto_anniversary', 'auto_seasonal',
                 'auto_equity', 'auto_holidays', 'equity_frequency',
-                'city', 'state', 'zip_code']:
+                'city', 'state', 'zip_code',
+                'lead_source', 'pipeline_stage', 'next_action_date', 'next_action_note']:
         try:
-            if col in ['auto_birthday', 'auto_anniversary', 'auto_seasonal', 
+            if col in ['auto_birthday', 'auto_anniversary', 'auto_seasonal',
                       'auto_equity', 'auto_holidays']:
                 cur.execute(f"ALTER TABLE agent_contacts ADD COLUMN {col} INTEGER DEFAULT 1")
             elif col == 'equity_frequency':
@@ -778,6 +790,45 @@ def init_db() -> None:
                 cur.execute(f"ALTER TABLE agent_contacts ADD COLUMN {col} TEXT")
         except:
             pass
+
+    # --- Drip / follow-up sequence tracking ---
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS crm_drip_sequences (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_user_id INTEGER,
+                contact_id INTEGER,
+                sequence_name TEXT DEFAULT 'new_lead',
+                step_number INTEGER DEFAULT 0,
+                scheduled_date TEXT,
+                sent_at TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (contact_id) REFERENCES agent_contacts(id) ON DELETE CASCADE
+            )
+        """)
+    except:
+        pass
+
+    # --- Post-close review requests ---
+    try:
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS review_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                agent_user_id INTEGER,
+                transaction_id INTEGER,
+                client_email TEXT,
+                client_name TEXT,
+                scheduled_date TEXT,
+                sent_at TEXT,
+                status TEXT DEFAULT 'pending',
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        """)
+    except:
+        pass
 
     # ------------- LENDER BORROWERS -------------
     cur.execute(
@@ -2062,6 +2113,9 @@ def add_agent_contact(
     city: str = "",
     state: str = "",
     zip_code: str = "",
+    lead_source: str = "",
+    next_action_date: str = "",
+    next_action_note: str = "",
 ) -> int:
     conn = get_connection()
     cur = conn.cursor()
@@ -2072,15 +2126,15 @@ def add_agent_contact(
             birthday, home_anniversary, address, notes, tags, property_address,
             property_value, equity_estimate, auto_birthday, auto_anniversary,
             auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-            city, state, zip_code
+            city, state, zip_code, lead_source, next_action_date, next_action_note
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (agent_user_id, name, email, phone, stage, best_contact, last_touch,
          birthday, home_anniversary, address, notes, tags, property_address,
          property_value, equity_estimate, auto_birthday, auto_anniversary,
          auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-         city, state, zip_code),
+         city, state, zip_code, lead_source, next_action_date, next_action_note),
     )
     contact_id = cur.lastrowid
     conn.commit()
@@ -2096,7 +2150,10 @@ def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[di
                birthday, home_anniversary, address, notes, tags, property_address,
                property_value, equity_estimate, auto_birthday, auto_anniversary,
                auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-               city, state, zip_code
+               city, state, zip_code,
+               COALESCE(lead_source, '') as lead_source,
+               COALESCE(next_action_date, '') as next_action_date,
+               COALESCE(next_action_note, '') as next_action_note
         FROM agent_contacts
         WHERE agent_user_id = ?
     """
@@ -3915,6 +3972,8 @@ def create_or_update_user_profile(
     va_rate_30yr: Optional[float] = None,
     fha_rate_30yr: Optional[float] = None,
     conventional_rate_30yr: Optional[float] = None,
+    google_review_link: Optional[str] = None,
+    calendly_url: Optional[str] = None,
 ) -> int:
     """Create or update user profile. Returns profile id."""
     conn = get_connection()
@@ -3990,6 +4049,8 @@ def create_or_update_user_profile(
                 va_rate_30yr           = ?,
                 fha_rate_30yr          = ?,
                 conventional_rate_30yr = ?,
+                google_review_link     = ?,
+                calendly_url           = ?,
                 updated_at             = CURRENT_TIMESTAMP
             WHERE user_id = ?
         """
@@ -4026,6 +4087,8 @@ def create_or_update_user_profile(
             _keep(va_rate_30yr,           "va_rate_30yr"),
             _keep(fha_rate_30yr,          "fha_rate_30yr"),
             _keep(conventional_rate_30yr, "conventional_rate_30yr"),
+            _keep(google_review_link,     "google_review_link"),
+            _keep(calendly_url,           "calendly_url"),
             user_id,
         ))
         profile_id = existing[0]

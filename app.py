@@ -1566,6 +1566,172 @@ def update_home_values_daily():
         print(f"Error in daily value update: {e}")
 
 
+def schedule_new_lead_drip(agent_user_id: int, contact_id: int, contact_email: str):
+    """
+    Schedule a 4-step follow-up drip when a new lead enters the CRM.
+    Steps: Day 1, Day 3, Day 7, Day 14.
+    """
+    if not contact_email:
+        return
+    from database import get_connection
+    from datetime import timedelta
+    today = datetime.now().date()
+    steps = [
+        (1,  "Following up on your home search"),
+        (3,  "Just checking in"),
+        (7,  "Still thinking about buying or selling?"),
+        (14, "Touching base"),
+    ]
+    conn = get_connection()
+    cur = conn.cursor()
+    for day_offset, subject in steps:
+        scheduled = (today + timedelta(days=day_offset)).isoformat()
+        cur.execute("""
+            INSERT INTO crm_drip_sequences
+                (agent_user_id, contact_id, sequence_name, step_number, scheduled_date, status)
+            VALUES (?, ?, 'new_lead', ?, ?, 'pending')
+        """, (agent_user_id, contact_id, day_offset, scheduled))
+    conn.commit()
+    conn.close()
+
+
+def send_drip_emails():
+    """Send any pending drip sequence emails that are due today."""
+    from database import get_connection
+    from datetime import date
+    today = date.today().isoformat()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT ds.id, ds.agent_user_id, ds.contact_id, ds.step_number, ds.scheduled_date,
+               ac.name as contact_name, ac.email as contact_email,
+               u.email as agent_email,
+               up.full_name as agent_name, up.phone as agent_phone
+        FROM crm_drip_sequences ds
+        JOIN agent_contacts ac ON ac.id = ds.contact_id
+        JOIN users u ON u.id = ds.agent_user_id
+        LEFT JOIN user_profiles up ON up.user_id = ds.agent_user_id
+        WHERE ds.status = 'pending'
+          AND ds.scheduled_date <= ?
+          AND ac.email IS NOT NULL AND ac.email != ''
+    """, (today,))
+    rows = cur.fetchall()
+    conn.close()
+    for row in rows:
+        row = dict(row)
+        step = row["step_number"]
+        contact_name = (row.get("contact_name") or "there").split()[0]
+        agent_name = row.get("agent_name") or "Your agent"
+        agent_email = row.get("agent_email") or ""
+        agent_phone = row.get("agent_phone") or ""
+        # Subject lines per step
+        subjects = {
+            1:  f"Great to connect with you, {contact_name}",
+            3:  f"Checking in, {contact_name}",
+            7:  f"Still here to help, {contact_name}",
+            14: f"Touching base — {agent_name}",
+        }
+        bodies = {
+            1: (f"Hi {contact_name},\n\nJust wanted to reach out and say it was great to connect with you. "
+                f"I am here whenever you are ready to talk about buying or selling. "
+                f"Feel free to reach me at {agent_phone or agent_email} anytime.\n\nWarm regards,\n{agent_name}"),
+            3: (f"Hi {contact_name},\n\nJust checking in to see if you have any questions or if there is "
+                f"anything I can help you with. No pressure at all — I just want to make sure you have "
+                f"everything you need.\n\nWarm regards,\n{agent_name}"),
+            7: (f"Hi {contact_name},\n\nI know life gets busy, so I just wanted to pop back in and let you "
+                f"know I am still here for you whenever the timing is right. Whether it is a question about "
+                f"the market or you are ready to take the next step — I am just a call or text away.\n\n"
+                f"Warm regards,\n{agent_name}\n{agent_phone}"),
+            14: (f"Hi {contact_name},\n\nI wanted to touch base one more time. Real estate decisions are "
+                 f"big ones, and I never want to rush you. If you are still exploring your options or have "
+                 f"questions, I am happy to chat — zero pressure.\n\n"
+                 f"Warm regards,\n{agent_name}\n{agent_phone or agent_email}"),
+        }
+        subject = subjects.get(step, f"Following up — {agent_name}")
+        body = bodies.get(step, f"Hi {contact_name},\n\nJust wanted to check in.\n\n{agent_name}")
+        try:
+            send_reminder_email(row["contact_email"], subject, body)
+            # Mark as sent
+            conn2 = get_connection()
+            cur2 = conn2.cursor()
+            cur2.execute("""
+                UPDATE crm_drip_sequences
+                SET status = 'sent', sent_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (row["id"],))
+            conn2.commit()
+            conn2.close()
+            print(f"[DRIP] Sent step {step} to {row['contact_email']}")
+        except Exception as e:
+            print(f"[DRIP] Error sending to {row.get('contact_email')}: {e}")
+
+
+def schedule_review_request(agent_user_id: int, transaction_id: int,
+                             client_name: str, client_email: str):
+    """Schedule a Google review request 3 days after closing."""
+    if not client_email:
+        return
+    from database import get_connection
+    from datetime import timedelta
+    send_date = (datetime.now().date() + timedelta(days=3)).isoformat()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO review_requests
+            (agent_user_id, transaction_id, client_email, client_name, scheduled_date, status)
+        VALUES (?, ?, ?, ?, ?, 'pending')
+    """, (agent_user_id, transaction_id, client_email, client_name, send_date))
+    conn.commit()
+    conn.close()
+
+
+def send_review_requests():
+    """Send any pending review request emails that are due today."""
+    from database import get_connection
+    from datetime import date
+    today = date.today().isoformat()
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT rr.id, rr.agent_user_id, rr.client_email, rr.client_name,
+               up.full_name as agent_name, up.phone as agent_phone,
+               up.google_review_link
+        FROM review_requests rr
+        LEFT JOIN user_profiles up ON up.user_id = rr.agent_user_id
+        WHERE rr.status = 'pending' AND rr.scheduled_date <= ?
+    """, (today,))
+    rows = cur.fetchall()
+    conn.close()
+    for row in rows:
+        row = dict(row)
+        client_first = (row.get("client_name") or "there").split()[0]
+        agent_name = row.get("agent_name") or "your agent"
+        review_link = row.get("google_review_link") or ""
+        review_cta = (f"\n\nIf you have a moment, I would be so grateful if you left me a review:\n{review_link}\n"
+                      if review_link else "\n\nIf you have a moment, a review or a referral means the world to me.\n")
+        subject = f"It was a pleasure working with you, {client_first}!"
+        body = (f"Hi {client_first},\n\n"
+                f"Congratulations again on your closing! It was truly a pleasure working with you, "
+                f"and I hope you are settling in and loving your new home.\n"
+                f"{review_cta}"
+                f"And please remember — I am always here for you, your family, and anyone you know "
+                f"who is thinking about buying or selling. I love referrals!\n\n"
+                f"Warmly,\n{agent_name}")
+        try:
+            send_reminder_email(row["client_email"], subject, body)
+            conn2 = get_connection()
+            cur2 = conn2.cursor()
+            cur2.execute("""
+                UPDATE review_requests SET status = 'sent', sent_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            """, (row["id"],))
+            conn2.commit()
+            conn2.close()
+            print(f"[REVIEW] Sent review request to {row['client_email']}")
+        except Exception as e:
+            print(f"[REVIEW] Error sending to {row.get('client_email')}: {e}")
+
+
 def start_scheduler():
     """Start background scheduler safely without blocking app startup."""
     try:
@@ -1577,6 +1743,9 @@ def start_scheduler():
         scheduler.add_job(send_seasonal_checklists, "cron", day=1, hour=10, minute=0)  # 1st of month, 10 AM
         scheduler.add_job(send_equity_updates, "cron", day=1, hour=10, minute=5)  # 1st of month, 10:05 AM
         scheduler.add_job(send_holiday_greetings, "cron", hour=9, minute=10)  # 9:10 AM daily
+        # Drip sequences and review requests
+        scheduler.add_job(send_drip_emails, "cron", hour=9, minute=20)  # 9:20 AM daily
+        scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.start()
@@ -4963,14 +5132,28 @@ def agent_crm():
                             return redirect(url_for("agent_crm"))
                     prop_val = float(property_value) if property_value else None
                     equity_val = float(equity_estimate) if equity_estimate else None
+                    lead_source = request.form.get("lead_source", "").strip()
+                    next_action_date = request.form.get("next_action_date", "").strip()
+                    next_action_note = request.form.get("next_action_note", "").strip()
                     print(f"Calling add_agent_contact with user_id={user['id']}, name='{name}'")
                     contact_id = add_agent_contact(
                         user["id"], name, email, phone, stage, email or phone, "",
                         birthday, home_anniversary, address, notes, tags,
-                        property_address, prop_val, equity_val
+                        property_address, prop_val, equity_val,
+                        lead_source=lead_source,
+                        next_action_date=next_action_date,
+                        next_action_note=next_action_note
                     )
                     print(f"SUCCESS: Contact added with ID {contact_id}")
-                    
+
+                    # Schedule new-lead follow-up drip if stage is 'new'
+                    if stage == 'new' and email:
+                        try:
+                            schedule_new_lead_drip(user["id"], contact_id, email)
+                            print(f"[DRIP] Scheduled drip sequence for contact {contact_id}")
+                        except Exception as drip_err:
+                            print(f"[DRIP] Could not schedule drip: {drip_err}")
+
                     # If email provided, try to link to existing homeowner account
                     if email:
                         from database import get_user_by_email, create_client_relationship, get_or_create_referral_code
@@ -5001,13 +5184,14 @@ def agent_crm():
             contact_id = request.form.get("contact_id")
             if contact_id:
                 updates = {}
-                for field in ['name', 'email', 'phone', 'stage', 'birthday', 
+                for field in ['name', 'email', 'phone', 'stage', 'birthday',
                             'home_anniversary', 'address', 'notes', 'tags',
                             'property_address', 'property_value', 'equity_estimate',
                             'city', 'state', 'zip_code',
                             'auto_birthday', 'auto_anniversary',
                             'auto_seasonal', 'auto_equity', 'auto_holidays',
-                            'equity_frequency']:
+                            'equity_frequency',
+                            'lead_source', 'next_action_date', 'next_action_note']:
                     val = request.form.get(field, "").strip()
                     if val or field in ['auto_birthday', 'auto_anniversary', 
                                        'auto_seasonal', 'auto_equity', 'auto_holidays']:
@@ -5268,7 +5452,9 @@ def agent_crm():
                     'home_anniversary': '', 'address': '', 'notes': '', 'tags': '',
                     'property_address': '', 'property_value': None, 'equity_estimate': None,
                     'auto_birthday': 1, 'auto_anniversary': 1, 'auto_seasonal': 1,
-                    'auto_equity': 1, 'auto_holidays': 1, 'equity_frequency': 'monthly'
+                    'auto_equity': 1, 'auto_holidays': 1, 'equity_frequency': 'monthly',
+                    'lead_source': '', 'pipeline_stage': '', 'next_action_date': '',
+                    'next_action_note': '', 'city': '', 'state': '', 'zip_code': ''
                 }
                 for field, default in expected_fields.items():
                     if field not in contact_dict:
@@ -5392,7 +5578,11 @@ def agent_crm():
         if sort_by == "name":
             contacts_list_dicts.sort(key=lambda x: (x.get('name') or '').lower() if isinstance(x, dict) else '')
         elif sort_by == "stage":
-            stage_order = {'new': 0, 'nurture': 1, 'active': 2, 'past': 3, 'sphere': 4}
+            stage_order = {
+                'new': 0, 'attempted': 1, 'contacted': 2, 'appt_set': 3,
+                'appt_done': 4, 'active': 5, 'under_contract': 6,
+                'closed': 7, 'past': 8, 'nurture': 9, 'sphere': 10, 'hold': 11
+            }
             contacts_list_dicts.sort(key=lambda x: stage_order.get(x.get('stage', 'new') if isinstance(x, dict) else 'new', 5))
         elif sort_by == "last_touch":
             contacts_list_dicts.sort(key=lambda x: (x.get('last_touch') or '') if isinstance(x, dict) else '', reverse=True)
@@ -6168,6 +6358,15 @@ def agent_transaction_edit(tx_id):
         
         if update_transaction(tx_id, user["id"], **update_data):
             flash("Transaction updated successfully!", "success")
+            # Schedule review request if stage was just set to closed
+            if db_stage == 'closed':
+                try:
+                    c_email = update_data.get("client_email") or transaction.get("client_email") or ""
+                    c_name = update_data.get("client_name") or transaction.get("client_name") or ""
+                    if c_email:
+                        schedule_review_request(user["id"], tx_id, c_name, c_email)
+                except Exception:
+                    pass
             return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
         else:
             flash("Error updating transaction.", "error")
@@ -6220,10 +6419,18 @@ def agent_transaction_change_stage(tx_id):
         if update_transaction_stage(tx_id, new_stage, user["id"], auto_changed=False):
             # Store sub-stage in notes if needed (for Summary vs Showings distinction)
             if sub_stage and new_stage == 'pre_contract':
-                # We could store this in a separate field or notes, but for now just update stage
-                # The timeline display logic will handle showing Summary vs Showings correctly
                 pass
             flash("Transaction stage updated successfully.", "success")
+            # When a transaction closes, schedule a review request
+            if new_stage == 'closed':
+                try:
+                    client_email = transaction.get("client_email") or ""
+                    client_name = transaction.get("client_name") or ""
+                    if client_email:
+                        schedule_review_request(user["id"], tx_id, client_name, client_email)
+                        print(f"[REVIEW] Scheduled review request for {client_email}")
+                except Exception as rev_err:
+                    print(f"[REVIEW] Could not schedule review request: {rev_err}")
         else:
             flash("Could not update transaction stage.", "error")
     except Exception as e:
@@ -8099,7 +8306,10 @@ def agent_booking():
     user = get_user_by_id(session["user_id"])
     if not user:
         return redirect(url_for("login"))
-    return render_template("agent/booking.html", user=user)
+    from database import get_user_profile
+    profile = get_user_profile(user["id"])
+    profile_dict = dict(profile) if profile else {}
+    return render_template("agent/booking.html", user=user, profile=profile_dict)
 
 
 # -------------------------------------------------
@@ -8527,8 +8737,22 @@ def agent_settings_profile():
                 va_rate_30yr=float(request.form.get("va_rate_30yr")) if request.form.get("va_rate_30yr") else None,
                 fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
                 conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
+                google_review_link=request.form.get("google_review_link", "").strip() or None,
             )
-            
+
+            # Auto-generate webhook token if agent doesn't have one yet
+            from database import get_connection as _gwc, get_user_profile as _gwp
+            _existing_profile = _gwp(user["id"])
+            if _existing_profile and not _existing_profile.get("webhook_token"):
+                import secrets
+                _token = secrets.token_urlsafe(16)
+                _conn = _gwc()
+                _cur = _conn.cursor()
+                _cur.execute("UPDATE user_profiles SET webhook_token = ? WHERE user_id = ?",
+                             (_token, user["id"]))
+                _conn.commit()
+                _conn.close()
+
             # Success message with specific photo/logo confirmation
             success_parts = ["Profile updated successfully!"]
             if professional_photo:
@@ -10713,6 +10937,106 @@ def agent_concierge_conversation_detail(conversation_id):
         conversation=conversation,
         messages=messages
     )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LEAD INTAKE WEBHOOK
+# Kayleigh can POST leads here from her website contact form or Zapier.
+# URL: POST /api/lead-intake/<agent_token>
+# Params (JSON or form): name, email, phone, source, message
+# ─────────────────────────────────────────────────────────────────────────────
+@app.route("/api/lead-intake/<agent_token>", methods=["POST"])
+def lead_intake_webhook(agent_token):
+    """
+    External lead intake endpoint. Accepts leads from website forms, Zapier,
+    or any HTTP POST source and automatically creates a CRM contact.
+    """
+    from database import get_connection, add_agent_contact
+
+    # Resolve agent by referral token or a dedicated webhook token stored in user_profiles
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT u.id, u.email, up.full_name
+        FROM users u
+        JOIN user_profiles up ON up.user_id = u.id
+        WHERE u.role = 'agent'
+          AND (up.referral_code = ? OR up.webhook_token = ?)
+        LIMIT 1
+    """, (agent_token, agent_token))
+    row = cur.fetchone()
+    conn.close()
+
+    if not row:
+        return {"success": False, "error": "Invalid token"}, 401
+
+    agent_id = row["id"]
+
+    # Parse incoming data (JSON or form)
+    if request.is_json:
+        data = request.get_json(force=True) or {}
+    else:
+        data = request.form.to_dict()
+
+    name = (data.get("name") or data.get("full_name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or data.get("phone_number") or "").strip()
+    source = (data.get("source") or data.get("lead_source") or "website").strip()
+    message = (data.get("message") or data.get("notes") or "").strip()
+
+    if not name and not email:
+        return {"success": False, "error": "Name or email is required"}, 400
+
+    # Prevent duplicates
+    from database import list_agent_contacts
+    existing = list_agent_contacts(agent_id)
+    for ex in existing:
+        if email and ex.get("email") and ex["email"].strip().lower() == email:
+            # Update lead source and note if contact already exists
+            from database import update_agent_contact
+            ex_id = ex.get("id")
+            if ex_id:
+                update_agent_contact(ex_id, agent_id,
+                                     notes=((ex.get("notes") or "") + f"\n[Web form] {message}").strip())
+            return {"success": True, "status": "existing", "contact_id": ex_id}, 200
+
+    notes = f"[From: {source}] {message}".strip(" []") if message else f"Lead from {source}"
+    try:
+        contact_id = add_agent_contact(
+            agent_user_id=agent_id,
+            name=name or email,
+            email=email,
+            phone=phone,
+            stage="new",
+            notes=notes,
+            lead_source=source,
+        )
+        # Schedule drip follow-up
+        if email:
+            try:
+                schedule_new_lead_drip(agent_id, contact_id, email)
+            except Exception:
+                pass
+        # Notify agent by email
+        try:
+            from database import get_connection as _gc
+            _conn = _gc()
+            _cur = _conn.cursor()
+            _cur.execute("SELECT email FROM users WHERE id = ?", (agent_id,))
+            _agent = _cur.fetchone()
+            _conn.close()
+            if _agent:
+                send_reminder_email(
+                    _agent["email"],
+                    f"New lead: {name or email}",
+                    f"A new lead just came in from your website.\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nSource: {source}\nMessage: {message}\n\nLog in to your CRM to follow up."
+                )
+        except Exception:
+            pass
+        return {"success": True, "status": "created", "contact_id": contact_id}, 201
+    except Exception as e:
+        print(f"[WEBHOOK] Error creating contact: {e}")
+        return {"success": False, "error": "Could not create contact"}, 500
 
 
 # ---------------- DEVELOPMENT SERVER ----------------

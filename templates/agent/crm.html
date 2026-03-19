@@ -461,7 +461,7 @@
 <!-- ── STAGE PILLS ────────────────────────────── -->
 <div class="pills-bar">
   <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill {% if not stage_filter %}stg-pill--on{% endif %}">All</a>
-  {% for slug,lbl in [('new','New'),('nurture','Nurture'),('active','Active'),('past','Past Clients'),('sphere','Sphere'),('closed','Closed'),('hold','Hold')] %}
+  {% for slug,lbl in [('new','New Lead'),('attempted','Attempted'),('contacted','Contacted'),('appt_set','Appt Set'),('appt_done','Appt Done'),('active','Active'),('under_contract','Under Contract'),('closed','Closed'),('past','Past Client'),('nurture','Nurture'),('sphere','Sphere'),('hold','Hold')] %}
     {% if stage_filter==slug %}
     <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill stg-pill--on">{{ lbl }}&nbsp;<span class="stg-pill-x" title="Clear filter">×</span></a>
     {% else %}
@@ -621,12 +621,17 @@
           <label>Stage</label>
           <select name="stage">
             <option value="new">New Lead</option>
-            <option value="nurture">Nurture</option>
-            <option value="active">Active</option>
-            <option value="past">Past Client</option>
-            <option value="sphere">Sphere</option>
+            <option value="attempted">Attempted Contact</option>
+            <option value="contacted">Contacted</option>
+            <option value="appt_set">Appointment Set</option>
+            <option value="appt_done">Appointment Completed</option>
+            <option value="active">Active Buyer/Seller</option>
+            <option value="under_contract">Under Contract</option>
             <option value="closed">Closed</option>
-            <option value="hold">Hold</option>
+            <option value="past">Past Client</option>
+            <option value="nurture">Nurture</option>
+            <option value="sphere">Sphere of Influence</option>
+            <option value="hold">On Hold</option>
           </select>
         </div>
         <div class="mf">
@@ -636,6 +641,28 @@
         <div class="mf">
           <label>Phone</label>
           <input type="tel" name="phone" placeholder="555-555-5555">
+        </div>
+        <div class="mf">
+          <label>Lead Source</label>
+          <select name="lead_source">
+            <option value="">Select source…</option>
+            <option value="website">Website Contact Form</option>
+            <option value="website_booking">Website Booking Page</option>
+            <option value="zillow">Zillow / Realtor.com</option>
+            <option value="referral_client">Referral — Client</option>
+            <option value="referral_agent">Referral — Agent</option>
+            <option value="social_instagram">Social Media — Instagram</option>
+            <option value="social_facebook">Social Media — Facebook</option>
+            <option value="social_other">Social Media — Other</option>
+            <option value="open_house">Open House</option>
+            <option value="sphere">Cold Outreach / Sphere</option>
+            <option value="sign_call">Sign Call</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="mf">
+          <label>Next Action Date</label>
+          <input type="date" name="next_action_date">
         </div>
       </div>
       <div class="mfoot">
@@ -663,14 +690,38 @@
         <div class="mf"><label>Stage</label>
           <select name="stage" id="e_stage">
             <option value="new">New Lead</option>
-            <option value="nurture">Nurture</option>
+            <option value="attempted">Attempted Contact</option>
+            <option value="contacted">Contacted</option>
+            <option value="appt_set">Appointment Set</option>
+            <option value="appt_done">Appointment Completed</option>
             <option value="active">Active Buyer/Seller</option>
-            <option value="past">Past Client</option>
-            <option value="sphere">Sphere</option>
+            <option value="under_contract">Under Contract</option>
             <option value="closed">Closed</option>
-            <option value="hold">Hold</option>
+            <option value="past">Past Client</option>
+            <option value="nurture">Nurture</option>
+            <option value="sphere">Sphere of Influence</option>
+            <option value="hold">On Hold</option>
           </select>
         </div>
+        <div class="mf"><label>Lead Source</label>
+          <select name="lead_source" id="e_source">
+            <option value="">Select source…</option>
+            <option value="website">Website Contact Form</option>
+            <option value="website_booking">Website Booking Page</option>
+            <option value="zillow">Zillow / Realtor.com</option>
+            <option value="referral_client">Referral — Client</option>
+            <option value="referral_agent">Referral — Agent</option>
+            <option value="social_instagram">Social Media — Instagram</option>
+            <option value="social_facebook">Social Media — Facebook</option>
+            <option value="social_other">Social Media — Other</option>
+            <option value="open_house">Open House</option>
+            <option value="sphere">Cold Outreach / Sphere</option>
+            <option value="sign_call">Sign Call</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="mf"><label>Next Action Date</label><input type="date" name="next_action_date" id="e_next_action"></div>
+        <div class="mf mgrid-full"><label>Next Action Note</label><input type="text" name="next_action_note" id="e_next_note" placeholder="e.g., Follow up on listing appointment"></div>
         <div class="mf"><label>Birthday (MM/DD)</label><input type="text" name="birthday" id="e_bday" placeholder="12/25"></div>
         <div class="mf"><label>Home Anniversary</label><input type="text" name="home_anniversary" id="e_anniv" placeholder="01/15/2020"></div>
         <div class="mf mgrid-full"><label>Street Address</label><input type="text" name="address" id="e_addr" placeholder="123 Main St"></div>
@@ -826,6 +877,9 @@ function openEdit(id){
   document.getElementById('e_email').value=c.email||'';
   document.getElementById('e_phone').value=c.phone||'';
   document.getElementById('e_stage').value=c.stage||'new';
+  document.getElementById('e_source').value=c.lead_source||'';
+  document.getElementById('e_next_action').value=c.next_action_date||'';
+  document.getElementById('e_next_note').value=c.next_action_note||'';
   document.getElementById('e_bday').value=c.birthday||'';
   document.getElementById('e_anniv').value=c.home_anniversary||'';
   document.getElementById('e_addr').value=c.address||'';
@@ -888,9 +942,9 @@ function closeHist(){document.getElementById('histModal').classList.remove('open
 
 function doExport(){
   if(!CD.length){alert('No contacts to export');return;}
-  var csv='Name,Email,Phone,Stage,Birthday,Anniversary,Address,City,State,ZIP,Property,Equity,Tags,Notes\n';
+  var csv='Name,Email,Phone,Stage,Lead Source,Next Action Date,Birthday,Anniversary,Address,City,State,ZIP,Property,Equity,Tags,Notes\n';
   CD.forEach(function(c){
-    csv+=[c.name,c.email,c.phone,c.stage,c.birthday,c.home_anniversary,c.address,c.city,c.state,c.zip_code,c.property_address,c.equity_estimate||'',c.tags,c.notes]
+    csv+=[c.name,c.email,c.phone,c.stage,c.lead_source||'',c.next_action_date||'',c.birthday,c.home_anniversary,c.address,c.city,c.state,c.zip_code,c.property_address,c.equity_estimate||'',c.tags,c.notes]
       .map(function(v){return'"'+(v||'').toString().replace(/"/g,'""')+'"';})
       .join(',') +'\n';
   });

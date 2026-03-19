@@ -193,91 +193,74 @@
 
 <div class="booking-container">
   <div class="booking-hero">
-    <h1>📅 Booking &amp; Calendar</h1>
+    <h1>Booking &amp; Calendar</h1>
     <p>Let your clients self-schedule at a time that works for everyone.</p>
   </div>
 
-  <!-- Calendly Integration Section -->
+  {% if profile and profile.schedule_url %}
+  <!-- ── LIVE CALENDLY EMBED ───────────────────────────── -->
   <div class="booking-section">
-    <h2>Getting Started with Calendly</h2>
+    <h2>Your Live Booking Calendar</h2>
+    <p style="color:var(--warm-gray);font-size:.9rem;margin-bottom:1rem;">Clients can book directly from this page. Your calendar updates in real time based on your availability in Calendly.</p>
+    <div class="calendly-inline-widget"
+         data-url="{{ profile.schedule_url }}?hide_gdpr_banner=1&primary_color=6B6A45"
+         style="min-width:320px;height:660px;border-radius:12px;overflow:hidden;">
+    </div>
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    <div style="margin-top:1rem;padding:.75rem 1rem;background:rgba(107,106,69,.06);border-radius:8px;font-size:.82rem;color:var(--warm-gray);">
+      Your booking URL: <a href="{{ profile.schedule_url }}" target="_blank" style="color:var(--olive-green);word-break:break-all;">{{ profile.schedule_url }}</a>
+      &nbsp;&middot;&nbsp;
+      <a href="{{ url_for('agent_settings_profile') }}" style="color:var(--olive-green);">Change in Settings</a>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ── SETUP INSTRUCTIONS ────────────────────────────── -->
+  <div class="booking-section">
+    <h2>Connect Your Calendar in One Step</h2>
 
     <div class="info-box">
-      <h4>What is Calendly?</h4>
-      <p>Calendly is the leading scheduling platform that eliminates the back-and-forth of finding a meeting time. Share your calendar link and let clients book directly into your availability.</p>
+      <h4>You are one minute away from a fully live booking page.</h4>
+      <p>Add your Calendly link (or any scheduling link like Acuity, MS Bookings, or Google Booking) in your Settings. Once saved, a live interactive calendar appears right here for clients to book from.</p>
     </div>
 
-    <h3 style="color: var(--charcoal-brown); font-size: 1.2rem; margin-top: 2rem; margin-bottom: 1rem;">Setup in 3 Steps</h3>
+    <div style="text-align:center;margin:1.5rem 0;">
+      <a href="{{ url_for('agent_settings_profile') }}" class="btn-primary">Go to Settings to Add Your Link</a>
+    </div>
+
+    <h3 style="color:var(--charcoal-brown);font-size:1rem;margin-top:1.5rem;margin-bottom:1rem;">Not on Calendly yet? Here is how to get started:</h3>
 
     <ol class="setup-steps">
       <li>
         <div class="step-number">1</div>
         <div class="step-content">
-          <h3>Create a Calendly Account</h3>
-          <p>Visit <a href="https://calendly.com" target="_blank" style="color: #b8973a; text-decoration: none;">calendly.com</a> and create a free account. You can sign up with your email, Google, or Outlook account.</p>
+          <h3>Create a Free Calendly Account</h3>
+          <p>Go to <a href="https://calendly.com" target="_blank" style="color:#b8973a;">calendly.com</a> and sign up with your Google or Outlook account. Takes about 2 minutes.</p>
         </div>
       </li>
       <li>
         <div class="step-number">2</div>
         <div class="step-content">
-          <h3>Configure Your Availability</h3>
-          <p>Set your working hours, timezone, and meeting types. Create different meeting types for property showings, consultations, and follow-ups. Connect your calendar to prevent double-bookings.</p>
+          <h3>Connect Your Calendar and Set Your Hours</h3>
+          <p>Connect Google or Outlook so Calendly reads your real availability. Set the days and times you want to accept bookings. Create meeting types like "Buyer Consultation" or "Listing Appointment."</p>
         </div>
       </li>
       <li>
         <div class="step-number">3</div>
         <div class="step-content">
-          <h3>Share Your Link</h3>
-          <p>Get your unique Calendly link and share it via email, text, your website, or social media. Clients will see your availability and book directly.</p>
+          <h3>Paste Your Link into Settings</h3>
+          <p>Copy your Calendly link (it looks like calendly.com/yourname) and paste it into the Schedule URL field in your <a href="{{ url_for('agent_settings_profile') }}" style="color:#b8973a;">Profile Settings</a>. Save, and your calendar goes live here instantly.</p>
         </div>
       </li>
     </ol>
   </div>
 
-  <!-- Embed Code Section -->
-  <div class="booking-section">
-    <h2>Embed on Your Website</h2>
-
-    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 1.5rem;">Once you have your Calendly account set up, you can embed your calendar directly into your agent profile page or website using this code:</p>
-
-    <div class="embed-example">
-      <code>&lt;div class="calendly-inline-widget" data-url="https://calendly.com/your-username" style="min-width:320px;height:630px;"&gt;&lt;/div&gt;<br/>&lt;script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async&gt;&lt;/script&gt;</code>
-    </div>
-
-    <div class="info-box" style="margin-top: 1.5rem;">
-      <h4>How to customize:</h4>
-      <p>Replace "your-username" with your actual Calendly username. You can adjust the height and width to fit your page layout. For more customization options, check the Calendly documentation.</p>
-    </div>
+  <div class="info-box" style="background:rgba(107,106,69,.05);border-left-color:var(--olive-green);margin-top:.5rem;">
+    <h4>Pro tip: Add your booking link everywhere</h4>
+    <p>Once your Calendly is live, copy the link and add it to your email signature, your website contact page, your text templates, and your social media bio. Every time someone clicks it, they land on a page that does the scheduling for you automatically — no back and forth.</p>
   </div>
+  {% endif %}
 
-  <!-- Widget Preview Section -->
-  <div class="booking-section">
-    <h2>Live Calendar Preview</h2>
-
-    <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 1.5rem;">Once you've set up Calendly and added your username below, your calendar will display here:</p>
-
-    <form method="POST" style="margin-bottom: 1.5rem;">
-      <div style="display: flex; gap: 1rem; align-items: flex-end;">
-        <div style="flex: 1;">
-          <label for="calendly_username" style="display: block; color: var(--charcoal-brown); font-weight: 600; margin-bottom: 0.5rem;">Your Calendly Username</label>
-          <input type="text" id="calendly_username" name="calendly_username"
-                 placeholder="e.g., your-name"
-                 style="width: 100%; padding: 0.75rem 1rem; border: var(--border-light); border-radius: var(--border-radius); font-size: 1rem;">
-          <small style="color: var(--charcoal-brown); opacity: 0.7;">Found in your Calendly URL: calendly.com/your-username</small>
-        </div>
-        <button type="submit" class="btn-primary" style="margin-top: 0;">Save & Embed</button>
-      </div>
-    </form>
-
-    <div class="widget-preview">
-      <p>Your Calendly widget will appear here after setup</p>
-    </div>
-  </div>
-
-  <!-- Coming Soon Section -->
-  <div class="coming-soon">
-    <h3>Advanced Scheduling Coming Soon</h3>
-    <p>We're working on direct integration with Calendly, Google Calendar, and Outlook to make scheduling even easier. Team scheduling, automatic reminders, and more features launching soon!</p>
-  </div>
 </div>
 
 {% endblock %}

@@ -395,7 +395,27 @@
       <div class="form-group">
         <label>Schedule/Calendar URL</label>
         <input type="url" name="schedule_url" value="{{ profile.schedule_url if profile and profile.schedule_url else '' }}" placeholder="https://calendly.com/yourname or https://yourcalendar.com">
-        <small>Link to your scheduling system (Calendly, Acuity, etc.)</small>
+        <small>Link to your scheduling system (Calendly, Acuity, etc.) — this also powers your Booking page embed.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Google Review Link</label>
+        <input type="url" name="google_review_link" value="{{ profile.google_review_link if profile and profile.google_review_link else '' }}" placeholder="https://g.page/r/your-review-link">
+        <small>Your Google Business review link. When you close a transaction, a review request email is automatically sent to your client 3 days later with this link.</small>
+      </div>
+
+      <div class="form-group">
+        <label>Website Lead Intake Webhook</label>
+        {% set wt = profile.webhook_token if profile and profile.webhook_token else '' %}
+        {% if wt %}
+        <div style="background:#F6F2E8;border:1px solid rgba(107,106,69,.2);border-radius:8px;padding:.625rem .875rem;font-family:monospace;font-size:.82rem;word-break:break-all;margin-bottom:.5rem;">
+          POST https://itsyourlifeyourhome.com/api/lead-intake/{{ wt }}
+        </div>
+        <small>Paste this URL into your website contact form or Zapier "Webhooks by Zapier" action. Leads go straight into your CRM and a follow-up sequence starts automatically.</small>
+        {% else %}
+        <input type="text" name="webhook_token" value="" placeholder="Save your profile to generate your webhook token">
+        <small>Save your profile and your personal lead intake webhook URL will appear here.</small>
+        {% endif %}
       </div>
     </div>
 
