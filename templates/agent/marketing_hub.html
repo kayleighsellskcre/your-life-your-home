@@ -5,28 +5,38 @@
   .marketing-hub-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .marketing-hub-container {
+      padding: 1.25rem 2rem;
+    }
   }
 
   .hub-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid rgba(200, 180, 151, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
   }
 
   .hub-header h1 {
     font-family: var(--font-heading);
-    font-size: 2.5rem;
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
-    margin: 0 0 0.5rem 0;
+    margin: 0;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
 
   .hub-header .subtitle {
     color: rgba(58, 53, 44, 0.7);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
     margin: 0;
     font-weight: 400;
   }
@@ -35,8 +45,8 @@
     background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
     border: 2px solid rgba(107, 106, 69, 0.15);
     border-radius: 16px;
-    padding: 1.5rem 2rem;
-    margin-bottom: 3rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -264,7 +274,7 @@
   <!-- Header -->
   <div class="hub-header">
     <h1>Marketing Hub</h1>
-    <p class="subtitle">Create luxury, print-ready marketing assets in seconds</p>
+    <p class="subtitle">Beautiful, print-ready marketing assets created in seconds.</p>
   </div>
 
   <!-- Property Context -->

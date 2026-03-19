@@ -14,37 +14,28 @@
   
   /* Header */
   .comms-header {
-    padding: 1.5rem 1rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border-radius: var(--border-radius-xl);
-    margin-bottom: 2rem;
-    text-align: center;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
-  
-  .comms-tagline {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--olive-green);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  
+
   .comms-header h1 {
     font-family: var(--font-heading);
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
+    margin: 0;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
-  
+
   .comms-header p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--warm-gray);
-    line-height: 1.6;
-    max-width: 700px;
-    margin: 0 auto;
+    margin: 0;
   }
   
   /* Cards */
@@ -52,17 +43,17 @@
     background: var(--soft-white);
     border: 1px solid rgba(200, 180, 151, 0.2);
     border-radius: var(--border-radius-xl);
-    padding: 2rem;
-    margin-bottom: 2rem;
+    padding: 1.25rem 1rem;
+    margin-bottom: 1rem;
     box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .comms-card h2 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     color: var(--charcoal-brown);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
@@ -312,56 +303,47 @@
      ============================================ */
   @media (min-width: 768px) {
     .comms-container {
-      padding: 2rem;
+      padding: 1.25rem 2rem;
     }
-    
+
     .comms-header {
-      padding: 2.5rem 2rem;
-      text-align: left;
+      padding: 0.5rem 0;
     }
-    
+
     .comms-header h1 {
-      font-size: 2.5rem;
+      font-size: 1.6rem;
     }
-    
-    .comms-header p {
-      max-width: none;
-      margin: 0;
-    }
-    
+
     .templates-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
+      gap: 1rem;
     }
-    
+
     .comms-form {
       grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .form-group.full-width {
       grid-column: 1 / -1;
     }
   }
-  
-  /* ============================================
-     DESKTOP BREAKPOINT (1024px+)
-     ============================================ */
+
   @media (min-width: 1024px) {
     .comms-container {
-      padding: 3rem 2rem;
+      padding: 1.5rem 2rem;
     }
-    
+
     .comms-header {
-      padding: 3rem 2.5rem;
+      padding: 0.5rem 0;
     }
-    
+
     .comms-header h1 {
-      font-size: 3rem;
+      font-size: 1.75rem;
     }
-    
+
     .templates-grid {
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+      gap: 1.25rem;
     }
   }
   
@@ -374,24 +356,24 @@
     }
     
     .comms-header {
-      padding: 1.25rem 1rem;
-      margin-bottom: 1.5rem;
+      padding: 0.25rem 0;
+      margin-bottom: 0.75rem;
     }
-    
+
     .comms-header h1 {
-      font-size: 1.75rem;
-    }
-    
-    .comms-header p {
-      font-size: 0.9375rem;
-    }
-    
-    .comms-card {
-      padding: 1.5rem 1rem;
-    }
-    
-    .comms-card h2 {
       font-size: 1.25rem;
+    }
+
+    .comms-header p {
+      font-size: 0.85rem;
+    }
+
+    .comms-card {
+      padding: 1rem 0.875rem;
+    }
+
+    .comms-card h2 {
+      font-size: 1rem;
     }
     
     .template-card {
@@ -534,10 +516,9 @@
 <div class="comms-container">
   <!-- Header -->
   <div class="comms-header animate-in">
-    <p class="comms-tagline">Stay on-brand</p>
-  <h1>Communication Hub</h1>
-  <p>Keep your most-used emails and texts in one place so you can respond quickly while staying kind and on-brand.</p>
-</div>
+    <h1>Communication Hub</h1>
+    <p>Your templates, ready to go whenever you need them.</p>
+  </div>
 
   <!-- Send Message Modal -->
   <div id="sendModal" class="modal" style="display: none;">
@@ -589,7 +570,7 @@
   <!-- Pre-Built Professional Templates -->
   <div class="comms-card">
     <h2>Professional Templates</h2>
-    <p style="color: var(--warm-gray); margin-bottom: 1.5rem; line-height: 1.6;">Ready-to-use templates crafted for real estate professionals. Click to use or copy and personalize.</p>
+    <p style="color: var(--warm-gray); margin-bottom: 1rem; line-height: 1.6;">Tap any template to use it or copy it and make it your own. These were written to sound like a real person, because that is exactly what you are.</p>
     
     <!-- NEW LEAD TEMPLATES -->
     <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">New Lead</h3>
@@ -1542,9 +1523,9 @@ Warmest wishes,
       </div>
     {% else %}
       <div class="empty-state">
-        <div class="empty-icon">—</div>
+        <div class="empty-icon">✉</div>
         <h3>No Custom Templates Yet</h3>
-        <p>Create your first custom template above, or use one of our professional templates to get started.</p>
+        <p>When you are ready, create a template above or start with one of the professional ones to the right.</p>
       </div>
     {% endif %}
   </div>

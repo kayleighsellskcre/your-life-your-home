@@ -14,45 +14,36 @@
   
   /* Header Section */
   .dashboard-header {
-    padding: 1.5rem 1rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border-radius: var(--border-radius-xl);
-    margin-bottom: 2rem;
-    text-align: center;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
-  
-  .dashboard-tagline {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--olive-green);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  
+
   .dashboard-header h1 {
     font-family: var(--font-heading);
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
+    margin: 0;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
-  
+
   .dashboard-header p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--warm-gray);
-    line-height: 1.6;
-    max-width: 600px;
-    margin: 0 auto;
+    margin: 0;
   }
   
   /* Responsive Grid System */
   .responsive-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
   }
   
   /* Cards */
@@ -60,16 +51,16 @@
     background: var(--soft-white);
     border: 1px solid rgba(200, 180, 151, 0.2);
     border-radius: var(--border-radius-xl);
-    padding: 2rem;
+    padding: 1.25rem 1rem;
     box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .card h2 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     color: var(--charcoal-brown);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
@@ -86,16 +77,16 @@
   /* Metric Cards */
   .metrics-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
-  
+
   .metric-card {
     background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
     border: 1px solid rgba(200, 180, 151, 0.2);
     border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
+    padding: 1rem 0.75rem;
     text-align: center;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -107,23 +98,23 @@
   }
   
   .metric-value {
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--olive-green);
     line-height: 1;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     font-family: var(--font-heading);
   }
-  
+
   .metric-label {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     color: var(--charcoal-brown);
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.15rem;
   }
-  
+
   .metric-subtext {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     color: var(--warm-gray);
   }
   
@@ -261,29 +252,23 @@
      ============================================ */
   @media (min-width: 768px) {
     .dashboard-container {
-      padding: 2rem;
+      padding: 1.25rem 2rem;
     }
-    
+
     .dashboard-header {
-      padding: 2.5rem 2rem;
-      text-align: left;
+      padding: 0.5rem 0;
     }
-    
+
     .dashboard-header h1 {
-      font-size: 2.5rem;
+      font-size: 1.6rem;
     }
-    
-    .dashboard-header p {
-      max-width: none;
-      margin: 0;
-    }
-    
-    /* Metrics: 2 columns on tablet */
+
+    /* Metrics: 3 columns on tablet */
     .metrics-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
     }
-    
+
     /* Actions: 2 columns on tablet */
     .actions-grid {
       grid-template-columns: repeat(2, 1fr);
@@ -296,41 +281,41 @@
      ============================================ */
   @media (min-width: 1024px) {
     .dashboard-container {
-      padding: 3rem 2rem;
+      padding: 1.5rem 2rem;
     }
-    
+
     .dashboard-header {
-      padding: 3rem 2.5rem;
+      padding: 0.5rem 0;
     }
-    
+
     .dashboard-header h1 {
-      font-size: 3rem;
+      font-size: 1.75rem;
     }
-    
+
     /* Metrics: 3 columns on desktop */
     .metrics-grid {
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+      gap: 1rem;
     }
-    
+
     /* Two-column layout for main content */
     .responsive-grid {
       grid-template-columns: 2fr 1fr;
-      gap: 2rem;
+      gap: 1.25rem;
     }
-    
+
     /* Actions: 2 columns on desktop */
     .actions-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+      gap: 1rem;
     }
-    
+
     .metric-card {
-      padding: 2rem;
+      padding: 1rem 0.75rem;
     }
-    
+
     .metric-value {
-      font-size: 3.5rem;
+      font-size: 2.25rem;
     }
   }
   
@@ -338,7 +323,6 @@
      LARGE DESKTOP BREAKPOINT (1280px+)
      ============================================ */
   @media (min-width: 1280px) {
-    /* Actions: Full width cards on large desktop */
     .actions-grid {
       grid-template-columns: 1fr;
     }
@@ -347,76 +331,85 @@
   /* ============================================
      MOBILE OPTIMIZATIONS (Portrait Mode)
      ============================================ */
-  @media (max-width: 767px) and (orientation: portrait) {
+  @media (max-width: 767px) {
     .dashboard-container {
+      padding: 0.75rem;
+    }
+
+    .dashboard-header {
+      padding: 0.25rem 0;
+      margin-bottom: 0.75rem;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.25rem;
+    }
+
+    .metrics-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .metric-card {
+      padding: 0.75rem 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1.6rem;
+    }
+
+    .metric-label {
+      font-size: 0.7rem;
+    }
+
+    .metric-subtext {
+      font-size: 0.65rem;
+    }
+
+    .card {
       padding: 1rem 0.875rem;
     }
-    
-    .dashboard-header {
-      padding: 1.25rem 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .dashboard-header h1 {
-      font-size: 1.75rem;
-    }
-    
-    .dashboard-header p {
-      font-size: 0.9375rem;
-    }
-    
-    .card {
-      padding: 1.5rem 1rem;
-    }
-    
+
     .card h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1.25rem;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
     }
-    
-    .metric-card {
-      padding: 1.25rem 1rem;
-    }
-    
-    .metric-value {
-      font-size: 2.5rem;
-    }
-    
+
     .action-card {
-      padding: 1rem;
+      padding: 0.875rem;
       min-height: auto;
     }
-    
+
     .action-icon {
-      width: 48px;
-      height: 48px;
-      font-size: 1.25rem;
-    }
-    
-    .action-title {
+      width: 40px;
+      height: 40px;
       font-size: 1rem;
     }
-    
-    .action-desc {
-      font-size: 0.8125rem;
+
+    .action-title {
+      font-size: 0.9375rem;
     }
-    
+
+    .action-desc {
+      font-size: 0.8rem;
+    }
+
     .btn-outline {
       width: 100%;
-      padding: 1rem 1.5rem;
-      min-height: 48px;
+      padding: 0.75rem 1.25rem;
     }
-    
+
     .transaction-item {
-      padding: 1rem;
+      padding: 0.875rem;
+      margin-bottom: 0.5rem;
     }
-    
+
     .transaction-address {
-      font-size: 1rem;
+      font-size: 0.9375rem;
     }
-    
+
     .transaction-meta {
-      font-size: 0.8125rem;
+      font-size: 0.8rem;
     }
   }
   
@@ -440,9 +433,8 @@
 <div class="dashboard-container">
   <!-- Header -->
   <div class="dashboard-header animate-in">
-    <p class="dashboard-tagline">Your command center</p>
     <h1>Agent Dashboard</h1>
-    <p>A clear view of your leads, transactions, and follow-ups at a glance.</p>
+    <p>Here is what is happening with your business today.</p>
   </div>
   
   <!-- Metrics Cards -->
@@ -450,19 +442,19 @@
     <div class="metric-card">
       <div class="metric-value">{{ metrics.new_leads|default(0) }}</div>
       <div class="metric-label">New Leads</div>
-      <div class="metric-subtext">Waiting for first contact</div>
+      <div class="metric-subtext">Ready for your call</div>
     </div>
-    
+
     <div class="metric-card">
       <div class="metric-value">{{ transactions|length if transactions else 0 }}</div>
-      <div class="metric-label">Active Transactions</div>
-      <div class="metric-subtext">Files in progress</div>
+      <div class="metric-label">Active Deals</div>
+      <div class="metric-subtext">Moving right along</div>
     </div>
-    
+
     <div class="metric-card">
       <div class="metric-value">{{ metrics.followups_today|default(0) }}</div>
       <div class="metric-label">Follow-ups Today</div>
-      <div class="metric-subtext">Clients to check in with</div>
+      <div class="metric-subtext">Time to reach out</div>
     </div>
   </div>
   
@@ -479,23 +471,23 @@
             <div>
               <div class="transaction-address">{{ tx.property_address or 'Property' }}</div>
               <div class="transaction-meta">
-                {{ tx.client_name }} • {{ tx.current_stage|replace('_', ' ')|title if tx.current_stage else 'New' }}
+                {{ tx.client_name }} &nbsp;|&nbsp; {{ tx.current_stage|replace('_', ' ')|title if tx.current_stage else 'New' }}
               </div>
             </div>
             <div class="transaction-arrow">→</div>
           </div>
         </a>
         {% endfor %}
-        <div style="margin-top: 1.5rem;">
-          <a href="{{ url_for('agent_transactions') }}" class="btn-outline">View All Transactions</a>
+        <div style="margin-top: 1rem;">
+          <a href="{{ url_for('agent_transactions') }}" class="btn-outline">See All Transactions</a>
         </div>
       </div>
       {% else %}
       <div class="card">
         <h2>Recent Transactions</h2>
-        <p style="color: var(--warm-gray); text-align: center; padding: 2rem 0;">No transactions yet. Ready to start your first deal?</p>
-        <div style="margin-top: 1.5rem;">
-          <a href="{{ url_for('agent_transactions') }}" class="btn-outline">Add Your First Transaction</a>
+        <p style="color: var(--warm-gray); text-align: center; padding: 1rem 0;">No transactions yet. When you are ready to start tracking a deal, we are here for you.</p>
+        <div style="margin-top: 1rem;">
+          <a href="{{ url_for('agent_transactions') }}" class="btn-outline">Start Your First Deal</a>
         </div>
       </div>
       {% endif %}
@@ -509,40 +501,40 @@
           <a href="{{ url_for('agent_crm') }}" class="action-card">
             <div class="action-icon">+</div>
             <div class="action-content">
-              <div class="action-title">Add New Contact</div>
-              <div class="action-desc">Quickly add a lead to your CRM</div>
+              <div class="action-title">Add a Contact</div>
+              <div class="action-desc">Drop a new lead straight into your CRM</div>
             </div>
           </a>
-          
+
           <a href="{{ url_for('agent_transactions') }}" class="action-card">
             <div class="action-icon">TX</div>
             <div class="action-content">
-              <div class="action-title">Add Transaction</div>
-              <div class="action-desc">Start tracking a new deal</div>
+              <div class="action-title">New Transaction</div>
+              <div class="action-desc">Start tracking a deal from day one</div>
             </div>
           </a>
-          
+
           <a href="{{ url_for('agent_communications') }}" class="action-card">
             <div class="action-icon">@</div>
             <div class="action-content">
-              <div class="action-title">Send Template</div>
-              <div class="action-desc">Use a saved email or text</div>
+              <div class="action-title">Send a Message</div>
+              <div class="action-desc">Use one of your saved email or text templates</div>
             </div>
           </a>
-          
+
           <a href="{{ url_for('agent_marketing') }}" class="action-card">
             <div class="action-icon">✎</div>
             <div class="action-content">
-              <div class="action-title">Create Marketing</div>
-              <div class="action-desc">Generate social media posts</div>
+              <div class="action-title">Create Content</div>
+              <div class="action-desc">Generate beautiful marketing in seconds</div>
             </div>
           </a>
-          
+
           <a href="{{ url_for('agent_settings_profile') }}" class="action-card">
             <div class="action-icon">⚙</div>
             <div class="action-content">
-              <div class="action-title">Settings</div>
-              <div class="action-desc">Update your profile & preferences</div>
+              <div class="action-title">Your Settings</div>
+              <div class="action-desc">Keep your profile looking great</div>
             </div>
           </a>
         </div>

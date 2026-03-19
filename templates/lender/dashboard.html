@@ -16,45 +16,36 @@
   
   /* Header Section */
   .dashboard-header {
-    padding: 1.5rem 1rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border-radius: var(--border-radius-xl);
-    margin-bottom: 2rem;
-    text-align: center;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
   }
-  
-  .dashboard-tagline {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--olive-green);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  
+
   .dashboard-header h1 {
     font-family: var(--font-heading);
-    font-size: 2rem;
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
+    margin: 0;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
-  
+
   .dashboard-header p {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: var(--warm-gray);
-    line-height: 1.6;
-    max-width: 600px;
-    margin: 0 auto;
+    margin: 0;
   }
   
   /* Responsive Grid System */
   .responsive-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
   }
   
   /* Cards */
@@ -62,16 +53,16 @@
     background: var(--soft-white);
     border: 1px solid rgba(200, 180, 151, 0.2);
     border-radius: var(--border-radius-xl);
-    padding: 2rem;
+    padding: 1.25rem 1rem;
     box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  
+
   .card h2 {
     font-family: var(--font-heading);
-    font-size: 1.5rem;
+    font-size: 1.15rem;
     color: var(--charcoal-brown);
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
@@ -79,16 +70,16 @@
   /* Metric Cards */
   .metrics-grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
   }
-  
+
   .metric-card {
     background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
     border: 1px solid rgba(200, 180, 151, 0.2);
     border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
+    padding: 1rem 0.75rem;
     text-align: center;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -100,19 +91,19 @@
   }
   
   .metric-value {
-    font-size: 3rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--olive-green);
     line-height: 1;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     font-family: var(--font-heading);
   }
-  
+
   .metric-label {
-    font-size: 0.9375rem;
+    font-size: 0.8125rem;
     color: var(--charcoal-brown);
     font-weight: 600;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.15rem;
   }
   
   .metric-subtext {
@@ -290,76 +281,62 @@
      ============================================ */
   @media (min-width: 768px) {
     .dashboard-container {
-      padding: 2rem;
+      padding: 1.25rem 2rem;
     }
-    
+
     .dashboard-header {
-      padding: 2.5rem 2rem;
-      text-align: left;
+      padding: 0.5rem 0;
     }
-    
+
     .dashboard-header h1 {
-      font-size: 2.5rem;
+      font-size: 1.6rem;
     }
-    
-    .dashboard-header p {
-      max-width: none;
-      margin: 0;
-    }
-    
-    /* Metrics: 2 columns on tablet */
+
     .metrics-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
     }
-    
-    /* Actions: 2 columns on tablet */
+
     .actions-grid {
       grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
     }
   }
-  
-  /* ============================================
-     DESKTOP BREAKPOINT (1024px+)
-     ============================================ */
+
   @media (min-width: 1024px) {
     .dashboard-container {
-      padding: 3rem 2rem;
+      padding: 1.5rem 2rem;
     }
-    
+
     .dashboard-header {
-      padding: 3rem 2.5rem;
+      padding: 0.5rem 0;
     }
-    
+
     .dashboard-header h1 {
-      font-size: 3rem;
+      font-size: 1.75rem;
     }
-    
-    /* Metrics: 3 columns on desktop */
+
     .metrics-grid {
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+      gap: 1rem;
     }
-    
-    /* Two-column layout for main content */
+
     .responsive-grid {
       grid-template-columns: 2fr 1fr;
-      gap: 2rem;
+      gap: 1.25rem;
     }
-    
-    /* Actions: 2 columns on desktop */
+
     .actions-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+      gap: 1rem;
     }
-    
+
     .metric-card {
-      padding: 2rem;
+      padding: 1rem 0.75rem;
     }
-    
+
     .metric-value {
-      font-size: 3.5rem;
+      font-size: 2.25rem;
     }
   }
   
@@ -477,9 +454,8 @@
 <div class="dashboard-container">
   <!-- Header -->
   <div class="dashboard-header animate-in">
-    <p class="dashboard-tagline">Your command center</p>
     <h1>Lender Dashboard</h1>
-    <p>A warm, clear view of borrowers, files, and growth tools.</p>
+    <p>Here is what is happening with your pipeline today.</p>
   </div>
   
   <!-- Metrics Cards -->
@@ -487,19 +463,19 @@
     <div class="metric-card">
       <div class="metric-value">{{ metrics.new_applications|default(0) }}</div>
       <div class="metric-label">New Applications</div>
-      <div class="metric-subtext">Started the process</div>
+      <div class="metric-subtext">Just getting started</div>
     </div>
-    
+
     <div class="metric-card">
       <div class="metric-value">{{ metrics.loans_in_process|default(0) }}</div>
       <div class="metric-label">Loans in Process</div>
-      <div class="metric-subtext">Moving through pipeline</div>
+      <div class="metric-subtext">Moving right along</div>
     </div>
-    
+
     <div class="metric-card">
       <div class="metric-value">{{ metrics.nurture_contacts|default(0) }}</div>
       <div class="metric-label">Nurture Contacts</div>
-      <div class="metric-subtext">Past clients & leads</div>
+      <div class="metric-subtext">Stay in touch</div>
     </div>
   </div>
   
@@ -530,9 +506,9 @@
       <div class="card">
         <h2>Active Loans</h2>
         <div class="empty-state">
-          <div class="empty-icon" style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--olive-green);">—</div>
-          <h3>No Active Loans</h3>
-          <p>Start tracking loans to see them here</p>
+          <div class="empty-icon" style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--olive-green);">🏠</div>
+          <h3>No Active Loans Yet</h3>
+          <p>When you are ready to start tracking, your loans will show up right here.</p>
           <a href="{{ url_for('lender_loans') }}" class="btn-primary" style="margin-top: 1.5rem;">Add Your First Loan</a>
         </div>
       </div>

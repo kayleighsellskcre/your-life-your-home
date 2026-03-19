@@ -8,60 +8,49 @@
      ================================================================= */
   
   .power-tools-header {
-    text-align: center;
-    padding: var(--space-2xl) var(--space-md) var(--space-xl);
-    background: linear-gradient(135deg, var(--warm-cream) 0%, var(--light-cream) 100%);
-    border-radius: var(--border-radius-xl);
-    margin-bottom: var(--space-2xl);
-    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
   }
-  
-  .power-tools-header__tagline {
-    font-size: var(--text-sm);
-    color: var(--olive-green);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: var(--weight-semibold);
-    margin-bottom: var(--space-sm);
-  }
-  
+
   .power-tools-header__title {
     font-family: var(--font-heading);
-    font-size: var(--text-4xl);
+    font-size: 1.5rem;
     color: var(--charcoal-brown);
-    margin-bottom: var(--space-md);
-    font-weight: var(--weight-normal);
+    margin: 0;
+    font-weight: var(--weight-semibold);
     line-height: var(--leading-tight);
   }
-  
+
   .power-tools-header__description {
-    font-size: var(--text-lg);
+    font-size: 0.9rem;
     color: var(--warm-gray);
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: var(--leading-relaxed);
+    margin: 0;
   }
   
   /* Tool Cards Grid - Mobile First */
   .tools-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--space-xl);
-    margin-bottom: var(--space-2xl);
+    gap: 1rem;
+    margin-bottom: 1rem;
   }
   
-  /* Tablet: 2 columns */
   @media (min-width: 768px) {
     .tools-grid {
       grid-template-columns: repeat(2, 1fr);
-      gap: var(--space-2xl);
+      gap: 1rem;
     }
   }
-  
-  /* Desktop: 3 columns */
+
   @media (min-width: 1200px) {
     .tools-grid {
       grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
     }
   }
   
@@ -69,7 +58,7 @@
   .tool-card {
     background: linear-gradient(135deg, #FFFFFF 0%, var(--cream-light) 100%);
     border-radius: var(--border-radius-xl);
-    padding: var(--space-2xl);
+    padding: 1.25rem 1rem;
     box-shadow: var(--shadow-md);
     transition: all var(--transition-base);
     border: var(--border-width-base) solid rgba(107, 106, 69, 0.1);
@@ -213,39 +202,36 @@
   /* Mobile Optimizations */
   @media (max-width: 767px) {
     .power-tools-header {
-      padding: var(--space-xl) var(--space-md);
-      margin-bottom: var(--space-xl);
+      padding: 0.25rem 0;
+      margin-bottom: 0.75rem;
     }
-    
+
     .power-tools-header__title {
-      font-size: var(--text-3xl);
+      font-size: 1.25rem;
     }
-    
-    .power-tools-header__description {
-      font-size: var(--text-base);
-    }
-    
+
     .tools-grid {
-      gap: var(--space-lg);
+      gap: 0.75rem;
     }
-    
+
     .tool-card {
-      padding: var(--space-xl);
+      padding: 1rem 0.875rem;
     }
-    
+
     .tool-card__icon {
-      width: 52px;
-      height: 52px;
-      font-size: 1.5rem;
+      width: 44px;
+      height: 44px;
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
     }
-    
+
     .tool-card__title {
-      font-size: var(--text-xl);
+      font-size: 1rem;
     }
-    
+
     .tool-card__button {
       padding: var(--space-md) var(--space-lg);
-      min-height: 48px; /* Touch-friendly */
+      min-height: 48px;
       font-size: var(--text-base);
     }
   }
@@ -459,12 +445,8 @@
 
 <!-- Header -->
 <div class="power-tools-header">
-  <p class="power-tools-header__tagline">Advanced Features</p>
   <h1 class="power-tools-header__title">Power Tools</h1>
-  <p class="power-tools-header__description">
-    Professional tools designed to elevate your business—from pricing conversations to marketing campaigns, 
-    all seamlessly connected to your CRM.
-  </p>
+  <p class="power-tools-header__description">Everything you need to work smarter and serve your clients better.</p>
 </div>
 
 <!-- Tools Grid -->
@@ -476,7 +458,7 @@
     <div class="tool-card__icon">🍂</div>
     <h3 class="tool-card__title">Seasonal Checklists</h3>
     <p class="tool-card__description">
-      Stunning, print-ready homeowner care guides for every season — the perfect gift to your clients that keeps you top of mind all year long.
+      Beautiful, print-ready homeowner care guides for every season. The perfect gift that keeps you top of mind all year long.
     </p>
     <ul class="tool-card__features">
       <li>Spring, Summer, Fall &amp; Winter editions</li>
@@ -554,7 +536,7 @@
     <div class="tool-card__icon">💬</div>
     <h3 class="tool-card__title">Script & Objection Support</h3>
     <p class="tool-card__description">
-      Get instant, personalized responses to common objections that sound authentically like you—not a robot.
+      Get instant, personalized responses to common objections that sound authentically like you. Because you are the expert, not a script.
     </p>
     <ul class="tool-card__features">
       <li>Real-time objection responses</li>
@@ -592,7 +574,7 @@
     <div class="tool-card__icon">👥</div>
     <h3 class="tool-card__title">Team Dashboards</h3>
     <p class="tool-card__description">
-      Monitor team performance, celebrate wins, and identify coaching opportunities—all in one beautiful view.
+      Monitor team performance, celebrate wins, and spot coaching opportunities. Everything in one clean place.
     </p>
     <ul class="tool-card__features">
       <li>Real-time team metrics</li>

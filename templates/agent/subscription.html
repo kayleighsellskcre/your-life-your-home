@@ -503,7 +503,7 @@
         {% else %}
           {% if stripe_configured %}
             <form class="btn-plan-form" method="POST" action="{{ url_for('agent_subscription_checkout', tier='professional') }}">
-              <button type="submit" class="btn-plan gold">Upgrade Now — $29/mo</button>
+              <button type="submit" class="btn-plan gold">Upgrade Now · $29/mo</button>
             </form>
           {% else %}
             <button class="btn-plan disabled" disabled>Coming Soon</button>
@@ -580,7 +580,7 @@
 
     <div class="faq-item">
       <div class="faq-q">What payment methods do you accept? <span class="faq-arrow">▼</span></div>
-      <div class="faq-a">We accept all major credit and debit cards — Visa, Mastercard, American Express, and Discover — securely processed through Stripe.</div>
+      <div class="faq-a">We accept all major credit and debit cards (Visa, Mastercard, American Express, and Discover), processed securely through Stripe.</div>
     </div>
 
     <div class="faq-item">
