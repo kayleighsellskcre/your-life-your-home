@@ -1413,7 +1413,7 @@ def init_db() -> None:
     print("[DATABASE] Invoice tables created/verified")
 
     # --- Client Contest / Bracket Tables ---
-    cursor.execute(
+    cur.execute(
         """
         CREATE TABLE IF NOT EXISTS agent_contests (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
