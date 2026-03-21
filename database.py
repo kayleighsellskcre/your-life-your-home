@@ -225,6 +225,15 @@ def init_db() -> None:
     except:
         pass  # Column already exists
 
+    # Migration: Add professional_role column (alias of professional_type for newer queries)
+    try:
+        cur.execute("ALTER TABLE client_relationships ADD COLUMN professional_role TEXT")
+        # Back-fill from professional_type so existing rows work immediately
+        cur.execute("UPDATE client_relationships SET professional_role = professional_type WHERE professional_role IS NULL")
+        conn.commit()
+    except:
+        pass  # Column already exists
+
     # ------------- REFERRAL LINKS -------------
     cur.execute(
         """
@@ -4762,7 +4771,11 @@ def get_agent_clients(agent_user_id: int) -> List[Dict]:
     """
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""
+    # Detect whether the table has professional_role or professional_type
+    cur.execute("PRAGMA table_info(client_relationships)")
+    cr_cols = [r[1] for r in cur.fetchall()]
+    role_col = "professional_role" if "professional_role" in cr_cols else "professional_type"
+    cur.execute(f"""
         SELECT DISTINCT u.id, u.name, u.email, u.created_at,
                hs.value_estimate, hs.equity_estimate, hs.loan_balance,
                hs.loan_rate, hs.loan_payment,
@@ -4783,7 +4796,7 @@ def get_agent_clients(agent_user_id: int) -> List[Dict]:
               OR EXISTS (
                   SELECT 1 FROM client_relationships cr
                   WHERE cr.homeowner_id = u.id AND cr.professional_id = ?
-                  AND cr.professional_role = 'agent' AND cr.status = 'active'
+                  AND cr.{role_col} = 'agent' AND cr.status = 'active'
               )
           )
         ORDER BY u.name ASC
@@ -4800,7 +4813,11 @@ def get_lender_clients(lender_user_id: int) -> List[Dict]:
     """
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("""
+    # Detect whether the table has professional_role or professional_type
+    cur.execute("PRAGMA table_info(client_relationships)")
+    cr_cols = [r[1] for r in cur.fetchall()]
+    role_col = "professional_role" if "professional_role" in cr_cols else "professional_type"
+    cur.execute(f"""
         SELECT DISTINCT u.id, u.name, u.email, u.created_at,
                hs.value_estimate, hs.equity_estimate, hs.loan_balance,
                hs.loan_rate, hs.loan_payment,
@@ -4820,7 +4837,7 @@ def get_lender_clients(lender_user_id: int) -> List[Dict]:
               OR EXISTS (
                   SELECT 1 FROM client_relationships cr
                   WHERE cr.homeowner_id = u.id AND cr.professional_id = ?
-                  AND cr.professional_role = 'lender' AND cr.status = 'active'
+                  AND cr.{role_col} = 'lender' AND cr.status = 'active'
               )
           )
         ORDER BY u.name ASC
