@@ -1,214 +1,408 @@
 {% extends "agent/layout.html" %}
-
 {% block title %}AI Concierge Dashboard{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
- <div class="row mb-4">
- <div class="col">
- <h1 class="h3 mb-2">AI Homeowner Concierge</h1>
- <p class="text-muted">Luxury-grade automated lead qualification and vendor routing</p>
- </div>
- <div class="col-auto">
- <a href="{{ url_for('agent_concierge_settings') }}" class="btn btn-outline-primary me-2">
- <i class="fas fa-cog"></i> Settings
- </a>
- <a href="{{ url_for('agent_concierge_vendors') }}" class="btn btn-primary">
- <i class="fas fa-users"></i> Manage Vendors
- </a>
- </div>
- </div>
+{% block agent_content %}
+<style>
+/* ── CONCIERGE DASHBOARD ────────────────────────────────────── */
+.con-hero {
+  padding: 1.375rem 0 1rem;
+  border-bottom: 1px solid rgba(143,168,138,.15);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.con-hero h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1E2A1A;
+  letter-spacing: -.025em;
+  margin: 0 0 .2rem;
+  line-height: 1.15;
+}
+.con-hero p {
+  font-size: .8rem;
+  color: #7A9068;
+  margin: 0;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.con-hero-btns { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+.con-btn {
+  display: inline-flex; align-items: center; gap: .35rem;
+  height: 34px; padding: 0 1rem;
+  border-radius: 6px; font-size: .72rem; font-weight: 600;
+  letter-spacing: .03em; cursor: pointer; text-decoration: none;
+  border: 1px solid; transition: all .15s; white-space: nowrap;
+}
+.con-btn--solid { background: #8FA88A; color: #fff; border-color: #8FA88A; }
+.con-btn--solid:hover { background: #5C7050; border-color: #5C7050; color: #fff; }
+.con-btn--ghost { background: #fff; color: #5C7050; border-color: rgba(143,168,138,.4); }
+.con-btn--ghost:hover { background: #ECF3E6; border-color: #8FA88A; }
 
- <!-- Stats Overview -->
- <div class="row g-3 mb-4">
- <div class="col-md-4">
- <div class="card border-0 shadow-sm">
- <div class="card-body">
- <div class="d-flex align-items-center">
- <div class="flex-shrink-0">
- <div class="p-3 bg-primary bg-opacity-10 rounded">
- <i class="fas fa-comments fa-2x text-primary"></i>
- </div>
- </div>
- <div class="flex-grow-1 ms-3">
- <h6 class="text-muted mb-1">Total Conversations</h6>
- <h3 class="mb-0">{{ stats.total_conversations }}</h3>
- <small class="text-success">{{ stats.active_conversations }} active (24h)</small>
- </div>
- </div>
- </div>
- </div>
- </div>
+/* ── 3-COLUMN KPI CARDS ─────────────────────────────────────── */
+.con-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.con-kpi {
+  background: #fff;
+  border: 1px solid rgba(143,168,138,.22);
+  border-radius: 10px;
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 2px 10px rgba(44,58,40,.06);
+  transition: box-shadow .2s;
+}
+.con-kpi:hover { box-shadow: 0 4px 18px rgba(44,58,40,.1); }
+.con-kpi__icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem;
+  margin-bottom: .75rem;
+}
+.con-kpi__icon--blue  { background: rgba(100,140,200,.12); color: #2A5080; }
+.con-kpi__icon--red   { background: rgba(192,57,43,.1);    color: #c0392b; }
+.con-kpi__icon--green { background: rgba(92,112,80,.15);   color: #2C4A20; }
+.con-kpi__label {
+  font-size: .6rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: #8A9A82; margin-bottom: .2rem;
+}
+.con-kpi__value {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem; font-weight: 600; color: #1E2A1A;
+  line-height: 1.1; margin-bottom: .2rem;
+}
+.con-kpi__sub { font-size: .72rem; color: #8A9A82; }
+.con-kpi__sub--green { color: #2C7A3A; }
+.con-kpi__sub--red   { color: #c0392b; }
 
- <div class="col-md-4">
- <div class="card border-0 shadow-sm">
- <div class="card-body">
- <div class="d-flex align-items-center">
- <div class="flex-shrink-0">
- <div class="p-3 bg-danger bg-opacity-10 rounded">
- <i class="fas fa-fire fa-2x text-danger"></i>
- </div>
- </div>
- <div class="flex-grow-1 ms-3">
- <h6 class="text-muted mb-1">Qualified Leads</h6>
- <h3 class="mb-0">{{ stats.total_leads }}</h3>
- <small class="text-danger">{{ stats.hot_leads }} hot </small>
- </div>
- </div>
- </div>
- </div>
- </div>
+/* ── 3-COLUMN ACTION CARDS ──────────────────────────────────── */
+.con-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.con-card {
+  background: #fff;
+  border: 1px solid rgba(143,168,138,.2);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(44,58,40,.05);
+  overflow: hidden;
+}
+.con-card__head {
+  padding: .75rem 1.125rem;
+  border-bottom: 1px solid rgba(143,168,138,.12);
+  background: linear-gradient(180deg, #F6F9F3 0%, #F0F7EA 100%);
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: #5C7050;
+}
+.con-card__body { padding: 1rem 1.125rem; }
 
- <div class="col-md-4">
- <div class="card border-0 shadow-sm">
- <div class="card-body">
- <div class="d-flex align-items-center">
- <div class="flex-shrink-0">
- <div class="p-3 bg-success bg-opacity-10 rounded">
- <i class="fas fa-dollar-sign fa-2x text-success"></i>
- </div>
- </div>
- <div class="flex-grow-1 ms-3">
- <h6 class="text-muted mb-1">Monthly Revenue</h6>
- <h3 class="mb-0">${{ "{:,.0f}".format(stats.monthly_revenue) }}</h3>
- <small class="text-muted">{{ stats.active_vendors }} active vendors</small>
- </div>
- </div>
- </div>
- </div>
- </div>
- </div>
+/* URL card */
+.con-url-input {
+  width: 100%; padding: .5rem .75rem;
+  border: 1px solid rgba(143,168,138,.35); border-radius: 5px;
+  font-size: .75rem; color: #2C3A28; background: #F6F9F3;
+  margin-bottom: .625rem; box-sizing: border-box;
+}
+.con-url-row { display: flex; gap: .4rem; }
+.con-url-copy, .con-url-preview {
+  flex: 1; height: 30px; border-radius: 5px;
+  font-size: .67rem; font-weight: 600; cursor: pointer;
+  border: 1px solid; transition: all .15s; text-decoration: none;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.con-url-copy   { background: #8FA88A; color: #fff; border-color: #8FA88A; }
+.con-url-copy:hover { background: #5C7050; border-color: #5C7050; }
+.con-url-preview { background: #fff; color: #5C7050; border-color: rgba(143,168,138,.4); }
+.con-url-preview:hover { background: #ECF3E6; }
 
- <!-- Quick Access Links -->
- <div class="row mb-4">
- <div class="col-md-8">
- <div class="card border-0 shadow-sm">
- <div class="card-header bg-white border-bottom">
- <h5 class="mb-0">Your Concierge URL</h5>
- </div>
- <div class="card-body">
- <p class="text-muted mb-2">Share this link with homeowners or embed on your website:</p>
- <div class="input-group">
- <input type="text" class="form-control" id="concierge-url" value="{{ concierge_url }}" readonly>
- <button class="btn btn-outline-secondary" type="button" onclick="copyUrl()">
- <i class="fas fa-copy"></i> Copy
- </button>
- </div>
- <div class="mt-3">
- <a href="{{ concierge_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
- <i class="fas fa-external-link-alt"></i> Preview Landing Page
- </a>
- </div>
- </div>
- </div>
- </div>
+/* Quick actions card */
+.con-quick-list { display: flex; flex-direction: column; gap: .4rem; }
+.con-quick-link {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .55rem .75rem; border-radius: 6px;
+  background: #F6F9F3; border: 1px solid rgba(143,168,138,.2);
+  text-decoration: none; color: #2C3A28;
+  font-size: .78rem; font-weight: 500;
+  transition: all .12s;
+}
+.con-quick-link:hover {
+  background: #ECF3E6; border-color: rgba(143,168,138,.4);
+  color: #1E2A1A;
+}
+.con-quick-link span { font-size: .8rem; }
 
- <div class="col-md-4">
- <div class="card border-0 shadow-sm h-100">
- <div class="card-header bg-white border-bottom">
- <h5 class="mb-0">Quick Actions</h5>
- </div>
- <div class="card-body">
- <div class="d-grid gap-2">
- <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-outline-primary">
- <i class="fas fa-list"></i> View All Leads
- </a>
- <a href="{{ url_for('agent_concierge_conversations') }}" class="btn btn-outline-secondary">
- <i class="fas fa-comments"></i> Conversations
- </a>
- <a href="{{ url_for('agent_concierge_vendors') }}" class="btn btn-outline-success">
- <i class="fas fa-users"></i> Vendor Performance
- </a>
- </div>
- </div>
- </div>
- </div>
- </div>
+/* Status card */
+.con-status-list { display: flex; flex-direction: column; gap: .5rem; }
+.con-status-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .45rem 0;
+  border-bottom: 1px solid rgba(143,168,138,.1);
+  font-size: .78rem; color: #2C3A28;
+}
+.con-status-row:last-child { border-bottom: none; }
+.con-status-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-right: .5rem;
+}
+.con-status-dot--green { background: #4CAF50; }
+.con-status-dot--amber { background: #FFC107; }
+.con-status-dot--blue  { background: #2196F3; }
+.con-status-label { display: flex; align-items: center; flex: 1; }
+.con-status-val { font-weight: 700; color: #1E2A1A; }
 
- <!-- Recent Leads -->
- <div class="card border-0 shadow-sm">
- <div class="card-header bg-white border-bottom">
- <div class="d-flex justify-content-between align-items-center">
- <h5 class="mb-0">Recent Leads</h5>
- <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-sm btn-link">View All</a>
- </div>
- </div>
- <div class="card-body p-0">
- {% if recent_leads %}
- <div class="table-responsive">
- <table class="table table-hover mb-0">
- <thead class="table-light">
- <tr>
- <th>Homeowner</th>
- <th>Category</th>
- <th>Urgency</th>
- <th>Vendor</th>
- <th>Status</th>
- <th>Date</th>
- </tr>
- </thead>
- <tbody>
- {% for lead in recent_leads %}
- <tr>
- <td>
- <strong>{{ lead.homeowner_name or 'Anonymous' }}</strong>
- {% if lead.homeowner_email %}
- <br><small class="text-muted">{{ lead.homeowner_email }}</small>
- {% endif %}
- </td>
- <td><span class="badge bg-secondary">{{ lead.category }}</span></td>
- <td>
- {% if lead.urgency == 'ready_now' %}
- <span class="badge bg-danger"> Ready Now</span>
- {% elif lead.urgency == 'exploring' %}
- <span class="badge bg-warning text-dark"> Exploring</span>
- {% else %}
- <span class="badge bg-info"> Future</span>
- {% endif %}
- </td>
- <td>{{ lead.vendor_name or 'Not assigned' }}</td>
- <td>
- {% if lead.status == 'new' %}
- <span class="badge bg-primary">New</span>
- {% elif lead.status == 'sent_to_vendor' %}
- <span class="badge bg-info">Sent to Vendor</span>
- {% elif lead.status == 'contacted' %}
- <span class="badge bg-warning">Contacted</span>
- {% elif lead.status == 'closed' %}
- <span class="badge bg-success">Closed</span>
- {% else %}
- <span class="badge bg-secondary">{{ lead.status }}</span>
- {% endif %}
- </td>
- <td><small class="text-muted">{{ lead.routed_at[:10] }}</small></td>
- </tr>
- {% endfor %}
- </tbody>
- </table>
- </div>
- {% else %}
- <div class="text-center py-5 text-muted">
- <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
- <p>No leads yet. Share your concierge URL to start receiving qualified leads.</p>
- </div>
- {% endif %}
- </div>
- </div>
+/* ── RECENT LEADS TABLE ─────────────────────────────────────── */
+.con-leads-card {
+  background: #fff;
+  border: 1px solid rgba(143,168,138,.2);
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(44,58,40,.05);
+  overflow: hidden;
+}
+.con-leads-head {
+  padding: .75rem 1.25rem;
+  border-bottom: 1px solid rgba(143,168,138,.12);
+  background: linear-gradient(180deg, #F6F9F3 0%, #F0F7EA 100%);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.con-leads-head h2 {
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .08em; color: #5C7050; margin: 0;
+}
+.con-leads-head a {
+  font-size: .7rem; color: #8FA88A; text-decoration: none; font-weight: 600;
+}
+.con-leads-head a:hover { color: #5C7050; }
+
+.con-table { width: 100%; border-collapse: collapse; }
+.con-table th {
+  padding: .45rem .875rem;
+  font-size: .58rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .09em; color: #7A9068;
+  background: #EEF5E8; border-bottom: 2px solid rgba(143,168,138,.2);
+  text-align: left; white-space: nowrap;
+}
+.con-table td {
+  padding: .55rem .875rem;
+  font-size: .78rem; color: #2C3A28;
+  border-bottom: 1px solid rgba(143,168,138,.08);
+  vertical-align: middle;
+}
+.con-table tr:last-child td { border-bottom: none; }
+.con-table tr:hover td { background: #F6FAF3; }
+.con-table td small { font-size: .68rem; color: #8A9A82; display: block; }
+
+.con-badge {
+  display: inline-block; padding: .1rem .45rem; border-radius: 8px;
+  font-size: .58rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  border: 1px solid transparent;
+}
+.con-badge--new      { background: rgba(143,168,138,.18); color: #2C5020; border-color: rgba(143,168,138,.3); }
+.con-badge--sent     { background: rgba(100,140,200,.12); color: #1E4A70; border-color: rgba(100,140,200,.25); }
+.con-badge--contacted{ background: rgba(184,134,11,.1);  color: #7A5800; border-color: rgba(184,134,11,.22); }
+.con-badge--closed   { background: rgba(44,58,40,.12);   color: #1A2614; border-color: rgba(44,58,40,.22); }
+.con-badge--hot      { background: rgba(192,57,43,.1);   color: #a02020; border-color: rgba(192,57,43,.2); }
+.con-badge--warm     { background: rgba(255,193,7,.1);   color: #7A5800; border-color: rgba(255,193,7,.25); }
+.con-badge--cool     { background: rgba(100,140,200,.1); color: #1E4A70; border-color: rgba(100,140,200,.2); }
+.con-badge--cat      { background: rgba(92,112,80,.12);  color: #2C4A20; border-color: rgba(92,112,80,.22); }
+
+.con-empty {
+  text-align: center; padding: 3rem 1rem; color: #8A9A82;
+}
+.con-empty p { font-size: .875rem; margin: .5rem 0 1rem; }
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .con-kpi-grid, .con-action-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 600px) {
+  .con-kpi-grid, .con-action-grid { grid-template-columns: 1fr; }
+  .con-hero { flex-direction: column; align-items: flex-start; }
+  .con-table { min-width: 560px; }
+  .con-leads-card { overflow-x: auto; }
+}
+</style>
+
+<!-- ── HERO ──────────────────────────────────────────────── -->
+<div class="con-hero">
+  <div>
+    <h1>AI Concierge</h1>
+    <p>Lead qualification &amp; vendor routing</p>
+  </div>
+  <div class="con-hero-btns">
+    <a href="{{ url_for('agent_concierge_settings') }}" class="con-btn con-btn--ghost">Settings</a>
+    <a href="{{ url_for('agent_concierge_vendors') }}" class="con-btn con-btn--solid">Manage Vendors</a>
+  </div>
+</div>
+
+<!-- ── KPI CARDS ─────────────────────────────────────────── -->
+<div class="con-kpi-grid">
+  <div class="con-kpi">
+    <div class="con-kpi__icon con-kpi__icon--blue">&#128172;</div>
+    <div class="con-kpi__label">Total Conversations</div>
+    <div class="con-kpi__value">{{ stats.total_conversations }}</div>
+    <div class="con-kpi__sub con-kpi__sub--green">{{ stats.active_conversations }} active (24h)</div>
+  </div>
+  <div class="con-kpi">
+    <div class="con-kpi__icon con-kpi__icon--red">&#128293;</div>
+    <div class="con-kpi__label">Qualified Leads</div>
+    <div class="con-kpi__value">{{ stats.total_leads }}</div>
+    <div class="con-kpi__sub con-kpi__sub--red">{{ stats.hot_leads }} hot leads</div>
+  </div>
+  <div class="con-kpi">
+    <div class="con-kpi__icon con-kpi__icon--green">&#128176;</div>
+    <div class="con-kpi__label">Monthly Revenue</div>
+    <div class="con-kpi__value">${{ "{:,.0f}".format(stats.monthly_revenue) }}</div>
+    <div class="con-kpi__sub">{{ stats.active_vendors }} active vendors</div>
+  </div>
+</div>
+
+<!-- ── 3 ACTION CARDS ────────────────────────────────────── -->
+<div class="con-action-grid">
+
+  <!-- Concierge URL -->
+  <div class="con-card">
+    <div class="con-card__head">Your Concierge URL</div>
+    <div class="con-card__body">
+      <p style="font-size:.72rem;color:#8A9A82;margin:0 0 .625rem;">Share with homeowners or embed on your website</p>
+      <input type="text" class="con-url-input" id="concierge-url" value="{{ concierge_url }}" readonly>
+      <div class="con-url-row">
+        <button class="con-url-copy" onclick="copyUrl()">Copy Link</button>
+        <a href="{{ concierge_url }}" target="_blank" class="con-url-preview">Preview</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="con-card">
+    <div class="con-card__head">Quick Actions</div>
+    <div class="con-card__body">
+      <div class="con-quick-list">
+        <a href="{{ url_for('agent_concierge_leads') }}" class="con-quick-link">
+          <span>&#128221;</span> View All Leads
+        </a>
+        <a href="{{ url_for('agent_concierge_conversations') }}" class="con-quick-link">
+          <span>&#128172;</span> All Conversations
+        </a>
+        <a href="{{ url_for('agent_concierge_vendors') }}" class="con-quick-link">
+          <span>&#128101;</span> Vendor Performance
+        </a>
+        <a href="{{ url_for('agent_concierge_settings') }}" class="con-quick-link">
+          <span>&#9881;</span> Concierge Settings
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Status -->
+  <div class="con-card">
+    <div class="con-card__head">Status Overview</div>
+    <div class="con-card__body">
+      <div class="con-status-list">
+        <div class="con-status-row">
+          <span class="con-status-label"><span class="con-status-dot con-status-dot--green"></span>AI Concierge</span>
+          <span class="con-status-val">Active</span>
+        </div>
+        <div class="con-status-row">
+          <span class="con-status-label"><span class="con-status-dot con-status-dot--blue"></span>Active Vendors</span>
+          <span class="con-status-val">{{ stats.active_vendors }}</span>
+        </div>
+        <div class="con-status-row">
+          <span class="con-status-label"><span class="con-status-dot con-status-dot--amber"></span>Pending Leads</span>
+          <span class="con-status-val">{{ stats.total_leads - stats.hot_leads if stats.total_leads > stats.hot_leads else 0 }}</span>
+        </div>
+        <div class="con-status-row">
+          <span class="con-status-label"><span class="con-status-dot con-status-dot--green"></span>Conversations (24h)</span>
+          <span class="con-status-val">{{ stats.active_conversations }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── RECENT LEADS ───────────────────────────────────────── -->
+<div class="con-leads-card">
+  <div class="con-leads-head">
+    <h2>Recent Leads</h2>
+    <a href="{{ url_for('agent_concierge_leads') }}">View All</a>
+  </div>
+
+  {% if recent_leads %}
+  <div style="overflow-x:auto;">
+    <table class="con-table">
+      <thead>
+        <tr>
+          <th>Homeowner</th>
+          <th>Category</th>
+          <th>Urgency</th>
+          <th>Vendor</th>
+          <th>Status</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for lead in recent_leads %}
+        <tr>
+          <td>
+            <strong>{{ lead.homeowner_name or 'Anonymous' }}</strong>
+            {% if lead.homeowner_email %}<small>{{ lead.homeowner_email }}</small>{% endif %}
+          </td>
+          <td><span class="con-badge con-badge--cat">{{ lead.category }}</span></td>
+          <td>
+            {% if lead.urgency == 'ready_now' %}
+              <span class="con-badge con-badge--hot">Ready Now</span>
+            {% elif lead.urgency == 'exploring' %}
+              <span class="con-badge con-badge--warm">Exploring</span>
+            {% else %}
+              <span class="con-badge con-badge--cool">Future</span>
+            {% endif %}
+          </td>
+          <td>{{ lead.vendor_name or 'Unassigned' }}</td>
+          <td>
+            {% if lead.status == 'new' %}
+              <span class="con-badge con-badge--new">New</span>
+            {% elif lead.status == 'sent_to_vendor' %}
+              <span class="con-badge con-badge--sent">Sent to Vendor</span>
+            {% elif lead.status == 'contacted' %}
+              <span class="con-badge con-badge--contacted">Contacted</span>
+            {% elif lead.status == 'closed' %}
+              <span class="con-badge con-badge--closed">Closed</span>
+            {% else %}
+              <span class="con-badge con-badge--cool">{{ lead.status }}</span>
+            {% endif %}
+          </td>
+          <td><small>{{ lead.routed_at[:10] }}</small></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="con-empty">
+    <p>No leads yet. Share your concierge URL to start receiving qualified leads.</p>
+    <a href="{{ concierge_url }}" target="_blank" class="con-btn con-btn--solid">Preview Concierge Page</a>
+  </div>
+  {% endif %}
 </div>
 
 <script>
 function copyUrl() {
- const urlInput = document.getElementById('concierge-url');
- urlInput.select();
- document.execCommand('copy');
- 
- const btn = event.target.closest('button');
- const originalHtml = btn.innerHTML;
- btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
- 
- setTimeout(() => {
- btn.innerHTML = originalHtml;
- }, 2000);
+  var inp = document.getElementById('concierge-url');
+  inp.select();
+  document.execCommand('copy');
+  var btn = event.target;
+  var orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(function(){ btn.textContent = orig; }, 2000);
 }
 </script>
 {% endblock %}
