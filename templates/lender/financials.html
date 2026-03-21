@@ -280,8 +280,8 @@
           <td style="text-transform:capitalize;">{{ r.loan_type or '—' }}</td>
           <td>{{ r.close_date or '—' }}</td>
           <td>${{ "{:,.0f}".format(r.loan_amount or 0) }}</td>
-          <td>{{ "{:.3f}".format(r.origination_pct or 0) }}%</td>
-          <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee or 0) }}</td>
+          <td>{{ "{:.3f}".format(r.origination_fee_pct or 0) }}%</td>
+          <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee_amt or 0) }}</td>
           <td>
             <span class="badge {% if r.status=='funded' %}badge-funded{% elif r.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">
               {{ r.status or 'projected' }}
@@ -305,7 +305,7 @@
     </table>
   </div>
   <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
-    Total revenue logged: <strong style="color:var(--charcoal);">${{ "{:,.0f}".format(revenues|sum(attribute='origination_fee')) }}</strong>
+    Total revenue logged: <strong style="color:var(--charcoal);">${{ "{:,.0f}".format(revenues|sum(attribute='origination_fee_amt')) }}</strong>
   </div>
   {% else %}
   <div class="empty-msg">

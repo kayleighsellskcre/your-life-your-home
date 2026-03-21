@@ -12184,7 +12184,7 @@ def agent_financials_mileage_add():
     conn = get_db_connection()
     conn.execute("""
         INSERT INTO agent_mileage
-        (agent_user_id, trip_date, from_location, to_location, purpose, miles, irs_rate, deduction_value)
+        (agent_user_id, trip_date, from_location, to_location, purpose, miles, irs_rate, deduction_amount)
         VALUES (?,?,?,?,?,?,?,?)
     """, (uid, f.get("trip_date",""), f.get("from_location",""),
           f.get("to_location",""), f.get("purpose",""),
@@ -12224,7 +12224,7 @@ def agent_financials_goal_save():
     if existing:
         conn.execute("""
             UPDATE agent_financial_goals SET
-            gci_goal=?, transactions_goal=?, expenses_budget=?, net_income_goal=?, notes=?
+            gross_commission_goal=?, transactions_goal=?, expenses_budget=?, net_income_goal=?, notes=?
             WHERE agent_user_id=? AND goal_year=?
         """, (float(f.get("gci_goal") or 0), int(f.get("transactions_goal") or 0),
               float(f.get("expenses_budget") or 0), float(f.get("net_income_goal") or 0),
@@ -12232,7 +12232,7 @@ def agent_financials_goal_save():
     else:
         conn.execute("""
             INSERT INTO agent_financial_goals
-            (agent_user_id, goal_year, gci_goal, transactions_goal, expenses_budget, net_income_goal, notes)
+            (agent_user_id, goal_year, gross_commission_goal, transactions_goal, expenses_budget, net_income_goal, notes)
             VALUES (?,?,?,?,?,?,?)
         """, (uid, year, float(f.get("gci_goal") or 0), int(f.get("transactions_goal") or 0),
               float(f.get("expenses_budget") or 0), float(f.get("net_income_goal") or 0),
@@ -12300,8 +12300,8 @@ def lender_financials():
 
     conn.close()
 
-    ytd_revenue = sum(r.get("origination_fee", 0) or 0 for r in revenues if r.get("status") == "funded")
-    ytd_projected = sum(r.get("origination_fee", 0) or 0 for r in revenues if r.get("status") == "projected")
+    ytd_revenue = sum(r.get("origination_fee_amt", 0) or 0 for r in revenues if r.get("status") == "funded")
+    ytd_projected = sum(r.get("origination_fee_amt", 0) or 0 for r in revenues if r.get("status") == "projected")
     ytd_expenses = sum(e.get("amount", 0) or 0 for e in expenses)
     ytd_loan_volume = sum(r.get("loan_amount", 0) or 0 for r in revenues if r.get("status") == "funded")
     net_income = ytd_revenue - ytd_expenses
@@ -12311,7 +12311,7 @@ def lender_financials():
         if r.get("status") == "funded" and r.get("close_date"):
             try:
                 mo = int(r["close_date"].split("-")[1])
-                monthly_revenue[mo] = monthly_revenue.get(mo, 0) + (r.get("origination_fee", 0) or 0)
+                monthly_revenue[mo] = monthly_revenue.get(mo, 0) + (r.get("origination_fee_amt", 0) or 0)
             except Exception:
                 pass
     monthly_revenue_list = [monthly_revenue.get(m, 0) for m in range(1, 13)]
@@ -12349,15 +12349,15 @@ def lender_financials_revenue_add():
     f = request.form
     loan_amount = float(f.get("loan_amount") or 0)
     orig_pct = float(f.get("origination_pct") or 1.0)
-    orig_fee = float(f.get("origination_fee") or round(loan_amount * orig_pct / 100, 2))
+    orig_fee_amt = float(f.get("origination_fee") or round(loan_amount * orig_pct / 100, 2))
     conn = get_db_connection()
     conn.execute("""
         INSERT INTO lender_loan_revenue
         (lender_user_id, borrower_name, property_address, loan_type, loan_amount,
-         origination_pct, origination_fee, close_date, status, notes)
-        VALUES (?,?,?,?,?,?,?,?,?,?)
+         origination_fee_pct, origination_fee_amt, total_revenue, close_date, status, notes)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
     """, (uid, f.get("borrower_name",""), f.get("property_address",""),
-          f.get("loan_type","purchase"), loan_amount, orig_pct, orig_fee,
+          f.get("loan_type","purchase"), loan_amount, orig_pct, orig_fee_amt, orig_fee_amt,
           f.get("close_date",""), f.get("status","projected"), f.get("notes","")))
     conn.commit()
     conn.close()
@@ -12441,7 +12441,8 @@ def lender_financials_goal_save():
     if existing:
         conn.execute("""
             UPDATE lender_financial_goals SET
-            revenue_goal=?, loan_count_goal=?, loan_volume_goal=?, expenses_budget=?, net_income_goal=?, notes=?
+            revenue_goal=?, loan_count_goal=?, loan_volume_goal=?,
+            expenses_budget=?, net_income_goal=?, notes=?
             WHERE lender_user_id=? AND goal_year=?
         """, (float(f.get("revenue_goal") or 0), int(f.get("loan_count_goal") or 0),
               float(f.get("loan_volume_goal") or 0), float(f.get("expenses_budget") or 0),
@@ -12449,7 +12450,8 @@ def lender_financials_goal_save():
     else:
         conn.execute("""
             INSERT INTO lender_financial_goals
-            (lender_user_id, goal_year, revenue_goal, loan_count_goal, loan_volume_goal, expenses_budget, net_income_goal, notes)
+            (lender_user_id, goal_year, revenue_goal, loan_count_goal, loan_volume_goal,
+             expenses_budget, net_income_goal, notes)
             VALUES (?,?,?,?,?,?,?,?)
         """, (uid, year, float(f.get("revenue_goal") or 0), int(f.get("loan_count_goal") or 0),
               float(f.get("loan_volume_goal") or 0), float(f.get("expenses_budget") or 0),

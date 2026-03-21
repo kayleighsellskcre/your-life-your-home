@@ -643,7 +643,7 @@
           <td>{{ m.to_location or '—' }}</td>
           <td>{{ m.purpose or '—' }}</td>
           <td>{{ "{:,.1f}".format(m.miles or 0) }}</td>
-          <td style="color:var(--green);font-weight:700;">${{ "{:,.2f}".format(m.deduction_value or 0) }}</td>
+          <td style="color:var(--green);font-weight:700;">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
           <td>
             <form method="POST" action="{{ url_for('agent_financials_mileage_delete', mid=m.id) }}" onsubmit="return confirm('Remove this trip?');" style="display:inline;">
               <button type="submit" class="tbl-act tbl-act-red">Delete</button>
@@ -675,7 +675,7 @@
 
   {% if goals %}
   {% set g = goals[0] %}
-  {% set gci_pct = [((ytd_gci / g.gci_goal * 100) if g.gci_goal > 0 else 0), 100]|min %}
+  {% set gci_pct = [((ytd_gci / g.gross_commission_goal * 100) if g.gross_commission_goal > 0 else 0), 100]|min %}
   {% set exp_pct = [((ytd_expenses / g.expenses_budget * 100) if g.expenses_budget > 0 else 0), 100]|min %}
   {% set net_pct = [((net_income / g.net_income_goal * 100) if g.net_income_goal > 0 else 0), 100]|min %}
   {% set tx_pct  = [((commissions|length / g.transactions_goal * 100) if g.transactions_goal > 0 else 0), 100]|min %}
@@ -683,8 +683,8 @@
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div class="goal-card">
       <div class="goal-label">
-        <span>🏡 GCI Goal</span>
-        <span style="color:var(--green);">${{ "{:,.0f}".format(ytd_gci) }} / ${{ "{:,.0f}".format(g.gci_goal) }}</span>
+        <span>GCI Goal</span>
+        <span style="color:var(--green);">${{ "{:,.0f}".format(ytd_gci) }} / ${{ "{:,.0f}".format(g.gross_commission_goal) }}</span>
       </div>
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ gci_pct|int }}%;"></div></div>
       <div class="goal-sub">{{ "{:.0f}".format(gci_pct) }}% complete</div>
@@ -908,7 +908,7 @@
         <div class="fmg">
           <label>GCI Goal ($)</label>
           <input type="number" name="gci_goal" step="1000" min="0"
-            value="{{ goals[0].gci_goal if goals else '' }}" placeholder="150000">
+            value="{{ goals[0].gross_commission_goal if goals else '' }}" placeholder="150000">
         </div>
         <div class="fmg">
           <label>Transactions Goal (#)</label>
@@ -1037,7 +1037,7 @@ YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}
 YTD Net Income: ${{ "{:,.0f}".format(net_income) }}
 Total Closings: {{ commissions|length }} ({{ commissions|selectattr('status','equalto','paid')|list|length }} paid)
 Mileage: {{ "{:,.0f}".format(ytd_miles) }} miles (${{ "{:,.0f}".format(mileage_deduction) }} deduction)
-{% if goals %}Goals — GCI: ${{ "{:,.0f}".format(goals[0].gci_goal) }}, Transactions: {{ goals[0].transactions_goal }}, Net Income: ${{ "{:,.0f}".format(goals[0].net_income_goal) }}{% else %}No goals set yet.{% endif %}
+{% if goals %}Goals — GCI: ${{ "{:,.0f}".format(goals[0].gross_commission_goal) }}, Transactions: {{ goals[0].transactions_goal }}, Net Income: ${{ "{:,.0f}".format(goals[0].net_income_goal) }}{% else %}No goals set yet.{% endif %}
 Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None' }}`;
 
   try {
