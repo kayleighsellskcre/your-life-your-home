@@ -12033,7 +12033,7 @@ Good luck! 🤞
     conn = get_db_connection()
     conn.execute(
         "UPDATE agent_contests SET invite_sent_at=? WHERE id=?",
-        (datetime.datetime.now().isoformat(), contest["id"])
+        (datetime.now().isoformat(), contest["id"])
     )
     conn.commit()
     conn.close()
@@ -12075,11 +12075,11 @@ def agent_financials():
     uid = user["id"]
 
     # Year filter
-    year = request.args.get("year", str(datetime.datetime.now().year))
+    year = request.args.get("year", str(datetime.now().year))
     try:
         year = int(year)
     except Exception:
-        year = datetime.datetime.now().year
+        year = datetime.now().year
 
     try:
         conn = get_db_connection()
@@ -12139,7 +12139,7 @@ def agent_financials():
         cat = e.get("category", "Other") or "Other"
         expense_by_cat[cat] = expense_by_cat.get(cat, 0) + (e.get("amount", 0) or 0)
 
-    available_years = list(range(datetime.datetime.now().year, 2023, -1))
+    available_years = list(range(datetime.now().year, 2023, -1))
 
     return render_template("agent/financials.html",
         user=user,
@@ -12192,7 +12192,7 @@ def agent_financials_commission_add():
     conn.commit()
     conn.close()
     flash("Commission added!", "success")
-    year = (f.get("close_date") or "")[:4] or str(datetime.datetime.now().year)
+    year = (f.get("close_date") or "")[:4] or str(datetime.now().year)
     return redirect(url_for("agent_financials", year=year))
 
 
@@ -12239,7 +12239,7 @@ def agent_financials_expense_add():
     conn.commit()
     conn.close()
     flash("Expense logged!", "success")
-    year = (f.get("expense_date") or "")[:4] or str(datetime.datetime.now().year)
+    year = (f.get("expense_date") or "")[:4] or str(datetime.now().year)
     return redirect(url_for("agent_financials", year=year))
 
 
@@ -12277,7 +12277,7 @@ def agent_financials_mileage_add():
     conn.commit()
     conn.close()
     flash("Mileage logged!", "success")
-    year = (f.get("trip_date") or "")[:4] or str(datetime.datetime.now().year)
+    year = (f.get("trip_date") or "")[:4] or str(datetime.now().year)
     return redirect(url_for("agent_financials", year=year))
 
 
@@ -12301,7 +12301,7 @@ def agent_financials_goal_save():
         return redirect(url_for("login", role="agent"))
     uid = user["id"]
     f = request.form
-    year = int(f.get("goal_year", datetime.datetime.now().year))
+    year = int(f.get("goal_year", datetime.now().year))
     conn = get_db_connection()
     existing = conn.execute(
         "SELECT id FROM agent_financial_goals WHERE agent_user_id=? AND goal_year=?", (uid, year)
@@ -12481,11 +12481,11 @@ def lender_financials():
         return redirect(url_for("login", role="lender"))
     uid = user["id"]
 
-    year = request.args.get("year", str(datetime.datetime.now().year))
+    year = request.args.get("year", str(datetime.now().year))
     try:
         year = int(year)
     except Exception:
-        year = datetime.datetime.now().year
+        year = datetime.now().year
 
     try:
         conn = get_db_connection()
@@ -12534,7 +12534,7 @@ def lender_financials():
         cat = e.get("category", "Other") or "Other"
         expense_by_cat[cat] = expense_by_cat.get(cat, 0) + (e.get("amount", 0) or 0)
 
-    available_years = list(range(datetime.datetime.now().year, 2023, -1))
+    available_years = list(range(datetime.now().year, 2023, -1))
 
     return render_template("lender/financials.html",
         user=user,
@@ -12575,7 +12575,7 @@ def lender_financials_revenue_add():
     conn.commit()
     conn.close()
     flash("Loan revenue added!", "success")
-    year = (f.get("close_date") or "")[:4] or str(datetime.datetime.now().year)
+    year = (f.get("close_date") or "")[:4] or str(datetime.now().year)
     return redirect(url_for("lender_financials", year=year))
 
 
@@ -12622,7 +12622,7 @@ def lender_financials_expense_add():
     conn.commit()
     conn.close()
     flash("Expense logged!", "success")
-    year = (f.get("expense_date") or "")[:4] or str(datetime.datetime.now().year)
+    year = (f.get("expense_date") or "")[:4] or str(datetime.now().year)
     return redirect(url_for("lender_financials", year=year))
 
 
@@ -12646,7 +12646,7 @@ def lender_financials_goal_save():
         return redirect(url_for("login", role="lender"))
     uid = user["id"]
     f = request.form
-    year = int(f.get("goal_year", datetime.datetime.now().year))
+    year = int(f.get("goal_year", datetime.now().year))
     conn = get_db_connection()
     existing = conn.execute(
         "SELECT id FROM lender_financial_goals WHERE lender_user_id=? AND goal_year=?", (uid, year)
