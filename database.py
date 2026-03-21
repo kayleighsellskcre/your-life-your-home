@@ -1497,12 +1497,20 @@ def init_db() -> None:
             gross_commission_goal REAL DEFAULT 0,
             net_income_goal REAL DEFAULT 0,
             transactions_goal INTEGER DEFAULT 0,
+            expenses_budget REAL DEFAULT 0,
+            notes TEXT DEFAULT '',
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now')),
             UNIQUE(agent_user_id, goal_year),
             FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    # Migrate existing tables — add columns if they don't exist yet
+    for col, definition in [("expenses_budget", "REAL DEFAULT 0"), ("notes", "TEXT DEFAULT ''")]:
+        try:
+            cur.execute(f"ALTER TABLE agent_financial_goals ADD COLUMN {col} {definition}")
+        except Exception:
+            pass  # Column already exists
     print("[DATABASE] Agent financial tables created/verified")
 
     # ── LENDER FINANCIAL TABLES ────────────────────────────────────────────────
@@ -1548,12 +1556,20 @@ def init_db() -> None:
             loan_volume_goal REAL DEFAULT 0,
             revenue_goal REAL DEFAULT 0,
             loan_count_goal INTEGER DEFAULT 0,
+            expenses_budget REAL DEFAULT 0,
+            net_income_goal REAL DEFAULT 0,
+            notes TEXT DEFAULT '',
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now')),
             UNIQUE(lender_user_id, goal_year),
             FOREIGN KEY (lender_user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     """)
+    for col, definition in [("expenses_budget", "REAL DEFAULT 0"), ("net_income_goal", "REAL DEFAULT 0"), ("notes", "TEXT DEFAULT ''")]:
+        try:
+            cur.execute(f"ALTER TABLE lender_financial_goals ADD COLUMN {col} {definition}")
+        except Exception:
+            pass  # Column already exists
     print("[DATABASE] Lender financial tables created/verified")
 
     conn.commit()

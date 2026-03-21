@@ -12184,7 +12184,7 @@ def agent_financials_mileage_add():
     conn = get_db_connection()
     conn.execute("""
         INSERT INTO agent_mileage
-        (agent_user_id, trip_date, from_location, to_location, purpose, miles, irs_rate, deduction_value)
+        (agent_user_id, trip_date, from_location, to_location, purpose, miles, irs_rate, deduction_amount)
         VALUES (?,?,?,?,?,?,?,?)
     """, (uid, f.get("trip_date",""), f.get("from_location",""),
           f.get("to_location",""), f.get("purpose",""),
@@ -12224,7 +12224,7 @@ def agent_financials_goal_save():
     if existing:
         conn.execute("""
             UPDATE agent_financial_goals SET
-            gci_goal=?, transactions_goal=?, expenses_budget=?, net_income_goal=?, notes=?
+            gross_commission_goal=?, transactions_goal=?, expenses_budget=?, net_income_goal=?, notes=?
             WHERE agent_user_id=? AND goal_year=?
         """, (float(f.get("gci_goal") or 0), int(f.get("transactions_goal") or 0),
               float(f.get("expenses_budget") or 0), float(f.get("net_income_goal") or 0),
@@ -12232,7 +12232,7 @@ def agent_financials_goal_save():
     else:
         conn.execute("""
             INSERT INTO agent_financial_goals
-            (agent_user_id, goal_year, gci_goal, transactions_goal, expenses_budget, net_income_goal, notes)
+            (agent_user_id, goal_year, gross_commission_goal, transactions_goal, expenses_budget, net_income_goal, notes)
             VALUES (?,?,?,?,?,?,?)
         """, (uid, year, float(f.get("gci_goal") or 0), int(f.get("transactions_goal") or 0),
               float(f.get("expenses_budget") or 0), float(f.get("net_income_goal") or 0),
@@ -12260,6 +12260,129 @@ Agent Data:
         return jsonify({"coach_response": response})
     except Exception as e:
         return jsonify({"coach_response": "Unable to generate coaching tips right now. Please try again shortly."})
+
+
+@app.route("/api/ai/financials/agent-insights", methods=["POST"])
+def agent_financials_ai_insights():
+    """Auto-load 3 smart observations about the agent's financials."""
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        ctx = data.get("context", "")
+        prompt = f"""You are an elite real estate financial advisor. Analyze this agent's financial snapshot and return EXACTLY 3 sharp, specific insights in JSON format.
+
+Each insight must be:
+- Concrete (use the numbers given)
+- Actionable (tell them what to do)
+- Brief (max 2 sentences each)
+
+Return ONLY valid JSON like this:
+{{
+  "insights": [
+    {{"icon": "trend", "title": "Income Pace", "body": "...", "type": "positive|warning|info"}},
+    {{"icon": "expense", "title": "Expense Alert", "body": "...", "type": "positive|warning|info"}},
+    {{"icon": "goal", "title": "Goal Progress", "body": "...", "type": "positive|warning|info"}}
+  ]
+}}
+
+Agent Data:
+{ctx}"""
+        from ai_platform import ai_complete
+        raw = ai_complete(prompt, system="You are a financial data analyst. Return only valid JSON.", max_tokens=400, temperature=0.5)
+        import json as _json
+        # Strip markdown code fences if present
+        clean = raw.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+        parsed = _json.loads(clean.strip())
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({"insights": [
+            {"icon": "trend", "title": "Keep Going", "body": "Your AI coach is ready — add some transactions to unlock personalized insights.", "type": "info"}
+        ]})
+
+
+@app.route("/api/ai/financials/agent-forecast", methods=["POST"])
+def agent_financials_ai_forecast():
+    """Project year-end income based on current pace."""
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        ctx = data.get("context", "")
+        prompt = f"""You are a top real estate financial forecaster. Based on this agent's YTD data, project their full-year income.
+
+Return ONLY valid JSON:
+{{
+  "projected_gci": 125000,
+  "projected_net": 95000,
+  "projected_transactions": 18,
+  "confidence": "high|medium|low",
+  "headline": "One compelling sentence about their trajectory",
+  "action": "The single most impactful action they can take right now"
+}}
+
+Use realistic projections based on their current month (extrapolate from YTD). Be specific with dollar amounts.
+
+Agent Data:
+{ctx}"""
+        from ai_platform import ai_complete
+        raw = ai_complete(prompt, system="You are a financial forecasting expert. Return only valid JSON.", max_tokens=300, temperature=0.4)
+        import json as _json
+        clean = raw.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+        parsed = _json.loads(clean.strip())
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({"headline": "Add more data to unlock your forecast.", "action": "Log your first commission to get started.", "confidence": "low"})
+
+
+@app.route("/api/ai/financials/agent-tax-optimizer", methods=["POST"])
+def agent_financials_ai_tax_optimizer():
+    """Identify tax deduction opportunities for the agent."""
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        ctx = data.get("context", "")
+        prompt = f"""You are a CPA specializing in real estate agent taxes. Analyze this agent's expense profile and identify deduction opportunities.
+
+Return ONLY valid JSON:
+{{
+  "estimated_tax_savings": 4200,
+  "tips": [
+    {{"title": "Home Office Deduction", "detail": "If you work from home, you may deduct...", "potential_savings": 1800}},
+    {{"title": "Vehicle Expenses", "detail": "Based on your mileage...", "potential_savings": 1400}},
+    {{"title": "Marketing Write-Offs", "detail": "...", "potential_savings": 1000}}
+  ],
+  "disclaimer": "Consult a licensed CPA before filing."
+}}
+
+Provide 3-4 specific, actionable tips. Use actual numbers from their data.
+
+Agent Data:
+{ctx}"""
+        from ai_platform import ai_complete
+        raw = ai_complete(prompt, system="You are a tax advisor for real estate professionals. Return only valid JSON.", max_tokens=500, temperature=0.4)
+        import json as _json
+        clean = raw.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+        parsed = _json.loads(clean.strip())
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({"tips": [{"title": "Track Everything", "detail": "Log all expenses to maximize your deductions at tax time.", "potential_savings": 0}], "estimated_tax_savings": 0, "disclaimer": "Consult a licensed CPA before filing."})
 
 
 # ============================================================
@@ -12300,8 +12423,8 @@ def lender_financials():
 
     conn.close()
 
-    ytd_revenue = sum(r.get("origination_fee", 0) or 0 for r in revenues if r.get("status") == "funded")
-    ytd_projected = sum(r.get("origination_fee", 0) or 0 for r in revenues if r.get("status") == "projected")
+    ytd_revenue = sum(r.get("origination_fee_amt", 0) or 0 for r in revenues if r.get("status") == "funded")
+    ytd_projected = sum(r.get("origination_fee_amt", 0) or 0 for r in revenues if r.get("status") == "projected")
     ytd_expenses = sum(e.get("amount", 0) or 0 for e in expenses)
     ytd_loan_volume = sum(r.get("loan_amount", 0) or 0 for r in revenues if r.get("status") == "funded")
     net_income = ytd_revenue - ytd_expenses
@@ -12311,7 +12434,7 @@ def lender_financials():
         if r.get("status") == "funded" and r.get("close_date"):
             try:
                 mo = int(r["close_date"].split("-")[1])
-                monthly_revenue[mo] = monthly_revenue.get(mo, 0) + (r.get("origination_fee", 0) or 0)
+                monthly_revenue[mo] = monthly_revenue.get(mo, 0) + (r.get("origination_fee_amt", 0) or 0)
             except Exception:
                 pass
     monthly_revenue_list = [monthly_revenue.get(m, 0) for m in range(1, 13)]
@@ -12349,15 +12472,15 @@ def lender_financials_revenue_add():
     f = request.form
     loan_amount = float(f.get("loan_amount") or 0)
     orig_pct = float(f.get("origination_pct") or 1.0)
-    orig_fee = float(f.get("origination_fee") or round(loan_amount * orig_pct / 100, 2))
+    orig_fee_amt = float(f.get("origination_fee") or round(loan_amount * orig_pct / 100, 2))
     conn = get_db_connection()
     conn.execute("""
         INSERT INTO lender_loan_revenue
         (lender_user_id, borrower_name, property_address, loan_type, loan_amount,
-         origination_pct, origination_fee, close_date, status, notes)
-        VALUES (?,?,?,?,?,?,?,?,?,?)
+         origination_fee_pct, origination_fee_amt, total_revenue, close_date, status, notes)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?)
     """, (uid, f.get("borrower_name",""), f.get("property_address",""),
-          f.get("loan_type","purchase"), loan_amount, orig_pct, orig_fee,
+          f.get("loan_type","purchase"), loan_amount, orig_pct, orig_fee_amt, orig_fee_amt,
           f.get("close_date",""), f.get("status","projected"), f.get("notes","")))
     conn.commit()
     conn.close()
@@ -12441,7 +12564,8 @@ def lender_financials_goal_save():
     if existing:
         conn.execute("""
             UPDATE lender_financial_goals SET
-            revenue_goal=?, loan_count_goal=?, loan_volume_goal=?, expenses_budget=?, net_income_goal=?, notes=?
+            revenue_goal=?, loan_count_goal=?, loan_volume_goal=?,
+            expenses_budget=?, net_income_goal=?, notes=?
             WHERE lender_user_id=? AND goal_year=?
         """, (float(f.get("revenue_goal") or 0), int(f.get("loan_count_goal") or 0),
               float(f.get("loan_volume_goal") or 0), float(f.get("expenses_budget") or 0),
@@ -12449,7 +12573,8 @@ def lender_financials_goal_save():
     else:
         conn.execute("""
             INSERT INTO lender_financial_goals
-            (lender_user_id, goal_year, revenue_goal, loan_count_goal, loan_volume_goal, expenses_budget, net_income_goal, notes)
+            (lender_user_id, goal_year, revenue_goal, loan_count_goal, loan_volume_goal,
+             expenses_budget, net_income_goal, notes)
             VALUES (?,?,?,?,?,?,?,?)
         """, (uid, year, float(f.get("revenue_goal") or 0), int(f.get("loan_count_goal") or 0),
               float(f.get("loan_volume_goal") or 0), float(f.get("expenses_budget") or 0),
@@ -12476,4 +12601,125 @@ Lender Data:
         response = call_ai(prompt)
         return jsonify({"coach_response": response})
     except Exception as e:
-        return jsonify({"coach_response": f"Unable to generate coaching tips right now. Please try again shortly."})
+        return jsonify({"coach_response": "Unable to generate coaching tips right now. Please try again shortly."})
+
+
+@app.route("/api/ai/financials/lender-insights", methods=["POST"])
+def lender_financials_ai_insights():
+    """Auto-load 3 smart observations about the lender's financials."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        ctx = data.get("context", "")
+        prompt = f"""You are an elite mortgage lending financial advisor. Analyze this lender's financial snapshot and return EXACTLY 3 sharp, specific insights in JSON format.
+
+Each insight must be concrete (use actual numbers), actionable, and brief (max 2 sentences).
+
+Return ONLY valid JSON:
+{{
+  "insights": [
+    {{"icon": "trend", "title": "Revenue Pace", "body": "...", "type": "positive|warning|info"}},
+    {{"icon": "pipeline", "title": "Pipeline Health", "body": "...", "type": "positive|warning|info"}},
+    {{"icon": "goal", "title": "Goal Progress", "body": "...", "type": "positive|warning|info"}}
+  ]
+}}
+
+Lender Data:
+{ctx}"""
+        from ai_platform import ai_complete
+        raw = ai_complete(prompt, system="You are a financial data analyst. Return only valid JSON.", max_tokens=400, temperature=0.5)
+        import json as _json
+        clean = raw.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+        parsed = _json.loads(clean.strip())
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({"insights": [
+            {"icon": "trend", "title": "Ready to Analyze", "body": "Add loans and expenses to unlock personalized AI insights for your business.", "type": "info"}
+        ]})
+
+
+@app.route("/api/ai/financials/lender-forecast", methods=["POST"])
+def lender_financials_ai_forecast():
+    """Project year-end revenue based on current pipeline and pace."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        ctx = data.get("context", "")
+        prompt = f"""You are a top mortgage lending financial forecaster. Based on this lender's YTD data, project their full-year revenue.
+
+Return ONLY valid JSON:
+{{
+  "projected_revenue": 180000,
+  "projected_loan_count": 52,
+  "projected_loan_volume": 18000000,
+  "confidence": "high|medium|low",
+  "headline": "One compelling sentence about their trajectory",
+  "action": "The single most impactful action they can take right now to hit their goals"
+}}
+
+Use realistic projections extrapolated from their current YTD pace. Be specific.
+
+Lender Data:
+{ctx}"""
+        from ai_platform import ai_complete
+        raw = ai_complete(prompt, system="You are a financial forecasting expert. Return only valid JSON.", max_tokens=300, temperature=0.4)
+        import json as _json
+        clean = raw.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+        parsed = _json.loads(clean.strip())
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({"headline": "Log your pipeline to unlock your forecast.", "action": "Add your first loan to get started.", "confidence": "low"})
+
+
+@app.route("/api/ai/financials/lender-pipeline", methods=["POST"])
+def lender_financials_ai_pipeline():
+    """Analyze pipeline health and identify at-risk loans."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        ctx = data.get("context", "")
+        prompt = f"""You are a mortgage operations expert. Analyze this lender's pipeline and provide a health assessment.
+
+Return ONLY valid JSON:
+{{
+  "pipeline_score": 78,
+  "pull_through_rate": "72%",
+  "at_risk_revenue": 12000,
+  "recommendations": [
+    {{"priority": "high", "title": "Follow Up on Stale Files", "detail": "..."}},
+    {{"priority": "medium", "title": "Diversify Loan Types", "detail": "..."}},
+    {{"priority": "low", "title": "Referral Partner Outreach", "detail": "..."}}
+  ],
+  "summary": "One sentence overall pipeline health assessment"
+}}
+
+Be specific using the data provided. pipeline_score is 0-100.
+
+Lender Data:
+{ctx}"""
+        from ai_platform import ai_complete
+        raw = ai_complete(prompt, system="You are a mortgage pipeline expert. Return only valid JSON.", max_tokens=500, temperature=0.4)
+        import json as _json
+        clean = raw.strip()
+        if clean.startswith("```"):
+            clean = clean.split("```")[1]
+            if clean.startswith("json"):
+                clean = clean[4:]
+        parsed = _json.loads(clean.strip())
+        return jsonify(parsed)
+    except Exception as e:
+        return jsonify({"pipeline_score": 0, "summary": "Add loans to your pipeline to get an AI health assessment.", "recommendations": []})
