@@ -1,15 +1,15 @@
 {% extends "agent/layout.html" %}
 {% block agent_content %}
 <style>
-#iform{all:revert;font-family:'Lato',sans-serif;color:#3A352C;background:#F9F7F2;min-height:80vh;}
+#iform{all:revert;font-family:'Lato',sans-serif;color:#3D2E24;background:#F9F7F2;min-height:80vh;}
 #iform *{box-sizing:border-box;}
 
 /* TOP BAR */
 .if-topbar{
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;
-  padding:1rem 1.5rem;background:#fff;border-bottom:1px solid rgba(200,180,151,.25);
+ display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;
+ padding:1rem 1.5rem;background:#fff;border-bottom:1px solid rgba(200,180,151,.25);
 }
-.if-topbar__title{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:400;color:#3A352C;margin:0;}
+.if-topbar__title{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:400;color:#3D2E24;margin:0;}
 .if-topbar__sub{font-size:.7rem;color:#9A9472;letter-spacing:.06em;text-transform:uppercase;margin-top:.12rem;}
 
 /* LAYOUT */
@@ -19,9 +19,9 @@
 /* CARD */
 .if-card{background:#fff;border:1px solid rgba(200,180,151,.25);border-radius:8px;overflow:hidden;}
 .if-card__hd{
-  padding:.65rem 1rem;background:#FDFBF7;border-bottom:1px solid rgba(200,180,151,.18);
-  font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#9A9472;
-  display:flex;align-items:center;justify-content:space-between;
+ padding:.65rem 1rem;background:#F5F0EB;border-bottom:1px solid rgba(200,180,151,.18);
+ font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#9A9472;
+ display:flex;align-items:center;justify-content:space-between;
 }
 .if-card__body{padding:1rem;}
 
@@ -32,11 +32,11 @@
 .if-field{display:flex;flex-direction:column;gap:.28rem;}
 .if-field label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9A9472;}
 .if-field input,.if-field select,.if-field textarea{
-  padding:.42rem .65rem;font-size:.8rem;border:1px solid rgba(200,180,151,.38);
-  border-radius:5px;background:#fff;color:#3A352C;font-family:inherit;outline:none;
-  transition:border-color .1s;
+ padding:.42rem .65rem;font-size:.8rem;border:1px solid rgba(200,180,151,.38);
+ border-radius:5px;background:#fff;color:#3D2E24;font-family:inherit;outline:none;
+ transition:border-color .1s;
 }
-.if-field input:focus,.if-field select:focus,.if-field textarea:focus{border-color:#6B6A45;}
+.if-field input:focus,.if-field select:focus,.if-field textarea:focus{border-color:#6B5B4D;}
 .if-field textarea{resize:vertical;min-height:70px;}
 
 /* CONTACT LOOKUP */
@@ -47,399 +47,399 @@
 .items-wrap{overflow-x:auto;}
 .items-table{width:100%;border-collapse:collapse;min-width:480px;}
 .items-table th{
-  font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
-  color:#9A9472;padding:.4rem .5rem;border-bottom:1px solid rgba(200,180,151,.22);
-  background:#FDFBF7;text-align:left;
+ font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+ color:#9A9472;padding:.4rem .5rem;border-bottom:1px solid rgba(200,180,151,.22);
+ background:#F5F0EB;text-align:left;
 }
 .items-table th:last-child{width:36px;}
 .items-table td{padding:.35rem .5rem;border-bottom:1px solid rgba(200,180,151,.1);vertical-align:middle;}
 .item-input{
-  width:100%;padding:.32rem .45rem;font-size:.78rem;border:1px solid rgba(200,180,151,.3);
-  border-radius:4px;background:#fff;color:#3A352C;font-family:inherit;outline:none;
+ width:100%;padding:.32rem .45rem;font-size:.78rem;border:1px solid rgba(200,180,151,.3);
+ border-radius:4px;background:#fff;color:#3D2E24;font-family:inherit;outline:none;
 }
-.item-input:focus{border-color:#6B6A45;}
+.item-input:focus{border-color:#6B5B4D;}
 .item-input--num{text-align:right;width:80px;}
 .item-input--price{text-align:right;width:90px;}
-.item-amount{font-size:.78rem;font-weight:600;text-align:right;min-width:75px;color:#3A352C;}
+.item-amount{font-size:.78rem;font-weight:600;text-align:right;min-width:75px;color:#3D2E24;}
 .del-row{
-  width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
-  background:none;border:none;cursor:pointer;color:#b94040;font-size:1rem;border-radius:4px;
-  transition:background .1s;
+ width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;
+ background:none;border:none;cursor:pointer;color:#b94040;font-size:1rem;border-radius:4px;
+ transition:background .1s;
 }
 .del-row:hover{background:rgba(185,64,64,.1);}
 .add-item-btn{
-  display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .85rem;
-  background:none;border:1px dashed rgba(107,106,69,.35);border-radius:5px;
-  font-size:.73rem;font-weight:600;color:#6B6A45;cursor:pointer;margin-top:.5rem;
-  transition:all .12s;
+ display:inline-flex;align-items:center;gap:.35rem;padding:.38rem .85rem;
+ background:none;border:1px dashed rgba(107,91,77,.35);border-radius:5px;
+ font-size:.73rem;font-weight:600;color:#6B5B4D;cursor:pointer;margin-top:.5rem;
+ transition:all .12s;
 }
-.add-item-btn:hover{background:rgba(107,106,69,.05);border-style:solid;}
+.add-item-btn:hover{background:rgba(107,91,77,.05);border-style:solid;}
 
 /* TOTALS */
 .totals-grid{display:grid;grid-template-columns:1fr auto;gap:.3rem .75rem;align-items:center;padding:.25rem 0;}
 .totals-grid .t-label{font-size:.75rem;color:#9A9472;text-align:right;}
-.totals-grid .t-val{font-size:.8rem;text-align:right;font-weight:600;color:#3A352C;min-width:80px;}
-.totals-grid .t-val--total{font-size:1rem;color:#3A352C;font-family:'Playfair Display',serif;font-weight:400;}
-.totals-grid .t-label--total{font-size:.8rem;font-weight:700;color:#3A352C;text-align:right;}
+.totals-grid .t-val{font-size:.8rem;text-align:right;font-weight:600;color:#3D2E24;min-width:80px;}
+.totals-grid .t-val--total{font-size:1rem;color:#3D2E24;font-family:'Playfair Display',serif;font-weight:400;}
+.totals-grid .t-label--total{font-size:.8rem;font-weight:700;color:#3D2E24;text-align:right;}
 .tot-divider{grid-column:1/-1;border:none;border-top:1px solid rgba(200,180,151,.25);margin:.3rem 0;}
 
 /* BUTTONS */
 .if-btnbar{
-  display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;
-  padding:.85rem 1rem;background:#FDFBF7;border-top:1px solid rgba(200,180,151,.18);
+ display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap;
+ padding:.85rem 1rem;background:#F5F0EB;border-top:1px solid rgba(200,180,151,.18);
 }
 .if-btn{
-  display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 1.15rem;
-  border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;
-  border:none;letter-spacing:.02em;transition:all .12s;white-space:nowrap;
+ display:inline-flex;align-items:center;gap:.35rem;padding:.5rem 1.15rem;
+ border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;
+ border:none;letter-spacing:.02em;transition:all .12s;white-space:nowrap;
 }
-.if-btn--primary{background:#6B6A45;color:#fff;}
-.if-btn--primary:hover{background:#5A5938;}
+.if-btn--primary{background:#6B5B4D;color:#fff;}
+.if-btn--primary:hover{background:#5A4A3C;}
 .if-btn--send{background:#4A7C59;color:#fff;}
 .if-btn--send:hover{background:#3d6a4a;}
-.if-btn--ghost{background:transparent;color:#6B6A45;border:1px solid rgba(107,106,69,.38);}
-.if-btn--ghost:hover{background:rgba(107,106,69,.07);}
+.if-btn--ghost{background:transparent;color:#6B5B4D;border:1px solid rgba(107,91,77,.38);}
+.if-btn--ghost:hover{background:rgba(107,91,77,.07);}
 
 /* SIDEBAR FIELDS */
 .if-input-sm{
-  width:100%;padding:.38rem .6rem;font-size:.78rem;border:1px solid rgba(200,180,151,.38);
-  border-radius:5px;background:#fff;color:#3A352C;font-family:inherit;outline:none;
-  transition:border-color .1s;margin-bottom:.6rem;
+ width:100%;padding:.38rem .6rem;font-size:.78rem;border:1px solid rgba(200,180,151,.38);
+ border-radius:5px;background:#fff;color:#3D2E24;font-family:inherit;outline:none;
+ transition:border-color .1s;margin-bottom:.6rem;
 }
-.if-input-sm:focus{border-color:#6B6A45;}
+.if-input-sm:focus{border-color:#6B5B4D;}
 .if-select-sm{width:100%;margin-bottom:.6rem;}
 .if-label-sm{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#9A9472;display:block;margin-bottom:.2rem;}
 
 /* PREVIEW STRIP */
 .inv-preview-no{
-  font-family:'Playfair Display',serif;font-size:1.1rem;color:#6B6A45;
-  padding:.5rem 1rem;background:#FDFBF7;border-radius:6px;text-align:center;
-  border:1px solid rgba(107,106,69,.2);margin-bottom:.75rem;letter-spacing:.04em;
+ font-family:'Playfair Display',serif;font-size:1.1rem;color:#6B5B4D;
+ padding:.5rem 1rem;background:#F5F0EB;border-radius:6px;text-align:center;
+ border:1px solid rgba(107,91,77,.2);margin-bottom:.75rem;letter-spacing:.04em;
 }
 </style>
 
 <div id="iform">
-  <div class="if-topbar">
-    <div>
-      <h1 class="if-topbar__title">{{ 'Edit Invoice' if mode=='edit' else 'New Invoice' }}</h1>
-      <div class="if-topbar__sub">Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts</div>
-    </div>
-    <div style="display:flex;gap:.5rem;">
-      <a href="{{ url_for('agent_invoices') }}" class="if-btn if-btn--ghost">← Back</a>
-      {% if mode=='edit' %}
-      <a href="{{ url_for('agent_invoice_print', inv_id=invoice.id) }}" target="_blank" class="if-btn if-btn--ghost">🖨 Preview</a>
-      {% endif %}
-    </div>
-  </div>
+ <div class="if-topbar">
+ <div>
+ <h1 class="if-topbar__title">{{ 'Edit Invoice' if mode=='edit' else 'New Invoice' }}</h1>
+ <div class="if-topbar__sub">Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts</div>
+ </div>
+ <div style="display:flex;gap:.5rem;">
+ <a href="{{ url_for('agent_invoices') }}" class="if-btn if-btn--ghost">← Back</a>
+ {% if mode=='edit' %}
+ <a href="{{ url_for('agent_invoice_print', inv_id=invoice.id) }}" target="_blank" class="if-btn if-btn--ghost"> Preview</a>
+ {% endif %}
+ </div>
+ </div>
 
-  <form method="post" id="invoiceForm">
-  <div class="if-body">
+ <form method="post" id="invoiceForm">
+ <div class="if-body">
 
-    <!-- LEFT COLUMN -->
-    <div>
+ <!-- LEFT COLUMN -->
+ <div>
 
-      <!-- CLIENT INFO -->
-      <div class="if-card" style="margin-bottom:1rem;">
-        <div class="if-card__hd">
-          Client Information
-          <span style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;color:#9A9472;">Pull from CRM or enter manually</span>
-        </div>
-        <div class="if-card__body">
-          <div class="if-row if-row--full" style="margin-bottom:.85rem;">
-            <div class="if-field">
-              <label>Pull from CRM Contact</label>
-              <select id="contactSelect" onchange="fillFromContact(this.value)">
-                <option value="">— Select contact (optional) —</option>
-                {% for c in contacts %}
-                <option value="{{ c.id }}"
-                  data-name="{{ c.name or '' }}"
-                  data-email="{{ c.email or '' }}"
-                  data-address="{{ c.address or '' }}"
-                  data-city="{{ c.city or '' }}"
-                  data-state="{{ c.state or '' }}"
-                  data-zip="{{ c.zip_code or '' }}"
-                  {% if invoice and invoice.contact_id == c.id %}selected{% endif %}
-                  {% if prefill_contact and prefill_contact.id == c.id %}selected{% endif %}
-                >{{ c.name }}</option>
-                {% endfor %}
-              </select>
-              <input type="hidden" name="contact_id" id="contactIdHidden" value="{{ (invoice.contact_id if invoice and invoice.contact_id) or (prefill_contact.id if prefill_contact) or '' }}">
-            </div>
-          </div>
-          <div class="if-row">
-            <div class="if-field">
-              <label>Client Name *</label>
-              <input type="text" name="client_name" id="f_name" required
-                value="{{ invoice.client_name if invoice else (prefill_contact.name if prefill_contact else '') }}"
-                placeholder="Full Name">
-            </div>
-            <div class="if-field">
-              <label>Client Email</label>
-              <input type="email" name="client_email" id="f_email"
-                value="{{ invoice.client_email if invoice else (prefill_contact.email if prefill_contact else '') }}"
-                placeholder="email@example.com">
-            </div>
-          </div>
-          <div class="if-row if-row--full">
-            <div class="if-field">
-              <label>Street Address</label>
-              <input type="text" name="client_address" id="f_addr"
-                value="{{ invoice.client_address if invoice else (prefill_contact.address if prefill_contact else '') }}"
-                placeholder="123 Main St">
-            </div>
-          </div>
-          <div class="if-row if-row--3">
-            <div class="if-field">
-              <label>City</label>
-              <input type="text" name="client_city" id="f_city"
-                value="{{ invoice.client_city if invoice else (prefill_contact.city if prefill_contact else '') }}">
-            </div>
-            <div class="if-field">
-              <label>State</label>
-              <input type="text" name="client_state" id="f_state" maxlength="2"
-                value="{{ invoice.client_state if invoice else (prefill_contact.state if prefill_contact else '') }}"
-                placeholder="KS">
-            </div>
-            <div class="if-field">
-              <label>ZIP</label>
-              <input type="text" name="client_zip" id="f_zip"
-                value="{{ invoice.client_zip if invoice else (prefill_contact.zip_code if prefill_contact else '') }}">
-            </div>
-          </div>
-        </div>
-      </div>
+ <!-- CLIENT INFO -->
+ <div class="if-card" style="margin-bottom:1rem;">
+ <div class="if-card__hd">
+ Client Information
+ <span style="font-size:.65rem;font-weight:400;text-transform:none;letter-spacing:0;color:#9A9472;">Pull from CRM or enter manually</span>
+ </div>
+ <div class="if-card__body">
+ <div class="if-row if-row--full" style="margin-bottom:.85rem;">
+ <div class="if-field">
+ <label>Pull from CRM Contact</label>
+ <select id="contactSelect" onchange="fillFromContact(this.value)">
+ <option value="">— Select contact (optional) —</option>
+ {% for c in contacts %}
+ <option value="{{ c.id }}"
+ data-name="{{ c.name or '' }}"
+ data-email="{{ c.email or '' }}"
+ data-address="{{ c.address or '' }}"
+ data-city="{{ c.city or '' }}"
+ data-state="{{ c.state or '' }}"
+ data-zip="{{ c.zip_code or '' }}"
+ {% if invoice and invoice.contact_id == c.id %}selected{% endif %}
+ {% if prefill_contact and prefill_contact.id == c.id %}selected{% endif %}
+ >{{ c.name }}</option>
+ {% endfor %}
+ </select>
+ <input type="hidden" name="contact_id" id="contactIdHidden" value="{{ (invoice.contact_id if invoice and invoice.contact_id) or (prefill_contact.id if prefill_contact) or '' }}">
+ </div>
+ </div>
+ <div class="if-row">
+ <div class="if-field">
+ <label>Client Name *</label>
+ <input type="text" name="client_name" id="f_name" required
+ value="{{ invoice.client_name if invoice else (prefill_contact.name if prefill_contact else '') }}"
+ placeholder="Full Name">
+ </div>
+ <div class="if-field">
+ <label>Client Email</label>
+ <input type="email" name="client_email" id="f_email"
+ value="{{ invoice.client_email if invoice else (prefill_contact.email if prefill_contact else '') }}"
+ placeholder="email@example.com">
+ </div>
+ </div>
+ <div class="if-row if-row--full">
+ <div class="if-field">
+ <label>Street Address</label>
+ <input type="text" name="client_address" id="f_addr"
+ value="{{ invoice.client_address if invoice else (prefill_contact.address if prefill_contact else '') }}"
+ placeholder="123 Main St">
+ </div>
+ </div>
+ <div class="if-row if-row--3">
+ <div class="if-field">
+ <label>City</label>
+ <input type="text" name="client_city" id="f_city"
+ value="{{ invoice.client_city if invoice else (prefill_contact.city if prefill_contact else '') }}">
+ </div>
+ <div class="if-field">
+ <label>State</label>
+ <input type="text" name="client_state" id="f_state" maxlength="2"
+ value="{{ invoice.client_state if invoice else (prefill_contact.state if prefill_contact else '') }}"
+ placeholder="KS">
+ </div>
+ <div class="if-field">
+ <label>ZIP</label>
+ <input type="text" name="client_zip" id="f_zip"
+ value="{{ invoice.client_zip if invoice else (prefill_contact.zip_code if prefill_contact else '') }}">
+ </div>
+ </div>
+ </div>
+ </div>
 
-      <!-- LINE ITEMS -->
-      <div class="if-card" style="margin-bottom:1rem;">
-        <div class="if-card__hd">Services &amp; Items</div>
-        <div class="if-card__body">
-          <div class="items-wrap">
-            <table class="items-table" id="itemsTable">
-              <thead>
-                <tr>
-                  <th style="width:45%">Description</th>
-                  <th style="width:12%;text-align:right">Qty</th>
-                  <th style="width:16%;text-align:right">Unit Price</th>
-                  <th style="width:16%;text-align:right">Amount</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="itemsBody">
-                {% if items %}
-                  {% for item in items %}
-                  <tr class="item-row">
-                    <td><input type="text" name="item_desc[]" class="item-input" value="{{ item.description }}" placeholder="e.g. Custom Cabinet Design – Kitchen" required></td>
-                    <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="{{ item.quantity }}" min="0" step="0.01" oninput="calcRow(this)"></td>
-                    <td><input type="number" name="item_price[]" class="item-input item-input--price" value="{{ item.unit_price }}" min="0" step="0.01" oninput="calcRow(this)"></td>
-                    <td><span class="item-amount">${{ "{:,.2f}".format(item.amount) }}</span></td>
-                    <td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>
-                  </tr>
-                  {% endfor %}
-                {% else %}
-                  <!-- Default rows for new invoice -->
-                  <tr class="item-row">
-                    <td><input type="text" name="item_desc[]" class="item-input" placeholder="e.g. 3D Layout Design – Full Home" required></td>
-                    <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="1" min="0" step="0.01" oninput="calcRow(this)"></td>
-                    <td><input type="number" name="item_price[]" class="item-input item-input--price" value="" min="0" step="0.01" placeholder="0.00" oninput="calcRow(this)"></td>
-                    <td><span class="item-amount">$0.00</span></td>
-                    <td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>
-                  </tr>
-                {% endif %}
-              </tbody>
-            </table>
-          </div>
-          <button type="button" class="add-item-btn" onclick="addRow()">+ Add Line Item</button>
-        </div>
+ <!-- LINE ITEMS -->
+ <div class="if-card" style="margin-bottom:1rem;">
+ <div class="if-card__hd">Services &amp; Items</div>
+ <div class="if-card__body">
+ <div class="items-wrap">
+ <table class="items-table" id="itemsTable">
+ <thead>
+ <tr>
+ <th style="width:45%">Description</th>
+ <th style="width:12%;text-align:right">Qty</th>
+ <th style="width:16%;text-align:right">Unit Price</th>
+ <th style="width:16%;text-align:right">Amount</th>
+ <th></th>
+ </tr>
+ </thead>
+ <tbody id="itemsBody">
+ {% if items %}
+ {% for item in items %}
+ <tr class="item-row">
+ <td><input type="text" name="item_desc[]" class="item-input" value="{{ item.description }}" placeholder="e.g. Custom Cabinet Design – Kitchen" required></td>
+ <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="{{ item.quantity }}" min="0" step="0.01" oninput="calcRow(this)"></td>
+ <td><input type="number" name="item_price[]" class="item-input item-input--price" value="{{ item.unit_price }}" min="0" step="0.01" oninput="calcRow(this)"></td>
+ <td><span class="item-amount">${{ "{:,.2f}".format(item.amount) }}</span></td>
+ <td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>
+ </tr>
+ {% endfor %}
+ {% else %}
+ <!-- Default rows for new invoice -->
+ <tr class="item-row">
+ <td><input type="text" name="item_desc[]" class="item-input" placeholder="e.g. 3D Layout Design – Full Home" required></td>
+ <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="1" min="0" step="0.01" oninput="calcRow(this)"></td>
+ <td><input type="number" name="item_price[]" class="item-input item-input--price" value="" min="0" step="0.01" placeholder="0.00" oninput="calcRow(this)"></td>
+ <td><span class="item-amount">$0.00</span></td>
+ <td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>
+ </tr>
+ {% endif %}
+ </tbody>
+ </table>
+ </div>
+ <button type="button" class="add-item-btn" onclick="addRow()">+ Add Line Item</button>
+ </div>
 
-        <!-- TOTALS -->
-        <div style="padding:.75rem 1rem;border-top:1px solid rgba(200,180,151,.18);">
-          <div class="totals-grid">
-            <div class="t-label">Subtotal</div>
-            <div class="t-val" id="subtotalDisplay">$0.00</div>
-            <div class="t-label">Tax Rate (%)</div>
-            <div class="t-val">
-              <input type="number" name="tax_rate" id="taxRate" min="0" max="30" step="0.1"
-                value="{{ invoice.tax_rate if invoice else 0 }}"
-                style="width:65px;padding:.25rem .4rem;font-size:.75rem;border:1px solid rgba(200,180,151,.38);border-radius:4px;text-align:right;"
-                oninput="calcTotals()">
-            </div>
-            <div class="t-label">Tax Amount</div>
-            <div class="t-val" id="taxDisplay">$0.00</div>
-            <div class="t-label">Discount ($)</div>
-            <div class="t-val">
-              <input type="number" name="discount_amount" id="discountAmt" min="0" step="0.01"
-                value="{{ invoice.discount_amount if invoice else 0 }}"
-                style="width:80px;padding:.25rem .4rem;font-size:.75rem;border:1px solid rgba(200,180,151,.38);border-radius:4px;text-align:right;"
-                oninput="calcTotals()">
-            </div>
-            <hr class="tot-divider">
-            <div class="t-label--total">Total Due</div>
-            <div class="t-val t-val--total" id="totalDisplay">$0.00</div>
-          </div>
-        </div>
+ <!-- TOTALS -->
+ <div style="padding:.75rem 1rem;border-top:1px solid rgba(200,180,151,.18);">
+ <div class="totals-grid">
+ <div class="t-label">Subtotal</div>
+ <div class="t-val" id="subtotalDisplay">$0.00</div>
+ <div class="t-label">Tax Rate (%)</div>
+ <div class="t-val">
+ <input type="number" name="tax_rate" id="taxRate" min="0" max="30" step="0.1"
+ value="{{ invoice.tax_rate if invoice else 0 }}"
+ style="width:65px;padding:.25rem .4rem;font-size:.75rem;border:1px solid rgba(200,180,151,.38);border-radius:4px;text-align:right;"
+ oninput="calcTotals()">
+ </div>
+ <div class="t-label">Tax Amount</div>
+ <div class="t-val" id="taxDisplay">$0.00</div>
+ <div class="t-label">Discount ($)</div>
+ <div class="t-val">
+ <input type="number" name="discount_amount" id="discountAmt" min="0" step="0.01"
+ value="{{ invoice.discount_amount if invoice else 0 }}"
+ style="width:80px;padding:.25rem .4rem;font-size:.75rem;border:1px solid rgba(200,180,151,.38);border-radius:4px;text-align:right;"
+ oninput="calcTotals()">
+ </div>
+ <hr class="tot-divider">
+ <div class="t-label--total">Total Due</div>
+ <div class="t-val t-val--total" id="totalDisplay">$0.00</div>
+ </div>
+ </div>
 
-        <div class="if-btnbar">
-          <a href="{{ url_for('agent_invoices') }}" class="if-btn if-btn--ghost">Cancel</a>
-          <button type="submit" name="save_action" value="save" class="if-btn if-btn--primary">Save Draft</button>
-          <button type="submit" name="save_action" value="send" class="if-btn if-btn--send">Save &amp; Mark Sent →</button>
-          {% if mode=='edit' and invoice.status != 'paid' %}
-          <button type="submit" name="save_action" value="paid" class="if-btn if-btn--send" style="background:#4A7C59;">✓ Mark Paid</button>
-          {% endif %}
-        </div>
-      </div>
+ <div class="if-btnbar">
+ <a href="{{ url_for('agent_invoices') }}" class="if-btn if-btn--ghost">Cancel</a>
+ <button type="submit" name="save_action" value="save" class="if-btn if-btn--primary">Save Draft</button>
+ <button type="submit" name="save_action" value="send" class="if-btn if-btn--send">Save &amp; Mark Sent →</button>
+ {% if mode=='edit' and invoice.status != 'paid' %}
+ <button type="submit" name="save_action" value="paid" class="if-btn if-btn--send" style="background:#4A7C59;"> Mark Paid</button>
+ {% endif %}
+ </div>
+ </div>
 
-    </div><!-- /left column -->
+ </div><!-- /left column -->
 
-    <!-- RIGHT COLUMN: SIDEBAR -->
-    <div>
+ <!-- RIGHT COLUMN: SIDEBAR -->
+ <div>
 
-      <!-- INVOICE META -->
-      <div class="if-card" style="margin-bottom:1rem;">
-        <div class="if-card__hd">Invoice Details</div>
-        <div class="if-card__body">
-          <div class="inv-preview-no" id="invNoDisplay">
-            {% if invoice %}{{ invoice.invoice_number }}{% else %}INV-####{% endif %}
-          </div>
-          <label class="if-label-sm">Issue Date</label>
-          <input type="date" name="issue_date" class="if-input-sm"
-            value="{{ invoice.issue_date if invoice and invoice.issue_date else today }}">
-          <label class="if-label-sm">Due Date</label>
-          <input type="date" name="due_date" class="if-input-sm"
-            value="{{ due_date_default }}">
-          {% if mode=='edit' %}
-          <label class="if-label-sm">Status</label>
-          <select name="_status_display" class="if-input-sm if-select-sm" disabled>
-            <option>{{ invoice.status|title }}</option>
-          </select>
-          {% endif %}
-        </div>
-      </div>
+ <!-- INVOICE META -->
+ <div class="if-card" style="margin-bottom:1rem;">
+ <div class="if-card__hd">Invoice Details</div>
+ <div class="if-card__body">
+ <div class="inv-preview-no" id="invNoDisplay">
+ {% if invoice %}{{ invoice.invoice_number }}{% else %}INV-####{% endif %}
+ </div>
+ <label class="if-label-sm">Issue Date</label>
+ <input type="date" name="issue_date" class="if-input-sm"
+ value="{{ invoice.issue_date if invoice and invoice.issue_date else today }}">
+ <label class="if-label-sm">Due Date</label>
+ <input type="date" name="due_date" class="if-input-sm"
+ value="{{ due_date_default }}">
+ {% if mode=='edit' %}
+ <label class="if-label-sm">Status</label>
+ <select name="_status_display" class="if-input-sm if-select-sm" disabled>
+ <option>{{ invoice.status|title }}</option>
+ </select>
+ {% endif %}
+ </div>
+ </div>
 
-      <!-- QUICK SERVICE PRESETS -->
-      <div class="if-card" style="margin-bottom:1rem;">
-        <div class="if-card__hd">Quick-Add Services</div>
-        <div class="if-card__body" style="display:flex;flex-direction:column;gap:.28rem;">
+ <!-- QUICK SERVICE PRESETS -->
+ <div class="if-card" style="margin-bottom:1rem;">
+ <div class="if-card__hd">Quick-Add Services</div>
+ <div class="if-card__body" style="display:flex;flex-direction:column;gap:.28rem;">
 
-          <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.1rem 0 .25rem;">Base Package</div>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Client Base Package – includes initial design meeting, 2 revision meetings &amp; final PDF', 1, 150)"><span>Client Base Package</span><span style="color:#9A9472;">$150</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring – 1 room included', 1, 50)"><span>Onsite Measuring (1 room)</span><span style="color:#9A9472;">$50</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring – Additional Room', 1, 20)"><span>Onsite Measuring (add. room)</span><span style="color:#9A9472;">$20</span></button>
+ <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.1rem 0 .25rem;">Base Package</div>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Client Base Package – includes initial design meeting, 2 revision meetings &amp; final PDF', 1, 150)"><span>Client Base Package</span><span style="color:#9A9472;">$150</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring – 1 room included', 1, 50)"><span>Onsite Measuring (1 room)</span><span style="color:#9A9472;">$50</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring – Additional Room', 1, 20)"><span>Onsite Measuring (add. room)</span><span style="color:#9A9472;">$20</span></button>
 
-          <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.35rem 0 .25rem;">Rooms</div>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Kitchen Design', 1, 900)"><span>Kitchen</span><span style="color:#9A9472;">$900</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Basement Kitchen / Bar Design', 1, 600)"><span>Basement Kitchen / Bar</span><span style="color:#9A9472;">$600</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Large Master Closet Design', 1, 500)"><span>Large Master Closet</span><span style="color:#9A9472;">$500</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Office Design', 1, 500)"><span>Office</span><span style="color:#9A9472;">$500</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Laundry Room Design', 1, 275)"><span>Laundry Room</span><span style="color:#9A9472;">$275</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Fireplace Mantle &amp; Bookcases Design', 1, 275)"><span>Fireplace Mantle &amp; Bookcases</span><span style="color:#9A9472;">$275</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Pantry Design', 1, 250)"><span>Pantry</span><span style="color:#9A9472;">$250</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Mudroom Design', 1, 250)"><span>Mudroom</span><span style="color:#9A9472;">$250</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Furniture Layout &amp; Measure (base 10\'x10\')', 1, 200)"><span>Furniture Layout &amp; Measure</span><span style="color:#9A9472;">$200+</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Small Master Closet Design', 1, 300)"><span>Small Master Closet</span><span style="color:#9A9472;">$300</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Master Bathroom Design', 1, 300)"><span>Master Bathroom</span><span style="color:#9A9472;">$300</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Dining Room Design', 1, 300)"><span>Dining Room</span><span style="color:#9A9472;">$300</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Bench Design', 1, 125)"><span>Bench</span><span style="color:#9A9472;">$125</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Buffet / Console / Bathroom Vanity Design', 1, 125)"><span>Buffet / Console / Vanity</span><span style="color:#9A9472;">$125</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Bookcase Design', 1, 125)"><span>Bookcase</span><span style="color:#9A9472;">$125</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Mantel Design', 1, 75)"><span>Mantel</span><span style="color:#9A9472;">$75</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Floating Shelving Design', 1, 50)"><span>Floating Shelving</span><span style="color:#9A9472;">$50</span></button>
+ <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.35rem 0 .25rem;">Rooms</div>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Kitchen Design', 1, 900)"><span>Kitchen</span><span style="color:#9A9472;">$900</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Basement Kitchen / Bar Design', 1, 600)"><span>Basement Kitchen / Bar</span><span style="color:#9A9472;">$600</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Large Master Closet Design', 1, 500)"><span>Large Master Closet</span><span style="color:#9A9472;">$500</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Office Design', 1, 500)"><span>Office</span><span style="color:#9A9472;">$500</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Laundry Room Design', 1, 275)"><span>Laundry Room</span><span style="color:#9A9472;">$275</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Fireplace Mantle &amp; Bookcases Design', 1, 275)"><span>Fireplace Mantle &amp; Bookcases</span><span style="color:#9A9472;">$275</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Pantry Design', 1, 250)"><span>Pantry</span><span style="color:#9A9472;">$250</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Mudroom Design', 1, 250)"><span>Mudroom</span><span style="color:#9A9472;">$250</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Furniture Layout &amp; Measure (base 10\'x10\')', 1, 200)"><span>Furniture Layout &amp; Measure</span><span style="color:#9A9472;">$200+</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Small Master Closet Design', 1, 300)"><span>Small Master Closet</span><span style="color:#9A9472;">$300</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Master Bathroom Design', 1, 300)"><span>Master Bathroom</span><span style="color:#9A9472;">$300</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Dining Room Design', 1, 300)"><span>Dining Room</span><span style="color:#9A9472;">$300</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Bench Design', 1, 125)"><span>Bench</span><span style="color:#9A9472;">$125</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Buffet / Console / Bathroom Vanity Design', 1, 125)"><span>Buffet / Console / Vanity</span><span style="color:#9A9472;">$125</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Bookcase Design', 1, 125)"><span>Bookcase</span><span style="color:#9A9472;">$125</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Mantel Design', 1, 75)"><span>Mantel</span><span style="color:#9A9472;">$75</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Floating Shelving Design', 1, 50)"><span>Floating Shelving</span><span style="color:#9A9472;">$50</span></button>
 
-          <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.35rem 0 .25rem;">Add-Ons</div>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional Revisions', 1, 50)"><span>Additional Revisions (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional Virtual Meeting', 1, 50)"><span>Additional Virtual Meeting (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional In-Person Meeting', 1, 50)"><span>Additional In-Person Meeting (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
-          <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Custom Design – TBD', 1, 0)"><span>Custom (price TBD)</span><span style="color:#9A9472;">TBD</span></button>
+ <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.35rem 0 .25rem;">Add-Ons</div>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional Revisions', 1, 50)"><span>Additional Revisions (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional Virtual Meeting', 1, 50)"><span>Additional Virtual Meeting (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional In-Person Meeting', 1, 50)"><span>Additional In-Person Meeting (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Custom Design – TBD', 1, 0)"><span>Custom (price TBD)</span><span style="color:#9A9472;">TBD</span></button>
 
-        </div>
-      </div>
+ </div>
+ </div>
 
-      <!-- NOTES & TERMS -->
-      <div class="if-card">
-        <div class="if-card__hd">Notes &amp; Terms</div>
-        <div class="if-card__body">
-          <label class="if-label-sm">Client Notes (shown on invoice)</label>
-          <textarea name="notes" class="if-input-sm" rows="3"
-            placeholder="e.g. Thank you for choosing Kayleigh Biggs Custom Cabinetry!">{{ invoice.notes if invoice else '' }}</textarea>
-          <label class="if-label-sm">Payment Terms</label>
-          <textarea name="terms" class="if-input-sm" rows="3">{{ invoice.terms if invoice else 'Payment due within 30 days of invoice date.\n\nNote: In KC Metro area. Further away will be an additional cost. We are not responsible for wrong measurements if onsite measurements are not done. Our/your cabinet maker will remeasure before constructing.' }}</textarea>
-        </div>
-      </div>
+ <!-- NOTES & TERMS -->
+ <div class="if-card">
+ <div class="if-card__hd">Notes &amp; Terms</div>
+ <div class="if-card__body">
+ <label class="if-label-sm">Client Notes (shown on invoice)</label>
+ <textarea name="notes" class="if-input-sm" rows="3"
+ placeholder="e.g. Thank you for choosing Kayleigh Biggs Custom Cabinetry!">{{ invoice.notes if invoice else '' }}</textarea>
+ <label class="if-label-sm">Payment Terms</label>
+ <textarea name="terms" class="if-input-sm" rows="3">{{ invoice.terms if invoice else 'Payment due within 30 days of invoice date.\n\nNote: In KC Metro area. Further away will be an additional cost. We are not responsible for wrong measurements if onsite measurements are not done. Our/your cabinet maker will remeasure before constructing.' }}</textarea>
+ </div>
+ </div>
 
-    </div><!-- /right column -->
+ </div><!-- /right column -->
 
-  </div><!-- /if-body -->
-  </form>
+ </div><!-- /if-body -->
+ </form>
 </div>
 
 <script>
 var contacts = {{ contacts|tojson }};
 
 function fillFromContact(val){
-  var sel = document.getElementById('contactSelect');
-  var opt = sel.options[sel.selectedIndex];
-  if(!val){ return; }
-  document.getElementById('contactIdHidden').value = val;
-  document.getElementById('f_name').value  = opt.dataset.name  || '';
-  document.getElementById('f_email').value = opt.dataset.email || '';
-  document.getElementById('f_addr').value  = opt.dataset.address || '';
-  document.getElementById('f_city').value  = opt.dataset.city  || '';
-  document.getElementById('f_state').value = opt.dataset.state || '';
-  document.getElementById('f_zip').value   = opt.dataset.zip   || '';
+ var sel = document.getElementById('contactSelect');
+ var opt = sel.options[sel.selectedIndex];
+ if(!val){ return; }
+ document.getElementById('contactIdHidden').value = val;
+ document.getElementById('f_name').value = opt.dataset.name || '';
+ document.getElementById('f_email').value = opt.dataset.email || '';
+ document.getElementById('f_addr').value = opt.dataset.address || '';
+ document.getElementById('f_city').value = opt.dataset.city || '';
+ document.getElementById('f_state').value = opt.dataset.state || '';
+ document.getElementById('f_zip').value = opt.dataset.zip || '';
 }
 
 function calcRow(input){
-  var tr = input.closest('tr');
-  var qty   = parseFloat(tr.querySelector('[name="item_qty[]"]').value)   || 0;
-  var price = parseFloat(tr.querySelector('[name="item_price[]"]').value) || 0;
-  tr.querySelector('.item-amount').textContent = '$' + (qty*price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  calcTotals();
+ var tr = input.closest('tr');
+ var qty = parseFloat(tr.querySelector('[name="item_qty[]"]').value) || 0;
+ var price = parseFloat(tr.querySelector('[name="item_price[]"]').value) || 0;
+ tr.querySelector('.item-amount').textContent = '$' + (qty*price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+ calcTotals();
 }
 
 function calcTotals(){
-  var rows = document.querySelectorAll('#itemsBody .item-row');
-  var sub = 0;
-  rows.forEach(function(tr){
-    var qty   = parseFloat(tr.querySelector('[name="item_qty[]"]').value)   || 0;
-    var price = parseFloat(tr.querySelector('[name="item_price[]"]').value) || 0;
-    sub += qty * price;
-  });
-  var taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
-  var disc    = parseFloat(document.getElementById('discountAmt').value) || 0;
-  var tax  = sub * taxRate / 100;
-  var total = sub + tax - disc;
-  document.getElementById('subtotalDisplay').textContent = '$' + sub.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  document.getElementById('taxDisplay').textContent      = '$' + tax.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  document.getElementById('totalDisplay').textContent    = '$' + Math.max(0,total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+ var rows = document.querySelectorAll('#itemsBody .item-row');
+ var sub = 0;
+ rows.forEach(function(tr){
+ var qty = parseFloat(tr.querySelector('[name="item_qty[]"]').value) || 0;
+ var price = parseFloat(tr.querySelector('[name="item_price[]"]').value) || 0;
+ sub += qty * price;
+ });
+ var taxRate = parseFloat(document.getElementById('taxRate').value) || 0;
+ var disc = parseFloat(document.getElementById('discountAmt').value) || 0;
+ var tax = sub * taxRate / 100;
+ var total = sub + tax - disc;
+ document.getElementById('subtotalDisplay').textContent = '$' + sub.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+ document.getElementById('taxDisplay').textContent = '$' + tax.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+ document.getElementById('totalDisplay').textContent = '$' + Math.max(0,total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
 }
 
 function addRow(desc, qty, price){
-  var tbody = document.getElementById('itemsBody');
-  var tr = document.createElement('tr');
-  tr.className = 'item-row';
-  tr.innerHTML = '<td><input type="text" name="item_desc[]" class="item-input" value="'+(desc||'')+'" placeholder="Service or item description" required></td>'
-    +'<td><input type="number" name="item_qty[]" class="item-input item-input--num" value="'+(qty||1)+'" min="0" step="0.01" oninput="calcRow(this)"></td>'
-    +'<td><input type="number" name="item_price[]" class="item-input item-input--price" value="'+(price||'')+'" min="0" step="0.01" placeholder="0.00" oninput="calcRow(this)"></td>'
-    +'<td><span class="item-amount">$'+((qty||0)*(price||0)).toFixed(2)+'</span></td>'
-    +'<td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>';
-  tbody.appendChild(tr);
-  tr.querySelector('[name="item_desc[]"]').focus();
-  calcTotals();
+ var tbody = document.getElementById('itemsBody');
+ var tr = document.createElement('tr');
+ tr.className = 'item-row';
+ tr.innerHTML = '<td><input type="text" name="item_desc[]" class="item-input" value="'+(desc||'')+'" placeholder="Service or item description" required></td>'
+ +'<td><input type="number" name="item_qty[]" class="item-input item-input--num" value="'+(qty||1)+'" min="0" step="0.01" oninput="calcRow(this)"></td>'
+ +'<td><input type="number" name="item_price[]" class="item-input item-input--price" value="'+(price||'')+'" min="0" step="0.01" placeholder="0.00" oninput="calcRow(this)"></td>'
+ +'<td><span class="item-amount">$'+((qty||0)*(price||0)).toFixed(2)+'</span></td>'
+ +'<td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>';
+ tbody.appendChild(tr);
+ tr.querySelector('[name="item_desc[]"]').focus();
+ calcTotals();
 }
 
 function addPreset(desc, qty, price){
-  addRow(desc, qty, price);
-  // update the new row's amount display
-  var rows = document.querySelectorAll('#itemsBody .item-row');
-  var last = rows[rows.length-1];
-  last.querySelector('.item-amount').textContent = '$'+(qty*price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  calcTotals();
+ addRow(desc, qty, price);
+ // update the new row's amount display
+ var rows = document.querySelectorAll('#itemsBody .item-row');
+ var last = rows[rows.length-1];
+ last.querySelector('.item-amount').textContent = '$'+(qty*price).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+ calcTotals();
 }
 
 function delRow(btn){
-  var rows = document.querySelectorAll('#itemsBody .item-row');
-  if(rows.length <= 1){ btn.closest('tr').querySelectorAll('input').forEach(function(i){i.value='';}); calcTotals(); return; }
-  btn.closest('tr').remove();
-  calcTotals();
+ var rows = document.querySelectorAll('#itemsBody .item-row');
+ if(rows.length <= 1){ btn.closest('tr').querySelectorAll('input').forEach(function(i){i.value='';}); calcTotals(); return; }
+ btn.closest('tr').remove();
+ calcTotals();
 }
 
 // Init totals on page load

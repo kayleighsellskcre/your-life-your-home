@@ -2,115 +2,115 @@
 
 {% block agent_content %}
 <style>
-  .preview-container { max-width: 900px; margin: 0 auto; }
-  .preview-card {
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    box-shadow: var(--shadow-medium);
-    border: var(--border-light);
-    margin-bottom: 2rem;
-  }
-  .mapping-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-  .mapping-row label { min-width: 120px; font-weight: 600; color: var(--olive-green); }
-  .mapping-row select { flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; }
-  .preview-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-  .preview-table th { background: var(--olive-green); color: white; padding: 0.75rem; text-align: left; }
-  .preview-table td { padding: 0.75rem; border-bottom: 1px solid #eee; }
-  .highlight { background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
+ .preview-container { max-width: 900px; margin: 0 auto; }
+ .preview-card {
+ background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+ border-radius: var(--border-radius);
+ padding: 2rem;
+ box-shadow: var(--shadow-medium);
+ border: var(--border-light);
+ margin-bottom: 2rem;
+ }
+ .mapping-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+ .mapping-row label { min-width: 120px; font-weight: 600; color: var(--olive-green); }
+ .mapping-row select { flex: 1; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; }
+ .preview-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+ .preview-table th { background: var(--olive-green); color: white; padding: 0.75rem; text-align: left; }
+ .preview-table td { padding: 0.75rem; border-bottom: 1px solid #eee; }
+ .highlight { background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; }
 </style>
 
 <div class="dashboard-main__header">
-  <p class="dashboard-tagline">Map columns</p>
-  <h1>Update Addresses – Map Columns</h1>
-  <p>Map your Excel columns. We'll match contacts by name and update City, State, ZIP.</p>
+ <p class="dashboard-tagline">Map columns</p>
+ <h1>Update Addresses – Map Columns</h1>
+ <p>Map your Excel columns. We'll match contacts by name and update City, State, ZIP.</p>
 </div>
 
 <div class="preview-container">
-  <div class="highlight">
-    <strong>Name</strong> is used to match existing contacts. <strong>City, State, Zip</strong> will be added to matched contacts.
-  </div>
+ <div class="highlight">
+ <strong>Name</strong> is used to match existing contacts. <strong>City, State, Zip</strong> will be added to matched contacts.
+ </div>
 
-  <form method="post">
-    <input type="hidden" name="action" value="update">
-    <div class="preview-card">
-      <h2 style="margin-bottom: 1.5rem;">Column Mapping</h2>
-      <div class="mapping-row">
-        <label>Name *</label>
-        <select name="map_name" required>
-          <option value="">-- Select Column --</option>
-          {% for col in columns %}
-          <option value="{{ col }}" {% if 'name' in col.lower() or 'contact' in col.lower() %}selected{% endif %}>{{ col }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mapping-row">
-        <label>Street Address</label>
-        <select name="map_address">
-          <option value="">-- Skip --</option>
-          {% for col in columns %}
-          <option value="{{ col }}" {% if 'address' in col.lower() and 'property' not in col.lower() %}selected{% endif %}>{{ col }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mapping-row">
-        <label>City</label>
-        <select name="map_city">
-          <option value="">-- Skip --</option>
-          {% for col in columns %}
-          <option value="{{ col }}" {% if 'city' in col.lower() %}selected{% endif %}>{{ col }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mapping-row">
-        <label>State</label>
-        <select name="map_state">
-          <option value="">-- Skip --</option>
-          {% for col in columns %}
-          <option value="{{ col }}" {% if 'state' in col.lower() and 'address' not in col.lower() %}selected{% endif %}>{{ col }}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div class="mapping-row">
-        <label>ZIP Code</label>
-        <select name="map_zip">
-          <option value="">-- Skip --</option>
-          {% for col in columns %}
-          <option value="{{ col }}" {% if 'zip' in col.lower() or 'postal' in col.lower() %}selected{% endif %}>{{ col }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
+ <form method="post">
+ <input type="hidden" name="action" value="update">
+ <div class="preview-card">
+ <h2 style="margin-bottom: 1.5rem;">Column Mapping</h2>
+ <div class="mapping-row">
+ <label>Name *</label>
+ <select name="map_name" required>
+ <option value="">-- Select Column --</option>
+ {% for col in columns %}
+ <option value="{{ col }}" {% if 'name' in col.lower() or 'contact' in col.lower() %}selected{% endif %}>{{ col }}</option>
+ {% endfor %}
+ </select>
+ </div>
+ <div class="mapping-row">
+ <label>Street Address</label>
+ <select name="map_address">
+ <option value="">-- Skip --</option>
+ {% for col in columns %}
+ <option value="{{ col }}" {% if 'address' in col.lower() and 'property' not in col.lower() %}selected{% endif %}>{{ col }}</option>
+ {% endfor %}
+ </select>
+ </div>
+ <div class="mapping-row">
+ <label>City</label>
+ <select name="map_city">
+ <option value="">-- Skip --</option>
+ {% for col in columns %}
+ <option value="{{ col }}" {% if 'city' in col.lower() %}selected{% endif %}>{{ col }}</option>
+ {% endfor %}
+ </select>
+ </div>
+ <div class="mapping-row">
+ <label>State</label>
+ <select name="map_state">
+ <option value="">-- Skip --</option>
+ {% for col in columns %}
+ <option value="{{ col }}" {% if 'state' in col.lower() and 'address' not in col.lower() %}selected{% endif %}>{{ col }}</option>
+ {% endfor %}
+ </select>
+ </div>
+ <div class="mapping-row">
+ <label>ZIP Code</label>
+ <select name="map_zip">
+ <option value="">-- Skip --</option>
+ {% for col in columns %}
+ <option value="{{ col }}" {% if 'zip' in col.lower() or 'postal' in col.lower() %}selected{% endif %}>{{ col }}</option>
+ {% endfor %}
+ </select>
+ </div>
+ </div>
 
-    <div class="preview-card">
-      <h3 style="margin-bottom: 1rem;">Preview (first 10 rows)</h3>
-      <div style="overflow-x: auto;">
-        <table class="preview-table">
-          <thead>
-            <tr>
-              {% for col in columns %}
-              <th>{{ col }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in data %}
-            <tr>
-              {% for col in columns %}
-              <td>{{ row.get(col, '') }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      <p style="margin-top: 1rem; opacity: 0.8;">Total rows: <strong>{{ total_rows }}</strong></p>
-    </div>
+ <div class="preview-card">
+ <h3 style="margin-bottom: 1rem;">Preview (first 10 rows)</h3>
+ <div style="overflow-x: auto;">
+ <table class="preview-table">
+ <thead>
+ <tr>
+ {% for col in columns %}
+ <th>{{ col }}</th>
+ {% endfor %}
+ </tr>
+ </thead>
+ <tbody>
+ {% for row in data %}
+ <tr>
+ {% for col in columns %}
+ <td>{{ row.get(col, '') }}</td>
+ {% endfor %}
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ <p style="margin-top: 1rem; opacity: 0.8;">Total rows: <strong>{{ total_rows }}</strong></p>
+ </div>
 
-    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-      <a href="{{ url_for('agent_update_addresses') }}" class="btn" style="background: var(--taupe-beige);">← Back</a>
-      <button type="submit" class="btn btn-primary">Update {{ total_rows }} Addresses</button>
-    </div>
-  </form>
+ <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+ <a href="{{ url_for('agent_update_addresses') }}" class="btn" style="background: var(--taupe-beige);">← Back</a>
+ <button type="submit" class="btn btn-primary">Update {{ total_rows }} Addresses</button>
+ </div>
+ </form>
 </div>
 {% endblock %}

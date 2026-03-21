@@ -4,727 +4,727 @@
 
 {% block content %}
 <style>
-  /* Integrated Header + Dashboard Navigation */
-  .ylh-horizontal-nav {
-    background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%);
-    border-bottom: 2px solid rgba(107, 91, 77, 0.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-    position: sticky;
-    top: 50px;
-    z-index: 999;
-  }
-  
-  .ylh-nav-container {
-    max-width: 1600px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1rem;
-    height: 60px;
-  }
-  
-  .ylh-nav-title {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.25rem;
-    color: #6B5B4D;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    margin: 0 0 0 4rem;
-    white-space: nowrap;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-  }
-  
-  .ylh-nav-title:hover {
-    color: #3D2E24;
-    transform: translateX(2px);
-  }
-  
-  .ylh-nav-items {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    flex: 1;
-    justify-content: flex-end;
-    margin-right: 0.5rem;
-    overflow: visible;
-    position: relative;
-  }
-  
-  .ylh-nav-button {
-    background: transparent;
-    border: none;
-    color: #6B5B4D;
-    padding: 0.75rem 0.875rem;
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    border-bottom: 3px solid transparent;
-    position: relative;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .ylh-nav-button:hover {
-    background: rgba(107, 91, 77, 0.1);
-    color: #3D2E24;
-    border-bottom-color: rgba(107, 91, 77, 0.5);
-  }
-  
-  .ylh-nav-button.active {
-    background: rgba(107, 91, 77, 0.15);
-    color: #3D2E24;
-    border-bottom-color: #6B5B4D;
-    font-weight: 600;
-  }
-  
-  .ylh-nav-link {
-    color: #6B5B4D;
-    padding: 0.75rem 0.875rem;
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    border-bottom: 3px solid transparent;
-    display: inline-block;
-  }
-  
-  .ylh-nav-link:hover {
-    background: rgba(107, 91, 77, 0.1);
-    color: #3D2E24;
-    border-bottom-color: rgba(107, 91, 77, 0.5);
-  }
-  
-  .ylh-nav-link.active {
-    background: rgba(107, 91, 77, 0.15);
-    color: #3D2E24;
-    border-bottom-color: #6B5B4D;
-    font-weight: 600;
-  }
-  
-  /* Dropdown styles */
-  .ylh-dropdown {
-    position: relative;
-  }
-  
-  .ylh-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: white;
-    min-width: 220px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-radius: 0 0 8px 8px;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: all 0.3s ease;
-    z-index: 1000;
-    overflow: visible;
-  }
-  
-  .ylh-dropdown:hover .ylh-dropdown-menu {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-  }
-  
-  .ylh-dropdown-item {
-    display: block;
-    padding: 1rem 1.5rem;
-    color: #3D2E24;
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 400;
-    letter-spacing: 0.03em;
-    transition: all 0.2s ease;
-    border-left: 3px solid transparent;
-  }
-  
-  .ylh-dropdown-item:hover {
-    background: #F0EBE4;
-    border-left-color: #6B5B4D;
-    padding-left: 1.75rem;
-  }
-  
-  .ylh-dropdown-item.active {
-    background: rgba(107, 91, 77, 0.1);
-    border-left-color: #6B5B4D;
-    font-weight: 600;
-  }
-  
-  /* Large Desktop - More Spacing */
-  @media (min-width: 1400px) {
-    .ylh-nav-link,
-    .ylh-nav-button {
-      padding: 0.75rem 1rem;
-      font-size: 0.75rem;
-    }
-    
-    .ylh-nav-title {
-      font-size: 1.5rem;
-      margin: 0 0 0 5rem;
-    }
-    
-    .ylh-nav-container {
-      padding: 0 2rem;
-    }
-  }
-  
-  /* Medium Desktop - Compact but Readable */
-  @media (min-width: 1024px) and (max-width: 1399px) {
-    .ylh-nav-link,
-    .ylh-nav-button {
-      padding: 0.75rem 0.75rem;
-      font-size: 0.68rem;
-    }
-  }
-  
-  /* Small Desktop / Large Tablet - Very Compact */
-  @media (min-width: 769px) and (max-width: 1023px) {
-    .ylh-nav-link,
-    .ylh-nav-button {
-      padding: 0.75rem 0.625rem;
-      font-size: 0.65rem;
-      letter-spacing: 0.03em;
-    }
-    
-    .ylh-nav-title {
-      font-size: 1.1rem;
-      margin: 0 0 0 3.75rem;
-    }
-    
-    .ylh-nav-container {
-      padding: 0 0.75rem;
-    }
-  }
-  
-  /* Mobile Responsive - Ultra Skinny & Luxurious */
-  @media (max-width: 768px) {
-    .ylh-horizontal-nav {
-      top: 0 !important;
-      border-bottom: 1px solid rgba(107, 91, 77, 0.15) !important;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
-      background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%) !important;
-    }
-    
-    .ylh-nav-container {
-      padding: 0.375rem 0.875rem !important;
-      flex-direction: row !important;
-      height: 44px !important;
-      min-height: 44px !important;
-      max-height: 44px !important;
-      align-items: center !important;
-      justify-content: space-between !important;
-      gap: 0.5rem !important;
-    }
-    
-    .ylh-nav-title {
-      font-size: 0.875rem !important;
-      font-weight: 600 !important;
-      margin: 0 !important;
-      color: #6B5B4D !important;
-      letter-spacing: 0.03em !important;
-      white-space: nowrap !important;
-      flex-shrink: 0 !important;
-    }
-    
-    .ylh-nav-items {
-      width: auto !important;
-      flex: 1 !important;
-      justify-content: flex-end !important;
-      flex-wrap: nowrap !important;
-      gap: 0.25rem !important;
-      overflow-x: auto !important;
-      overflow-y: hidden !important;
-      -webkit-overflow-scrolling: touch !important;
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
-    }
-    
-    .ylh-nav-items::-webkit-scrollbar {
-      display: none !important;
-    }
-    
-    .ylh-nav-button,
-    .ylh-nav-link {
-      padding: 0.375rem 0.625rem !important;
-      font-size: 0.7rem !important;
-      letter-spacing: 0.04em !important;
-      min-height: 32px !important;
-      height: 32px !important;
-      border-bottom: 2px solid transparent !important;
-      white-space: nowrap !important;
-      flex-shrink: 0 !important;
-      border-radius: 6px !important;
-      transition: all 0.2s ease !important;
-    }
-    
-    .ylh-nav-button:hover,
-    .ylh-nav-link:hover {
-      background: rgba(107, 91, 77, 0.08) !important;
-      border-bottom-color: transparent !important;
-    }
-    
-    .ylh-nav-button.active,
-    .ylh-nav-link.active {
-      background: rgba(107, 91, 77, 0.12) !important;
-      border-bottom-color: #6B5B4D !important;
-      font-weight: 600 !important;
-    }
-    
-    /* Dropdowns - Mobile Friendly */
-    .ylh-dropdown {
-      position: relative !important;
-    }
-    
-    .ylh-dropdown-menu {
-      position: fixed !important;
-      top: auto !important;
-      bottom: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      width: 100% !important;
-      min-width: 100% !important;
-      max-height: 60vh !important;
-      border-radius: 16px 16px 0 0 !important;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
-      transform: translateY(100%) !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      overflow-y: auto !important;
-      z-index: 10000 !important;
-      background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%) !important;
-      backdrop-filter: blur(20px) !important;
-    }
-    
-    .ylh-dropdown.active .ylh-dropdown-menu {
-      transform: translateY(0) !important;
-    }
-    
-    /* Backdrop overlay for mobile dropdowns */
-    .ylh-dropdown.active::before {
-      content: '' !important;
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      background: rgba(61, 46, 36, 0.4) !important;
-      z-index: 9999 !important;
-      backdrop-filter: blur(4px) !important;
-    }
-    
-    .ylh-dropdown-item {
-      padding: 1rem 1.25rem !important;
-      font-size: 0.9rem !important;
-      min-height: 52px !important;
-      border-left: none !important;
-      border-bottom: 1px solid rgba(107, 91, 77, 0.1) !important;
-    }
-    
-    .ylh-dropdown-item:last-child {
-      border-bottom: none !important;
-    }
-  }
-  
-  /* Extra Small - Even Skinnier */
-  @media (max-width: 480px) {
-    .ylh-nav-container {
-      padding: 0.3125rem 0.75rem !important;
-      height: 40px !important;
-      min-height: 40px !important;
-      max-height: 40px !important;
-    }
-    
-    .ylh-nav-title {
-      font-size: 0.8rem !important;
-    }
-    
-    .ylh-nav-button,
-    .ylh-nav-link {
-      padding: 0.3125rem 0.5rem !important;
-      font-size: 0.65rem !important;
-      min-height: 28px !important;
-      height: 28px !important;
-    }
-  }
+ /* Integrated Header + Dashboard Navigation */
+ .ylh-horizontal-nav {
+ background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%);
+ border-bottom: 2px solid rgba(107, 91, 77, 0.15);
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+ position: sticky;
+ top: 50px;
+ z-index: 999;
+ }
+ 
+ .ylh-nav-container {
+ max-width: 1600px;
+ margin: 0 auto;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ padding: 0 1rem;
+ height: 60px;
+ }
+ 
+ .ylh-nav-title {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.25rem;
+ color: #6B5B4D;
+ font-weight: 400;
+ letter-spacing: 0.02em;
+ margin: 0 0 0 4rem;
+ white-space: nowrap;
+ transition: all 0.3s ease;
+ flex-shrink: 0;
+ }
+ 
+ .ylh-nav-title:hover {
+ color: #3D2E24;
+ transform: translateX(2px);
+ }
+ 
+ .ylh-nav-items {
+ display: flex;
+ align-items: center;
+ gap: 0;
+ flex: 1;
+ justify-content: flex-end;
+ margin-right: 0.5rem;
+ overflow: visible;
+ position: relative;
+ }
+ 
+ .ylh-nav-button {
+ background: transparent;
+ border: none;
+ color: #6B5B4D;
+ padding: 0.75rem 0.875rem;
+ font-size: 0.7rem;
+ font-weight: 500;
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ white-space: nowrap;
+ border-bottom: 3px solid transparent;
+ position: relative;
+ min-height: 44px;
+ display: flex;
+ align-items: center;
+ }
+ 
+ .ylh-nav-button:hover {
+ background: rgba(107, 91, 77, 0.1);
+ color: #3D2E24;
+ border-bottom-color: rgba(107, 91, 77, 0.5);
+ }
+ 
+ .ylh-nav-button.active {
+ background: rgba(107, 91, 77, 0.15);
+ color: #3D2E24;
+ border-bottom-color: #6B5B4D;
+ font-weight: 600;
+ }
+ 
+ .ylh-nav-link {
+ color: #6B5B4D;
+ padding: 0.75rem 0.875rem;
+ font-size: 0.7rem;
+ font-weight: 500;
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ text-decoration: none;
+ transition: all 0.3s ease;
+ white-space: nowrap;
+ border-bottom: 3px solid transparent;
+ display: inline-block;
+ }
+ 
+ .ylh-nav-link:hover {
+ background: rgba(107, 91, 77, 0.1);
+ color: #3D2E24;
+ border-bottom-color: rgba(107, 91, 77, 0.5);
+ }
+ 
+ .ylh-nav-link.active {
+ background: rgba(107, 91, 77, 0.15);
+ color: #3D2E24;
+ border-bottom-color: #6B5B4D;
+ font-weight: 600;
+ }
+ 
+ /* Dropdown styles */
+ .ylh-dropdown {
+ position: relative;
+ }
+ 
+ .ylh-dropdown-menu {
+ position: absolute;
+ top: 100%;
+ left: 0;
+ background: white;
+ min-width: 220px;
+ box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+ border-radius: 0 0 8px 8px;
+ opacity: 0;
+ visibility: hidden;
+ transform: translateY(-10px);
+ transition: all 0.3s ease;
+ z-index: 1000;
+ overflow: visible;
+ }
+ 
+ .ylh-dropdown:hover .ylh-dropdown-menu {
+ opacity: 1;
+ visibility: visible;
+ transform: translateY(0);
+ }
+ 
+ .ylh-dropdown-item {
+ display: block;
+ padding: 1rem 1.5rem;
+ color: #3D2E24;
+ text-decoration: none;
+ font-size: 0.85rem;
+ font-weight: 400;
+ letter-spacing: 0.03em;
+ transition: all 0.2s ease;
+ border-left: 3px solid transparent;
+ }
+ 
+ .ylh-dropdown-item:hover {
+ background: #F0EBE4;
+ border-left-color: #6B5B4D;
+ padding-left: 1.75rem;
+ }
+ 
+ .ylh-dropdown-item.active {
+ background: rgba(107, 91, 77, 0.1);
+ border-left-color: #6B5B4D;
+ font-weight: 600;
+ }
+ 
+ /* Large Desktop - More Spacing */
+ @media (min-width: 1400px) {
+ .ylh-nav-link,
+ .ylh-nav-button {
+ padding: 0.75rem 1rem;
+ font-size: 0.75rem;
+ }
+ 
+ .ylh-nav-title {
+ font-size: 1.5rem;
+ margin: 0 0 0 5rem;
+ }
+ 
+ .ylh-nav-container {
+ padding: 0 2rem;
+ }
+ }
+ 
+ /* Medium Desktop - Compact but Readable */
+ @media (min-width: 1024px) and (max-width: 1399px) {
+ .ylh-nav-link,
+ .ylh-nav-button {
+ padding: 0.75rem 0.75rem;
+ font-size: 0.68rem;
+ }
+ }
+ 
+ /* Small Desktop / Large Tablet - Very Compact */
+ @media (min-width: 769px) and (max-width: 1023px) {
+ .ylh-nav-link,
+ .ylh-nav-button {
+ padding: 0.75rem 0.625rem;
+ font-size: 0.65rem;
+ letter-spacing: 0.03em;
+ }
+ 
+ .ylh-nav-title {
+ font-size: 1.1rem;
+ margin: 0 0 0 3.75rem;
+ }
+ 
+ .ylh-nav-container {
+ padding: 0 0.75rem;
+ }
+ }
+ 
+ /* Mobile Responsive - Ultra Skinny & Luxurious */
+ @media (max-width: 768px) {
+ .ylh-horizontal-nav {
+ top: 0 !important;
+ border-bottom: 1px solid rgba(107, 91, 77, 0.15) !important;
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+ background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%) !important;
+ }
+ 
+ .ylh-nav-container {
+ padding: 0.375rem 0.875rem !important;
+ flex-direction: row !important;
+ height: 44px !important;
+ min-height: 44px !important;
+ max-height: 44px !important;
+ align-items: center !important;
+ justify-content: space-between !important;
+ gap: 0.5rem !important;
+ }
+ 
+ .ylh-nav-title {
+ font-size: 0.875rem !important;
+ font-weight: 600 !important;
+ margin: 0 !important;
+ color: #6B5B4D !important;
+ letter-spacing: 0.03em !important;
+ white-space: nowrap !important;
+ flex-shrink: 0 !important;
+ }
+ 
+ .ylh-nav-items {
+ width: auto !important;
+ flex: 1 !important;
+ justify-content: flex-end !important;
+ flex-wrap: nowrap !important;
+ gap: 0.25rem !important;
+ overflow-x: auto !important;
+ overflow-y: hidden !important;
+ -webkit-overflow-scrolling: touch !important;
+ scrollbar-width: none !important;
+ -ms-overflow-style: none !important;
+ }
+ 
+ .ylh-nav-items::-webkit-scrollbar {
+ display: none !important;
+ }
+ 
+ .ylh-nav-button,
+ .ylh-nav-link {
+ padding: 0.375rem 0.625rem !important;
+ font-size: 0.7rem !important;
+ letter-spacing: 0.04em !important;
+ min-height: 32px !important;
+ height: 32px !important;
+ border-bottom: 2px solid transparent !important;
+ white-space: nowrap !important;
+ flex-shrink: 0 !important;
+ border-radius: 6px !important;
+ transition: all 0.2s ease !important;
+ }
+ 
+ .ylh-nav-button:hover,
+ .ylh-nav-link:hover {
+ background: rgba(107, 91, 77, 0.08) !important;
+ border-bottom-color: transparent !important;
+ }
+ 
+ .ylh-nav-button.active,
+ .ylh-nav-link.active {
+ background: rgba(107, 91, 77, 0.12) !important;
+ border-bottom-color: #6B5B4D !important;
+ font-weight: 600 !important;
+ }
+ 
+ /* Dropdowns - Mobile Friendly */
+ .ylh-dropdown {
+ position: relative !important;
+ }
+ 
+ .ylh-dropdown-menu {
+ position: fixed !important;
+ top: auto !important;
+ bottom: 0 !important;
+ left: 0 !important;
+ right: 0 !important;
+ width: 100% !important;
+ min-width: 100% !important;
+ max-height: 60vh !important;
+ border-radius: 16px 16px 0 0 !important;
+ box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
+ transform: translateY(100%) !important;
+ opacity: 1 !important;
+ visibility: visible !important;
+ overflow-y: auto !important;
+ z-index: 10000 !important;
+ background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%) !important;
+ backdrop-filter: blur(20px) !important;
+ }
+ 
+ .ylh-dropdown.active .ylh-dropdown-menu {
+ transform: translateY(0) !important;
+ }
+ 
+ /* Backdrop overlay for mobile dropdowns */
+ .ylh-dropdown.active::before {
+ content: '' !important;
+ position: fixed !important;
+ top: 0 !important;
+ left: 0 !important;
+ right: 0 !important;
+ bottom: 0 !important;
+ background: rgba(61, 46, 36, 0.4) !important;
+ z-index: 9999 !important;
+ backdrop-filter: blur(4px) !important;
+ }
+ 
+ .ylh-dropdown-item {
+ padding: 1rem 1.25rem !important;
+ font-size: 0.9rem !important;
+ min-height: 52px !important;
+ border-left: none !important;
+ border-bottom: 1px solid rgba(107, 91, 77, 0.1) !important;
+ }
+ 
+ .ylh-dropdown-item:last-child {
+ border-bottom: none !important;
+ }
+ }
+ 
+ /* Extra Small - Even Skinnier */
+ @media (max-width: 480px) {
+ .ylh-nav-container {
+ padding: 0.3125rem 0.75rem !important;
+ height: 40px !important;
+ min-height: 40px !important;
+ max-height: 40px !important;
+ }
+ 
+ .ylh-nav-title {
+ font-size: 0.8rem !important;
+ }
+ 
+ .ylh-nav-button,
+ .ylh-nav-link {
+ padding: 0.3125rem 0.5rem !important;
+ font-size: 0.65rem !important;
+ min-height: 28px !important;
+ height: 28px !important;
+ }
+ }
 </style>
 
 <nav class="ylh-horizontal-nav">
-  <div class="ylh-nav-container">
-    <a href="{{ url_for('agent_dashboard') }}" class="ylh-nav-title" style="text-decoration: none; cursor: pointer;">
-      Agent Dashboard
-    </a>
-    
-    <div class="ylh-nav-items">
-      <a href="{{ url_for('agent_crm') }}" 
-         class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">
-        CRM
-      </a>
+ <div class="ylh-nav-container">
+ <a href="{{ url_for('agent_dashboard') }}" class="ylh-nav-title" style="text-decoration: none; cursor: pointer;">
+ Agent Dashboard
+ </a>
+ 
+ <div class="ylh-nav-items">
+ <a href="{{ url_for('agent_crm') }}" 
+ class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">
+ CRM
+ </a>
 
-      <a href="{{ url_for('agent_clients') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/clients') %}active{% endif %}"
-         style="{% if request.path.startswith('/agent/clients') %}{% else %}position:relative{% endif %}">
-        Clients
-      </a>
-      
-      <a href="{{ url_for('agent_transactions') }}" 
-         class="ylh-nav-link {% if request.path.startswith('/agent/transactions') %}active{% endif %}">
-        Transactions
-      </a>
-      
-      <a href="{{ url_for('agent_communications') }}" 
-         class="ylh-nav-link {% if request.path.startswith('/agent/communications') %}active{% endif %}">
-        Communications
-      </a>
-      
-      <a href="{{ url_for('agent_marketing_hub_global') }}" 
-         class="ylh-nav-link {% if request.path == url_for('agent_marketing_hub_global') or 'marketing-hub' in request.path %}active{% endif %}">
-        Marketing Hub
-      </a>
-      
-      <a href="{{ url_for('agent_referrals') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">
-        Referrals
-      </a>
+ <a href="{{ url_for('agent_clients') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/clients') %}active{% endif %}"
+ style="{% if request.path.startswith('/agent/clients') %}{% else %}position:relative{% endif %}">
+ Clients
+ </a>
+ 
+ <a href="{{ url_for('agent_transactions') }}" 
+ class="ylh-nav-link {% if request.path.startswith('/agent/transactions') %}active{% endif %}">
+ Transactions
+ </a>
+ 
+ <a href="{{ url_for('agent_communications') }}" 
+ class="ylh-nav-link {% if request.path.startswith('/agent/communications') %}active{% endif %}">
+ Communications
+ </a>
+ 
+ <a href="{{ url_for('agent_marketing_hub_global') }}" 
+ class="ylh-nav-link {% if request.path == url_for('agent_marketing_hub_global') or 'marketing-hub' in request.path %}active{% endif %}">
+ Marketing Hub
+ </a>
+ 
+ <a href="{{ url_for('agent_referrals') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">
+ Referrals
+ </a>
 
-      <a href="{{ url_for('agent_vendors') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/vendors') %}active{% endif %}">
-        Vendors
-      </a>
+ <a href="{{ url_for('agent_vendors') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/vendors') %}active{% endif %}">
+ Vendors
+ </a>
 
-      <a href="{{ url_for('agent_booking') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/booking') %}active{% endif %}">
-        📅 Booking
-      </a>
+ <a href="{{ url_for('agent_booking') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/booking') %}active{% endif %}">
+ Booking
+ </a>
 
-      <a href="{{ url_for('agent_contests') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/contests') %}active{% endif %}">
-        🏆 Contests
-      </a>
+ <a href="{{ url_for('agent_contests') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/contests') %}active{% endif %}">
+ Contests
+ </a>
 
-      <a href="{{ url_for('agent_financials') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/financials') %}active{% endif %}">
-        💰 Financials
-      </a>
+ <a href="{{ url_for('agent_financials') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/financials') %}active{% endif %}">
+ Financials
+ </a>
 
-      <!-- Tools dropdown: Power Tools + AI Concierge -->
-      <div class="ylh-dropdown" style="display:inline-block;position:relative;">
-        <a href="#" class="ylh-nav-link {% if request.path == url_for('agent_power_tools') or request.path.startswith('/agent/concierge') %}active{% endif %}"
-           onclick="event.preventDefault();this.parentElement.classList.toggle('active-drop');"
-           style="user-select:none;">
-          🛠 Tools ▾
-        </a>
-        <div class="ylh-dropdown-menu" style="right:0;left:auto;min-width:200px;">
-          <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
-            ⚡ Power Tools
-          </a>
-          <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">
-            🤖 AI Concierge
-          </a>
-        </div>
-      </div>
-      
-      {% if current_user and current_user.get('role') == 'admin' %}
-      <a href="{{ url_for('admin_settings') }}"
-         class="ylh-nav-link {% if 'admin' in request.path %}active{% endif %}"
-         style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-radius: 4px; border-bottom: 3px solid #667eea;">
-        ⚙️ Admin
-      </a>
-      {% endif %}
+ <!-- Tools dropdown: Power Tools + AI Concierge -->
+ <div class="ylh-dropdown" style="display:inline-block;position:relative;">
+ <a href="#" class="ylh-nav-link {% if request.path == url_for('agent_power_tools') or request.path.startswith('/agent/concierge') %}active{% endif %}"
+ onclick="event.preventDefault();this.parentElement.classList.toggle('active-drop');"
+ style="user-select:none;">
+ Tools ▾
+ </a>
+ <div class="ylh-dropdown-menu" style="right:0;left:auto;min-width:200px;">
+ <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
+ Power Tools
+ </a>
+ <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">
+ AI Concierge
+ </a>
+ </div>
+ </div>
+ 
+ {% if current_user and current_user.get('role') == 'admin' %}
+ <a href="{{ url_for('admin_settings') }}"
+ class="ylh-nav-link {% if 'admin' in request.path %}active{% endif %}"
+ style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-radius: 4px; border-bottom: 3px solid #667eea;">
+ Admin
+ </a>
+ {% endif %}
 
-      <a href="{{ url_for('agent_subscription') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/subscription') %}active{% endif %}"
-         style="background: linear-gradient(135deg, rgba(184, 151, 58, 0.15) 0%, rgba(184, 151, 58, 0.08) 100%); border-radius: 4px; border-bottom: 3px solid #b8973a;">
-        ✨ Upgrade
-      </a>
+ <a href="{{ url_for('agent_subscription') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/subscription') %}active{% endif %}"
+ style="background: linear-gradient(135deg, rgba(184, 151, 58, 0.15) 0%, rgba(184, 151, 58, 0.08) 100%); border-radius: 4px; border-bottom: 3px solid #b8973a;">
+ Upgrade
+ </a>
 
-      <a href="{{ url_for('agent_settings_profile') }}"
-         class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">
-        Settings
-      </a>
-    </div>
-  </div>
+ <a href="{{ url_for('agent_settings_profile') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">
+ Settings
+ </a>
+ </div>
+ </div>
 </nav>
 
 <script>
 /* Close Tools dropdown when clicking outside */
 document.addEventListener('click', function(e) {
-  document.querySelectorAll('.ylh-dropdown.active-drop').forEach(function(d) {
-    if (!d.contains(e.target)) d.classList.remove('active-drop');
-  });
+ document.querySelectorAll('.ylh-dropdown.active-drop').forEach(function(d) {
+ if (!d.contains(e.target)) d.classList.remove('active-drop');
+ });
 });
 /* Show dropdown menu when active-drop */
 document.querySelectorAll('.ylh-dropdown').forEach(function(d) {
-  d.addEventListener('mouseleave', function(){ d.classList.remove('active-drop'); });
+ d.addEventListener('mouseleave', function(){ d.classList.remove('active-drop'); });
 });
 </script>
 
 <div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;" class="agent-content-wrapper">
-  {% block agent_content %}
-  {% endblock %}
+ {% block agent_content %}
+ {% endblock %}
 </div>
 
 <style>
-  /* Portrait Mobile Optimization */
-  @media (max-width: 768px) and (orientation: portrait) {
-    .agent-content-wrapper {
-      padding: 1.25rem 0.875rem !important;
-    }
-    
-    /* Navigation - Compact but readable */
-    .ylh-nav-container {
-      padding: 0.75rem 0.875rem !important;
-    }
-    
-    .ylh-nav-title {
-      font-size: 1rem !important;
-      margin-bottom: 0.5rem !important;
-    }
-    
-    .ylh-nav-button,
-    .ylh-nav-link {
-      font-size: 0.75rem !important;
-      padding: 0.5rem 0.75rem !important;
-      min-height: 40px !important;
-    }
-    
-    /* Feature Spotlight Cards - Portrait Optimized */
-    .feature-spotlight-container {
-      padding: 0.875rem !important;
-    }
-    
-    .premium-header {
-      margin-bottom: 1.5rem !important;
-      padding-bottom: 1rem !important;
-    }
-    
-    .premium-header h1 {
-      font-size: 1.5rem !important;
-      line-height: 1.3 !important;
-    }
-    
-    .premium-header p {
-      font-size: 0.9rem !important;
-      line-height: 1.5 !important;
-    }
-    
-    .card-premium {
-      padding: 1.5rem 1.125rem !important;
-      margin-bottom: 1.5rem !important;
-    }
-    
-    .feature-card {
-      padding: 1.25rem 1rem !important;
-      margin-bottom: 1rem !important;
-    }
-    
-    /* Transaction Pages - Portrait Layout */
-    .transaction-header,
-    .transaction-detail-header {
-      flex-direction: column !important;
-      gap: 1rem !important;
-      align-items: stretch !important;
-      padding: 1rem 0.875rem !important;
-    }
-    
-    .transaction-actions,
-    .transaction-actions-group {
-      flex-direction: column !important;
-      width: 100% !important;
-      gap: 0.75rem !important;
-    }
-    
-    .transaction-actions button,
-    .transaction-actions a,
-    .transaction-actions-group button {
-      width: 100% !important;
-      margin: 0 !important;
-    }
-    
-    /* Form Pages - Professional Spacing */
-    .form-group {
-      margin-bottom: 1.5rem !important;
-    }
-    
-    .form-group label {
-      margin-bottom: 0.625rem !important;
-    }
-    
-    /* CRM Tables - Scrollable */
-    .crm-table-wrapper {
-      overflow-x: auto !important;
-      -webkit-overflow-scrolling: touch !important;
-      margin: 0 -0.875rem !important;
-      padding: 0 0.875rem !important;
-    }
-    
-    table {
-      min-width: 650px !important;
-      font-size: 0.9rem !important;
-    }
-    
-    th, td {
-      padding: 0.75rem 0.625rem !important;
-    }
-    
-    /* Dashboard Headers - Ultra Compact & Luxurious */
-    .dashboard-main__header {
-      padding: 0.75rem 0.875rem !important;
-      margin-bottom: 1rem !important;
-      border-bottom: 1px solid rgba(107, 91, 77, 0.1) !important;
-    }
-    
-    .dashboard-main__header .dashboard-tagline {
-      font-size: 0.7rem !important;
-      margin-bottom: 0.25rem !important;
-      color: #6B5B4D !important;
-      text-transform: uppercase !important;
-      letter-spacing: 0.1em !important;
-      font-weight: 600 !important;
-    }
-    
-    .dashboard-main__header h1 {
-      font-size: 1.25rem !important;
-      margin: 0 0 0.375rem 0 !important;
-      line-height: 1.3 !important;
-      font-weight: 600 !important;
-    }
-    
-    .dashboard-main__header p {
-      font-size: 0.85rem !important;
-      margin: 0 !important;
-      line-height: 1.5 !important;
-      color: rgba(61, 46, 36, 0.7) !important;
-    }
-    
-    /* Dashboard Cards - Stack Vertically */
-    .dashboard-cards {
-      grid-template-columns: 1fr !important;
-      gap: 0.875rem !important;
-      margin-top: 0.75rem !important;
-    }
-    
-    .card-value {
-      font-size: 1.75rem !important;
-    }
-    
-    .card h3 {
-      font-size: 0.9rem !important;
-      margin-bottom: 0.5rem !important;
-    }
-    
-    .card-subtext {
-      font-size: 0.8rem !important;
-    }
-    
-    /* Quick Actions - Compact */
-    .action-card {
-      padding: 0.875rem !important;
-      gap: 0.75rem !important;
-    }
-    
-    .action-card span {
-      font-size: 1.5rem !important;
-    }
-    
-    /* Modals - Full Screen Feel */
-    .modal-content,
-    [id*="modal"] > div {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin: 0 !important;
-      border-radius: 0 !important;
-      min-height: 100vh !important;
-      padding: 1.5rem 1rem !important;
-    }
-  }
-  
-  @media (max-width: 480px) and (orientation: portrait) {
-    .dashboard-main__header {
-      padding: 0.625rem 0.75rem !important;
-    }
-    
-    .dashboard-main__header h1 {
-      font-size: 1.1rem !important;
-    }
-    
-    .dashboard-main__header .dashboard-tagline {
-      font-size: 0.65rem !important;
-    }
-    
-    .dashboard-main__header p {
-      font-size: 0.8rem !important;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .agent-content-wrapper {
-      padding: 1.5rem 1rem !important;
-    }
-    
-    /* Feature Spotlight Cards Mobile */
-    .feature-spotlight-container {
-      padding: 1rem !important;
-    }
-    
-    .premium-header h1 {
-      font-size: 1.5rem !important;
-    }
-    
-    .premium-header p {
-      font-size: 0.9rem !important;
-    }
-    
-    .card-premium {
-      padding: 1.5rem 1rem !important;
-    }
-    
-    .feature-card {
-      padding: 1rem !important;
-    }
-    
-    /* Transaction Pages Mobile */
-    .transaction-header,
-    .transaction-detail-header {
-      flex-direction: column !important;
-      gap: 1rem !important;
-    }
-    
-    .transaction-actions {
-      flex-direction: column !important;
-      width: 100% !important;
-    }
-    
-    .transaction-actions button,
-    .transaction-actions a {
-      width: 100% !important;
-    }
-    
-    /* Form Pages Mobile */
-    .form-group {
-      margin-bottom: 1.25rem !important;
-    }
-    
-    /* CRM Tables Mobile */
-    .crm-table-wrapper {
-      overflow-x: auto !important;
-    }
-    
-    table {
-      min-width: 600px !important;
-    }
-  }
+ /* Portrait Mobile Optimization */
+ @media (max-width: 768px) and (orientation: portrait) {
+ .agent-content-wrapper {
+ padding: 1.25rem 0.875rem !important;
+ }
+ 
+ /* Navigation - Compact but readable */
+ .ylh-nav-container {
+ padding: 0.75rem 0.875rem !important;
+ }
+ 
+ .ylh-nav-title {
+ font-size: 1rem !important;
+ margin-bottom: 0.5rem !important;
+ }
+ 
+ .ylh-nav-button,
+ .ylh-nav-link {
+ font-size: 0.75rem !important;
+ padding: 0.5rem 0.75rem !important;
+ min-height: 40px !important;
+ }
+ 
+ /* Feature Spotlight Cards - Portrait Optimized */
+ .feature-spotlight-container {
+ padding: 0.875rem !important;
+ }
+ 
+ .premium-header {
+ margin-bottom: 1.5rem !important;
+ padding-bottom: 1rem !important;
+ }
+ 
+ .premium-header h1 {
+ font-size: 1.5rem !important;
+ line-height: 1.3 !important;
+ }
+ 
+ .premium-header p {
+ font-size: 0.9rem !important;
+ line-height: 1.5 !important;
+ }
+ 
+ .card-premium {
+ padding: 1.5rem 1.125rem !important;
+ margin-bottom: 1.5rem !important;
+ }
+ 
+ .feature-card {
+ padding: 1.25rem 1rem !important;
+ margin-bottom: 1rem !important;
+ }
+ 
+ /* Transaction Pages - Portrait Layout */
+ .transaction-header,
+ .transaction-detail-header {
+ flex-direction: column !important;
+ gap: 1rem !important;
+ align-items: stretch !important;
+ padding: 1rem 0.875rem !important;
+ }
+ 
+ .transaction-actions,
+ .transaction-actions-group {
+ flex-direction: column !important;
+ width: 100% !important;
+ gap: 0.75rem !important;
+ }
+ 
+ .transaction-actions button,
+ .transaction-actions a,
+ .transaction-actions-group button {
+ width: 100% !important;
+ margin: 0 !important;
+ }
+ 
+ /* Form Pages - Professional Spacing */
+ .form-group {
+ margin-bottom: 1.5rem !important;
+ }
+ 
+ .form-group label {
+ margin-bottom: 0.625rem !important;
+ }
+ 
+ /* CRM Tables - Scrollable */
+ .crm-table-wrapper {
+ overflow-x: auto !important;
+ -webkit-overflow-scrolling: touch !important;
+ margin: 0 -0.875rem !important;
+ padding: 0 0.875rem !important;
+ }
+ 
+ table {
+ min-width: 650px !important;
+ font-size: 0.9rem !important;
+ }
+ 
+ th, td {
+ padding: 0.75rem 0.625rem !important;
+ }
+ 
+ /* Dashboard Headers - Ultra Compact & Luxurious */
+ .dashboard-main__header {
+ padding: 0.75rem 0.875rem !important;
+ margin-bottom: 1rem !important;
+ border-bottom: 1px solid rgba(107, 91, 77, 0.1) !important;
+ }
+ 
+ .dashboard-main__header .dashboard-tagline {
+ font-size: 0.7rem !important;
+ margin-bottom: 0.25rem !important;
+ color: #6B5B4D !important;
+ text-transform: uppercase !important;
+ letter-spacing: 0.1em !important;
+ font-weight: 600 !important;
+ }
+ 
+ .dashboard-main__header h1 {
+ font-size: 1.25rem !important;
+ margin: 0 0 0.375rem 0 !important;
+ line-height: 1.3 !important;
+ font-weight: 600 !important;
+ }
+ 
+ .dashboard-main__header p {
+ font-size: 0.85rem !important;
+ margin: 0 !important;
+ line-height: 1.5 !important;
+ color: rgba(61, 46, 36, 0.7) !important;
+ }
+ 
+ /* Dashboard Cards - Stack Vertically */
+ .dashboard-cards {
+ grid-template-columns: 1fr !important;
+ gap: 0.875rem !important;
+ margin-top: 0.75rem !important;
+ }
+ 
+ .card-value {
+ font-size: 1.75rem !important;
+ }
+ 
+ .card h3 {
+ font-size: 0.9rem !important;
+ margin-bottom: 0.5rem !important;
+ }
+ 
+ .card-subtext {
+ font-size: 0.8rem !important;
+ }
+ 
+ /* Quick Actions - Compact */
+ .action-card {
+ padding: 0.875rem !important;
+ gap: 0.75rem !important;
+ }
+ 
+ .action-card span {
+ font-size: 1.5rem !important;
+ }
+ 
+ /* Modals - Full Screen Feel */
+ .modal-content,
+ [id*="modal"] > div {
+ width: 100% !important;
+ max-width: 100% !important;
+ margin: 0 !important;
+ border-radius: 0 !important;
+ min-height: 100vh !important;
+ padding: 1.5rem 1rem !important;
+ }
+ }
+ 
+ @media (max-width: 480px) and (orientation: portrait) {
+ .dashboard-main__header {
+ padding: 0.625rem 0.75rem !important;
+ }
+ 
+ .dashboard-main__header h1 {
+ font-size: 1.1rem !important;
+ }
+ 
+ .dashboard-main__header .dashboard-tagline {
+ font-size: 0.65rem !important;
+ }
+ 
+ .dashboard-main__header p {
+ font-size: 0.8rem !important;
+ }
+ }
+ 
+ @media (max-width: 768px) {
+ .agent-content-wrapper {
+ padding: 1.5rem 1rem !important;
+ }
+ 
+ /* Feature Spotlight Cards Mobile */
+ .feature-spotlight-container {
+ padding: 1rem !important;
+ }
+ 
+ .premium-header h1 {
+ font-size: 1.5rem !important;
+ }
+ 
+ .premium-header p {
+ font-size: 0.9rem !important;
+ }
+ 
+ .card-premium {
+ padding: 1.5rem 1rem !important;
+ }
+ 
+ .feature-card {
+ padding: 1rem !important;
+ }
+ 
+ /* Transaction Pages Mobile */
+ .transaction-header,
+ .transaction-detail-header {
+ flex-direction: column !important;
+ gap: 1rem !important;
+ }
+ 
+ .transaction-actions {
+ flex-direction: column !important;
+ width: 100% !important;
+ }
+ 
+ .transaction-actions button,
+ .transaction-actions a {
+ width: 100% !important;
+ }
+ 
+ /* Form Pages Mobile */
+ .form-group {
+ margin-bottom: 1.25rem !important;
+ }
+ 
+ /* CRM Tables Mobile */
+ .crm-table-wrapper {
+ overflow-x: auto !important;
+ }
+ 
+ table {
+ min-width: 600px !important;
+ }
+ }
 </style>
 
 {% endblock %}

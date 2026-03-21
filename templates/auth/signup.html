@@ -4,277 +4,277 @@
 
 {% block content %}
 <style>
-  .auth-page {
-    min-height: calc(100vh - 4rem);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%);
-    padding: 3rem 2rem;
-  }
-  
-  .auth-card {
-    background: #FFFFFF;
-    border: 1px solid #C2B1A1;
-    border-radius: 2px;
-    padding: 3rem;
-    max-width: 520px;
-    width: 100%;
-    box-shadow: 0 12px 40px rgba(61, 46, 36, 0.15);
-  }
-  
-  .auth-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    border-bottom: 1px solid #E9E4D8;
-    padding-bottom: 2rem;
-  }
-  
-  .auth-tagline {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.1rem;
-    color: #6B5B4D;
-    margin: 0 0 0.75rem;
-    font-weight: 500;
-    font-style: italic;
-  }
-  
-  .auth-title {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 2.5rem;
-    margin: 0 0 1rem;
-    color: #3D2E24;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  
-  .auth-description {
-    font-size: 1rem;
-    color: #3D2E24;
-    opacity: 0.8;
-    line-height: 1.7;
-    margin: 0;
-  }
-  
-  .auth-form {
-    display: grid;
-    gap: 1.5rem;
-  }
-  
-  .auth-form-group {
-    display: grid;
-    gap: 0.5rem;
-  }
-  
-  .auth-form-group label {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #3D2E24;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-  
-  .auth-form-group input,
-  .auth-form-group select {
-    padding: 0.875rem 1.25rem;
-    border: 2px solid #C2B1A1;
-    border-radius: 2px;
-    font-size: 1rem;
-    color: #3D2E24;
-    background: #FFFFFF;
-    transition: all 0.3s ease;
-  }
-  
-  .auth-form-group input:focus,
-  .auth-form-group select:focus {
-    outline: none;
-    border-color: #6B5B4D;
-    box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
-  }
-  
-  .auth-form-group select {
-    cursor: pointer;
-  }
-  
-  /* Password field wrapper - MUST override base.html mobile styles */
-  .auth-form .password-wrapper {
-    position: relative !important;
-    display: block !important;
-    width: 100% !important;
-  }
-  
-  /* Password input - ensure full width but leave room for icon */
-  .auth-form .password-wrapper input[type="password"],
-  .auth-form .password-wrapper input[type="text"] {
-    width: 100% !important;
-    padding-right: 3rem !important;
-    padding-left: 1.25rem !important;
-    box-sizing: border-box !important;
-  }
+ .auth-page {
+ min-height: calc(100vh - 4rem);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%);
+ padding: 3rem 2rem;
+ }
+ 
+ .auth-card {
+ background: #FFFFFF;
+ border: 1px solid #C2B1A1;
+ border-radius: 2px;
+ padding: 3rem;
+ max-width: 520px;
+ width: 100%;
+ box-shadow: 0 12px 40px rgba(61, 46, 36, 0.15);
+ }
+ 
+ .auth-header {
+ text-align: center;
+ margin-bottom: 2.5rem;
+ border-bottom: 1px solid #E9E4D8;
+ padding-bottom: 2rem;
+ }
+ 
+ .auth-tagline {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.1rem;
+ color: #6B5B4D;
+ margin: 0 0 0.75rem;
+ font-weight: 500;
+ font-style: italic;
+ }
+ 
+ .auth-title {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 2.5rem;
+ margin: 0 0 1rem;
+ color: #3D2E24;
+ font-weight: 600;
+ letter-spacing: -0.02em;
+ }
+ 
+ .auth-description {
+ font-size: 1rem;
+ color: #3D2E24;
+ opacity: 0.8;
+ line-height: 1.7;
+ margin: 0;
+ }
+ 
+ .auth-form {
+ display: grid;
+ gap: 1.5rem;
+ }
+ 
+ .auth-form-group {
+ display: grid;
+ gap: 0.5rem;
+ }
+ 
+ .auth-form-group label {
+ font-size: 0.95rem;
+ font-weight: 600;
+ color: #3D2E24;
+ text-transform: uppercase;
+ letter-spacing: 0.03em;
+ }
+ 
+ .auth-form-group input,
+ .auth-form-group select {
+ padding: 0.875rem 1.25rem;
+ border: 2px solid #C2B1A1;
+ border-radius: 2px;
+ font-size: 1rem;
+ color: #3D2E24;
+ background: #FFFFFF;
+ transition: all 0.3s ease;
+ }
+ 
+ .auth-form-group input:focus,
+ .auth-form-group select:focus {
+ outline: none;
+ border-color: #6B5B4D;
+ box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
+ }
+ 
+ .auth-form-group select {
+ cursor: pointer;
+ }
+ 
+ /* Password field wrapper - MUST override base.html mobile styles */
+ .auth-form .password-wrapper {
+ position: relative !important;
+ display: block !important;
+ width: 100% !important;
+ }
+ 
+ /* Password input - ensure full width but leave room for icon */
+ .auth-form .password-wrapper input[type="password"],
+ .auth-form .password-wrapper input[type="text"] {
+ width: 100% !important;
+ padding-right: 3rem !important;
+ padding-left: 1.25rem !important;
+ box-sizing: border-box !important;
+ }
 
-  /* Eye icon button - position inside input on the right */
-  .auth-form .password-wrapper .password-toggle {
-    position: absolute !important;
-    right: 1rem !important;
-    top: 50% !important;
-    transform: translateY(-50%) !important;
-    border: none !important;
-    background: transparent !important;
-    cursor: pointer !important;
-    padding: 0.5rem !important;
-    margin: 0 !important;
-    transition: opacity 0.2s ease !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    opacity: 0.5 !important;
-    width: 24px !important;
-    height: 24px !important;
-    z-index: 10 !important;
-    pointer-events: all !important;
-    min-height: unset !important;
-  }
+ /* Eye icon button - position inside input on the right */
+ .auth-form .password-wrapper .password-toggle {
+ position: absolute !important;
+ right: 1rem !important;
+ top: 50% !important;
+ transform: translateY(-50%) !important;
+ border: none !important;
+ background: transparent !important;
+ cursor: pointer !important;
+ padding: 0.5rem !important;
+ margin: 0 !important;
+ transition: opacity 0.2s ease !important;
+ display: flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ opacity: 0.5 !important;
+ width: 24px !important;
+ height: 24px !important;
+ z-index: 10 !important;
+ pointer-events: all !important;
+ min-height: unset !important;
+ }
 
-  .auth-form .password-wrapper .password-toggle:hover {
-    opacity: 0.7 !important;
-  }
-  
-  .auth-form .password-wrapper .password-toggle svg {
-    width: 100% !important;
-    height: 100% !important;
-    stroke: #3D2E24 !important;
-    fill: none !important;
-    stroke-width: 2 !important;
-    stroke-linecap: round !important;
-    stroke-linejoin: round !important;
-  }
-  
-  .role-hint {
-    background: linear-gradient(135deg, #E9E4D8 0%, #F0EBE4 100%);
-    border: 1px solid #C2B1A1;
-    border-radius: 2px;
-    padding: 1rem 1.25rem;
-    font-size: 0.9rem;
-    color: #3D2E24;
-    line-height: 1.6;
-  }
-  
-  .auth-footer {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #E9E4D8;
-    font-size: 1rem;
-    color: #3D2E24;
-    opacity: 0.8;
-  }
-  
-  .auth-footer a {
-    color: #6B5B4D;
-    font-weight: 600;
-  }
-  
-  .auth-footer a:hover {
-    color: #3D2E24;
-  }
-  
-  @media (max-width: 600px) {
-    .auth-card {
-      padding: 2rem 1.5rem;
-    }
-    
-    .auth-title {
-      font-size: 2rem;
-    }
-  }
+ .auth-form .password-wrapper .password-toggle:hover {
+ opacity: 0.7 !important;
+ }
+ 
+ .auth-form .password-wrapper .password-toggle svg {
+ width: 100% !important;
+ height: 100% !important;
+ stroke: #3D2E24 !important;
+ fill: none !important;
+ stroke-width: 2 !important;
+ stroke-linecap: round !important;
+ stroke-linejoin: round !important;
+ }
+ 
+ .role-hint {
+ background: linear-gradient(135deg, #E9E4D8 0%, #F0EBE4 100%);
+ border: 1px solid #C2B1A1;
+ border-radius: 2px;
+ padding: 1rem 1.25rem;
+ font-size: 0.9rem;
+ color: #3D2E24;
+ line-height: 1.6;
+ }
+ 
+ .auth-footer {
+ text-align: center;
+ margin-top: 2rem;
+ padding-top: 2rem;
+ border-top: 1px solid #E9E4D8;
+ font-size: 1rem;
+ color: #3D2E24;
+ opacity: 0.8;
+ }
+ 
+ .auth-footer a {
+ color: #6B5B4D;
+ font-weight: 600;
+ }
+ 
+ .auth-footer a:hover {
+ color: #3D2E24;
+ }
+ 
+ @media (max-width: 600px) {
+ .auth-card {
+ padding: 2rem 1.5rem;
+ }
+ 
+ .auth-title {
+ font-size: 2rem;
+ }
+ }
 </style>
 
 <div class="auth-page">
-  <div class="auth-card">
-    <header class="auth-header">
-      <p class="auth-tagline">Begin your journey</p>
-      <h1 class="auth-title">Create Account</h1>
-      <p class="auth-description">
-        Choose the role that fits you best and start exploring
-      </p>
-    </header>
+ <div class="auth-card">
+ <header class="auth-header">
+ <p class="auth-tagline">Begin your journey</p>
+ <h1 class="auth-title">Create Account</h1>
+ <p class="auth-description">
+ Choose the role that fits you best and start exploring
+ </p>
+ </header>
 
-    <form method="post" class="auth-form">
-      <div class="auth-form-group">
-        <label for="name">Full Name</label>
-        <input id="name" name="name" type="text" placeholder="Enter your full name" />
-      </div>
-      
-      <div class="auth-form-group">
-        <label for="email">Email Address</label>
-        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
-      </div>
-      
-      <div class="auth-form-group">
-        <label for="password">Password</label>
-        <div class="password-wrapper">
-          <input id="password" name="password" type="password" autocomplete="new-password" required placeholder="Create a secure password" />
-          <button type="button" onclick="togglePasswordSignup()" class="password-toggle" title="Show password" id="passwordToggleBtnSignup">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-      </div>
-      
-      {% if role != 'homeowner' %}
-      <div class="auth-form-group">
-        <label for="role">I am signing up as</label>
-        <select id="role" name="role">
-          <option value="agent" {% if role == 'agent' %}selected{% endif %}>
-            Real Estate Agent
-          </option>
-          <option value="lender" {% if role == 'lender' %}selected{% endif %}>
-            Lender or Loan Officer
-          </option>
-        </select>
-      </div>
-      {% else %}
-      <input type="hidden" name="role" value="homeowner" />
-      {% endif %}
-      
-      {% if referral_code %}
-      <input type="hidden" name="ref_token" value="{{ referral_code }}" />
-      {% endif %}
-      
-      <div class="role-hint">
-        <strong>Homeowners:</strong> Free forever. 
-        {% if role != 'homeowner' %}
-        <strong>Professionals:</strong> Free trial, then subscribe for full access.
-        {% endif %}
-      </div>
-      
-      <button class="btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
-        Create My Account
-      </button>
-    </form>
+ <form method="post" class="auth-form">
+ <div class="auth-form-group">
+ <label for="name">Full Name</label>
+ <input id="name" name="name" type="text" placeholder="Enter your full name" />
+ </div>
+ 
+ <div class="auth-form-group">
+ <label for="email">Email Address</label>
+ <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+ </div>
+ 
+ <div class="auth-form-group">
+ <label for="password">Password</label>
+ <div class="password-wrapper">
+ <input id="password" name="password" type="password" autocomplete="new-password" required placeholder="Create a secure password" />
+ <button type="button" onclick="togglePasswordSignup()" class="password-toggle" title="Show password" id="passwordToggleBtnSignup">
+ <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+ <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+ <circle cx="12" cy="12" r="3"></circle>
+ </svg>
+ </button>
+ </div>
+ </div>
+ 
+ {% if role != 'homeowner' %}
+ <div class="auth-form-group">
+ <label for="role">I am signing up as</label>
+ <select id="role" name="role">
+ <option value="agent" {% if role == 'agent' %}selected{% endif %}>
+ Real Estate Agent
+ </option>
+ <option value="lender" {% if role == 'lender' %}selected{% endif %}>
+ Lender or Loan Officer
+ </option>
+ </select>
+ </div>
+ {% else %}
+ <input type="hidden" name="role" value="homeowner" />
+ {% endif %}
+ 
+ {% if referral_code %}
+ <input type="hidden" name="ref_token" value="{{ referral_code }}" />
+ {% endif %}
+ 
+ <div class="role-hint">
+ <strong>Homeowners:</strong> Free forever. 
+ {% if role != 'homeowner' %}
+ <strong>Professionals:</strong> Free trial, then subscribe for full access.
+ {% endif %}
+ </div>
+ 
+ <button class="btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
+ Create My Account
+ </button>
+ </form>
 
-    <div class="auth-footer">
-      Already have an account?
-      <a href="{{ url_for('login') }}">Sign in here</a>
-    </div>
-  </div>
+ <div class="auth-footer">
+ Already have an account?
+ <a href="{{ url_for('login') }}">Sign in here</a>
+ </div>
+ </div>
 </div>
 
 <script>
-  function togglePasswordSignup() {
-    const input = document.getElementById("password");
-    const btn = document.getElementById("passwordToggleBtnSignup");
-    if (input.type === "password") {
-      input.type = "text";
-      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
-      btn.title = "Hide password";
-    } else {
-      input.type = "password";
-      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-      btn.title = "Show password";
-    }
-  }
+ function togglePasswordSignup() {
+ const input = document.getElementById("password");
+ const btn = document.getElementById("passwordToggleBtnSignup");
+ if (input.type === "password") {
+ input.type = "text";
+ btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+ btn.title = "Hide password";
+ } else {
+ input.type = "password";
+ btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+ btn.title = "Show password";
+ }
+ }
 </script>
 {% endblock %}

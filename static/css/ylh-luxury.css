@@ -816,3 +816,222 @@ p, span, li, td, th {
 [class*="hero-"] {
   background: linear-gradient(160deg, #F5F0EB 0%, #E9E4D8 100%) !important;
 }
+
+/* =============================================================
+   COMPACT LAYOUT — Reduce bulk, less scrolling, denser view
+   Applied: March 2026
+   ============================================================= */
+
+/* ── Page & container padding ── */
+.dashboard-container,
+.page-container,
+.content-wrapper,
+main.dashboard-main,
+.main-content {
+  padding: 1rem 1.25rem !important;
+}
+
+/* ── Section / panel spacing ── */
+.section,
+.section-alt,
+.dashboard-section,
+.panel,
+.widget,
+.card-section {
+  padding: 0.75rem 0 !important;
+  margin-bottom: 0.75rem !important;
+}
+
+/* ── Cards: much tighter ── */
+.card,
+.card-premium,
+.metric-card,
+.stat-card,
+.summary-card,
+.dashboard-card,
+.info-card,
+.feature-card,
+.action-card,
+a.action-card {
+  padding: 0.75rem 1rem !important;
+  border-radius: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* ── Card headers & bodies ── */
+.card-header,
+.card-title {
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.8rem !important;
+  margin-bottom: 0.35rem !important;
+}
+
+.card-body,
+.card-content {
+  padding: 0.5rem 0 !important;
+}
+
+/* ── Grid gaps ── */
+.dashboard-grid,
+.dashboard-cards,
+.stats-grid,
+.metrics-grid,
+.cards-grid,
+.grid,
+[class*="-grid"],
+[class*="-cards"] {
+  gap: 0.6rem !important;
+}
+
+/* ── Stat / metric number display ── */
+.metric-value,
+.stat-number,
+.stat-value,
+.kpi-value,
+.dashboard-stat h2,
+.dashboard-stat .value {
+  font-size: 1.6rem !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+}
+
+.metric-label,
+.stat-label,
+.kpi-label {
+  font-size: 0.7rem !important;
+  margin-top: 0.1rem !important;
+}
+
+/* ── Section / page headings ── */
+.dashboard-main__header,
+.page-header,
+.section-header,
+.content-header {
+  padding: 0.5rem 0 !important;
+  margin-bottom: 0.6rem !important;
+}
+
+.dashboard-main__header h1,
+.page-header h1,
+.section-header h1,
+h1.page-title {
+  font-size: 1.25rem !important;
+  margin: 0 !important;
+}
+
+.dashboard-main__header p,
+.page-header p,
+.section-header p {
+  font-size: 0.78rem !important;
+  margin: 0.1rem 0 0 !important;
+}
+
+/* ── Tables — tighter rows ── */
+.table th,
+table th {
+  padding: 0.4rem 0.65rem !important;
+  font-size: 0.7rem !important;
+}
+
+.table td,
+table td {
+  padding: 0.35rem 0.65rem !important;
+  font-size: 0.78rem !important;
+}
+
+/* ── Forms — less vertical space ── */
+.form-group,
+.fmg,
+.field-group {
+  margin-bottom: 0.5rem !important;
+}
+
+.form-group label,
+.fmg label,
+label {
+  font-size: 0.72rem !important;
+  margin-bottom: 0.2rem !important;
+  display: block;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="url"],
+input[type="password"],
+select,
+textarea {
+  padding: 0.35rem 0.6rem !important;
+  font-size: 0.8rem !important;
+}
+
+/* ── Morning briefing / AI panels — no giant blank space ── */
+.briefing-card,
+.morning-briefing,
+.ai-briefing,
+[class*="briefing"],
+.ai-panel,
+.ai-card {
+  padding: 0.75rem 1rem !important;
+  min-height: unset !important;
+}
+
+/* ── Lender sidebar ── */
+.lender-sidebar {
+  padding: 0.75rem 0 !important;
+}
+
+.sidebar-section {
+  padding: 0 0.5rem 0.5rem !important;
+}
+
+.sidebar-section-title {
+  font-size: 0.6rem !important;
+  padding: 0.35rem 0.75rem !important;
+  margin-bottom: 0.15rem !important;
+}
+
+.sidebar-nav-link {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.75rem !important;
+}
+
+/* ── Page-level wrapper padding ── */
+.page-wrapper,
+.app-wrapper,
+.content-area,
+.main-area {
+  padding: 0.75rem 1rem !important;
+}
+
+/* ── Containers on public/landing pages — keep some breathing room ── */
+.container {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+}
+
+/* ── Reduce vertical rhythm in list items / timeline ── */
+.timeline-item,
+.list-item,
+.activity-item,
+.log-item {
+  padding: 0.35rem 0.5rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+/* ── Modals / overlays — compact header ── */
+.modal-header,
+.modal-title {
+  padding: 0.6rem 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+.modal-body {
+  padding: 0.75rem 1rem !important;
+}
+
+.modal-footer {
+  padding: 0.5rem 1rem !important;
+}

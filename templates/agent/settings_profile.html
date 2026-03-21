@@ -2,561 +2,561 @@
 
 {% block agent_content %}
 <style>
-  .settings-container {
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  
-  .settings-header {
-    margin-bottom: 2rem;
-  }
-  
-  .settings-header h1 {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-  }
-  
-  .settings-header p {
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    font-size: 1rem;
-  }
-  
-  .settings-section {
-    background: var(--white);
-    border: var(--border-light);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-light);
-  }
-  
-  .settings-section h2 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--olive-green);
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 2px solid var(--taupe-beige);
-  }
-  
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  .form-group label {
-    display: block;
-    font-weight: 600;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-  }
-  
-  .form-group input[type="text"],
-  .form-group input[type="url"],
-  .form-group input[type="tel"],
-  .form-group input[type="number"],
-  .form-group textarea,
-  .form-group select {
-    width: 100%;
-    padding: 0.75rem;
-    border: var(--border-light);
-    border-radius: var(--border-radius);
-    background: var(--white);
-    color: var(--charcoal-brown);
-    font-size: 0.95rem;
-    font-family: var(--font-body);
-    transition: border-color var(--transition-base);
-  }
-  
-  .form-group input:focus,
-  .form-group textarea:focus,
-  .form-group select:focus {
-    outline: none;
-    border-color: var(--olive-green);
-    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
-  }
-  
-  .form-group textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
-  
-  .form-group small {
-    display: block;
-    color: var(--charcoal-brown);
-    opacity: 0.7;
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-  }
-  
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
-  
-  @media (max-width: 768px) {
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .file-upload-wrapper {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-  }
-  
-  .file-upload-preview {
-    margin-top: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    background: var(--warm-cream);
-    border-radius: var(--border-radius);
-    border: var(--border-light);
-  }
-  
-  .file-upload-preview img {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: var(--border-radius);
-    border: 2px solid var(--taupe-beige);
-  }
-  
-  .file-upload-label {
-    display: inline-block;
-    padding: 0.75rem 1.5rem;
-    background: var(--olive-green);
-    color: var(--white);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: background var(--transition-base);
-    text-align: center;
-  }
-  
-  .file-upload-label:hover {
-    background: #5A6D47;
-  }
-  
-  .file-upload-label input[type="file"] {
-    position: absolute;
-    opacity: 0;
-    width: 0;
-    height: 0;
-  }
-  
-  .checkbox-group {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
-  }
-  
-  .checkbox-group input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-  }
-  
-  .checkbox-group label {
-    margin: 0;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  
-  .btn-save {
-    background: var(--olive-green);
-    color: var(--white);
-    padding: 1rem 2.5rem;
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-base);
-    box-shadow: var(--shadow-light);
-  }
-  
-  .btn-save:hover {
-    background: #5A6D47;
-    box-shadow: var(--shadow-medium);
-    transform: translateY(-2px);
-  }
-  
-  .btn-save:active {
-    transform: translateY(0);
-  }
-  
-  .social-links-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
-  }
-  
-  @media (max-width: 768px) {
-    .social-links-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .preview-section {
-    background: var(--gradient-warm);
-    border: var(--border-light);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    margin-top: 2rem;
-  }
-  
-  .preview-section h3 {
-    font-family: var(--font-heading);
-    color: var(--olive-green);
-    margin-bottom: 1rem;
-  }
+ .settings-container {
+ max-width: 1200px;
+ margin: 0 auto;
+ }
+ 
+ .settings-header {
+ margin-bottom: 2rem;
+ }
+ 
+ .settings-header h1 {
+ font-family: var(--font-heading);
+ font-size: 2.5rem;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.5rem;
+ }
+ 
+ .settings-header p {
+ color: var(--charcoal-brown);
+ opacity: 0.8;
+ font-size: 1rem;
+ }
+ 
+ .settings-section {
+ background: var(--white);
+ border: var(--border-light);
+ border-radius: var(--border-radius-lg);
+ padding: 2rem;
+ margin-bottom: 2rem;
+ box-shadow: var(--shadow-light);
+ }
+ 
+ .settings-section h2 {
+ font-family: var(--font-heading);
+ font-size: 1.5rem;
+ color: var(--olive-green);
+ margin-bottom: 1.5rem;
+ padding-bottom: 0.75rem;
+ border-bottom: 2px solid var(--taupe-beige);
+ }
+ 
+ .form-group {
+ margin-bottom: 1.5rem;
+ }
+ 
+ .form-group label {
+ display: block;
+ font-weight: 600;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.5rem;
+ font-size: 0.9rem;
+ }
+ 
+ .form-group input[type="text"],
+ .form-group input[type="url"],
+ .form-group input[type="tel"],
+ .form-group input[type="number"],
+ .form-group textarea,
+ .form-group select {
+ width: 100%;
+ padding: 0.75rem;
+ border: var(--border-light);
+ border-radius: var(--border-radius);
+ background: var(--white);
+ color: var(--charcoal-brown);
+ font-size: 0.95rem;
+ font-family: var(--font-body);
+ transition: border-color var(--transition-base);
+ }
+ 
+ .form-group input:focus,
+ .form-group textarea:focus,
+ .form-group select:focus {
+ outline: none;
+ border-color: var(--olive-green);
+ box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
+ }
+ 
+ .form-group textarea {
+ min-height: 120px;
+ resize: vertical;
+ }
+ 
+ .form-group small {
+ display: block;
+ color: var(--charcoal-brown);
+ opacity: 0.7;
+ font-size: 0.85rem;
+ margin-top: 0.25rem;
+ }
+ 
+ .form-row {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 1.5rem;
+ }
+ 
+ @media (max-width: 768px) {
+ .form-row {
+ grid-template-columns: 1fr;
+ }
+ }
+ 
+ .file-upload-wrapper {
+ position: relative;
+ display: inline-block;
+ width: 100%;
+ }
+ 
+ .file-upload-preview {
+ margin-top: 1rem;
+ display: flex;
+ align-items: center;
+ gap: 1rem;
+ padding: 1rem;
+ background: var(--warm-cream);
+ border-radius: var(--border-radius);
+ border: var(--border-light);
+ }
+ 
+ .file-upload-preview img {
+ width: 120px;
+ height: 120px;
+ object-fit: cover;
+ border-radius: var(--border-radius);
+ border: 2px solid var(--taupe-beige);
+ }
+ 
+ .file-upload-label {
+ display: inline-block;
+ padding: 0.75rem 1.5rem;
+ background: var(--olive-green);
+ color: var(--white);
+ border-radius: var(--border-radius);
+ cursor: pointer;
+ font-weight: 600;
+ font-size: 0.9rem;
+ transition: background var(--transition-base);
+ text-align: center;
+ }
+ 
+ .file-upload-label:hover {
+ background: #5A6D47;
+ }
+ 
+ .file-upload-label input[type="file"] {
+ position: absolute;
+ opacity: 0;
+ width: 0;
+ height: 0;
+ }
+ 
+ .checkbox-group {
+ display: flex;
+ align-items: center;
+ gap: 0.75rem;
+ margin-top: 0.5rem;
+ }
+ 
+ .checkbox-group input[type="checkbox"] {
+ width: 20px;
+ height: 20px;
+ cursor: pointer;
+ }
+ 
+ .checkbox-group label {
+ margin: 0;
+ font-weight: 500;
+ cursor: pointer;
+ }
+ 
+ .btn-save {
+ background: var(--olive-green);
+ color: var(--white);
+ padding: 1rem 2.5rem;
+ border: none;
+ border-radius: var(--border-radius);
+ font-size: 1rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all var(--transition-base);
+ box-shadow: var(--shadow-light);
+ }
+ 
+ .btn-save:hover {
+ background: #5A6D47;
+ box-shadow: var(--shadow-medium);
+ transform: translateY(-2px);
+ }
+ 
+ .btn-save:active {
+ transform: translateY(0);
+ }
+ 
+ .social-links-grid {
+ display: grid;
+ grid-template-columns: repeat(2, 1fr);
+ gap: 1.5rem;
+ }
+ 
+ @media (max-width: 768px) {
+ .social-links-grid {
+ grid-template-columns: 1fr;
+ }
+ }
+ 
+ .preview-section {
+ background: var(--gradient-warm);
+ border: var(--border-light);
+ border-radius: var(--border-radius-lg);
+ padding: 2rem;
+ margin-top: 2rem;
+ }
+ 
+ .preview-section h3 {
+ font-family: var(--font-heading);
+ color: var(--olive-green);
+ margin-bottom: 1rem;
+ }
 </style>
 
 <div class="settings-container">
-  <div class="settings-header">
-    <h1>Profile & Branding</h1>
-    <p>This is the public view that leads and clients will see when they click your link from emails or marketing pieces.</p>
-  </div>
+ <div class="settings-header">
+ <h1>Profile & Branding</h1>
+ <p>This is the public view that leads and clients will see when they click your link from emails or marketing pieces.</p>
+ </div>
 
-  <form method="post" enctype="multipart/form-data" id="profileForm">
-    <!-- Professional Photo & Logo -->
-    <div class="settings-section">
-      <h2>📸 Photos & Branding</h2>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Professional Photo</label>
-          <div class="file-upload-wrapper">
-            <label class="file-upload-label">
-              <input type="file" name="professional_photo" accept="image/*" onchange="previewImage(this, 'photo-preview')">
-              Choose Photo
-            </label>
-          </div>
-          {% if profile and profile.get('professional_photo') %}
-          <div class="file-upload-preview" id="photo-preview-wrapper">
-            <img src="{% if profile.professional_photo.startswith('data:') %}{{ profile.professional_photo }}{% elif profile.professional_photo.startswith('http') %}{{ profile.professional_photo }}{% else %}{{ url_for('static', filename=profile.professional_photo) }}{% endif %}" alt="Professional Photo" id="photo-preview" style="max-height: 150px; width: auto; object-fit: contain;">
-            <div>
-              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Photo</p>
-              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">✅ Permanently saved - never disappears on redeploy</p>
-            </div>
-          </div>
-          {% else %}
-          <div class="file-upload-preview" id="photo-preview-wrapper" style="display: none;">
-            <img src="" alt="Preview" id="photo-preview">
-            <div>
-              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Preview</p>
-              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Your new photo will appear here</p>
-            </div>
-          </div>
-          {% endif %}
-          <small>Recommended: Square image, at least 400x400px. JPG or PNG format.</small>
-        </div>
-        
-        <div class="form-group">
-          <label>Brokerage/Team Logo</label>
-          <div class="file-upload-wrapper">
-            <label class="file-upload-label">
-              <input type="file" name="brokerage_logo" accept="image/*" onchange="previewImage(this, 'logo-preview')">
-              Choose Logo
-            </label>
-          </div>
-          {% if profile and profile.get('brokerage_logo') %}
-          <div class="file-upload-preview" id="logo-preview-wrapper">
-            <img src="{% if profile.brokerage_logo.startswith('data:') %}{{ profile.brokerage_logo }}{% elif profile.brokerage_logo.startswith('http') %}{{ profile.brokerage_logo }}{% else %}{{ url_for('static', filename=profile.brokerage_logo) }}{% endif %}" alt="Brokerage Logo" id="logo-preview" style="max-height: 120px; width: auto; object-fit: contain;">
-            <div>
-              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Logo</p>
-              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">✅ Permanently saved - never disappears on redeploy</p>
-            </div>
-          </div>
-          {% else %}
-          <div class="file-upload-preview" id="logo-preview-wrapper" style="display: none;">
-            <img src="" alt="Preview" id="logo-preview">
-            <div>
-              <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Preview</p>
-              <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Your new logo will appear here</p>
-            </div>
-          </div>
-          {% endif %}
-          <small>Recommended: Horizontal logo, transparent background preferred. PNG format.</small>
-        </div>
-      </div>
-    </div>
+ <form method="post" enctype="multipart/form-data" id="profileForm">
+ <!-- Professional Photo & Logo -->
+ <div class="settings-section">
+ <h2> Photos & Branding</h2>
+ 
+ <div class="form-row">
+ <div class="form-group">
+ <label>Professional Photo</label>
+ <div class="file-upload-wrapper">
+ <label class="file-upload-label">
+ <input type="file" name="professional_photo" accept="image/*" onchange="previewImage(this, 'photo-preview')">
+ Choose Photo
+ </label>
+ </div>
+ {% if profile and profile.get('professional_photo') %}
+ <div class="file-upload-preview" id="photo-preview-wrapper">
+ <img src="{% if profile.professional_photo.startswith('data:') %}{{ profile.professional_photo }}{% elif profile.professional_photo.startswith('http') %}{{ profile.professional_photo }}{% else %}{{ url_for('static', filename=profile.professional_photo) }}{% endif %}" alt="Professional Photo" id="photo-preview" style="max-height: 150px; width: auto; object-fit: contain;">
+ <div>
+ <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Photo</p>
+ <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;"> Permanently saved - never disappears on redeploy</p>
+ </div>
+ </div>
+ {% else %}
+ <div class="file-upload-preview" id="photo-preview-wrapper" style="display: none;">
+ <img src="" alt="Preview" id="photo-preview">
+ <div>
+ <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Preview</p>
+ <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Your new photo will appear here</p>
+ </div>
+ </div>
+ {% endif %}
+ <small>Recommended: Square image, at least 400x400px. JPG or PNG format.</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>Brokerage/Team Logo</label>
+ <div class="file-upload-wrapper">
+ <label class="file-upload-label">
+ <input type="file" name="brokerage_logo" accept="image/*" onchange="previewImage(this, 'logo-preview')">
+ Choose Logo
+ </label>
+ </div>
+ {% if profile and profile.get('brokerage_logo') %}
+ <div class="file-upload-preview" id="logo-preview-wrapper">
+ <img src="{% if profile.brokerage_logo.startswith('data:') %}{{ profile.brokerage_logo }}{% elif profile.brokerage_logo.startswith('http') %}{{ profile.brokerage_logo }}{% else %}{{ url_for('static', filename=profile.brokerage_logo) }}{% endif %}" alt="Brokerage Logo" id="logo-preview" style="max-height: 120px; width: auto; object-fit: contain;">
+ <div>
+ <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Logo</p>
+ <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;"> Permanently saved - never disappears on redeploy</p>
+ </div>
+ </div>
+ {% else %}
+ <div class="file-upload-preview" id="logo-preview-wrapper" style="display: none;">
+ <img src="" alt="Preview" id="logo-preview">
+ <div>
+ <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Preview</p>
+ <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">Your new logo will appear here</p>
+ </div>
+ </div>
+ {% endif %}
+ <small>Recommended: Horizontal logo, transparent background preferred. PNG format.</small>
+ </div>
+ </div>
+ </div>
 
-    <!-- Basic Information -->
-    <div class="settings-section">
-      <h2>👤 Basic Information</h2>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Team Name</label>
-          <input type="text" name="team_name" value="{{ profile.team_name if profile else '' }}" placeholder="e.g., The Smith Team">
-          <small>Your team or group name (optional)</small>
-        </div>
-        
-        <div class="form-group">
-          <label>Brokerage Name</label>
-          <input type="text" name="brokerage_name" value="{{ profile.brokerage_name if profile else '' }}" placeholder="e.g., ABC Realty">
-          <small>Your brokerage or company name</small>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" name="phone" value="{{ profile.phone if profile else '' }}" placeholder="(555) 123-4567">
-        <small>This will be used for the call button on your public profile</small>
-      </div>
-      
-      <div class="form-group">
-        <label>Bio / About Me</label>
-        <textarea name="bio" placeholder="Tell potential clients about yourself, your experience, and what makes you unique...">{{ profile.bio if profile else '' }}</textarea>
-        <small>A brief, friendly description that will appear on your public profile</small>
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Years of Experience</label>
-          <input type="number" name="years_experience" value="{{ profile.years_experience if profile else '' }}" min="0" placeholder="5">
-        </div>
-        
-        <div class="form-group">
-          <label>License Number</label>
-          <input type="text" name="license_number" value="{{ profile.license_number if profile else '' }}" placeholder="RE-12345">
-        </div>
-      </div>
-    </div>
+ <!-- Basic Information -->
+ <div class="settings-section">
+ <h2> Basic Information</h2>
+ 
+ <div class="form-row">
+ <div class="form-group">
+ <label>Team Name</label>
+ <input type="text" name="team_name" value="{{ profile.team_name if profile else '' }}" placeholder="e.g., The Smith Team">
+ <small>Your team or group name (optional)</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>Brokerage Name</label>
+ <input type="text" name="brokerage_name" value="{{ profile.brokerage_name if profile else '' }}" placeholder="e.g., ABC Realty">
+ <small>Your brokerage or company name</small>
+ </div>
+ </div>
+ 
+ <div class="form-group">
+ <label>Phone Number</label>
+ <input type="tel" name="phone" value="{{ profile.phone if profile else '' }}" placeholder="(555) 123-4567">
+ <small>This will be used for the call button on your public profile</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>Bio / About Me</label>
+ <textarea name="bio" placeholder="Tell potential clients about yourself, your experience, and what makes you unique...">{{ profile.bio if profile else '' }}</textarea>
+ <small>A brief, friendly description that will appear on your public profile</small>
+ </div>
+ 
+ <div class="form-row">
+ <div class="form-group">
+ <label>Years of Experience</label>
+ <input type="number" name="years_experience" value="{{ profile.years_experience if profile else '' }}" min="0" placeholder="5">
+ </div>
+ 
+ <div class="form-group">
+ <label>License Number</label>
+ <input type="text" name="license_number" value="{{ profile.license_number if profile else '' }}" placeholder="RE-12345">
+ </div>
+ </div>
+ </div>
 
-    <!-- Social Media & Links -->
-    <div class="settings-section">
-      <h2>🔗 Social Media & Links</h2>
-      <p style="color: var(--charcoal-brown); opacity: 0.7; margin-bottom: 1.5rem; font-size: 0.9rem;">All social media links are optional. Only add the platforms you actively use.</p>
-      
-      <div class="form-group">
-        <label>Website URL <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-        <input type="url" name="website_url" value="{{ profile.website_url if profile and profile.website_url else '' }}" placeholder="https://yourwebsite.com">
-      </div>
-      
-      <div class="social-links-grid">
-        <div class="form-group">
-          <label>Facebook <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="facebook_url" value="{{ profile.facebook_url if profile and profile.facebook_url else '' }}" placeholder="https://facebook.com/yourpage">
-        </div>
-        
-        <div class="form-group">
-          <label>Instagram <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="instagram_url" value="{{ profile.instagram_url if profile and profile.instagram_url else '' }}" placeholder="https://instagram.com/yourhandle">
-        </div>
-        
-        <div class="form-group">
-          <label>LinkedIn <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile and profile.linkedin_url else '' }}" placeholder="https://linkedin.com/in/yourprofile">
-        </div>
-        
-        <div class="form-group">
-          <label>Twitter/X <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="twitter_url" value="{{ profile.twitter_url if profile and profile.twitter_url else '' }}" placeholder="https://twitter.com/yourhandle">
-        </div>
-        
-        <div class="form-group">
-          <label>YouTube <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
-          <input type="url" name="youtube_url" value="{{ profile.youtube_url if profile and profile.youtube_url else '' }}" placeholder="https://youtube.com/@yourchannel">
-        </div>
-      </div>
-    </div>
+ <!-- Social Media & Links -->
+ <div class="settings-section">
+ <h2> Social Media & Links</h2>
+ <p style="color: var(--charcoal-brown); opacity: 0.7; margin-bottom: 1.5rem; font-size: 0.9rem;">All social media links are optional. Only add the platforms you actively use.</p>
+ 
+ <div class="form-group">
+ <label>Website URL <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+ <input type="url" name="website_url" value="{{ profile.website_url if profile and profile.website_url else '' }}" placeholder="https://yourwebsite.com">
+ </div>
+ 
+ <div class="social-links-grid">
+ <div class="form-group">
+ <label>Facebook <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+ <input type="url" name="facebook_url" value="{{ profile.facebook_url if profile and profile.facebook_url else '' }}" placeholder="https://facebook.com/yourpage">
+ </div>
+ 
+ <div class="form-group">
+ <label>Instagram <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+ <input type="url" name="instagram_url" value="{{ profile.instagram_url if profile and profile.instagram_url else '' }}" placeholder="https://instagram.com/yourhandle">
+ </div>
+ 
+ <div class="form-group">
+ <label>LinkedIn <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+ <input type="url" name="linkedin_url" value="{{ profile.linkedin_url if profile and profile.linkedin_url else '' }}" placeholder="https://linkedin.com/in/yourprofile">
+ </div>
+ 
+ <div class="form-group">
+ <label>Twitter/X <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+ <input type="url" name="twitter_url" value="{{ profile.twitter_url if profile and profile.twitter_url else '' }}" placeholder="https://twitter.com/yourhandle">
+ </div>
+ 
+ <div class="form-group">
+ <label>YouTube <span style="color: var(--charcoal-brown); opacity: 0.6; font-weight: normal;">(optional)</span></label>
+ <input type="url" name="youtube_url" value="{{ profile.youtube_url if profile and profile.youtube_url else '' }}" placeholder="https://youtube.com/@yourchannel">
+ </div>
+ </div>
+ </div>
 
-    <!-- Call & Schedule Buttons -->
-    <div class="settings-section">
-      <h2>📞 Call & Schedule Buttons</h2>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" name="call_button_enabled" id="call_button_enabled" {% if not profile or profile.get('call_button_enabled', 1) %}checked{% endif %}>
-          <label for="call_button_enabled">Enable Call Button</label>
-        </div>
-        <small>The call button will use the phone number you entered above</small>
-      </div>
-      
-      <div class="form-group">
-        <div class="checkbox-group">
-          <input type="checkbox" name="schedule_button_enabled" id="schedule_button_enabled" {% if not profile or profile.get('schedule_button_enabled', 1) %}checked{% endif %}>
-          <label for="schedule_button_enabled">Enable Schedule Button</label>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label>Schedule/Calendar URL</label>
-        <input type="url" name="schedule_url" value="{{ profile.schedule_url if profile and profile.schedule_url else '' }}" placeholder="https://calendly.com/yourname or https://yourcalendar.com">
-        <small>Link to your scheduling system (Calendly, Acuity, etc.) — this also powers your Booking page embed.</small>
-      </div>
+ <!-- Call & Schedule Buttons -->
+ <div class="settings-section">
+ <h2> Call & Schedule Buttons</h2>
+ 
+ <div class="form-group">
+ <div class="checkbox-group">
+ <input type="checkbox" name="call_button_enabled" id="call_button_enabled" {% if not profile or profile.get('call_button_enabled', 1) %}checked{% endif %}>
+ <label for="call_button_enabled">Enable Call Button</label>
+ </div>
+ <small>The call button will use the phone number you entered above</small>
+ </div>
+ 
+ <div class="form-group">
+ <div class="checkbox-group">
+ <input type="checkbox" name="schedule_button_enabled" id="schedule_button_enabled" {% if not profile or profile.get('schedule_button_enabled', 1) %}checked{% endif %}>
+ <label for="schedule_button_enabled">Enable Schedule Button</label>
+ </div>
+ </div>
+ 
+ <div class="form-group">
+ <label>Schedule/Calendar URL</label>
+ <input type="url" name="schedule_url" value="{{ profile.schedule_url if profile and profile.schedule_url else '' }}" placeholder="https://calendly.com/yourname or https://yourcalendar.com">
+ <small>Link to your scheduling system (Calendly, Acuity, etc.) — this also powers your Booking page embed.</small>
+ </div>
 
-      <div class="form-group">
-        <label>Google Review Link</label>
-        <input type="url" name="google_review_link" value="{{ profile.google_review_link if profile and profile.google_review_link else '' }}" placeholder="https://g.page/r/your-review-link">
-        <small>Your Google Business review link. When you close a transaction, a review request email is automatically sent to your client 3 days later with this link.</small>
-      </div>
+ <div class="form-group">
+ <label>Google Review Link</label>
+ <input type="url" name="google_review_link" value="{{ profile.google_review_link if profile and profile.google_review_link else '' }}" placeholder="https://g.page/r/your-review-link">
+ <small>Your Google Business review link. When you close a transaction, a review request email is automatically sent to your client 3 days later with this link.</small>
+ </div>
 
-      <div class="form-group">
-        <label>Website Lead Intake Webhook</label>
-        {% set wt = profile.webhook_token if profile and profile.webhook_token else '' %}
-        {% if wt %}
-        <div style="background:#F6F2E8;border:1px solid rgba(107,106,69,.2);border-radius:8px;padding:.625rem .875rem;font-family:monospace;font-size:.82rem;word-break:break-all;margin-bottom:.5rem;">
-          POST https://itsyourlifeyourhome.com/api/lead-intake/{{ wt }}
-        </div>
-        <small>Paste this URL into your website contact form or Zapier "Webhooks by Zapier" action. Leads go straight into your CRM and a follow-up sequence starts automatically.</small>
-        {% else %}
-        <input type="text" name="webhook_token" value="" placeholder="Save your profile to generate your webhook token">
-        <small>Save your profile and your personal lead intake webhook URL will appear here.</small>
-        {% endif %}
-      </div>
-    </div>
+ <div class="form-group">
+ <label>Website Lead Intake Webhook</label>
+ {% set wt = profile.webhook_token if profile and profile.webhook_token else '' %}
+ {% if wt %}
+ <div style="background:#F0EBE4;border:1px solid rgba(107,91,77,.2);border-radius:8px;padding:.625rem .875rem;font-family:monospace;font-size:.82rem;word-break:break-all;margin-bottom:.5rem;">
+ POST https://itsyourlifeyourhome.com/api/lead-intake/{{ wt }}
+ </div>
+ <small>Paste this URL into your website contact form or Zapier "Webhooks by Zapier" action. Leads go straight into your CRM and a follow-up sequence starts automatically.</small>
+ {% else %}
+ <input type="text" name="webhook_token" value="" placeholder="Save your profile to generate your webhook token">
+ <small>Save your profile and your personal lead intake webhook URL will appear here.</small>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Professional Details -->
-    <div class="settings-section">
-      <h2>🏆 Professional Details</h2>
-      
-      <div class="form-group">
-        <label>Specialties</label>
-        <input type="text" name="specialties" value="{{ profile.specialties if profile else '' }}" placeholder="e.g., Luxury Homes, First-Time Buyers, Investment Properties">
-        <small>Comma-separated list of your specialties</small>
-      </div>
-      
-      <div class="form-group">
-        <label>Service Areas</label>
-        <input type="text" name="service_areas" value="{{ profile.service_areas if profile else '' }}" placeholder="e.g., Downtown, Suburbs, Metro Area">
-        <small>Areas you serve (comma-separated)</small>
-      </div>
-      
-      <div class="form-group">
-        <label>Languages Spoken</label>
-        <input type="text" name="languages" value="{{ profile.languages if profile else '' }}" placeholder="e.g., English, Spanish, French">
-        <small>Languages you can communicate in (comma-separated)</small>
-      </div>
-    </div>
+ <!-- Professional Details -->
+ <div class="settings-section">
+ <h2> Professional Details</h2>
+ 
+ <div class="form-group">
+ <label>Specialties</label>
+ <input type="text" name="specialties" value="{{ profile.specialties if profile else '' }}" placeholder="e.g., Luxury Homes, First-Time Buyers, Investment Properties">
+ <small>Comma-separated list of your specialties</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>Service Areas</label>
+ <input type="text" name="service_areas" value="{{ profile.service_areas if profile else '' }}" placeholder="e.g., Downtown, Suburbs, Metro Area">
+ <small>Areas you serve (comma-separated)</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>Languages Spoken</label>
+ <input type="text" name="languages" value="{{ profile.languages if profile else '' }}" placeholder="e.g., English, Spanish, French">
+ <small>Languages you can communicate in (comma-separated)</small>
+ </div>
+ </div>
 
-    <!-- Market Rates -->
-    <div class="settings-section">
-      <h2>📊 Current Market Rates (30-Year Fixed)</h2>
-      <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">
-        Set the current market rates that will be displayed to your clients on the Value & Equity page. 
-        <strong style="color: var(--olive-green);">Note: If your client has a lender, their rates will take precedence over yours.</strong>
-      </p>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>Conventional Rate (%)</label>
-          <input type="number" name="conventional_rate_30yr" value="{{ profile.conventional_rate_30yr if profile and profile.conventional_rate_30yr else '6.1' }}" step="0.01" min="0" max="20" placeholder="6.1">
-          <small>30-year fixed conventional mortgage rate</small>
-        </div>
-        
-        <div class="form-group">
-          <label>FHA Rate (%)</label>
-          <input type="number" name="fha_rate_30yr" value="{{ profile.fha_rate_30yr if profile and profile.fha_rate_30yr else '6.1' }}" step="0.01" min="0" max="20" placeholder="6.1">
-          <small>30-year fixed FHA mortgage rate</small>
-        </div>
-        
-        <div class="form-group">
-          <label>VA Rate (%)</label>
-          <input type="number" name="va_rate_30yr" value="{{ profile.va_rate_30yr if profile and profile.va_rate_30yr else '6.1' }}" step="0.01" min="0" max="20" placeholder="6.1">
-          <small>30-year fixed VA mortgage rate</small>
-        </div>
-      </div>
-    </div>
+ <!-- Market Rates -->
+ <div class="settings-section">
+ <h2> Current Market Rates (30-Year Fixed)</h2>
+ <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">
+ Set the current market rates that will be displayed to your clients on the Value & Equity page. 
+ <strong style="color: var(--olive-green);">Note: If your client has a lender, their rates will take precedence over yours.</strong>
+ </p>
+ 
+ <div class="form-row">
+ <div class="form-group">
+ <label>Conventional Rate (%)</label>
+ <input type="number" name="conventional_rate_30yr" value="{{ profile.conventional_rate_30yr if profile and profile.conventional_rate_30yr else '6.1' }}" step="0.01" min="0" max="20" placeholder="6.1">
+ <small>30-year fixed conventional mortgage rate</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>FHA Rate (%)</label>
+ <input type="number" name="fha_rate_30yr" value="{{ profile.fha_rate_30yr if profile and profile.fha_rate_30yr else '6.1' }}" step="0.01" min="0" max="20" placeholder="6.1">
+ <small>30-year fixed FHA mortgage rate</small>
+ </div>
+ 
+ <div class="form-group">
+ <label>VA Rate (%)</label>
+ <input type="number" name="va_rate_30yr" value="{{ profile.va_rate_30yr if profile and profile.va_rate_30yr else '6.1' }}" step="0.01" min="0" max="20" placeholder="6.1">
+ <small>30-year fixed VA mortgage rate</small>
+ </div>
+ </div>
+ </div>
 
-    <!-- Company Address -->
-    <div class="settings-section">
-      <h2>📍 Company Address</h2>
-      
-      <div class="form-group">
-        <label>Street Address</label>
-        <input type="text" name="company_address" value="{{ profile.company_address if profile else '' }}" placeholder="123 Main Street">
-      </div>
-      
-      <div class="form-row">
-        <div class="form-group">
-          <label>City</label>
-          <input type="text" name="company_city" value="{{ profile.company_city if profile else '' }}" placeholder="City">
-        </div>
-        
-        <div class="form-group">
-          <label>State</label>
-          <input type="text" name="company_state" value="{{ profile.company_state if profile else '' }}" placeholder="State" maxlength="2" style="text-transform: uppercase;">
-        </div>
-        
-        <div class="form-group">
-          <label>ZIP Code</label>
-          <input type="text" name="company_zip" value="{{ profile.company_zip if profile else '' }}" placeholder="12345">
-        </div>
-      </div>
-    </div>
+ <!-- Company Address -->
+ <div class="settings-section">
+ <h2> Company Address</h2>
+ 
+ <div class="form-group">
+ <label>Street Address</label>
+ <input type="text" name="company_address" value="{{ profile.company_address if profile else '' }}" placeholder="123 Main Street">
+ </div>
+ 
+ <div class="form-row">
+ <div class="form-group">
+ <label>City</label>
+ <input type="text" name="company_city" value="{{ profile.company_city if profile else '' }}" placeholder="City">
+ </div>
+ 
+ <div class="form-group">
+ <label>State</label>
+ <input type="text" name="company_state" value="{{ profile.company_state if profile else '' }}" placeholder="State" maxlength="2" style="text-transform: uppercase;">
+ </div>
+ 
+ <div class="form-group">
+ <label>ZIP Code</label>
+ <input type="text" name="company_zip" value="{{ profile.company_zip if profile else '' }}" placeholder="12345">
+ </div>
+ </div>
+ </div>
 
-    <!-- Homebot Integration -->
-    <div class="settings-section">
-      <h2>🏠 Homebot Integration</h2>
-      
-      <div class="form-group">
-        <label>Homebot Widget ID</label>
-        <input 
-          type="text" 
-          name="homebot_widget_id" 
-          value="{{ profile.homebot_widget_id if profile and profile.homebot_widget_id else '' }}" 
-          placeholder="609d2ed47cccc8e5fb0fa47e18bbba4af4a393607881765"
-          style="font-family: monospace;"
-        >
-        <small>
-          <strong>How to get your Homebot Widget ID:</strong><br>
-          1. Log into your Homebot account<br>
-          2. Go to <strong>Share → Embed a widget</strong><br>
-          3. Choose <strong>Widget type: Homeowner</strong> and pick your style/theme<br>
-          4. Look at the embed code and copy just the long ID at the end (the string after the comma in <code>Homebot('#homebot_homeowner', 'YOUR_ID_HERE')</code>)<br>
-          5. Paste that ID above (without quotes)
-        </small>
-        <div style="margin-top: 1rem; padding: 1rem; background: #f0f7ff; border-left: 4px solid #6B6A45; border-radius: 4px;">
-          <strong>💡 What this does:</strong> When homeowners visit your equity page, they'll see your Homebot widget. All leads and activity will go directly into your Homebot account, not ours. You own your leads!
-          <br><br>
-          <strong>🔄 Automatic Loan Updates:</strong> To automatically sync loan data when homeowners link their Homebot account, configure your Homebot webhook to point to: <code style="background: white; padding: 0.25rem 0.5rem; border-radius: 3px;">https://itsyourlifeyourhome.com/api/homebot/webhook</code>
-        </div>
-      </div>
-    </div>
+ <!-- Homebot Integration -->
+ <div class="settings-section">
+ <h2> Homebot Integration</h2>
+ 
+ <div class="form-group">
+ <label>Homebot Widget ID</label>
+ <input 
+ type="text" 
+ name="homebot_widget_id" 
+ value="{{ profile.homebot_widget_id if profile and profile.homebot_widget_id else '' }}" 
+ placeholder="609d2ed47cccc8e5fb0fa47e18bbba4af4a393607881765"
+ style="font-family: monospace;"
+ >
+ <small>
+ <strong>How to get your Homebot Widget ID:</strong><br>
+ 1. Log into your Homebot account<br>
+ 2. Go to <strong>Share → Embed a widget</strong><br>
+ 3. Choose <strong>Widget type: Homeowner</strong> and pick your style/theme<br>
+ 4. Look at the embed code and copy just the long ID at the end (the string after the comma in <code>Homebot('#homebot_homeowner', 'YOUR_ID_HERE')</code>)<br>
+ 5. Paste that ID above (without quotes)
+ </small>
+ <div style="margin-top: 1rem; padding: 1rem; background: #f0f7ff; border-left: 4px solid #6B5B4D; border-radius: 4px;">
+ <strong> What this does:</strong> When homeowners visit your equity page, they'll see your Homebot widget. All leads and activity will go directly into your Homebot account, not ours. You own your leads!
+ <br><br>
+ <strong> Automatic Loan Updates:</strong> To automatically sync loan data when homeowners link their Homebot account, configure your Homebot webhook to point to: <code style="background: white; padding: 0.25rem 0.5rem; border-radius: 3px;">https://itsyourlifeyourhome.com/api/homebot/webhook</code>
+ </div>
+ </div>
+ </div>
 
-    <!-- Save Button -->
-    <div style="text-align: center; margin-top: 2rem; margin-bottom: 3rem;">
-      <button type="submit" class="btn-save">💾 Save Profile</button>
-    </div>
-  </form>
+ <!-- Save Button -->
+ <div style="text-align: center; margin-top: 2rem; margin-bottom: 3rem;">
+ <button type="submit" class="btn-save"> Save Profile</button>
+ </div>
+ </form>
 </div>
 
 <script>
 function previewImage(input, previewId) {
-  const preview = document.getElementById(previewId);
-  const wrapper = document.getElementById(previewId + '-wrapper');
-  
-  if (input.files && input.files[0]) {
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-      preview.src = e.target.result;
-      if (wrapper) wrapper.style.display = 'flex';
-    };
-    
-    reader.readAsDataURL(input.files[0]);
-  }
+ const preview = document.getElementById(previewId);
+ const wrapper = document.getElementById(previewId + '-wrapper');
+ 
+ if (input.files && input.files[0]) {
+ const reader = new FileReader();
+ 
+ reader.onload = function(e) {
+ preview.src = e.target.result;
+ if (wrapper) wrapper.style.display = 'flex';
+ };
+ 
+ reader.readAsDataURL(input.files[0]);
+ }
 }
 
 document.getElementById('profileForm').addEventListener('submit', function(e) {
-  const submitBtn = this.querySelector('.btn-save');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.textContent = '💾 Saving...';
-  }
+ const submitBtn = this.querySelector('.btn-save');
+ if (submitBtn) {
+ submitBtn.disabled = true;
+ submitBtn.textContent = ' Saving...';
+ }
 });
 </script>
 {% endblock %}

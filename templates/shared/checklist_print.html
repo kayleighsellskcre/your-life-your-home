@@ -1,629 +1,629 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{{ checklist.label }} Checklist – Your Life Your Home</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>{{ checklist.label }} Checklist – Your Life Your Home</title>
+ <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
+ <style>
+ *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --accent:  {{ checklist.accent }};
-      --light:   {{ checklist.light }};
-      --brown:   #3A352C;
-      --muted:   #9A9472;
-      --tan:     rgba(200,180,151,.22);
-      --cream:   #FDFBF7;
-      --ivory:   #FFFDF9;
-    }
+ :root {
+ --accent: {{ checklist.accent }};
+ --light: {{ checklist.light }};
+ --brown: #3D2E24;
+ --muted: #9A9472;
+ --tan: rgba(200,180,151,.22);
+ --cream: #F5F0EB;
+ --ivory: #FFFDF9;
+ }
 
-    body {
-      font-family: 'Lato', sans-serif;
-      background: #E8E4DA;
-      color: var(--brown);
-      padding: 2rem;
-    }
+ body {
+ font-family: 'Lato', sans-serif;
+ background: #E8E4DA;
+ color: var(--brown);
+ padding: 2rem;
+ }
 
-    /* ── SCREEN ACTIONS ── */
-    @media screen {
-      .cl-actions {
-        max-width: 760px;
-        margin: 0 auto 1.25rem;
-        display: flex;
-        gap: .6rem;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .cl-actions a, .cl-actions button {
-        display: inline-flex;
-        align-items: center;
-        gap: .35rem;
-        padding: .45rem 1rem;
-        border-radius: 6px;
-        font-size: .8rem;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        text-decoration: none;
-        font-family: 'Lato', sans-serif;
-        transition: all .12s;
-      }
-      .btn-back  { background: #fff; color: var(--accent); border: 1px solid var(--tan); }
-      .btn-back:hover { background: var(--cream); }
-      .btn-print { background: var(--accent); color: #fff; }
-      .btn-print:hover { filter: brightness(1.1); }
-      .btn-hint  { font-size: .7rem; color: var(--muted); margin-left: auto; }
-    }
-    @media print {
-      body { background: #fff !important; padding: 0 !important; }
-      .cl-actions { display: none !important; }
-      .checklist-paper {
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        max-width: 100% !important;
-        width: 100% !important;
-      }
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
+ /* ── SCREEN ACTIONS ── */
+ @media screen {
+ .cl-actions {
+ max-width: 760px;
+ margin: 0 auto 1.25rem;
+ display: flex;
+ gap: .6rem;
+ flex-wrap: wrap;
+ align-items: center;
+ }
+ .cl-actions a, .cl-actions button {
+ display: inline-flex;
+ align-items: center;
+ gap: .35rem;
+ padding: .45rem 1rem;
+ border-radius: 6px;
+ font-size: .8rem;
+ font-weight: 600;
+ cursor: pointer;
+ border: none;
+ text-decoration: none;
+ font-family: 'Lato', sans-serif;
+ transition: all .12s;
+ }
+ .btn-back { background: #fff; color: var(--accent); border: 1px solid var(--tan); }
+ .btn-back:hover { background: var(--cream); }
+ .btn-print { background: var(--accent); color: #fff; }
+ .btn-print:hover { filter: brightness(1.1); }
+ .btn-hint { font-size: .7rem; color: var(--muted); margin-left: auto; }
+ }
+ @media print {
+ body { background: #fff !important; padding: 0 !important; }
+ .cl-actions { display: none !important; }
+ .checklist-paper {
+ box-shadow: none !important;
+ border-radius: 0 !important;
+ max-width: 100% !important;
+ width: 100% !important;
+ }
+ -webkit-print-color-adjust: exact;
+ print-color-adjust: exact;
+ }
 
-    /* ── PAPER ── */
-    .checklist-paper {
-      max-width: 760px;
-      margin: 0 auto;
-      background: var(--ivory);
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,.13);
-    }
+ /* ── PAPER ── */
+ .checklist-paper {
+ max-width: 760px;
+ margin: 0 auto;
+ background: var(--ivory);
+ border-radius: 6px;
+ overflow: hidden;
+ box-shadow: 0 8px 40px rgba(0,0,0,.13);
+ }
 
-    /* ── HEADER ── */
-    .cl-header {
-      background: var(--accent);
-      padding: 2.5rem 2.75rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .cl-header::before {
-      content: '{{ checklist.icon }}';
-      position: absolute;
-      right: 2rem;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 6rem;
-      opacity: .12;
-      line-height: 1;
-    }
-    .cl-header__season {
-      font-size: .62rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .18em;
-      color: rgba(255,255,255,.7);
-      margin-bottom: .5rem;
-    }
-    .cl-header__title {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.25rem;
-      font-weight: 400;
-      color: #fff;
-      line-height: 1.15;
-      margin-bottom: .5rem;
-    }
-    .cl-header__subtitle {
-      font-size: .88rem;
-      color: rgba(255,255,255,.82);
-      font-style: italic;
-      letter-spacing: .01em;
-    }
+ /* ── HEADER ── */
+ .cl-header {
+ background: var(--accent);
+ padding: 2.5rem 2.75rem 2rem;
+ position: relative;
+ overflow: hidden;
+ }
+ .cl-header::before {
+ content: '{{ checklist.icon }}';
+ position: absolute;
+ right: 2rem;
+ top: 50%;
+ transform: translateY(-50%);
+ font-size: 6rem;
+ opacity: .12;
+ line-height: 1;
+ }
+ .cl-header__season {
+ font-size: .62rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .18em;
+ color: rgba(255,255,255,.7);
+ margin-bottom: .5rem;
+ }
+ .cl-header__title {
+ font-family: 'Playfair Display', serif;
+ font-size: 2.25rem;
+ font-weight: 400;
+ color: #fff;
+ line-height: 1.15;
+ margin-bottom: .5rem;
+ }
+ .cl-header__subtitle {
+ font-size: .88rem;
+ color: rgba(255,255,255,.82);
+ font-style: italic;
+ letter-spacing: .01em;
+ }
 
-    /* ── TAGLINE STRIP ── */
-    .cl-tagline {
-      background: var(--light);
-      padding: 1rem 2.75rem;
-      border-bottom: 1px solid var(--tan);
-      font-size: .8rem;
-      color: var(--brown);
-      line-height: 1.6;
-      font-style: italic;
-    }
-    .cl-tagline strong {
-      font-style: normal;
-      font-weight: 700;
-      color: var(--accent);
-    }
+ /* ── TAGLINE STRIP ── */
+ .cl-tagline {
+ background: var(--light);
+ padding: 1rem 2.75rem;
+ border-bottom: 1px solid var(--tan);
+ font-size: .8rem;
+ color: var(--brown);
+ line-height: 1.6;
+ font-style: italic;
+ }
+ .cl-tagline strong {
+ font-style: normal;
+ font-weight: 700;
+ color: var(--accent);
+ }
 
-    /* ── BODY ── */
-    .cl-body {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-    }
-    @media (max-width: 560px) { .cl-body { grid-template-columns: 1fr; } }
+ /* ── BODY ── */
+ .cl-body {
+ display: grid;
+ grid-template-columns: 1fr 1fr;
+ gap: 0;
+ }
+ @media (max-width: 560px) { .cl-body { grid-template-columns: 1fr; } }
 
-    /* ── SECTION ── */
-    .cl-section {
-      padding: 1.75rem 2.25rem;
-    }
-    .cl-section:first-child {
-      border-right: 1px solid var(--tan);
-    }
-    .cl-section__heading {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.05rem;
-      font-weight: 500;
-      color: var(--brown);
-      margin-bottom: 1.1rem;
-      padding-bottom: .55rem;
-      border-bottom: 2px solid var(--accent);
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    .cl-section__heading::before {
-      content: '';
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
+ /* ── SECTION ── */
+ .cl-section {
+ padding: 1.75rem 2.25rem;
+ }
+ .cl-section:first-child {
+ border-right: 1px solid var(--tan);
+ }
+ .cl-section__heading {
+ font-family: 'Playfair Display', serif;
+ font-size: 1.05rem;
+ font-weight: 500;
+ color: var(--brown);
+ margin-bottom: 1.1rem;
+ padding-bottom: .55rem;
+ border-bottom: 2px solid var(--accent);
+ display: flex;
+ align-items: center;
+ gap: .5rem;
+ }
+ .cl-section__heading::before {
+ content: '';
+ display: inline-block;
+ width: 8px;
+ height: 8px;
+ border-radius: 50%;
+ background: var(--accent);
+ flex-shrink: 0;
+ }
 
-    /* ── CHECKLIST ITEMS ── */
-    .cl-items {
-      display: flex;
-      flex-direction: column;
-      gap: .55rem;
-    }
-    .cl-item {
-      display: flex;
-      align-items: flex-start;
-      gap: .65rem;
-      font-size: .79rem;
-      color: var(--brown);
-      line-height: 1.45;
-    }
-    .cl-box {
-      flex-shrink: 0;
-      width: 15px;
-      height: 15px;
-      border: 1.5px solid var(--accent);
-      border-radius: 3px;
-      margin-top: .12rem;
-      background: #fff;
-      position: relative;
-    }
-    /* On screen: actually checkable */
-    @media screen {
-      .cl-item input[type="checkbox"] {
-        flex-shrink: 0;
-        width: 15px;
-        height: 15px;
-        accent-color: var(--accent);
-        cursor: pointer;
-        margin-top: .13rem;
-      }
-      .cl-item label {
-        cursor: pointer;
-        line-height: 1.45;
-        font-size: .79rem;
-        color: var(--brown);
-        transition: color .1s;
-        user-select: none;
-      }
-      .cl-item input[type="checkbox"]:checked + label {
-        color: var(--muted);
-        text-decoration: line-through;
-      }
-      .cl-box { display: none; }
-    }
-    @media print {
-      /* base print item rules — detail sizes handled in one-page block below */
-      .cl-item input[type="checkbox"] { display: none; }
-      .cl-box { display: block; }
-      .cl-item label { color: var(--brown); }
-    }
+ /* ── CHECKLIST ITEMS ── */
+ .cl-items {
+ display: flex;
+ flex-direction: column;
+ gap: .55rem;
+ }
+ .cl-item {
+ display: flex;
+ align-items: flex-start;
+ gap: .65rem;
+ font-size: .79rem;
+ color: var(--brown);
+ line-height: 1.45;
+ }
+ .cl-box {
+ flex-shrink: 0;
+ width: 15px;
+ height: 15px;
+ border: 1.5px solid var(--accent);
+ border-radius: 3px;
+ margin-top: .12rem;
+ background: #fff;
+ position: relative;
+ }
+ /* On screen: actually checkable */
+ @media screen {
+ .cl-item input[type="checkbox"] {
+ flex-shrink: 0;
+ width: 15px;
+ height: 15px;
+ accent-color: var(--accent);
+ cursor: pointer;
+ margin-top: .13rem;
+ }
+ .cl-item label {
+ cursor: pointer;
+ line-height: 1.45;
+ font-size: .79rem;
+ color: var(--brown);
+ transition: color .1s;
+ user-select: none;
+ }
+ .cl-item input[type="checkbox"]:checked + label {
+ color: var(--muted);
+ text-decoration: line-through;
+ }
+ .cl-box { display: none; }
+ }
+ @media print {
+ /* base print item rules — detail sizes handled in one-page block below */
+ .cl-item input[type="checkbox"] { display: none; }
+ .cl-box { display: block; }
+ .cl-item label { color: var(--brown); }
+ }
 
-    /* ── AGENT BRAND STRIP ── */
-    .cl-brand-strip {
-      background: var(--cream);
-      border-top: 2px solid var(--accent);
-      padding: 1.25rem 2.75rem;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 1rem;
-      align-items: center;
-    }
-    @media (max-width: 560px) {
-      .cl-brand-strip { grid-template-columns: auto 1fr; }
-      .cl-brand-qr { display: none; }
-    }
-    .cl-brand-photo {
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2.5px solid var(--accent);
-      flex-shrink: 0;
-    }
-    .cl-brand-photo-placeholder {
-      width: 62px;
-      height: 62px;
-      border-radius: 50%;
-      background: var(--light);
-      border: 2.5px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      flex-shrink: 0;
-      color: var(--accent);
-    }
-    .cl-brand-info {
-      display: flex;
-      flex-direction: column;
-      gap: .15rem;
-    }
-    .cl-brand-name {
-      font-family: 'Playfair Display', serif;
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--brown);
-      line-height: 1.2;
-    }
-    .cl-brand-title {
-      font-size: .7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      color: var(--accent);
-    }
-    .cl-brand-contact {
-      font-size: .72rem;
-      color: var(--muted);
-      margin-top: .18rem;
-      line-height: 1.6;
-    }
-    .cl-brand-license {
-      font-size: .63rem;
-      color: var(--muted);
-      margin-top: .1rem;
-      font-style: italic;
-    }
-    .cl-brand-logo {
-      max-height: 36px;
-      max-width: 120px;
-      object-fit: contain;
-      opacity: .85;
-    }
-    .cl-brand-qr {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .3rem;
-      text-align: center;
-    }
-    .cl-brand-qr img {
-      width: 68px;
-      height: 68px;
-      object-fit: contain;
-    }
-    .cl-brand-qr-label {
-      font-size: .56rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
-      max-width: 72px;
-      line-height: 1.3;
-    }
+ /* ── AGENT BRAND STRIP ── */
+ .cl-brand-strip {
+ background: var(--cream);
+ border-top: 2px solid var(--accent);
+ padding: 1.25rem 2.75rem;
+ display: grid;
+ grid-template-columns: auto 1fr auto;
+ gap: 1rem;
+ align-items: center;
+ }
+ @media (max-width: 560px) {
+ .cl-brand-strip { grid-template-columns: auto 1fr; }
+ .cl-brand-qr { display: none; }
+ }
+ .cl-brand-photo {
+ width: 62px;
+ height: 62px;
+ border-radius: 50%;
+ object-fit: cover;
+ border: 2.5px solid var(--accent);
+ flex-shrink: 0;
+ }
+ .cl-brand-photo-placeholder {
+ width: 62px;
+ height: 62px;
+ border-radius: 50%;
+ background: var(--light);
+ border: 2.5px solid var(--accent);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 1.5rem;
+ flex-shrink: 0;
+ color: var(--accent);
+ }
+ .cl-brand-info {
+ display: flex;
+ flex-direction: column;
+ gap: .15rem;
+ }
+ .cl-brand-name {
+ font-family: 'Playfair Display', serif;
+ font-size: 1rem;
+ font-weight: 500;
+ color: var(--brown);
+ line-height: 1.2;
+ }
+ .cl-brand-title {
+ font-size: .7rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .08em;
+ color: var(--accent);
+ }
+ .cl-brand-contact {
+ font-size: .72rem;
+ color: var(--muted);
+ margin-top: .18rem;
+ line-height: 1.6;
+ }
+ .cl-brand-license {
+ font-size: .63rem;
+ color: var(--muted);
+ margin-top: .1rem;
+ font-style: italic;
+ }
+ .cl-brand-logo {
+ max-height: 36px;
+ max-width: 120px;
+ object-fit: contain;
+ opacity: .85;
+ }
+ .cl-brand-qr {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ gap: .3rem;
+ text-align: center;
+ }
+ .cl-brand-qr img {
+ width: 68px;
+ height: 68px;
+ object-fit: contain;
+ }
+ .cl-brand-qr-label {
+ font-size: .56rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .1em;
+ color: var(--muted);
+ max-width: 72px;
+ line-height: 1.3;
+ }
 
-    /* ── FOOTER ── */
-    .cl-footer {
-      background: var(--ivory);
-      border-top: 1px solid var(--tan);
-      padding: .6rem 2.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: .3rem;
-    }
-    .cl-footer__brand {
-      font-family: 'Playfair Display', serif;
-      font-size: .75rem;
-      color: var(--accent);
-      letter-spacing: .04em;
-    }
-    .cl-footer__tagline {
-      font-size: .63rem;
-      color: var(--muted);
-      letter-spacing: .03em;
-    }
-    .cl-footer__season {
-      font-size: .6rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .12em;
-      color: var(--accent);
-      opacity: .7;
-    }
+ /* ── FOOTER ── */
+ .cl-footer {
+ background: var(--ivory);
+ border-top: 1px solid var(--tan);
+ padding: .6rem 2.75rem;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: .3rem;
+ }
+ .cl-footer__brand {
+ font-family: 'Playfair Display', serif;
+ font-size: .75rem;
+ color: var(--accent);
+ letter-spacing: .04em;
+ }
+ .cl-footer__tagline {
+ font-size: .63rem;
+ color: var(--muted);
+ letter-spacing: .03em;
+ }
+ .cl-footer__season {
+ font-size: .6rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .12em;
+ color: var(--accent);
+ opacity: .7;
+ }
 
-    /* ── PROGRESS BAR (screen only) ── */
-    @media screen {
-      .cl-progress-wrap {
-        padding: .75rem 2.75rem .5rem;
-        background: var(--ivory);
-        border-top: 1px solid var(--tan);
-      }
-      .cl-progress-label {
-        font-size: .65rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-        color: var(--muted);
-        margin-bottom: .3rem;
-        display: flex;
-        justify-content: space-between;
-      }
-      .cl-progress-bar {
-        height: 5px;
-        background: var(--tan);
-        border-radius: 3px;
-        overflow: hidden;
-      }
-      .cl-progress-fill {
-        height: 100%;
-        background: var(--accent);
-        border-radius: 3px;
-        transition: width .3s ease;
-        width: 0%;
-      }
-    }
-    /* ── FULL-PAGE PRINT LAYOUT ── */
-    @media print {
-      /* Let @page handle the margins — body gets 0 so dimensions are predictable */
-      @page { size: letter portrait; margin: 0.42in; }
+ /* ── PROGRESS BAR (screen only) ── */
+ @media screen {
+ .cl-progress-wrap {
+ padding: .75rem 2.75rem .5rem;
+ background: var(--ivory);
+ border-top: 1px solid var(--tan);
+ }
+ .cl-progress-label {
+ font-size: .65rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .08em;
+ color: var(--muted);
+ margin-bottom: .3rem;
+ display: flex;
+ justify-content: space-between;
+ }
+ .cl-progress-bar {
+ height: 5px;
+ background: var(--tan);
+ border-radius: 3px;
+ overflow: hidden;
+ }
+ .cl-progress-fill {
+ height: 100%;
+ background: var(--accent);
+ border-radius: 3px;
+ transition: width .3s ease;
+ width: 0%;
+ }
+ }
+ /* ── FULL-PAGE PRINT LAYOUT ── */
+ @media print {
+ /* Let @page handle the margins — body gets 0 so dimensions are predictable */
+ @page { size: letter portrait; margin: 0.42in; }
 
-      body {
-        background: #fff !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
+ body {
+ background: #fff !important;
+ padding: 0 !important;
+ margin: 0 !important;
+ -webkit-print-color-adjust: exact !important;
+ print-color-adjust: exact !important;
+ }
 
-      .cl-actions       { display: none !important; }
-      .cl-progress-wrap { display: none !important; }
+ .cl-actions { display: none !important; }
+ .cl-progress-wrap { display: none !important; }
 
-      /* Paper = full printable area of a US Letter sheet (11in − 2×0.42in margins) */
-      .checklist-paper {
-        box-shadow:     none !important;
-        border-radius:  0    !important;
-        max-width:      100% !important;
-        width:          100% !important;
-        height:         10.16in !important;
-        display:        flex !important;
-        flex-direction: column !important;
-        overflow:       hidden !important;
-      }
+ /* Paper = full printable area of a US Letter sheet (11in − 2×0.42in margins) */
+ .checklist-paper {
+ box-shadow: none !important;
+ border-radius: 0 !important;
+ max-width: 100% !important;
+ width: 100% !important;
+ height: 10.16in !important;
+ display: flex !important;
+ flex-direction: column !important;
+ overflow: hidden !important;
+ }
 
-      /* ── header ── */
-      .cl-header { padding: 1.4rem 1.9rem 1.1rem !important; }
-      .cl-header::before { font-size: 5.5rem !important; right: 1.6rem !important; }
-      .cl-header__season   { font-size: 7pt  !important; margin-bottom: .35rem !important; }
-      .cl-header__title    { font-size: 25pt !important; margin-bottom: .3rem  !important; }
-      .cl-header__subtitle { font-size: 9pt  !important; }
+ /* ── header ── */
+ .cl-header { padding: 1.4rem 1.9rem 1.1rem !important; }
+ .cl-header::before { font-size: 5.5rem !important; right: 1.6rem !important; }
+ .cl-header__season { font-size: 7pt !important; margin-bottom: .35rem !important; }
+ .cl-header__title { font-size: 25pt !important; margin-bottom: .3rem !important; }
+ .cl-header__subtitle { font-size: 9pt !important; }
 
-      /* ── tagline ── */
-      .cl-tagline {
-        padding:     .8rem 1.9rem !important;
-        font-size:   8.5pt        !important;
-        line-height: 1.55         !important;
-      }
+ /* ── tagline ── */
+ .cl-tagline {
+ padding: .8rem 1.9rem !important;
+ font-size: 8.5pt !important;
+ line-height: 1.55 !important;
+ }
 
-      /* ── body: flex:1 takes all remaining height;
-         align-content:stretch makes the single grid row fill it;
-         sections become flex columns so items can be space-between ── */
-      .cl-body {
-        flex:                  1        !important;
-        display:               grid     !important;
-        grid-template-columns: 1fr 1fr  !important;
-        align-content:         stretch  !important;
-        align-items:           stretch  !important;
-      }
-      .cl-section {
-        padding:        1.1rem 1.5rem !important;
-        display:        flex          !important;
-        flex-direction: column        !important;
-      }
-      .cl-section__heading {
-        font-size:      11pt   !important;
-        margin-bottom:  .65rem !important;
-        padding-bottom: .35rem !important;
-        flex-shrink:    0      !important;
-      }
-      .cl-section__heading::before { width: 7px !important; height: 7px !important; }
+ /* ── body: flex:1 takes all remaining height;
+ align-content:stretch makes the single grid row fill it;
+ sections become flex columns so items can be space-between ── */
+ .cl-body {
+ flex: 1 !important;
+ display: grid !important;
+ grid-template-columns: 1fr 1fr !important;
+ align-content: stretch !important;
+ align-items: stretch !important;
+ }
+ .cl-section {
+ padding: 1.1rem 1.5rem !important;
+ display: flex !important;
+ flex-direction: column !important;
+ }
+ .cl-section__heading {
+ font-size: 11pt !important;
+ margin-bottom: .65rem !important;
+ padding-bottom: .35rem !important;
+ flex-shrink: 0 !important;
+ }
+ .cl-section__heading::before { width: 7px !important; height: 7px !important; }
 
-      /* Items fill the column height evenly — no wasted space */
-      .cl-items {
-        flex:             1               !important;
-        display:          flex            !important;
-        flex-direction:   column          !important;
-        justify-content:  space-between   !important;
-        gap:              0               !important;
-      }
-      .cl-item  { gap: .5rem !important; }
-      .cl-item label {
-        font-size:   9.5pt  !important;
-        line-height: 1.4    !important;
-        color:       #3A352C !important;
-      }
-      .cl-item input[type="checkbox"] { display: none !important; }
-      .cl-box {
-        display:       block  !important;
-        width:         11px   !important;
-        height:        11px   !important;
-        margin-top:    .1rem  !important;
-        flex-shrink:   0      !important;
-        border:        1.5px solid var(--accent) !important;
-        border-radius: 3px    !important;
-        background:    #fff   !important;
-      }
+ /* Items fill the column height evenly — no wasted space */
+ .cl-items {
+ flex: 1 !important;
+ display: flex !important;
+ flex-direction: column !important;
+ justify-content: space-between !important;
+ gap: 0 !important;
+ }
+ .cl-item { gap: .5rem !important; }
+ .cl-item label {
+ font-size: 9.5pt !important;
+ line-height: 1.4 !important;
+ color: #3D2E24 !important;
+ }
+ .cl-item input[type="checkbox"] { display: none !important; }
+ .cl-box {
+ display: block !important;
+ width: 11px !important;
+ height: 11px !important;
+ margin-top: .1rem !important;
+ flex-shrink: 0 !important;
+ border: 1.5px solid var(--accent) !important;
+ border-radius: 3px !important;
+ background: #fff !important;
+ }
 
-      /* ── brand strip ── */
-      .cl-brand-strip {
-        padding:       .9rem 1.9rem !important;
-        gap:           .9rem        !important;
-        break-inside:  avoid        !important;
-        flex-shrink:   0            !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust:         exact !important;
-      }
-      .cl-brand-photo,
-      .cl-brand-photo-placeholder { width: 56px !important; height: 56px !important; }
-      .cl-brand-name    { font-size: 10pt !important; }
-      .cl-brand-title   { font-size: 7.5pt !important; }
-      .cl-brand-contact { font-size: 7.5pt !important; margin-top: .1rem !important; }
-      .cl-brand-license { font-size: 7pt   !important; }
-      .cl-brand-logo    { max-height: 28px !important; }
-      .cl-brand-qr img  { width: 58px !important; height: 58px !important; }
-      .cl-brand-qr-label{ font-size: 6pt   !important; }
+ /* ── brand strip ── */
+ .cl-brand-strip {
+ padding: .9rem 1.9rem !important;
+ gap: .9rem !important;
+ break-inside: avoid !important;
+ flex-shrink: 0 !important;
+ -webkit-print-color-adjust: exact !important;
+ print-color-adjust: exact !important;
+ }
+ .cl-brand-photo,
+ .cl-brand-photo-placeholder { width: 56px !important; height: 56px !important; }
+ .cl-brand-name { font-size: 10pt !important; }
+ .cl-brand-title { font-size: 7.5pt !important; }
+ .cl-brand-contact { font-size: 7.5pt !important; margin-top: .1rem !important; }
+ .cl-brand-license { font-size: 7pt !important; }
+ .cl-brand-logo { max-height: 28px !important; }
+ .cl-brand-qr img { width: 58px !important; height: 58px !important; }
+ .cl-brand-qr-label{ font-size: 6pt !important; }
 
-      /* ── footer ── */
-      .cl-footer {
-        padding:    .45rem 1.9rem !important;
-        flex-shrink: 0            !important;
-      }
-      .cl-footer__brand   { font-size: 8.5pt !important; }
-      .cl-footer__tagline { font-size: 7pt   !important; }
-      .cl-footer__season  { font-size: 7pt   !important; }
-    }
-  </style>
+ /* ── footer ── */
+ .cl-footer {
+ padding: .45rem 1.9rem !important;
+ flex-shrink: 0 !important;
+ }
+ .cl-footer__brand { font-size: 8.5pt !important; }
+ .cl-footer__tagline { font-size: 7pt !important; }
+ .cl-footer__season { font-size: 7pt !important; }
+ }
+ </style>
 </head>
 <body>
 
-  <!-- SCREEN ACTIONS -->
-  <div class="cl-actions">
-    <a href="{{ back_url }}" class="btn-back">← All Seasons</a>
-    <button onclick="window.print()" class="btn-print">🖨 Print / Save as PDF</button>
-    <span class="btn-hint">Works great for social media too — screenshot the checklist!</span>
-  </div>
+ <!-- SCREEN ACTIONS -->
+ <div class="cl-actions">
+ <a href="{{ back_url }}" class="btn-back">← All Seasons</a>
+ <button onclick="window.print()" class="btn-print"> Print / Save as PDF</button>
+ <span class="btn-hint">Works great for social media too — screenshot the checklist!</span>
+ </div>
 
-  <div class="checklist-paper">
+ <div class="checklist-paper">
 
-    <!-- HEADER -->
-    <div class="cl-header">
-      <div class="cl-header__season">{{ checklist.label }} · Homeowner Edition</div>
-      <div class="cl-header__title">{{ checklist.title }}</div>
-      <div class="cl-header__subtitle">{{ checklist.subtitle }}</div>
-    </div>
+ <!-- HEADER -->
+ <div class="cl-header">
+ <div class="cl-header__season">{{ checklist.label }} · Homeowner Edition</div>
+ <div class="cl-header__title">{{ checklist.title }}</div>
+ <div class="cl-header__subtitle">{{ checklist.subtitle }}</div>
+ </div>
 
-    <!-- TAGLINE -->
-    <div class="cl-tagline">
-      <strong>Your Life · Your Home</strong> &nbsp;—&nbsp; {{ checklist.tagline }}
-    </div>
+ <!-- TAGLINE -->
+ <div class="cl-tagline">
+ <strong>Your Life · Your Home</strong> &nbsp;—&nbsp; {{ checklist.tagline }}
+ </div>
 
-    <!-- BODY: TWO-COLUMN CHECKLIST -->
-    <div class="cl-body">
-      {% for section in checklist.sections %}
-      <div class="cl-section">
-        <div class="cl-section__heading">{{ section['heading'] }}</div>
-        <div class="cl-items">
-          {% for item in section['items'] %}
-          <div class="cl-item">
-            <input type="checkbox" id="item-{{ loop.index }}-{{ loop.index0 }}-{{ section['heading']|replace(' ','') }}" class="cl-checkbox" onchange="updateProgress()">
-            <div class="cl-box"></div>
-            <label for="item-{{ loop.index }}-{{ loop.index0 }}-{{ section['heading']|replace(' ','') }}">{{ item }}</label>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      {% endfor %}
-    </div>
+ <!-- BODY: TWO-COLUMN CHECKLIST -->
+ <div class="cl-body">
+ {% for section in checklist.sections %}
+ <div class="cl-section">
+ <div class="cl-section__heading">{{ section['heading'] }}</div>
+ <div class="cl-items">
+ {% for item in section['items'] %}
+ <div class="cl-item">
+ <input type="checkbox" id="item-{{ loop.index }}-{{ loop.index0 }}-{{ section['heading']|replace(' ','') }}" class="cl-checkbox" onchange="updateProgress()">
+ <div class="cl-box"></div>
+ <label for="item-{{ loop.index }}-{{ loop.index0 }}-{{ section['heading']|replace(' ','') }}">{{ item }}</label>
+ </div>
+ {% endfor %}
+ </div>
+ </div>
+ {% endfor %}
+ </div>
 
-    <!-- PROGRESS (screen only) -->
-    <div class="cl-progress-wrap">
-      <div class="cl-progress-label">
-        <span>Your Progress</span>
-        <span id="progressText">0 of 0 completed</span>
-      </div>
-      <div class="cl-progress-bar">
-        <div class="cl-progress-fill" id="progressFill"></div>
-      </div>
-    </div>
+ <!-- PROGRESS (screen only) -->
+ <div class="cl-progress-wrap">
+ <div class="cl-progress-label">
+ <span>Your Progress</span>
+ <span id="progressText">0 of 0 completed</span>
+ </div>
+ <div class="cl-progress-bar">
+ <div class="cl-progress-fill" id="progressFill"></div>
+ </div>
+ </div>
 
-    <!-- AGENT / LENDER BRAND STRIP -->
-    <div class="cl-brand-strip">
+ <!-- AGENT / LENDER BRAND STRIP -->
+ <div class="cl-brand-strip">
 
-      <!-- Photo -->
-      {% set photo_url = get_professional_photo_url(profile.get('professional_photo')) if profile.get('professional_photo') else None %}
-      {% if photo_url %}
-        <img src="{{ photo_url }}" alt="{{ user.name }}" class="cl-brand-photo">
-      {% else %}
-        <div class="cl-brand-photo-placeholder">{{ (user.name or 'A')[0].upper() }}</div>
-      {% endif %}
+ <!-- Photo -->
+ {% set photo_url = get_professional_photo_url(profile.get('professional_photo')) if profile.get('professional_photo') else None %}
+ {% if photo_url %}
+ <img src="{{ photo_url }}" alt="{{ user.name }}" class="cl-brand-photo">
+ {% else %}
+ <div class="cl-brand-photo-placeholder">{{ (user.name or 'A')[0].upper() }}</div>
+ {% endif %}
 
-      <!-- Info -->
-      <div class="cl-brand-info">
-        <div class="cl-brand-name">{{ user.name or 'Your Agent' }}</div>
-        <div class="cl-brand-title">
-          {{ 'Real Estate Agent' if user.role == 'agent' else 'Mortgage Lender' }}
-          {% if profile.get('brokerage_name') %} · {{ profile.brokerage_name }}{% endif %}
-        </div>
-        <div class="cl-brand-contact">
-          {% if profile.get('phone') %}{{ profile.phone }}{% endif %}
-          {% if profile.get('phone') and user.get('email') %} &nbsp;·&nbsp; {% endif %}
-          {% if user.get('email') %}{{ user.email }}{% endif %}
-        </div>
-        {% if profile.get('license_number') %}
-          <div class="cl-brand-license">License #{{ profile.license_number }}</div>
-        {% endif %}
-        {% set logo_url = get_professional_photo_url(profile.get('brokerage_logo')) if profile.get('brokerage_logo') else None %}
-        {% if logo_url %}
-          <img src="{{ logo_url }}" alt="Brokerage" class="cl-brand-logo" style="margin-top:.35rem;">
-        {% endif %}
-      </div>
+ <!-- Info -->
+ <div class="cl-brand-info">
+ <div class="cl-brand-name">{{ user.name or 'Your Agent' }}</div>
+ <div class="cl-brand-title">
+ {{ 'Real Estate Agent' if user.role == 'agent' else 'Mortgage Lender' }}
+ {% if profile.get('brokerage_name') %} · {{ profile.brokerage_name }}{% endif %}
+ </div>
+ <div class="cl-brand-contact">
+ {% if profile.get('phone') %}{{ profile.phone }}{% endif %}
+ {% if profile.get('phone') and user.get('email') %} &nbsp;·&nbsp; {% endif %}
+ {% if user.get('email') %}{{ user.email }}{% endif %}
+ </div>
+ {% if profile.get('license_number') %}
+ <div class="cl-brand-license">License #{{ profile.license_number }}</div>
+ {% endif %}
+ {% set logo_url = get_professional_photo_url(profile.get('brokerage_logo')) if profile.get('brokerage_logo') else None %}
+ {% if logo_url %}
+ <img src="{{ logo_url }}" alt="Brokerage" class="cl-brand-logo" style="margin-top:.35rem;">
+ {% endif %}
+ </div>
 
-      <!-- QR Code (Kayleigh only) OR season icon -->
-      {% if is_kayleigh %}
-        <div class="cl-brand-qr">
-          <img src="{{ url_for('static', filename='img/vendor_qr.png') }}" alt="Trusted Vendors QR">
-          <div class="cl-brand-qr-label">Scan for Trusted Vendors</div>
-        </div>
-      {% else %}
-        <div class="cl-brand-qr" style="font-size:2.2rem;opacity:.25;">
-          {{ '🌸' if checklist.season=='spring' else '☀️' if checklist.season=='summer' else '🍂' if checklist.season=='fall' else '❄️' }}
-        </div>
-      {% endif %}
+ <!-- QR Code (Kayleigh only) OR season icon -->
+ {% if is_kayleigh %}
+ <div class="cl-brand-qr">
+ <img src="{{ url_for('static', filename='img/vendor_qr.png') }}" alt="Trusted Vendors QR">
+ <div class="cl-brand-qr-label">Scan for Trusted Vendors</div>
+ </div>
+ {% else %}
+ <div class="cl-brand-qr" style="font-size:2.2rem;opacity:.25;">
+ {{ '' if checklist.season=='spring' else '' if checklist.season=='summer' else '' if checklist.season=='fall' else '' }}
+ </div>
+ {% endif %}
 
-    </div>
+ </div>
 
-    <!-- FOOTER -->
-    <div class="cl-footer">
-      <div>
-        <div class="cl-footer__brand">Your Life · Your Home</div>
-        <div class="cl-footer__tagline">itsyourlifeyourhome.com</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="cl-footer__tagline">{{ checklist.label }} Homeowner Checklist</div>
-        <div class="cl-footer__season">{{ checklist.label }} {{ '🌸' if checklist.season=='spring' else '☀️' if checklist.season=='summer' else '🍂' if checklist.season=='fall' else '❄️' }}</div>
-      </div>
-    </div>
+ <!-- FOOTER -->
+ <div class="cl-footer">
+ <div>
+ <div class="cl-footer__brand">Your Life · Your Home</div>
+ <div class="cl-footer__tagline">itsyourlifeyourhome.com</div>
+ </div>
+ <div style="text-align:right;">
+ <div class="cl-footer__tagline">{{ checklist.label }} Homeowner Checklist</div>
+ <div class="cl-footer__season">{{ checklist.label }} {{ '' if checklist.season=='spring' else '' if checklist.season=='summer' else '' if checklist.season=='fall' else '' }}</div>
+ </div>
+ </div>
 
-  </div><!-- /checklist-paper -->
+ </div><!-- /checklist-paper -->
 
-  <script>
-  var total = document.querySelectorAll('.cl-checkbox').length;
-  function updateProgress(){
-    var checked = document.querySelectorAll('.cl-checkbox:checked').length;
-    var pct = total > 0 ? (checked / total * 100).toFixed(0) : 0;
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('progressText').textContent = checked + ' of ' + total + ' completed';
-  }
-  updateProgress();
-  </script>
+ <script>
+ var total = document.querySelectorAll('.cl-checkbox').length;
+ function updateProgress(){
+ var checked = document.querySelectorAll('.cl-checkbox:checked').length;
+ var pct = total > 0 ? (checked / total * 100).toFixed(0) : 0;
+ document.getElementById('progressFill').style.width = pct + '%';
+ document.getElementById('progressText').textContent = checked + ' of ' + total + ' completed';
+ }
+ updateProgress();
+ </script>
 </body>
 </html>

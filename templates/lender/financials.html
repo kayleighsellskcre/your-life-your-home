@@ -1,716 +1,716 @@
 {% extends "lender/layout.html" %}
 {% block lender_content %}
 <style>
-  :root {
-    --olive: #6B6A45;
-    --olive-dark: #5a593a;
-    --olive-light: rgba(107,106,69,.08);
-    --cream: #F8F5F0;
-    --cream2: #FDFBF7;
-    --charcoal: #3A352C;
-    --warm-gray: rgba(58,53,44,.52);
-    --accent: #C8B497;
-    --green: #15803d;
-    --red: #dc2626;
-    --amber: #b45309;
-    --blue: #1d4ed8;
-    --purple: #7c3aed;
-    --border: rgba(200,180,151,.28);
-    --shadow-sm: 0 2px 8px rgba(58,53,44,.07);
-    --shadow-md: 0 8px 32px rgba(58,53,44,.10);
-    --shadow-lg: 0 20px 60px rgba(58,53,44,.14);
-    --radius: 16px;
-    --radius-sm: 10px;
-  }
+ :root {
+ --olive: #6B5B4D;
+ --olive-dark: #5A4A3C;
+ --olive-light: rgba(107,91,77,.08);
+ --cream: #F8F5F0;
+ --cream2: #F5F0EB;
+ --charcoal: #3D2E24;
+ --warm-gray: rgba(61,46,36,.52);
+ --accent: #C2B1A1;
+ --green: #15803d;
+ --red: #dc2626;
+ --amber: #b45309;
+ --blue: #1d4ed8;
+ --purple: #7c3aed;
+ --border: rgba(200,180,151,.28);
+ --shadow-sm: 0 2px 8px rgba(61,46,36,.07);
+ --shadow-md: 0 8px 32px rgba(61,46,36,.10);
+ --shadow-lg: 0 20px 60px rgba(61,46,36,.14);
+ --radius: 16px;
+ --radius-sm: 10px;
+ }
 
-  .fin-header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
-  .fin-header-title { font-family:'Playfair Display',serif; font-size:1.9rem; color:var(--charcoal); margin:0 0 .25rem; letter-spacing:-.02em; }
-  .fin-header-sub { color:var(--warm-gray); font-size:.88rem; margin:0; }
-  .year-select { display:flex; align-items:center; gap:.5rem; font-size:.82rem; color:var(--olive); font-weight:600; }
-  .year-select select { border:1.5px solid var(--border); border-radius:9px; padding:.38rem .75rem; font-size:.82rem; color:var(--charcoal); background:#fff; cursor:pointer; outline:none; box-shadow:var(--shadow-sm); }
+ .fin-header { display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+ .fin-header-title { font-family:'Playfair Display',serif; font-size:1.9rem; color:var(--charcoal); margin:0 0 .25rem; letter-spacing:-.02em; }
+ .fin-header-sub { color:var(--warm-gray); font-size:.88rem; margin:0; }
+ .year-select { display:flex; align-items:center; gap:.5rem; font-size:.82rem; color:var(--olive); font-weight:600; }
+ .year-select select { border:1.5px solid var(--border); border-radius:9px; padding:.38rem .75rem; font-size:.82rem; color:var(--charcoal); background:#fff; cursor:pointer; outline:none; box-shadow:var(--shadow-sm); }
 
-  .fin-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
-  .fin-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem; position:relative; overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .2s,box-shadow .2s; }
-  .fin-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
-  .fin-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-  .fin-card.green::before  { background:linear-gradient(90deg,#15803d,#4ade80); }
-  .fin-card.amber::before  { background:linear-gradient(90deg,#b45309,#fbbf24); }
-  .fin-card.red::before    { background:linear-gradient(90deg,#dc2626,#f87171); }
-  .fin-card.blue::before   { background:linear-gradient(90deg,#1d4ed8,#60a5fa); }
-  .fin-card.purple::before { background:linear-gradient(90deg,#7c3aed,#c084fc); }
-  .fin-card-icon { position:absolute; top:1.1rem; right:1.1rem; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
-  .fin-card.green .fin-card-icon  { background:rgba(21,128,61,.1); }
-  .fin-card.amber .fin-card-icon  { background:rgba(180,83,9,.1); }
-  .fin-card.red .fin-card-icon    { background:rgba(220,38,38,.09); }
-  .fin-card.blue .fin-card-icon   { background:rgba(29,78,216,.09); }
-  .fin-card.purple .fin-card-icon { background:rgba(124,58,237,.09); }
-  .fin-card-label { font-size:.66rem; text-transform:uppercase; letter-spacing:.09em; color:var(--warm-gray); font-weight:700; margin-bottom:.5rem; }
-  .fin-card-value { font-family:'Playfair Display',serif; font-size:1.65rem; color:var(--charcoal); font-weight:700; line-height:1; margin-bottom:.3rem; }
-  .fin-card-sub { font-size:.71rem; color:var(--warm-gray); }
+ .fin-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+ .fin-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem; position:relative; overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .2s,box-shadow .2s; }
+ .fin-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+ .fin-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+ .fin-card.green::before { background:linear-gradient(90deg,#15803d,#4ade80); }
+ .fin-card.amber::before { background:linear-gradient(90deg,#b45309,#fbbf24); }
+ .fin-card.red::before { background:linear-gradient(90deg,#dc2626,#f87171); }
+ .fin-card.blue::before { background:linear-gradient(90deg,#1d4ed8,#60a5fa); }
+ .fin-card.purple::before { background:linear-gradient(90deg,#7c3aed,#c084fc); }
+ .fin-card-icon { position:absolute; top:1.1rem; right:1.1rem; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+ .fin-card.green .fin-card-icon { background:rgba(21,128,61,.1); }
+ .fin-card.amber .fin-card-icon { background:rgba(180,83,9,.1); }
+ .fin-card.red .fin-card-icon { background:rgba(220,38,38,.09); }
+ .fin-card.blue .fin-card-icon { background:rgba(29,78,216,.09); }
+ .fin-card.purple .fin-card-icon { background:rgba(124,58,237,.09); }
+ .fin-card-label { font-size:.66rem; text-transform:uppercase; letter-spacing:.09em; color:var(--warm-gray); font-weight:700; margin-bottom:.5rem; }
+ .fin-card-value { font-family:'Playfair Display',serif; font-size:1.65rem; color:var(--charcoal); font-weight:700; line-height:1; margin-bottom:.3rem; }
+ .fin-card-sub { font-size:.71rem; color:var(--warm-gray); }
 
-  /* AI Command Center */
-  .ai-command-center {
-    background:linear-gradient(135deg,#fff 0%,var(--cream) 100%);
-    border:1px solid var(--border); border-radius:var(--radius);
-    padding:1.75rem; margin-bottom:2rem;
-    box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
-  }
-  .ai-command-center::before {
-    content:''; position:absolute; top:0; left:0; right:0; height:3px;
-    background:linear-gradient(90deg,var(--olive),var(--accent),var(--olive-dark));
-  }
-  .ai-cc-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:1.5rem; }
-  .ai-cc-title { display:flex; align-items:center; gap:.6rem; }
-  .ai-cc-title h3 { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--charcoal); margin:0; }
-  .ai-badge { display:inline-flex; align-items:center; gap:.3rem; background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; font-size:.65rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:.22rem .6rem; border-radius:20px; }
-  .ai-cc-tabs { display:flex; gap:.5rem; flex-wrap:wrap; }
-  .ai-cc-tab { padding:.4rem .9rem; font-size:.76rem; font-weight:600; border-radius:20px; border:1.5px solid var(--border); background:#fff; color:var(--charcoal); cursor:pointer; transition:all .15s; white-space:nowrap; }
-  .ai-cc-tab:hover { border-color:var(--olive); color:var(--olive); }
-  .ai-cc-tab.active { background:var(--olive); color:#fff; border-color:var(--olive); }
-  .ai-cc-panel { display:none; }
-  .ai-cc-panel.active { display:block; }
+ /* AI Command Center */
+ .ai-command-center {
+ background:linear-gradient(135deg,#fff 0%,var(--cream) 100%);
+ border:1px solid var(--border); border-radius:var(--radius);
+ padding:1.75rem; margin-bottom:2rem;
+ box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
+ }
+ .ai-command-center::before {
+ content:''; position:absolute; top:0; left:0; right:0; height:3px;
+ background:linear-gradient(90deg,var(--olive),var(--accent),var(--olive-dark));
+ }
+ .ai-cc-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.75rem; margin-bottom:1.5rem; }
+ .ai-cc-title { display:flex; align-items:center; gap:.6rem; }
+ .ai-cc-title h3 { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--charcoal); margin:0; }
+ .ai-badge { display:inline-flex; align-items:center; gap:.3rem; background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; font-size:.65rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase; padding:.22rem .6rem; border-radius:20px; }
+ .ai-cc-tabs { display:flex; gap:.5rem; flex-wrap:wrap; }
+ .ai-cc-tab { padding:.4rem .9rem; font-size:.76rem; font-weight:600; border-radius:20px; border:1.5px solid var(--border); background:#fff; color:var(--charcoal); cursor:pointer; transition:all .15s; white-space:nowrap; }
+ .ai-cc-tab:hover { border-color:var(--olive); color:var(--olive); }
+ .ai-cc-tab.active { background:var(--olive); color:#fff; border-color:var(--olive); }
+ .ai-cc-panel { display:none; }
+ .ai-cc-panel.active { display:block; }
 
-  .ai-insights-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem; }
-  .ai-insight-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:1.1rem 1.2rem; position:relative; overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .15s; }
-  .ai-insight-card:hover { transform:translateY(-1px); }
-  .ai-insight-card.positive::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--green); }
-  .ai-insight-card.warning::before  { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber); }
-  .ai-insight-card.info::before     { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--blue); }
-  .ai-insight-title { font-size:.78rem; font-weight:700; color:var(--charcoal); margin-bottom:.35rem; text-transform:uppercase; letter-spacing:.05em; }
-  .ai-insight-body  { font-size:.83rem; color:var(--charcoal); line-height:1.6; }
-  .ai-insights-loading { display:flex; align-items:center; gap:.75rem; padding:1.25rem; color:var(--warm-gray); font-size:.85rem; }
-  .ai-spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--olive); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
-  @keyframes spin { to { transform:rotate(360deg); } }
+ .ai-insights-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem; }
+ .ai-insight-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:1.1rem 1.2rem; position:relative; overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .15s; }
+ .ai-insight-card:hover { transform:translateY(-1px); }
+ .ai-insight-card.positive::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--green); }
+ .ai-insight-card.warning::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber); }
+ .ai-insight-card.info::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--blue); }
+ .ai-insight-title { font-size:.78rem; font-weight:700; color:var(--charcoal); margin-bottom:.35rem; text-transform:uppercase; letter-spacing:.05em; }
+ .ai-insight-body { font-size:.83rem; color:var(--charcoal); line-height:1.6; }
+ .ai-insights-loading { display:flex; align-items:center; gap:.75rem; padding:1.25rem; color:var(--warm-gray); font-size:.85rem; }
+ .ai-spinner { width:20px; height:20px; border:2px solid var(--border); border-top-color:var(--olive); border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+ @keyframes spin { to { transform:rotate(360deg); } }
 
-  .ai-forecast-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1rem; }
-  .ai-forecast-card { background:var(--cream2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem 1.1rem; text-align:center; }
-  .ai-forecast-card .val { font-family:'Playfair Display',serif; font-size:1.45rem; color:var(--charcoal); font-weight:700; margin-bottom:.2rem; }
-  .ai-forecast-card .lbl { font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); font-weight:700; }
-  .ai-confidence { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600; padding:.2rem .6rem; border-radius:20px; margin-top:.5rem; }
-  .ai-confidence.high   { background:rgba(21,128,61,.1); color:#15803d; }
-  .ai-confidence.medium { background:rgba(180,83,9,.1);  color:#b45309; }
-  .ai-confidence.low    { background:rgba(107,106,69,.1); color:var(--olive); }
-  .ai-forecast-headline { font-size:.88rem; color:var(--charcoal); line-height:1.5; font-style:italic; margin-bottom:.5rem; }
-  .ai-forecast-action { background:rgba(107,106,69,.07); border-radius:9px; padding:.7rem 1rem; font-size:.82rem; color:var(--charcoal); border-left:3px solid var(--olive); }
+ .ai-forecast-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:1rem; margin-bottom:1rem; }
+ .ai-forecast-card { background:var(--cream2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem 1.1rem; text-align:center; }
+ .ai-forecast-card .val { font-family:'Playfair Display',serif; font-size:1.45rem; color:var(--charcoal); font-weight:700; margin-bottom:.2rem; }
+ .ai-forecast-card .lbl { font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); font-weight:700; }
+ .ai-confidence { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600; padding:.2rem .6rem; border-radius:20px; margin-top:.5rem; }
+ .ai-confidence.high { background:rgba(21,128,61,.1); color:#15803d; }
+ .ai-confidence.medium { background:rgba(180,83,9,.1); color:#b45309; }
+ .ai-confidence.low { background:rgba(107,91,77,.1); color:var(--olive); }
+ .ai-forecast-headline { font-size:.88rem; color:var(--charcoal); line-height:1.5; font-style:italic; margin-bottom:.5rem; }
+ .ai-forecast-action { background:rgba(107,91,77,.07); border-radius:9px; padding:.7rem 1rem; font-size:.82rem; color:var(--charcoal); border-left:3px solid var(--olive); }
 
-  /* Pipeline analyzer */
-  .pipeline-score-ring {
-    display:flex; align-items:center; gap:1.5rem;
-    background:var(--cream2); border:1px solid var(--border);
-    border-radius:var(--radius-sm); padding:1.1rem 1.4rem;
-    margin-bottom:1rem;
-  }
-  .score-circle {
-    width:72px; height:72px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Playfair Display',serif; font-size:1.5rem;
-    font-weight:700; color:#fff;
-  }
-  .score-circle.high   { background:linear-gradient(135deg,#15803d,#4ade80); }
-  .score-circle.medium { background:linear-gradient(135deg,#b45309,#fbbf24); }
-  .score-circle.low    { background:linear-gradient(135deg,#dc2626,#f87171); }
-  .score-circle.na     { background:linear-gradient(135deg,#6B6A45,#C8B497); }
-  .pipeline-rec { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:.85rem 1.1rem; margin-bottom:.6rem; display:flex; align-items:flex-start; gap:.75rem; }
-  .priority-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:.35rem; }
-  .priority-dot.high   { background:var(--red); }
-  .priority-dot.medium { background:var(--amber); }
-  .priority-dot.low    { background:var(--green); }
-  .pipeline-rec-title  { font-size:.8rem; font-weight:700; color:var(--charcoal); margin-bottom:.2rem; }
-  .pipeline-rec-detail { font-size:.79rem; color:var(--warm-gray); line-height:1.5; }
+ /* Pipeline analyzer */
+ .pipeline-score-ring {
+ display:flex; align-items:center; gap:1.5rem;
+ background:var(--cream2); border:1px solid var(--border);
+ border-radius:var(--radius-sm); padding:1.1rem 1.4rem;
+ margin-bottom:1rem;
+ }
+ .score-circle {
+ width:72px; height:72px; border-radius:50%; flex-shrink:0;
+ display:flex; align-items:center; justify-content:center;
+ font-family:'Playfair Display',serif; font-size:1.5rem;
+ font-weight:700; color:#fff;
+ }
+ .score-circle.high { background:linear-gradient(135deg,#15803d,#4ade80); }
+ .score-circle.medium { background:linear-gradient(135deg,#b45309,#fbbf24); }
+ .score-circle.low { background:linear-gradient(135deg,#dc2626,#f87171); }
+ .score-circle.na { background:linear-gradient(135deg,#6B5B4D,#C2B1A1); }
+ .pipeline-rec { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:.85rem 1.1rem; margin-bottom:.6rem; display:flex; align-items:flex-start; gap:.75rem; }
+ .priority-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:.35rem; }
+ .priority-dot.high { background:var(--red); }
+ .priority-dot.medium { background:var(--amber); }
+ .priority-dot.low { background:var(--green); }
+ .pipeline-rec-title { font-size:.8rem; font-weight:700; color:var(--charcoal); margin-bottom:.2rem; }
+ .pipeline-rec-detail { font-size:.79rem; color:var(--warm-gray); line-height:1.5; }
 
-  .ai-response { background:var(--cream2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem 1.2rem; font-size:.85rem; line-height:1.75; color:var(--charcoal); min-height:80px; white-space:pre-wrap; }
-  .ai-response.loading { color:var(--warm-gray); font-style:italic; }
-  .btn-coach { margin-top:.85rem; background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; border:none; border-radius:9px; padding:.65rem 1.4rem; font-size:.85rem; font-weight:600; cursor:pointer; transition:opacity .2s; }
-  .btn-coach:hover { opacity:.88; }
-  .btn-coach:disabled { opacity:.5; cursor:default; }
+ .ai-response { background:var(--cream2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:1rem 1.2rem; font-size:.85rem; line-height:1.75; color:var(--charcoal); min-height:80px; white-space:pre-wrap; }
+ .ai-response.loading { color:var(--warm-gray); font-style:italic; }
+ .btn-coach { margin-top:.85rem; background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; border:none; border-radius:9px; padding:.65rem 1.4rem; font-size:.85rem; font-weight:600; cursor:pointer; transition:opacity .2s; }
+ .btn-coach:hover { opacity:.88; }
+ .btn-coach:disabled { opacity:.5; cursor:default; }
 
-  .chart-row { display:grid; grid-template-columns:2fr 1fr; gap:1.25rem; margin-bottom:2rem; }
-  .chart-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.4rem 1.5rem; box-shadow:var(--shadow-sm); }
-  .chart-card h4 { font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); font-weight:700; margin:0 0 1.1rem; }
+ .chart-row { display:grid; grid-template-columns:2fr 1fr; gap:1.25rem; margin-bottom:2rem; }
+ .chart-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.4rem 1.5rem; box-shadow:var(--shadow-sm); }
+ .chart-card h4 { font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); font-weight:700; margin:0 0 1.1rem; }
 
-  .fin-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:1.75rem; overflow-x:auto; scrollbar-width:none; }
-  .fin-tabs::-webkit-scrollbar { display:none; }
-  .fin-tab { padding:.7rem 1.3rem; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--warm-gray); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; transition:all .18s; }
-  .fin-tab:hover { color:var(--charcoal); }
-  .fin-tab.active { color:var(--olive-dark); border-bottom-color:var(--olive); }
-  .fin-panel { display:none; }
-  .fin-panel.active { display:block; }
+ .fin-tabs { display:flex; gap:0; border-bottom:2px solid var(--border); margin-bottom:1.75rem; overflow-x:auto; scrollbar-width:none; }
+ .fin-tabs::-webkit-scrollbar { display:none; }
+ .fin-tab { padding:.7rem 1.3rem; font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--warm-gray); cursor:pointer; border:none; background:none; border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; transition:all .18s; }
+ .fin-tab:hover { color:var(--charcoal); }
+ .fin-tab.active { color:var(--olive-dark); border-bottom-color:var(--olive); }
+ .fin-panel { display:none; }
+ .fin-panel.active { display:block; }
 
-  .sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.1rem; }
-  .sec-hdr h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--charcoal); margin:0; }
-  .btn-add { background:var(--olive); color:#fff; border:none; border-radius:9px; padding:.45rem 1.1rem; font-size:.8rem; font-weight:700; cursor:pointer; transition:background .18s; letter-spacing:.02em; }
-  .btn-add:hover { background:var(--olive-dark); }
+ .sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.1rem; }
+ .sec-hdr h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--charcoal); margin:0; }
+ .btn-add { background:var(--olive); color:#fff; border:none; border-radius:9px; padding:.45rem 1.1rem; font-size:.8rem; font-weight:700; cursor:pointer; transition:background .18s; letter-spacing:.02em; }
+ .btn-add:hover { background:var(--olive-dark); }
 
-  .fin-table-wrap { overflow-x:auto; border-radius:var(--radius-sm); }
-  .fin-table { width:100%; border-collapse:collapse; font-size:.82rem; }
-  .fin-table th { text-align:left; padding:.65rem .9rem; font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); border-bottom:1px solid var(--border); font-weight:700; white-space:nowrap; background:var(--cream2); }
-  .fin-table td { padding:.75rem .9rem; border-bottom:1px solid rgba(200,180,151,.1); color:var(--charcoal); vertical-align:middle; }
-  .fin-table tr:last-child td { border-bottom:none; }
-  .fin-table tr:hover td { background:rgba(107,106,69,.025); }
-  .badge { display:inline-flex; align-items:center; padding:.22rem .6rem; border-radius:20px; font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
-  .badge-funded { background:rgba(21,128,61,.12);  color:#15803d; }
-  .badge-proj   { background:rgba(180,83,9,.12);   color:#b45309; }
-  .badge-lost   { background:rgba(220,38,38,.1);   color:#dc2626; }
-  .empty-msg { text-align:center; padding:3.5rem 1rem; color:var(--warm-gray); font-size:.88rem; line-height:1.7; }
-  .empty-msg .big { font-size:2.5rem; margin-bottom:.75rem; }
-  .tbl-act { display:inline-flex; align-items:center; gap:.25rem; font-size:.71rem; font-weight:700; padding:.2rem .55rem; border-radius:6px; border:1px solid; cursor:pointer; background:none; text-decoration:none; transition:all .12s; letter-spacing:.02em; }
-  .tbl-act-green { color:var(--green); border-color:rgba(21,128,61,.3); }
-  .tbl-act-green:hover { background:rgba(21,128,61,.08); }
-  .tbl-act-red   { color:var(--red);   border-color:rgba(220,38,38,.25); }
-  .tbl-act-red:hover { background:rgba(220,38,38,.07); }
+ .fin-table-wrap { overflow-x:auto; border-radius:var(--radius-sm); }
+ .fin-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+ .fin-table th { text-align:left; padding:.65rem .9rem; font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); border-bottom:1px solid var(--border); font-weight:700; white-space:nowrap; background:var(--cream2); }
+ .fin-table td { padding:.75rem .9rem; border-bottom:1px solid rgba(200,180,151,.1); color:var(--charcoal); vertical-align:middle; }
+ .fin-table tr:last-child td { border-bottom:none; }
+ .fin-table tr:hover td { background:rgba(107,91,77,.025); }
+ .badge { display:inline-flex; align-items:center; padding:.22rem .6rem; border-radius:20px; font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+ .badge-funded { background:rgba(21,128,61,.12); color:#15803d; }
+ .badge-proj { background:rgba(180,83,9,.12); color:#b45309; }
+ .badge-lost { background:rgba(220,38,38,.1); color:#dc2626; }
+ .empty-msg { text-align:center; padding:3.5rem 1rem; color:var(--warm-gray); font-size:.88rem; line-height:1.7; }
+ .empty-msg .big { font-size:2.5rem; margin-bottom:.75rem; }
+ .tbl-act { display:inline-flex; align-items:center; gap:.25rem; font-size:.71rem; font-weight:700; padding:.2rem .55rem; border-radius:6px; border:1px solid; cursor:pointer; background:none; text-decoration:none; transition:all .12s; letter-spacing:.02em; }
+ .tbl-act-green { color:var(--green); border-color:rgba(21,128,61,.3); }
+ .tbl-act-green:hover { background:rgba(21,128,61,.08); }
+ .tbl-act-red { color:var(--red); border-color:rgba(220,38,38,.25); }
+ .tbl-act-red:hover { background:rgba(220,38,38,.07); }
 
-  .goal-card { background:var(--cream2); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1.4rem; margin-bottom:.85rem; }
-  .goal-label { display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; color:var(--charcoal); margin-bottom:.55rem; }
-  .goal-bar-bg { height:10px; background:rgba(107,106,69,.12); border-radius:5px; overflow:hidden; }
-  .goal-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--olive),var(--accent)); transition:width .8s cubic-bezier(.4,0,.2,1); }
-  .goal-bar-fill.danger { background:linear-gradient(90deg,#dc2626,#f87171); }
-  .goal-sub { font-size:.69rem; color:var(--warm-gray); margin-top:.35rem; text-align:right; }
+ .goal-card { background:var(--cream2); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1.4rem; margin-bottom:.85rem; }
+ .goal-label { display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; color:var(--charcoal); margin-bottom:.55rem; }
+ .goal-bar-bg { height:10px; background:rgba(107,91,77,.12); border-radius:5px; overflow:hidden; }
+ .goal-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--olive),var(--accent)); transition:width .8s cubic-bezier(.4,0,.2,1); }
+ .goal-bar-fill.danger { background:linear-gradient(90deg,#dc2626,#f87171); }
+ .goal-sub { font-size:.69rem; color:var(--warm-gray); margin-top:.35rem; text-align:right; }
 
-  .fin-modal-overlay { display:none; position:fixed; inset:0; background:rgba(30,24,18,.5); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
-  .fin-modal-overlay.open { display:flex; }
-  .fin-modal { background:#fff; border-radius:20px; padding:2rem 2.25rem; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); animation:modal-in .2s ease; }
-  @keyframes modal-in { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
-  .fin-modal h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--charcoal); margin:0 0 1.4rem; }
-  .fmg { margin-bottom:1rem; }
-  .fmg label { display:block; font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--charcoal); margin-bottom:.3rem; }
-  .fmg input, .fmg select, .fmg textarea { width:100%; border:1.5px solid rgba(107,106,69,.25); border-radius:9px; padding:.52rem .8rem; font-size:.85rem; color:var(--charcoal); background:var(--cream2); box-sizing:border-box; outline:none; font-family:inherit; transition:border-color .15s,background .15s; }
-  .fmg input:focus, .fmg select:focus, .fmg textarea:focus { border-color:var(--olive); background:#fff; }
-  .fm-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
-  .fm-actions { display:flex; gap:.75rem; margin-top:1.4rem; padding-top:1.1rem; border-top:1px solid var(--border); }
-  .fm-submit { background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; border:none; border-radius:9px; padding:.62rem 1.5rem; font-size:.88rem; font-weight:700; cursor:pointer; transition:opacity .15s; }
-  .fm-submit:hover { opacity:.9; }
-  .fm-cancel { background:none; border:1.5px solid var(--border); color:var(--olive); border-radius:9px; padding:.62rem 1.1rem; font-size:.88rem; font-weight:600; cursor:pointer; }
+ .fin-modal-overlay { display:none; position:fixed; inset:0; background:rgba(30,24,18,.5); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
+ .fin-modal-overlay.open { display:flex; }
+ .fin-modal { background:#fff; border-radius:20px; padding:2rem 2.25rem; width:100%; max-width:560px; max-height:90vh; overflow-y:auto; box-shadow:var(--shadow-lg); animation:modal-in .2s ease; }
+ @keyframes modal-in { from { opacity:0; transform:translateY(12px) scale(.98); } to { opacity:1; transform:none; } }
+ .fin-modal h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--charcoal); margin:0 0 1.4rem; }
+ .fmg { margin-bottom:1rem; }
+ .fmg label { display:block; font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--charcoal); margin-bottom:.3rem; }
+ .fmg input, .fmg select, .fmg textarea { width:100%; border:1.5px solid rgba(107,91,77,.25); border-radius:9px; padding:.52rem .8rem; font-size:.85rem; color:var(--charcoal); background:var(--cream2); box-sizing:border-box; outline:none; font-family:inherit; transition:border-color .15s,background .15s; }
+ .fmg input:focus, .fmg select:focus, .fmg textarea:focus { border-color:var(--olive); background:#fff; }
+ .fm-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+ .fm-actions { display:flex; gap:.75rem; margin-top:1.4rem; padding-top:1.1rem; border-top:1px solid var(--border); }
+ .fm-submit { background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; border:none; border-radius:9px; padding:.62rem 1.5rem; font-size:.88rem; font-weight:700; cursor:pointer; transition:opacity .15s; }
+ .fm-submit:hover { opacity:.9; }
+ .fm-cancel { background:none; border:1.5px solid var(--border); color:var(--olive); border-radius:9px; padding:.62rem 1.1rem; font-size:.88rem; font-weight:600; cursor:pointer; }
 
-  @media(max-width:768px) {
-    .fin-cards { grid-template-columns:1fr 1fr; }
-    .chart-row { grid-template-columns:1fr; }
-    .fm-row { grid-template-columns:1fr; }
-    .ai-insights-grid { grid-template-columns:1fr; }
-    .ai-forecast-grid { grid-template-columns:1fr 1fr; }
-  }
-  @media(max-width:480px) {
-    .fin-cards { grid-template-columns:1fr; }
-    .ai-forecast-grid { grid-template-columns:1fr; }
-  }
+ @media(max-width:768px) {
+ .fin-cards { grid-template-columns:1fr 1fr; }
+ .chart-row { grid-template-columns:1fr; }
+ .fm-row { grid-template-columns:1fr; }
+ .ai-insights-grid { grid-template-columns:1fr; }
+ .ai-forecast-grid { grid-template-columns:1fr 1fr; }
+ }
+ @media(max-width:480px) {
+ .fin-cards { grid-template-columns:1fr; }
+ .ai-forecast-grid { grid-template-columns:1fr; }
+ }
 </style>
 
 <!-- Page Header -->
 <div class="fin-header">
-  <div>
-    <h1 class="fin-header-title">Financials Hub</h1>
-    <p class="fin-header-sub">Track loan revenue, pipeline, expenses, and income goals for {{ year }}.</p>
-  </div>
-  <div class="year-select">
-    <span>Year</span>
-    <select onchange="window.location.href='?year='+this.value">
-      {% for y in available_years %}
-      <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-      {% endfor %}
-    </select>
-  </div>
+ <div>
+ <h1 class="fin-header-title">Financials Hub</h1>
+ <p class="fin-header-sub">Track loan revenue, pipeline, expenses, and income goals for {{ year }}.</p>
+ </div>
+ <div class="year-select">
+ <span>Year</span>
+ <select onchange="window.location.href='?year='+this.value">
+ {% for y in available_years %}
+ <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+ {% endfor %}
+ </select>
+ </div>
 </div>
 
 <!-- KPI Cards -->
 <div class="fin-cards">
-  <div class="fin-card green">
-    <div class="fin-card-icon">&#x2713;</div>
-    <div class="fin-card-label">YTD Revenue (Funded)</div>
-    <div class="fin-card-value">${{ "{:,.0f}".format(ytd_revenue) }}</div>
-    {% if ytd_projected > 0 %}
-    <div class="fin-card-sub">+ ${{ "{:,.0f}".format(ytd_projected) }} in pipeline</div>
-    {% else %}
-    <div class="fin-card-sub">Funded loans {{ year }}</div>
-    {% endif %}
-  </div>
-  <div class="fin-card blue">
-    <div class="fin-card-icon">&#x7e;</div>
-    <div class="fin-card-label">YTD Loan Volume</div>
-    <div class="fin-card-value">${{ "{:,.0f}".format(ytd_loan_volume // 1000) }}k</div>
-    <div class="fin-card-sub">Total funded loan volume</div>
-  </div>
-  <div class="fin-card red">
-    <div class="fin-card-icon">&#x2212;</div>
-    <div class="fin-card-label">YTD Expenses</div>
-    <div class="fin-card-value">${{ "{:,.0f}".format(ytd_expenses) }}</div>
-    <div class="fin-card-sub">{{ expenses|length }} entr{{ 'ies' if expenses|length != 1 else 'y' }} logged</div>
-  </div>
-  <div class="fin-card {% if net_income >= 0 %}green{% else %}red{% endif %}">
-    <div class="fin-card-icon">&#x3d;</div>
-    <div class="fin-card-label">Net Income</div>
-    <div class="fin-card-value">{% if net_income < 0 %}-{% endif %}${{ "{:,.0f}".format(net_income|abs) }}</div>
-    <div class="fin-card-sub">Revenue minus expenses</div>
-  </div>
-  <div class="fin-card amber">
-    <div class="fin-card-icon">&#x23;</div>
-    <div class="fin-card-label">Loans Funded</div>
-    <div class="fin-card-value">{{ revenues|selectattr('status','equalto','funded')|list|length }}</div>
-    <div class="fin-card-sub">{{ revenues|selectattr('status','equalto','projected')|list|length }} in pipeline</div>
-  </div>
+ <div class="fin-card green">
+ <div class="fin-card-icon">&#x2713;</div>
+ <div class="fin-card-label">YTD Revenue (Funded)</div>
+ <div class="fin-card-value">${{ "{:,.0f}".format(ytd_revenue) }}</div>
+ {% if ytd_projected > 0 %}
+ <div class="fin-card-sub">+ ${{ "{:,.0f}".format(ytd_projected) }} in pipeline</div>
+ {% else %}
+ <div class="fin-card-sub">Funded loans {{ year }}</div>
+ {% endif %}
+ </div>
+ <div class="fin-card blue">
+ <div class="fin-card-icon">&#x7e;</div>
+ <div class="fin-card-label">YTD Loan Volume</div>
+ <div class="fin-card-value">${{ "{:,.0f}".format(ytd_loan_volume // 1000) }}k</div>
+ <div class="fin-card-sub">Total funded loan volume</div>
+ </div>
+ <div class="fin-card red">
+ <div class="fin-card-icon">&#x2212;</div>
+ <div class="fin-card-label">YTD Expenses</div>
+ <div class="fin-card-value">${{ "{:,.0f}".format(ytd_expenses) }}</div>
+ <div class="fin-card-sub">{{ expenses|length }} entr{{ 'ies' if expenses|length != 1 else 'y' }} logged</div>
+ </div>
+ <div class="fin-card {% if net_income >= 0 %}green{% else %}red{% endif %}">
+ <div class="fin-card-icon">&#x3d;</div>
+ <div class="fin-card-label">Net Income</div>
+ <div class="fin-card-value">{% if net_income < 0 %}-{% endif %}${{ "{:,.0f}".format(net_income|abs) }}</div>
+ <div class="fin-card-sub">Revenue minus expenses</div>
+ </div>
+ <div class="fin-card amber">
+ <div class="fin-card-icon">&#x23;</div>
+ <div class="fin-card-label">Loans Funded</div>
+ <div class="fin-card-value">{{ revenues|selectattr('status','equalto','funded')|list|length }}</div>
+ <div class="fin-card-sub">{{ revenues|selectattr('status','equalto','projected')|list|length }} in pipeline</div>
+ </div>
 </div>
 
 <!-- Charts -->
 <div class="chart-row">
-  <div class="chart-card">
-    <h4>Monthly Revenue / {{ year }}</h4>
-    <canvas id="monthlyChart" height="95"></canvas>
-  </div>
-  <div class="chart-card">
-    <h4>Expenses by Category</h4>
-    <canvas id="expenseChart" height="155"></canvas>
-    {% if not expense_by_cat %}
-    <div style="text-align:center;color:var(--warm-gray);font-size:.8rem;padding:1.5rem 0;">No expense data yet</div>
-    {% endif %}
-  </div>
+ <div class="chart-card">
+ <h4>Monthly Revenue / {{ year }}</h4>
+ <canvas id="monthlyChart" height="95"></canvas>
+ </div>
+ <div class="chart-card">
+ <h4>Expenses by Category</h4>
+ <canvas id="expenseChart" height="155"></canvas>
+ {% if not expense_by_cat %}
+ <div style="text-align:center;color:var(--warm-gray);font-size:.8rem;padding:1.5rem 0;">No expense data yet</div>
+ {% endif %}
+ </div>
 </div>
 
 <!-- AI Command Center -->
 <div class="ai-command-center">
-  <div class="ai-cc-header">
-    <div class="ai-cc-title">
-      <h3>Financial Command Center</h3>
-    </div>
-    <div class="ai-cc-tabs">
-      <button class="ai-cc-tab active" onclick="switchAiTab('insights',this)">Smart Insights</button>
-      <button class="ai-cc-tab" onclick="switchAiTab('forecast',this)">Revenue Forecast</button>
-      <button class="ai-cc-tab" onclick="switchAiTab('pipeline',this)">Pipeline Analyzer</button>
-      <button class="ai-cc-tab" onclick="switchAiTab('coach',this)">Full Coaching</button>
-    </div>
-  </div>
+ <div class="ai-cc-header">
+ <div class="ai-cc-title">
+ <h3>Financial Command Center</h3>
+ </div>
+ <div class="ai-cc-tabs">
+ <button class="ai-cc-tab active" onclick="switchAiTab('insights',this)">Smart Insights</button>
+ <button class="ai-cc-tab" onclick="switchAiTab('forecast',this)">Revenue Forecast</button>
+ <button class="ai-cc-tab" onclick="switchAiTab('pipeline',this)">Pipeline Analyzer</button>
+ <button class="ai-cc-tab" onclick="switchAiTab('coach',this)">Full Coaching</button>
+ </div>
+ </div>
 
-  <!-- Smart Insights -->
-  <div class="ai-cc-panel active" id="ai-insights">
-    <div id="insightsLoading" class="ai-insights-loading">
-      <div class="ai-spinner"></div>
-      Analyzing your {{ year }} financials&hellip;
-    </div>
-    <div id="insightsGrid" class="ai-insights-grid" style="display:none;"></div>
-  </div>
+ <!-- Smart Insights -->
+ <div class="ai-cc-panel active" id="ai-insights">
+ <div id="insightsLoading" class="ai-insights-loading">
+ <div class="ai-spinner"></div>
+ Analyzing your {{ year }} financials&hellip;
+ </div>
+ <div id="insightsGrid" class="ai-insights-grid" style="display:none;"></div>
+ </div>
 
-  <!-- Revenue Forecast -->
-  <div class="ai-cc-panel" id="ai-forecast">
-    <div id="forecastLoading" class="ai-insights-loading" style="display:none;">
-      <div class="ai-spinner"></div>
-      Building your revenue projection&hellip;
-    </div>
-    <div id="forecastContent" style="display:none;">
-      <div class="ai-forecast-grid" id="forecastCards"></div>
-      <p class="ai-forecast-headline" id="forecastHeadline"></p>
-      <div class="ai-forecast-action" id="forecastAction"></div>
-    </div>
-    <div id="forecastEmpty" style="text-align:center;padding:1.5rem;color:var(--warm-gray);font-size:.85rem;">
-      <button class="btn-coach" onclick="loadForecast()">Generate Revenue Forecast</button>
-    </div>
-  </div>
+ <!-- Revenue Forecast -->
+ <div class="ai-cc-panel" id="ai-forecast">
+ <div id="forecastLoading" class="ai-insights-loading" style="display:none;">
+ <div class="ai-spinner"></div>
+ Building your revenue projection&hellip;
+ </div>
+ <div id="forecastContent" style="display:none;">
+ <div class="ai-forecast-grid" id="forecastCards"></div>
+ <p class="ai-forecast-headline" id="forecastHeadline"></p>
+ <div class="ai-forecast-action" id="forecastAction"></div>
+ </div>
+ <div id="forecastEmpty" style="text-align:center;padding:1.5rem;color:var(--warm-gray);font-size:.85rem;">
+ <button class="btn-coach" onclick="loadForecast()">Generate Revenue Forecast</button>
+ </div>
+ </div>
 
-  <!-- Pipeline Analyzer -->
-  <div class="ai-cc-panel" id="ai-pipeline">
-    <div id="pipelineLoading" class="ai-insights-loading" style="display:none;">
-      <div class="ai-spinner"></div>
-      Analyzing your pipeline health&hellip;
-    </div>
-    <div id="pipelineContent" style="display:none;"></div>
-    <div id="pipelineEmpty" style="text-align:center;padding:1.5rem;color:var(--warm-gray);font-size:.85rem;">
-      <button class="btn-coach" onclick="loadPipeline()">Analyze Pipeline Health</button>
-    </div>
-  </div>
+ <!-- Pipeline Analyzer -->
+ <div class="ai-cc-panel" id="ai-pipeline">
+ <div id="pipelineLoading" class="ai-insights-loading" style="display:none;">
+ <div class="ai-spinner"></div>
+ Analyzing your pipeline health&hellip;
+ </div>
+ <div id="pipelineContent" style="display:none;"></div>
+ <div id="pipelineEmpty" style="text-align:center;padding:1.5rem;color:var(--warm-gray);font-size:.85rem;">
+ <button class="btn-coach" onclick="loadPipeline()">Analyze Pipeline Health</button>
+ </div>
+ </div>
 
-  <!-- Full Coaching -->
-  <div class="ai-cc-panel" id="ai-coach">
-    <div class="ai-response" id="aiCoachOutput">Click below to receive a personalized coaching session based on your {{ year }} numbers.</div>
-    <button class="btn-coach" id="btnCoach" onclick="loadCoach()">Get Full Coaching Session</button>
-  </div>
+ <!-- Full Coaching -->
+ <div class="ai-cc-panel" id="ai-coach">
+ <div class="ai-response" id="aiCoachOutput">Click below to receive a personalized coaching session based on your {{ year }} numbers.</div>
+ <button class="btn-coach" id="btnCoach" onclick="loadCoach()">Get Full Coaching Session</button>
+ </div>
 </div>
 
 <!-- Data Tabs -->
 <div class="fin-tabs">
-  <button class="fin-tab active" onclick="switchTab('revenue',this)">Loan Revenue</button>
-  <button class="fin-tab" onclick="switchTab('expenses',this)">Expenses</button>
-  <button class="fin-tab" onclick="switchTab('goals',this)">Goals</button>
+ <button class="fin-tab active" onclick="switchTab('revenue',this)">Loan Revenue</button>
+ <button class="fin-tab" onclick="switchTab('expenses',this)">Expenses</button>
+ <button class="fin-tab" onclick="switchTab('goals',this)">Goals</button>
 </div>
 
 <!-- REVENUE PANEL -->
 <div id="panel-revenue" class="fin-panel active">
-  <div class="sec-hdr">
-    <h3>Loan Revenue Tracker</h3>
-    <button class="btn-add" onclick="document.getElementById('modal-revenue').classList.add('open')">+ Add Loan</button>
-  </div>
-  {% if revenues %}
-  <div class="fin-table-wrap">
-    <table class="fin-table">
-      <thead>
-        <tr>
-          <th>Borrower</th><th>Property</th><th>Loan Type</th><th>Close Date</th>
-          <th>Loan Amount</th><th>Orig. %</th><th>Revenue</th><th>Status</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in revenues %}
-        <tr>
-          <td style="font-weight:600;">{{ r.borrower_name or '--' }}</td>
-          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.property_address or '--' }}</td>
-          <td style="text-transform:capitalize;">{{ r.loan_type or '--' }}</td>
-          <td>{{ r.close_date or '--' }}</td>
-          <td>${{ "{:,.0f}".format(r.loan_amount or 0) }}</td>
-          <td>{{ "{:.3f}".format(r.origination_fee_pct or 0) }}%</td>
-          <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee_amt or 0) }}</td>
-          <td>
-            <span class="badge {% if r.status=='funded' %}badge-funded{% elif r.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">{{ r.status or 'projected' }}</span>
-          </td>
-          <td>
-            <div style="display:flex;gap:.3rem;flex-wrap:wrap;">
-              {% if r.status != 'funded' %}
-              <form method="POST" action="{{ url_for('lender_financials_revenue_mark_funded', rid=r.id) }}" style="display:inline;">
-                <button type="submit" class="tbl-act tbl-act-green">Mark Funded</button>
-              </form>
-              {% endif %}
-              <form method="POST" action="{{ url_for('lender_financials_revenue_delete', rid=r.id) }}" onsubmit="return confirm('Remove this loan?');" style="display:inline;">
-                <button type="submit" class="tbl-act tbl-act-red">Delete</button>
-              </form>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
-    Total revenue logged: <strong style="color:var(--charcoal);">${{ "{:,.0f}".format(revenues|sum(attribute='origination_fee_amt')) }}</strong>
-  </div>
-  {% else %}
-  <div class="empty-msg">
-    <div class="big">&#x1f3e6;</div>
-    No loans logged for {{ year }} yet.<br>
-    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-revenue').classList.add('open')">Log Your First Loan</button>
-  </div>
-  {% endif %}
+ <div class="sec-hdr">
+ <h3>Loan Revenue Tracker</h3>
+ <button class="btn-add" onclick="document.getElementById('modal-revenue').classList.add('open')">+ Add Loan</button>
+ </div>
+ {% if revenues %}
+ <div class="fin-table-wrap">
+ <table class="fin-table">
+ <thead>
+ <tr>
+ <th>Borrower</th><th>Property</th><th>Loan Type</th><th>Close Date</th>
+ <th>Loan Amount</th><th>Orig. %</th><th>Revenue</th><th>Status</th><th>Actions</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for r in revenues %}
+ <tr>
+ <td style="font-weight:600;">{{ r.borrower_name or '--' }}</td>
+ <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.property_address or '--' }}</td>
+ <td style="text-transform:capitalize;">{{ r.loan_type or '--' }}</td>
+ <td>{{ r.close_date or '--' }}</td>
+ <td>${{ "{:,.0f}".format(r.loan_amount or 0) }}</td>
+ <td>{{ "{:.3f}".format(r.origination_fee_pct or 0) }}%</td>
+ <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee_amt or 0) }}</td>
+ <td>
+ <span class="badge {% if r.status=='funded' %}badge-funded{% elif r.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">{{ r.status or 'projected' }}</span>
+ </td>
+ <td>
+ <div style="display:flex;gap:.3rem;flex-wrap:wrap;">
+ {% if r.status != 'funded' %}
+ <form method="POST" action="{{ url_for('lender_financials_revenue_mark_funded', rid=r.id) }}" style="display:inline;">
+ <button type="submit" class="tbl-act tbl-act-green">Mark Funded</button>
+ </form>
+ {% endif %}
+ <form method="POST" action="{{ url_for('lender_financials_revenue_delete', rid=r.id) }}" onsubmit="return confirm('Remove this loan?');" style="display:inline;">
+ <button type="submit" class="tbl-act tbl-act-red">Delete</button>
+ </form>
+ </div>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
+ Total revenue logged: <strong style="color:var(--charcoal);">${{ "{:,.0f}".format(ytd_revenue + ytd_projected) }}</strong>
+ </div>
+ {% else %}
+ <div class="empty-msg">
+ <div class="big">&#x1f3e6;</div>
+ No loans logged for {{ year }} yet.<br>
+ <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-revenue').classList.add('open')">Log Your First Loan</button>
+ </div>
+ {% endif %}
 </div>
 
 <!-- EXPENSES PANEL -->
 <div id="panel-expenses" class="fin-panel">
-  <div class="sec-hdr">
-    <h3>Expense Log</h3>
-    <button class="btn-add" onclick="document.getElementById('modal-expense').classList.add('open')">+ Add Expense</button>
-  </div>
-  {% if expenses %}
-  <div class="fin-table-wrap">
-    <table class="fin-table">
-      <thead>
-        <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Notes</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        {% for e in expenses %}
-        <tr>
-          <td>{{ e.expense_date or '--' }}</td>
-          <td><span class="badge" style="background:rgba(107,106,69,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
-          <td>{{ e.description or '--' }}</td>
-          <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
-          <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
-          <td>
-            <form method="POST" action="{{ url_for('lender_financials_expense_delete', eid=e.id) }}" onsubmit="return confirm('Remove this expense?');" style="display:inline;">
-              <button type="submit" class="tbl-act tbl-act-red">Delete</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
-    Total: <strong style="color:var(--red);">-${{ "{:,.2f}".format(ytd_expenses) }}</strong>
-  </div>
-  {% else %}
-  <div class="empty-msg">
-    <div class="big">&#x1f4b3;</div>
-    No expenses logged for {{ year }} yet.<br>
-    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-expense').classList.add('open')">Log Your First Expense</button>
-  </div>
-  {% endif %}
+ <div class="sec-hdr">
+ <h3>Expense Log</h3>
+ <button class="btn-add" onclick="document.getElementById('modal-expense').classList.add('open')">+ Add Expense</button>
+ </div>
+ {% if expenses %}
+ <div class="fin-table-wrap">
+ <table class="fin-table">
+ <thead>
+ <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Notes</th><th>Action</th></tr>
+ </thead>
+ <tbody>
+ {% for e in expenses %}
+ <tr>
+ <td>{{ e.expense_date or '--' }}</td>
+ <td><span class="badge" style="background:rgba(107,91,77,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
+ <td>{{ e.description or '--' }}</td>
+ <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
+ <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
+ <td>
+ <form method="POST" action="{{ url_for('lender_financials_expense_delete', eid=e.id) }}" onsubmit="return confirm('Remove this expense?');" style="display:inline;">
+ <button type="submit" class="tbl-act tbl-act-red">Delete</button>
+ </form>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
+ Total: <strong style="color:var(--red);">-${{ "{:,.2f}".format(ytd_expenses) }}</strong>
+ </div>
+ {% else %}
+ <div class="empty-msg">
+ <div class="big">&#x1f4b3;</div>
+ No expenses logged for {{ year }} yet.<br>
+ <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-expense').classList.add('open')">Log Your First Expense</button>
+ </div>
+ {% endif %}
 </div>
 
 <!-- GOALS PANEL -->
 <div id="panel-goals" class="fin-panel">
-  <div class="sec-hdr">
-    <h3>{{ year }} Revenue Goals</h3>
-    <button class="btn-add" onclick="document.getElementById('modal-goals').classList.add('open')">
-      {% if goals %}Edit Goals{% else %}+ Set Goals{% endif %}
-    </button>
-  </div>
-  {% if goals %}
-  {% set g = goals[0] %}
-  {% set rev_pct  = [((ytd_revenue / g.revenue_goal * 100) if g.revenue_goal > 0 else 0), 100]|min %}
-  {% set loan_pct = [((revenues|selectattr('status','equalto','funded')|list|length / g.loan_count_goal * 100) if g.loan_count_goal > 0 else 0), 100]|min %}
-  {% set vol_pct  = [((ytd_loan_volume / g.loan_volume_goal * 100) if g.loan_volume_goal > 0 else 0), 100]|min %}
-  {% set exp_pct  = [((ytd_expenses / g.expenses_budget * 100) if g.expenses_budget > 0 else 0), 100]|min %}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-    <div class="goal-card">
-      <div class="goal-label">
-        <span>Revenue Goal</span>
-        <span style="color:var(--green);">${{ "{:,.0f}".format(ytd_revenue) }} / ${{ "{:,.0f}".format(g.revenue_goal) }}</span>
-      </div>
-      <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ rev_pct|int }}%;"></div></div>
-      <div class="goal-sub">{{ "{:.0f}".format(rev_pct) }}% complete</div>
-    </div>
-    <div class="goal-card">
-      <div class="goal-label">
-        <span>Loans Funded</span>
-        <span>{{ revenues|selectattr('status','equalto','funded')|list|length }} / {{ g.loan_count_goal }}</span>
-      </div>
-      <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ loan_pct|int }}%;"></div></div>
-      <div class="goal-sub">{{ "{:.0f}".format(loan_pct) }}% complete</div>
-    </div>
-    <div class="goal-card">
-      <div class="goal-label">
-        <span>Loan Volume</span>
-        <span>${{ "{:,.0f}".format(ytd_loan_volume // 1000) }}k / ${{ "{:,.0f}".format(g.loan_volume_goal // 1000) }}k</span>
-      </div>
-      <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ vol_pct|int }}%;"></div></div>
-      <div class="goal-sub">{{ "{:.0f}".format(vol_pct) }}% complete</div>
-    </div>
-    <div class="goal-card">
-      <div class="goal-label">
-        <span>Expense Budget</span>
-        <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(g.expenses_budget or 0) }}</span>
-      </div>
-      <div class="goal-bar-bg"><div class="goal-bar-fill {% if exp_pct >= 90 %}danger{% endif %}" style="width:{{ exp_pct|int }}%;"></div></div>
-      <div class="goal-sub">{{ "{:.0f}".format(exp_pct) }}% of budget used</div>
-    </div>
-  </div>
-  {% if g.notes %}
-  <div style="margin-top:1rem;padding:.9rem 1.1rem;background:rgba(107,106,69,.06);border-radius:10px;font-size:.83rem;color:var(--charcoal);line-height:1.6;">{{ g.notes }}</div>
-  {% endif %}
-  {% else %}
-  <div class="empty-msg">
-    <div class="big">&#x1f3af;</div>
-    No goals set for {{ year }} yet.<br>
-    Set your revenue target, loan count, and volume goal to track progress all year.<br>
-    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-goals').classList.add('open')">Set {{ year }} Goals</button>
-  </div>
-  {% endif %}
+ <div class="sec-hdr">
+ <h3>{{ year }} Revenue Goals</h3>
+ <button class="btn-add" onclick="document.getElementById('modal-goals').classList.add('open')">
+ {% if goals %}Edit Goals{% else %}+ Set Goals{% endif %}
+ </button>
+ </div>
+ {% if goals %}
+ {% set g = goals[0] %}
+ {% set rev_pct = [((ytd_revenue / g.revenue_goal * 100) if (g.revenue_goal and g.revenue_goal > 0) else 0), 100]|min %}
+ {% set loan_pct = [((revenues|selectattr('status','equalto','funded')|list|length / g.loan_count_goal * 100) if (g.loan_count_goal and g.loan_count_goal > 0) else 0), 100]|min %}
+ {% set vol_pct = [((ytd_loan_volume / g.loan_volume_goal * 100) if (g.loan_volume_goal and g.loan_volume_goal > 0) else 0), 100]|min %}
+ {% set exp_pct = [((ytd_expenses / g.expenses_budget * 100) if (g.expenses_budget and g.expenses_budget > 0) else 0), 100]|min %}
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+ <div class="goal-card">
+ <div class="goal-label">
+ <span>Revenue Goal</span>
+ <span style="color:var(--green);">${{ "{:,.0f}".format(ytd_revenue) }} / ${{ "{:,.0f}".format(g.revenue_goal or 0) }}</span>
+ </div>
+ <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ rev_pct|int }}%;"></div></div>
+ <div class="goal-sub">{{ "{:.0f}".format(rev_pct) }}% complete</div>
+ </div>
+ <div class="goal-card">
+ <div class="goal-label">
+ <span>Loans Funded</span>
+ <span>{{ revenues|selectattr('status','equalto','funded')|list|length }} / {{ g.loan_count_goal }}</span>
+ </div>
+ <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ loan_pct|int }}%;"></div></div>
+ <div class="goal-sub">{{ "{:.0f}".format(loan_pct) }}% complete</div>
+ </div>
+ <div class="goal-card">
+ <div class="goal-label">
+ <span>Loan Volume</span>
+ <span>${{ "{:,.0f}".format((ytd_loan_volume or 0) // 1000) }}k / ${{ "{:,.0f}".format((g.loan_volume_goal or 0) // 1000) }}k</span>
+ </div>
+ <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ vol_pct|int }}%;"></div></div>
+ <div class="goal-sub">{{ "{:.0f}".format(vol_pct) }}% complete</div>
+ </div>
+ <div class="goal-card">
+ <div class="goal-label">
+ <span>Expense Budget</span>
+ <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(g.expenses_budget or 0) }}</span>
+ </div>
+ <div class="goal-bar-bg"><div class="goal-bar-fill {% if exp_pct >= 90 %}danger{% endif %}" style="width:{{ exp_pct|int }}%;"></div></div>
+ <div class="goal-sub">{{ "{:.0f}".format(exp_pct) }}% of budget used</div>
+ </div>
+ </div>
+ {% if g.notes %}
+ <div style="margin-top:1rem;padding:.9rem 1.1rem;background:rgba(107,91,77,.06);border-radius:10px;font-size:.83rem;color:var(--charcoal);line-height:1.6;">{{ g.notes }}</div>
+ {% endif %}
+ {% else %}
+ <div class="empty-msg">
+ <div class="big">&#x1f3af;</div>
+ No goals set for {{ year }} yet.<br>
+ Set your revenue target, loan count, and volume goal to track progress all year.<br>
+ <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-goals').classList.add('open')">Set {{ year }} Goals</button>
+ </div>
+ {% endif %}
 </div>
 
 <!-- =================== MODALS =================== -->
 
 <!-- Add Loan Revenue -->
 <div class="fin-modal-overlay" id="modal-revenue" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="fin-modal">
-    <h2>Add Loan</h2>
-    <form method="POST" action="{{ url_for('lender_financials_revenue_add') }}">
-      <div class="fm-row">
-        <div class="fmg">
-          <label>Borrower Name *</label>
-          <input type="text" name="borrower_name" required placeholder="John &amp; Jane Smith">
-        </div>
-        <div class="fmg">
-          <label>Loan Type</label>
-          <select name="loan_type">
-            <option value="purchase">Purchase</option>
-            <option value="refinance">Refinance</option>
-            <option value="cash_out_refi">Cash-Out Refi</option>
-            <option value="heloc">HELOC</option>
-            <option value="construction">Construction</option>
-            <option value="fha">FHA</option>
-            <option value="va">VA</option>
-            <option value="jumbo">Jumbo</option>
-          </select>
-        </div>
-      </div>
-      <div class="fmg">
-        <label>Property Address</label>
-        <input type="text" name="property_address" placeholder="123 Main St, City, State">
-      </div>
-      <div class="fm-row">
-        <div class="fmg">
-          <label>Loan Amount ($) *</label>
-          <input type="number" name="loan_amount" step="1000" min="0" required placeholder="400000" oninput="calcRevenue()">
-        </div>
-        <div class="fmg">
-          <label>Origination % (points)</label>
-          <input type="number" name="origination_pct" step="0.125" min="0" max="5" value="1.0" oninput="calcRevenue()">
-        </div>
-      </div>
-      <div class="fm-row">
-        <div class="fmg">
-          <label>Estimated Revenue</label>
-          <input type="text" id="calcRevAmt" readonly style="background:#f4f4f4;font-weight:700;color:var(--green);" placeholder="$0">
-          <input type="hidden" name="origination_fee" id="hiddenOrigFee" value="0">
-        </div>
-        <div class="fmg">
-          <label>Close Date</label>
-          <input type="date" name="close_date">
-        </div>
-      </div>
-      <div class="fmg">
-        <label>Status</label>
-        <select name="status">
-          <option value="projected">In Pipeline (Projected)</option>
-          <option value="funded">Funded / Closed</option>
-          <option value="lost">Lost / Fallen Out</option>
-        </select>
-      </div>
-      <div class="fmg">
-        <label>Notes</label>
-        <textarea name="notes" rows="2" placeholder="Loan details, referral source, etc."></textarea>
-      </div>
-      <div class="fm-actions">
-        <button type="submit" class="fm-submit">Save Loan</button>
-        <button type="button" class="fm-cancel" onclick="document.getElementById('modal-revenue').classList.remove('open')">Cancel</button>
-      </div>
-    </form>
-  </div>
+ <div class="fin-modal">
+ <h2>Add Loan</h2>
+ <form method="POST" action="{{ url_for('lender_financials_revenue_add') }}">
+ <div class="fm-row">
+ <div class="fmg">
+ <label>Borrower Name *</label>
+ <input type="text" name="borrower_name" required placeholder="John &amp; Jane Smith">
+ </div>
+ <div class="fmg">
+ <label>Loan Type</label>
+ <select name="loan_type">
+ <option value="purchase">Purchase</option>
+ <option value="refinance">Refinance</option>
+ <option value="cash_out_refi">Cash-Out Refi</option>
+ <option value="heloc">HELOC</option>
+ <option value="construction">Construction</option>
+ <option value="fha">FHA</option>
+ <option value="va">VA</option>
+ <option value="jumbo">Jumbo</option>
+ </select>
+ </div>
+ </div>
+ <div class="fmg">
+ <label>Property Address</label>
+ <input type="text" name="property_address" placeholder="123 Main St, City, State">
+ </div>
+ <div class="fm-row">
+ <div class="fmg">
+ <label>Loan Amount ($) *</label>
+ <input type="number" name="loan_amount" step="1000" min="0" required placeholder="400000" oninput="calcRevenue()">
+ </div>
+ <div class="fmg">
+ <label>Origination % (points)</label>
+ <input type="number" name="origination_pct" step="0.125" min="0" max="5" value="1.0" oninput="calcRevenue()">
+ </div>
+ </div>
+ <div class="fm-row">
+ <div class="fmg">
+ <label>Estimated Revenue</label>
+ <input type="text" id="calcRevAmt" readonly style="background:#f4f4f4;font-weight:700;color:var(--green);" placeholder="$0">
+ <input type="hidden" name="origination_fee" id="hiddenOrigFee" value="0">
+ </div>
+ <div class="fmg">
+ <label>Close Date</label>
+ <input type="date" name="close_date">
+ </div>
+ </div>
+ <div class="fmg">
+ <label>Status</label>
+ <select name="status">
+ <option value="projected">In Pipeline (Projected)</option>
+ <option value="funded">Funded / Closed</option>
+ <option value="lost">Lost / Fallen Out</option>
+ </select>
+ </div>
+ <div class="fmg">
+ <label>Notes</label>
+ <textarea name="notes" rows="2" placeholder="Loan details, referral source, etc."></textarea>
+ </div>
+ <div class="fm-actions">
+ <button type="submit" class="fm-submit">Save Loan</button>
+ <button type="button" class="fm-cancel" onclick="document.getElementById('modal-revenue').classList.remove('open')">Cancel</button>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Add Expense -->
 <div class="fin-modal-overlay" id="modal-expense" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="fin-modal">
-    <h2>Log Expense</h2>
-    <form method="POST" action="{{ url_for('lender_financials_expense_add') }}">
-      <div class="fm-row">
-        <div class="fmg">
-          <label>Date *</label>
-          <input type="date" name="expense_date" required>
-        </div>
-        <div class="fmg">
-          <label>Amount ($) *</label>
-          <input type="number" name="amount" step="0.01" min="0" required placeholder="0.00">
-        </div>
-      </div>
-      <div class="fmg">
-        <label>Category</label>
-        <select name="category">
-          <option>Marketing &amp; Lead Generation</option>
-          <option>NMLS &amp; Licensing</option>
-          <option>Technology &amp; Software (LOS, CRM)</option>
-          <option>Appraisal &amp; Third-Party Fees</option>
-          <option>Office &amp; Supplies</option>
-          <option>Professional Development</option>
-          <option>Referral Partner Gifts &amp; Events</option>
-          <option>Phone &amp; Internet</option>
-          <option>Professional Services</option>
-          <option>Auto &amp; Transportation</option>
-          <option>Meals &amp; Entertainment</option>
-          <option>Insurance &amp; E&amp;O</option>
-          <option>Other</option>
-        </select>
-      </div>
-      <div class="fmg">
-        <label>Description *</label>
-        <input type="text" name="description" required placeholder="What was this expense for?">
-      </div>
-      <div class="fmg">
-        <label>Notes</label>
-        <textarea name="notes" rows="2" placeholder="Vendor, receipt details, etc."></textarea>
-      </div>
-      <div class="fm-actions">
-        <button type="submit" class="fm-submit">Log Expense</button>
-        <button type="button" class="fm-cancel" onclick="document.getElementById('modal-expense').classList.remove('open')">Cancel</button>
-      </div>
-    </form>
-  </div>
+ <div class="fin-modal">
+ <h2>Log Expense</h2>
+ <form method="POST" action="{{ url_for('lender_financials_expense_add') }}">
+ <div class="fm-row">
+ <div class="fmg">
+ <label>Date *</label>
+ <input type="date" name="expense_date" required>
+ </div>
+ <div class="fmg">
+ <label>Amount ($) *</label>
+ <input type="number" name="amount" step="0.01" min="0" required placeholder="0.00">
+ </div>
+ </div>
+ <div class="fmg">
+ <label>Category</label>
+ <select name="category">
+ <option>Marketing &amp; Lead Generation</option>
+ <option>NMLS &amp; Licensing</option>
+ <option>Technology &amp; Software (LOS, CRM)</option>
+ <option>Appraisal &amp; Third-Party Fees</option>
+ <option>Office &amp; Supplies</option>
+ <option>Professional Development</option>
+ <option>Referral Partner Gifts &amp; Events</option>
+ <option>Phone &amp; Internet</option>
+ <option>Professional Services</option>
+ <option>Auto &amp; Transportation</option>
+ <option>Meals &amp; Entertainment</option>
+ <option>Insurance &amp; E&amp;O</option>
+ <option>Other</option>
+ </select>
+ </div>
+ <div class="fmg">
+ <label>Description *</label>
+ <input type="text" name="description" required placeholder="What was this expense for?">
+ </div>
+ <div class="fmg">
+ <label>Notes</label>
+ <textarea name="notes" rows="2" placeholder="Vendor, receipt details, etc."></textarea>
+ </div>
+ <div class="fm-actions">
+ <button type="submit" class="fm-submit">Log Expense</button>
+ <button type="button" class="fm-cancel" onclick="document.getElementById('modal-expense').classList.remove('open')">Cancel</button>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Set Goals -->
 <div class="fin-modal-overlay" id="modal-goals" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="fin-modal">
-    <h2>Set {{ year }} Goals</h2>
-    <form method="POST" action="{{ url_for('lender_financials_goal_save') }}">
-      <input type="hidden" name="goal_year" value="{{ year }}">
-      <div class="fm-row">
-        <div class="fmg">
-          <label>Revenue Goal ($)</label>
-          <input type="number" name="revenue_goal" step="1000" min="0"
-            value="{{ goals[0].revenue_goal if goals else '' }}" placeholder="200000">
-        </div>
-        <div class="fmg">
-          <label>Loans Funded (#)</label>
-          <input type="number" name="loan_count_goal" min="0"
-            value="{{ goals[0].loan_count_goal if goals else '' }}" placeholder="60">
-        </div>
-      </div>
-      <div class="fm-row">
-        <div class="fmg">
-          <label>Loan Volume Goal ($)</label>
-          <input type="number" name="loan_volume_goal" step="100000" min="0"
-            value="{{ goals[0].loan_volume_goal if goals else '' }}" placeholder="20000000">
-        </div>
-        <div class="fmg">
-          <label>Expense Budget ($)</label>
-          <input type="number" name="expenses_budget" step="500" min="0"
-            value="{{ goals[0].expenses_budget if goals else '' }}" placeholder="50000">
-        </div>
-      </div>
-      <div class="fmg">
-        <label>Net Income Goal ($)</label>
-        <input type="number" name="net_income_goal" step="1000" min="0"
-          value="{{ goals[0].net_income_goal if goals else '' }}" placeholder="150000">
-      </div>
-      <div class="fmg">
-        <label>Notes / Affirmations</label>
-        <textarea name="notes" rows="2" placeholder="What will you achieve this year?">{{ goals[0].notes if goals else '' }}</textarea>
-      </div>
-      <div class="fm-actions">
-        <button type="submit" class="fm-submit">Save Goals</button>
-        <button type="button" class="fm-cancel" onclick="document.getElementById('modal-goals').classList.remove('open')">Cancel</button>
-      </div>
-    </form>
-  </div>
+ <div class="fin-modal">
+ <h2>Set {{ year }} Goals</h2>
+ <form method="POST" action="{{ url_for('lender_financials_goal_save') }}">
+ <input type="hidden" name="goal_year" value="{{ year }}">
+ <div class="fm-row">
+ <div class="fmg">
+ <label>Revenue Goal ($)</label>
+ <input type="number" name="revenue_goal" step="1000" min="0"
+ value="{{ goals[0].revenue_goal if goals else '' }}" placeholder="200000">
+ </div>
+ <div class="fmg">
+ <label>Loans Funded (#)</label>
+ <input type="number" name="loan_count_goal" min="0"
+ value="{{ goals[0].loan_count_goal if goals else '' }}" placeholder="60">
+ </div>
+ </div>
+ <div class="fm-row">
+ <div class="fmg">
+ <label>Loan Volume Goal ($)</label>
+ <input type="number" name="loan_volume_goal" step="100000" min="0"
+ value="{{ goals[0].loan_volume_goal if goals else '' }}" placeholder="20000000">
+ </div>
+ <div class="fmg">
+ <label>Expense Budget ($)</label>
+ <input type="number" name="expenses_budget" step="500" min="0"
+ value="{{ goals[0].expenses_budget if goals else '' }}" placeholder="50000">
+ </div>
+ </div>
+ <div class="fmg">
+ <label>Net Income Goal ($)</label>
+ <input type="number" name="net_income_goal" step="1000" min="0"
+ value="{{ goals[0].net_income_goal if goals else '' }}" placeholder="150000">
+ </div>
+ <div class="fmg">
+ <label>Notes / Affirmations</label>
+ <textarea name="notes" rows="2" placeholder="What will you achieve this year?">{{ goals[0].notes if goals else '' }}</textarea>
+ </div>
+ <div class="fm-actions">
+ <button type="submit" class="fm-submit">Save Goals</button>
+ <button type="button" class="fm-cancel" onclick="document.getElementById('modal-goals').classList.remove('open')">Cancel</button>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- =================== SCRIPTS =================== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
 function switchTab(name, btn) {
-  document.querySelectorAll('.fin-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.fin-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  btn.classList.add('active');
+ document.querySelectorAll('.fin-panel').forEach(p => p.classList.remove('active'));
+ document.querySelectorAll('.fin-tab').forEach(b => b.classList.remove('active'));
+ document.getElementById('panel-' + name).classList.add('active');
+ btn.classList.add('active');
 }
 function switchAiTab(name, btn) {
-  document.querySelectorAll('.ai-cc-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.ai-cc-tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('ai-' + name).classList.add('active');
-  btn.classList.add('active');
+ document.querySelectorAll('.ai-cc-panel').forEach(p => p.classList.remove('active'));
+ document.querySelectorAll('.ai-cc-tab').forEach(b => b.classList.remove('active'));
+ document.getElementById('ai-' + name).classList.add('active');
+ btn.classList.add('active');
 }
 function calcRevenue() {
-  const amt = parseFloat(document.querySelector('[name=loan_amount]').value) || 0;
-  const pct = parseFloat(document.querySelector('[name=origination_pct]').value) || 0;
-  const rev = amt * pct / 100;
-  document.getElementById('calcRevAmt').value = '$' + rev.toLocaleString('en-US', {minimumFractionDigits:0,maximumFractionDigits:0});
-  document.getElementById('hiddenOrigFee').value = rev.toFixed(2);
+ const amt = parseFloat(document.querySelector('[name=loan_amount]').value) || 0;
+ const pct = parseFloat(document.querySelector('[name=origination_pct]').value) || 0;
+ const rev = amt * pct / 100;
+ document.getElementById('calcRevAmt').value = '$' + rev.toLocaleString('en-US', {minimumFractionDigits:0,maximumFractionDigits:0});
+ document.getElementById('hiddenOrigFee').value = rev.toFixed(2);
 }
 
 // Charts
 const monthlyData = {{ monthly_revenue_list | tojson }};
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 new Chart(document.getElementById('monthlyChart').getContext('2d'), {
-  type: 'bar',
-  data: {
-    labels: months,
-    datasets: [{
-      label: 'Revenue ($)',
-      data: monthlyData,
-      backgroundColor: monthlyData.map(v => v > 0 ? 'rgba(107,106,69,0.7)' : 'rgba(220,38,38,0.25)'),
-      borderColor: monthlyData.map(v => v > 0 ? '#6B6A45' : '#dc2626'),
-      borderWidth: 1, borderRadius: 5,
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { display: false } },
-    scales: {
-      y: { beginAtZero: true, ticks: { callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'k':v), font:{size:10} }, grid: { color: 'rgba(200,180,151,.15)' } },
-      x: { ticks: { font: { size: 10 } }, grid: { display: false } }
-    }
-  }
+ type: 'bar',
+ data: {
+ labels: months,
+ datasets: [{
+ label: 'Revenue ($)',
+ data: monthlyData,
+ backgroundColor: monthlyData.map(v => v > 0 ? 'rgba(107,91,77,0.7)' : 'rgba(220,38,38,0.25)'),
+ borderColor: monthlyData.map(v => v > 0 ? '#6B5B4D' : '#dc2626'),
+ borderWidth: 1, borderRadius: 5,
+ }]
+ },
+ options: {
+ responsive: true,
+ plugins: { legend: { display: false } },
+ scales: {
+ y: { beginAtZero: true, ticks: { callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'k':v), font:{size:10} }, grid: { color: 'rgba(200,180,151,.15)' } },
+ x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+ }
+ }
 });
 {% if expense_by_cat %}
 const expCtx = document.getElementById('expenseChart').getContext('2d');
 const expLabels = {{ expense_by_cat.keys() | list | tojson }};
-const expVals   = {{ expense_by_cat.values() | list | tojson }};
-const palette = ['#6B6A45','#C8B497','#8B8A5A','#b45309','#15803d','#1d4ed8','#7c3aed','#dc2626','#0891b2','#be185d','#92400e','#374151'];
+const expVals = {{ expense_by_cat.values() | list | tojson }};
+const palette = ['#6B5B4D','#C2B1A1','#8B8A5A','#b45309','#15803d','#1d4ed8','#7c3aed','#dc2626','#0891b2','#be185d','#92400e','#374151'];
 new Chart(expCtx, {
-  type: 'doughnut',
-  data: { labels: expLabels, datasets: [{ data: expVals, backgroundColor: palette.slice(0,expLabels.length), borderWidth:2, borderColor:'#fff' }] },
-  options: { responsive: true, plugins: { legend: { position:'bottom', labels:{ font:{size:10}, padding:8 } } }, cutout:'60%' }
+ type: 'doughnut',
+ data: { labels: expLabels, datasets: [{ data: expVals, backgroundColor: palette.slice(0,expLabels.length), borderWidth:2, borderColor:'#fff' }] },
+ options: { responsive: true, plugins: { legend: { position:'bottom', labels:{ font:{size:10}, padding:8 } } }, cutout:'60%' }
 });
 {% endif %}
 
@@ -723,135 +723,135 @@ Loans Funded: {{ revenues|selectattr('status','equalto','funded')|list|length }}
 Loans in Pipeline: {{ revenues|selectattr('status','equalto','projected')|list|length }}
 YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}
 Net Income: ${{ "{:,.0f}".format(net_income) }}
-{% if goals %}Goals — Revenue: ${{ "{:,.0f}".format(goals[0].revenue_goal) }}, Loans: {{ goals[0].loan_count_goal }}, Volume: ${{ "{:,.0f}".format(goals[0].loan_volume_goal) }}, Expense Budget: ${{ "{:,.0f}".format(goals[0].expenses_budget or 0) }}{% else %}No goals set yet.{% endif %}
+{% if goals %}Goals — Revenue: ${{ "{:,.0f}".format(goals[0].revenue_goal or 0) }}, Loans: {{ goals[0].loan_count_goal or 0 }}, Volume: ${{ "{:,.0f}".format(goals[0].loan_volume_goal or 0) }}, Expense Budget: ${{ "{:,.0f}".format(goals[0].expenses_budget or 0) }}{% else %}No goals set yet.{% endif %}
 Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None logged' }}`;
 
 // Auto-load insights
 async function loadInsights() {
-  try {
-    const resp = await fetch('/api/ai/financials/lender-insights', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ context: AI_CONTEXT })
-    });
-    const data = await resp.json();
-    document.getElementById('insightsLoading').style.display = 'none';
-    const grid = document.getElementById('insightsGrid');
-    if (data.insights && data.insights.length) {
-      grid.innerHTML = data.insights.map(i => `
-        <div class="ai-insight-card ${i.type || 'info'}">
-          <div class="ai-insight-title">${escHtml(i.title)}</div>
-          <div class="ai-insight-body">${escHtml(i.body)}</div>
-        </div>`).join('');
-      grid.style.display = 'grid';
-    } else {
-      grid.innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Add pipeline data to unlock personalized insights.</div>';
-      grid.style.display = 'block';
-    }
-  } catch(e) {
-    document.getElementById('insightsLoading').style.display = 'none';
-    document.getElementById('insightsGrid').innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Unable to load insights right now.</div>';
-    document.getElementById('insightsGrid').style.display = 'block';
-  }
+ try {
+ const resp = await fetch('/api/ai/financials/lender-insights', {
+ method:'POST', headers:{'Content-Type':'application/json'},
+ body: JSON.stringify({ context: AI_CONTEXT })
+ });
+ const data = await resp.json();
+ document.getElementById('insightsLoading').style.display = 'none';
+ const grid = document.getElementById('insightsGrid');
+ if (data.insights && data.insights.length) {
+ grid.innerHTML = data.insights.map(i => `
+ <div class="ai-insight-card ${i.type || 'info'}">
+ <div class="ai-insight-title">${escHtml(i.title)}</div>
+ <div class="ai-insight-body">${escHtml(i.body)}</div>
+ </div>`).join('');
+ grid.style.display = 'grid';
+ } else {
+ grid.innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Add pipeline data to unlock personalized insights.</div>';
+ grid.style.display = 'block';
+ }
+ } catch(e) {
+ document.getElementById('insightsLoading').style.display = 'none';
+ document.getElementById('insightsGrid').innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Unable to load insights right now.</div>';
+ document.getElementById('insightsGrid').style.display = 'block';
+ }
 }
 
 async function loadForecast() {
-  document.getElementById('forecastEmpty').style.display = 'none';
-  document.getElementById('forecastLoading').style.display = 'flex';
-  try {
-    const resp = await fetch('/api/ai/financials/lender-forecast', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ context: AI_CONTEXT })
-    });
-    const d = await resp.json();
-    document.getElementById('forecastLoading').style.display = 'none';
-    const confClass = d.confidence || 'medium';
-    document.getElementById('forecastCards').innerHTML = `
-      <div class="ai-forecast-card">
-        <div class="val">${d.projected_revenue ? '$'+Math.round(d.projected_revenue).toLocaleString() : '--'}</div>
-        <div class="lbl">Projected Revenue</div>
-        <div class="ai-confidence ${confClass}">${confClass} confidence</div>
-      </div>
-      <div class="ai-forecast-card">
-        <div class="val">${d.projected_loan_count || '&mdash;'}</div>
-        <div class="lbl">Projected Loans</div>
-      </div>
-      <div class="ai-forecast-card">
-        <div class="val">${d.projected_loan_volume ? '$'+Math.round(d.projected_loan_volume/1000000*10)/10+'M' : '--'}</div>
-        <div class="lbl">Projected Volume</div>
-      </div>`;
-    document.getElementById('forecastHeadline').textContent = d.headline || '';
-    document.getElementById('forecastAction').textContent = d.action ? 'Next best action: ' + d.action : '';
-    document.getElementById('forecastContent').style.display = 'block';
-  } catch(e) {
-    document.getElementById('forecastLoading').style.display = 'none';
-    document.getElementById('forecastEmpty').innerHTML = '<p style="color:var(--warm-gray);font-size:.85rem;">Unable to generate forecast right now.</p><button class="btn-coach" onclick="loadForecast()">Try Again</button>';
-    document.getElementById('forecastEmpty').style.display = 'block';
-  }
+ document.getElementById('forecastEmpty').style.display = 'none';
+ document.getElementById('forecastLoading').style.display = 'flex';
+ try {
+ const resp = await fetch('/api/ai/financials/lender-forecast', {
+ method:'POST', headers:{'Content-Type':'application/json'},
+ body: JSON.stringify({ context: AI_CONTEXT })
+ });
+ const d = await resp.json();
+ document.getElementById('forecastLoading').style.display = 'none';
+ const confClass = d.confidence || 'medium';
+ document.getElementById('forecastCards').innerHTML = `
+ <div class="ai-forecast-card">
+ <div class="val">${d.projected_revenue ? '$'+Math.round(d.projected_revenue).toLocaleString() : '--'}</div>
+ <div class="lbl">Projected Revenue</div>
+ <div class="ai-confidence ${confClass}">${confClass} confidence</div>
+ </div>
+ <div class="ai-forecast-card">
+ <div class="val">${d.projected_loan_count || '&mdash;'}</div>
+ <div class="lbl">Projected Loans</div>
+ </div>
+ <div class="ai-forecast-card">
+ <div class="val">${d.projected_loan_volume ? '$'+Math.round(d.projected_loan_volume/1000000*10)/10+'M' : '--'}</div>
+ <div class="lbl">Projected Volume</div>
+ </div>`;
+ document.getElementById('forecastHeadline').textContent = d.headline || '';
+ document.getElementById('forecastAction').textContent = d.action ? 'Next best action: ' + d.action : '';
+ document.getElementById('forecastContent').style.display = 'block';
+ } catch(e) {
+ document.getElementById('forecastLoading').style.display = 'none';
+ document.getElementById('forecastEmpty').innerHTML = '<p style="color:var(--warm-gray);font-size:.85rem;">Unable to generate forecast right now.</p><button class="btn-coach" onclick="loadForecast()">Try Again</button>';
+ document.getElementById('forecastEmpty').style.display = 'block';
+ }
 }
 
 async function loadPipeline() {
-  document.getElementById('pipelineEmpty').style.display = 'none';
-  document.getElementById('pipelineLoading').style.display = 'flex';
-  try {
-    const resp = await fetch('/api/ai/financials/lender-pipeline', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ context: AI_CONTEXT })
-    });
-    const d = await resp.json();
-    document.getElementById('pipelineLoading').style.display = 'none';
-    const score = d.pipeline_score || 0;
-    const scoreClass = score >= 75 ? 'high' : score >= 45 ? 'medium' : score > 0 ? 'low' : 'na';
-    let html = `<div class="pipeline-score-ring">
-      <div class="score-circle ${scoreClass}">${score > 0 ? score : '--'}</div>
-      <div>
-        <div style="font-size:.8rem;font-weight:700;color:var(--charcoal);margin-bottom:.25rem;">Pipeline Health Score</div>
-        <div style="font-size:.82rem;color:var(--warm-gray);line-height:1.5;">${escHtml(d.summary || '')}</div>
-        ${d.pull_through_rate ? `<div style="font-size:.75rem;margin-top:.4rem;color:var(--olive);font-weight:600;">Pull-through rate: ${escHtml(d.pull_through_rate)}</div>` : ''}
-      </div>
-    </div>`;
-    if (d.recommendations && d.recommendations.length) {
-      html += '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--warm-gray);margin-bottom:.6rem;">Action Items</div>';
-      d.recommendations.forEach(r => {
-        html += `<div class="pipeline-rec">
-          <div class="priority-dot ${r.priority || 'low'}"></div>
-          <div>
-            <div class="pipeline-rec-title">${escHtml(r.title)}</div>
-            <div class="pipeline-rec-detail">${escHtml(r.detail)}</div>
-          </div>
-        </div>`;
-      });
-    }
-    document.getElementById('pipelineContent').innerHTML = html;
-    document.getElementById('pipelineContent').style.display = 'block';
-  } catch(e) {
-    document.getElementById('pipelineLoading').style.display = 'none';
-    document.getElementById('pipelineEmpty').innerHTML = '<p style="color:var(--warm-gray);font-size:.85rem;">Unable to analyze pipeline right now.</p><button class="btn-coach" onclick="loadPipeline()">Try Again</button>';
-    document.getElementById('pipelineEmpty').style.display = 'block';
-  }
+ document.getElementById('pipelineEmpty').style.display = 'none';
+ document.getElementById('pipelineLoading').style.display = 'flex';
+ try {
+ const resp = await fetch('/api/ai/financials/lender-pipeline', {
+ method:'POST', headers:{'Content-Type':'application/json'},
+ body: JSON.stringify({ context: AI_CONTEXT })
+ });
+ const d = await resp.json();
+ document.getElementById('pipelineLoading').style.display = 'none';
+ const score = d.pipeline_score || 0;
+ const scoreClass = score >= 75 ? 'high' : score >= 45 ? 'medium' : score > 0 ? 'low' : 'na';
+ let html = `<div class="pipeline-score-ring">
+ <div class="score-circle ${scoreClass}">${score > 0 ? score : '--'}</div>
+ <div>
+ <div style="font-size:.8rem;font-weight:700;color:var(--charcoal);margin-bottom:.25rem;">Pipeline Health Score</div>
+ <div style="font-size:.82rem;color:var(--warm-gray);line-height:1.5;">${escHtml(d.summary || '')}</div>
+ ${d.pull_through_rate ? `<div style="font-size:.75rem;margin-top:.4rem;color:var(--olive);font-weight:600;">Pull-through rate: ${escHtml(d.pull_through_rate)}</div>` : ''}
+ </div>
+ </div>`;
+ if (d.recommendations && d.recommendations.length) {
+ html += '<div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:var(--warm-gray);margin-bottom:.6rem;">Action Items</div>';
+ d.recommendations.forEach(r => {
+ html += `<div class="pipeline-rec">
+ <div class="priority-dot ${r.priority || 'low'}"></div>
+ <div>
+ <div class="pipeline-rec-title">${escHtml(r.title)}</div>
+ <div class="pipeline-rec-detail">${escHtml(r.detail)}</div>
+ </div>
+ </div>`;
+ });
+ }
+ document.getElementById('pipelineContent').innerHTML = html;
+ document.getElementById('pipelineContent').style.display = 'block';
+ } catch(e) {
+ document.getElementById('pipelineLoading').style.display = 'none';
+ document.getElementById('pipelineEmpty').innerHTML = '<p style="color:var(--warm-gray);font-size:.85rem;">Unable to analyze pipeline right now.</p><button class="btn-coach" onclick="loadPipeline()">Try Again</button>';
+ document.getElementById('pipelineEmpty').style.display = 'block';
+ }
 }
 
 async function loadCoach() {
-  const btn = document.getElementById('btnCoach');
-  const out = document.getElementById('aiCoachOutput');
-  btn.disabled = true; btn.textContent = 'Analyzing your numbers\u2026';
-  out.classList.add('loading'); out.textContent = 'Reviewing your data and preparing a personalized coaching session\u2026';
-  try {
-    const resp = await fetch('/api/ai/financials/lender-coach', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ context: AI_CONTEXT })
-    });
-    const data = await resp.json();
-    out.classList.remove('loading');
-    out.textContent = data.coach_response || 'No response received.';
-  } catch(e) {
-    out.classList.remove('loading');
-    out.textContent = 'Unable to connect right now. Please try again.';
-  }
-  btn.disabled = false; btn.textContent = 'Refresh Coaching Session';
+ const btn = document.getElementById('btnCoach');
+ const out = document.getElementById('aiCoachOutput');
+ btn.disabled = true; btn.textContent = 'Analyzing your numbers\u2026';
+ out.classList.add('loading'); out.textContent = 'Reviewing your data and preparing a personalized coaching session\u2026';
+ try {
+ const resp = await fetch('/api/ai/financials/lender-coach', {
+ method:'POST', headers:{'Content-Type':'application/json'},
+ body: JSON.stringify({ context: AI_CONTEXT })
+ });
+ const data = await resp.json();
+ out.classList.remove('loading');
+ out.textContent = data.coach_response || 'No response received.';
+ } catch(e) {
+ out.classList.remove('loading');
+ out.textContent = 'Unable to connect right now. Please try again.';
+ }
+ btn.disabled = false; btn.textContent = 'Refresh Coaching Session';
 }
 
 function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 loadInsights();

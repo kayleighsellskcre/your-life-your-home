@@ -3,140 +3,140 @@
 
 {% block homeowner_content %}
 <style>
-  .nh-page {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 2.5rem 1.5rem 4rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  .nh-hero {
-    text-align: center;
-    margin-bottom: 2.75rem;
-  }
-  .nh-hero h1 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 2.1rem;
-    font-weight: 400;
-    color: #3A352C;
-    margin-bottom: .5rem;
-  }
-  .nh-hero p {
-    font-size: .95rem;
-    color: rgba(58,53,44,.6);
-    max-width: 520px;
-    margin: 0 auto;
-    line-height: 1.65;
-  }
+ .nh-page {
+ max-width: 1000px;
+ margin: 0 auto;
+ padding: 2.5rem 1.5rem 4rem;
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ }
+ .nh-hero {
+ text-align: center;
+ margin-bottom: 2.75rem;
+ }
+ .nh-hero h1 {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 2.1rem;
+ font-weight: 400;
+ color: #3D2E24;
+ margin-bottom: .5rem;
+ }
+ .nh-hero p {
+ font-size: .95rem;
+ color: rgba(61,46,36,.6);
+ max-width: 520px;
+ margin: 0 auto;
+ line-height: 1.65;
+ }
 
-  .nh-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1.25rem;
-  }
+ .nh-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+ gap: 1.25rem;
+ }
 
-  .nh-card {
-    background: linear-gradient(135deg, #fff 0%, #FDFBF7 100%);
-    border: 1px solid rgba(107,106,69,.15);
-    border-radius: 12px;
-    padding: 1.75rem 1.5rem 1.5rem;
-    text-decoration: none;
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-    transition: all .25s cubic-bezier(.4,0,.2,1);
-    position: relative;
-    overflow: hidden;
-  }
-  .nh-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #6B6A45, #C8B497);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform .25s;
-  }
-  .nh-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(58,53,44,.1);
-    border-color: rgba(107,106,69,.25);
-  }
-  .nh-card:hover::before { transform: scaleX(1); }
+ .nh-card {
+ background: linear-gradient(135deg, #fff 0%, #F5F0EB 100%);
+ border: 1px solid rgba(107,91,77,.15);
+ border-radius: 12px;
+ padding: 1.75rem 1.5rem 1.5rem;
+ text-decoration: none;
+ display: flex;
+ flex-direction: column;
+ gap: .5rem;
+ transition: all .25s cubic-bezier(.4,0,.2,1);
+ position: relative;
+ overflow: hidden;
+ }
+ .nh-card::before {
+ content: '';
+ position: absolute;
+ top: 0; left: 0; right: 0;
+ height: 3px;
+ background: linear-gradient(90deg, #6B5B4D, #C2B1A1);
+ transform: scaleX(0);
+ transform-origin: left;
+ transition: transform .25s;
+ }
+ .nh-card:hover {
+ transform: translateY(-4px);
+ box-shadow: 0 8px 24px rgba(61,46,36,.1);
+ border-color: rgba(107,91,77,.25);
+ }
+ .nh-card:hover::before { transform: scaleX(1); }
 
-  .nh-card .icon {
-    font-size: 1.75rem;
-    line-height: 1;
-    margin-bottom: .25rem;
-  }
-  .nh-card h2 {
-    font-family: 'Playfair Display', Georgia, serif;
-    font-size: 1.15rem;
-    font-weight: 500;
-    color: #3A352C;
-    margin: 0;
-    line-height: 1.3;
-  }
-  .nh-card p {
-    font-size: .82rem;
-    color: rgba(58,53,44,.6);
-    line-height: 1.55;
-    margin: 0;
-    flex: 1;
-  }
-  .nh-card .go {
-    font-size: .75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #6B6A45;
-    margin-top: .25rem;
-  }
+ .nh-card .icon {
+ font-size: 1.75rem;
+ line-height: 1;
+ margin-bottom: .25rem;
+ }
+ .nh-card h2 {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.15rem;
+ font-weight: 500;
+ color: #3D2E24;
+ margin: 0;
+ line-height: 1.3;
+ }
+ .nh-card p {
+ font-size: .82rem;
+ color: rgba(61,46,36,.6);
+ line-height: 1.55;
+ margin: 0;
+ flex: 1;
+ }
+ .nh-card .go {
+ font-size: .75rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .06em;
+ color: #6B5B4D;
+ margin-top: .25rem;
+ }
 
-  @media (max-width: 640px) {
-    .nh-page { padding: 1.5rem .875rem 3rem; }
-    .nh-hero h1 { font-size: 1.6rem; }
-    .nh-grid { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 420px) {
-    .nh-grid { grid-template-columns: 1fr; }
-  }
+ @media (max-width: 640px) {
+ .nh-page { padding: 1.5rem .875rem 3rem; }
+ .nh-hero h1 { font-size: 1.6rem; }
+ .nh-grid { grid-template-columns: 1fr 1fr; }
+ }
+ @media (max-width: 420px) {
+ .nh-grid { grid-template-columns: 1fr; }
+ }
 </style>
 
 <div class="nh-page">
-  <div class="nh-hero">
-    <h1>Your Next Home</h1>
-    <p>Whether you're just thinking about it or ready to make a move, everything you need to plan your next chapter is right here.</p>
-  </div>
+ <div class="nh-hero">
+ <h1>Your Next Home</h1>
+ <p>Whether you're just thinking about it or ready to make a move, everything you need to plan your next chapter is right here.</p>
+ </div>
 
-  <div class="nh-grid">
-    <a href="{{ url_for('homeowner_next_plan_move') }}" class="nh-card">
-      <div class="icon">🗺️</div>
-      <h2>Plan My Move</h2>
-      <p>Walk through a guided questionnaire that helps you get clear on timing, priorities, and what's holding you back.</p>
-      <span class="go">Start Planning →</span>
-    </a>
+ <div class="nh-grid">
+ <a href="{{ url_for('homeowner_next_plan_move') }}" class="nh-card">
+ <div class="icon"></div>
+ <h2>Plan My Move</h2>
+ <p>Walk through a guided questionnaire that helps you get clear on timing, priorities, and what's holding you back.</p>
+ <span class="go">Start Planning →</span>
+ </a>
 
-    <a href="{{ url_for('homeowner_next_buy_sell_guidance') }}" class="nh-card">
-      <div class="icon">🏡</div>
-      <h2>Buy & Sell Guidance</h2>
-      <p>Should you sell first or buy first? Get personalized guidance on the best approach for your situation.</p>
-      <span class="go">Get Guidance →</span>
-    </a>
+ <a href="{{ url_for('homeowner_next_buy_sell_guidance') }}" class="nh-card">
+ <div class="icon"></div>
+ <h2>Buy & Sell Guidance</h2>
+ <p>Should you sell first or buy first? Get personalized guidance on the best approach for your situation.</p>
+ <span class="go">Get Guidance →</span>
+ </a>
 
-    <a href="{{ url_for('homeowner_next_loan_paths') }}" class="nh-card">
-      <div class="icon">🏦</div>
-      <h2>Loan Paths</h2>
-      <p>Explore your financing options — from conventional loans to bridge financing — explained in plain language.</p>
-      <span class="go">Explore Options →</span>
-    </a>
+ <a href="{{ url_for('homeowner_next_loan_paths') }}" class="nh-card">
+ <div class="icon"></div>
+ <h2>Loan Paths</h2>
+ <p>Explore your financing options — from conventional loans to bridge financing — explained in plain language.</p>
+ <span class="go">Explore Options →</span>
+ </a>
 
-    <a href="{{ url_for('homeowner_next_affordability') }}" class="nh-card">
-      <div class="icon">🧮</div>
-      <h2>Affordability</h2>
-      <p>Run the numbers on what you can comfortably afford based on your income, equity, and goals.</p>
-      <span class="go">Calculate →</span>
-    </a>
-  </div>
+ <a href="{{ url_for('homeowner_next_affordability') }}" class="nh-card">
+ <div class="icon"></div>
+ <h2>Affordability</h2>
+ <p>Run the numbers on what you can comfortably afford based on your income, equity, and goals.</p>
+ <span class="go">Calculate →</span>
+ </a>
+ </div>
 </div>
 {% endblock %}

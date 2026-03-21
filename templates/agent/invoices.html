@@ -1,60 +1,60 @@
 {% extends "agent/layout.html" %}
 {% block agent_content %}
 <style>
-#inv-wrap{all:revert;font-family:'Lato',sans-serif;color:#3A352C;background:#F9F7F2;min-height:80vh;}
+#inv-wrap{all:revert;font-family:'Lato',sans-serif;color:#3D2E24;background:#F9F7F2;min-height:80vh;}
 #inv-wrap *{box-sizing:border-box;}
 #inv-wrap a{text-decoration:none;}
 
 /* ── TOP BAR ── */
 .inv-topbar{
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;
-  padding:1.1rem 1.5rem;background:#fff;border-bottom:1px solid rgba(200,180,151,.25);
+ display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;
+ padding:1.1rem 1.5rem;background:#fff;border-bottom:1px solid rgba(200,180,151,.25);
 }
-.inv-topbar__title{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:400;color:#3A352C;margin:0;}
+.inv-topbar__title{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:400;color:#3D2E24;margin:0;}
 .inv-topbar__sub{font-size:.72rem;color:#9A9472;letter-spacing:.06em;text-transform:uppercase;margin-top:.15rem;}
 .inv-topbar__actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
 
 /* ── BUTTONS ── */
 .i-btn{
-  display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;
-  border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;
-  border:none;letter-spacing:.02em;transition:all .12s;white-space:nowrap;
+ display:inline-flex;align-items:center;gap:.35rem;padding:.45rem 1rem;
+ border-radius:6px;font-size:.78rem;font-weight:600;cursor:pointer;
+ border:none;letter-spacing:.02em;transition:all .12s;white-space:nowrap;
 }
-.i-btn--primary{background:#6B6A45;color:#fff;}
-.i-btn--primary:hover{background:#5A5938;}
-.i-btn--ghost{background:transparent;color:#6B6A45;border:1px solid rgba(107,106,69,.38);}
-.i-btn--ghost:hover{background:rgba(107,106,69,.07);}
+.i-btn--primary{background:#6B5B4D;color:#fff;}
+.i-btn--primary:hover{background:#5A4A3C;}
+.i-btn--ghost{background:transparent;color:#6B5B4D;border:1px solid rgba(107,91,77,.38);}
+.i-btn--ghost:hover{background:rgba(107,91,77,.07);}
 .i-btn--danger{background:transparent;color:#b94040;border:1px solid rgba(185,64,64,.3);}
 .i-btn--danger:hover{background:rgba(185,64,64,.07);}
 .i-btn--sm{padding:.28rem .65rem;font-size:.7rem;}
 
 /* ── STATS STRIP ── */
 .inv-stats{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
-  background:rgba(200,180,151,.2);border-top:1px solid rgba(200,180,151,.2);
-  border-bottom:1px solid rgba(200,180,151,.2);
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
+ background:rgba(200,180,151,.2);border-top:1px solid rgba(200,180,151,.2);
+ border-bottom:1px solid rgba(200,180,151,.2);
 }
 .inv-stat{
-  background:#fff;padding:.85rem 1.25rem;
+ background:#fff;padding:.85rem 1.25rem;
 }
 .inv-stat__label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;margin-bottom:.3rem;}
-.inv-stat__val{font-family:'Playfair Display',serif;font-size:1.35rem;color:#3A352C;font-weight:400;}
+.inv-stat__val{font-family:'Playfair Display',serif;font-size:1.35rem;color:#3D2E24;font-weight:400;}
 .inv-stat__val--green{color:#4A7C59;}
 .inv-stat__val--gold{color:#8B6914;}
 .inv-stat__val--muted{color:#9A9472;}
 
 /* ── FILTER PILLS ── */
 .inv-pills{
-  padding:.6rem 1.5rem;display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
-  background:#fff;border-bottom:1px solid rgba(200,180,151,.18);
+ padding:.6rem 1.5rem;display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
+ background:#fff;border-bottom:1px solid rgba(200,180,151,.18);
 }
 .i-pill{
-  display:inline-flex;align-items:center;gap:.2rem;height:24px;padding:0 .7rem;
-  border-radius:12px;border:1px solid rgba(200,180,151,.4);font-size:.63rem;
-  font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6B6A45;
-  background:#fff;cursor:pointer;text-decoration:none;transition:all .12s;
+ display:inline-flex;align-items:center;gap:.2rem;height:24px;padding:0 .7rem;
+ border-radius:12px;border:1px solid rgba(200,180,151,.4);font-size:.63rem;
+ font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#6B5B4D;
+ background:#fff;cursor:pointer;text-decoration:none;transition:all .12s;
 }
-.i-pill:hover,.i-pill--on{background:#6B6A45;color:#fff;border-color:#6B6A45;}
+.i-pill:hover,.i-pill--on{background:#6B5B4D;color:#fff;border-color:#6B5B4D;}
 
 /* ── FLASH ── */
 .inv-flash{padding:.6rem 1.5rem;}
@@ -67,33 +67,33 @@
 .inv-table-wrap{overflow-x:auto;border-radius:8px;border:1px solid rgba(200,180,151,.25);}
 .inv-table{width:100%;border-collapse:collapse;background:#fff;min-width:720px;}
 .inv-table thead th{
-  padding:.5rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.08em;color:#9A9472;background:#FDFBF7;
-  border-bottom:1px solid rgba(200,180,151,.22);text-align:left;
+ padding:.5rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;
+ letter-spacing:.08em;color:#9A9472;background:#F5F0EB;
+ border-bottom:1px solid rgba(200,180,151,.22);text-align:left;
 }
 .inv-table thead th:last-child{text-align:right;}
 .inv-table tbody tr{border-bottom:1px solid rgba(200,180,151,.12);transition:background .1s;}
 .inv-table tbody tr:last-child{border-bottom:none;}
-.inv-table tbody tr:hover{background:#FDFBF7;}
-.inv-td{padding:.55rem .75rem;font-size:.78rem;color:#3A352C;vertical-align:middle;}
+.inv-table tbody tr:hover{background:#F5F0EB;}
+.inv-td{padding:.55rem .75rem;font-size:.78rem;color:#3D2E24;vertical-align:middle;}
 .inv-td--muted{color:#9A9472;}
 .inv-td--right{text-align:right;}
 .inv-td--bold{font-weight:700;}
 
 /* ── STATUS BADGE ── */
 .s-badge{
-  display:inline-block;padding:.12rem .55rem;border-radius:10px;
-  font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+ display:inline-block;padding:.12rem .55rem;border-radius:10px;
+ font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
 }
-.s-badge--draft   {background:rgba(200,180,151,.22);color:#5A5938;}
-.s-badge--sent    {background:rgba(107,106,69,.15);color:#3A352C;}
-.s-badge--paid    {background:rgba(74,124,89,.15);color:#2e6b3c;}
+.s-badge--draft {background:rgba(200,180,151,.22);color:#5A4A3C;}
+.s-badge--sent {background:rgba(107,91,77,.15);color:#3D2E24;}
+.s-badge--paid {background:rgba(74,124,89,.15);color:#2e6b3c;}
 .s-badge--overdue {background:rgba(185,64,64,.12);color:#b94040;}
 
 /* ── EMPTY STATE ── */
 .inv-empty{text-align:center;padding:3.5rem 1.5rem;color:#9A9472;}
 .inv-empty svg{opacity:.25;margin-bottom:1rem;}
-.inv-empty h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:400;color:#3A352C;margin-bottom:.5rem;}
+.inv-empty h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:400;color:#3D2E24;margin-bottom:.5rem;}
 .inv-empty p{font-size:.82rem;margin-bottom:1.25rem;}
 
 /* ── ACTIONS CELL ── */
@@ -101,133 +101,133 @@
 
 /* ── STATUS QUICK-CHANGE ── */
 .status-sel{
-  font-size:.65rem;padding:.18rem .3rem;border:1px solid rgba(200,180,151,.4);
-  border-radius:4px;background:#fff;color:#6B6A45;cursor:pointer;font-weight:600;
+ font-size:.65rem;padding:.18rem .3rem;border:1px solid rgba(200,180,151,.4);
+ border-radius:4px;background:#fff;color:#6B5B4D;cursor:pointer;font-weight:600;
 }
 </style>
 
 <div id="inv-wrap">
 
-  <!-- TOP BAR -->
-  <div class="inv-topbar">
-    <div>
-      <h1 class="inv-topbar__title">Invoices</h1>
-      <div class="inv-topbar__sub">Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts</div>
-    </div>
-    <div class="inv-topbar__actions">
-      <a href="{{ url_for('agent_invoices') }}" class="i-btn i-btn--ghost">All Invoices</a>
-      <a href="{{ url_for('agent_invoice_new') }}" class="i-btn i-btn--primary">+ New Invoice</a>
-    </div>
-  </div>
+ <!-- TOP BAR -->
+ <div class="inv-topbar">
+ <div>
+ <h1 class="inv-topbar__title">Invoices</h1>
+ <div class="inv-topbar__sub">Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts</div>
+ </div>
+ <div class="inv-topbar__actions">
+ <a href="{{ url_for('agent_invoices') }}" class="i-btn i-btn--ghost">All Invoices</a>
+ <a href="{{ url_for('agent_invoice_new') }}" class="i-btn i-btn--primary">+ New Invoice</a>
+ </div>
+ </div>
 
-  <!-- STATS -->
-  <div class="inv-stats">
-    <div class="inv-stat">
-      <div class="inv-stat__label">Total Invoices</div>
-      <div class="inv-stat__val">{{ invoices|length if not status_filter else '—' }}</div>
-    </div>
-    <div class="inv-stat">
-      <div class="inv-stat__label">Outstanding</div>
-      <div class="inv-stat__val inv-stat__val--gold">${{ "{:,.2f}".format(total_outstanding) }}</div>
-    </div>
-    <div class="inv-stat">
-      <div class="inv-stat__label">Collected</div>
-      <div class="inv-stat__val inv-stat__val--green">${{ "{:,.2f}".format(total_paid) }}</div>
-    </div>
-    <div class="inv-stat">
-      <div class="inv-stat__label">Drafts</div>
-      <div class="inv-stat__val inv-stat__val--muted">${{ "{:,.2f}".format(total_draft) }}</div>
-    </div>
-  </div>
+ <!-- STATS -->
+ <div class="inv-stats">
+ <div class="inv-stat">
+ <div class="inv-stat__label">Total Invoices</div>
+ <div class="inv-stat__val">{{ invoices|length if not status_filter else '—' }}</div>
+ </div>
+ <div class="inv-stat">
+ <div class="inv-stat__label">Outstanding</div>
+ <div class="inv-stat__val inv-stat__val--gold">${{ "{:,.2f}".format(total_outstanding) }}</div>
+ </div>
+ <div class="inv-stat">
+ <div class="inv-stat__label">Collected</div>
+ <div class="inv-stat__val inv-stat__val--green">${{ "{:,.2f}".format(total_paid) }}</div>
+ </div>
+ <div class="inv-stat">
+ <div class="inv-stat__label">Drafts</div>
+ <div class="inv-stat__val inv-stat__val--muted">${{ "{:,.2f}".format(total_draft) }}</div>
+ </div>
+ </div>
 
-  <!-- PILLS -->
-  <div class="inv-pills">
-    <a href="{{ url_for('agent_invoices') }}" class="i-pill {% if not status_filter %}i-pill--on{% endif %}">All</a>
-    {% for slug,lbl in [('draft','Draft'),('sent','Sent'),('paid','Paid'),('overdue','Overdue')] %}
-    <a href="{{ url_for('agent_invoices') }}?status={{ slug }}" class="i-pill {% if status_filter==slug %}i-pill--on{% endif %}">{{ lbl }}</a>
-    {% endfor %}
-  </div>
+ <!-- PILLS -->
+ <div class="inv-pills">
+ <a href="{{ url_for('agent_invoices') }}" class="i-pill {% if not status_filter %}i-pill--on{% endif %}">All</a>
+ {% for slug,lbl in [('draft','Draft'),('sent','Sent'),('paid','Paid'),('overdue','Overdue')] %}
+ <a href="{{ url_for('agent_invoices') }}?status={{ slug }}" class="i-pill {% if status_filter==slug %}i-pill--on{% endif %}">{{ lbl }}</a>
+ {% endfor %}
+ </div>
 
-  <!-- FLASH -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="inv-flash">
-    {% for cat,msg in messages %}
-    <div class="flash-msg flash-msg--{{ 'success' if cat=='success' else 'error' }}">{{ msg }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% endwith %}
+ <!-- FLASH -->
+ {% with messages = get_flashed_messages(with_categories=true) %}
+ {% if messages %}
+ <div class="inv-flash">
+ {% for cat,msg in messages %}
+ <div class="flash-msg flash-msg--{{ 'success' if cat=='success' else 'error' }}">{{ msg }}</div>
+ {% endfor %}
+ </div>
+ {% endif %}
+ {% endwith %}
 
-  <!-- TABLE -->
-  <div class="inv-body">
-    {% if invoices %}
-    <div class="inv-table-wrap">
-      <table class="inv-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Client</th>
-            <th>Issue Date</th>
-            <th>Due Date</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th style="text-align:right">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for inv in invoices %}
-          <tr id="inv-row-{{ inv.id }}">
-            <td class="inv-td inv-td--bold"><a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" style="color:#6B6A45;">{{ inv.invoice_number }}</a></td>
-            <td class="inv-td">
-              <div style="font-weight:600;">{{ inv.client_name or '—' }}</div>
-              {% if inv.client_email %}<div style="font-size:.68rem;color:#9A9472;">{{ inv.client_email }}</div>{% endif %}
-            </td>
-            <td class="inv-td inv-td--muted">{{ inv.issue_date or '—' }}</td>
-            <td class="inv-td inv-td--muted {% if inv.status == 'overdue' %}inv-td--bold{% endif %}" style="{% if inv.status == 'overdue' %}color:#b94040{% endif %}">{{ inv.due_date or '—' }}</td>
-            <td class="inv-td inv-td--bold">${{ "{:,.2f}".format(inv.total or 0) }}</td>
-            <td class="inv-td">
-              <span class="s-badge s-badge--{{ inv.status }}">{{ inv.status }}</span>
-            </td>
-            <td class="inv-td inv-td--right">
-              <div class="inv-acts">
-                <a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" class="i-btn i-btn--ghost i-btn--sm" title="View / Print">🖨</a>
-                <a href="{{ url_for('agent_invoice_edit', inv_id=inv.id) }}" class="i-btn i-btn--ghost i-btn--sm">Edit</a>
-                {% if inv.status != 'paid' %}
-                <button class="i-btn i-btn--ghost i-btn--sm" onclick="markPaid({{ inv.id }})">Mark Paid</button>
-                {% endif %}
-                <form method="post" action="{{ url_for('agent_invoice_delete', inv_id=inv.id) }}" onsubmit="return confirm('Delete this invoice?')" style="display:inline">
-                  <button type="submit" class="i-btn i-btn--danger i-btn--sm">Delete</button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-    <div class="inv-empty">
-      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#6B6A45" stroke-width="1.2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>
-      <h3>No invoices yet</h3>
-      <p>Create your first invoice for a client project.</p>
-      <a href="{{ url_for('agent_invoice_new') }}" class="i-btn i-btn--primary">+ Create Invoice</a>
-    </div>
-    {% endif %}
-  </div>
+ <!-- TABLE -->
+ <div class="inv-body">
+ {% if invoices %}
+ <div class="inv-table-wrap">
+ <table class="inv-table">
+ <thead>
+ <tr>
+ <th>#</th>
+ <th>Client</th>
+ <th>Issue Date</th>
+ <th>Due Date</th>
+ <th>Amount</th>
+ <th>Status</th>
+ <th style="text-align:right">Actions</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for inv in invoices %}
+ <tr id="inv-row-{{ inv.id }}">
+ <td class="inv-td inv-td--bold"><a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" style="color:#6B5B4D;">{{ inv.invoice_number }}</a></td>
+ <td class="inv-td">
+ <div style="font-weight:600;">{{ inv.client_name or '—' }}</div>
+ {% if inv.client_email %}<div style="font-size:.68rem;color:#9A9472;">{{ inv.client_email }}</div>{% endif %}
+ </td>
+ <td class="inv-td inv-td--muted">{{ inv.issue_date or '—' }}</td>
+ <td class="inv-td inv-td--muted {% if inv.status == 'overdue' %}inv-td--bold{% endif %}" style="{% if inv.status == 'overdue' %}color:#b94040{% endif %}">{{ inv.due_date or '—' }}</td>
+ <td class="inv-td inv-td--bold">${{ "{:,.2f}".format(inv.total or 0) }}</td>
+ <td class="inv-td">
+ <span class="s-badge s-badge--{{ inv.status }}">{{ inv.status }}</span>
+ </td>
+ <td class="inv-td inv-td--right">
+ <div class="inv-acts">
+ <a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" class="i-btn i-btn--ghost i-btn--sm" title="View / Print"></a>
+ <a href="{{ url_for('agent_invoice_edit', inv_id=inv.id) }}" class="i-btn i-btn--ghost i-btn--sm">Edit</a>
+ {% if inv.status != 'paid' %}
+ <button class="i-btn i-btn--ghost i-btn--sm" onclick="markPaid({{ inv.id }})">Mark Paid</button>
+ {% endif %}
+ <form method="post" action="{{ url_for('agent_invoice_delete', inv_id=inv.id) }}" onsubmit="return confirm('Delete this invoice?')" style="display:inline">
+ <button type="submit" class="i-btn i-btn--danger i-btn--sm">Delete</button>
+ </form>
+ </div>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ {% else %}
+ <div class="inv-empty">
+ <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#6B5B4D" stroke-width="1.2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg>
+ <h3>No invoices yet</h3>
+ <p>Create your first invoice for a client project.</p>
+ <a href="{{ url_for('agent_invoice_new') }}" class="i-btn i-btn--primary">+ Create Invoice</a>
+ </div>
+ {% endif %}
+ </div>
 
 </div>
 
 <script>
 function markPaid(id){
-  if(!confirm('Mark invoice as Paid?')) return;
-  var fd = new FormData();
-  fd.append('status','paid');
-  fetch('/agent/invoices/'+id+'/status',{method:'POST',body:fd})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d.success) window.location.reload();
-    });
+ if(!confirm('Mark invoice as Paid?')) return;
+ var fd = new FormData();
+ fd.append('status','paid');
+ fetch('/agent/invoices/'+id+'/status',{method:'POST',body:fd})
+ .then(function(r){return r.json();})
+ .then(function(d){
+ if(d.success) window.location.reload();
+ });
 }
 </script>
 {% endblock %}

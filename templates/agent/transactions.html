@@ -7,378 +7,378 @@
 
 /* ─── Page wrapper ─── */
 #txpage {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  color: #3A352C;
-  background: #F8F5F0;
-  padding: 0;
-  margin: 0;
+ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ color: #3D2E24;
+ background: #F8F5F0;
+ padding: 0;
+ margin: 0;
 }
 
 /* ─── Top bar ─── */
 .tx-bar {
-  background: linear-gradient(135deg, #F6F2E8 0%, #EDE8DC 100%);
-  border-bottom: 1px solid rgba(107,106,69,.18);
-  padding: .625rem 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  flex-wrap: wrap;
+ background: linear-gradient(135deg, #F0EBE4 0%, #EDE8DC 100%);
+ border-bottom: 1px solid rgba(107,91,77,.18);
+ padding: .625rem 1.25rem;
+ display: flex;
+ align-items: center;
+ gap: .75rem;
+ flex-wrap: wrap;
 }
 .tx-bar__title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.25rem;
-  font-weight: 500;
-  color: #3A352C;
-  letter-spacing: -.02em;
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.25rem;
+ font-weight: 500;
+ color: #3D2E24;
+ letter-spacing: -.02em;
 }
 .tx-bar__count {
-  font-size: .7rem;
-  color: #9A9472;
-  font-weight: 600;
-  background: rgba(107,106,69,.1);
-  border-radius: 10px;
-  padding: .1rem .45rem;
+ font-size: .7rem;
+ color: #9A9472;
+ font-weight: 600;
+ background: rgba(107,91,77,.1);
+ border-radius: 10px;
+ padding: .1rem .45rem;
 }
 .tx-bar__spacer { flex: 1; }
 .tx-bar__btns { display: flex; gap: .4rem; flex-wrap: wrap; }
 
 /* ─── Top-bar buttons ─── */
 .t-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: .25rem;
-  height: 28px;
-  padding: 0 .75rem;
-  border-radius: 5px;
-  font-size: .72rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid;
-  text-decoration: none;
-  white-space: nowrap;
-  transition: all .12s;
+ display: inline-flex;
+ align-items: center;
+ gap: .25rem;
+ height: 28px;
+ padding: 0 .75rem;
+ border-radius: 5px;
+ font-size: .72rem;
+ font-weight: 700;
+ cursor: pointer;
+ border: 1px solid;
+ text-decoration: none;
+ white-space: nowrap;
+ transition: all .12s;
 }
 .t-btn--solid {
-  background: #6B6A45;
-  color: #fff;
-  border-color: #6B6A45;
+ background: #6B5B4D;
+ color: #fff;
+ border-color: #6B5B4D;
 }
-.t-btn--solid:hover { background: #5A5938; }
+.t-btn--solid:hover { background: #5A4A3C; }
 .t-btn--ghost {
-  background: #fff;
-  color: #6B6A45;
-  border-color: rgba(107,106,69,.3);
+ background: #fff;
+ color: #6B5B4D;
+ border-color: rgba(107,91,77,.3);
 }
-.t-btn--ghost:hover { background: #F6F2E8; border-color: #6B6A45; }
+.t-btn--ghost:hover { background: #F0EBE4; border-color: #6B5B4D; }
 
 /* ─── Flash ─── */
 .flash-bar { padding: .5rem 1.25rem; }
 .flash-item {
-  padding: .5rem .875rem;
-  border-radius: 6px;
-  font-size: .8rem;
-  font-weight: 500;
-  margin-bottom: .25rem;
+ padding: .5rem .875rem;
+ border-radius: 6px;
+ font-size: .8rem;
+ font-weight: 500;
+ margin-bottom: .25rem;
 }
 .flash-item--success { background: #e8f5e9; color: #2e7d32; }
-.flash-item--error   { background: #fdecea; color: #c62828; }
+.flash-item--error { background: #fdecea; color: #c62828; }
 .flash-item--warning { background: #fff8e1; color: #f57f17; }
-.flash-item--info    { background: #e3f2fd; color: #1565c0; }
+.flash-item--info { background: #e3f2fd; color: #1565c0; }
 
 /* ─── Stage summary strip ─── */
 .stage-strip {
-  display: flex;
-  gap: .375rem;
-  padding: .625rem 1.25rem;
-  overflow-x: auto;
-  background: #FDFBF7;
-  border-bottom: 1px solid rgba(200,180,151,.2);
-  scrollbar-width: none;
+ display: flex;
+ gap: .375rem;
+ padding: .625rem 1.25rem;
+ overflow-x: auto;
+ background: #F5F0EB;
+ border-bottom: 1px solid rgba(200,180,151,.2);
+ scrollbar-width: none;
 }
 .stage-strip::-webkit-scrollbar { display: none; }
 .stage-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  height: 24px;
-  padding: 0 .65rem;
-  border-radius: 12px;
-  font-size: .65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  white-space: nowrap;
-  cursor: pointer;
-  text-decoration: none;
-  border: 1px solid rgba(107,106,69,.18);
-  background: #fff;
-  color: #6B6A45;
-  transition: all .12s;
+ display: inline-flex;
+ align-items: center;
+ gap: .3rem;
+ height: 24px;
+ padding: 0 .65rem;
+ border-radius: 12px;
+ font-size: .65rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .05em;
+ white-space: nowrap;
+ cursor: pointer;
+ text-decoration: none;
+ border: 1px solid rgba(107,91,77,.18);
+ background: #fff;
+ color: #6B5B4D;
+ transition: all .12s;
 }
 .stage-pill:hover, .stage-pill--on {
-  background: #6B6A45;
-  color: #fff;
-  border-color: #6B6A45;
+ background: #6B5B4D;
+ color: #fff;
+ border-color: #6B5B4D;
 }
 .stage-pill__n {
-  background: rgba(255,255,255,.3);
-  border-radius: 8px;
-  padding: 0 .3rem;
-  font-size: .6rem;
-  min-width: 16px;
-  text-align: center;
+ background: rgba(255,255,255,.3);
+ border-radius: 8px;
+ padding: 0 .3rem;
+ font-size: .6rem;
+ min-width: 16px;
+ text-align: center;
 }
 .stage-pill--on .stage-pill__n { background: rgba(255,255,255,.25); }
 
 /* ─── Table area ─── */
 .tx-table-wrap {
-  overflow-x: auto;
-  overflow-y: auto;
+ overflow-x: auto;
+ overflow-y: auto;
 }
 .tx-table-wrap::-webkit-scrollbar { height: 5px; width: 5px; }
 .tx-table-wrap::-webkit-scrollbar-thumb { background: rgba(200,180,151,.45); border-radius: 3px; }
 
 .tx-table {
-  min-width: 860px;
-  width: 100%;
-  border-collapse: collapse;
+ min-width: 860px;
+ width: 100%;
+ border-collapse: collapse;
 }
 
 /* column widths */
 .tx-table colgroup col:nth-child(1) { width: 220px; } /* address */
 .tx-table colgroup col:nth-child(2) { width: 160px; } /* client */
 .tx-table colgroup col:nth-child(3) { width: 130px; } /* stage */
-.tx-table colgroup col:nth-child(4) { width: 70px;  } /* side */
+.tx-table colgroup col:nth-child(4) { width: 70px; } /* side */
 .tx-table colgroup col:nth-child(5) { width: 105px; } /* close date */
-.tx-table colgroup col:nth-child(6) { width: 95px;  } /* created */
+.tx-table colgroup col:nth-child(6) { width: 95px; } /* created */
 .tx-table colgroup col:nth-child(7) { width: 130px; } /* actions */
 
 .tx-table thead th {
-  padding: .425rem .625rem;
-  font-size: .58rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .09em;
-  color: #9A9472;
-  background: #F0EDE5;
-  border-bottom: 1.5px solid rgba(107,106,69,.15);
-  white-space: nowrap;
-  text-align: left;
-  position: sticky;
-  top: 0;
-  z-index: 5;
+ padding: .425rem .625rem;
+ font-size: .58rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .09em;
+ color: #9A9472;
+ background: #F0EDE5;
+ border-bottom: 1.5px solid rgba(107,91,77,.15);
+ white-space: nowrap;
+ text-align: left;
+ position: sticky;
+ top: 0;
+ z-index: 5;
 }
 .tx-table thead th:last-child { text-align: right; padding-right: .875rem; }
 
 /* data rows */
 .tx-row {
-  border-bottom: 1px solid rgba(200,180,151,.12);
-  cursor: pointer;
-  transition: background .1s;
+ border-bottom: 1px solid rgba(200,180,151,.12);
+ cursor: pointer;
+ transition: background .1s;
 }
-.tx-row:hover { background: #FDFBF7; }
-.tx-row--odd  { background: #FCFAF7; }
+.tx-row:hover { background: #F5F0EB; }
+.tx-row--odd { background: #FCFAF7; }
 .tx-row--odd:hover { background: #F7F4EF; }
 
 .tx-td {
-  padding: .5rem .625rem;
-  font-size: .78rem;
-  color: #3A352C;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  vertical-align: middle;
+ padding: .5rem .625rem;
+ font-size: .78rem;
+ color: #3D2E24;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ vertical-align: middle;
 }
 .tx-td--addr {
-  font-weight: 600;
-  color: #2c3320;
-  max-width: 220px;
+ font-weight: 600;
+ color: #2c3320;
+ max-width: 220px;
 }
 .tx-td--muted { color: #9A9472; }
 .tx-td--actions {
-  text-align: right;
-  padding-right: .75rem;
+ text-align: right;
+ padding-right: .75rem;
 }
 
 /* ─── Stage badge ─── */
 .stg {
-  display: inline-block;
-  padding: .1rem .45rem;
-  border-radius: 9px;
-  font-size: .58rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
-  white-space: nowrap;
+ display: inline-block;
+ padding: .1rem .45rem;
+ border-radius: 9px;
+ font-size: .58rem;
+ font-weight: 700;
+ letter-spacing: .04em;
+ text-transform: uppercase;
+ white-space: nowrap;
 }
-.stg--summary        { background: rgba(200,180,151,.22); color: #5A5938; }
-.stg--showings       { background: rgba(33,150,243,.12);  color: #1565C0; }
-.stg--under_contract { background: rgba(255,152,0,.14);   color: #E65100; }
-.stg--earnest_money  { background: rgba(156,39,176,.12);  color: #6A1B9A; }
-.stg--inspection     { background: rgba(244,67,54,.12);   color: #B71C1C; }
-.stg--appraisal      { background: rgba(0,150,136,.12);   color: #00695C; }
-.stg--loan_commitment{ background: rgba(63,81,181,.12);   color: #283593; }
-.stg--final_walkthrough{background:rgba(139,195,74,.14);  color: #33691E; }
-.stg--closing        { background: rgba(76,175,80,.14);   color: #2E7D32; }
+.stg--summary { background: rgba(200,180,151,.22); color: #5A4A3C; }
+.stg--showings { background: rgba(33,150,243,.12); color: #1565C0; }
+.stg--under_contract { background: rgba(255,152,0,.14); color: #E65100; }
+.stg--earnest_money { background: rgba(156,39,176,.12); color: #6A1B9A; }
+.stg--inspection { background: rgba(244,67,54,.12); color: #B71C1C; }
+.stg--appraisal { background: rgba(0,150,136,.12); color: #00695C; }
+.stg--loan_commitment{ background: rgba(63,81,181,.12); color: #283593; }
+.stg--final_walkthrough{background:rgba(139,195,74,.14); color: #33691E; }
+.stg--closing { background: rgba(76,175,80,.14); color: #2E7D32; }
 
 /* ─── Side badge ─── */
 .side-b {
-  display: inline-block;
-  padding: .08rem .35rem;
-  border-radius: 8px;
-  font-size: .56rem;
-  font-weight: 700;
-  letter-spacing: .04em;
-  text-transform: uppercase;
+ display: inline-block;
+ padding: .08rem .35rem;
+ border-radius: 8px;
+ font-size: .56rem;
+ font-weight: 700;
+ letter-spacing: .04em;
+ text-transform: uppercase;
 }
-.side-b--buyer  { background: rgba(33,150,243,.12); color: #1565C0; }
-.side-b--seller { background: rgba(255,152,0,.14);  color: #E65100; }
-.side-b--both   { background: rgba(156,39,176,.12); color: #6A1B9A; }
+.side-b--buyer { background: rgba(33,150,243,.12); color: #1565C0; }
+.side-b--seller { background: rgba(255,152,0,.14); color: #E65100; }
+.side-b--both { background: rgba(156,39,176,.12); color: #6A1B9A; }
 
 /* ─── Action buttons ─── */
 .tx-act {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 24px;
-  padding: 0 .55rem;
-  border-radius: 4px;
-  border: 1px solid rgba(200,180,151,.35);
-  background: #fff;
-  color: #6B6A45;
-  font-size: .65rem;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all .12s;
-  white-space: nowrap;
-  /* Reset button defaults so <button> matches <a> */
-  font-family: inherit;
-  line-height: 1;
-  -webkit-appearance: none;
-  appearance: none;
-  box-sizing: border-box;
-  vertical-align: middle;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ height: 24px;
+ padding: 0 .55rem;
+ border-radius: 4px;
+ border: 1px solid rgba(200,180,151,.35);
+ background: #fff;
+ color: #6B5B4D;
+ font-size: .65rem;
+ font-weight: 600;
+ cursor: pointer;
+ text-decoration: none;
+ transition: all .12s;
+ white-space: nowrap;
+ /* Reset button defaults so <button> matches <a> */
+ font-family: inherit;
+ line-height: 1;
+ -webkit-appearance: none;
+ appearance: none;
+ box-sizing: border-box;
+ vertical-align: middle;
 }
-.tx-act:hover { background: #F6F2E8; border-color: #6B6A45; color: #3A352C; }
-.tx-act--del  { color: #c0392b; border-color: rgba(192,57,43,.25); background: #fff; }
+.tx-act:hover { background: #F0EBE4; border-color: #6B5B4D; color: #3D2E24; }
+.tx-act--del { color: #c0392b; border-color: rgba(192,57,43,.25); background: #fff; }
 .tx-act--del:hover { background: rgba(192,57,43,.08); color: #c0392b; border-color: rgba(192,57,43,.5); }
-.tx-actions   { display: flex; gap: .35rem; justify-content: flex-end; align-items: center; }
+.tx-actions { display: flex; gap: .35rem; justify-content: flex-end; align-items: center; }
 
 /* ─── Empty state ─── */
 .tx-empty {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #9A9472;
+ text-align: center;
+ padding: 3rem 1rem;
+ color: #9A9472;
 }
 .tx-empty p { font-size: .875rem; margin: .5rem 0 1.25rem; }
 
 /* ─── Add modal ─── */
 .txmod {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(58,53,44,.5);
-  backdrop-filter: blur(4px);
-  z-index: 6000;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
+ display: none;
+ position: fixed;
+ inset: 0;
+ background: rgba(61,46,36,.5);
+ backdrop-filter: blur(4px);
+ z-index: 6000;
+ align-items: center;
+ justify-content: center;
+ padding: 1rem;
 }
 .txmod.open { display: flex; }
 .txmod-box {
-  background: #fff;
-  border-radius: 14px;
-  padding: 1.75rem;
-  width: 100%;
-  max-width: 580px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(58,53,44,.2);
+ background: #fff;
+ border-radius: 14px;
+ padding: 1.75rem;
+ width: 100%;
+ max-width: 580px;
+ max-height: 90vh;
+ overflow-y: auto;
+ box-shadow: 0 24px 64px rgba(61,46,36,.2);
 }
 .txmod-head {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1.15rem;
-  color: #3A352C;
-  margin: 0 0 1.25rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.15rem;
+ color: #3D2E24;
+ margin: 0 0 1.25rem;
+ font-weight: 600;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
 }
 .txmod-x {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: #F6F2E8;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 1.1rem;
-  color: #7B7766;
-  flex-shrink: 0;
-  transition: all .12s;
+ display: inline-flex;
+ align-items: center;
+ justify-content: center;
+ width: 28px;
+ height: 28px;
+ background: #F0EBE4;
+ border: none;
+ border-radius: 50%;
+ cursor: pointer;
+ font-size: 1.1rem;
+ color: #7B7766;
+ flex-shrink: 0;
+ transition: all .12s;
 }
-.txmod-x:hover { background: rgba(107,106,69,.15); color: #3A352C; }
+.txmod-x:hover { background: rgba(107,91,77,.15); color: #3D2E24; }
 .txgrid { display: grid; grid-template-columns: repeat(2,1fr); gap: .75rem; }
 .txgrid-full { grid-column: 1 / -1; }
 .txf { display: flex; flex-direction: column; }
 .txf label {
-  display: block;
-  font-size: .6rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: #6B6A45;
-  margin-bottom: .18rem;
+ display: block;
+ font-size: .6rem;
+ font-weight: 700;
+ text-transform: uppercase;
+ letter-spacing: .06em;
+ color: #6B5B4D;
+ margin-bottom: .18rem;
 }
 .txf input, .txf select {
-  width: 100%;
-  padding: .42rem .6rem;
-  border: 1px solid rgba(200,180,151,.4);
-  border-radius: 5px;
-  font-size: .8rem;
-  color: #3A352C;
-  background: #fff;
-  outline: none;
+ width: 100%;
+ padding: .42rem .6rem;
+ border: 1px solid rgba(200,180,151,.4);
+ border-radius: 5px;
+ font-size: .8rem;
+ color: #3D2E24;
+ background: #fff;
+ outline: none;
 }
 .txf input:focus, .txf select:focus {
-  border-color: #6B6A45;
-  box-shadow: 0 0 0 2px rgba(107,106,69,.1);
+ border-color: #6B5B4D;
+ box-shadow: 0 0 0 2px rgba(107,91,77,.1);
 }
 .txfoot {
-  display: flex;
-  gap: .45rem;
-  margin-top: 1.125rem;
-  justify-content: flex-end;
-  flex-wrap: wrap;
+ display: flex;
+ gap: .45rem;
+ margin-top: 1.125rem;
+ justify-content: flex-end;
+ flex-wrap: wrap;
 }
 .txbtn {
-  display: inline-flex;
-  align-items: center;
-  height: 34px;
-  padding: 0 1.1rem;
-  border-radius: 5px;
-  font-size: .78rem;
-  font-weight: 700;
-  cursor: pointer;
-  border: 1px solid;
-  white-space: nowrap;
-  transition: all .13s;
+ display: inline-flex;
+ align-items: center;
+ height: 34px;
+ padding: 0 1.1rem;
+ border-radius: 5px;
+ font-size: .78rem;
+ font-weight: 700;
+ cursor: pointer;
+ border: 1px solid;
+ white-space: nowrap;
+ transition: all .13s;
 }
-.txbtn--p { background: #6B6A45; color: #fff; border-color: #6B6A45; }
-.txbtn--p:hover { background: #5A5938; }
-.txbtn--s { background: #fff; color: #6B6A45; border-color: rgba(107,106,69,.35); }
-.txbtn--s:hover { background: #F6F2E8; }
+.txbtn--p { background: #6B5B4D; color: #fff; border-color: #6B5B4D; }
+.txbtn--p:hover { background: #5A4A3C; }
+.txbtn--s { background: #fff; color: #6B5B4D; border-color: rgba(107,91,77,.35); }
+.txbtn--s:hover { background: #F0EBE4; }
 
 /* ─── Responsive ─── */
 @media (max-width: 600px) {
-  .txgrid { grid-template-columns: 1fr; }
-  .txgrid-full { grid-column: 1; }
-  .stage-strip { padding: .5rem .75rem; }
-  .tx-bar { padding: .5rem .75rem; }
+ .txgrid { grid-template-columns: 1fr; }
+ .txgrid-full { grid-column: 1; }
+ .stage-strip { padding: .5rem .75rem; }
+ .tx-bar { padding: .5rem .75rem; }
 }
 </style>
 
@@ -386,168 +386,168 @@
 
 <!-- ── TOP BAR ─────────────────────────────────── -->
 <div class="tx-bar">
-  <span class="tx-bar__title">Transactions</span>
-  <span class="tx-bar__count">{{ transactions|length if transactions else 0 }}</span>
-  <div class="tx-bar__spacer"></div>
-  <div class="tx-bar__btns">
-    <button class="t-btn t-btn--solid" onclick="openAddTx()">+ New Transaction</button>
-  </div>
+ <span class="tx-bar__title">Transactions</span>
+ <span class="tx-bar__count">{{ transactions|length if transactions else 0 }}</span>
+ <div class="tx-bar__spacer"></div>
+ <div class="tx-bar__btns">
+ <button class="t-btn t-btn--solid" onclick="openAddTx()">+ New Transaction</button>
+ </div>
 </div>
 
 <!-- ── FLASH ────────────────────────────────────── -->
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="flash-bar">
-    {% for cat, msg in messages %}
-      <div class="flash-item flash-item--{{ cat }}">{{ msg }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
+ {% if messages %}
+ <div class="flash-bar">
+ {% for cat, msg in messages %}
+ <div class="flash-item flash-item--{{ cat }}">{{ msg }}</div>
+ {% endfor %}
+ </div>
+ {% endif %}
 {% endwith %}
 
 <!-- ── STAGE FILTER PILLS (client-side) ─────────── -->
 {% if transactions %}
 <div class="stage-strip" id="stagePills">
-  <button class="stage-pill stage-pill--on" onclick="filterStage(this,'all')">
-    All <span class="stage-pill__n" id="pill-count-all">{{ transactions|length }}</span>
-  </button>
-  {% set stages_seen = [] %}
-  {% for tx in transactions %}
-    {% set s = tx.current_stage or 'pre_contract' %}
-    {% if s not in stages_seen %}
-      {{ stages_seen.append(s) or '' }}
-      <button class="stage-pill" onclick="filterStage(this,'{{ s }}')">
-        {{ s|replace('_',' ')|title }}
-        <span class="stage-pill__n" id="pill-count-{{ s }}">
-          {{ transactions|selectattr('current_stage','equalto',s)|list|length }}
-        </span>
-      </button>
-    {% endif %}
-  {% endfor %}
+ <button class="stage-pill stage-pill--on" onclick="filterStage(this,'all')">
+ All <span class="stage-pill__n" id="pill-count-all">{{ transactions|length }}</span>
+ </button>
+ {% set stages_seen = [] %}
+ {% for tx in transactions %}
+ {% set s = tx.current_stage or 'pre_contract' %}
+ {% if s not in stages_seen %}
+ {{ stages_seen.append(s) or '' }}
+ <button class="stage-pill" onclick="filterStage(this,'{{ s }}')">
+ {{ s|replace('_',' ')|title }}
+ <span class="stage-pill__n" id="pill-count-{{ s }}">
+ {{ transactions|selectattr('current_stage','equalto',s)|list|length }}
+ </span>
+ </button>
+ {% endif %}
+ {% endfor %}
 </div>
 {% endif %}
 
 <!-- ── TRANSACTIONS TABLE ────────────────────────── -->
 <div class="tx-table-wrap">
-  {% if transactions %}
-  <table class="tx-table">
-    <colgroup><col><col><col><col><col><col><col></colgroup>
-    <thead>
-      <tr>
-        <th>Property Address</th>
-        <th>Client</th>
-        <th>Stage</th>
-        <th>Side</th>
-        <th>Close Date</th>
-        <th>Created</th>
-        <th style="text-align:right;padding-right:.875rem;">Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for tx in transactions %}
-      <tr class="tx-row {% if loop.index is odd %}tx-row--odd{% endif %}"
-          onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'"
-          title="Open AI Transaction Coordinator">
-        <td class="tx-td tx-td--addr" title="{{ tx.property_address }}">{{ tx.property_address }}</td>
-        <td class="tx-td" title="{{ tx.client_name }}">{{ tx.client_name }}</td>
-        <td class="tx-td">
-          <span class="stg stg--{{ tx.current_stage or 'summary' }}">
-            {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
-          </span>
-        </td>
-        <td class="tx-td">
-          <span class="side-b side-b--{{ tx.side or 'buyer' }}">
-            {{ (tx.side or 'buyer')|capitalize }}
-          </span>
-        </td>
-        <td class="tx-td tx-td--muted">{{ tx.target_close_date or '—' }}</td>
-        <td class="tx-td tx-td--muted">{{ tx.created_at[:10] if tx.created_at else '—' }}</td>
-        <td class="tx-td tx-td--actions" onclick="event.stopPropagation()">
-          <div class="tx-actions">
-            <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-act">Open</a>
-            <a href="{{ url_for('agent_transaction_edit', tx_id=tx.id) }}" class="tx-act">Edit</a>
-            <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;">
-              <button type="submit" class="tx-act tx-act--del"
-                onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
-            </form>
-          </div>
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <div class="tx-empty">
-    <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;">🏡</div>
-    <p>No transactions yet. Tap <strong>+ New Transaction</strong> whenever you are ready to start tracking a deal.</p>
-  </div>
-  {% endif %}
+ {% if transactions %}
+ <table class="tx-table">
+ <colgroup><col><col><col><col><col><col><col></colgroup>
+ <thead>
+ <tr>
+ <th>Property Address</th>
+ <th>Client</th>
+ <th>Stage</th>
+ <th>Side</th>
+ <th>Close Date</th>
+ <th>Created</th>
+ <th style="text-align:right;padding-right:.875rem;">Actions</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for tx in transactions %}
+ <tr class="tx-row {% if loop.index is odd %}tx-row--odd{% endif %}"
+ onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'"
+ title="Open AI Transaction Coordinator">
+ <td class="tx-td tx-td--addr" title="{{ tx.property_address }}">{{ tx.property_address }}</td>
+ <td class="tx-td" title="{{ tx.client_name }}">{{ tx.client_name }}</td>
+ <td class="tx-td">
+ <span class="stg stg--{{ tx.current_stage or 'summary' }}">
+ {{ (tx.current_stage or 'summary')|replace('_',' ')|title }}
+ </span>
+ </td>
+ <td class="tx-td">
+ <span class="side-b side-b--{{ tx.side or 'buyer' }}">
+ {{ (tx.side or 'buyer')|capitalize }}
+ </span>
+ </td>
+ <td class="tx-td tx-td--muted">{{ tx.target_close_date or '—' }}</td>
+ <td class="tx-td tx-td--muted">{{ tx.created_at[:10] if tx.created_at else '—' }}</td>
+ <td class="tx-td tx-td--actions" onclick="event.stopPropagation()">
+ <div class="tx-actions">
+ <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-act">Open</a>
+ <a href="{{ url_for('agent_transaction_edit', tx_id=tx.id) }}" class="tx-act">Edit</a>
+ <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;">
+ <button type="submit" class="tx-act tx-act--del"
+ onclick="return confirm('Delete this transaction? This cannot be undone.')">Delete</button>
+ </form>
+ </div>
+ </td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ {% else %}
+ <div class="tx-empty">
+ <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;"></div>
+ <p>No transactions yet. Tap <strong>+ New Transaction</strong> whenever you are ready to start tracking a deal.</p>
+ </div>
+ {% endif %}
 </div>
 
 </div><!-- /txpage -->
 
 <!-- ══ ADD TRANSACTION MODAL ══════════════════════ -->
 <div id="addTxModal" class="txmod">
-  <div class="txmod-box">
-    <div class="txmod-head">
-      New Transaction
-      <button class="txmod-x" onclick="closeAddTx()">×</button>
-    </div>
-    <form method="post" action="{{ url_for('agent_transactions') }}">
-      <div class="txgrid">
-        <div class="txf txgrid-full">
-          <label>Property Address *</label>
-          <input type="text" name="property_address" required placeholder="123 Main St, City, State" id="txAddr">
-        </div>
-        <div class="txf">
-          <label>Client Name *</label>
-          <input type="text" name="client_name" required placeholder="Jane Doe">
-        </div>
-        <div class="txf">
-          <label>Side</label>
-          <select name="side">
-            <option value="buyer">Buyer</option>
-            <option value="seller">Seller</option>
-            <option value="both">Both</option>
-          </select>
-        </div>
-        <div class="txf">
-          <label>Stage</label>
-          <select name="stage">
-            <option value="summary">Summary</option>
-            <option value="showings">Showings</option>
-            <option value="under_contract">Under Contract</option>
-            <option value="earnest_money">Earnest Money</option>
-            <option value="inspection">Inspection</option>
-            <option value="appraisal">Appraisal</option>
-            <option value="loan_commitment">Loan Commitment</option>
-            <option value="final_walkthrough">Final Walkthrough</option>
-            <option value="closing">Closing</option>
-          </select>
-        </div>
-        <div class="txf">
-          <label>Target Close Date <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(optional)</span></label>
-          <input type="date" name="close_date">
-        </div>
-      </div>
-      <div class="txfoot">
-        <button type="button" class="txbtn txbtn--s" onclick="closeAddTx()">Cancel</button>
-        <button type="submit" class="txbtn txbtn--p">Start Transaction</button>
-      </div>
-    </form>
-  </div>
+ <div class="txmod-box">
+ <div class="txmod-head">
+ New Transaction
+ <button class="txmod-x" onclick="closeAddTx()">×</button>
+ </div>
+ <form method="post" action="{{ url_for('agent_transactions') }}">
+ <div class="txgrid">
+ <div class="txf txgrid-full">
+ <label>Property Address *</label>
+ <input type="text" name="property_address" required placeholder="123 Main St, City, State" id="txAddr">
+ </div>
+ <div class="txf">
+ <label>Client Name *</label>
+ <input type="text" name="client_name" required placeholder="Jane Doe">
+ </div>
+ <div class="txf">
+ <label>Side</label>
+ <select name="side">
+ <option value="buyer">Buyer</option>
+ <option value="seller">Seller</option>
+ <option value="both">Both</option>
+ </select>
+ </div>
+ <div class="txf">
+ <label>Stage</label>
+ <select name="stage">
+ <option value="summary">Summary</option>
+ <option value="showings">Showings</option>
+ <option value="under_contract">Under Contract</option>
+ <option value="earnest_money">Earnest Money</option>
+ <option value="inspection">Inspection</option>
+ <option value="appraisal">Appraisal</option>
+ <option value="loan_commitment">Loan Commitment</option>
+ <option value="final_walkthrough">Final Walkthrough</option>
+ <option value="closing">Closing</option>
+ </select>
+ </div>
+ <div class="txf">
+ <label>Target Close Date <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(optional)</span></label>
+ <input type="date" name="close_date">
+ </div>
+ </div>
+ <div class="txfoot">
+ <button type="button" class="txbtn txbtn--s" onclick="closeAddTx()">Cancel</button>
+ <button type="submit" class="txbtn txbtn--p">Start Transaction</button>
+ </div>
+ </form>
+ </div>
 </div>
 
 <script>
 function openAddTx() {
-  document.getElementById('addTxModal').classList.add('open');
-  setTimeout(function(){ document.getElementById('txAddr').focus(); }, 80);
+ document.getElementById('addTxModal').classList.add('open');
+ setTimeout(function(){ document.getElementById('txAddr').focus(); }, 80);
 }
 function closeAddTx() {
-  document.getElementById('addTxModal').classList.remove('open');
+ document.getElementById('addTxModal').classList.remove('open');
 }
 document.getElementById('addTxModal').addEventListener('click', function(e){
-  if(e.target === this) closeAddTx();
+ if(e.target === this) closeAddTx();
 });
 
 // Check URL param to auto-open modal
@@ -555,18 +555,18 @@ if(new URLSearchParams(window.location.search).get('add') === '1') openAddTx();
 
 // Client-side stage filtering
 function filterStage(btn, stage) {
-  document.querySelectorAll('.stage-pill').forEach(function(p){ p.classList.remove('stage-pill--on'); });
-  btn.classList.add('stage-pill--on');
-  var rows = document.querySelectorAll('.tx-row');
-  rows.forEach(function(row) {
-    if(stage === 'all') {
-      row.style.display = '';
-    } else {
-      var stgCell = row.querySelector('.stg');
-      var rowStage = stgCell ? stgCell.className.replace(/.*stg--/,'').split(' ')[0] : '';
-      row.style.display = (rowStage === stage) ? '' : 'none';
-    }
-  });
+ document.querySelectorAll('.stage-pill').forEach(function(p){ p.classList.remove('stage-pill--on'); });
+ btn.classList.add('stage-pill--on');
+ var rows = document.querySelectorAll('.tx-row');
+ rows.forEach(function(row) {
+ if(stage === 'all') {
+ row.style.display = '';
+ } else {
+ var stgCell = row.querySelector('.stg');
+ var rowStage = stgCell ? stgCell.className.replace(/.*stg--/,'').split(' ')[0] : '';
+ row.style.display = (rowStage === stage) ? '' : 'none';
+ }
+ });
 }
 </script>
 

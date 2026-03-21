@@ -2,29 +2,29 @@
 
 {% block agent_content %}
 <style>
-#client-detail { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3A352C; }
+#client-detail { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; }
 
 .detail-header {
-  background: linear-gradient(135deg, #F6F2E8 0%, #EDE8DC 100%);
-  border-bottom: 1px solid rgba(107,106,69,.18);
-  padding: 1.25rem 1.5rem;
-  display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+ background: linear-gradient(135deg, #F0EBE4 0%, #EDE8DC 100%);
+ border-bottom: 1px solid rgba(107,91,77,.18);
+ padding: 1.25rem 1.5rem;
+ display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
 }
 .detail-header__left { display: flex; align-items: center; gap: 1rem; }
 .big-avatar {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: linear-gradient(135deg, #6B6A45, #8B8A5A);
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 1.4rem; font-weight: 600; flex-shrink: 0;
+ width: 56px; height: 56px; border-radius: 50%;
+ background: linear-gradient(135deg, #6B5B4D, #8B8A5A);
+ display: flex; align-items: center; justify-content: center;
+ color: white; font-size: 1.4rem; font-weight: 600; flex-shrink: 0;
 }
 .detail-header__name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 400; margin: 0; }
-.detail-header__sub { font-size: .8rem; color: #6B6A45; margin: .2rem 0 0; }
-.btn-back { color: #6B6A45; text-decoration: none; font-size: .8rem; display: flex; align-items: center; gap: .3rem; }
-.btn-back:hover { color: #3A352C; }
+.detail-header__sub { font-size: .8rem; color: #6B5B4D; margin: .2rem 0 0; }
+.btn-back { color: #6B5B4D; text-decoration: none; font-size: .8rem; display: flex; align-items: center; gap: .3rem; }
+.btn-back:hover { color: #3D2E24; }
 .btn-portal-header {
-  background: linear-gradient(135deg, #6B6A45, #8B8A5A); color: white;
-  border: none; border-radius: 8px; padding: .55rem 1.1rem;
-  font-size: .8rem; font-weight: 600; text-decoration: none; display: inline-block;
+ background: linear-gradient(135deg, #6B5B4D, #8B8A5A); color: white;
+ border: none; border-radius: 8px; padding: .55rem 1.1rem;
+ font-size: .8rem; font-weight: 600; text-decoration: none; display: inline-block;
 }
 .btn-portal-header:hover { background: linear-gradient(135deg, #5A5935, #7A7948); color: white; }
 
@@ -32,273 +32,273 @@
 @media (max-width: 900px) { .detail-body { grid-template-columns: 1fr; } }
 
 .panel {
-  background: white; border-radius: 10px; border: 1px solid rgba(107,106,69,.12); overflow: hidden;
+ background: white; border-radius: 10px; border: 1px solid rgba(107,91,77,.12); overflow: hidden;
 }
 .panel__title {
-  background: linear-gradient(135deg, #F6F2E8 0%, #F0EBE0 100%);
-  padding: .75rem 1rem; font-size: .8rem; font-weight: 700;
-  color: #6B6A45; text-transform: uppercase; letter-spacing: .05em;
-  border-bottom: 1px solid rgba(107,106,69,.1);
-  display: flex; align-items: center; gap: .5rem;
+ background: linear-gradient(135deg, #F0EBE4 0%, #F0EBE0 100%);
+ padding: .75rem 1rem; font-size: .8rem; font-weight: 700;
+ color: #6B5B4D; text-transform: uppercase; letter-spacing: .05em;
+ border-bottom: 1px solid rgba(107,91,77,.1);
+ display: flex; align-items: center; gap: .5rem;
 }
 .panel__body { padding: .875rem 1rem; }
 
 .kpi-row { display: flex; gap: .875rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
 .kpi-box {
-  flex: 1; min-width: 120px; background: #F8F5F0; border-radius: 8px;
-  padding: .75rem 1rem; border: 1px solid rgba(107,106,69,.1); text-align: center;
+ flex: 1; min-width: 120px; background: #F8F5F0; border-radius: 8px;
+ padding: .75rem 1rem; border: 1px solid rgba(107,91,77,.1); text-align: center;
 }
-.kpi-box__val { font-size: 1.35rem; font-weight: 700; color: #3A352C; line-height: 1.1; }
+.kpi-box__val { font-size: 1.35rem; font-weight: 700; color: #3D2E24; line-height: 1.1; }
 .kpi-box__val.green { color: #2e7d32; }
-.kpi-box__label { font-size: .65rem; color: #6B6A45; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-top: .2rem; }
+.kpi-box__label { font-size: .65rem; color: #6B5B4D; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-top: .2rem; }
 
-.data-row { display: flex; justify-content: space-between; align-items: center; padding: .4rem 0; border-bottom: 1px solid rgba(107,106,69,.06); font-size: .82rem; }
+.data-row { display: flex; justify-content: space-between; align-items: center; padding: .4rem 0; border-bottom: 1px solid rgba(107,91,77,.06); font-size: .82rem; }
 .data-row:last-child { border-bottom: none; }
-.data-row__label { color: #6B6A45; }
-.data-row__val { color: #3A352C; font-weight: 600; text-align: right; max-width: 55%; }
+.data-row__label { color: #6B5B4D; }
+.data-row__val { color: #3D2E24; font-weight: 600; text-align: right; max-width: 55%; }
 
 .item-list { list-style: none; padding: 0; margin: 0; }
 .item-list li {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: .5rem 0; border-bottom: 1px solid rgba(107,106,69,.07);
-  font-size: .82rem;
+ display: flex; justify-content: space-between; align-items: center;
+ padding: .5rem 0; border-bottom: 1px solid rgba(107,91,77,.07);
+ font-size: .82rem;
 }
 .item-list li:last-child { border-bottom: none; }
-.item-list li .item-name { color: #3A352C; font-weight: 500; }
-.item-list li .item-meta { color: #6B6A45; font-size: .75rem; }
+.item-list li .item-name { color: #3D2E24; font-weight: 500; }
+.item-list li .item-meta { color: #6B5B4D; font-size: .75rem; }
 
 .activity-item {
-  display: flex; align-items: flex-start; gap: .625rem;
-  padding: .5rem 0; border-bottom: 1px solid rgba(107,106,69,.07);
-  font-size: .82rem;
+ display: flex; align-items: flex-start; gap: .625rem;
+ padding: .5rem 0; border-bottom: 1px solid rgba(107,91,77,.07);
+ font-size: .82rem;
 }
 .activity-item:last-child { border-bottom: none; }
 .activity-dot {
-  width: 8px; height: 8px; border-radius: 50%; background: #6B6A45;
-  flex-shrink: 0; margin-top: .35rem;
+ width: 8px; height: 8px; border-radius: 50%; background: #6B5B4D;
+ flex-shrink: 0; margin-top: .35rem;
 }
 .activity-dot.document { background: #1565c0; }
 .activity-dot.project { background: #2e7d32; }
 .activity-dot.warranty { background: #e65100; }
 .activity-dot.timeline { background: #6a1b9a; }
-.activity-content .activity-title { color: #3A352C; font-weight: 500; }
-.activity-content .activity-date { color: #6B6A45; font-size: .72rem; margin-top: .1rem; }
+.activity-content .activity-title { color: #3D2E24; font-weight: 500; }
+.activity-content .activity-date { color: #6B5B4D; font-size: .72rem; margin-top: .1rem; }
 
 .empty-panel { text-align: center; padding: 1.5rem 1rem; color: #9e9e9e; font-size: .82rem; }
 
 .full-width { grid-column: 1 / -1; }
 
 .crm-note {
-  background: #fff8e1; border: 1px solid rgba(255,160,0,.3); border-radius: 8px;
-  padding: .75rem 1rem; font-size: .82rem; color: #5d4037;
-  display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .875rem;
+ background: #fff8e1; border: 1px solid rgba(255,160,0,.3); border-radius: 8px;
+ padding: .75rem 1rem; font-size: .82rem; color: #5d4037;
+ display: flex; align-items: flex-start; gap: .5rem; margin-bottom: .875rem;
 }
 </style>
 
 <div id="client-detail">
-  <div class="detail-header">
-    <div class="detail-header__left">
-      <div class="big-avatar">{{ (homeowner.name or 'C')[0]|upper }}</div>
-      <div>
-        <h1 class="detail-header__name">{{ homeowner.name or 'Client' }}</h1>
-        <p class="detail-header__sub">{{ homeowner.email }} · Member since {{ homeowner.created_at[:10] if homeowner.created_at else '—' }}</p>
-      </div>
-    </div>
-    <div style="display:flex;gap:.625rem;align-items:center;flex-wrap:wrap">
-      <a href="{{ url_for('agent_clients') }}" class="btn-back">← All Clients</a>
-      <a href="{{ url_for('homeowner_overview', homeowner_id=homeowner.id) }}" class="btn-portal-header">View Full Portal →</a>
-    </div>
-  </div>
+ <div class="detail-header">
+ <div class="detail-header__left">
+ <div class="big-avatar">{{ (homeowner.name or 'C')[0]|upper }}</div>
+ <div>
+ <h1 class="detail-header__name">{{ homeowner.name or 'Client' }}</h1>
+ <p class="detail-header__sub">{{ homeowner.email }} · Member since {{ homeowner.created_at[:10] if homeowner.created_at else '—' }}</p>
+ </div>
+ </div>
+ <div style="display:flex;gap:.625rem;align-items:center;flex-wrap:wrap">
+ <a href="{{ url_for('agent_clients') }}" class="btn-back">← All Clients</a>
+ <a href="{{ url_for('homeowner_overview', homeowner_id=homeowner.id) }}" class="btn-portal-header">View Full Portal →</a>
+ </div>
+ </div>
 
-  <!-- KPI Row -->
-  <div style="padding:1rem 1.5rem;background:white;border-bottom:1px solid rgba(107,106,69,.1)">
-    <div class="kpi-row">
-      <div class="kpi-box">
-        <div class="kpi-box__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %}—{% endif %}</div>
-        <div class="kpi-box__label">Home Value</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box__val green">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %}—{% endif %}</div>
-        <div class="kpi-box__label">Equity</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %}—{% endif %}</div>
-        <div class="kpi-box__label">Loan Balance</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box__val">{{ profile.doc_count or 0 }}</div>
-        <div class="kpi-box__label">Documents</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box__val">{{ profile.project_count or 0 }}</div>
-        <div class="kpi-box__label">Projects</div>
-      </div>
-      <div class="kpi-box">
-        <div class="kpi-box__val">{{ profile.warranty_count or 0 }}</div>
-        <div class="kpi-box__label">Warranties</div>
-      </div>
-    </div>
-  </div>
+ <!-- KPI Row -->
+ <div style="padding:1rem 1.5rem;background:white;border-bottom:1px solid rgba(107,91,77,.1)">
+ <div class="kpi-row">
+ <div class="kpi-box">
+ <div class="kpi-box__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %}—{% endif %}</div>
+ <div class="kpi-box__label">Home Value</div>
+ </div>
+ <div class="kpi-box">
+ <div class="kpi-box__val green">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %}—{% endif %}</div>
+ <div class="kpi-box__label">Equity</div>
+ </div>
+ <div class="kpi-box">
+ <div class="kpi-box__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %}—{% endif %}</div>
+ <div class="kpi-box__label">Loan Balance</div>
+ </div>
+ <div class="kpi-box">
+ <div class="kpi-box__val">{{ profile.doc_count or 0 }}</div>
+ <div class="kpi-box__label">Documents</div>
+ </div>
+ <div class="kpi-box">
+ <div class="kpi-box__val">{{ profile.project_count or 0 }}</div>
+ <div class="kpi-box__label">Projects</div>
+ </div>
+ <div class="kpi-box">
+ <div class="kpi-box__val">{{ profile.warranty_count or 0 }}</div>
+ <div class="kpi-box__label">Warranties</div>
+ </div>
+ </div>
+ </div>
 
-  <div class="detail-body">
+ <div class="detail-body">
 
-    <!-- Property & Snapshot -->
-    <div class="panel">
-      <div class="panel__title">🏠 Property & Equity</div>
-      <div class="panel__body">
-        <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '—' }}</span></div>
-        <div class="data-row"><span class="data-row__label">Type</span><span class="data-row__val">{{ profile.property_type or '—' }}</span></div>
-        <div class="data-row"><span class="data-row__label">Estimated Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %}—{% endif %}</span></div>
-        <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#2e7d32">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %}—{% endif %}</span></div>
-        <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %}—{% endif %}</span></div>
-        <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %}—{% endif %}</span></div>
-        <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %}—{% endif %}</span></div>
-        <div class="data-row"><span class="data-row__label">Last Refreshed</span><span class="data-row__val">{{ (profile.last_value_refresh or '—')[:10] }}</span></div>
-      </div>
-    </div>
+ <!-- Property & Snapshot -->
+ <div class="panel">
+ <div class="panel__title"> Property & Equity</div>
+ <div class="panel__body">
+ <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '—' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Type</span><span class="data-row__val">{{ profile.property_type or '—' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Estimated Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %}—{% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#2e7d32">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %}—{% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %}—{% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %}—{% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %}—{% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Last Refreshed</span><span class="data-row__val">{{ (profile.last_value_refresh or '—')[:10] }}</span></div>
+ </div>
+ </div>
 
-    <!-- CRM Contact -->
-    <div class="panel">
-      <div class="panel__title">📋 CRM Record</div>
-      <div class="panel__body">
-        {% if crm_contact %}
-        <div class="data-row"><span class="data-row__label">Stage</span><span class="data-row__val">{{ crm_contact.stage or '—' }}</span></div>
-        <div class="data-row"><span class="data-row__label">Last Touch</span><span class="data-row__val">{{ crm_contact.last_touch or '—' }}</span></div>
-        <div class="data-row"><span class="data-row__label">Next Action</span><span class="data-row__val">{{ crm_contact.next_action_date or '—' }}</span></div>
-        {% if crm_contact.next_action_note %}<div class="data-row"><span class="data-row__label">Note</span><span class="data-row__val">{{ crm_contact.next_action_note }}</span></div>{% endif %}
-        <div class="data-row"><span class="data-row__label">Tags</span><span class="data-row__val">{{ crm_contact.tags or '—' }}</span></div>
-        {% if crm_contact.notes %}<div style="margin-top:.75rem;padding:.625rem;background:#F8F5F0;border-radius:6px;font-size:.78rem;color:#6B6A45">{{ crm_contact.notes }}</div>{% endif %}
-        <div style="margin-top:.875rem">
-          <a href="{{ url_for('agent_crm') }}#contact-{{ crm_contact.id }}" style="font-size:.78rem;color:#6B6A45;text-decoration:underline">Open in CRM →</a>
-        </div>
-        {% else %}
-        <div class="empty-panel">No CRM record linked yet.<br><small>This client signed up before CRM linking was added, or via a different path.</small></div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- CRM Contact -->
+ <div class="panel">
+ <div class="panel__title"> CRM Record</div>
+ <div class="panel__body">
+ {% if crm_contact %}
+ <div class="data-row"><span class="data-row__label">Stage</span><span class="data-row__val">{{ crm_contact.stage or '—' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Last Touch</span><span class="data-row__val">{{ crm_contact.last_touch or '—' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Next Action</span><span class="data-row__val">{{ crm_contact.next_action_date or '—' }}</span></div>
+ {% if crm_contact.next_action_note %}<div class="data-row"><span class="data-row__label">Note</span><span class="data-row__val">{{ crm_contact.next_action_note }}</span></div>{% endif %}
+ <div class="data-row"><span class="data-row__label">Tags</span><span class="data-row__val">{{ crm_contact.tags or '—' }}</span></div>
+ {% if crm_contact.notes %}<div style="margin-top:.75rem;padding:.625rem;background:#F8F5F0;border-radius:6px;font-size:.78rem;color:#6B5B4D">{{ crm_contact.notes }}</div>{% endif %}
+ <div style="margin-top:.875rem">
+ <a href="{{ url_for('agent_crm') }}#contact-{{ crm_contact.id }}" style="font-size:.78rem;color:#6B5B4D;text-decoration:underline">Open in CRM →</a>
+ </div>
+ {% else %}
+ <div class="empty-panel">No CRM record linked yet.<br><small>This client signed up before CRM linking was added, or via a different path.</small></div>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Professional Team -->
-    <div class="panel">
-      <div class="panel__title">👥 Professional Team on File</div>
-      <div class="panel__body">
-        {% if professionals %}
-        {% for prof in professionals %}
-        <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem 0;border-bottom:1px solid rgba(107,106,69,.07)">
-          <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6B6A45,#8B8A5A);display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;font-weight:600;flex-shrink:0">{{ (prof.name or 'P')[0]|upper }}</div>
-          <div>
-            <div style="font-size:.82rem;font-weight:600;color:#3A352C">{{ prof.name or '—' }}</div>
-            <div style="font-size:.72rem;color:#6B6A45">{{ (prof.professional_role or '')|capitalize }} · {{ prof.email or '' }}</div>
-          </div>
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="empty-panel">No professionals on file.</div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- Professional Team -->
+ <div class="panel">
+ <div class="panel__title"> Professional Team on File</div>
+ <div class="panel__body">
+ {% if professionals %}
+ {% for prof in professionals %}
+ <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem 0;border-bottom:1px solid rgba(107,91,77,.07)">
+ <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6B5B4D,#8B8A5A);display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;font-weight:600;flex-shrink:0">{{ (prof.name or 'P')[0]|upper }}</div>
+ <div>
+ <div style="font-size:.82rem;font-weight:600;color:#3D2E24">{{ prof.name or '—' }}</div>
+ <div style="font-size:.72rem;color:#6B5B4D">{{ (prof.professional_role or '')|capitalize }} · {{ prof.email or '' }}</div>
+ </div>
+ </div>
+ {% endfor %}
+ {% else %}
+ <div class="empty-panel">No professionals on file.</div>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Recent Activity -->
-    <div class="panel">
-      <div class="panel__title">⚡ Recent Activity</div>
-      <div class="panel__body">
-        {% if recent_activity %}
-        {% for act in recent_activity %}
-        <div class="activity-item">
-          <div class="activity-dot {{ act.type }}"></div>
-          <div class="activity-content">
-            <div class="activity-title">{{ act.title or '—' }}</div>
-            <div class="activity-date">{{ (act.created_at or '')[:10] }} · {{ act.type|capitalize }}</div>
-          </div>
-        </div>
-        {% endfor %}
-        {% else %}
-        <div class="empty-panel">No recent activity yet.</div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- Recent Activity -->
+ <div class="panel">
+ <div class="panel__title"> Recent Activity</div>
+ <div class="panel__body">
+ {% if recent_activity %}
+ {% for act in recent_activity %}
+ <div class="activity-item">
+ <div class="activity-dot {{ act.type }}"></div>
+ <div class="activity-content">
+ <div class="activity-title">{{ act.title or '—' }}</div>
+ <div class="activity-date">{{ (act.created_at or '')[:10] }} · {{ act.type|capitalize }}</div>
+ </div>
+ </div>
+ {% endfor %}
+ {% else %}
+ <div class="empty-panel">No recent activity yet.</div>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Documents -->
-    <div class="panel">
-      <div class="panel__title">📄 Documents ({{ docs|length }})</div>
-      <div class="panel__body">
-        {% if docs %}
-        <ul class="item-list">
-          {% for doc in docs %}
-          <li>
-            <span class="item-name">{{ doc.name or 'Document' }}</span>
-            <span class="item-meta">{{ doc.category or '' }} · {{ (doc.created_at or '')[:10] }}</span>
-          </li>
-          {% endfor %}
-        </ul>
-        <div style="margin-top:.625rem">
-          <a href="{{ url_for('homeowner_overview', homeowner_id=homeowner.id) }}" style="font-size:.75rem;color:#6B6A45;text-decoration:underline">View all in portal →</a>
-        </div>
-        {% else %}
-        <div class="empty-panel">No documents uploaded yet.</div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- Documents -->
+ <div class="panel">
+ <div class="panel__title"> Documents ({{ docs|length }})</div>
+ <div class="panel__body">
+ {% if docs %}
+ <ul class="item-list">
+ {% for doc in docs %}
+ <li>
+ <span class="item-name">{{ doc.name or 'Document' }}</span>
+ <span class="item-meta">{{ doc.category or '' }} · {{ (doc.created_at or '')[:10] }}</span>
+ </li>
+ {% endfor %}
+ </ul>
+ <div style="margin-top:.625rem">
+ <a href="{{ url_for('homeowner_overview', homeowner_id=homeowner.id) }}" style="font-size:.75rem;color:#6B5B4D;text-decoration:underline">View all in portal →</a>
+ </div>
+ {% else %}
+ <div class="empty-panel">No documents uploaded yet.</div>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Projects -->
-    <div class="panel">
-      <div class="panel__title">🔨 Renovation Projects ({{ projects|length }})</div>
-      <div class="panel__body">
-        {% if projects %}
-        <ul class="item-list">
-          {% for proj in projects %}
-          <li>
-            <span class="item-name">{{ proj.name or 'Project' }}</span>
-            <span class="item-meta">{{ proj.status or '' }}{% if proj.budget %} · ${{ "{:,.0f}".format(proj.budget) }}{% endif %}</span>
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <div class="empty-panel">No renovation projects yet.</div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- Projects -->
+ <div class="panel">
+ <div class="panel__title"> Renovation Projects ({{ projects|length }})</div>
+ <div class="panel__body">
+ {% if projects %}
+ <ul class="item-list">
+ {% for proj in projects %}
+ <li>
+ <span class="item-name">{{ proj.name or 'Project' }}</span>
+ <span class="item-meta">{{ proj.status or '' }}{% if proj.budget %} · ${{ "{:,.0f}".format(proj.budget) }}{% endif %}</span>
+ </li>
+ {% endfor %}
+ </ul>
+ {% else %}
+ <div class="empty-panel">No renovation projects yet.</div>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Warranties -->
-    <div class="panel">
-      <div class="panel__title">🛡️ Warranties ({{ warranties|length }})</div>
-      <div class="panel__body">
-        {% if warranties %}
-        <ul class="item-list">
-          {% for w in warranties %}
-          <li>
-            <span class="item-name">{{ w.item_name or '—' }}</span>
-            <span class="item-meta">{{ w.category or '' }} · Exp: {{ w.warranty_expiry or '—' }}</span>
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <div class="empty-panel">No warranties logged yet.</div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- Warranties -->
+ <div class="panel">
+ <div class="panel__title"> Warranties ({{ warranties|length }})</div>
+ <div class="panel__body">
+ {% if warranties %}
+ <ul class="item-list">
+ {% for w in warranties %}
+ <li>
+ <span class="item-name">{{ w.item_name or '—' }}</span>
+ <span class="item-meta">{{ w.category or '' }} · Exp: {{ w.warranty_expiry or '—' }}</span>
+ </li>
+ {% endfor %}
+ </ul>
+ {% else %}
+ <div class="empty-panel">No warranties logged yet.</div>
+ {% endif %}
+ </div>
+ </div>
 
-    <!-- Equity History -->
-    <div class="panel">
-      <div class="panel__title">📊 Equity History</div>
-      <div class="panel__body">
-        {% if snapshot_history %}
-        <ul class="item-list">
-          {% for snap in snapshot_history %}
-          <li>
-            <span class="item-name">{{ snap.snapshot_date or '—' }}</span>
-            <span class="item-meta">
-              {% if snap.value_estimate %}${{ "{:,.0f}".format(snap.value_estimate) }} value · {% endif %}
-              {% if snap.equity_estimate %}${{ "{:,.0f}".format(snap.equity_estimate) }} equity{% endif %}
-            </span>
-          </li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <div class="empty-panel">No equity history recorded yet.</div>
-        {% endif %}
-      </div>
-    </div>
+ <!-- Equity History -->
+ <div class="panel">
+ <div class="panel__title"> Equity History</div>
+ <div class="panel__body">
+ {% if snapshot_history %}
+ <ul class="item-list">
+ {% for snap in snapshot_history %}
+ <li>
+ <span class="item-name">{{ snap.snapshot_date or '—' }}</span>
+ <span class="item-meta">
+ {% if snap.value_estimate %}${{ "{:,.0f}".format(snap.value_estimate) }} value · {% endif %}
+ {% if snap.equity_estimate %}${{ "{:,.0f}".format(snap.equity_estimate) }} equity{% endif %}
+ </span>
+ </li>
+ {% endfor %}
+ </ul>
+ {% else %}
+ <div class="empty-panel">No equity history recorded yet.</div>
+ {% endif %}
+ </div>
+ </div>
 
-  </div>
+ </div>
 </div>
 {% endblock %}

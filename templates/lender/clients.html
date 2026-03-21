@@ -2,154 +2,154 @@
 
 {% block lender_content %}
 <style>
-#lender-clients { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3A352C; background: #F8F5F0; min-height: 100vh; }
+#lender-clients { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; background: #F8F5F0; min-height: 100vh; }
 
 .page-header {
-  background: linear-gradient(135deg, #F6F2E8 0%, #EDE8DC 100%);
-  border-bottom: 1px solid rgba(107,106,69,.18);
-  padding: 1.25rem 1.5rem;
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
+ background: linear-gradient(135deg, #F0EBE4 0%, #EDE8DC 100%);
+ border-bottom: 1px solid rgba(107,91,77,.18);
+ padding: 1.25rem 1.5rem;
+ display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
 }
 .page-header h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 400; margin: 0; }
-.page-header p { font-size: .8rem; color: #6B6A45; margin: .25rem 0 0; }
+.page-header p { font-size: .8rem; color: #6B5B4D; margin: .25rem 0 0; }
 
-.stat-bar { display: flex; gap: 1rem; padding: .875rem 1.5rem; background: white; border-bottom: 1px solid rgba(107,106,69,.1); flex-wrap: wrap; }
-.stat-pill { background: #F6F2E8; border-radius: 20px; padding: .3rem .875rem; font-size: .75rem; color: #6B6A45; font-weight: 500; }
-.stat-pill strong { color: #3A352C; }
+.stat-bar { display: flex; gap: 1rem; padding: .875rem 1.5rem; background: white; border-bottom: 1px solid rgba(107,91,77,.1); flex-wrap: wrap; }
+.stat-pill { background: #F0EBE4; border-radius: 20px; padding: .3rem .875rem; font-size: .75rem; color: #6B5B4D; font-weight: 500; }
+.stat-pill strong { color: #3D2E24; }
 
 .client-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; padding: 1.25rem 1.5rem; }
 
-.client-card { background: white; border-radius: 10px; border: 1px solid rgba(107,106,69,.12); overflow: hidden; transition: all .2s ease; display: flex; flex-direction: column; }
-.client-card:hover { box-shadow: 0 4px 16px rgba(107,106,69,.15); border-color: rgba(107,106,69,.3); transform: translateY(-2px); }
+.client-card { background: white; border-radius: 10px; border: 1px solid rgba(107,91,77,.12); overflow: hidden; transition: all .2s ease; display: flex; flex-direction: column; }
+.client-card:hover { box-shadow: 0 4px 16px rgba(107,91,77,.15); border-color: rgba(107,91,77,.3); transform: translateY(-2px); }
 
 .client-card__header {
-  padding: .875rem 1rem;
-  background: linear-gradient(135deg, #F6F2E8 0%, #F0EBE0 100%);
-  border-bottom: 1px solid rgba(107,106,69,.1);
-  display: flex; align-items: center; gap: .75rem;
+ padding: .875rem 1rem;
+ background: linear-gradient(135deg, #F0EBE4 0%, #F0EBE0 100%);
+ border-bottom: 1px solid rgba(107,91,77,.1);
+ display: flex; align-items: center; gap: .75rem;
 }
-.client-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6B6A45, #8B8A5A); display: flex; align-items: center; justify-content: center; color: white; font-size: .9rem; font-weight: 600; flex-shrink: 0; }
-.client-name { font-size: .95rem; font-weight: 600; color: #3A352C; margin: 0; }
-.client-email { font-size: .75rem; color: #6B6A45; margin: .1rem 0 0; }
+.client-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #6B5B4D, #8B8A5A); display: flex; align-items: center; justify-content: center; color: white; font-size: .9rem; font-weight: 600; flex-shrink: 0; }
+.client-name { font-size: .95rem; font-weight: 600; color: #3D2E24; margin: 0; }
+.client-email { font-size: .75rem; color: #6B5B4D; margin: .1rem 0 0; }
 
 .client-card__body { padding: .875rem 1rem; flex: 1; }
-.data-row { display: flex; justify-content: space-between; align-items: center; padding: .3rem 0; border-bottom: 1px solid rgba(107,106,69,.06); font-size: .8rem; }
+.data-row { display: flex; justify-content: space-between; align-items: center; padding: .3rem 0; border-bottom: 1px solid rgba(107,91,77,.06); font-size: .8rem; }
 .data-row:last-child { border-bottom: none; }
-.data-row__label { color: #6B6A45; font-weight: 500; }
-.data-row__val { color: #3A352C; font-weight: 600; }
+.data-row__label { color: #6B5B4D; font-weight: 500; }
+.data-row__val { color: #3D2E24; font-weight: 600; }
 .data-row__val.green { color: #2e7d32; }
 .data-row__val.muted { color: #9e9e9e; font-weight: 400; font-style: italic; }
 
 .agent-badge { display: inline-flex; align-items: center; gap: .3rem; background: #e8f5e9; color: #2e7d32; border-radius: 12px; padding: .2rem .55rem; font-size: .7rem; font-weight: 600; margin-top: .5rem; }
 
-.client-card__footer { padding: .625rem 1rem; border-top: 1px solid rgba(107,106,69,.1); display: flex; gap: .5rem; align-items: center; justify-content: space-between; }
-.btn-view { background: linear-gradient(135deg, #6B6A45, #8B8A5A); color: white; border: none; border-radius: 6px; padding: .45rem .9rem; font-size: .75rem; font-weight: 600; text-decoration: none; display: inline-block; transition: all .2s; }
+.client-card__footer { padding: .625rem 1rem; border-top: 1px solid rgba(107,91,77,.1); display: flex; gap: .5rem; align-items: center; justify-content: space-between; }
+.btn-view { background: linear-gradient(135deg, #6B5B4D, #8B8A5A); color: white; border: none; border-radius: 6px; padding: .45rem .9rem; font-size: .75rem; font-weight: 600; text-decoration: none; display: inline-block; transition: all .2s; }
 .btn-view:hover { background: linear-gradient(135deg, #5A5935, #7A7948); color: white; }
-.btn-portal { background: rgba(107,106,69,.1); color: #6B6A45; border: 1px solid rgba(107,106,69,.2); border-radius: 6px; padding: .45rem .9rem; font-size: .75rem; text-decoration: none; display: inline-block; transition: all .2s; }
-.btn-portal:hover { background: rgba(107,106,69,.18); color: #3A352C; }
+.btn-portal { background: rgba(107,91,77,.1); color: #6B5B4D; border: 1px solid rgba(107,91,77,.2); border-radius: 6px; padding: .45rem .9rem; font-size: .75rem; text-decoration: none; display: inline-block; transition: all .2s; }
+.btn-portal:hover { background: rgba(107,91,77,.18); color: #3D2E24; }
 
-.empty-state { text-align: center; padding: 4rem 2rem; color: #6B6A45; }
+.empty-state { text-align: center; padding: 4rem 2rem; color: #6B5B4D; }
 .empty-state h2 { font-family: 'Playfair Display', Georgia, serif; font-weight: 400; }
 
 .search-bar { display: flex; gap: .75rem; align-items: center; }
-.search-input { border: 1px solid rgba(107,106,69,.25); border-radius: 8px; padding: .45rem .75rem; font-size: .8rem; color: #3A352C; outline: none; min-width: 200px; }
-.search-input:focus { border-color: #6B6A45; }
+.search-input { border: 1px solid rgba(107,91,77,.25); border-radius: 8px; padding: .45rem .75rem; font-size: .8rem; color: #3D2E24; outline: none; min-width: 200px; }
+.search-input:focus { border-color: #6B5B4D; }
 </style>
 
 <div id="lender-clients">
-  <div class="page-header">
-    <div>
-      <h1>My Clients</h1>
-      <p>All linked homeowner clients — live portal data at a glance</p>
-    </div>
-    <div class="search-bar">
-      <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)">
-      <a href="{{ url_for('lender_referrals') }}" class="btn-view">+ Invite Client</a>
-    </div>
-  </div>
+ <div class="page-header">
+ <div>
+ <h1>My Clients</h1>
+ <p>All linked homeowner clients — live portal data at a glance</p>
+ </div>
+ <div class="search-bar">
+ <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)">
+ <a href="{{ url_for('lender_referrals') }}" class="btn-view">+ Invite Client</a>
+ </div>
+ </div>
 
-  {% if clients %}
-  <div class="stat-bar">
-    <div class="stat-pill"><strong>{{ clients|length }}</strong> Total Clients</div>
-    <div class="stat-pill"><strong>{{ clients|selectattr('value_estimate')|list|length }}</strong> With Home Data</div>
-    <div class="stat-pill"><strong>{{ clients|selectattr('loan_balance')|list|length }}</strong> With Loan Data</div>
-  </div>
-  {% endif %}
+ {% if clients %}
+ <div class="stat-bar">
+ <div class="stat-pill"><strong>{{ clients|length }}</strong> Total Clients</div>
+ <div class="stat-pill"><strong>{{ clients|selectattr('value_estimate')|list|length }}</strong> With Home Data</div>
+ <div class="stat-pill"><strong>{{ clients|selectattr('loan_balance')|list|length }}</strong> With Loan Data</div>
+ </div>
+ {% endif %}
 
-  {% if clients %}
-  <div class="client-grid" id="clientGrid">
-    {% for client in clients %}
-    <div class="client-card" data-name="{{ (client.name or '')|lower }}" data-address="{{ (client.property_address or '')|lower }}">
-      <div class="client-card__header">
-        <div class="client-avatar">{{ (client.name or 'C')[0]|upper }}</div>
-        <div style="flex:1">
-          <p class="client-name">{{ client.name or 'Unnamed Client' }}</p>
-          <p class="client-email">{{ client.email or '—' }}</p>
-          {% if client.agent_name %}
-          <span class="agent-badge">🏡 Agent: {{ client.agent_name }}</span>
-          {% endif %}
-        </div>
-      </div>
+ {% if clients %}
+ <div class="client-grid" id="clientGrid">
+ {% for client in clients %}
+ <div class="client-card" data-name="{{ (client.name or '')|lower }}" data-address="{{ (client.property_address or '')|lower }}">
+ <div class="client-card__header">
+ <div class="client-avatar">{{ (client.name or 'C')[0]|upper }}</div>
+ <div style="flex:1">
+ <p class="client-name">{{ client.name or 'Unnamed Client' }}</p>
+ <p class="client-email">{{ client.email or '—' }}</p>
+ {% if client.agent_name %}
+ <span class="agent-badge"> Agent: {{ client.agent_name }}</span>
+ {% endif %}
+ </div>
+ </div>
 
-      <div class="client-card__body">
-        <div class="data-row">
-          <span class="data-row__label">🏠 Property</span>
-          <span class="data-row__val">{{ client.property_address or '—' }}</span>
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">💰 Home Value</span>
-          {% if client.value_estimate %}<span class="data-row__val">${{ "{:,.0f}".format(client.value_estimate) }}</span>
-          {% else %}<span class="data-row__val muted">Not set</span>{% endif %}
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">📈 Equity</span>
-          {% if client.equity_estimate %}<span class="data-row__val green">${{ "{:,.0f}".format(client.equity_estimate) }}</span>
-          {% else %}<span class="data-row__val muted">Not set</span>{% endif %}
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">🏦 Loan Balance</span>
-          {% if client.loan_balance %}<span class="data-row__val">${{ "{:,.0f}".format(client.loan_balance) }}</span>
-          {% else %}<span class="data-row__val muted">—</span>{% endif %}
-        </div>
-        <div class="data-row">
-          <span class="data-row__label">📉 Rate</span>
-          {% if client.loan_rate %}<span class="data-row__val">{{ client.loan_rate }}%</span>
-          {% else %}<span class="data-row__val muted">—</span>{% endif %}
-        </div>
-        {% if client.crm_status %}
-        <div class="data-row">
-          <span class="data-row__label">CRM Status</span>
-          <span class="data-row__val">{{ client.crm_status }}</span>
-        </div>
-        {% endif %}
-      </div>
+ <div class="client-card__body">
+ <div class="data-row">
+ <span class="data-row__label"> Property</span>
+ <span class="data-row__val">{{ client.property_address or '—' }}</span>
+ </div>
+ <div class="data-row">
+ <span class="data-row__label"> Home Value</span>
+ {% if client.value_estimate %}<span class="data-row__val">${{ "{:,.0f}".format(client.value_estimate) }}</span>
+ {% else %}<span class="data-row__val muted">Not set</span>{% endif %}
+ </div>
+ <div class="data-row">
+ <span class="data-row__label"> Equity</span>
+ {% if client.equity_estimate %}<span class="data-row__val green">${{ "{:,.0f}".format(client.equity_estimate) }}</span>
+ {% else %}<span class="data-row__val muted">Not set</span>{% endif %}
+ </div>
+ <div class="data-row">
+ <span class="data-row__label"> Loan Balance</span>
+ {% if client.loan_balance %}<span class="data-row__val">${{ "{:,.0f}".format(client.loan_balance) }}</span>
+ {% else %}<span class="data-row__val muted">—</span>{% endif %}
+ </div>
+ <div class="data-row">
+ <span class="data-row__label"> Rate</span>
+ {% if client.loan_rate %}<span class="data-row__val">{{ client.loan_rate }}%</span>
+ {% else %}<span class="data-row__val muted">—</span>{% endif %}
+ </div>
+ {% if client.crm_status %}
+ <div class="data-row">
+ <span class="data-row__label">CRM Status</span>
+ <span class="data-row__val">{{ client.crm_status }}</span>
+ </div>
+ {% endif %}
+ </div>
 
-      <div class="client-card__footer">
-        <a href="{{ url_for('lender_client_detail', homeowner_id=client.id) }}" class="btn-view">View Full Profile</a>
-        <a href="{{ url_for('homeowner_overview', homeowner_id=client.id) }}" class="btn-portal">View Portal →</a>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
+ <div class="client-card__footer">
+ <a href="{{ url_for('lender_client_detail', homeowner_id=client.id) }}" class="btn-view">View Full Profile</a>
+ <a href="{{ url_for('homeowner_overview', homeowner_id=client.id) }}" class="btn-portal">View Portal →</a>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
 
-  {% else %}
-  <div class="empty-state">
-    <div style="font-size:3rem;margin-bottom:1rem">🏦</div>
-    <h2>No Clients Yet</h2>
-    <p>Share your referral link and your clients will appear here automatically when they sign up.</p>
-    <a href="{{ url_for('lender_referrals') }}" style="background:linear-gradient(135deg,#6B6A45,#8B8A5A);color:white;border-radius:8px;padding:.7rem 1.5rem;text-decoration:none;font-size:.85rem;font-weight:600;display:inline-block">Get My Referral Link</a>
-  </div>
-  {% endif %}
+ {% else %}
+ <div class="empty-state">
+ <div style="font-size:3rem;margin-bottom:1rem"></div>
+ <h2>No Clients Yet</h2>
+ <p>Share your referral link and your clients will appear here automatically when they sign up.</p>
+ <a href="{{ url_for('lender_referrals') }}" style="background:linear-gradient(135deg,#6B5B4D,#8B8A5A);color:white;border-radius:8px;padding:.7rem 1.5rem;text-decoration:none;font-size:.85rem;font-weight:600;display:inline-block">Get My Referral Link</a>
+ </div>
+ {% endif %}
 </div>
 
 <script>
 function filterClients(q) {
-  q = q.toLowerCase().trim();
-  document.querySelectorAll('#clientGrid .client-card').forEach(function(card) {
-    var name = card.dataset.name || '';
-    var addr = card.dataset.address || '';
-    card.style.display = (!q || name.includes(q) || addr.includes(q)) ? '' : 'none';
-  });
+ q = q.toLowerCase().trim();
+ document.querySelectorAll('#clientGrid .client-card').forEach(function(card) {
+ var name = card.dataset.name || '';
+ var addr = card.dataset.address || '';
+ card.style.display = (!q || name.includes(q) || addr.includes(q)) ? '' : 'none';
+ });
 }
 </script>
 {% endblock %}

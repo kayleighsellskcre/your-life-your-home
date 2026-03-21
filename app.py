@@ -12042,7 +12042,6 @@ def agent_financials():
     if not user or user.get("role") not in ("agent", "admin"):
         return redirect(url_for("login", role="agent"))
     uid = user["id"]
-    conn = get_db_connection()
 
     # Year filter
     year = request.args.get("year", str(datetime.datetime.now().year))
@@ -12051,31 +12050,37 @@ def agent_financials():
     except Exception:
         year = datetime.datetime.now().year
 
-    # Commissions
-    commissions = [dict(r) for r in conn.execute(
-        "SELECT * FROM agent_commissions WHERE agent_user_id=? AND (close_date LIKE ? OR close_date='') ORDER BY close_date DESC",
-        (uid, f"{year}%")
-    ).fetchall()]
+    try:
+        conn = get_db_connection()
 
-    # Expenses
-    expenses = [dict(r) for r in conn.execute(
-        "SELECT * FROM agent_expenses WHERE agent_user_id=? AND expense_date LIKE ? ORDER BY expense_date DESC",
-        (uid, f"{year}%")
-    ).fetchall()]
+        # Commissions
+        commissions = [dict(r) for r in conn.execute(
+            "SELECT * FROM agent_commissions WHERE agent_user_id=? AND (close_date LIKE ? OR close_date='') ORDER BY close_date DESC",
+            (uid, f"{year}%")
+        ).fetchall()]
 
-    # Mileage
-    mileage_logs = [dict(r) for r in conn.execute(
-        "SELECT * FROM agent_mileage WHERE agent_user_id=? AND trip_date LIKE ? ORDER BY trip_date DESC",
-        (uid, f"{year}%")
-    ).fetchall()]
+        # Expenses
+        expenses = [dict(r) for r in conn.execute(
+            "SELECT * FROM agent_expenses WHERE agent_user_id=? AND expense_date LIKE ? ORDER BY expense_date DESC",
+            (uid, f"{year}%")
+        ).fetchall()]
 
-    # Goals
-    goals = [dict(r) for r in conn.execute(
-        "SELECT * FROM agent_financial_goals WHERE agent_user_id=? AND goal_year=?",
-        (uid, year)
-    ).fetchall()]
+        # Mileage
+        mileage_logs = [dict(r) for r in conn.execute(
+            "SELECT * FROM agent_mileage WHERE agent_user_id=? AND trip_date LIKE ? ORDER BY trip_date DESC",
+            (uid, f"{year}%")
+        ).fetchall()]
 
-    conn.close()
+        # Goals
+        goals = [dict(r) for r in conn.execute(
+            "SELECT * FROM agent_financial_goals WHERE agent_user_id=? AND goal_year=?",
+            (uid, year)
+        ).fetchall()]
+
+        conn.close()
+    except Exception as db_err:
+        app.logger.error(f"agent_financials DB error: {db_err}")
+        commissions, expenses, mileage_logs, goals = [], [], [], []
 
     # Computed summaries
     ytd_gci = sum(c.get("net_commission", 0) or 0 for c in commissions if c.get("status") == "paid")
@@ -12444,7 +12449,6 @@ def lender_financials():
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
     uid = user["id"]
-    conn = get_db_connection()
 
     year = request.args.get("year", str(datetime.datetime.now().year))
     try:
@@ -12452,25 +12456,31 @@ def lender_financials():
     except Exception:
         year = datetime.datetime.now().year
 
-    # Revenue (closed loans)
-    revenues = [dict(r) for r in conn.execute(
-        "SELECT * FROM lender_loan_revenue WHERE lender_user_id=? AND close_date LIKE ? ORDER BY close_date DESC",
-        (uid, f"{year}%")
-    ).fetchall()]
+    try:
+        conn = get_db_connection()
 
-    # Expenses
-    expenses = [dict(r) for r in conn.execute(
-        "SELECT * FROM lender_expenses WHERE lender_user_id=? AND expense_date LIKE ? ORDER BY expense_date DESC",
-        (uid, f"{year}%")
-    ).fetchall()]
+        # Revenue (closed loans)
+        revenues = [dict(r) for r in conn.execute(
+            "SELECT * FROM lender_loan_revenue WHERE lender_user_id=? AND close_date LIKE ? ORDER BY close_date DESC",
+            (uid, f"{year}%")
+        ).fetchall()]
 
-    # Goals
-    goals = [dict(r) for r in conn.execute(
-        "SELECT * FROM lender_financial_goals WHERE lender_user_id=? AND goal_year=?",
-        (uid, year)
-    ).fetchall()]
+        # Expenses
+        expenses = [dict(r) for r in conn.execute(
+            "SELECT * FROM lender_expenses WHERE lender_user_id=? AND expense_date LIKE ? ORDER BY expense_date DESC",
+            (uid, f"{year}%")
+        ).fetchall()]
 
-    conn.close()
+        # Goals
+        goals = [dict(r) for r in conn.execute(
+            "SELECT * FROM lender_financial_goals WHERE lender_user_id=? AND goal_year=?",
+            (uid, year)
+        ).fetchall()]
+
+        conn.close()
+    except Exception as db_err:
+        app.logger.error(f"lender_financials DB error: {db_err}")
+        revenues, expenses, goals = [], [], []
 
     ytd_revenue = sum(r.get("origination_fee_amt", 0) or 0 for r in revenues if r.get("status") == "funded")
     ytd_projected = sum(r.get("origination_fee_amt", 0) or 0 for r in revenues if r.get("status") == "projected")

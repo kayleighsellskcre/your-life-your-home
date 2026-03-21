@@ -4,167 +4,167 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3 mb-2">Conversation Transcript</h1>
-            <p class="text-muted">
-                {% if conversation.homeowner_name %}
-                {{ conversation.homeowner_name }}
-                {% if conversation.homeowner_email %}
-                ({{ conversation.homeowner_email }})
-                {% endif %}
-                {% else %}
-                Anonymous visitor
-                {% endif %}
-            </p>
-        </div>
-        <div class="col-auto">
-            <a href="{{ url_for('agent_concierge_conversations') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Conversations
-            </a>
-        </div>
-    </div>
+ <div class="row mb-4">
+ <div class="col">
+ <h1 class="h3 mb-2">Conversation Transcript</h1>
+ <p class="text-muted">
+ {% if conversation.homeowner_name %}
+ {{ conversation.homeowner_name }}
+ {% if conversation.homeowner_email %}
+ ({{ conversation.homeowner_email }})
+ {% endif %}
+ {% else %}
+ Anonymous visitor
+ {% endif %}
+ </p>
+ </div>
+ <div class="col-auto">
+ <a href="{{ url_for('agent_concierge_conversations') }}" class="btn btn-outline-secondary">
+ <i class="fas fa-arrow-left"></i> Back to Conversations
+ </a>
+ </div>
+ </div>
 
-    <div class="row">
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">Messages</h5>
-                </div>
-                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
-                    {% if messages %}
-                    <div class="conversation-thread">
-                        {% for msg in messages %}
-                        {% if msg.role != 'system' %}
-                        <div class="message-bubble {{ msg.role }} mb-3">
-                            <div class="message-header mb-1">
-                                <small class="text-muted">
-                                    {% if msg.role == 'user' %}
-                                    <i class="fas fa-user"></i> Homeowner
-                                    {% else %}
-                                    <i class="fas fa-robot"></i> AI Concierge
-                                    {% endif %}
-                                    - {{ msg.created_at[:16] if msg.created_at else '' }}
-                                </small>
-                            </div>
-                            <div class="message-content">
-                                {{ msg.content }}
-                            </div>
-                        </div>
-                        {% endif %}
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-comments fa-3x mb-3 opacity-25"></i>
-                        <p>No messages in this conversation</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
+ <div class="row">
+ <div class="col-lg-8">
+ <div class="card border-0 shadow-sm">
+ <div class="card-header bg-white border-bottom">
+ <h5 class="mb-0">Messages</h5>
+ </div>
+ <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+ {% if messages %}
+ <div class="conversation-thread">
+ {% for msg in messages %}
+ {% if msg.role != 'system' %}
+ <div class="message-bubble {{ msg.role }} mb-3">
+ <div class="message-header mb-1">
+ <small class="text-muted">
+ {% if msg.role == 'user' %}
+ <i class="fas fa-user"></i> Homeowner
+ {% else %}
+ <i class="fas fa-robot"></i> AI Concierge
+ {% endif %}
+ - {{ msg.created_at[:16] if msg.created_at else '' }}
+ </small>
+ </div>
+ <div class="message-content">
+ {{ msg.content }}
+ </div>
+ </div>
+ {% endif %}
+ {% endfor %}
+ </div>
+ {% else %}
+ <div class="text-center py-5 text-muted">
+ <i class="fas fa-comments fa-3x mb-3 opacity-25"></i>
+ <p>No messages in this conversation</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ </div>
 
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm mb-3">
-                <div class="card-header bg-white border-bottom">
-                    <h6 class="mb-0">Conversation Info</h6>
-                </div>
-                <div class="card-body">
-                    <table class="table table-sm mb-0">
-                        <tr>
-                            <td class="text-muted">Status:</td>
-                            <td>
-                                {% if conversation.status == 'active' %}
-                                <span class="badge bg-success">Active</span>
-                                {% elif conversation.status == 'completed' %}
-                                <span class="badge bg-primary">Completed</span>
-                                {% else %}
-                                <span class="badge bg-secondary">Abandoned</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Lead Captured:</td>
-                            <td>
-                                {% if conversation.lead_captured %}
-                                <i class="fas fa-check-circle text-success"></i> Yes
-                                {% else %}
-                                <i class="fas fa-times-circle text-muted"></i> No
-                                {% endif %}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Started:</td>
-                            <td>{{ conversation.started_at[:16] if conversation.started_at else '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Last Activity:</td>
-                            <td>{{ conversation.last_message_at[:16] if conversation.last_message_at else '-' }}</td>
-                        </tr>
-                        <tr>
-                            <td class="text-muted">Session ID:</td>
-                            <td><small class="font-monospace">{{ conversation.session_id[:12] }}...</small></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
+ <div class="col-lg-4">
+ <div class="card border-0 shadow-sm mb-3">
+ <div class="card-header bg-white border-bottom">
+ <h6 class="mb-0">Conversation Info</h6>
+ </div>
+ <div class="card-body">
+ <table class="table table-sm mb-0">
+ <tr>
+ <td class="text-muted">Status:</td>
+ <td>
+ {% if conversation.status == 'active' %}
+ <span class="badge bg-success">Active</span>
+ {% elif conversation.status == 'completed' %}
+ <span class="badge bg-primary">Completed</span>
+ {% else %}
+ <span class="badge bg-secondary">Abandoned</span>
+ {% endif %}
+ </td>
+ </tr>
+ <tr>
+ <td class="text-muted">Lead Captured:</td>
+ <td>
+ {% if conversation.lead_captured %}
+ <i class="fas fa-check-circle text-success"></i> Yes
+ {% else %}
+ <i class="fas fa-times-circle text-muted"></i> No
+ {% endif %}
+ </td>
+ </tr>
+ <tr>
+ <td class="text-muted">Started:</td>
+ <td>{{ conversation.started_at[:16] if conversation.started_at else '-' }}</td>
+ </tr>
+ <tr>
+ <td class="text-muted">Last Activity:</td>
+ <td>{{ conversation.last_message_at[:16] if conversation.last_message_at else '-' }}</td>
+ </tr>
+ <tr>
+ <td class="text-muted">Session ID:</td>
+ <td><small class="font-monospace">{{ conversation.session_id[:12] }}...</small></td>
+ </tr>
+ </table>
+ </div>
+ </div>
 
-            {% if conversation.homeowner_name %}
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h6 class="mb-0">Homeowner Details</h6>
-                </div>
-                <div class="card-body">
-                    <div class="mb-2">
-                        <strong>{{ conversation.homeowner_name }}</strong>
-                    </div>
-                    {% if conversation.homeowner_email %}
-                    <div class="text-muted mb-1">
-                        <i class="fas fa-envelope"></i> {{ conversation.homeowner_email }}
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+ {% if conversation.homeowner_name %}
+ <div class="card border-0 shadow-sm">
+ <div class="card-header bg-white border-bottom">
+ <h6 class="mb-0">Homeowner Details</h6>
+ </div>
+ <div class="card-body">
+ <div class="mb-2">
+ <strong>{{ conversation.homeowner_name }}</strong>
+ </div>
+ {% if conversation.homeowner_email %}
+ <div class="text-muted mb-1">
+ <i class="fas fa-envelope"></i> {{ conversation.homeowner_email }}
+ </div>
+ {% endif %}
+ </div>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 </div>
 
 <style>
 .conversation-thread {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+ display: flex;
+ flex-direction: column;
+ gap: 8px;
 }
 
 .message-bubble {
-    max-width: 80%;
+ max-width: 80%;
 }
 
 .message-bubble.user {
-    align-self: flex-end;
+ align-self: flex-end;
 }
 
 .message-bubble.assistant {
-    align-self: flex-start;
+ align-self: flex-start;
 }
 
 .message-content {
-    padding: 12px 16px;
-    border-radius: 12px;
-    line-height: 1.5;
+ padding: 12px 16px;
+ border-radius: 12px;
+ line-height: 1.5;
 }
 
 .message-bubble.user .message-content {
-    background: #2c5f2d;
-    color: white;
-    border-bottom-right-radius: 4px;
+ background: #2c5f2d;
+ color: white;
+ border-bottom-right-radius: 4px;
 }
 
 .message-bubble.assistant .message-content {
-    background: #f5f5f5;
-    color: #333;
-    border-bottom-left-radius: 4px;
+ background: #f5f5f5;
+ color: #333;
+ border-bottom-left-radius: 4px;
 }
 </style>
 {% endblock %}

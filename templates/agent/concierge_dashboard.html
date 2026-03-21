@@ -4,211 +4,211 @@
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="h3 mb-2">AI Homeowner Concierge</h1>
-            <p class="text-muted">Luxury-grade automated lead qualification and vendor routing</p>
-        </div>
-        <div class="col-auto">
-            <a href="{{ url_for('agent_concierge_settings') }}" class="btn btn-outline-primary me-2">
-                <i class="fas fa-cog"></i> Settings
-            </a>
-            <a href="{{ url_for('agent_concierge_vendors') }}" class="btn btn-primary">
-                <i class="fas fa-users"></i> Manage Vendors
-            </a>
-        </div>
-    </div>
+ <div class="row mb-4">
+ <div class="col">
+ <h1 class="h3 mb-2">AI Homeowner Concierge</h1>
+ <p class="text-muted">Luxury-grade automated lead qualification and vendor routing</p>
+ </div>
+ <div class="col-auto">
+ <a href="{{ url_for('agent_concierge_settings') }}" class="btn btn-outline-primary me-2">
+ <i class="fas fa-cog"></i> Settings
+ </a>
+ <a href="{{ url_for('agent_concierge_vendors') }}" class="btn btn-primary">
+ <i class="fas fa-users"></i> Manage Vendors
+ </a>
+ </div>
+ </div>
 
-    <!-- Stats Overview -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="p-3 bg-primary bg-opacity-10 rounded">
-                                <i class="fas fa-comments fa-2x text-primary"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Total Conversations</h6>
-                            <h3 class="mb-0">{{ stats.total_conversations }}</h3>
-                            <small class="text-success">{{ stats.active_conversations }} active (24h)</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+ <!-- Stats Overview -->
+ <div class="row g-3 mb-4">
+ <div class="col-md-4">
+ <div class="card border-0 shadow-sm">
+ <div class="card-body">
+ <div class="d-flex align-items-center">
+ <div class="flex-shrink-0">
+ <div class="p-3 bg-primary bg-opacity-10 rounded">
+ <i class="fas fa-comments fa-2x text-primary"></i>
+ </div>
+ </div>
+ <div class="flex-grow-1 ms-3">
+ <h6 class="text-muted mb-1">Total Conversations</h6>
+ <h3 class="mb-0">{{ stats.total_conversations }}</h3>
+ <small class="text-success">{{ stats.active_conversations }} active (24h)</small>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="p-3 bg-danger bg-opacity-10 rounded">
-                                <i class="fas fa-fire fa-2x text-danger"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Qualified Leads</h6>
-                            <h3 class="mb-0">{{ stats.total_leads }}</h3>
-                            <small class="text-danger">{{ stats.hot_leads }} hot 🔥</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+ <div class="col-md-4">
+ <div class="card border-0 shadow-sm">
+ <div class="card-body">
+ <div class="d-flex align-items-center">
+ <div class="flex-shrink-0">
+ <div class="p-3 bg-danger bg-opacity-10 rounded">
+ <i class="fas fa-fire fa-2x text-danger"></i>
+ </div>
+ </div>
+ <div class="flex-grow-1 ms-3">
+ <h6 class="text-muted mb-1">Qualified Leads</h6>
+ <h3 class="mb-0">{{ stats.total_leads }}</h3>
+ <small class="text-danger">{{ stats.hot_leads }} hot </small>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-shrink-0">
-                            <div class="p-3 bg-success bg-opacity-10 rounded">
-                                <i class="fas fa-dollar-sign fa-2x text-success"></i>
-                            </div>
-                        </div>
-                        <div class="flex-grow-1 ms-3">
-                            <h6 class="text-muted mb-1">Monthly Revenue</h6>
-                            <h3 class="mb-0">${{ "{:,.0f}".format(stats.monthly_revenue) }}</h3>
-                            <small class="text-muted">{{ stats.active_vendors }} active vendors</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="col-md-4">
+ <div class="card border-0 shadow-sm">
+ <div class="card-body">
+ <div class="d-flex align-items-center">
+ <div class="flex-shrink-0">
+ <div class="p-3 bg-success bg-opacity-10 rounded">
+ <i class="fas fa-dollar-sign fa-2x text-success"></i>
+ </div>
+ </div>
+ <div class="flex-grow-1 ms-3">
+ <h6 class="text-muted mb-1">Monthly Revenue</h6>
+ <h3 class="mb-0">${{ "{:,.0f}".format(stats.monthly_revenue) }}</h3>
+ <small class="text-muted">{{ stats.active_vendors }} active vendors</small>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Quick Access Links -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">Your Concierge URL</h5>
-                </div>
-                <div class="card-body">
-                    <p class="text-muted mb-2">Share this link with homeowners or embed on your website:</p>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="concierge-url" value="{{ concierge_url }}" readonly>
-                        <button class="btn btn-outline-secondary" type="button" onclick="copyUrl()">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                    </div>
-                    <div class="mt-3">
-                        <a href="{{ concierge_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                            <i class="fas fa-external-link-alt"></i> Preview Landing Page
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+ <!-- Quick Access Links -->
+ <div class="row mb-4">
+ <div class="col-md-8">
+ <div class="card border-0 shadow-sm">
+ <div class="card-header bg-white border-bottom">
+ <h5 class="mb-0">Your Concierge URL</h5>
+ </div>
+ <div class="card-body">
+ <p class="text-muted mb-2">Share this link with homeowners or embed on your website:</p>
+ <div class="input-group">
+ <input type="text" class="form-control" id="concierge-url" value="{{ concierge_url }}" readonly>
+ <button class="btn btn-outline-secondary" type="button" onclick="copyUrl()">
+ <i class="fas fa-copy"></i> Copy
+ </button>
+ </div>
+ <div class="mt-3">
+ <a href="{{ concierge_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+ <i class="fas fa-external-link-alt"></i> Preview Landing Page
+ </a>
+ </div>
+ </div>
+ </div>
+ </div>
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-list"></i> View All Leads
-                        </a>
-                        <a href="{{ url_for('agent_concierge_conversations') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-comments"></i> Conversations
-                        </a>
-                        <a href="{{ url_for('agent_concierge_vendors') }}" class="btn btn-outline-success">
-                            <i class="fas fa-users"></i> Vendor Performance
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+ <div class="col-md-4">
+ <div class="card border-0 shadow-sm h-100">
+ <div class="card-header bg-white border-bottom">
+ <h5 class="mb-0">Quick Actions</h5>
+ </div>
+ <div class="card-body">
+ <div class="d-grid gap-2">
+ <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-outline-primary">
+ <i class="fas fa-list"></i> View All Leads
+ </a>
+ <a href="{{ url_for('agent_concierge_conversations') }}" class="btn btn-outline-secondary">
+ <i class="fas fa-comments"></i> Conversations
+ </a>
+ <a href="{{ url_for('agent_concierge_vendors') }}" class="btn btn-outline-success">
+ <i class="fas fa-users"></i> Vendor Performance
+ </a>
+ </div>
+ </div>
+ </div>
+ </div>
+ </div>
 
-    <!-- Recent Leads -->
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white border-bottom">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Recent Leads</h5>
-                <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-sm btn-link">View All</a>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            {% if recent_leads %}
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Homeowner</th>
-                            <th>Category</th>
-                            <th>Urgency</th>
-                            <th>Vendor</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for lead in recent_leads %}
-                        <tr>
-                            <td>
-                                <strong>{{ lead.homeowner_name or 'Anonymous' }}</strong>
-                                {% if lead.homeowner_email %}
-                                <br><small class="text-muted">{{ lead.homeowner_email }}</small>
-                                {% endif %}
-                            </td>
-                            <td><span class="badge bg-secondary">{{ lead.category }}</span></td>
-                            <td>
-                                {% if lead.urgency == 'ready_now' %}
-                                <span class="badge bg-danger">🔥 Ready Now</span>
-                                {% elif lead.urgency == 'exploring' %}
-                                <span class="badge bg-warning text-dark">🟡 Exploring</span>
-                                {% else %}
-                                <span class="badge bg-info">🧊 Future</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ lead.vendor_name or 'Not assigned' }}</td>
-                            <td>
-                                {% if lead.status == 'new' %}
-                                <span class="badge bg-primary">New</span>
-                                {% elif lead.status == 'sent_to_vendor' %}
-                                <span class="badge bg-info">Sent to Vendor</span>
-                                {% elif lead.status == 'contacted' %}
-                                <span class="badge bg-warning">Contacted</span>
-                                {% elif lead.status == 'closed' %}
-                                <span class="badge bg-success">Closed</span>
-                                {% else %}
-                                <span class="badge bg-secondary">{{ lead.status }}</span>
-                                {% endif %}
-                            </td>
-                            <td><small class="text-muted">{{ lead.routed_at[:10] }}</small></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div class="text-center py-5 text-muted">
-                <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                <p>No leads yet. Share your concierge URL to start receiving qualified leads.</p>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+ <!-- Recent Leads -->
+ <div class="card border-0 shadow-sm">
+ <div class="card-header bg-white border-bottom">
+ <div class="d-flex justify-content-between align-items-center">
+ <h5 class="mb-0">Recent Leads</h5>
+ <a href="{{ url_for('agent_concierge_leads') }}" class="btn btn-sm btn-link">View All</a>
+ </div>
+ </div>
+ <div class="card-body p-0">
+ {% if recent_leads %}
+ <div class="table-responsive">
+ <table class="table table-hover mb-0">
+ <thead class="table-light">
+ <tr>
+ <th>Homeowner</th>
+ <th>Category</th>
+ <th>Urgency</th>
+ <th>Vendor</th>
+ <th>Status</th>
+ <th>Date</th>
+ </tr>
+ </thead>
+ <tbody>
+ {% for lead in recent_leads %}
+ <tr>
+ <td>
+ <strong>{{ lead.homeowner_name or 'Anonymous' }}</strong>
+ {% if lead.homeowner_email %}
+ <br><small class="text-muted">{{ lead.homeowner_email }}</small>
+ {% endif %}
+ </td>
+ <td><span class="badge bg-secondary">{{ lead.category }}</span></td>
+ <td>
+ {% if lead.urgency == 'ready_now' %}
+ <span class="badge bg-danger"> Ready Now</span>
+ {% elif lead.urgency == 'exploring' %}
+ <span class="badge bg-warning text-dark"> Exploring</span>
+ {% else %}
+ <span class="badge bg-info"> Future</span>
+ {% endif %}
+ </td>
+ <td>{{ lead.vendor_name or 'Not assigned' }}</td>
+ <td>
+ {% if lead.status == 'new' %}
+ <span class="badge bg-primary">New</span>
+ {% elif lead.status == 'sent_to_vendor' %}
+ <span class="badge bg-info">Sent to Vendor</span>
+ {% elif lead.status == 'contacted' %}
+ <span class="badge bg-warning">Contacted</span>
+ {% elif lead.status == 'closed' %}
+ <span class="badge bg-success">Closed</span>
+ {% else %}
+ <span class="badge bg-secondary">{{ lead.status }}</span>
+ {% endif %}
+ </td>
+ <td><small class="text-muted">{{ lead.routed_at[:10] }}</small></td>
+ </tr>
+ {% endfor %}
+ </tbody>
+ </table>
+ </div>
+ {% else %}
+ <div class="text-center py-5 text-muted">
+ <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
+ <p>No leads yet. Share your concierge URL to start receiving qualified leads.</p>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 </div>
 
 <script>
 function copyUrl() {
-    const urlInput = document.getElementById('concierge-url');
-    urlInput.select();
-    document.execCommand('copy');
-    
-    const btn = event.target.closest('button');
-    const originalHtml = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    
-    setTimeout(() => {
-        btn.innerHTML = originalHtml;
-    }, 2000);
+ const urlInput = document.getElementById('concierge-url');
+ urlInput.select();
+ document.execCommand('copy');
+ 
+ const btn = event.target.closest('button');
+ const originalHtml = btn.innerHTML;
+ btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+ 
+ setTimeout(() => {
+ btn.innerHTML = originalHtml;
+ }, 2000);
 }
 </script>
 {% endblock %}

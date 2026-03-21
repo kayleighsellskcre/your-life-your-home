@@ -2,821 +2,821 @@
 
 {% block agent_content %}
 <style>
-  .feature-spotlight-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-  }
+ .feature-spotlight-container {
+ max-width: 1200px;
+ margin: 0 auto;
+ padding: 2rem;
+ }
 
-  .premium-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-    padding-bottom: 1.5rem;
-    border-bottom: 2px solid rgba(200, 180, 151, 0.2);
-  }
+ .premium-header {
+ text-align: center;
+ margin-bottom: 2.5rem;
+ padding-bottom: 1.5rem;
+ border-bottom: 2px solid rgba(200, 180, 151, 0.2);
+ }
 
-  .premium-header h1 {
-    font-family: var(--font-heading);
-    font-size: 2rem;
-    color: var(--charcoal-brown);
-    margin: 0 0 0.5rem 0;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
+ .premium-header h1 {
+ font-family: var(--font-heading);
+ font-size: 2rem;
+ color: var(--charcoal-brown);
+ margin: 0 0 0.5rem 0;
+ font-weight: 600;
+ letter-spacing: -0.02em;
+ }
 
-  .premium-header p {
-    color: rgba(58, 53, 44, 0.7);
-    font-size: 0.95rem;
-    margin: 0;
-  }
+ .premium-header p {
+ color: rgba(61, 46, 36, 0.7);
+ font-size: 0.95rem;
+ margin: 0;
+ }
 
-  .card-premium {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.08);
-  }
+ .card-premium {
+ background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 242, 232, 0.95) 100%);
+ border-radius: 16px;
+ padding: 2rem;
+ margin-bottom: 2rem;
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.08);
+ }
 
-  .form-group {
-    margin-bottom: 1.5rem;
-  }
+ .form-group {
+ margin-bottom: 1.5rem;
+ }
 
-  .form-group label {
-    display: block;
-    font-weight: 600;
-    color: var(--olive-green);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.5rem;
-  }
+ .form-group label {
+ display: block;
+ font-weight: 600;
+ color: var(--olive-green);
+ font-size: 0.75rem;
+ text-transform: uppercase;
+ letter-spacing: 0.1em;
+ margin-bottom: 0.5rem;
+ }
 
-  .premium-input,
-  .premium-select,
-  .premium-textarea {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    border: 1px solid rgba(200, 180, 151, 0.3);
-    border-radius: 8px;
-    font-size: 0.95rem;
-    color: var(--charcoal-brown);
-    background: white;
-    transition: all 0.3s ease;
-    font-family: inherit;
-  }
+ .premium-input,
+ .premium-select,
+ .premium-textarea {
+ width: 100%;
+ padding: 0.875rem 1rem;
+ border: 1px solid rgba(200, 180, 151, 0.3);
+ border-radius: 8px;
+ font-size: 0.95rem;
+ color: var(--charcoal-brown);
+ background: white;
+ transition: all 0.3s ease;
+ font-family: inherit;
+ }
 
-  .premium-input:focus,
-  .premium-select:focus,
-  .premium-textarea:focus {
-    outline: none;
-    border-color: var(--olive-green);
-    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
-  }
+ .premium-input:focus,
+ .premium-select:focus,
+ .premium-textarea:focus {
+ outline: none;
+ border-color: var(--olive-green);
+ box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
+ }
 
-  .premium-textarea {
-    min-height: 100px;
-    resize: vertical;
-  }
+ .premium-textarea {
+ min-height: 100px;
+ resize: vertical;
+ }
 
-  .feature-card {
-    background: white;
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
+ .feature-card {
+ background: white;
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: 12px;
+ padding: 1.5rem;
+ margin-bottom: 1rem;
+ }
 
-  .feature-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
+ .feature-card-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 1rem;
+ }
 
-  .feature-card-title {
-    font-weight: 600;
-    color: var(--charcoal-brown);
-    font-size: 1rem;
-  }
+ .feature-card-title {
+ font-weight: 600;
+ color: var(--charcoal-brown);
+ font-size: 1rem;
+ }
 
-  .btn-remove {
-    background: rgba(198, 107, 61, 0.1);
-    color: rgba(198, 107, 61, 0.9);
-    border: 1px solid rgba(198, 107, 61, 0.3);
-    border-radius: 6px;
-    padding: 0.4rem 0.75rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
+ .btn-remove {
+ background: rgba(198, 107, 61, 0.1);
+ color: rgba(198, 107, 61, 0.9);
+ border: 1px solid rgba(198, 107, 61, 0.3);
+ border-radius: 6px;
+ padding: 0.4rem 0.75rem;
+ font-size: 0.8rem;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ }
 
-  .btn-remove:hover {
-    background: rgba(198, 107, 61, 0.2);
-  }
+ .btn-remove:hover {
+ background: rgba(198, 107, 61, 0.2);
+ }
 
-  .btn-premium {
-    background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 106, 69, 0.95) 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.875rem 2rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 10px rgba(107, 106, 69, 0.3);
-    letter-spacing: 0.02em;
-  }
+ .btn-premium {
+ background: linear-gradient(135deg, var(--olive-green) 0%, rgba(107, 91, 77, 0.95) 100%);
+ color: white;
+ border: none;
+ border-radius: 8px;
+ padding: 0.875rem 2rem;
+ font-size: 0.95rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ box-shadow: 0 2px 10px rgba(107, 91, 77, 0.3);
+ letter-spacing: 0.02em;
+ }
 
-  .btn-premium:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.4);
-  }
+ .btn-premium:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 4px 16px rgba(107, 91, 77, 0.4);
+ }
 
-  .btn-secondary {
-    background: white;
-    color: var(--olive-green);
-    border: 1.5px solid rgba(107, 106, 69, 0.3);
-    border-radius: 8px;
-    padding: 0.875rem 2rem;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
+ .btn-secondary {
+ background: white;
+ color: var(--olive-green);
+ border: 1.5px solid rgba(107, 91, 77, 0.3);
+ border-radius: 8px;
+ padding: 0.875rem 2rem;
+ font-size: 0.95rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.3s ease;
+ }
 
-  .btn-secondary:hover {
-    background: rgba(107, 106, 69, 0.05);
-    border-color: var(--olive-green);
-  }
+ .btn-secondary:hover {
+ background: rgba(107, 91, 77, 0.05);
+ border-color: var(--olive-green);
+ }
 
-  .button-group {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-top: 2rem;
-  }
-  
-  /* Mobile Responsive Styles */
-  @media (max-width: 768px) {
-    .feature-spotlight-container {
-      padding: 1rem !important;
-    }
-    
-    .premium-header {
-      margin-bottom: 1.5rem !important;
-      padding-bottom: 1rem !important;
-    }
-    
-    .premium-header h1 {
-      font-size: 1.5rem !important;
-    }
-    
-    .premium-header p {
-      font-size: 0.9rem !important;
-    }
-    
-    .card-premium {
-      padding: 1.5rem 1rem !important;
-      border-radius: 12px !important;
-    }
-    
-    .feature-card {
-      padding: 1rem !important;
-    }
-    
-    .feature-card-header {
-      flex-direction: column !important;
-      align-items: flex-start !important;
-      gap: 0.75rem !important;
-    }
-    
-    .btn-remove {
-      width: 100% !important;
-      text-align: center !important;
-    }
-    
-    .button-group {
-      flex-direction: column !important;
-      gap: 0.75rem !important;
-      margin-top: 1.5rem !important;
-    }
-    
-    .btn-premium,
-    .btn-secondary {
-      width: 100% !important;
-      margin: 0 !important;
-    }
-    
-    .btn-refine {
-      width: 100% !important;
-      margin-top: 0.75rem !important;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .premium-header h1 {
-      font-size: 1.25rem !important;
-    }
-    
-    .card-premium {
-      padding: 1rem 0.75rem !important;
-    }
-    
-    .feature-card {
-      padding: 0.875rem !important;
-    }
-  }
+ .button-group {
+ display: flex;
+ gap: 1rem;
+ justify-content: center;
+ margin-top: 2rem;
+ }
+ 
+ /* Mobile Responsive Styles */
+ @media (max-width: 768px) {
+ .feature-spotlight-container {
+ padding: 1rem !important;
+ }
+ 
+ .premium-header {
+ margin-bottom: 1.5rem !important;
+ padding-bottom: 1rem !important;
+ }
+ 
+ .premium-header h1 {
+ font-size: 1.5rem !important;
+ }
+ 
+ .premium-header p {
+ font-size: 0.9rem !important;
+ }
+ 
+ .card-premium {
+ padding: 1.5rem 1rem !important;
+ border-radius: 12px !important;
+ }
+ 
+ .feature-card {
+ padding: 1rem !important;
+ }
+ 
+ .feature-card-header {
+ flex-direction: column !important;
+ align-items: flex-start !important;
+ gap: 0.75rem !important;
+ }
+ 
+ .btn-remove {
+ width: 100% !important;
+ text-align: center !important;
+ }
+ 
+ .button-group {
+ flex-direction: column !important;
+ gap: 0.75rem !important;
+ margin-top: 1.5rem !important;
+ }
+ 
+ .btn-premium,
+ .btn-secondary {
+ width: 100% !important;
+ margin: 0 !important;
+ }
+ 
+ .btn-refine {
+ width: 100% !important;
+ margin-top: 0.75rem !important;
+ }
+ }
+ 
+ @media (max-width: 480px) {
+ .premium-header h1 {
+ font-size: 1.25rem !important;
+ }
+ 
+ .card-premium {
+ padding: 1rem 0.75rem !important;
+ }
+ 
+ .feature-card {
+ padding: 0.875rem !important;
+ }
+ }
 </style>
 
 <div class="feature-spotlight-container">
-  <div class="premium-header">
-    <h1>Feature Spotlight Cards</h1>
-    <p>Create elegant, print-ready feature cards for in-home showings</p>
-  </div>
+ <div class="premium-header">
+ <h1>Feature Spotlight Cards</h1>
+ <p>Create elegant, print-ready feature cards for in-home showings</p>
+ </div>
 
-  {% if saved_sets %}
-  <div class="card-premium" style="margin-bottom: 2rem;">
-    <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;">Saved Card Sets</h3>
-    <div style="display: grid; gap: 0.75rem;">
-      {% for card_set in saved_sets %}
-      <div class="saved-set-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border: 1px solid rgba(200, 180, 151, 0.2); border-radius: 8px;">
-        <div>
-          <div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">{{ card_set.set_name }}</div>
-          <div style="font-size: 0.85rem; color: rgba(58, 53, 44, 0.7);">{{ card_set.features|length }} cards • {{ card_set.updated_at }}</div>
-        </div>
-        <div style="display: flex; gap: 0.5rem;">
-          <button type="button" class="btn-secondary" onclick="loadSavedSet({{ card_set.id }})" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
-            Load
-          </button>
-          <button type="button" class="btn-remove" onclick="deleteSavedSet({{ card_set.id }}, '{{ card_set.set_name }}')" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
-            Delete
-          </button>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-  {% endif %}
+ {% if saved_sets %}
+ <div class="card-premium" style="margin-bottom: 2rem;">
+ <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;">Saved Card Sets</h3>
+ <div style="display: grid; gap: 0.75rem;">
+ {% for card_set in saved_sets %}
+ <div class="saved-set-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border: 1px solid rgba(200, 180, 151, 0.2); border-radius: 8px;">
+ <div>
+ <div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">{{ card_set.set_name }}</div>
+ <div style="font-size: 0.85rem; color: rgba(61, 46, 36, 0.7);">{{ card_set.features|length }} cards • {{ card_set.updated_at }}</div>
+ </div>
+ <div style="display: flex; gap: 0.5rem;">
+ <button type="button" class="btn-secondary" onclick="loadSavedSet({{ card_set.id }})" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+ Load
+ </button>
+ <button type="button" class="btn-remove" onclick="deleteSavedSet({{ card_set.id }}, '{{ card_set.set_name }}')" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+ Delete
+ </button>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
+ </div>
+ {% endif %}
 
-  <!-- BRANDING PREVIEW CARD -->
-  <div class="card-premium" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%); border: 2px solid rgba(107, 106, 69, 0.2);">
-    <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
-      <div style="flex: 0 0 auto;">
-        {% if brokerage_logo %}
-          <div style="background: white; padding: 1rem; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
-            <img src="{{ brokerage_logo }}" alt="Your Logo" style="height: 60px; max-width: 180px; object-fit: contain; display: block;">
-          </div>
-        {% else %}
-          <div style="background: rgba(200, 180, 151, 0.1); padding: 1.5rem 2rem; border-radius: 12px; border: 2px dashed rgba(107, 106, 69, 0.3);">
-            <span style="color: rgba(58, 53, 44, 0.5); font-size: 0.85rem; font-weight: 600;">No Logo Set</span>
-          </div>
-        {% endif %}
-      </div>
-      
-      <div style="flex: 1 1 300px;">
-        <h3 style="margin: 0 0 0.5rem 0; color: var(--olive-green); font-size: 1.1rem; font-weight: 600;">
-          Your Spotlight Card Branding
-        </h3>
-        <p style="margin: 0 0 0.75rem 0; color: rgba(58, 53, 44, 0.8); font-size: 0.9rem; line-height: 1.5;">
-          {% if brokerage_logo %}
-            ✅ This logo and your name "<strong>{{ user.name }}</strong>" will appear at the top of <strong>every</strong> spotlight card.
-          {% else %}
-            ⚠️ No logo set. Cards will only show your name "<strong>{{ user.name }}</strong>".
-          {% endif %}
-        </p>
-        <a href="{{ url_for('agent_settings_profile') }}" style="color: var(--olive-green); font-size: 0.85rem; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--olive-green); padding-bottom: 1px; transition: all 0.2s ease;">
-          {% if brokerage_logo %}
-            Update Logo in Settings →
-          {% else %}
-            Add Your Logo in Settings →
-          {% endif %}
-        </a>
-      </div>
-    </div>
-  </div>
+ <!-- BRANDING PREVIEW CARD -->
+ <div class="card-premium" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(107, 91, 77, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%); border: 2px solid rgba(107, 91, 77, 0.2);">
+ <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+ <div style="flex: 0 0 auto;">
+ {% if brokerage_logo %}
+ <div style="background: white; padding: 1rem; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.2); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);">
+ <img src="{{ brokerage_logo }}" alt="Your Logo" style="height: 60px; max-width: 180px; object-fit: contain; display: block;">
+ </div>
+ {% else %}
+ <div style="background: rgba(200, 180, 151, 0.1); padding: 1.5rem 2rem; border-radius: 12px; border: 2px dashed rgba(107, 91, 77, 0.3);">
+ <span style="color: rgba(61, 46, 36, 0.5); font-size: 0.85rem; font-weight: 600;">No Logo Set</span>
+ </div>
+ {% endif %}
+ </div>
+ 
+ <div style="flex: 1 1 300px;">
+ <h3 style="margin: 0 0 0.5rem 0; color: var(--olive-green); font-size: 1.1rem; font-weight: 600;">
+ Your Spotlight Card Branding
+ </h3>
+ <p style="margin: 0 0 0.75rem 0; color: rgba(61, 46, 36, 0.8); font-size: 0.9rem; line-height: 1.5;">
+ {% if brokerage_logo %}
+ This logo and your name "<strong>{{ user.name }}</strong>" will appear at the top of <strong>every</strong> spotlight card.
+ {% else %}
+ No logo set. Cards will only show your name "<strong>{{ user.name }}</strong>".
+ {% endif %}
+ </p>
+ <a href="{{ url_for('agent_settings_profile') }}" style="color: var(--olive-green); font-size: 0.85rem; font-weight: 600; text-decoration: none; border-bottom: 1.5px solid var(--olive-green); padding-bottom: 1px; transition: all 0.2s ease;">
+ {% if brokerage_logo %}
+ Update Logo in Settings →
+ {% else %}
+ Add Your Logo in Settings →
+ {% endif %}
+ </a>
+ </div>
+ </div>
+ </div>
 
-  <div class="card-premium" style="margin-bottom: 2rem;">
-    <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;">🤖 AI Auto-Generate from Walkthrough Notes</h3>
-    <p style="font-size: 0.9rem; color: rgba(58, 53, 44, 0.7); margin-bottom: 1rem;">
-      Paste your walkthrough notes below and let AI automatically create all your spotlight cards!
-    </p>
-    
-    <div class="form-group">
-      <label style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Walkthrough Notes</label>
-      <textarea id="walkthrough-notes" class="premium-textarea" placeholder="Example:&#10;&#10;Kitchen - Updated in 2022, gorgeous white cabinets, quartz counters, new SS appliances including built-in fridge. Big pantry with custom shelving.&#10;&#10;Master Bath - Completely renovated, walk-in shower with rainfall head and body jets, dual vanity with vessel sinks, heated floors.&#10;&#10;Backyard - New composite deck 2023, overlooks wooded lot, gas line for grill, twinkle lights already installed..." style="min-height: 200px; font-family: inherit; font-size: 0.9rem;"></textarea>
-    </div>
-    
-    <div style="text-align: center; margin-top: 1rem;">
-      <button type="button" class="btn-premium" onclick="generateFromNotes()" style="padding: 0.875rem 2rem;">
-        ✨ Auto-Create Spotlight Cards from Notes
-      </button>
-    </div>
-    
-    <div id="ai-status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; font-weight: 600; display: none;"></div>
-  </div>
+ <div class="card-premium" style="margin-bottom: 2rem;">
+ <h3 style="margin-bottom: 1rem; color: var(--olive-green); font-size: 1.1rem;"> AI Auto-Generate from Walkthrough Notes</h3>
+ <p style="font-size: 0.9rem; color: rgba(61, 46, 36, 0.7); margin-bottom: 1rem;">
+ Paste your walkthrough notes below and let AI automatically create all your spotlight cards!
+ </p>
+ 
+ <div class="form-group">
+ <label style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Walkthrough Notes</label>
+ <textarea id="walkthrough-notes" class="premium-textarea" placeholder="Example:&#10;&#10;Kitchen - Updated in 2022, gorgeous white cabinets, quartz counters, new SS appliances including built-in fridge. Big pantry with custom shelving.&#10;&#10;Master Bath - Completely renovated, walk-in shower with rainfall head and body jets, dual vanity with vessel sinks, heated floors.&#10;&#10;Backyard - New composite deck 2023, overlooks wooded lot, gas line for grill, twinkle lights already installed..." style="min-height: 200px; font-family: inherit; font-size: 0.9rem;"></textarea>
+ </div>
+ 
+ <div style="text-align: center; margin-top: 1rem;">
+ <button type="button" class="btn-premium" onclick="generateFromNotes()" style="padding: 0.875rem 2rem;">
+ Auto-Create Spotlight Cards from Notes
+ </button>
+ </div>
+ 
+ <div id="ai-status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+ </div>
 
-  <div class="card-premium">
-    <form id="feature-form" method="POST" action="{{ url_for('agent_feature_spotlight_cards_generate', tx_id=tx_id) }}">
-      <div class="form-group" style="background: rgba(107, 106, 69, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(107, 106, 69, 0.15); margin-bottom: 1.5rem;">
-        <label style="font-weight: 600; color: var(--olive-green); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; display: block;">Card Set Name (Optional)</label>
-        <input type="text" name="set_name" id="set-name-input" class="premium-input" placeholder="e.g., 'Kitchen Features' (auto-saves with timestamp if blank)" style="margin-bottom: 0.5rem;">
-        <div style="font-size: 0.8rem; color: rgba(58, 53, 44, 0.7); font-style: italic;">
-          💾 Click <strong>"Save Draft"</strong> anytime to save your progress, or <strong>"Generate & Print"</strong> to save + create PDF
-        </div>
-      </div>
-      
-      <div id="features-container">
-        <!-- Feature cards will be added here dynamically -->
-      </div>
+ <div class="card-premium">
+ <form id="feature-form" method="POST" action="{{ url_for('agent_feature_spotlight_cards_generate', tx_id=tx_id) }}">
+ <div class="form-group" style="background: rgba(107, 91, 77, 0.05); padding: 1rem; border-radius: 8px; border: 1px solid rgba(107, 91, 77, 0.15); margin-bottom: 1.5rem;">
+ <label style="font-weight: 600; color: var(--olive-green); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; display: block;">Card Set Name (Optional)</label>
+ <input type="text" name="set_name" id="set-name-input" class="premium-input" placeholder="e.g., 'Kitchen Features' (auto-saves with timestamp if blank)" style="margin-bottom: 0.5rem;">
+ <div style="font-size: 0.8rem; color: rgba(61, 46, 36, 0.7); font-style: italic;">
+ Click <strong>"Save Draft"</strong> anytime to save your progress, or <strong>"Generate & Print"</strong> to save + create PDF
+ </div>
+ </div>
+ 
+ <div id="features-container">
+ <!-- Feature cards will be added here dynamically -->
+ </div>
 
-      <div style="text-align: center; margin-top: 2rem;">
-        <button type="button" id="add-feature-btn" class="btn-secondary" style="margin-right: 1rem;">
-          + Add Feature
-        </button>
-      </div>
+ <div style="text-align: center; margin-top: 2rem;">
+ <button type="button" id="add-feature-btn" class="btn-secondary" style="margin-right: 1rem;">
+ + Add Feature
+ </button>
+ </div>
 
-      <div class="button-group">
-        <button type="button" class="btn-premium" onclick="generateCards()">
-          Generate & Print Cards
-        </button>
-        <button type="button" class="btn-secondary" onclick="saveDraft()" style="background: rgba(107, 106, 69, 0.1); color: var(--olive-green); border: 1.5px solid var(--olive-green);">
-          💾 Save Draft
-        </button>
-        <button type="button" class="btn-secondary" onclick="previewCards()">
-          Preview Cards
-        </button>
-        <a href="{{ url_for('agent_transaction_detail', tx_id=tx_id) }}" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
-          Cancel
-        </a>
-      </div>
-      <div id="save-status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; font-weight: 600; display: none;"></div>
-    </form>
-  </div>
+ <div class="button-group">
+ <button type="button" class="btn-premium" onclick="generateCards()">
+ Generate & Print Cards
+ </button>
+ <button type="button" class="btn-secondary" onclick="saveDraft()" style="background: rgba(107, 91, 77, 0.1); color: var(--olive-green); border: 1.5px solid var(--olive-green);">
+ Save Draft
+ </button>
+ <button type="button" class="btn-secondary" onclick="previewCards()">
+ Preview Cards
+ </button>
+ <a href="{{ url_for('agent_transaction_detail', tx_id=tx_id) }}" class="btn-secondary" style="text-decoration: none; display: inline-flex; align-items: center;">
+ Cancel
+ </a>
+ </div>
+ <div id="save-status" style="text-align: center; margin-top: 1rem; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+ </form>
+ </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script type="text/javascript">
-  let featureCount = 0;
+ let featureCount = 0;
 
-  function addFeatureCard() {
-    featureCount++;
-    const container = document.getElementById('features-container');
-    if (!container) {
-      console.error('Features container not found!');
-      return;
-    }
-    
-    const card = document.createElement('div');
-    card.className = 'feature-card';
-    card.id = 'feature-' + featureCount;
-    
-    card.innerHTML = '<div class="feature-card-header">' +
-      '<div class="feature-card-title">Feature ' + featureCount + '</div>' +
-      '<button type="button" class="btn-remove" onclick="removeFeatureCard(' + featureCount + ')">Remove</button>' +
-      '</div>' +
-      '<div class="form-group">' +
-      '<label>Feature Title</label>' +
-      '<input type="text" name="features[' + featureCount + '][title]" class="premium-input" placeholder="e.g., Hidden Storage Pantry" required>' +
-      '</div>' +
-      '<div class="form-group">' +
-      '<label>Room/Location</label>' +
-      '<input type="text" name="features[' + featureCount + '][room]" class="premium-input" placeholder="e.g., Kitchen" required>' +
-      '</div>' +
-      '<div class="form-group">' +
-      '<label>Description</label>' +
-      '<textarea name="features[' + featureCount + '][description]" class="premium-textarea" placeholder="Custom pull-out shelving maximizes storage while keeping countertops clutter-free." required></textarea>' +
-      '<button type="button" class="btn-refine" onclick="refineFeature(' + featureCount + ')" style="margin-top: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.8rem; background: rgba(107, 106, 69, 0.1); color: var(--olive-green); border: 1px solid rgba(107, 106, 69, 0.3); border-radius: 6px; cursor: pointer;">' +
-      '✨ Make it sound more natural' +
-      '</button>' +
-      '</div>';
-    
-    container.appendChild(card);
-  }
+ function addFeatureCard() {
+ featureCount++;
+ const container = document.getElementById('features-container');
+ if (!container) {
+ console.error('Features container not found!');
+ return;
+ }
+ 
+ const card = document.createElement('div');
+ card.className = 'feature-card';
+ card.id = 'feature-' + featureCount;
+ 
+ card.innerHTML = '<div class="feature-card-header">' +
+ '<div class="feature-card-title">Feature ' + featureCount + '</div>' +
+ '<button type="button" class="btn-remove" onclick="removeFeatureCard(' + featureCount + ')">Remove</button>' +
+ '</div>' +
+ '<div class="form-group">' +
+ '<label>Feature Title</label>' +
+ '<input type="text" name="features[' + featureCount + '][title]" class="premium-input" placeholder="e.g., Hidden Storage Pantry" required>' +
+ '</div>' +
+ '<div class="form-group">' +
+ '<label>Room/Location</label>' +
+ '<input type="text" name="features[' + featureCount + '][room]" class="premium-input" placeholder="e.g., Kitchen" required>' +
+ '</div>' +
+ '<div class="form-group">' +
+ '<label>Description</label>' +
+ '<textarea name="features[' + featureCount + '][description]" class="premium-textarea" placeholder="Custom pull-out shelving maximizes storage while keeping countertops clutter-free." required></textarea>' +
+ '<button type="button" class="btn-refine" onclick="refineFeature(' + featureCount + ')" style="margin-top: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.8rem; background: rgba(107, 91, 77, 0.1); color: var(--olive-green); border: 1px solid rgba(107, 91, 77, 0.3); border-radius: 6px; cursor: pointer;">' +
+ ' Make it sound more natural' +
+ '</button>' +
+ '</div>';
+ 
+ container.appendChild(card);
+ }
 
-  function removeFeatureCard(id) {
-    const card = document.getElementById('feature-' + id);
-    if (card) {
-      card.remove();
-    }
-  }
+ function removeFeatureCard(id) {
+ const card = document.getElementById('feature-' + id);
+ if (card) {
+ card.remove();
+ }
+ }
 
-  // Refine feature with AI
-  async function refineFeature(featureId) {
-    const titleInput = document.querySelector('input[name="features[' + featureId + '][title]"]');
-    const roomInput = document.querySelector('input[name="features[' + featureId + '][room]"]');
-    const descInput = document.querySelector('textarea[name="features[' + featureId + '][description]"]');
-    
-    if (!titleInput || !descInput) {
-      alert('Feature fields not found.');
-      return;
-    }
-    
-    if (!titleInput.value.trim() || !descInput.value.trim()) {
-      alert('Please enter a title and description before refining.');
-      return;
-    }
-    
-    const refineBtn = event.target;
-    const originalText = refineBtn.textContent;
-    refineBtn.textContent = 'Refining...';
-    refineBtn.disabled = true;
-    
-    try {
-      const response = await fetch('/agent/feature-spotlight/refine', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: titleInput.value,
-          room: roomInput.value || '',
-          description: descInput.value
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        titleInput.value = data.refined.title || titleInput.value;
-        descInput.value = data.refined.description || descInput.value;
-        if (data.refined.room) {
-          roomInput.value = data.refined.room;
-        }
-      } else {
-        alert('Refinement failed: ' + (data.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Error refining feature:', error);
-      alert('Error refining feature. Please try again.');
-    } finally {
-      refineBtn.textContent = originalText;
-      refineBtn.disabled = false;
-    }
-  }
+ // Refine feature with AI
+ async function refineFeature(featureId) {
+ const titleInput = document.querySelector('input[name="features[' + featureId + '][title]"]');
+ const roomInput = document.querySelector('input[name="features[' + featureId + '][room]"]');
+ const descInput = document.querySelector('textarea[name="features[' + featureId + '][description]"]');
+ 
+ if (!titleInput || !descInput) {
+ alert('Feature fields not found.');
+ return;
+ }
+ 
+ if (!titleInput.value.trim() || !descInput.value.trim()) {
+ alert('Please enter a title and description before refining.');
+ return;
+ }
+ 
+ const refineBtn = event.target;
+ const originalText = refineBtn.textContent;
+ refineBtn.textContent = 'Refining...';
+ refineBtn.disabled = true;
+ 
+ try {
+ const response = await fetch('/agent/feature-spotlight/refine', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({
+ title: titleInput.value,
+ room: roomInput.value || '',
+ description: descInput.value
+ })
+ });
+ 
+ const data = await response.json();
+ 
+ if (data.success) {
+ titleInput.value = data.refined.title || titleInput.value;
+ descInput.value = data.refined.description || descInput.value;
+ if (data.refined.room) {
+ roomInput.value = data.refined.room;
+ }
+ } else {
+ alert('Refinement failed: ' + (data.error || 'Unknown error'));
+ }
+ } catch (error) {
+ console.error('Error refining feature:', error);
+ alert('Error refining feature. Please try again.');
+ } finally {
+ refineBtn.textContent = originalText;
+ refineBtn.disabled = false;
+ }
+ }
 
-  // Generate spotlight cards from walkthrough notes using AI
-  async function generateFromNotes() {
-    const notesTextarea = document.getElementById('walkthrough-notes');
-    const notes = notesTextarea.value.trim();
-    
-    if (!notes) {
-      alert('Please paste your walkthrough notes first!');
-      return;
-    }
-    
-    // Show processing message
-    const aiStatus = document.getElementById('ai-status');
-    if (aiStatus) {
-      aiStatus.textContent = '🤖 AI is analyzing your notes and creating spotlight cards...';
-      aiStatus.style.color = 'rgba(58, 53, 44, 0.7)';
-      aiStatus.style.display = 'block';
-    }
-    
-    try {
-      const response = await fetch('/agent/spotlight-cards/generate-from-notes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ notes: notes })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success && data.features && data.features.length > 0) {
-        // Clear existing features
-        const container = document.getElementById('features-container');
-        container.innerHTML = '';
-        featureCount = 0;
-        
-        // Add all generated features
-        for (const feature of data.features) {
-          addFeatureCard();
-          const currentIdx = featureCount;
-          
-          // Populate fields with AI-generated content
-          document.querySelector('input[name="features[' + currentIdx + '][title]"]').value = feature.title;
-          document.querySelector('input[name="features[' + currentIdx + '][room]"]').value = feature.room;
-          document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
-        }
-        
-        // Show success message
-        if (aiStatus) {
-          aiStatus.textContent = '✓ Created ' + data.features.length + ' spotlight cards! Review and edit them below.';
-          aiStatus.style.color = 'var(--olive-green)';
-        }
-        
-        // Clear notes textarea
-        notesTextarea.value = '';
-        
-        // Scroll to features
-        setTimeout(function() {
-          document.getElementById('features-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 500);
-        
-        // Hide success message after 7 seconds
-        setTimeout(function() {
-          aiStatus.style.display = 'none';
-        }, 7000);
-      } else {
-        throw new Error(data.error || 'No features generated');
-      }
-    } catch (error) {
-      console.error('Error generating from notes:', error);
-      if (aiStatus) {
-        aiStatus.textContent = '⚠ Error generating cards. Please try again or create cards manually.';
-        aiStatus.style.color = 'rgba(198, 107, 61, 0.9)';
-      }
-    }
-  }
+ // Generate spotlight cards from walkthrough notes using AI
+ async function generateFromNotes() {
+ const notesTextarea = document.getElementById('walkthrough-notes');
+ const notes = notesTextarea.value.trim();
+ 
+ if (!notes) {
+ alert('Please paste your walkthrough notes first!');
+ return;
+ }
+ 
+ // Show processing message
+ const aiStatus = document.getElementById('ai-status');
+ if (aiStatus) {
+ aiStatus.textContent = ' AI is analyzing your notes and creating spotlight cards...';
+ aiStatus.style.color = 'rgba(61, 46, 36, 0.7)';
+ aiStatus.style.display = 'block';
+ }
+ 
+ try {
+ const response = await fetch('/agent/spotlight-cards/generate-from-notes', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({ notes: notes })
+ });
+ 
+ const data = await response.json();
+ 
+ if (data.success && data.features && data.features.length > 0) {
+ // Clear existing features
+ const container = document.getElementById('features-container');
+ container.innerHTML = '';
+ featureCount = 0;
+ 
+ // Add all generated features
+ for (const feature of data.features) {
+ addFeatureCard();
+ const currentIdx = featureCount;
+ 
+ // Populate fields with AI-generated content
+ document.querySelector('input[name="features[' + currentIdx + '][title]"]').value = feature.title;
+ document.querySelector('input[name="features[' + currentIdx + '][room]"]').value = feature.room;
+ document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
+ }
+ 
+ // Show success message
+ if (aiStatus) {
+ aiStatus.textContent = ' Created ' + data.features.length + ' spotlight cards! Review and edit them below.';
+ aiStatus.style.color = 'var(--olive-green)';
+ }
+ 
+ // Clear notes textarea
+ notesTextarea.value = '';
+ 
+ // Scroll to features
+ setTimeout(function() {
+ document.getElementById('features-container').scrollIntoView({ behavior: 'smooth', block: 'start' });
+ }, 500);
+ 
+ // Hide success message after 7 seconds
+ setTimeout(function() {
+ aiStatus.style.display = 'none';
+ }, 7000);
+ } else {
+ throw new Error(data.error || 'No features generated');
+ }
+ } catch (error) {
+ console.error('Error generating from notes:', error);
+ if (aiStatus) {
+ aiStatus.textContent = ' Error generating cards. Please try again or create cards manually.';
+ aiStatus.style.color = 'rgba(198, 107, 61, 0.9)';
+ }
+ }
+ }
 
-  // Save draft without generating PDF
-  async function saveDraft() {
-    const form = document.getElementById('feature-form');
-    const formData = new FormData(form);
-    
-    // Collect all features
-    const features = [];
-    const featureIndices = new Set();
-    
-    // Find all feature indices
-    formData.forEach((value, key) => {
-      const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
-      if (match) {
-        featureIndices.add(parseInt(match[1]));
-      }
-    });
-    
-    // Build features array
-    for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
-      const title = formData.get('features[' + idx + '][title]') || '';
-      const room = formData.get('features[' + idx + '][room]') || '';
-      const description = formData.get('features[' + idx + '][description]') || '';
-      
-      if (title && room && description) {
-        features.push({ title, room, description });
-      }
-    }
-    
-    if (features.length === 0) {
-      alert('Please add at least one feature before saving.');
-      return;
-    }
-    
-    // Show saving message
-    const saveStatus = document.getElementById('save-status');
-    if (saveStatus) {
-      saveStatus.textContent = '💾 Saving...';
-      saveStatus.style.color = 'rgba(58, 53, 44, 0.7)';
-      saveStatus.style.display = 'block';
-    }
-    
-    try {
-      // Submit form via fetch to save without navigation
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData
-      });
-      
-      if (response.ok) {
-        // Show success message
-        if (saveStatus) {
-          saveStatus.textContent = '✓ Draft saved successfully! You can continue editing or close this page.';
-          saveStatus.style.color = 'var(--olive-green)';
-        }
-        
-        // Hide after 5 seconds
-        setTimeout(function() {
-          saveStatus.style.display = 'none';
-        }, 5000);
-      } else {
-        throw new Error('Save failed');
-      }
-    } catch (error) {
-      console.error('Error saving draft:', error);
-      if (saveStatus) {
-        saveStatus.textContent = '⚠ Error saving. Please try again.';
-        saveStatus.style.color = 'rgba(198, 107, 61, 0.9)';
-      }
-    }
-  }
+ // Save draft without generating PDF
+ async function saveDraft() {
+ const form = document.getElementById('feature-form');
+ const formData = new FormData(form);
+ 
+ // Collect all features
+ const features = [];
+ const featureIndices = new Set();
+ 
+ // Find all feature indices
+ formData.forEach((value, key) => {
+ const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
+ if (match) {
+ featureIndices.add(parseInt(match[1]));
+ }
+ });
+ 
+ // Build features array
+ for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
+ const title = formData.get('features[' + idx + '][title]') || '';
+ const room = formData.get('features[' + idx + '][room]') || '';
+ const description = formData.get('features[' + idx + '][description]') || '';
+ 
+ if (title && room && description) {
+ features.push({ title, room, description });
+ }
+ }
+ 
+ if (features.length === 0) {
+ alert('Please add at least one feature before saving.');
+ return;
+ }
+ 
+ // Show saving message
+ const saveStatus = document.getElementById('save-status');
+ if (saveStatus) {
+ saveStatus.textContent = ' Saving...';
+ saveStatus.style.color = 'rgba(61, 46, 36, 0.7)';
+ saveStatus.style.display = 'block';
+ }
+ 
+ try {
+ // Submit form via fetch to save without navigation
+ const response = await fetch(form.action, {
+ method: 'POST',
+ body: formData
+ });
+ 
+ if (response.ok) {
+ // Show success message
+ if (saveStatus) {
+ saveStatus.textContent = ' Draft saved successfully! You can continue editing or close this page.';
+ saveStatus.style.color = 'var(--olive-green)';
+ }
+ 
+ // Hide after 5 seconds
+ setTimeout(function() {
+ saveStatus.style.display = 'none';
+ }, 5000);
+ } else {
+ throw new Error('Save failed');
+ }
+ } catch (error) {
+ console.error('Error saving draft:', error);
+ if (saveStatus) {
+ saveStatus.textContent = ' Error saving. Please try again.';
+ saveStatus.style.color = 'rgba(198, 107, 61, 0.9)';
+ }
+ }
+ }
 
-  // Generate and print cards (opens in new tab, keeps current page open)
-  function generateCards() {
-    const form = document.getElementById('feature-form');
-    const formData = new FormData(form);
-    
-    // Collect all features
-    const features = [];
-    const featureIndices = new Set();
-    
-    // Find all feature indices
-    formData.forEach((value, key) => {
-      const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
-      if (match) {
-        featureIndices.add(parseInt(match[1]));
-      }
-    });
-    
-    // Build features array
-    for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
-      const title = formData.get('features[' + idx + '][title]') || '';
-      const room = formData.get('features[' + idx + '][room]') || '';
-      const description = formData.get('features[' + idx + '][description]') || '';
-      
-      if (title && room && description) {
-        features.push({ title, room, description });
-      }
-    }
-    
-    if (features.length === 0) {
-      alert('Please add at least one feature before generating.');
-      return;
-    }
-    
-    // Submit form in new tab
-    form.target = '_blank';
-    form.submit();
-    form.target = '';
-    
-    // Show save confirmation
-    const saveStatus = document.getElementById('save-status');
-    if (saveStatus) {
-      saveStatus.textContent = '✓ Cards saved and generated! Check the new tab for your PDF.';
-      saveStatus.style.color = 'var(--olive-green)';
-      saveStatus.style.display = 'block';
-      setTimeout(function() {
-        saveStatus.style.display = 'none';
-      }, 5000);
-    }
-  }
+ // Generate and print cards (opens in new tab, keeps current page open)
+ function generateCards() {
+ const form = document.getElementById('feature-form');
+ const formData = new FormData(form);
+ 
+ // Collect all features
+ const features = [];
+ const featureIndices = new Set();
+ 
+ // Find all feature indices
+ formData.forEach((value, key) => {
+ const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
+ if (match) {
+ featureIndices.add(parseInt(match[1]));
+ }
+ });
+ 
+ // Build features array
+ for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
+ const title = formData.get('features[' + idx + '][title]') || '';
+ const room = formData.get('features[' + idx + '][room]') || '';
+ const description = formData.get('features[' + idx + '][description]') || '';
+ 
+ if (title && room && description) {
+ features.push({ title, room, description });
+ }
+ }
+ 
+ if (features.length === 0) {
+ alert('Please add at least one feature before generating.');
+ return;
+ }
+ 
+ // Submit form in new tab
+ form.target = '_blank';
+ form.submit();
+ form.target = '';
+ 
+ // Show save confirmation
+ const saveStatus = document.getElementById('save-status');
+ if (saveStatus) {
+ saveStatus.textContent = ' Cards saved and generated! Check the new tab for your PDF.';
+ saveStatus.style.color = 'var(--olive-green)';
+ saveStatus.style.display = 'block';
+ setTimeout(function() {
+ saveStatus.style.display = 'none';
+ }, 5000);
+ }
+ }
 
-  // Preview cards before generating PDF
-  function previewCards() {
-    const form = document.getElementById('feature-form');
-    const formData = new FormData(form);
-    
-    // Collect all features
-    const features = [];
-    const featureIndices = new Set();
-    
-    // Find all feature indices
-    formData.forEach((value, key) => {
-      const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
-      if (match) {
-        featureIndices.add(parseInt(match[1]));
-      }
-    });
-    
-    // Build features array
-    for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
-      const title = formData.get('features[' + idx + '][title]') || '';
-      const room = formData.get('features[' + idx + '][room]') || '';
-      const description = formData.get('features[' + idx + '][description]') || '';
-      
-      if (title && room && description) {
-        features.push({ title, room, description });
-      }
-    }
-    
-    if (features.length === 0) {
-      alert('Please add at least one feature before previewing.');
-      return;
-    }
-    
-    // Open preview in new window
-    const previewWindow = window.open('', '_blank');
-    const featuresJson = JSON.stringify(features);
-    
-    // Build HTML using string concatenation to avoid template literal issues
-    let previewHtml = '<!DOCTYPE html><html><head><title>Feature Spotlight Cards Preview - 4 per page (5.5x4.25 each)</title><style>';
-    previewHtml += '@page { size: 11in 8.5in; margin: 0.125in; }';
-    previewHtml += '* { margin: 0; padding: 0; box-sizing: border-box; }';
-    previewHtml += 'body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); padding: 1rem; min-height: 100vh; }';
-    previewHtml += '.page { width: 11in; height: 8.5in; display: grid; grid-template-columns: 5.375in 5.375in; grid-template-rows: 4.125in 4.125in; gap: 0.25in; padding: 0; page-break-after: always; margin-bottom: 1rem; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); }';
-    previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 2px solid rgba(200, 180, 151, 0.3); padding: 0.4in 0.5in 0.45in 0.5in; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden; width: 5.375in; height: 4.125in; }';
-    previewHtml += '.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(107, 106, 69, 0.5) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.5) 100%); }';
-    previewHtml += '.card-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 0.15in; width: 100%; }';
-    previewHtml += '.card-logo { height: 28px; margin-bottom: 0.1in; opacity: 0.9; }';
-    previewHtml += '.card-agent { font-size: 7.5pt; color: rgba(107, 106, 69, 0.85); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; font-family: Arial, sans-serif; }';
-    previewHtml += '.card-content { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; justify-content: center; width: 100%; }';
-    previewHtml += '.card-room { font-size: 7.5pt; color: rgba(107, 106, 69, 0.75); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 0.15in; font-weight: 600; font-family: Arial, sans-serif; text-align: center; }';
-    previewHtml += '.card-title { font-size: 18pt; font-weight: 600; color: #2C2820; margin-bottom: 0.18in; letter-spacing: -0.01em; line-height: 1.25; font-family: Georgia, serif; text-align: center; max-width: 90%; }';
-    previewHtml += '.card-divider { width: 60px; height: 2.5px; background: linear-gradient(90deg, rgba(107, 106, 69, 0.3) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.3) 100%); margin: 0 auto 0.18in auto; border-radius: 2px; }';
-    previewHtml += '.card-description { font-size: 10pt; color: #3A352C; line-height: 1.65; font-family: Georgia, serif; font-weight: 400; text-align: center; max-width: 92%; margin: 0 auto; }';
-    previewHtml += '.print-button { position: fixed; top: 1rem; right: 1rem; background: linear-gradient(135deg, #6B6A45 0%, rgba(107, 106, 69, 0.95) 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(107, 106, 69, 0.3); z-index: 1000; font-size: 0.95rem; }';
-    previewHtml += '.print-button:hover { background: linear-gradient(135deg, rgba(107, 106, 69, 0.95) 0%, #6B6A45 100%); transform: translateY(-1px); }';
-    previewHtml += '@media print { .print-button { display: none; } body { padding: 0; } }';
-    previewHtml += '</style></head><body><button class="print-button" onclick="window.print()">Print Cards</button><div id="cards-container"></div><script>';
-    previewHtml += 'const features = ' + featuresJson + ';';
-    previewHtml += 'const container = document.getElementById("cards-container");';
-    previewHtml += 'let html = "";';
-    previewHtml += 'features.forEach(function(feature, index) {';
-    previewHtml += 'if (index % 4 === 0) { if (index > 0) html += "</div>"; html += "<div class=\\"page\\">"; }';
-    previewHtml += 'html += "<div class=\\"card\\">";';
-    previewHtml += 'html += "<div class=\\"card-header\\">";';
-    previewHtml += 'html += "<img src=\\"{{ brokerage_logo }}\\" alt=\\"Brokerage Logo\\" class=\\"card-logo\\" onerror=\\"this.style.display=\'none\';\\">";';
-    previewHtml += 'html += "<div class=\\"card-agent\\">Presented by {{ user.name }}</div>";';
-    previewHtml += 'html += "</div>";';
-    previewHtml += 'html += "<div class=\\"card-content\\">";';
-    previewHtml += 'html += "<div class=\\"card-room\\">" + escapeHtml(feature.room) + "</div>";';
-    previewHtml += 'html += "<div class=\\"card-title\\">" + escapeHtml(feature.title) + "</div>";';
-    previewHtml += 'html += "<div class=\\"card-divider\\"></div>";';
-    previewHtml += 'html += "<div class=\\"card-description\\">" + escapeHtml(feature.description) + "</div>";';
-    previewHtml += 'html += "</div></div>";';
-    previewHtml += 'if (index % 4 === 3 || index === features.length - 1) { html += "</div>"; }';
-    previewHtml += '});';
-    previewHtml += 'container.innerHTML = html;';
-    previewHtml += 'function escapeHtml(text) { const div = document.createElement("div"); div.textContent = text; return div.innerHTML; }';
-    previewHtml += '<\/script></body></html>';
-    
-    previewWindow.document.write(previewHtml);
-    previewWindow.document.close();
-  }
+ // Preview cards before generating PDF
+ function previewCards() {
+ const form = document.getElementById('feature-form');
+ const formData = new FormData(form);
+ 
+ // Collect all features
+ const features = [];
+ const featureIndices = new Set();
+ 
+ // Find all feature indices
+ formData.forEach((value, key) => {
+ const match = key.match(/features\[(\d+)\]\[(\w+)\]/);
+ if (match) {
+ featureIndices.add(parseInt(match[1]));
+ }
+ });
+ 
+ // Build features array
+ for (const idx of Array.from(featureIndices).sort(function(a, b) { return a - b; })) {
+ const title = formData.get('features[' + idx + '][title]') || '';
+ const room = formData.get('features[' + idx + '][room]') || '';
+ const description = formData.get('features[' + idx + '][description]') || '';
+ 
+ if (title && room && description) {
+ features.push({ title, room, description });
+ }
+ }
+ 
+ if (features.length === 0) {
+ alert('Please add at least one feature before previewing.');
+ return;
+ }
+ 
+ // Open preview in new window
+ const previewWindow = window.open('', '_blank');
+ const featuresJson = JSON.stringify(features);
+ 
+ // Build HTML using string concatenation to avoid template literal issues
+ let previewHtml = '<!DOCTYPE html><html><head><title>Feature Spotlight Cards Preview - 4 per page (5.5x4.25 each)</title><style>';
+ previewHtml += '@page { size: 11in 8.5in; margin: 0.125in; }';
+ previewHtml += '* { margin: 0; padding: 0; box-sizing: border-box; }';
+ previewHtml += 'body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); padding: 1rem; min-height: 100vh; }';
+ previewHtml += '.page { width: 11in; height: 8.5in; display: grid; grid-template-columns: 5.375in 5.375in; grid-template-rows: 4.125in 4.125in; gap: 0.25in; padding: 0; page-break-after: always; margin-bottom: 1rem; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); }';
+ previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 2px solid rgba(200, 180, 151, 0.3); padding: 0.4in 0.5in 0.45in 0.5in; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden; width: 5.375in; height: 4.125in; }';
+ previewHtml += '.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(107, 91, 77, 0.5) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.5) 100%); }';
+ previewHtml += '.card-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 0.15in; width: 100%; }';
+ previewHtml += '.card-logo { height: 28px; margin-bottom: 0.1in; opacity: 0.9; }';
+ previewHtml += '.card-agent { font-size: 7.5pt; color: rgba(107, 91, 77, 0.85); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; font-family: Arial, sans-serif; }';
+ previewHtml += '.card-content { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; justify-content: center; width: 100%; }';
+ previewHtml += '.card-room { font-size: 7.5pt; color: rgba(107, 91, 77, 0.75); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 0.15in; font-weight: 600; font-family: Arial, sans-serif; text-align: center; }';
+ previewHtml += '.card-title { font-size: 18pt; font-weight: 600; color: #2C2820; margin-bottom: 0.18in; letter-spacing: -0.01em; line-height: 1.25; font-family: Georgia, serif; text-align: center; max-width: 90%; }';
+ previewHtml += '.card-divider { width: 60px; height: 2.5px; background: linear-gradient(90deg, rgba(107, 91, 77, 0.3) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.3) 100%); margin: 0 auto 0.18in auto; border-radius: 2px; }';
+ previewHtml += '.card-description { font-size: 10pt; color: #3D2E24; line-height: 1.65; font-family: Georgia, serif; font-weight: 400; text-align: center; max-width: 92%; margin: 0 auto; }';
+ previewHtml += '.print-button { position: fixed; top: 1rem; right: 1rem; background: linear-gradient(135deg, #6B5B4D 0%, rgba(107, 91, 77, 0.95) 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(107, 91, 77, 0.3); z-index: 1000; font-size: 0.95rem; }';
+ previewHtml += '.print-button:hover { background: linear-gradient(135deg, rgba(107, 91, 77, 0.95) 0%, #6B5B4D 100%); transform: translateY(-1px); }';
+ previewHtml += '@media print { .print-button { display: none; } body { padding: 0; } }';
+ previewHtml += '</style></head><body><button class="print-button" onclick="window.print()">Print Cards</button><div id="cards-container"></div><script>';
+ previewHtml += 'const features = ' + featuresJson + ';';
+ previewHtml += 'const container = document.getElementById("cards-container");';
+ previewHtml += 'let html = "";';
+ previewHtml += 'features.forEach(function(feature, index) {';
+ previewHtml += 'if (index % 4 === 0) { if (index > 0) html += "</div>"; html += "<div class=\\"page\\">"; }';
+ previewHtml += 'html += "<div class=\\"card\\">";';
+ previewHtml += 'html += "<div class=\\"card-header\\">";';
+ previewHtml += 'html += "<img src=\\"{{ brokerage_logo }}\\" alt=\\"Brokerage Logo\\" class=\\"card-logo\\" onerror=\\"this.style.display=\'none\';\\">";';
+ previewHtml += 'html += "<div class=\\"card-agent\\">Presented by {{ user.name }}</div>";';
+ previewHtml += 'html += "</div>";';
+ previewHtml += 'html += "<div class=\\"card-content\\">";';
+ previewHtml += 'html += "<div class=\\"card-room\\">" + escapeHtml(feature.room) + "</div>";';
+ previewHtml += 'html += "<div class=\\"card-title\\">" + escapeHtml(feature.title) + "</div>";';
+ previewHtml += 'html += "<div class=\\"card-divider\\"></div>";';
+ previewHtml += 'html += "<div class=\\"card-description\\">" + escapeHtml(feature.description) + "</div>";';
+ previewHtml += 'html += "</div></div>";';
+ previewHtml += 'if (index % 4 === 3 || index === features.length - 1) { html += "</div>"; }';
+ previewHtml += '});';
+ previewHtml += 'container.innerHTML = html;';
+ previewHtml += 'function escapeHtml(text) { const div = document.createElement("div"); div.textContent = text; return div.innerHTML; }';
+ previewHtml += '<\/script></body></html>';
+ 
+ previewWindow.document.write(previewHtml);
+ previewWindow.document.close();
+ }
 
-  // Load a saved card set
-  async function loadSavedSet(setId) {
-    try {
-      const response = await fetch('/agent/spotlight-cards/' + setId + '/load');
-      const data = await response.json();
-      
-      if (data.success) {
-        const cardSet = data.card_set;
-        
-        // Clear existing features
-        const container = document.getElementById('features-container');
-        container.innerHTML = '';
-        featureCount = 0;
-        
-        // Load features from saved set
-        for (const feature of cardSet.features) {
-          addFeatureCard();
-          const currentIdx = featureCount;
-          
-          // Populate fields
-          document.querySelector('input[name="features[' + currentIdx + '][title]"]').value = feature.title;
-          document.querySelector('input[name="features[' + currentIdx + '][room]"]').value = feature.room;
-          document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
-        }
-        
-        // Show success message
-        alert('Card set "' + cardSet.set_name + '" loaded successfully!');
-      } else {
-        alert('Error loading card set: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error loading card set:', error);
-      alert('Error loading card set. Please try again.');
-    }
-  }
-  
-  // Delete a saved card set
-  async function deleteSavedSet(setId, setName) {
-    if (!confirm('Are you sure you want to delete "' + setName + '"? This cannot be undone.')) {
-      return;
-    }
-    
-    try {
-      const response = await fetch('/agent/spotlight-cards/' + setId + '/delete', {
-        method: 'POST'
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        alert('Card set deleted successfully!');
-        location.reload();
-      } else {
-        alert('Error deleting card set: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error deleting card set:', error);
-      alert('Error deleting card set. Please try again.');
-    }
-  }
+ // Load a saved card set
+ async function loadSavedSet(setId) {
+ try {
+ const response = await fetch('/agent/spotlight-cards/' + setId + '/load');
+ const data = await response.json();
+ 
+ if (data.success) {
+ const cardSet = data.card_set;
+ 
+ // Clear existing features
+ const container = document.getElementById('features-container');
+ container.innerHTML = '';
+ featureCount = 0;
+ 
+ // Load features from saved set
+ for (const feature of cardSet.features) {
+ addFeatureCard();
+ const currentIdx = featureCount;
+ 
+ // Populate fields
+ document.querySelector('input[name="features[' + currentIdx + '][title]"]').value = feature.title;
+ document.querySelector('input[name="features[' + currentIdx + '][room]"]').value = feature.room;
+ document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
+ }
+ 
+ // Show success message
+ alert('Card set "' + cardSet.set_name + '" loaded successfully!');
+ } else {
+ alert('Error loading card set: ' + data.error);
+ }
+ } catch (error) {
+ console.error('Error loading card set:', error);
+ alert('Error loading card set. Please try again.');
+ }
+ }
+ 
+ // Delete a saved card set
+ async function deleteSavedSet(setId, setName) {
+ if (!confirm('Are you sure you want to delete "' + setName + '"? This cannot be undone.')) {
+ return;
+ }
+ 
+ try {
+ const response = await fetch('/agent/spotlight-cards/' + setId + '/delete', {
+ method: 'POST'
+ });
+ const data = await response.json();
+ 
+ if (data.success) {
+ alert('Card set deleted successfully!');
+ location.reload();
+ } else {
+ alert('Error deleting card set: ' + data.error);
+ }
+ } catch (error) {
+ console.error('Error deleting card set:', error);
+ alert('Error deleting card set. Please try again.');
+ }
+ }
 
-  // Initialize on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    // Add first feature card on page load
-    addFeatureCard();
-    
-    // Add click event listener to Add Feature button
-    const addFeatureBtn = document.getElementById('add-feature-btn');
-    if (addFeatureBtn) {
-      addFeatureBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        addFeatureCard();
-        return false;
-      });
-    } else {
-      console.error('Add Feature button not found!');
-    }
-    
-  });
+ // Initialize on page load
+ document.addEventListener('DOMContentLoaded', function() {
+ // Add first feature card on page load
+ addFeatureCard();
+ 
+ // Add click event listener to Add Feature button
+ const addFeatureBtn = document.getElementById('add-feature-btn');
+ if (addFeatureBtn) {
+ addFeatureBtn.addEventListener('click', function(e) {
+ e.preventDefault();
+ e.stopPropagation();
+ addFeatureCard();
+ return false;
+ });
+ } else {
+ console.error('Add Feature button not found!');
+ }
+ 
+ });
 </script>
 {% endblock %}
 

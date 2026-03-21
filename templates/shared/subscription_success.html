@@ -4,270 +4,270 @@
 
 {% block content %}
 <style>
-  .success-container {
-    max-width: 800px;
-    margin: 4rem auto;
-    padding: 0 2rem;
-    text-align: center;
-  }
+ .success-container {
+ max-width: 800px;
+ margin: 4rem auto;
+ padding: 0 2rem;
+ text-align: center;
+ }
 
-  .success-checkmark {
-    width: 120px;
-    height: 120px;
-    margin: 0 auto 2rem;
-    background: linear-gradient(135deg, #b8973a 0%, #a6823e 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: popIn 0.6s ease-out;
-  }
+ .success-checkmark {
+ width: 120px;
+ height: 120px;
+ margin: 0 auto 2rem;
+ background: linear-gradient(135deg, #b8973a 0%, #a6823e 100%);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ animation: popIn 0.6s ease-out;
+ }
 
-  .success-checkmark svg {
-    width: 70px;
-    height: 70px;
-    stroke: white;
-    stroke-width: 3;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    animation: drawStroke 0.6s ease-out forwards;
-    stroke-dasharray: 150;
-    stroke-dashoffset: 150;
-  }
+ .success-checkmark svg {
+ width: 70px;
+ height: 70px;
+ stroke: white;
+ stroke-width: 3;
+ fill: none;
+ stroke-linecap: round;
+ stroke-linejoin: round;
+ animation: drawStroke 0.6s ease-out forwards;
+ stroke-dasharray: 150;
+ stroke-dashoffset: 150;
+ }
 
-  @keyframes popIn {
-    0% {
-      transform: scale(0);
-    }
-    50% {
-      transform: scale(1.1);
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
+ @keyframes popIn {
+ 0% {
+ transform: scale(0);
+ }
+ 50% {
+ transform: scale(1.1);
+ }
+ 100% {
+ transform: scale(1);
+ }
+ }
 
-  @keyframes drawStroke {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
+ @keyframes drawStroke {
+ to {
+ stroke-dashoffset: 0;
+ }
+ }
 
-  .success-heading {
-    font-family: var(--font-heading);
-    font-size: 2.5rem;
-    color: #b8973a;
-    margin-bottom: 1rem;
-    font-weight: 600;
-  }
+ .success-heading {
+ font-family: var(--font-heading);
+ font-size: 2.5rem;
+ color: #b8973a;
+ margin-bottom: 1rem;
+ font-weight: 600;
+ }
 
-  .success-subheading {
-    font-size: 1.5rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 2rem;
-    font-weight: 500;
-  }
+ .success-subheading {
+ font-size: 1.5rem;
+ color: var(--charcoal-brown);
+ margin-bottom: 2rem;
+ font-weight: 500;
+ }
 
-  .success-message {
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    font-size: 1rem;
-    line-height: 1.8;
-    margin-bottom: 3rem;
-  }
+ .success-message {
+ color: var(--charcoal-brown);
+ opacity: 0.8;
+ font-size: 1rem;
+ line-height: 1.8;
+ margin-bottom: 3rem;
+ }
 
-  .features-unlocked {
-    background: linear-gradient(135deg, rgba(184, 151, 58, 0.1) 0%, rgba(74, 82, 64, 0.05) 100%);
-    border: 2px solid rgba(184, 151, 58, 0.3);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    margin-bottom: 3rem;
-    text-align: left;
-  }
+ .features-unlocked {
+ background: linear-gradient(135deg, rgba(184, 151, 58, 0.1) 0%, rgba(74, 82, 64, 0.05) 100%);
+ border: 2px solid rgba(184, 151, 58, 0.3);
+ border-radius: var(--border-radius-lg);
+ padding: 2rem;
+ margin-bottom: 3rem;
+ text-align: left;
+ }
 
-  .features-unlocked h3 {
-    font-family: var(--font-heading);
-    font-size: 1.3rem;
-    color: #4a5240;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
+ .features-unlocked h3 {
+ font-family: var(--font-heading);
+ font-size: 1.3rem;
+ color: #4a5240;
+ margin-bottom: 1.5rem;
+ text-align: center;
+ }
 
-  .features-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-  }
+ .features-list {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+ gap: 1.5rem;
+ }
 
-  .feature-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
+ .feature-item {
+ display: flex;
+ align-items: flex-start;
+ gap: 0.75rem;
+ }
 
-  .feature-icon {
-    color: #b8973a;
-    font-weight: 600;
-    flex-shrink: 0;
-    margin-top: 0.1rem;
-  }
+ .feature-icon {
+ color: #b8973a;
+ font-weight: 600;
+ flex-shrink: 0;
+ margin-top: 0.1rem;
+ }
 
-  .feature-text {
-    color: var(--charcoal-brown);
-    opacity: 0.85;
-    line-height: 1.5;
-  }
+ .feature-text {
+ color: var(--charcoal-brown);
+ opacity: 0.85;
+ line-height: 1.5;
+ }
 
-  .btn-dashboard {
-    display: inline-block;
-    background: linear-gradient(135deg, #4a5240 0%, #3a3f31 100%);
-    color: white;
-    padding: 1.25rem 3rem;
-    border-radius: var(--border-radius-lg);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 1.1rem;
-    transition: all var(--transition-base);
-    margin-bottom: 2rem;
-  }
+ .btn-dashboard {
+ display: inline-block;
+ background: linear-gradient(135deg, #4a5240 0%, #3a3f31 100%);
+ color: white;
+ padding: 1.25rem 3rem;
+ border-radius: var(--border-radius-lg);
+ text-decoration: none;
+ font-weight: 600;
+ font-size: 1.1rem;
+ transition: all var(--transition-base);
+ margin-bottom: 2rem;
+ }
 
-  .btn-dashboard:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(74, 82, 64, 0.25);
-  }
+ .btn-dashboard:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 20px rgba(74, 82, 64, 0.25);
+ }
 
-  .success-footer {
-    background: var(--white);
-    border: var(--border-light);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    text-align: center;
-  }
+ .success-footer {
+ background: var(--white);
+ border: var(--border-light);
+ border-radius: var(--border-radius-lg);
+ padding: 2rem;
+ text-align: center;
+ }
 
-  .success-footer h4 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-  }
+ .success-footer h4 {
+ font-family: var(--font-heading);
+ color: var(--charcoal-brown);
+ margin-bottom: 0.5rem;
+ }
 
-  .success-footer p {
-    color: var(--charcoal-brown);
-    opacity: 0.7;
-    margin: 0;
-    font-size: 0.95rem;
-  }
+ .success-footer p {
+ color: var(--charcoal-brown);
+ opacity: 0.7;
+ margin: 0;
+ font-size: 0.95rem;
+ }
 
-  @media (max-width: 768px) {
-    .success-container {
-      margin: 2rem auto;
-    }
+ @media (max-width: 768px) {
+ .success-container {
+ margin: 2rem auto;
+ }
 
-    .success-heading {
-      font-size: 2rem;
-    }
+ .success-heading {
+ font-size: 2rem;
+ }
 
-    .success-subheading {
-      font-size: 1.25rem;
-    }
+ .success-subheading {
+ font-size: 1.25rem;
+ }
 
-    .features-unlocked {
-      padding: 1.5rem;
-    }
+ .features-unlocked {
+ padding: 1.5rem;
+ }
 
-    .features-list {
-      grid-template-columns: 1fr;
-    }
+ .features-list {
+ grid-template-columns: 1fr;
+ }
 
-    .btn-dashboard {
-      width: 100%;
-      padding: 1rem 1.5rem;
-    }
-  }
+ .btn-dashboard {
+ width: 100%;
+ padding: 1rem 1.5rem;
+ }
+ }
 </style>
 
 <div class="success-container">
-  <!-- Success Checkmark Animation -->
-  <div class="success-checkmark">
-    <svg viewBox="0 0 52 52">
-      <path d="M16 28.4 l8.4 8.4 L36 16" fill="none" />
-    </svg>
-  </div>
+ <!-- Success Checkmark Animation -->
+ <div class="success-checkmark">
+ <svg viewBox="0 0 52 52">
+ <path d="M16 28.4 l8.4 8.4 L36 16" fill="none" />
+ </svg>
+ </div>
 
-  <!-- Success Message -->
-  <h1 class="success-heading">You're All Set!</h1>
-  <h2 class="success-subheading">Your subscription is now active</h2>
+ <!-- Success Message -->
+ <h1 class="success-heading">You're All Set!</h1>
+ <h2 class="success-subheading">Your subscription is now active</h2>
 
-  <p class="success-message">
-    Welcome to the next level! Your account has been successfully upgraded. You now have access to all the premium features and priority support.
-  </p>
+ <p class="success-message">
+ Welcome to the next level! Your account has been successfully upgraded. You now have access to all the premium features and priority support.
+ </p>
 
-  <!-- Features Unlocked -->
-  <div class="features-unlocked">
-    <h3>🎉 What's Now Unlocked</h3>
-    <div class="features-list">
-      {% if role == 'agent' %}
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Unlimited CRM contacts</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Unlimited transactions</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">AI Concierge (lead qualification)</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Full Marketing Hub</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">All Power Tools</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Partner with subscribed lenders</span>
-        </div>
-      {% elif role == 'lender' %}
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Unlimited CRM borrowers</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Unlimited loan products</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">AI Concierge (lead qualification)</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Full Marketing Hub</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">All Power Tools</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">✓</span>
-          <span class="feature-text">Partner with subscribed agents</span>
-        </div>
-      {% endif %}
-    </div>
-  </div>
+ <!-- Features Unlocked -->
+ <div class="features-unlocked">
+ <h3> What's Now Unlocked</h3>
+ <div class="features-list">
+ {% if role == 'agent' %}
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Unlimited CRM contacts</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Unlimited transactions</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">AI Concierge (lead qualification)</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Full Marketing Hub</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">All Power Tools</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Partner with subscribed lenders</span>
+ </div>
+ {% elif role == 'lender' %}
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Unlimited CRM borrowers</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Unlimited loan products</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">AI Concierge (lead qualification)</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Full Marketing Hub</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">All Power Tools</span>
+ </div>
+ <div class="feature-item">
+ <span class="feature-icon"></span>
+ <span class="feature-text">Partner with subscribed agents</span>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 
-  <!-- Call to Action -->
-  <a href="{{ dashboard_url }}" class="btn-dashboard">Go to Dashboard</a>
+ <!-- Call to Action -->
+ <a href="{{ dashboard_url }}" class="btn-dashboard">Go to Dashboard</a>
 
-  <!-- Footer Info -->
-  <div class="success-footer">
-    <h4>Need Help?</h4>
-    <p>Our support team is here for you. Email us at support@yourlifeyourhome.com or use the help button in your dashboard.</p>
-  </div>
+ <!-- Footer Info -->
+ <div class="success-footer">
+ <h4>Need Help?</h4>
+ <p>Our support team is here for you. Email us at support@yourlifeyourhome.com or use the help button in your dashboard.</p>
+ </div>
 </div>
 
 {% endblock %}

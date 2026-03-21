@@ -1,764 +1,764 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    
-    <!-- Responsive Mobile-First Meta Tags -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="theme-color" content="#6B5B4D" />
-    <meta name="format-detection" content="telephone=no" />
-    
-    <!-- Performance -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
-    <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
-    <meta name="description" content="Luxury homeowner platform connecting you with trusted real estate professionals" />
+ <head>
+ <meta charset="utf-8" />
+ 
+ <!-- Responsive Mobile-First Meta Tags -->
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+ <meta name="apple-mobile-web-app-capable" content="yes" />
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+ <meta name="theme-color" content="#6B5B4D" />
+ <meta name="format-detection" content="telephone=no" />
+ 
+ <!-- Performance -->
+ <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+ <link rel="preconnect" href="https://fonts.googleapis.com" />
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+ 
+ <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
+ <meta name="description" content="Luxury homeowner platform connecting you with trusted real estate professionals" />
 
-    <!-- Main CSS -->
-    <!-- Design System Foundation -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/design-system.css') }}"
-    />
-    <!-- Variable Bridge for CSS Alignment -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/variable-bridge.css') }}"
-    />
-    <!-- Responsive Grid System (NEW - Mobile-First) -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/responsive-grid.css') }}"
-    />
-    <!-- Custom Styles -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/styles.css') }}"
-    />
-    <!-- Platform Enhancements -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/platform-enhancements.css') }}"
-    />
-    <!-- Compact / Dainty Styling -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/compact-dainty.css') }}"
-    />
-    <!-- Form Enhancements -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/form-enhancements.css') }}"
-    />
-    <!-- Luxury Palette — Warm Taupe / Espresso / Soft Cream (loads last = highest priority) -->
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='css/ylh-luxury.css') }}"
-    />
+ <!-- Main CSS -->
+ <!-- Design System Foundation -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/design-system.css') }}"
+ />
+ <!-- Variable Bridge for CSS Alignment -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/variable-bridge.css') }}"
+ />
+ <!-- Responsive Grid System (NEW - Mobile-First) -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/responsive-grid.css') }}"
+ />
+ <!-- Custom Styles -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/styles.css') }}"
+ />
+ <!-- Platform Enhancements -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/platform-enhancements.css') }}"
+ />
+ <!-- Compact / Dainty Styling -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/compact-dainty.css') }}"
+ />
+ <!-- Form Enhancements -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/form-enhancements.css') }}"
+ />
+ <!-- Luxury Palette — Warm Taupe / Espresso / Soft Cream (loads last = highest priority) -->
+ <link
+ rel="stylesheet"
+ href="{{ url_for('static', filename='css/ylh-luxury.css') }}"
+ />
 
-    <!-- Google Fonts - Optimized Loading -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    
-    <style>
-      /* Base overrides for full-width layouts */
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      
-      .ylh-shell {
-        margin: 0;
-        padding: 0;
-      }
-      
-      .ylh-main {
-        margin: 0;
-        padding: 0;
-      }
-      
-      /* Agent Info in Header - Hide on desktop, show on mobile */
-      .header-agent-info {
-        display: none; /* Hide by default on desktop */
-      }
-      
-      /* Show agent info on mobile only - user loves this version */
-      @media (max-width: 768px) {
-        .header-agent-info {
-          display: flex !important;
-          position: relative !important;
-          left: auto !important;
-          transform: none !important;
-          width: 100%;
-          max-width: 100%;
-          margin: 0.5rem 0 0 0;
-          padding: 0.5rem 0.75rem;
-          order: 3;
-          justify-content: center;
-          align-items: center;
-          gap: 0.6rem;
-          background: rgba(255, 255, 255, 0.18);
-          border-radius: 8px;
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.25);
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header-agent-info > div[style*="width: 40px"] {
-          width: 32px !important;
-          height: 32px !important;
-          font-size: 0.9rem !important;
-        }
-        
-        .header-agent-info > div[style*="flex-direction: column"] {
-          gap: 0.05rem !important;
-        }
-        
-        .header-agent-info > div[style*="font-size: 0.9rem"] {
-          font-size: 0.75rem !important;
-        }
-        
-        .header-agent-info > div[style*="font-size: 0.7rem"] {
-          font-size: 0.65rem !important;
-        }
-        
-        .header-agent-info > div[style*="font-size: 0.65rem"] {
-          font-size: 0.6rem !important;
-        }
-        
-        .header-agent-info img[style*="max-height: 28px"] {
-          max-height: 22px !important;
-          max-width: 60px !important;
-        }
-      }
-      
-      /* Portrait Mobile Optimization - Primary Focus */
-      @media (max-width: 768px) and (orientation: portrait) {
-        /* Base Mobile Styles */
-        html {
-          font-size: 16px !important;
-          -webkit-text-size-adjust: 100%;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-        
-        body {
-          overflow-x: hidden !important;
-          width: 100% !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        
-        /* Ensure no horizontal scrolling */
-        * {
-          max-width: 100% !important;
-          box-sizing: border-box !important;
-        }
-        
-        /* Remove any fixed widths that could cause overflow */
-        img, video, iframe, embed, object {
-          max-width: 100% !important;
-          height: auto !important;
-        }
-      }
-      
-      @media (max-width: 768px) {
-        /* Base Mobile Styles - Ultra Skinny & No Horizontal Scroll */
-        html {
-          font-size: 16px !important;
-          -webkit-text-size-adjust: 100%;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          overflow-x: hidden !important;
-        }
-        
-        body {
-          overflow-x: hidden !important;
-          width: 100% !important;
-          max-width: 100vw !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          position: relative !important;
-        }
-        
-        /* CRITICAL: Prevent ANY horizontal overflow */
-        * {
-          max-width: 100% !important;
-          box-sizing: border-box !important;
-        }
-        
-        /* Force all containers to respect viewport */
-        html, body, main, section, article, div {
-          overflow-x: hidden !important;
-        }
-        
-        img, video, iframe, embed, object, svg {
-          max-width: 100% !important;
-          height: auto !important;
-          display: block !important;
-        }
-        
-        /* Ultra Skinny Main Header */
-        .site-header {
-          padding: 0.5rem 0 !important;
-          min-height: 48px !important;
-          max-height: 48px !important;
-          background: linear-gradient(135deg, #6B5B4D 0%, #5A4A3C 100%) !important;
-          position: sticky !important;
-          top: 0 !important;
-          z-index: 1000 !important;
-        }
-        
-        .header-content {
-          padding: 0 0.875rem !important;
-          flex-wrap: nowrap !important;
-          gap: 0.5rem !important;
-          min-height: 48px !important;
-          max-height: 48px !important;
-          align-items: center !important;
-          overflow: hidden !important;
-        }
-        
-        .brand-logo {
-          font-size: 0.95rem !important;
-          text-align: left !important;
-          flex: 0 0 auto !important;
-          white-space: nowrap !important;
-          overflow: hidden !important;
-          text-overflow: ellipsis !important;
-          max-width: 60% !important;
-        }
-        
-        .main-nav {
-          flex: 1 1 auto !important;
-          min-width: 0 !important;
-          overflow: hidden !important;
-        }
-        
-        .main-nav ul {
-          flex-direction: row !important;
-          gap: 0.375rem !important;
-          justify-content: flex-end !important;
-          flex-wrap: nowrap !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          overflow-x: auto !important;
-          overflow-y: hidden !important;
-          -webkit-overflow-scrolling: touch !important;
-          scrollbar-width: none !important;
-          -ms-overflow-style: none !important;
-        }
-        
-        .main-nav ul::-webkit-scrollbar {
-          display: none !important;
-        }
-        
-        .main-nav ul li a {
-          font-size: 0.7rem !important;
-          padding: 0.375rem 0.625rem !important;
-          white-space: nowrap !important;
-          border-radius: 6px !important;
-          transition: all 0.2s ease !important;
-        }
-        
-        .main-nav ul li a:hover {
-          background: rgba(255, 255, 255, 0.15) !important;
-        }
-      }
-      
-      @media (max-width: 480px) {
-        .site-header {
-          padding: 0.4375rem 0 !important;
-          min-height: 44px !important;
-          max-height: 44px !important;
-        }
-        
-        .header-content {
-          padding: 0 0.75rem !important;
-          min-height: 44px !important;
-          max-height: 44px !important;
-        }
-        
-        .brand-logo {
-          font-size: 0.875rem !important;
-          max-width: 55% !important;
-        }
-        
-        .main-nav ul li a {
-          font-size: 0.65rem !important;
-          padding: 0.3125rem 0.5rem !important;
-        }
-      }
-        
-        /* Global Container Padding - Optimized for Portrait */
-        div[style*="max-width: 1600px"],
-        div[style*="max-width: 1200px"],
-        .container,
-        .dashboard-container,
-        .agent-content-wrapper {
-          padding: 1rem 0.875rem !important;
-          max-width: 100% !important;
-          margin: 0 auto !important;
-        }
-        
-        /* Remove excessive padding/margins */
-        section, article, aside {
-          padding-left: 0.875rem !important;
-          padding-right: 0.875rem !important;
-        }
-        
-        /* All Buttons - Full Width on Mobile - Professional Touch Targets */
-        /* Exclude ALL CRM-wrap descendants from this override */
-        .crm-wrap button,
-        .crm-wrap a,
-        .crm-wrap input[type="submit"] {
-          width: auto !important;
-          min-height: unset !important;
-          margin: 0 !important;
-          padding: unset !important;
-          font-size: unset !important;
-          white-space: nowrap !important;
-        }
+ <!-- Google Fonts - Optimized Loading -->
+ <link
+ href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&display=swap"
+ rel="stylesheet"
+ />
+ 
+ <style>
+ /* Base overrides for full-width layouts */
+ body {
+ margin: 0;
+ padding: 0;
+ }
+ 
+ .ylh-shell {
+ margin: 0;
+ padding: 0;
+ }
+ 
+ .ylh-main {
+ margin: 0;
+ padding: 0;
+ }
+ 
+ /* Agent Info in Header - Hide on desktop, show on mobile */
+ .header-agent-info {
+ display: none; /* Hide by default on desktop */
+ }
+ 
+ /* Show agent info on mobile only - user loves this version */
+ @media (max-width: 768px) {
+ .header-agent-info {
+ display: flex !important;
+ position: relative !important;
+ left: auto !important;
+ transform: none !important;
+ width: 100%;
+ max-width: 100%;
+ margin: 0.5rem 0 0 0;
+ padding: 0.5rem 0.75rem;
+ order: 3;
+ justify-content: center;
+ align-items: center;
+ gap: 0.6rem;
+ background: rgba(255, 255, 255, 0.18);
+ border-radius: 8px;
+ backdrop-filter: blur(12px);
+ border: 1px solid rgba(255, 255, 255, 0.25);
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+ }
+ 
+ .header-agent-info > div[style*="width: 40px"] {
+ width: 32px !important;
+ height: 32px !important;
+ font-size: 0.9rem !important;
+ }
+ 
+ .header-agent-info > div[style*="flex-direction: column"] {
+ gap: 0.05rem !important;
+ }
+ 
+ .header-agent-info > div[style*="font-size: 0.9rem"] {
+ font-size: 0.75rem !important;
+ }
+ 
+ .header-agent-info > div[style*="font-size: 0.7rem"] {
+ font-size: 0.65rem !important;
+ }
+ 
+ .header-agent-info > div[style*="font-size: 0.65rem"] {
+ font-size: 0.6rem !important;
+ }
+ 
+ .header-agent-info img[style*="max-height: 28px"] {
+ max-height: 22px !important;
+ max-width: 60px !important;
+ }
+ }
+ 
+ /* Portrait Mobile Optimization - Primary Focus */
+ @media (max-width: 768px) and (orientation: portrait) {
+ /* Base Mobile Styles */
+ html {
+ font-size: 16px !important;
+ -webkit-text-size-adjust: 100%;
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
+ }
+ 
+ body {
+ overflow-x: hidden !important;
+ width: 100% !important;
+ padding: 0 !important;
+ margin: 0 !important;
+ }
+ 
+ /* Ensure no horizontal scrolling */
+ * {
+ max-width: 100% !important;
+ box-sizing: border-box !important;
+ }
+ 
+ /* Remove any fixed widths that could cause overflow */
+ img, video, iframe, embed, object {
+ max-width: 100% !important;
+ height: auto !important;
+ }
+ }
+ 
+ @media (max-width: 768px) {
+ /* Base Mobile Styles - Ultra Skinny & No Horizontal Scroll */
+ html {
+ font-size: 16px !important;
+ -webkit-text-size-adjust: 100%;
+ -webkit-font-smoothing: antialiased;
+ -moz-osx-font-smoothing: grayscale;
+ overflow-x: hidden !important;
+ }
+ 
+ body {
+ overflow-x: hidden !important;
+ width: 100% !important;
+ max-width: 100vw !important;
+ padding: 0 !important;
+ margin: 0 !important;
+ position: relative !important;
+ }
+ 
+ /* CRITICAL: Prevent ANY horizontal overflow */
+ * {
+ max-width: 100% !important;
+ box-sizing: border-box !important;
+ }
+ 
+ /* Force all containers to respect viewport */
+ html, body, main, section, article, div {
+ overflow-x: hidden !important;
+ }
+ 
+ img, video, iframe, embed, object, svg {
+ max-width: 100% !important;
+ height: auto !important;
+ display: block !important;
+ }
+ 
+ /* Ultra Skinny Main Header */
+ .site-header {
+ padding: 0.5rem 0 !important;
+ min-height: 48px !important;
+ max-height: 48px !important;
+ background: linear-gradient(135deg, #6B5B4D 0%, #5A4A3C 100%) !important;
+ position: sticky !important;
+ top: 0 !important;
+ z-index: 1000 !important;
+ }
+ 
+ .header-content {
+ padding: 0 0.875rem !important;
+ flex-wrap: nowrap !important;
+ gap: 0.5rem !important;
+ min-height: 48px !important;
+ max-height: 48px !important;
+ align-items: center !important;
+ overflow: hidden !important;
+ }
+ 
+ .brand-logo {
+ font-size: 0.95rem !important;
+ text-align: left !important;
+ flex: 0 0 auto !important;
+ white-space: nowrap !important;
+ overflow: hidden !important;
+ text-overflow: ellipsis !important;
+ max-width: 60% !important;
+ }
+ 
+ .main-nav {
+ flex: 1 1 auto !important;
+ min-width: 0 !important;
+ overflow: hidden !important;
+ }
+ 
+ .main-nav ul {
+ flex-direction: row !important;
+ gap: 0.375rem !important;
+ justify-content: flex-end !important;
+ flex-wrap: nowrap !important;
+ margin: 0 !important;
+ padding: 0 !important;
+ overflow-x: auto !important;
+ overflow-y: hidden !important;
+ -webkit-overflow-scrolling: touch !important;
+ scrollbar-width: none !important;
+ -ms-overflow-style: none !important;
+ }
+ 
+ .main-nav ul::-webkit-scrollbar {
+ display: none !important;
+ }
+ 
+ .main-nav ul li a {
+ font-size: 0.7rem !important;
+ padding: 0.375rem 0.625rem !important;
+ white-space: nowrap !important;
+ border-radius: 6px !important;
+ transition: all 0.2s ease !important;
+ }
+ 
+ .main-nav ul li a:hover {
+ background: rgba(255, 255, 255, 0.15) !important;
+ }
+ }
+ 
+ @media (max-width: 480px) {
+ .site-header {
+ padding: 0.4375rem 0 !important;
+ min-height: 44px !important;
+ max-height: 44px !important;
+ }
+ 
+ .header-content {
+ padding: 0 0.75rem !important;
+ min-height: 44px !important;
+ max-height: 44px !important;
+ }
+ 
+ .brand-logo {
+ font-size: 0.875rem !important;
+ max-width: 55% !important;
+ }
+ 
+ .main-nav ul li a {
+ font-size: 0.65rem !important;
+ padding: 0.3125rem 0.5rem !important;
+ }
+ }
+ 
+ /* Global Container Padding - Optimized for Portrait */
+ div[style*="max-width: 1600px"],
+ div[style*="max-width: 1200px"],
+ .container,
+ .dashboard-container,
+ .agent-content-wrapper {
+ padding: 1rem 0.875rem !important;
+ max-width: 100% !important;
+ margin: 0 auto !important;
+ }
+ 
+ /* Remove excessive padding/margins */
+ section, article, aside {
+ padding-left: 0.875rem !important;
+ padding-right: 0.875rem !important;
+ }
+ 
+ /* All Buttons - Full Width on Mobile - Professional Touch Targets */
+ /* Exclude ALL CRM-wrap descendants from this override */
+ .crm-wrap button,
+ .crm-wrap a,
+ .crm-wrap input[type="submit"] {
+ width: auto !important;
+ min-height: unset !important;
+ margin: 0 !important;
+ padding: unset !important;
+ font-size: unset !important;
+ white-space: nowrap !important;
+ }
 
-        button:not(.btn-remove):not(.btn-refine):not(.crm-abtn):not(.crm-act):not(.crm-xbtn):not(.crm-cbtn):not(.crm-sf-submit):not(.mbtn):not(.crm-pill):not(.crm-modal-close),
-        .btn:not([class*="crm-"]),
-        .btn-premium,
-        .btn-secondary:not([class*="crm-"]),
-        .btn-primary:not([class*="crm-"]),
-        a.btn:not([class*="crm-"]),
-        input[type="submit"]:not(.crm-sf-submit),
-        input[type="button"] {
-          width: 100% !important;
-          padding: 1rem 1.25rem !important;
-          font-size: 1rem !important;
-          min-height: 52px !important;
-          box-sizing: border-box !important;
-          margin: 0.75rem 0 !important;
-          border-radius: 8px !important;
-          font-weight: 600 !important;
-          letter-spacing: 0.02em !important;
-          white-space: normal !important;
-          word-wrap: break-word !important;
-        }
-        
-        /* Small action buttons - keep compact but touchable */
-        .btn-remove,
-        .btn-refine {
-          min-height: 44px !important;
-          padding: 0.625rem 1rem !important;
-          font-size: 0.9rem !important;
-        }
-        
-        /* Button Groups - Stack Vertically */
-        .button-group,
-        div[style*="display: flex"][style*="gap"] {
-          flex-direction: column !important;
-          gap: 1rem !important;
-          width: 100% !important;
-        }
-        
-        /* All Forms - Full Width (CRM forms excluded via their parent) */
-        form:not(.crm-topbar__actions form):not(.crm-bar form):not(.crm-stages form) {
-          width: 100% !important;
-        }
-        
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        input[type="tel"],
-        input[type="date"],
-        input[type="file"],
-        select,
-        textarea,
-        .premium-input,
-        .premium-select,
-        .premium-textarea {
-          width: 100% !important;
-          padding: 0.875rem !important;
-          font-size: 1rem !important;
-          min-height: 48px !important;
-          box-sizing: border-box !important;
-        }
-        
-        /* Cards - Full Width with Professional Spacing */
-        .card,
-        .card-premium,
-        .feature-card,
-        div[class*="card"] {
-          width: 100% !important;
-          padding: 1.5rem 1.125rem !important;
-          margin: 1rem 0 !important;
-          box-sizing: border-box !important;
-          border-radius: 12px !important;
-        }
-        
-        /* Card headers - better spacing */
-        .card-header,
-        .feature-card-header {
-          margin-bottom: 1.25rem !important;
-          padding-bottom: 1rem !important;
-        }
-        
-        /* Grids - Single Column */
-        div[style*="display: grid"],
-        div[style*="grid-template-columns"],
-        .dashboard-grid,
-        .dashboard-cards,
-        .stats-grid {
-          display: flex !important;
-          flex-direction: column !important;
-          grid-template-columns: 1fr !important;
-          gap: 1rem !important;
-        }
-        
-        /* Flex Containers - Stack Vertically */
-        div[style*="display: flex"]:not(.header-content):not(.main-nav ul) {
-          flex-direction: column !important;
-          gap: 1rem !important;
-        }
-        
-        /* Typography - Professional Mobile Sizing */
-        h1 {
-          font-size: 1.75rem !important;
-          line-height: 1.3 !important;
-          margin: 0 0 1rem 0 !important;
-          font-weight: 600 !important;
-        }
-        
-        h2 {
-          font-size: 1.5rem !important;
-          line-height: 1.35 !important;
-          margin: 0 0 0.875rem 0 !important;
-          font-weight: 600 !important;
-        }
-        
-        h3 {
-          font-size: 1.25rem !important;
-          line-height: 1.4 !important;
-          margin: 0 0 0.75rem 0 !important;
-          font-weight: 600 !important;
-        }
-        
-        h4 {
-          font-size: 1.1rem !important;
-          line-height: 1.4 !important;
-          margin: 0 0 0.625rem 0 !important;
-        }
-        
-        p {
-          font-size: 1rem !important;
-          line-height: 1.6 !important;
-          margin: 0 0 1rem 0 !important;
-        }
-        
-        /* Labels and small text */
-        label {
-          font-size: 0.875rem !important;
-          margin-bottom: 0.5rem !important;
-          display: block !important;
-        }
-        
-        /* Tables - Scrollable */
-        table {
-          display: block !important;
-          overflow-x: auto !important;
-          width: 100% !important;
-          font-size: 0.9rem !important;
-        }
-        
-        th, td {
-          padding: 0.75rem 0.5rem !important;
-          white-space: nowrap !important;
-        }
-        
-        /* Modals - Full Width */
-        [id*="modal"] > div,
-        .modal-content {
-          width: 95% !important;
-          max-width: 95% !important;
-          padding: 1.5rem !important;
-          margin: 1rem auto !important;
-        }
-        
-        /* Images - Responsive */
-        img {
-          max-width: 100% !important;
-          height: auto !important;
-        }
-        
-        /* Hide Desktop Elements */
-        .desktop-only {
-          display: none !important;
-        }
-        
-        /* Show Mobile Elements */
-        .mobile-only {
-          display: block !important;
-        }
-      }
-      
-      /* Extra Small Devices - Portrait Phones */
-      @media (max-width: 480px) and (orientation: portrait) {
-        html {
-          font-size: 16px !important; /* Keep readable size */
-        }
-        
-        body {
-          padding: 0 !important;
-        }
-        
-        h1 {
-          font-size: 1.5rem !important;
-          line-height: 1.25 !important;
-        }
-        
-        h2 {
-          font-size: 1.25rem !important;
-          line-height: 1.3 !important;
-        }
-        
-        h3 {
-          font-size: 1.1rem !important;
-        }
-        
-        /* Tighter but still professional spacing */
-        div[style*="max-width: 1600px"],
-        div[style*="max-width: 1200px"],
-        .container,
-        .dashboard-container {
-          padding: 0.875rem 0.75rem !important;
-        }
-        
-        .card,
-        .card-premium {
-          padding: 1.25rem 1rem !important;
-          margin: 0.875rem 0 !important;
-        }
-        
-        button,
-        .btn {
-          padding: 0.9375rem 1.125rem !important;
-          font-size: 0.95rem !important;
-          min-height: 50px !important;
-        }
-        
-        /* Form inputs - prevent zoom on iOS */
-        input[type="text"],
-        input[type="email"],
-        input[type="password"],
-        input[type="number"],
-        input[type="tel"],
-        select,
-        textarea {
-          font-size: 16px !important;
-        }
-      }
-      
-      /* General small devices */
-      @media (max-width: 480px) {
-        html {
-          font-size: 16px !important;
-        }
-        
-        h1 {
-          font-size: 1.5rem !important;
-        }
-        
-        h2 {
-          font-size: 1.25rem !important;
-        }
-        
-        .card,
-        .card-premium {
-          padding: 1rem 0.75rem !important;
-        }
-        
-        button,
-        .btn {
-          padding: 0.875rem 1rem !important;
-          font-size: 0.95rem !important;
-        }
-        
-        input,
-        select,
-        textarea {
-          font-size: 16px !important; /* Prevents zoom on iOS */
-        }
-      }
-      
-      /* Portrait-Specific Enhancements for Professional Look */
-      @media (max-width: 768px) and (orientation: portrait) {
-        /* Ensure proper vertical spacing */
-        section {
-          margin: 1.5rem 0 !important;
-          padding: 1rem 0.875rem !important;
-        }
-        
-        /* Professional section headers */
-        section > h1,
-        section > h2 {
-          margin-top: 0 !important;
-          margin-bottom: 1rem !important;
-        }
-        
-        /* Better list spacing */
-        ul, ol {
-          padding-left: 1.5rem !important;
-          margin: 1rem 0 !important;
-        }
-        
-        li {
-          margin-bottom: 0.5rem !important;
-          line-height: 1.6 !important;
-        }
-        
-        /* Professional spacing between elements */
-        .spacing-section {
-          margin: 2rem 0 !important;
-        }
-        
-        /* Ensure proper text wrapping */
-        p, span, div {
-          word-wrap: break-word !important;
-          overflow-wrap: break-word !important;
-        }
-        
-        /* Professional card shadows on mobile */
-        .card,
-        .card-premium {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-        }
-        
-        /* Better focus states for accessibility */
-        button:focus,
-        input:focus,
-        select:focus,
-        textarea:focus,
-        a:focus {
-          outline: 3px solid rgba(107, 91, 77, 0.5) !important;
-          outline-offset: 2px !important;
-        }
-        
-        /* Smooth scrolling */
-        html {
-          scroll-behavior: smooth !important;
-        }
-        
-        /* Professional loading states */
-        .loading,
-        [class*="loading"] {
-          min-height: 200px !important;
-          display: flex !important;
-          align-items: center !important;
-          justify-content: center !important;
-        }
-      }
-    </style>
-  </head>
+ button:not(.btn-remove):not(.btn-refine):not(.crm-abtn):not(.crm-act):not(.crm-xbtn):not(.crm-cbtn):not(.crm-sf-submit):not(.mbtn):not(.crm-pill):not(.crm-modal-close),
+ .btn:not([class*="crm-"]),
+ .btn-premium,
+ .btn-secondary:not([class*="crm-"]),
+ .btn-primary:not([class*="crm-"]),
+ a.btn:not([class*="crm-"]),
+ input[type="submit"]:not(.crm-sf-submit),
+ input[type="button"] {
+ width: 100% !important;
+ padding: 1rem 1.25rem !important;
+ font-size: 1rem !important;
+ min-height: 52px !important;
+ box-sizing: border-box !important;
+ margin: 0.75rem 0 !important;
+ border-radius: 8px !important;
+ font-weight: 600 !important;
+ letter-spacing: 0.02em !important;
+ white-space: normal !important;
+ word-wrap: break-word !important;
+ }
+ 
+ /* Small action buttons - keep compact but touchable */
+ .btn-remove,
+ .btn-refine {
+ min-height: 44px !important;
+ padding: 0.625rem 1rem !important;
+ font-size: 0.9rem !important;
+ }
+ 
+ /* Button Groups - Stack Vertically */
+ .button-group,
+ div[style*="display: flex"][style*="gap"] {
+ flex-direction: column !important;
+ gap: 1rem !important;
+ width: 100% !important;
+ }
+ 
+ /* All Forms - Full Width (CRM forms excluded via their parent) */
+ form:not(.crm-topbar__actions form):not(.crm-bar form):not(.crm-stages form) {
+ width: 100% !important;
+ }
+ 
+ input[type="text"],
+ input[type="email"],
+ input[type="password"],
+ input[type="number"],
+ input[type="tel"],
+ input[type="date"],
+ input[type="file"],
+ select,
+ textarea,
+ .premium-input,
+ .premium-select,
+ .premium-textarea {
+ width: 100% !important;
+ padding: 0.875rem !important;
+ font-size: 1rem !important;
+ min-height: 48px !important;
+ box-sizing: border-box !important;
+ }
+ 
+ /* Cards - Full Width with Professional Spacing */
+ .card,
+ .card-premium,
+ .feature-card,
+ div[class*="card"] {
+ width: 100% !important;
+ padding: 1.5rem 1.125rem !important;
+ margin: 1rem 0 !important;
+ box-sizing: border-box !important;
+ border-radius: 12px !important;
+ }
+ 
+ /* Card headers - better spacing */
+ .card-header,
+ .feature-card-header {
+ margin-bottom: 1.25rem !important;
+ padding-bottom: 1rem !important;
+ }
+ 
+ /* Grids - Single Column */
+ div[style*="display: grid"],
+ div[style*="grid-template-columns"],
+ .dashboard-grid,
+ .dashboard-cards,
+ .stats-grid {
+ display: flex !important;
+ flex-direction: column !important;
+ grid-template-columns: 1fr !important;
+ gap: 1rem !important;
+ }
+ 
+ /* Flex Containers - Stack Vertically */
+ div[style*="display: flex"]:not(.header-content):not(.main-nav ul) {
+ flex-direction: column !important;
+ gap: 1rem !important;
+ }
+ 
+ /* Typography - Professional Mobile Sizing */
+ h1 {
+ font-size: 1.75rem !important;
+ line-height: 1.3 !important;
+ margin: 0 0 1rem 0 !important;
+ font-weight: 600 !important;
+ }
+ 
+ h2 {
+ font-size: 1.5rem !important;
+ line-height: 1.35 !important;
+ margin: 0 0 0.875rem 0 !important;
+ font-weight: 600 !important;
+ }
+ 
+ h3 {
+ font-size: 1.25rem !important;
+ line-height: 1.4 !important;
+ margin: 0 0 0.75rem 0 !important;
+ font-weight: 600 !important;
+ }
+ 
+ h4 {
+ font-size: 1.1rem !important;
+ line-height: 1.4 !important;
+ margin: 0 0 0.625rem 0 !important;
+ }
+ 
+ p {
+ font-size: 1rem !important;
+ line-height: 1.6 !important;
+ margin: 0 0 1rem 0 !important;
+ }
+ 
+ /* Labels and small text */
+ label {
+ font-size: 0.875rem !important;
+ margin-bottom: 0.5rem !important;
+ display: block !important;
+ }
+ 
+ /* Tables - Scrollable */
+ table {
+ display: block !important;
+ overflow-x: auto !important;
+ width: 100% !important;
+ font-size: 0.9rem !important;
+ }
+ 
+ th, td {
+ padding: 0.75rem 0.5rem !important;
+ white-space: nowrap !important;
+ }
+ 
+ /* Modals - Full Width */
+ [id*="modal"] > div,
+ .modal-content {
+ width: 95% !important;
+ max-width: 95% !important;
+ padding: 1.5rem !important;
+ margin: 1rem auto !important;
+ }
+ 
+ /* Images - Responsive */
+ img {
+ max-width: 100% !important;
+ height: auto !important;
+ }
+ 
+ /* Hide Desktop Elements */
+ .desktop-only {
+ display: none !important;
+ }
+ 
+ /* Show Mobile Elements */
+ .mobile-only {
+ display: block !important;
+ }
+ }
+ 
+ /* Extra Small Devices - Portrait Phones */
+ @media (max-width: 480px) and (orientation: portrait) {
+ html {
+ font-size: 16px !important; /* Keep readable size */
+ }
+ 
+ body {
+ padding: 0 !important;
+ }
+ 
+ h1 {
+ font-size: 1.5rem !important;
+ line-height: 1.25 !important;
+ }
+ 
+ h2 {
+ font-size: 1.25rem !important;
+ line-height: 1.3 !important;
+ }
+ 
+ h3 {
+ font-size: 1.1rem !important;
+ }
+ 
+ /* Tighter but still professional spacing */
+ div[style*="max-width: 1600px"],
+ div[style*="max-width: 1200px"],
+ .container,
+ .dashboard-container {
+ padding: 0.875rem 0.75rem !important;
+ }
+ 
+ .card,
+ .card-premium {
+ padding: 1.25rem 1rem !important;
+ margin: 0.875rem 0 !important;
+ }
+ 
+ button,
+ .btn {
+ padding: 0.9375rem 1.125rem !important;
+ font-size: 0.95rem !important;
+ min-height: 50px !important;
+ }
+ 
+ /* Form inputs - prevent zoom on iOS */
+ input[type="text"],
+ input[type="email"],
+ input[type="password"],
+ input[type="number"],
+ input[type="tel"],
+ select,
+ textarea {
+ font-size: 16px !important;
+ }
+ }
+ 
+ /* General small devices */
+ @media (max-width: 480px) {
+ html {
+ font-size: 16px !important;
+ }
+ 
+ h1 {
+ font-size: 1.5rem !important;
+ }
+ 
+ h2 {
+ font-size: 1.25rem !important;
+ }
+ 
+ .card,
+ .card-premium {
+ padding: 1rem 0.75rem !important;
+ }
+ 
+ button,
+ .btn {
+ padding: 0.875rem 1rem !important;
+ font-size: 0.95rem !important;
+ }
+ 
+ input,
+ select,
+ textarea {
+ font-size: 16px !important; /* Prevents zoom on iOS */
+ }
+ }
+ 
+ /* Portrait-Specific Enhancements for Professional Look */
+ @media (max-width: 768px) and (orientation: portrait) {
+ /* Ensure proper vertical spacing */
+ section {
+ margin: 1.5rem 0 !important;
+ padding: 1rem 0.875rem !important;
+ }
+ 
+ /* Professional section headers */
+ section > h1,
+ section > h2 {
+ margin-top: 0 !important;
+ margin-bottom: 1rem !important;
+ }
+ 
+ /* Better list spacing */
+ ul, ol {
+ padding-left: 1.5rem !important;
+ margin: 1rem 0 !important;
+ }
+ 
+ li {
+ margin-bottom: 0.5rem !important;
+ line-height: 1.6 !important;
+ }
+ 
+ /* Professional spacing between elements */
+ .spacing-section {
+ margin: 2rem 0 !important;
+ }
+ 
+ /* Ensure proper text wrapping */
+ p, span, div {
+ word-wrap: break-word !important;
+ overflow-wrap: break-word !important;
+ }
+ 
+ /* Professional card shadows on mobile */
+ .card,
+ .card-premium {
+ box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+ }
+ 
+ /* Better focus states for accessibility */
+ button:focus,
+ input:focus,
+ select:focus,
+ textarea:focus,
+ a:focus {
+ outline: 3px solid rgba(107, 91, 77, 0.5) !important;
+ outline-offset: 2px !important;
+ }
+ 
+ /* Smooth scrolling */
+ html {
+ scroll-behavior: smooth !important;
+ }
+ 
+ /* Professional loading states */
+ .loading,
+ [class*="loading"] {
+ min-height: 200px !important;
+ display: flex !important;
+ align-items: center !important;
+ justify-content: center !important;
+ }
+ }
+ </style>
+ </head>
 
-  <body>
-    <!-- Eco-Inspired Header -->
-    <header class="site-header">
-      <div class="header-content" style="display: flex; align-items: center; justify-content: space-between; position: relative;">
-        <a href="{{ url_for('index') }}" class="brand-logo" style="flex-shrink: 0;">
-          Your Life • Your Home
-        </a>
-        
-        <!-- Agent/Lender Info in Center (for homeowners only) -->
-        {% if session.get('role') == 'homeowner' and professionals and professionals|length > 0 %}
-          {% set primary_prof = professionals[0] %}
-          <div class="header-agent-info">
-            <!-- Professional Photo -->
-            {% set header_photo_url = get_professional_photo_url(primary_prof.get('professional_photo')) if primary_prof else None %}
-            {% if header_photo_url %}
-            <img src="{{ header_photo_url }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: none; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] if primary_prof else '?' }}</div>
-            {% else %}
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] }}</div>
-            {% endif %}
-            
-            <!-- Professional Info -->
-            <div style="display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;">
-              <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 0.9rem; color: white; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.name or 'Professional' }}</div>
-              <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); text-transform: capitalize;">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</div>
-              {% if primary_prof.get('brokerage_name') %}
-              <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.brokerage_name }}</div>
-              {% endif %}
-            </div>
-            
-            <!-- Brokerage Logo (if available) -->
-            {% if primary_prof.get('brokerage_logo') %}
-            <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" style="max-height: 28px; max-width: 80px; object-fit: contain; flex-shrink: 0; margin-left: 0.5rem; filter: brightness(0) invert(1); opacity: 0.9;">
-            {% endif %}
-          </div>
-        {% endif %}
-        
-        <nav class="main-nav" style="flex-shrink: 0;">
-          <ul>
-            <li><a href="{{ url_for('index') }}">Home</a></li>
-            {% if session.get('user_id') %}
-              <li>
-                <a href="{% if session.get('role') == 'agent' %}{{ url_for('agent_dashboard') }}{% elif session.get('role') == 'lender' %}{{ url_for('lender_dashboard') }}{% else %}{{ url_for('homeowner_overview') }}{% endif %}">
-                  Dashboard
-                </a>
-              </li>
-              <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
-            {% else %}
-              <li><a href="{{ url_for('login') }}">Sign In</a></li>
-            {% endif %}
-          </ul>
-        </nav>
-      </div>
-    </header>
+ <body>
+ <!-- Eco-Inspired Header -->
+ <header class="site-header">
+ <div class="header-content" style="display: flex; align-items: center; justify-content: space-between; position: relative;">
+ <a href="{{ url_for('index') }}" class="brand-logo" style="flex-shrink: 0;">
+ Your Life • Your Home
+ </a>
+ 
+ <!-- Agent/Lender Info in Center (for homeowners only) -->
+ {% if session.get('role') == 'homeowner' and professionals and professionals|length > 0 %}
+ {% set primary_prof = professionals[0] %}
+ <div class="header-agent-info">
+ <!-- Professional Photo -->
+ {% set header_photo_url = get_professional_photo_url(primary_prof.get('professional_photo')) if primary_prof else None %}
+ {% if header_photo_url %}
+ <img src="{{ header_photo_url }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+ <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: none; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] if primary_prof else '?' }}</div>
+ {% else %}
+ <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] }}</div>
+ {% endif %}
+ 
+ <!-- Professional Info -->
+ <div style="display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;">
+ <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 0.9rem; color: white; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.name or 'Professional' }}</div>
+ <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); text-transform: capitalize;">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</div>
+ {% if primary_prof.get('brokerage_name') %}
+ <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.brokerage_name }}</div>
+ {% endif %}
+ </div>
+ 
+ <!-- Brokerage Logo (if available) -->
+ {% if primary_prof.get('brokerage_logo') %}
+ <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" style="max-height: 28px; max-width: 80px; object-fit: contain; flex-shrink: 0; margin-left: 0.5rem; filter: brightness(0) invert(1); opacity: 0.9;">
+ {% endif %}
+ </div>
+ {% endif %}
+ 
+ <nav class="main-nav" style="flex-shrink: 0;">
+ <ul>
+ <li><a href="{{ url_for('index') }}">Home</a></li>
+ {% if session.get('user_id') %}
+ <li>
+ <a href="{% if session.get('role') == 'agent' %}{{ url_for('agent_dashboard') }}{% elif session.get('role') == 'lender' %}{{ url_for('lender_dashboard') }}{% else %}{{ url_for('homeowner_overview') }}{% endif %}">
+ Dashboard
+ </a>
+ </li>
+ <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
+ {% else %}
+ <li><a href="{{ url_for('login') }}">Sign In</a></li>
+ {% endif %}
+ </ul>
+ </nav>
+ </div>
+ </header>
 
-    <div class="ylh-shell">
-      <main class="ylh-main">
-        {# Optional flash messages section #}
-        {% with messages = get_flashed_messages(with_categories=True) %}
-          {% if messages %}
-            <div style="margin-bottom:0.8rem;">
-              {% for category, message in messages %}
-                <div class="ylh-flash {{ category }}">
-                  {{ message }}
-                </div>
-              {% endfor %}
-            </div>
-          {% endif %}
-        {% endwith %}
+ <div class="ylh-shell">
+ <main class="ylh-main">
+ {# Optional flash messages section #}
+ {% with messages = get_flashed_messages(with_categories=True) %}
+ {% if messages %}
+ <div style="margin-bottom:0.8rem;">
+ {% for category, message in messages %}
+ <div class="ylh-flash {{ category }}">
+ {{ message }}
+ </div>
+ {% endfor %}
+ </div>
+ {% endif %}
+ {% endwith %}
 
-        {% block content %}{% endblock %}
-      </main>
-    </div>
+ {% block content %}{% endblock %}
+ </main>
+ </div>
 
-    <!-- Sidebar menu toggle logic -->
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const buttons = document.querySelectorAll("[data-menu-toggle]");
-        buttons.forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            const target = btn.getAttribute("data-menu-toggle");
-            const submenu = document.querySelector(
-              '[data-menu-section="' + target + '"]'
-            );
-            if (!submenu) return;
+ <!-- Sidebar menu toggle logic -->
+ <script>
+ document.addEventListener("DOMContentLoaded", function () {
+ const buttons = document.querySelectorAll("[data-menu-toggle]");
+ buttons.forEach(function (btn) {
+ btn.addEventListener("click", function () {
+ const target = btn.getAttribute("data-menu-toggle");
+ const submenu = document.querySelector(
+ '[data-menu-section="' + target + '"]'
+ );
+ if (!submenu) return;
 
-            const isOpen = submenu.getAttribute("data-open") === "true";
-            submenu.style.display = isOpen ? "none" : "block";
-            submenu.setAttribute("data-open", isOpen ? "false" : "true");
-            btn.classList.toggle("is-open", !isOpen);
-          });
-        });
-      });
-    </script>
-    
-    {% block extra_js %}
-    {% endblock %}
-  </body>
+ const isOpen = submenu.getAttribute("data-open") === "true";
+ submenu.style.display = isOpen ? "none" : "block";
+ submenu.setAttribute("data-open", isOpen ? "false" : "true");
+ btn.classList.toggle("is-open", !isOpen);
+ });
+ });
+ });
+ </script>
+ 
+ {% block extra_js %}
+ {% endblock %}
+ </body>
 </html>

@@ -2,929 +2,929 @@
 
 {% block lender_content %}
 <style>
-  .crm-container {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-  .crm-sidebar {
-    background: var(--gradient-warm);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-light);
-    height: fit-content;
-    position: sticky;
-    top: 2rem;
-    border: var(--border-light);
-  }
-  .crm-main {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  .filter-buttons {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-  }
-  .filter-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--olive-green);
-    background: var(--white);
-    color: var(--olive-green);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 600;
-    transition: var(--transition-base);
-    text-decoration: none;
-    text-align: center;
-    display: block;
-    font-size: 0.85rem;
-  }
-  .filter-btn:hover, .filter-btn.active {
-    background: var(--olive-green);
-    color: var(--white);
-  }
-  .borrower-card {
-    background: var(--gradient-warm);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-light);
-    margin-bottom: 1rem;
-    transition: var(--transition-base);
-    border: var(--border-light);
-  }
-  .borrower-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-medium);
-  }
-  .borrower-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
-  }
-  .borrower-name {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: var(--charcoal-brown);
-    margin: 0;
-  }
-  .borrower-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--border-radius);
-    font-size: 0.8rem;
-    font-weight: 600;
-  }
-  .badge-preapproval { background: rgba(200, 180, 151, 0.3); color: var(--charcoal-brown); }
-  .badge-in_process { background: rgba(107, 106, 69, 0.3); color: var(--charcoal-brown); }
-  .badge-closed { background: rgba(200, 180, 151, 0.25); color: var(--charcoal-brown); }
-  .badge-prospect { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
-  .borrower-info {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  .info-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--charcoal-brown);
-    opacity: 0.8;
-    font-size: 0.9rem;
-  }
-  .info-item strong {
-    color: var(--charcoal-brown);
-    min-width: 120px;
-    font-weight: 600;
-  }
-  .info-item a {
-    color: var(--olive-green);
-    text-decoration: none;
-  }
-  .info-item a:hover {
-    text-decoration: underline;
-  }
-  .auto-email-badges {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-top: 0.5rem;
-  }
-  .auto-badge {
-    padding: 0.3rem 0.7rem;
-    border-radius: var(--border-radius);
-    font-size: 0.75rem;
-    background: rgba(107, 106, 69, 0.15);
-    color: var(--charcoal-brown);
-    font-weight: 500;
-  }
-  .borrower-actions {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: var(--border-light);
-  }
-  .btn-small {
-    padding: 0.4rem 0.8rem;
-    font-size: 0.85rem;
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(58, 53, 44, 0.6);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal.active {
-    display: flex;
-  }
-  .modal-content {
-    background: var(--white);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    max-width: 600px;
-    width: 90%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-premium);
-    border: var(--border-light);
-  }
-  .modal-content h2 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-  }
-  .modal-content h3 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-  }
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-  .form-full {
-    grid-column: 1 / -1;
-  }
-  .form-grid label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--olive-green);
-    margin-bottom: 0.5rem;
-  }
-  .form-grid input[type="text"],
-  .form-grid input[type="email"],
-  .form-grid input[type="tel"],
-  .form-grid input[type="number"],
-  .form-grid select,
-  .form-grid textarea {
-    width: 100%;
-    padding: 0.6rem;
-    border: var(--border-light);
-    border-radius: var(--border-radius);
-    background: var(--white);
-    color: var(--charcoal-brown);
-    font-size: 0.9rem;
-    transition: var(--transition-base);
-  }
-  .form-grid input:focus,
-  .form-grid select:focus,
-  .form-grid textarea:focus {
-    outline: none;
-    border-color: var(--olive-green);
-    box-shadow: 0 0 0 2px rgba(107, 106, 69, 0.1);
-  }
-  .toggle-switch {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  .toggle-switch label {
-    color: var(--charcoal-brown);
-    font-weight: 400;
-    margin: 0;
-  }
-  .toggle-switch input[type="checkbox"] {
-    width: 40px;
-    height: 20px;
-    appearance: none;
-    background: var(--taupe-beige);
-    border-radius: 10px;
-    position: relative;
-    cursor: pointer;
-    transition: var(--transition-base);
-  }
-  .toggle-switch input[type="checkbox"]:checked {
-    background: var(--olive-green);
-  }
-  .toggle-switch input[type="checkbox"]::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--white);
-    top: 2px;
-    left: 2px;
-    transition: var(--transition-base);
-  }
-  .toggle-switch input[type="checkbox"]:checked::before {
-    left: 22px;
-  }
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
-    border-radius: var(--border-radius);
-    border: var(--border-light);
-  }
-  .empty-state h3 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-  }
+ .crm-container {
+ display: grid;
+ grid-template-columns: 300px 1fr;
+ gap: 2rem;
+ margin-top: 2rem;
+ }
+ .crm-sidebar {
+ background: var(--gradient-warm);
+ border-radius: var(--border-radius-lg);
+ padding: 1.5rem;
+ box-shadow: var(--shadow-light);
+ height: fit-content;
+ position: sticky;
+ top: 2rem;
+ border: var(--border-light);
+ }
+ .crm-main {
+ display: flex;
+ flex-direction: column;
+ gap: 1.5rem;
+ }
+ .filter-buttons {
+ display: flex;
+ gap: 0.5rem;
+ flex-wrap: wrap;
+ margin-bottom: 1rem;
+ }
+ .filter-btn {
+ padding: 0.5rem 1rem;
+ border: 2px solid var(--olive-green);
+ background: var(--white);
+ color: var(--olive-green);
+ border-radius: var(--border-radius);
+ cursor: pointer;
+ font-weight: 600;
+ transition: var(--transition-base);
+ text-decoration: none;
+ text-align: center;
+ display: block;
+ font-size: 0.85rem;
+ }
+ .filter-btn:hover, .filter-btn.active {
+ background: var(--olive-green);
+ color: var(--white);
+ }
+ .borrower-card {
+ background: var(--gradient-warm);
+ border-radius: var(--border-radius-lg);
+ padding: 1.5rem;
+ box-shadow: var(--shadow-light);
+ margin-bottom: 1rem;
+ transition: var(--transition-base);
+ border: var(--border-light);
+ }
+ .borrower-card:hover {
+ transform: translateY(-2px);
+ box-shadow: var(--shadow-medium);
+ }
+ .borrower-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: start;
+ margin-bottom: 1rem;
+ }
+ .borrower-name {
+ font-family: var(--font-heading);
+ font-size: 1.5rem;
+ font-weight: 500;
+ color: var(--charcoal-brown);
+ margin: 0;
+ }
+ .borrower-badge {
+ padding: 0.25rem 0.75rem;
+ border-radius: var(--border-radius);
+ font-size: 0.8rem;
+ font-weight: 600;
+ }
+ .badge-preapproval { background: rgba(200, 180, 151, 0.3); color: var(--charcoal-brown); }
+ .badge-in_process { background: rgba(107, 91, 77, 0.3); color: var(--charcoal-brown); }
+ .badge-closed { background: rgba(200, 180, 151, 0.25); color: var(--charcoal-brown); }
+ .badge-prospect { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
+ .borrower-info {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ gap: 1rem;
+ margin-bottom: 1rem;
+ }
+ .info-item {
+ display: flex;
+ align-items: center;
+ gap: 0.5rem;
+ color: var(--charcoal-brown);
+ opacity: 0.8;
+ font-size: 0.9rem;
+ }
+ .info-item strong {
+ color: var(--charcoal-brown);
+ min-width: 120px;
+ font-weight: 600;
+ }
+ .info-item a {
+ color: var(--olive-green);
+ text-decoration: none;
+ }
+ .info-item a:hover {
+ text-decoration: underline;
+ }
+ .auto-email-badges {
+ display: flex;
+ gap: 0.5rem;
+ flex-wrap: wrap;
+ margin-top: 0.5rem;
+ }
+ .auto-badge {
+ padding: 0.3rem 0.7rem;
+ border-radius: var(--border-radius);
+ font-size: 0.75rem;
+ background: rgba(107, 91, 77, 0.15);
+ color: var(--charcoal-brown);
+ font-weight: 500;
+ }
+ .borrower-actions {
+ display: flex;
+ gap: 0.5rem;
+ margin-top: 1rem;
+ padding-top: 1rem;
+ border-top: var(--border-light);
+ }
+ .btn-small {
+ padding: 0.4rem 0.8rem;
+ font-size: 0.85rem;
+ }
+ .modal {
+ display: none;
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background: rgba(61, 46, 36, 0.6);
+ z-index: 1000;
+ align-items: center;
+ justify-content: center;
+ }
+ .modal.active {
+ display: flex;
+ }
+ .modal-content {
+ background: var(--white);
+ border-radius: var(--border-radius);
+ padding: 2rem;
+ max-width: 600px;
+ width: 90%;
+ max-height: 90vh;
+ overflow-y: auto;
+ box-shadow: var(--shadow-premium);
+ border: var(--border-light);
+ }
+ .modal-content h2 {
+ font-family: var(--font-heading);
+ color: var(--charcoal-brown);
+ }
+ .modal-content h3 {
+ font-family: var(--font-heading);
+ color: var(--charcoal-brown);
+ }
+ .form-grid {
+ display: grid;
+ grid-template-columns: repeat(2, 1fr);
+ gap: 1rem;
+ }
+ .form-full {
+ grid-column: 1 / -1;
+ }
+ .form-grid label {
+ display: block;
+ font-size: 0.85rem;
+ font-weight: 600;
+ color: var(--olive-green);
+ margin-bottom: 0.5rem;
+ }
+ .form-grid input[type="text"],
+ .form-grid input[type="email"],
+ .form-grid input[type="tel"],
+ .form-grid input[type="number"],
+ .form-grid select,
+ .form-grid textarea {
+ width: 100%;
+ padding: 0.6rem;
+ border: var(--border-light);
+ border-radius: var(--border-radius);
+ background: var(--white);
+ color: var(--charcoal-brown);
+ font-size: 0.9rem;
+ transition: var(--transition-base);
+ }
+ .form-grid input:focus,
+ .form-grid select:focus,
+ .form-grid textarea:focus {
+ outline: none;
+ border-color: var(--olive-green);
+ box-shadow: 0 0 0 2px rgba(107, 91, 77, 0.1);
+ }
+ .toggle-switch {
+ display: flex;
+ align-items: center;
+ gap: 0.5rem;
+ }
+ .toggle-switch label {
+ color: var(--charcoal-brown);
+ font-weight: 400;
+ margin: 0;
+ }
+ .toggle-switch input[type="checkbox"] {
+ width: 40px;
+ height: 20px;
+ appearance: none;
+ background: var(--taupe-beige);
+ border-radius: 10px;
+ position: relative;
+ cursor: pointer;
+ transition: var(--transition-base);
+ }
+ .toggle-switch input[type="checkbox"]:checked {
+ background: var(--olive-green);
+ }
+ .toggle-switch input[type="checkbox"]::before {
+ content: '';
+ position: absolute;
+ width: 16px;
+ height: 16px;
+ border-radius: 50%;
+ background: var(--white);
+ top: 2px;
+ left: 2px;
+ transition: var(--transition-base);
+ }
+ .toggle-switch input[type="checkbox"]:checked::before {
+ left: 22px;
+ }
+ .empty-state {
+ text-align: center;
+ padding: 4rem 2rem;
+ background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
+ border-radius: var(--border-radius);
+ border: var(--border-light);
+ }
+ .empty-state h3 {
+ font-family: var(--font-heading);
+ color: var(--charcoal-brown);
+ }
 </style>
 
 <div class="dashboard-main__header">
-  <p class="dashboard-tagline">Track relationships</p>
-  <h1>Borrower CRM</h1>
-  <p>Complete borrower management with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
+ <p class="dashboard-tagline">Track relationships</p>
+ <h1>Borrower CRM</h1>
+ <p>Complete borrower management with automated birthday wishes, home anniversaries, seasonal checklists, equity updates, and holiday greetings.</p>
 </div>
 
 <!-- Stats Cards - 2 Columns, 3 boxes each -->
 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
-  <!-- Column 1 -->
-  <div class="stat-card-clickable" onclick="openStatModal('total')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">📊 Total Borrowers</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">All borrowers in your CRM</p>
-  </div>
-  
-  <div class="stat-card-clickable" onclick="openStatModal('in_process')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🔄 In Process</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.in_process|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Active loans in process</p>
-  </div>
-  
-  <div class="stat-card-clickable" onclick="openStatModal('prospect')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">⭐ Prospects</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.prospect|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">New prospects</p>
-  </div>
-  
-  <!-- Column 2 -->
-  <div class="stat-card-clickable" onclick="openStatModal('tasks')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">✅ Pending Tasks</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.pending_tasks|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Follow-ups & reminders</p>
-  </div>
-  
-  <div class="stat-card-clickable" onclick="openStatModal('followup')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base); position: relative;">
-    <div style="position: absolute; top: 0.5rem; right: 0.5rem;">
-      <button onclick="event.stopPropagation(); openFollowupSettings();" style="background: transparent; border: none; color: var(--olive-green); cursor: pointer; font-size: 0.8rem; padding: 0.25rem 0.5rem; z-index: 10;" title="Settings">⚙️</button>
-    </div>
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">📞 Needs Follow-up</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: {% if stats.needs_followup|default(0) > 0 %}#c0392b{% else %}var(--olive-green){% endif %}; margin-bottom: 0.1rem;">{{ stats.needs_followup|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">No contact in {{ stats.follow_up_days|default(30) }}+ days</p>
-  </div>
-  
-  {% if stats.total_deals|default(0) > 0 %}
-  <div class="stat-card-clickable" onclick="openStatModal('deals')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">💼 Active Deals</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total_deals }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">${{ "{:,.0f}".format(stats.pipeline_value|default(0)) }} pipeline</p>
-  </div>
-  {% else %}
-  <div class="stat-card-clickable" onclick="openStatModal('automation')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
-    <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);">🤖 Automation</h3>
-    <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.with_automation|default(0) }}</div>
-    <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Borrowers with auto-emails</p>
-  </div>
-  {% endif %}
+ <!-- Column 1 -->
+ <div class="stat-card-clickable" onclick="openStatModal('total')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Total Borrowers</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total|default(0) }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">All borrowers in your CRM</p>
+ </div>
+ 
+ <div class="stat-card-clickable" onclick="openStatModal('in_process')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> In Process</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.in_process|default(0) }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Active loans in process</p>
+ </div>
+ 
+ <div class="stat-card-clickable" onclick="openStatModal('prospect')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Prospects</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.prospect|default(0) }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">New prospects</p>
+ </div>
+ 
+ <!-- Column 2 -->
+ <div class="stat-card-clickable" onclick="openStatModal('tasks')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Pending Tasks</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.pending_tasks|default(0) }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Follow-ups & reminders</p>
+ </div>
+ 
+ <div class="stat-card-clickable" onclick="openStatModal('followup')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base); position: relative;">
+ <div style="position: absolute; top: 0.5rem; right: 0.5rem;">
+ <button onclick="event.stopPropagation(); openFollowupSettings();" style="background: transparent; border: none; color: var(--olive-green); cursor: pointer; font-size: 0.8rem; padding: 0.25rem 0.5rem; z-index: 10;" title="Settings"></button>
+ </div>
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Needs Follow-up</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: {% if stats.needs_followup|default(0) > 0 %}#c0392b{% else %}var(--olive-green){% endif %}; margin-bottom: 0.1rem;">{{ stats.needs_followup|default(0) }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">No contact in {{ stats.follow_up_days|default(30) }}+ days</p>
+ </div>
+ 
+ {% if stats.total_deals|default(0) > 0 %}
+ <div class="stat-card-clickable" onclick="openStatModal('deals')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Active Deals</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total_deals }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">${{ "{:,.0f}".format(stats.pipeline_value|default(0)) }} pipeline</p>
+ </div>
+ {% else %}
+ <div class="stat-card-clickable" onclick="openStatModal('automation')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
+ <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Automation</h3>
+ <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.with_automation|default(0) }}</div>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">Borrowers with auto-emails</p>
+ </div>
+ {% endif %}
 </div>
 
 <div class="crm-container">
-  <!-- Sidebar: Add Borrower & Filters -->
-  <div class="crm-sidebar">
-    <div style="margin-bottom: 1.5rem;">
-      <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none; margin-bottom: 0.75rem;">
-        📥 Import from Excel/CSV
-      </a>
-      <a href="{{ url_for('lender_address_labels') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none;">
-        🏷️ Print Address Labels
-      </a>
-    </div>
-    <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
-    <form method="post" id="addBorrowerForm">
-      <input type="hidden" name="action" value="add">
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
-          <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
-          <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
-          <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Status</label>
-          <select name="status" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-            <option value="prospect">Prospect</option>
-            <option value="preapproval">Pre-Approval</option>
-            <option value="in_process">In Process</option>
-            <option value="closed">Closed</option>
-          </select>
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Loan Type</label>
-          <input type="text" name="loan_type" placeholder="Conventional, FHA, VA..." style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Borrower</button>
-      </div>
-    </form>
+ <!-- Sidebar: Add Borrower & Filters -->
+ <div class="crm-sidebar">
+ <div style="margin-bottom: 1.5rem;">
+ <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none; margin-bottom: 0.75rem;">
+ Import from Excel/CSV
+ </a>
+ <a href="{{ url_for('lender_address_labels') }}" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 0.75rem; text-decoration: none;">
+ Print Address Labels
+ </a>
+ </div>
+ <h2 style="margin-top: 0; color: var(--charcoal-brown); font-family: var(--font-heading);">Quick Add</h2>
+ <form method="post" id="addBorrowerForm">
+ <input type="hidden" name="action" value="add">
+ <div style="display: grid; gap: 1rem;">
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Name *</label>
+ <input type="text" name="name" required style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+ </div>
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Email</label>
+ <input type="email" name="email" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+ </div>
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Phone</label>
+ <input type="tel" name="phone" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+ </div>
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Status</label>
+ <select name="status" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+ <option value="prospect">Prospect</option>
+ <option value="preapproval">Pre-Approval</option>
+ <option value="in_process">In Process</option>
+ <option value="closed">Closed</option>
+ </select>
+ </div>
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Loan Type</label>
+ <input type="text" name="loan_type" placeholder="Conventional, FHA, VA..." style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown);">
+ </div>
+ <button type="submit" class="btn btn-primary" style="width: 100%;">Add Borrower</button>
+ </div>
+ </form>
 
-    <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
-      <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Status</h3>
-      <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        <a href="?status=" class="filter-btn {% if not status_filter %}active{% endif %}">All Borrowers</a>
-        <a href="?status=prospect" class="filter-btn {% if status_filter == 'prospect' %}active{% endif %}">Prospects</a>
-        <a href="?status=preapproval" class="filter-btn {% if status_filter == 'preapproval' %}active{% endif %}">Pre-Approval</a>
-        <a href="?status=in_process" class="filter-btn {% if status_filter == 'in_process' %}active{% endif %}">In Process</a>
-        <a href="?status=closed" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
-      </div>
-    </div>
-  </div>
+ <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
+ <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Status</h3>
+ <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+ <a href="?status=" class="filter-btn {% if not status_filter %}active{% endif %}">All Borrowers</a>
+ <a href="?status=prospect" class="filter-btn {% if status_filter == 'prospect' %}active{% endif %}">Prospects</a>
+ <a href="?status=preapproval" class="filter-btn {% if status_filter == 'preapproval' %}active{% endif %}">Pre-Approval</a>
+ <a href="?status=in_process" class="filter-btn {% if status_filter == 'in_process' %}active{% endif %}">In Process</a>
+ <a href="?status=closed" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
+ </div>
+ </div>
+ </div>
 
-  <!-- Main: Borrower List -->
-  <div class="crm-main">
-    {% if borrowers %}
-      <div style="margin-bottom: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light); display: flex; justify-content: space-between; align-items: center;">
-        <div>
-          <input type="checkbox" id="selectAll" onchange="toggleAllBorrowers(this.checked)" style="margin-right: 0.5rem; width: 18px; height: 18px; cursor: pointer;">
-          <label for="selectAll" style="font-weight: 600; color: var(--charcoal-brown); cursor: pointer;">Select All</label>
-        </div>
-        <button onclick="openBulkActionModal(getSelectedBorrowerIds())" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;" id="bulkActionBtn" disabled>Bulk Actions</button>
-      </div>
-      {% for borrower in borrowers %}
-        <div class="borrower-card" style="position: relative;">
-          <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
-            <input type="checkbox" class="borrower-checkbox" value="{{ borrower.id }}" onchange="updateBulkActionButton()" style="width: 18px; height: 18px; cursor: pointer;">
-          </div>
-          <div class="borrower-header">
-            <div>
-              <h3 class="borrower-name">{{ borrower.name }}</h3>
-              <span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span>
-            </div>
-            <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Edit</button>
-          </div>
+ <!-- Main: Borrower List -->
+ <div class="crm-main">
+ {% if borrowers %}
+ <div style="margin-bottom: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+ <div>
+ <input type="checkbox" id="selectAll" onchange="toggleAllBorrowers(this.checked)" style="margin-right: 0.5rem; width: 18px; height: 18px; cursor: pointer;">
+ <label for="selectAll" style="font-weight: 600; color: var(--charcoal-brown); cursor: pointer;">Select All</label>
+ </div>
+ <button onclick="openBulkActionModal(getSelectedBorrowerIds())" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;" id="bulkActionBtn" disabled>Bulk Actions</button>
+ </div>
+ {% for borrower in borrowers %}
+ <div class="borrower-card" style="position: relative;">
+ <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
+ <input type="checkbox" class="borrower-checkbox" value="{{ borrower.id }}" onchange="updateBulkActionButton()" style="width: 18px; height: 18px; cursor: pointer;">
+ </div>
+ <div class="borrower-header">
+ <div>
+ <h3 class="borrower-name">{{ borrower.name }}</h3>
+ <span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span>
+ </div>
+ <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Edit</button>
+ </div>
 
-          <div class="borrower-info">
-            {% if borrower.email %}
-              <div class="info-item">
-                <strong>Email:</strong>
-                <a href="mailto:{{ borrower.email }}">{{ borrower.email }}</a>
-              </div>
-            {% endif %}
-            {% if borrower.phone %}
-              <div class="info-item">
-                <strong>Phone:</strong>
-                <a href="tel:{{ borrower.phone }}">{{ borrower.phone }}</a>
-              </div>
-            {% endif %}
-            {% if borrower.loan_type %}
-              <div class="info-item">
-                <strong>Loan Type:</strong>
-                <span>{{ borrower.loan_type }}</span>
-              </div>
-            {% endif %}
-            {% if borrower.target_payment %}
-              <div class="info-item">
-                <strong>Target Payment:</strong>
-                <span>{{ borrower.target_payment }}</span>
-              </div>
-            {% endif %}
-            {% if borrower.loan_amount %}
-              <div class="info-item">
-                <strong>Loan Amount:</strong>
-                <span>${{ "{:,.0f}".format(borrower.loan_amount) }}</span>
-              </div>
-            {% endif %}
-            {% if borrower.loan_rate %}
-              <div class="info-item">
-                <strong>Loan Rate:</strong>
-                <span>{{ borrower.loan_rate }}%</span>
-              </div>
-            {% endif %}
-            {% if borrower.birthday %}
-              <div class="info-item">
-                <strong>Birthday:</strong>
-                <span>{{ borrower.birthday }}</span>
-              </div>
-            {% endif %}
-            {% if borrower.home_anniversary %}
-              <div class="info-item">
-                <strong>Home Anniversary:</strong>
-                <span>{{ borrower.home_anniversary }}</span>
-              </div>
-            {% endif %}
-            {% if borrower.property_address %}
-              <div class="info-item">
-                <strong>Property:</strong>
-                <span>{{ borrower.property_address }}</span>
-              </div>
-            {% endif %}
-            {% if borrower.last_touch %}
-              <div class="info-item">
-                <strong>Last Touch:</strong>
-                <span>{{ borrower.last_touch }}</span>
-              </div>
-            {% endif %}
-          </div>
+ <div class="borrower-info">
+ {% if borrower.email %}
+ <div class="info-item">
+ <strong>Email:</strong>
+ <a href="mailto:{{ borrower.email }}">{{ borrower.email }}</a>
+ </div>
+ {% endif %}
+ {% if borrower.phone %}
+ <div class="info-item">
+ <strong>Phone:</strong>
+ <a href="tel:{{ borrower.phone }}">{{ borrower.phone }}</a>
+ </div>
+ {% endif %}
+ {% if borrower.loan_type %}
+ <div class="info-item">
+ <strong>Loan Type:</strong>
+ <span>{{ borrower.loan_type }}</span>
+ </div>
+ {% endif %}
+ {% if borrower.target_payment %}
+ <div class="info-item">
+ <strong>Target Payment:</strong>
+ <span>{{ borrower.target_payment }}</span>
+ </div>
+ {% endif %}
+ {% if borrower.loan_amount %}
+ <div class="info-item">
+ <strong>Loan Amount:</strong>
+ <span>${{ "{:,.0f}".format(borrower.loan_amount) }}</span>
+ </div>
+ {% endif %}
+ {% if borrower.loan_rate %}
+ <div class="info-item">
+ <strong>Loan Rate:</strong>
+ <span>{{ borrower.loan_rate }}%</span>
+ </div>
+ {% endif %}
+ {% if borrower.birthday %}
+ <div class="info-item">
+ <strong>Birthday:</strong>
+ <span>{{ borrower.birthday }}</span>
+ </div>
+ {% endif %}
+ {% if borrower.home_anniversary %}
+ <div class="info-item">
+ <strong>Home Anniversary:</strong>
+ <span>{{ borrower.home_anniversary }}</span>
+ </div>
+ {% endif %}
+ {% if borrower.property_address %}
+ <div class="info-item">
+ <strong>Property:</strong>
+ <span>{{ borrower.property_address }}</span>
+ </div>
+ {% endif %}
+ {% if borrower.last_touch %}
+ <div class="info-item">
+ <strong>Last Touch:</strong>
+ <span>{{ borrower.last_touch }}</span>
+ </div>
+ {% endif %}
+ </div>
 
-          {% if borrower.notes %}
-            <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
-              <strong style="color: var(--charcoal-brown);">Notes:</strong>
-              <p style="margin: 0.5rem 0 0 0; color: var(--charcoal-brown); opacity: 0.8; white-space: pre-wrap;">{{ borrower.notes }}</p>
-            </div>
-          {% endif %}
+ {% if borrower.notes %}
+ <div style="margin: 1rem 0; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border: var(--border-light);">
+ <strong style="color: var(--charcoal-brown);">Notes:</strong>
+ <p style="margin: 0.5rem 0 0 0; color: var(--charcoal-brown); opacity: 0.8; white-space: pre-wrap;">{{ borrower.notes }}</p>
+ </div>
+ {% endif %}
 
-          {% if borrower.tags %}
-            <div style="margin: 0.5rem 0;">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
-              <span style="color: var(--charcoal-brown); opacity: 0.8;">{{ borrower.tags }}</span>
-            </div>
-          {% endif %}
+ {% if borrower.tags %}
+ <div style="margin: 0.5rem 0;">
+ <strong style="color: var(--charcoal-brown); font-size: 0.85rem;">Tags:</strong>
+ <span style="color: var(--charcoal-brown); opacity: 0.8;">{{ borrower.tags }}</span>
+ </div>
+ {% endif %}
 
-          <div class="auto-email-badges">
-            {% if borrower.auto_birthday %}
-              <span class="auto-badge">🎂 Birthday Emails</span>
-            {% endif %}
-            {% if borrower.auto_anniversary %}
-              <span class="auto-badge">🏠 Home Anniversary</span>
-            {% endif %}
-            {% if borrower.auto_seasonal %}
-              <span class="auto-badge">🍂 Seasonal Checklists</span>
-            {% endif %}
-            {% if borrower.auto_equity %}
-              <span class="auto-badge">💰 Equity Updates ({{ borrower.equity_frequency }})</span>
-            {% endif %}
-            {% if borrower.auto_holidays %}
-              <span class="auto-badge">🎄 Holiday Greetings</span>
-            {% endif %}
-          </div>
+ <div class="auto-email-badges">
+ {% if borrower.auto_birthday %}
+ <span class="auto-badge"> Birthday Emails</span>
+ {% endif %}
+ {% if borrower.auto_anniversary %}
+ <span class="auto-badge"> Home Anniversary</span>
+ {% endif %}
+ {% if borrower.auto_seasonal %}
+ <span class="auto-badge"> Seasonal Checklists</span>
+ {% endif %}
+ {% if borrower.auto_equity %}
+ <span class="auto-badge"> Equity Updates ({{ borrower.equity_frequency }})</span>
+ {% endif %}
+ {% if borrower.auto_holidays %}
+ <span class="auto-badge"> Holiday Greetings</span>
+ {% endif %}
+ </div>
 
-          {% if borrower.pending_tasks|default([])|length > 0 %}
-            <div style="margin: 1rem 0; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                ✅ Pending Tasks ({{ borrower.task_count|default(0) }})
-              </strong>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                {% for task in borrower.pending_tasks[:3] %}
-                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
-                  <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
-                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ task.title }}</div>
-                      {% if task.due_date %}
-                      <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Due: {{ task.due_date[:10] }}</div>
-                      {% endif %}
-                    </div>
-                    <span style="padding: 0.2rem 0.5rem; background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">{{ task.priority }}</span>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
+ {% if borrower.pending_tasks|default([])|length > 0 %}
+ <div style="margin: 1rem 0; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: var(--border-radius); border-left: 4px solid #ffc107;">
+ <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
+ Pending Tasks ({{ borrower.task_count|default(0) }})
+ </strong>
+ <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+ {% for task in borrower.pending_tasks[:3] %}
+ <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
+ <div style="display: flex; justify-content: space-between; align-items: start;">
+ <div style="flex: 1;">
+ <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ task.title }}</div>
+ {% if task.due_date %}
+ <div style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">Due: {{ task.due_date[:10] }}</div>
+ {% endif %}
+ </div>
+ <span style="padding: 0.2rem 0.5rem; background: rgba(107, 91, 77, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">{{ task.priority }}</span>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
+ </div>
+ {% endif %}
 
-          {% if borrower.deals|default([])|length > 0 %}
-            <div style="margin: 1rem 0; padding: 1rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
-              <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
-                💼 Active Deals ({{ borrower.deal_count|default(0) }})
-              </strong>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                {% for deal in borrower.deals[:2] %}
-                <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
-                  <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <div style="flex: 1;">
-                      <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ deal.deal_name }}</div>
-                      {% if deal.deal_value %}
-                      <div style="font-size: 0.75rem; color: var(--olive-green); font-weight: 600;">${{ "{:,.0f}".format(deal.deal_value) }}</div>
-                      {% endif %}
-                    </div>
-                    <span style="padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">{{ deal.stage|replace('_', ' ') }}</span>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            </div>
-          {% endif %}
+ {% if borrower.deals|default([])|length > 0 %}
+ <div style="margin: 1rem 0; padding: 1rem; background: rgba(76, 175, 80, 0.1); border-radius: var(--border-radius); border-left: 4px solid #4caf50;">
+ <strong style="color: var(--charcoal-brown); font-size: 0.85rem; display: block; margin-bottom: 0.5rem;">
+ Active Deals ({{ borrower.deal_count|default(0) }})
+ </strong>
+ <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+ {% for deal in borrower.deals[:2] %}
+ <div style="padding: 0.5rem; background: var(--white); border-radius: var(--border-radius);">
+ <div style="display: flex; justify-content: space-between; align-items: start;">
+ <div style="flex: 1;">
+ <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ deal.deal_name }}</div>
+ {% if deal.deal_value %}
+ <div style="font-size: 0.75rem; color: var(--olive-green); font-weight: 600;">${{ "{:,.0f}".format(deal.deal_value) }}</div>
+ {% endif %}
+ </div>
+ <span style="padding: 0.2rem 0.5rem; background: rgba(76, 175, 80, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">{{ deal.stage|replace('_', ' ') }}</span>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
+ </div>
+ {% endif %}
 
-          <div class="borrower-actions">
-            <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">📝 Log Interaction</button>
-            <button onclick="openTaskModal({{ borrower.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;">✅ Add Task</button>
-            <a href="/agent/transactions?borrower_id={{ borrower.id }}" class="btn btn-small" style="background: #4caf50; color: var(--white); text-decoration: none; border: none; display: inline-block;">💼 Add Transaction</a>
-            {% if borrower.email %}
-              <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;">✉️ Email</a>
-            {% endif %}
-            {% if borrower.phone %}
-              <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;">📞 Call</a>
-            {% endif %}
-            {% if borrower.interaction_count > 0 %}
-            <button onclick="openHistoryModal({{ borrower.id }})" class="btn btn-small" style="background: rgba(107, 106, 69, 0.2); color: var(--charcoal-brown); border: none;">📋 History ({{ borrower.interaction_count }})</button>
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <div class="empty-state">
-        <div style="font-size: 4rem; margin-bottom: 1rem;">👥</div>
-        <h3>No Borrowers Yet</h3>
-        <p style="color: var(--charcoal-brown); opacity: 0.8;">Start building your network by adding your first borrower!</p>
-        <div style="margin-top: 1.5rem;">
-          <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
-            📥 Import Your Borrowers from Excel/CSV
-          </a>
-        </div>
-      </div>
-    {% endif %}
-  </div>
+ <div class="borrower-actions">
+ <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;"> Log Interaction</button>
+ <button onclick="openTaskModal({{ borrower.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;"> Add Task</button>
+ <a href="/agent/transactions?borrower_id={{ borrower.id }}" class="btn btn-small" style="background: #4caf50; color: var(--white); text-decoration: none; border: none; display: inline-block;"> Add Transaction</a>
+ {% if borrower.email %}
+ <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;"> Email</a>
+ {% endif %}
+ {% if borrower.phone %}
+ <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;"> Call</a>
+ {% endif %}
+ {% if borrower.interaction_count > 0 %}
+ <button onclick="openHistoryModal({{ borrower.id }})" class="btn btn-small" style="background: rgba(107, 91, 77, 0.2); color: var(--charcoal-brown); border: none;"> History ({{ borrower.interaction_count }})</button>
+ {% endif %}
+ </div>
+ </div>
+ {% endfor %}
+ {% else %}
+ <div class="empty-state">
+ <div style="font-size: 4rem; margin-bottom: 1rem;"></div>
+ <h3>No Borrowers Yet</h3>
+ <p style="color: var(--charcoal-brown); opacity: 0.8;">Start building your network by adding your first borrower!</p>
+ <div style="margin-top: 1.5rem;">
+ <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
+ Import Your Borrowers from Excel/CSV
+ </a>
+ </div>
+ </div>
+ {% endif %}
+ </div>
 </div>
 
 {% if borrowers %}
 <div style="margin-top: 2rem; padding: 1.5rem; background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%); border-radius: var(--border-radius); border: var(--border-light); text-align: center;">
-  <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
-    📥 Import More Borrowers from Excel/CSV
-  </a>
+ <a href="{{ url_for('lender_crm_import') }}" class="btn btn-primary" style="text-decoration: none; padding: 0.75rem 2rem;">
+ Import More Borrowers from Excel/CSV
+ </a>
 </div>
 {% endif %}
 
 <!-- Edit Borrower Modal -->
 <div id="editModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Edit Borrower</h2>
-    <form method="post" id="editBorrowerForm">
-      <input type="hidden" name="action" value="update">
-      <input type="hidden" name="borrower_id" id="edit_borrower_id">
-      
-      <div class="form-grid">
-        <div>
-          <label>Name *</label>
-          <input type="text" name="name" id="edit_name" required>
-        </div>
-        <div>
-          <label>Email</label>
-          <input type="email" name="email" id="edit_email">
-        </div>
-        <div>
-          <label>Phone</label>
-          <input type="tel" name="phone" id="edit_phone">
-        </div>
-        <div>
-          <label>Status</label>
-          <select name="status" id="edit_status">
-            <option value="prospect">Prospect</option>
-            <option value="preapproval">Pre-Approval</option>
-            <option value="in_process">In Process</option>
-            <option value="closed">Closed</option>
-          </select>
-        </div>
-        <div>
-          <label>Loan Type</label>
-          <input type="text" name="loan_type" id="edit_loan_type">
-        </div>
-        <div>
-          <label>Target Payment</label>
-          <input type="text" name="target_payment" id="edit_target_payment">
-        </div>
-        <div>
-          <label>Loan Amount</label>
-          <input type="number" name="loan_amount" id="edit_loan_amount" step="1000">
-        </div>
-        <div>
-          <label>Loan Rate (%)</label>
-          <input type="number" name="loan_rate" id="edit_loan_rate" step="0.01">
-        </div>
-        <div>
-          <label>Birthday (MM/DD)</label>
-          <input type="text" name="birthday" id="edit_birthday" placeholder="12/25">
-        </div>
-        <div>
-          <label>Home Anniversary (MM/DD/YYYY)</label>
-          <input type="text" name="home_anniversary" id="edit_home_anniversary" placeholder="01/15/2020">
-        </div>
-        <div class="form-full">
-          <label>Address</label>
-          <input type="text" name="address" id="edit_address">
-        </div>
-        <div class="form-full">
-          <label>Property Address</label>
-          <input type="text" name="property_address" id="edit_property_address">
-        </div>
-        <div>
-          <label>Equity Update Frequency</label>
-          <select name="equity_frequency" id="edit_equity_frequency">
-            <option value="monthly">Monthly</option>
-            <option value="bimonthly">Every 2 Months</option>
-            <option value="quarterly">Quarterly</option>
-          </select>
-        </div>
-        <div class="form-full">
-          <label>Tags (comma-separated)</label>
-          <input type="text" name="tags" id="edit_tags" placeholder="VIP, Referral, Investor">
-        </div>
-        <div class="form-full">
-          <label>Notes</label>
-          <textarea name="notes" id="edit_notes" rows="4"></textarea>
-        </div>
-      </div>
+ <div class="modal-content">
+ <h2 style="margin-top: 0; font-family: var(--font-heading);">Edit Borrower</h2>
+ <form method="post" id="editBorrowerForm">
+ <input type="hidden" name="action" value="update">
+ <input type="hidden" name="borrower_id" id="edit_borrower_id">
+ 
+ <div class="form-grid">
+ <div>
+ <label>Name *</label>
+ <input type="text" name="name" id="edit_name" required>
+ </div>
+ <div>
+ <label>Email</label>
+ <input type="email" name="email" id="edit_email">
+ </div>
+ <div>
+ <label>Phone</label>
+ <input type="tel" name="phone" id="edit_phone">
+ </div>
+ <div>
+ <label>Status</label>
+ <select name="status" id="edit_status">
+ <option value="prospect">Prospect</option>
+ <option value="preapproval">Pre-Approval</option>
+ <option value="in_process">In Process</option>
+ <option value="closed">Closed</option>
+ </select>
+ </div>
+ <div>
+ <label>Loan Type</label>
+ <input type="text" name="loan_type" id="edit_loan_type">
+ </div>
+ <div>
+ <label>Target Payment</label>
+ <input type="text" name="target_payment" id="edit_target_payment">
+ </div>
+ <div>
+ <label>Loan Amount</label>
+ <input type="number" name="loan_amount" id="edit_loan_amount" step="1000">
+ </div>
+ <div>
+ <label>Loan Rate (%)</label>
+ <input type="number" name="loan_rate" id="edit_loan_rate" step="0.01">
+ </div>
+ <div>
+ <label>Birthday (MM/DD)</label>
+ <input type="text" name="birthday" id="edit_birthday" placeholder="12/25">
+ </div>
+ <div>
+ <label>Home Anniversary (MM/DD/YYYY)</label>
+ <input type="text" name="home_anniversary" id="edit_home_anniversary" placeholder="01/15/2020">
+ </div>
+ <div class="form-full">
+ <label>Address</label>
+ <input type="text" name="address" id="edit_address">
+ </div>
+ <div class="form-full">
+ <label>Property Address</label>
+ <input type="text" name="property_address" id="edit_property_address">
+ </div>
+ <div>
+ <label>Equity Update Frequency</label>
+ <select name="equity_frequency" id="edit_equity_frequency">
+ <option value="monthly">Monthly</option>
+ <option value="bimonthly">Every 2 Months</option>
+ <option value="quarterly">Quarterly</option>
+ </select>
+ </div>
+ <div class="form-full">
+ <label>Tags (comma-separated)</label>
+ <input type="text" name="tags" id="edit_tags" placeholder="VIP, Referral, Investor">
+ </div>
+ <div class="form-full">
+ <label>Notes</label>
+ <textarea name="notes" id="edit_notes" rows="4"></textarea>
+ </div>
+ </div>
 
-      <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Automated Emails</h3>
-      <div class="form-grid">
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_birthday" id="edit_auto_birthday" value="1">
-          <label for="edit_auto_birthday">Send Birthday Emails</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_anniversary" id="edit_auto_anniversary" value="1">
-          <label for="edit_auto_anniversary">Send Home Anniversary Emails</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_seasonal" id="edit_auto_seasonal" value="1">
-          <label for="edit_auto_seasonal">Send Seasonal Checklists</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_equity" id="edit_auto_equity" value="1">
-          <label for="edit_auto_equity">Send Equity Updates</label>
-        </div>
-        <div class="toggle-switch">
-          <input type="checkbox" name="auto_holidays" id="edit_auto_holidays" value="1">
-          <label for="edit_auto_holidays">Send Holiday Greetings</label>
-        </div>
-      </div>
+ <h3 style="margin-top: 1.5rem; margin-bottom: 1rem;">Automated Emails</h3>
+ <div class="form-grid">
+ <div class="toggle-switch">
+ <input type="checkbox" name="auto_birthday" id="edit_auto_birthday" value="1">
+ <label for="edit_auto_birthday">Send Birthday Emails</label>
+ </div>
+ <div class="toggle-switch">
+ <input type="checkbox" name="auto_anniversary" id="edit_auto_anniversary" value="1">
+ <label for="edit_auto_anniversary">Send Home Anniversary Emails</label>
+ </div>
+ <div class="toggle-switch">
+ <input type="checkbox" name="auto_seasonal" id="edit_auto_seasonal" value="1">
+ <label for="edit_auto_seasonal">Send Seasonal Checklists</label>
+ </div>
+ <div class="toggle-switch">
+ <input type="checkbox" name="auto_equity" id="edit_auto_equity" value="1">
+ <label for="edit_auto_equity">Send Equity Updates</label>
+ </div>
+ <div class="toggle-switch">
+ <input type="checkbox" name="auto_holidays" id="edit_auto_holidays" value="1">
+ <label for="edit_auto_holidays">Send Holiday Greetings</label>
+ </div>
+ </div>
 
-      <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <button type="button" onclick="closeEditModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-      </div>
-    </form>
-  </div>
+ <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+ <button type="submit" class="btn btn-primary">Save Changes</button>
+ <button type="button" onclick="closeEditModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Log Interaction Modal -->
 <div id="interactionModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Log Interaction</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="add_interaction">
-      <input type="hidden" name="borrower_id" id="interaction_borrower_id">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label>Interaction Type *</label>
-          <select name="interaction_type" required>
-            <option value="email">Email</option>
-            <option value="call">Phone Call</option>
-            <option value="meeting">Meeting</option>
-            <option value="text">Text Message</option>
-            <option value="note">Note</option>
-          </select>
-        </div>
-        <div>
-          <label>Channel</label>
-          <select name="channel">
-            <option value="email">Email</option>
-            <option value="phone">Phone</option>
-            <option value="in-person">In Person</option>
-            <option value="text">Text</option>
-          </select>
-        </div>
-        <div>
-          <label>Subject</label>
-          <input type="text" name="subject">
-        </div>
-        <div>
-          <label>Notes *</label>
-          <textarea name="notes" rows="4" required></textarea>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Log Interaction</button>
-          <button type="button" onclick="closeInteractionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
+ <div class="modal-content">
+ <h2 style="margin-top: 0; font-family: var(--font-heading);">Log Interaction</h2>
+ <form method="post">
+ <input type="hidden" name="action" value="add_interaction">
+ <input type="hidden" name="borrower_id" id="interaction_borrower_id">
+ 
+ <div style="display: grid; gap: 1rem;">
+ <div>
+ <label>Interaction Type *</label>
+ <select name="interaction_type" required>
+ <option value="email">Email</option>
+ <option value="call">Phone Call</option>
+ <option value="meeting">Meeting</option>
+ <option value="text">Text Message</option>
+ <option value="note">Note</option>
+ </select>
+ </div>
+ <div>
+ <label>Channel</label>
+ <select name="channel">
+ <option value="email">Email</option>
+ <option value="phone">Phone</option>
+ <option value="in-person">In Person</option>
+ <option value="text">Text</option>
+ </select>
+ </div>
+ <div>
+ <label>Subject</label>
+ <input type="text" name="subject">
+ </div>
+ <div>
+ <label>Notes *</label>
+ <textarea name="notes" rows="4" required></textarea>
+ </div>
+ <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+ <button type="submit" class="btn btn-primary">Log Interaction</button>
+ <button type="button" onclick="closeInteractionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+ </div>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Add Task Modal -->
 <div id="taskModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Task / Follow-up</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="add_task">
-      <input type="hidden" name="borrower_id" id="task_borrower_id">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label>Task Title *</label>
-          <input type="text" name="title" required placeholder="e.g., Follow up on loan application">
-        </div>
-        <div>
-          <label>Description</label>
-          <textarea name="description" rows="3" placeholder="Additional details..."></textarea>
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Due Date</label>
-            <input type="date" name="due_date">
-          </div>
-          <div>
-            <label>Priority</label>
-            <select name="priority">
-              <option value="low">Low</option>
-              <option value="medium" selected>Medium</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
-            </select>
-          </div>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Add Task</button>
-          <button type="button" onclick="closeTaskModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
+ <div class="modal-content">
+ <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Task / Follow-up</h2>
+ <form method="post">
+ <input type="hidden" name="action" value="add_task">
+ <input type="hidden" name="borrower_id" id="task_borrower_id">
+ 
+ <div style="display: grid; gap: 1rem;">
+ <div>
+ <label>Task Title *</label>
+ <input type="text" name="title" required placeholder="e.g., Follow up on loan application">
+ </div>
+ <div>
+ <label>Description</label>
+ <textarea name="description" rows="3" placeholder="Additional details..."></textarea>
+ </div>
+ <div class="form-grid">
+ <div>
+ <label>Due Date</label>
+ <input type="date" name="due_date">
+ </div>
+ <div>
+ <label>Priority</label>
+ <select name="priority">
+ <option value="low">Low</option>
+ <option value="medium" selected>Medium</option>
+ <option value="high">High</option>
+ <option value="urgent">Urgent</option>
+ </select>
+ </div>
+ </div>
+ <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+ <button type="submit" class="btn btn-primary">Add Task</button>
+ <button type="button" onclick="closeTaskModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+ </div>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Add Deal Modal -->
 <div id="dealModal" class="modal">
-  <div class="modal-content" style="max-width: 700px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Deal</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="add_deal">
-      <input type="hidden" name="borrower_id" id="deal_borrower_id">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label>Deal Name *</label>
-          <input type="text" name="deal_name" required placeholder="e.g., 123 Main St Refinance">
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Deal Type</label>
-            <select name="deal_type">
-              <option value="refinance">Refinance</option>
-              <option value="purchase">Purchase</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label>Stage</label>
-            <select name="stage">
-              <option value="prospect">Prospect</option>
-              <option value="qualified">Qualified</option>
-              <option value="offer">Offer</option>
-              <option value="under_contract">Under Contract</option>
-              <option value="closed">Closed</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label>Property Address</label>
-          <input type="text" name="property_address" placeholder="123 Main St, City, State">
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Deal Value ($)</label>
-            <input type="number" name="deal_value" step="1000" placeholder="500000">
-          </div>
-          <div>
-            <label>Commission Rate (%)</label>
-            <input type="number" name="commission_rate" step="0.1" placeholder="1.0">
-          </div>
-        </div>
-        <div class="form-grid">
-          <div>
-            <label>Probability (%)</label>
-            <input type="number" name="probability" min="0" max="100" value="50">
-          </div>
-          <div>
-            <label>Expected Close Date</label>
-            <input type="date" name="expected_close_date">
-          </div>
-        </div>
-        <div>
-          <label>Notes</label>
-          <textarea name="notes" rows="3" placeholder="Additional deal details..."></textarea>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Add Deal</button>
-          <button type="button" onclick="closeDealModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
+ <div class="modal-content" style="max-width: 700px;">
+ <h2 style="margin-top: 0; font-family: var(--font-heading);">Add Deal</h2>
+ <form method="post">
+ <input type="hidden" name="action" value="add_deal">
+ <input type="hidden" name="borrower_id" id="deal_borrower_id">
+ 
+ <div style="display: grid; gap: 1rem;">
+ <div>
+ <label>Deal Name *</label>
+ <input type="text" name="deal_name" required placeholder="e.g., 123 Main St Refinance">
+ </div>
+ <div class="form-grid">
+ <div>
+ <label>Deal Type</label>
+ <select name="deal_type">
+ <option value="refinance">Refinance</option>
+ <option value="purchase">Purchase</option>
+ <option value="other">Other</option>
+ </select>
+ </div>
+ <div>
+ <label>Stage</label>
+ <select name="stage">
+ <option value="prospect">Prospect</option>
+ <option value="qualified">Qualified</option>
+ <option value="offer">Offer</option>
+ <option value="under_contract">Under Contract</option>
+ <option value="closed">Closed</option>
+ </select>
+ </div>
+ </div>
+ <div>
+ <label>Property Address</label>
+ <input type="text" name="property_address" placeholder="123 Main St, City, State">
+ </div>
+ <div class="form-grid">
+ <div>
+ <label>Deal Value ($)</label>
+ <input type="number" name="deal_value" step="1000" placeholder="500000">
+ </div>
+ <div>
+ <label>Commission Rate (%)</label>
+ <input type="number" name="commission_rate" step="0.1" placeholder="1.0">
+ </div>
+ </div>
+ <div class="form-grid">
+ <div>
+ <label>Probability (%)</label>
+ <input type="number" name="probability" min="0" max="100" value="50">
+ </div>
+ <div>
+ <label>Expected Close Date</label>
+ <input type="date" name="expected_close_date">
+ </div>
+ </div>
+ <div>
+ <label>Notes</label>
+ <textarea name="notes" rows="3" placeholder="Additional deal details..."></textarea>
+ </div>
+ <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+ <button type="submit" class="btn btn-primary">Add Deal</button>
+ <button type="button" onclick="closeDealModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+ </div>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Interaction History Modal -->
 <div id="historyModal" class="modal">
-  <div class="modal-content" style="max-width: 800px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading);">Interaction History</h2>
-    <div id="historyContent" style="max-height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading history...</p>
-    </div>
-    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-      <button type="button" onclick="closeHistoryModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
-    </div>
-  </div>
+ <div class="modal-content" style="max-width: 800px;">
+ <h2 style="margin-top: 0; font-family: var(--font-heading);">Interaction History</h2>
+ <div id="historyContent" style="max-height: 60vh; overflow-y: auto;">
+ <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading history...</p>
+ </div>
+ <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+ <button type="button" onclick="closeHistoryModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
+ </div>
+ </div>
 </div>
 
 <!-- Stat Details Modal -->
 <div id="statModal" class="modal">
-  <div class="modal-content" style="max-width: 800px;">
-    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);" id="statModalTitle">Stat Details</h2>
-    <div id="statModalContent" style="max-height: 60vh; overflow-y: auto;">
-      <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading...</p>
-    </div>
-    <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
-      <button type="button" onclick="closeStatModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
-    </div>
-  </div>
+ <div class="modal-content" style="max-width: 800px;">
+ <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);" id="statModalTitle">Stat Details</h2>
+ <div id="statModalContent" style="max-height: 60vh; overflow-y: auto;">
+ <p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">Loading...</p>
+ </div>
+ <div style="margin-top: 1rem; display: flex; justify-content: flex-end;">
+ <button type="button" onclick="closeStatModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Close</button>
+ </div>
+ </div>
 </div>
 
 <!-- Follow-up Settings Modal -->
 <div id="followupSettingsModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Follow-up Reminder Settings</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="update_followup_days">
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Days Without Contact</label>
-          <input type="number" name="follow_up_days" min="1" max="365" value="{{ stats.follow_up_days|default(30) }}" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;" required>
-          <p style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-top: 0.5rem;">Borrowers without communication in this many days will appear in "Needs Follow-up"</p>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Save Settings</button>
-          <button type="button" onclick="closeFollowupSettings()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
+ <div class="modal-content">
+ <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Follow-up Reminder Settings</h2>
+ <form method="post">
+ <input type="hidden" name="action" value="update_followup_days">
+ 
+ <div style="display: grid; gap: 1rem;">
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Days Without Contact</label>
+ <input type="number" name="follow_up_days" min="1" max="365" value="{{ stats.follow_up_days|default(30) }}" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;" required>
+ <p style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-top: 0.5rem;">Borrowers without communication in this many days will appear in "Needs Follow-up"</p>
+ </div>
+ <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+ <button type="submit" class="btn btn-primary">Save Settings</button>
+ <button type="button" onclick="closeFollowupSettings()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+ </div>
+ </div>
+ </form>
+ </div>
 </div>
 
 <!-- Bulk Actions Modal -->
 <div id="bulkActionModal" class="modal">
-  <div class="modal-content">
-    <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Bulk Actions</h2>
-    <form method="post">
-      <input type="hidden" name="action" value="bulk_action">
-      <div id="bulkBorrowerIds"></div>
-      
-      <div style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Action</label>
-          <select name="bulk_action_type" id="bulkActionType" onchange="updateBulkActionFields()" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
-            <option value="">Select an action...</option>
-            <option value="add_tag">Add Tag</option>
-            <option value="change_status">Change Status</option>
-          </select>
-        </div>
-        <div id="bulkTagField" style="display: none;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Tag to Add</label>
-          <input type="text" name="bulk_tag" placeholder="e.g., VIP, Referral" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
-        </div>
-        <div id="bulkStatusField" style="display: none;">
-          <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">New Status</label>
-          <select name="bulk_status" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
-            <option value="prospect">Prospect</option>
-            <option value="preapproval">Pre-Approval</option>
-            <option value="in_process">In Process</option>
-            <option value="closed">Closed</option>
-          </select>
-        </div>
-        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
-          <button type="submit" class="btn btn-primary">Apply to Selected</button>
-          <button type="button" onclick="closeBulkActionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
+ <div class="modal-content">
+ <h2 style="margin-top: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">Bulk Actions</h2>
+ <form method="post">
+ <input type="hidden" name="action" value="bulk_action">
+ <div id="bulkBorrowerIds"></div>
+ 
+ <div style="display: grid; gap: 1rem;">
+ <div>
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Action</label>
+ <select name="bulk_action_type" id="bulkActionType" onchange="updateBulkActionFields()" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+ <option value="">Select an action...</option>
+ <option value="add_tag">Add Tag</option>
+ <option value="change_status">Change Status</option>
+ </select>
+ </div>
+ <div id="bulkTagField" style="display: none;">
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">Tag to Add</label>
+ <input type="text" name="bulk_tag" placeholder="e.g., VIP, Referral" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+ </div>
+ <div id="bulkStatusField" style="display: none;">
+ <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem;">New Status</label>
+ <select name="bulk_status" style="width: 100%; padding: 0.6rem; border: var(--border-light); border-radius: var(--border-radius); background: var(--white); color: var(--charcoal-brown); font-size: 0.9rem;">
+ <option value="prospect">Prospect</option>
+ <option value="preapproval">Pre-Approval</option>
+ <option value="in_process">In Process</option>
+ <option value="closed">Closed</option>
+ </select>
+ </div>
+ <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+ <button type="submit" class="btn btn-primary">Apply to Selected</button>
+ <button type="button" onclick="closeBulkActionModal()" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">Cancel</button>
+ </div>
+ </div>
+ </form>
+ </div>
 </div>
 
 <script>
@@ -932,367 +932,367 @@ var borrowersData = {{ borrowers|tojson|default('[]') }};
 const borrowers = borrowersData;
 
 function openEditModal(borrowerId) {
-  const borrower = borrowers.find(b => b.id === borrowerId);
-  if (!borrower) return;
-  
-  document.getElementById('edit_borrower_id').value = borrower.id;
-  document.getElementById('edit_name').value = borrower.name || '';
-  document.getElementById('edit_email').value = borrower.email || '';
-  document.getElementById('edit_phone').value = borrower.phone || '';
-  document.getElementById('edit_status').value = borrower.status || 'prospect';
-  document.getElementById('edit_loan_type').value = borrower.loan_type || '';
-  document.getElementById('edit_target_payment').value = borrower.target_payment || '';
-  document.getElementById('edit_loan_amount').value = borrower.loan_amount || '';
-  document.getElementById('edit_loan_rate').value = borrower.loan_rate || '';
-  document.getElementById('edit_birthday').value = borrower.birthday || '';
-  document.getElementById('edit_home_anniversary').value = borrower.home_anniversary || '';
-  document.getElementById('edit_address').value = borrower.address || '';
-  document.getElementById('edit_property_address').value = borrower.property_address || '';
-  document.getElementById('edit_equity_frequency').value = borrower.equity_frequency || 'monthly';
-  document.getElementById('edit_tags').value = borrower.tags || '';
-  document.getElementById('edit_notes').value = borrower.notes || '';
-  document.getElementById('edit_auto_birthday').checked = borrower.auto_birthday == 1;
-  document.getElementById('edit_auto_anniversary').checked = borrower.auto_anniversary == 1;
-  document.getElementById('edit_auto_seasonal').checked = borrower.auto_seasonal == 1;
-  document.getElementById('edit_auto_equity').checked = borrower.auto_equity == 1;
-  document.getElementById('edit_auto_holidays').checked = borrower.auto_holidays == 1;
-  
-  document.getElementById('editModal').classList.add('active');
+ const borrower = borrowers.find(b => b.id === borrowerId);
+ if (!borrower) return;
+ 
+ document.getElementById('edit_borrower_id').value = borrower.id;
+ document.getElementById('edit_name').value = borrower.name || '';
+ document.getElementById('edit_email').value = borrower.email || '';
+ document.getElementById('edit_phone').value = borrower.phone || '';
+ document.getElementById('edit_status').value = borrower.status || 'prospect';
+ document.getElementById('edit_loan_type').value = borrower.loan_type || '';
+ document.getElementById('edit_target_payment').value = borrower.target_payment || '';
+ document.getElementById('edit_loan_amount').value = borrower.loan_amount || '';
+ document.getElementById('edit_loan_rate').value = borrower.loan_rate || '';
+ document.getElementById('edit_birthday').value = borrower.birthday || '';
+ document.getElementById('edit_home_anniversary').value = borrower.home_anniversary || '';
+ document.getElementById('edit_address').value = borrower.address || '';
+ document.getElementById('edit_property_address').value = borrower.property_address || '';
+ document.getElementById('edit_equity_frequency').value = borrower.equity_frequency || 'monthly';
+ document.getElementById('edit_tags').value = borrower.tags || '';
+ document.getElementById('edit_notes').value = borrower.notes || '';
+ document.getElementById('edit_auto_birthday').checked = borrower.auto_birthday == 1;
+ document.getElementById('edit_auto_anniversary').checked = borrower.auto_anniversary == 1;
+ document.getElementById('edit_auto_seasonal').checked = borrower.auto_seasonal == 1;
+ document.getElementById('edit_auto_equity').checked = borrower.auto_equity == 1;
+ document.getElementById('edit_auto_holidays').checked = borrower.auto_holidays == 1;
+ 
+ document.getElementById('editModal').classList.add('active');
 }
 
 function closeEditModal() {
-  document.getElementById('editModal').classList.remove('active');
+ document.getElementById('editModal').classList.remove('active');
 }
 
 function openInteractionModal(borrowerId) {
-  document.getElementById('interaction_borrower_id').value = borrowerId;
-  document.getElementById('interactionModal').classList.add('active');
+ document.getElementById('interaction_borrower_id').value = borrowerId;
+ document.getElementById('interactionModal').classList.add('active');
 }
 
 function closeInteractionModal() {
-  document.getElementById('interactionModal').classList.remove('active');
+ document.getElementById('interactionModal').classList.remove('active');
 }
 
 // Task Modal Functions
 function openTaskModal(borrowerId) {
-  document.getElementById('task_borrower_id').value = borrowerId;
-  document.getElementById('taskModal').classList.add('active');
+ document.getElementById('task_borrower_id').value = borrowerId;
+ document.getElementById('taskModal').classList.add('active');
 }
 
 function closeTaskModal() {
-  document.getElementById('taskModal').classList.remove('active');
+ document.getElementById('taskModal').classList.remove('active');
 }
 
 // Deal Modal Functions
 function openDealModal(borrowerId) {
-  document.getElementById('deal_borrower_id').value = borrowerId;
-  document.getElementById('dealModal').classList.add('active');
+ document.getElementById('deal_borrower_id').value = borrowerId;
+ document.getElementById('dealModal').classList.add('active');
 }
 
 function closeDealModal() {
-  document.getElementById('dealModal').classList.remove('active');
+ document.getElementById('dealModal').classList.remove('active');
 }
 
 // History Modal Functions
 function openHistoryModal(borrowerId) {
-  const borrower = borrowers.find(b => b.id === borrowerId);
-  if (!borrower) return;
-  
-  const historyContent = document.getElementById('historyContent');
-  const interactions = borrower.all_interactions || borrower.recent_interactions || [];
-  
-  if (interactions.length > 0) {
-    let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-      <strong style="color: var(--charcoal-brown);">Total Interactions: ${borrower.interaction_count || interactions.length}</strong>
-    </div>`;
-    html += '<div style="display: flex; flex-direction: column; gap: 1rem;">';
-    interactions.forEach(interaction => {
-      html += `
-        <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid var(--olive-green);">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-            <div>
-              <span style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">
-                ${interaction.interaction_type ? interaction.interaction_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Interaction'}
-              </span>
-              <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-left: 0.5rem;">
-                via ${interaction.channel || 'N/A'}
-              </span>
-            </div>
-            <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">
-              ${interaction.interaction_date || (interaction.created_at ? interaction.created_at.substring(0, 10) : '')}
-            </span>
-          </div>
-          ${interaction.subject ? `<div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">${interaction.subject}</div>` : ''}
-          ${interaction.notes ? `<div style="font-size: 0.9rem; color: var(--charcoal-brown); opacity: 0.9; white-space: pre-wrap;">${interaction.notes}</div>` : ''}
-        </div>
-      `;
-    });
-    html += '</div>';
-    historyContent.innerHTML = html;
-  } else {
-    historyContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No interactions recorded yet.</p>';
-  }
-  
-  document.getElementById('historyModal').classList.add('active');
+ const borrower = borrowers.find(b => b.id === borrowerId);
+ if (!borrower) return;
+ 
+ const historyContent = document.getElementById('historyContent');
+ const interactions = borrower.all_interactions || borrower.recent_interactions || [];
+ 
+ if (interactions.length > 0) {
+ let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+ <strong style="color: var(--charcoal-brown);">Total Interactions: ${borrower.interaction_count || interactions.length}</strong>
+ </div>`;
+ html += '<div style="display: flex; flex-direction: column; gap: 1rem;">';
+ interactions.forEach(interaction => {
+ html += `
+ <div style="padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius); border-left: 4px solid var(--olive-green);">
+ <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+ <div>
+ <span style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.9rem;">
+ ${interaction.interaction_type ? interaction.interaction_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Interaction'}
+ </span>
+ <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7; margin-left: 0.5rem;">
+ via ${interaction.channel || 'N/A'}
+ </span>
+ </div>
+ <span style="font-size: 0.75rem; color: var(--charcoal-brown); opacity: 0.7;">
+ ${interaction.interaction_date || (interaction.created_at ? interaction.created_at.substring(0, 10) : '')}
+ </span>
+ </div>
+ ${interaction.subject ? `<div style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.5rem;">${interaction.subject}</div>` : ''}
+ ${interaction.notes ? `<div style="font-size: 0.9rem; color: var(--charcoal-brown); opacity: 0.9; white-space: pre-wrap;">${interaction.notes}</div>` : ''}
+ </div>
+ `;
+ });
+ html += '</div>';
+ historyContent.innerHTML = html;
+ } else {
+ historyContent.innerHTML = '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No interactions recorded yet.</p>';
+ }
+ 
+ document.getElementById('historyModal').classList.add('active');
 }
 
 function closeHistoryModal() {
-  document.getElementById('historyModal').classList.remove('active');
+ document.getElementById('historyModal').classList.remove('active');
 }
 
 // Bulk Actions
 function openBulkActionModal(selectedIds) {
-  const bulkBorrowerIds = document.getElementById('bulkBorrowerIds');
-  bulkBorrowerIds.innerHTML = '';
-  selectedIds.forEach(id => {
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'borrower_ids';
-    input.value = id;
-    bulkBorrowerIds.appendChild(input);
-  });
-  document.getElementById('bulkActionModal').classList.add('active');
+ const bulkBorrowerIds = document.getElementById('bulkBorrowerIds');
+ bulkBorrowerIds.innerHTML = '';
+ selectedIds.forEach(id => {
+ const input = document.createElement('input');
+ input.type = 'hidden';
+ input.name = 'borrower_ids';
+ input.value = id;
+ bulkBorrowerIds.appendChild(input);
+ });
+ document.getElementById('bulkActionModal').classList.add('active');
 }
 
 function closeBulkActionModal() {
-  document.getElementById('bulkActionModal').classList.remove('active');
+ document.getElementById('bulkActionModal').classList.remove('active');
 }
 
 function updateBulkActionFields() {
-  const actionType = document.getElementById('bulkActionType').value;
-  document.getElementById('bulkTagField').style.display = actionType === 'add_tag' ? 'block' : 'none';
-  document.getElementById('bulkStatusField').style.display = actionType === 'change_status' ? 'block' : 'none';
+ const actionType = document.getElementById('bulkActionType').value;
+ document.getElementById('bulkTagField').style.display = actionType === 'add_tag' ? 'block' : 'none';
+ document.getElementById('bulkStatusField').style.display = actionType === 'change_status' ? 'block' : 'none';
 }
 
 function openFollowupSettings() {
-  document.getElementById('followupSettingsModal').classList.add('active');
+ document.getElementById('followupSettingsModal').classList.add('active');
 }
 
 function closeFollowupSettings() {
-  document.getElementById('followupSettingsModal').classList.remove('active');
+ document.getElementById('followupSettingsModal').classList.remove('active');
 }
 
 function openStatModal(statType) {
-  const modal = document.getElementById('statModal');
-  const title = document.getElementById('statModalTitle');
-  const content = document.getElementById('statModalContent');
-  
-  let titleText = '';
-  let html = '';
-  
-  var borrowersData = {{ borrowers|tojson|default('[]') }};
-  const borrowers = borrowersData;
-  
-  switch(statType) {
-    case 'total':
-      titleText = '📊 All Borrowers';
-      html = generateBorrowersList(borrowers, 'All borrowers in your CRM');
-      break;
-    case 'in_process':
-      titleText = '🔄 In Process';
-      const inProcessBorrowers = borrowers.filter(b => b.status === 'in_process');
-      html = generateBorrowersList(inProcessBorrowers, 'Borrowers with active loans in process');
-      break;
-    case 'prospect':
-      titleText = '⭐ Prospects';
-      const prospectBorrowers = borrowers.filter(b => b.status === 'prospect');
-      html = generateBorrowersList(prospectBorrowers, 'New prospects');
-      break;
-    case 'tasks':
-      titleText = '✅ Pending Tasks';
-      html = generateTasksList(borrowers);
-      break;
-    case 'followup':
-      titleText = '📞 Needs Follow-up';
-      html = generateBorrowersList(borrowers, 'Borrowers needing follow-up');
-      break;
-    case 'deals':
-      titleText = '💼 Active Deals';
-      html = generateDealsList(borrowers);
-      break;
-    case 'automation':
-      titleText = '🤖 Automation';
-      const autoBorrowers = borrowers.filter(b => 
-        b.auto_birthday || b.auto_anniversary || b.auto_seasonal || 
-        b.auto_equity || b.auto_holidays
-      );
-      html = generateBorrowersList(autoBorrowers, 'Borrowers with automated emails enabled');
-      break;
-    default:
-      titleText = 'Stat Details';
-      html = '<p>No information available.</p>';
-  }
-  
-  title.textContent = titleText;
-  content.innerHTML = html;
-  modal.classList.add('active');
+ const modal = document.getElementById('statModal');
+ const title = document.getElementById('statModalTitle');
+ const content = document.getElementById('statModalContent');
+ 
+ let titleText = '';
+ let html = '';
+ 
+ var borrowersData = {{ borrowers|tojson|default('[]') }};
+ const borrowers = borrowersData;
+ 
+ switch(statType) {
+ case 'total':
+ titleText = ' All Borrowers';
+ html = generateBorrowersList(borrowers, 'All borrowers in your CRM');
+ break;
+ case 'in_process':
+ titleText = ' In Process';
+ const inProcessBorrowers = borrowers.filter(b => b.status === 'in_process');
+ html = generateBorrowersList(inProcessBorrowers, 'Borrowers with active loans in process');
+ break;
+ case 'prospect':
+ titleText = ' Prospects';
+ const prospectBorrowers = borrowers.filter(b => b.status === 'prospect');
+ html = generateBorrowersList(prospectBorrowers, 'New prospects');
+ break;
+ case 'tasks':
+ titleText = ' Pending Tasks';
+ html = generateTasksList(borrowers);
+ break;
+ case 'followup':
+ titleText = ' Needs Follow-up';
+ html = generateBorrowersList(borrowers, 'Borrowers needing follow-up');
+ break;
+ case 'deals':
+ titleText = ' Active Deals';
+ html = generateDealsList(borrowers);
+ break;
+ case 'automation':
+ titleText = ' Automation';
+ const autoBorrowers = borrowers.filter(b => 
+ b.auto_birthday || b.auto_anniversary || b.auto_seasonal || 
+ b.auto_equity || b.auto_holidays
+ );
+ html = generateBorrowersList(autoBorrowers, 'Borrowers with automated emails enabled');
+ break;
+ default:
+ titleText = 'Stat Details';
+ html = '<p>No information available.</p>';
+ }
+ 
+ title.textContent = titleText;
+ content.innerHTML = html;
+ modal.classList.add('active');
 }
 
 function closeStatModal() {
-  document.getElementById('statModal').classList.remove('active');
+ document.getElementById('statModal').classList.remove('active');
 }
 
 function generateBorrowersList(borrowersList, description) {
-  if (borrowersList.length === 0) {
-    return `<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No borrowers found. ${description}</p>`;
-  }
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total: ${borrowersList.length}</strong>
-    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${description}</p>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  borrowersList.forEach(borrower => {
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${borrower.name || 'Unnamed'}</h4>
-          <span class="badge-${borrower.status || 'prospect'}" style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600;">
-            ${(borrower.status || 'prospect').replace('_', ' ').charAt(0).toUpperCase() + (borrower.status || 'prospect').replace('_', ' ').slice(1)}
-          </span>
-        </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">
-          ${borrower.email ? `<div>📧 ${borrower.email}</div>` : ''}
-          ${borrower.phone ? `<div>📞 ${borrower.phone}</div>` : ''}
-          ${borrower.property_address ? `<div>🏠 ${borrower.property_address}</div>` : ''}
-        </div>
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
+ if (borrowersList.length === 0) {
+ return `<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No borrowers found. ${description}</p>`;
+ }
+ 
+ let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+ <strong style="color: var(--charcoal-brown);">Total: ${borrowersList.length}</strong>
+ <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${description}</p>
+ </div>`;
+ html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+ 
+ borrowersList.forEach(borrower => {
+ html += `
+ <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+ <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+ <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${borrower.name || 'Unnamed'}</h4>
+ <span class="badge-${borrower.status || 'prospect'}" style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600;">
+ ${(borrower.status || 'prospect').replace('_', ' ').charAt(0).toUpperCase() + (borrower.status || 'prospect').replace('_', ' ').slice(1)}
+ </span>
+ </div>
+ <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">
+ ${borrower.email ? `<div> ${borrower.email}</div>` : ''}
+ ${borrower.phone ? `<div> ${borrower.phone}</div>` : ''}
+ ${borrower.property_address ? `<div> ${borrower.property_address}</div>` : ''}
+ </div>
+ </div>
+ `;
+ });
+ 
+ html += '</div>';
+ return html;
 }
 
 function generateTasksList(borrowers) {
-  let allTasks = [];
-  borrowers.forEach(borrower => {
-    if (borrower.pending_tasks && borrower.pending_tasks.length > 0) {
-      borrower.pending_tasks.forEach(task => {
-        allTasks.push({...task, borrower_name: borrower.name, borrower_id: borrower.id});
-      });
-    }
-  });
-  
-  if (allTasks.length === 0) {
-    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No pending tasks found.</p>';
-  }
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total Pending Tasks: ${allTasks.length}</strong>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  allTasks.forEach(task => {
-    const priorityColors = {high: '#c0392b', medium: '#f39c12', low: '#27ae60'};
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${task.title || 'Untitled Task'}</h4>
-          <span style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600; background: ${priorityColors[task.priority] || '#95a5a6'}20; color: ${priorityColors[task.priority] || '#95a5a6'};">
-            ${(task.priority || 'medium').charAt(0).toUpperCase() + (task.priority || 'medium').slice(1)}
-          </span>
-        </div>
-        <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Borrower: ${task.borrower_name || 'Unknown'}</p>
-        ${task.due_date ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Due: ${task.due_date}</p>` : ''}
-        ${task.description ? `<p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${task.description}</p>` : ''}
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
+ let allTasks = [];
+ borrowers.forEach(borrower => {
+ if (borrower.pending_tasks && borrower.pending_tasks.length > 0) {
+ borrower.pending_tasks.forEach(task => {
+ allTasks.push({...task, borrower_name: borrower.name, borrower_id: borrower.id});
+ });
+ }
+ });
+ 
+ if (allTasks.length === 0) {
+ return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No pending tasks found.</p>';
+ }
+ 
+ let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+ <strong style="color: var(--charcoal-brown);">Total Pending Tasks: ${allTasks.length}</strong>
+ </div>`;
+ html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+ 
+ allTasks.forEach(task => {
+ const priorityColors = {high: '#c0392b', medium: '#f39c12', low: '#27ae60'};
+ html += `
+ <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+ <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+ <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${task.title || 'Untitled Task'}</h4>
+ <span style="padding: 0.25rem 0.75rem; border-radius: var(--border-radius); font-size: 0.75rem; font-weight: 600; background: ${priorityColors[task.priority] || '#95a5a6'}20; color: ${priorityColors[task.priority] || '#95a5a6'};">
+ ${(task.priority || 'medium').charAt(0).toUpperCase() + (task.priority || 'medium').slice(1)}
+ </span>
+ </div>
+ <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Borrower: ${task.borrower_name || 'Unknown'}</p>
+ ${task.due_date ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Due: ${task.due_date}</p>` : ''}
+ ${task.description ? `<p style="margin: 0.5rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${task.description}</p>` : ''}
+ </div>
+ `;
+ });
+ 
+ html += '</div>';
+ return html;
 }
 
 function generateDealsList(borrowers) {
-  let allDeals = [];
-  borrowers.forEach(borrower => {
-    if (borrower.deals && borrower.deals.length > 0) {
-      borrower.deals.forEach(deal => {
-        allDeals.push({...deal, borrower_name: borrower.name, borrower_id: borrower.id});
-      });
-    }
-  });
-  
-  if (allDeals.length === 0) {
-    return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No active deals found.</p>';
-  }
-  
-  const totalValue = allDeals.reduce((sum, d) => sum + (d.deal_value || 0), 0);
-  
-  let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
-    <strong style="color: var(--charcoal-brown);">Total Pipeline Value: $${totalValue.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
-    <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${allDeals.length} active deal(s)</p>
-  </div>`;
-  html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
-  
-  allDeals.forEach(deal => {
-    html += `
-      <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
-        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-          <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${deal.deal_name || 'Untitled Deal'}</h4>
-          ${deal.deal_value ? `<strong style="color: var(--olive-green);">$${(deal.deal_value || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>` : ''}
-        </div>
-        <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Borrower: ${deal.borrower_name || 'Unknown'}</p>
-        ${deal.property_address ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">🏠 ${deal.property_address}</p>` : ''}
-        ${deal.stage ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Stage: ${deal.stage}</p>` : ''}
-      </div>
-    `;
-  });
-  
-  html += '</div>';
-  return html;
+ let allDeals = [];
+ borrowers.forEach(borrower => {
+ if (borrower.deals && borrower.deals.length > 0) {
+ borrower.deals.forEach(deal => {
+ allDeals.push({...deal, borrower_name: borrower.name, borrower_id: borrower.id});
+ });
+ }
+ });
+ 
+ if (allDeals.length === 0) {
+ return '<p style="text-align: center; padding: 2rem; color: var(--charcoal-brown); opacity: 0.7;">No active deals found.</p>';
+ }
+ 
+ const totalValue = allDeals.reduce((sum, d) => sum + (d.deal_value || 0), 0);
+ 
+ let html = `<div style="margin-bottom: 1rem; padding: 0.75rem; background: var(--light-cream); border-radius: var(--border-radius); border: var(--border-light);">
+ <strong style="color: var(--charcoal-brown);">Total Pipeline Value: $${totalValue.toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>
+ <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7;">${allDeals.length} active deal(s)</p>
+ </div>`;
+ html += '<div style="display: flex; flex-direction: column; gap: 0.75rem;">';
+ 
+ allDeals.forEach(deal => {
+ html += `
+ <div style="padding: 1rem; background: var(--white); border-radius: var(--border-radius); border: var(--border-light);">
+ <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+ <h4 style="margin: 0; font-family: var(--font-heading); color: var(--charcoal-brown);">${deal.deal_name || 'Untitled Deal'}</h4>
+ ${deal.deal_value ? `<strong style="color: var(--olive-green);">$${(deal.deal_value || 0).toLocaleString('en-US', {maximumFractionDigits: 0})}</strong>` : ''}
+ </div>
+ <p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Borrower: ${deal.borrower_name || 'Unknown'}</p>
+ ${deal.property_address ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;"> ${deal.property_address}</p>` : ''}
+ ${deal.stage ? `<p style="margin: 0.25rem 0; font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.8;">Stage: ${deal.stage}</p>` : ''}
+ </div>
+ `;
+ });
+ 
+ html += '</div>';
+ return html;
 }
 
 function toggleAllBorrowers(checked) {
-  const checkboxes = document.querySelectorAll('.borrower-checkbox');
-  checkboxes.forEach(cb => cb.checked = checked);
-  updateBulkActionButton();
+ const checkboxes = document.querySelectorAll('.borrower-checkbox');
+ checkboxes.forEach(cb => cb.checked = checked);
+ updateBulkActionButton();
 }
 
 function getSelectedBorrowerIds() {
-  const checkboxes = document.querySelectorAll('.borrower-checkbox:checked');
-  return Array.from(checkboxes).map(cb => parseInt(cb.value));
+ const checkboxes = document.querySelectorAll('.borrower-checkbox:checked');
+ return Array.from(checkboxes).map(cb => parseInt(cb.value));
 }
 
 function updateBulkActionButton() {
-  const selected = getSelectedBorrowerIds();
-  const btn = document.getElementById('bulkActionBtn');
-  if (btn) {
-    btn.disabled = selected.length === 0;
-    if (selected.length > 0) {
-      btn.textContent = `Bulk Actions (${selected.length})`;
-    } else {
-      btn.textContent = 'Bulk Actions';
-    }
-  }
+ const selected = getSelectedBorrowerIds();
+ const btn = document.getElementById('bulkActionBtn');
+ if (btn) {
+ btn.disabled = selected.length === 0;
+ if (selected.length > 0) {
+ btn.textContent = `Bulk Actions (${selected.length})`;
+ } else {
+ btn.textContent = 'Bulk Actions';
+ }
+ }
 }
 
 // Close modals on outside click
 document.getElementById('editModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeEditModal();
+ if (e.target === this) closeEditModal();
 });
 document.getElementById('interactionModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeInteractionModal();
+ if (e.target === this) closeInteractionModal();
 });
 document.getElementById('taskModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeTaskModal();
+ if (e.target === this) closeTaskModal();
 });
 document.getElementById('dealModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeDealModal();
+ if (e.target === this) closeDealModal();
 });
 document.getElementById('historyModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeHistoryModal();
+ if (e.target === this) closeHistoryModal();
 });
 document.getElementById('bulkActionModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeBulkActionModal();
+ if (e.target === this) closeBulkActionModal();
 });
 document.getElementById('followupSettingsModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeFollowupSettings();
+ if (e.target === this) closeFollowupSettings();
 });
 document.getElementById('statModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeStatModal();
+ if (e.target === this) closeStatModal();
 });
 </script>
 {% endblock %}

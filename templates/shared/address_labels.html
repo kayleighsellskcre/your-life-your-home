@@ -1,282 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Print Address Labels – Your Life Your Home</title>
-  <style>
-    /* Screen: show back button and print button */
-    @media screen {
-      body { font-family: system-ui, sans-serif; padding: 1rem; background: #f5f1e8; }
-      .print-actions {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-      }
-      .print-actions a, .print-actions button {
-        padding: 0.6rem 1.2rem;
-        border-radius: 8px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-        font-size: 0.95rem;
-      }
-      .btn-back {
-        background: #6B6A45;
-        color: white;
-      }
-      .btn-back:hover { background: #5A5938; }
-      .btn-print {
-        background: #2c5f2d;
-        color: white;
-      }
-      .btn-print:hover { background: #234a24; }
-      .print-hint {
-        font-size: 0.9rem;
-        color: #3A352C;
-        opacity: 0.8;
-      }
-      .labels-page {
-        background: white;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        border-radius: 8px;
-        overflow: hidden;
-        max-width: 8.5in;
-        margin: 0 auto;
-      }
-    }
+ <meta charset="utf-8">
+ <title>Print Address Labels – Your Life Your Home</title>
+ <style>
+ /* Screen: show back button and print button */
+ @media screen {
+ body { font-family: system-ui, sans-serif; padding: 1rem; background: #f5f1e8; }
+ .print-actions {
+ display: flex;
+ align-items: center;
+ gap: 1rem;
+ margin-bottom: 1.5rem;
+ flex-wrap: wrap;
+ }
+ .print-actions a, .print-actions button {
+ padding: 0.6rem 1.2rem;
+ border-radius: 8px;
+ font-weight: 600;
+ text-decoration: none;
+ cursor: pointer;
+ border: none;
+ font-size: 0.95rem;
+ }
+ .btn-back {
+ background: #6B5B4D;
+ color: white;
+ }
+ .btn-back:hover { background: #5A4A3C; }
+ .btn-print {
+ background: #2c5f2d;
+ color: white;
+ }
+ .btn-print:hover { background: #234a24; }
+ .print-hint {
+ font-size: 0.9rem;
+ color: #3D2E24;
+ opacity: 0.8;
+ }
+ .labels-page {
+ background: white;
+ box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+ border-radius: 8px;
+ overflow: hidden;
+ max-width: 8.5in;
+ margin: 0 auto;
+ }
+ }
 
-    /* Print: hide actions and single-sheet option, show only labels */
-    @media print {
-      .print-actions { display: none !important; }
-      body { margin: 0; padding: 0; background: white; }
-      .labels-page {
-        box-shadow: none;
-        border-radius: 0;
-        max-width: none;
-      }
-    }
+ /* Print: hide actions and single-sheet option, show only labels */
+ @media print {
+ .print-actions { display: none !important; }
+ body { margin: 0; padding: 0; background: white; }
+ .labels-page {
+ box-shadow: none;
+ border-radius: 0;
+ max-width: none;
+ }
+ }
 
-    /* Label grid: 30 labels/sheet, 1" x 2-5/8" (Avery 5160 / 8160) */
-    .labels-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 2.625in);
-      grid-template-rows: repeat(10, 1in);
-      grid-gap: 0 0.125in;
-      width: 8.5in;
-      height: 11in;
-      padding: 0.5in 0.1875in 0.5in 0.1875in;
-      box-sizing: border-box;
-      page-break-after: always;
-    }
+ /* Label grid: 30 labels/sheet, 1" x 2-5/8" (Avery 5160 / 8160) */
+ .labels-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 2.625in);
+ grid-template-rows: repeat(10, 1in);
+ grid-gap: 0 0.125in;
+ width: 8.5in;
+ height: 11in;
+ padding: 0.5in 0.1875in 0.5in 0.1875in;
+ box-sizing: border-box;
+ page-break-after: always;
+ }
 
-    .label-cell {
-      width: 2.625in;
-      height: 1in;
-      padding: 0.08in 0.12in;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
-      font-size: 9pt;
-      line-height: 1.2;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
+ .label-cell {
+ width: 2.625in;
+ height: 1in;
+ padding: 0.08in 0.12in;
+ border: 1px solid #ddd;
+ box-sizing: border-box;
+ font-size: 9pt;
+ line-height: 1.2;
+ overflow: hidden;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ text-align: center;
+ }
 
-    @media print {
-      .label-cell {
-        border: 1px solid #ccc;
-      }
-    }
+ @media print {
+ .label-cell {
+ border: 1px solid #ccc;
+ }
+ }
 
-    .label-cell .label-content {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      min-height: 100%;
-    }
+ .label-cell .label-content {
+ width: 100%;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ text-align: center;
+ min-height: 100%;
+ }
 
-    .label-name {
-      font-weight: 600;
-      margin-bottom: 0.15em;
-      color: #3A352C;
-      text-align: center;
-    }
+ .label-name {
+ font-weight: 600;
+ margin-bottom: 0.15em;
+ color: #3D2E24;
+ text-align: center;
+ }
 
-    .label-address {
-      font-size: 9pt;
-      color: #3A352C;
-      white-space: pre-line;
-      text-align: center;
-    }
+ .label-address {
+ font-size: 9pt;
+ color: #3D2E24;
+ white-space: pre-line;
+ text-align: center;
+ }
 
-    .label-cell:empty .label-name,
-    .label-cell:empty .label-address {
-      display: none;
-    }
+ .label-cell:empty .label-name,
+ .label-cell:empty .label-address {
+ display: none;
+ }
 
-    .single-sheet-option {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      margin-top: 0.5rem;
-    }
-    .single-sheet-option select {
-      padding: 0.5rem 0.75rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      min-width: 200px;
-    }
-    .single-sheet-option .btn-single {
-      padding: 0.5rem 1rem;
-      background: #5a7d5a;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-    .single-sheet-option .btn-single:hover {
-      background: #4a6d4a;
-    }
+ .single-sheet-option {
+ display: flex;
+ align-items: center;
+ gap: 0.75rem;
+ flex-wrap: wrap;
+ margin-top: 0.5rem;
+ }
+ .single-sheet-option select {
+ padding: 0.5rem 0.75rem;
+ border-radius: 6px;
+ border: 1px solid #ccc;
+ min-width: 200px;
+ }
+ .single-sheet-option .btn-single {
+ padding: 0.5rem 1rem;
+ background: #5a7d5a;
+ color: white;
+ border: none;
+ border-radius: 6px;
+ font-weight: 600;
+ cursor: pointer;
+ text-decoration: none;
+ font-size: 0.9rem;
+ }
+ .single-sheet-option .btn-single:hover {
+ background: #4a6d4a;
+ }
 
-    /* Missing address warning – screen only */
-    @media screen {
-      .missing-banner {
-        background: #fffbe6;
-        border: 1px solid #e6c619;
-        border-radius: 8px;
-        padding: 0.9rem 1.25rem;
-        max-width: 8.5in;
-        margin: 0 auto 1rem;
-        font-size: 0.875rem;
-        color: #3a3000;
-      }
-      .missing-banner h3 {
-        margin: 0 0 0.5rem;
-        font-size: 0.95rem;
-        color: #7a5c00;
-      }
-      .missing-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.4rem;
-        list-style: none;
-        margin: 0;
-        padding: 0;
-      }
-      .missing-list li a {
-        display: inline-block;
-        padding: 0.25rem 0.65rem;
-        background: #fff3cd;
-        border: 1px solid #e6c619;
-        border-radius: 20px;
-        color: #6a4f00;
-        text-decoration: none;
-        font-size: 0.78rem;
-        font-weight: 600;
-      }
-      .missing-list li a:hover { background: #ffe082; }
+ /* Missing address warning – screen only */
+ @media screen {
+ .missing-banner {
+ background: #fffbe6;
+ border: 1px solid #e6c619;
+ border-radius: 8px;
+ padding: 0.9rem 1.25rem;
+ max-width: 8.5in;
+ margin: 0 auto 1rem;
+ font-size: 0.875rem;
+ color: #3a3000;
+ }
+ .missing-banner h3 {
+ margin: 0 0 0.5rem;
+ font-size: 0.95rem;
+ color: #7a5c00;
+ }
+ .missing-list {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 0.4rem;
+ list-style: none;
+ margin: 0;
+ padding: 0;
+ }
+ .missing-list li a {
+ display: inline-block;
+ padding: 0.25rem 0.65rem;
+ background: #fff3cd;
+ border: 1px solid #e6c619;
+ border-radius: 20px;
+ color: #6a4f00;
+ text-decoration: none;
+ font-size: 0.78rem;
+ font-weight: 600;
+ }
+ .missing-list li a:hover { background: #ffe082; }
 
-      .label-cell.missing-csz { border: 1.5px dashed #e6a000 !important; }
-      .label-missing-hint {
-        font-size: 7pt;
-        color: #c07000;
-        font-style: italic;
-        margin-top: 2px;
-      }
-      .label-edit-link {
-        font-size: 7pt;
-        color: #6B6A45;
-        text-decoration: underline;
-        margin-top: 1px;
-        display: block;
-      }
-    }
-    @media print {
-      .missing-banner { display: none !important; }
-      .label-missing-hint, .label-edit-link { display: none !important; }
-      .label-cell.missing-csz { border: 1px solid #ccc !important; }
-    }
-  </style>
+ .label-cell.missing-csz { border: 1.5px dashed #e6a000 !important; }
+ .label-missing-hint {
+ font-size: 7pt;
+ color: #c07000;
+ font-style: italic;
+ margin-top: 2px;
+ }
+ .label-edit-link {
+ font-size: 7pt;
+ color: #6B5B4D;
+ text-decoration: underline;
+ margin-top: 1px;
+ display: block;
+ }
+ }
+ @media print {
+ .missing-banner { display: none !important; }
+ .label-missing-hint, .label-edit-link { display: none !important; }
+ .label-cell.missing-csz { border: 1px solid #ccc !important; }
+ }
+ </style>
 </head>
 <body>
-  <div class="print-actions">
-    <a href="{{ back_url }}" class="btn-back">{{ back_label }}</a>
-    <button type="button" class="btn-print" onclick="window.print();">🖨️ Print Labels</button>
-    <span class="print-hint">Avery 5160 / 8160: 30 labels/sheet, 1" × 2-5/8" each. 8.5"×11" paper.</span>
-    {% if contacts is defined and contacts and role == 'agent' %}
-    <div class="single-sheet-option">
-      <span style="color: var(--charcoal-brown); font-size: 0.9rem;">Print full sheet for one client:</span>
-      <select id="singleContactSelect">
-        <option value="">-- Select contact --</option>
-        {% for c in contacts %}
-        <option value="{{ c.id }}">{{ c.name or 'Unnamed' }}</option>
-        {% endfor %}
-      </select>
-      <a href="#" class="btn-single" id="btnSingleSheet">Print Full Sheet</a>
-    </div>
-    {% endif %}
-  </div>
-  {% if contacts is defined and contacts and role == 'agent' and labels_base_url is defined %}
-  <script>
-  document.getElementById('btnSingleSheet').addEventListener('click', function(e) {
-    e.preventDefault();
-    const id = document.getElementById('singleContactSelect').value;
-    if (id) window.location.href = '{{ labels_base_url }}?contact_id=' + id + '&single_sheet=1';
-  });
-  </script>
-  {% endif %}
+ <div class="print-actions">
+ <a href="{{ back_url }}" class="btn-back">{{ back_label }}</a>
+ <button type="button" class="btn-print" onclick="window.print();"> Print Labels</button>
+ <span class="print-hint">Avery 5160 / 8160: 30 labels/sheet, 1" × 2-5/8" each. 8.5"×11" paper.</span>
+ {% if contacts is defined and contacts and role == 'agent' %}
+ <div class="single-sheet-option">
+ <span style="color: var(--charcoal-brown); font-size: 0.9rem;">Print full sheet for one client:</span>
+ <select id="singleContactSelect">
+ <option value="">-- Select contact --</option>
+ {% for c in contacts %}
+ <option value="{{ c.id }}">{{ c.name or 'Unnamed' }}</option>
+ {% endfor %}
+ </select>
+ <a href="#" class="btn-single" id="btnSingleSheet">Print Full Sheet</a>
+ </div>
+ {% endif %}
+ </div>
+ {% if contacts is defined and contacts and role == 'agent' and labels_base_url is defined %}
+ <script>
+ document.getElementById('btnSingleSheet').addEventListener('click', function(e) {
+ e.preventDefault();
+ const id = document.getElementById('singleContactSelect').value;
+ if (id) window.location.href = '{{ labels_base_url }}?contact_id=' + id + '&single_sheet=1';
+ });
+ </script>
+ {% endif %}
 
-  {% set incomplete = labels | selectattr('missing_csz', 'equalto', true) | list %}
-  {% if incomplete %}
-  <div class="missing-banner">
-    <h3>⚠ {{ incomplete | length }} contact(s) missing City, State, or ZIP — click to edit:</h3>
-    <ul class="missing-list">
-      {% for item in incomplete %}
-      {% if item.id %}
-      <li><a href="/agent/crm?edit={{ item.id }}" target="_blank">✏ {{ item.name }}</a></li>
-      {% endif %}
-      {% endfor %}
-    </ul>
-  </div>
-  {% endif %}
+ {% set incomplete = labels | selectattr('missing_csz', 'equalto', true) | list %}
+ {% if incomplete %}
+ <div class="missing-banner">
+ <h3> {{ incomplete | length }} contact(s) missing City, State, or ZIP — click to edit:</h3>
+ <ul class="missing-list">
+ {% for item in incomplete %}
+ {% if item.id %}
+ <li><a href="/agent/crm?edit={{ item.id }}" target="_blank"> {{ item.name }}</a></li>
+ {% endif %}
+ {% endfor %}
+ </ul>
+ </div>
+ {% endif %}
 
-  <div class="labels-page">
-    {% for page in labels|batch(30) %}
-    <div class="labels-grid">
-      {% for item in page %}
-      <div class="label-cell {% if item.missing_csz %}missing-csz{% endif %}">
-        {% if item.name or item.address %}
-        <div class="label-content">
-          <div class="label-name">{{ item.name }}</div>
-          <div class="label-address">{{ item.address }}</div>
-          {% if item.missing_csz %}
-          <span class="label-missing-hint">⚠ City/State/ZIP missing</span>
-          {% if item.id %}
-          <a class="label-edit-link" href="/agent/crm?edit={{ item.id }}" target="_blank">Click to add address</a>
-          {% endif %}
-          {% endif %}
-        </div>
-        {% endif %}
-      </div>
-      {% endfor %}
-      {% for i in range(30 - page|length) %}
-      <div class="label-cell"></div>
-      {% endfor %}
-    </div>
-    {% endfor %}
-  </div>
+ <div class="labels-page">
+ {% for page in labels|batch(30) %}
+ <div class="labels-grid">
+ {% for item in page %}
+ <div class="label-cell {% if item.missing_csz %}missing-csz{% endif %}">
+ {% if item.name or item.address %}
+ <div class="label-content">
+ <div class="label-name">{{ item.name }}</div>
+ <div class="label-address">{{ item.address }}</div>
+ {% if item.missing_csz %}
+ <span class="label-missing-hint"> City/State/ZIP missing</span>
+ {% if item.id %}
+ <a class="label-edit-link" href="/agent/crm?edit={{ item.id }}" target="_blank">Click to add address</a>
+ {% endif %}
+ {% endif %}
+ </div>
+ {% endif %}
+ </div>
+ {% endfor %}
+ {% for i in range(30 - page|length) %}
+ <div class="label-cell"></div>
+ {% endfor %}
+ </div>
+ {% endfor %}
+ </div>
 </body>
 </html>

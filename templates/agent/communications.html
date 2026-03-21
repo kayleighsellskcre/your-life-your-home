@@ -2,596 +2,596 @@
 
 {% block agent_content %}
 <style>
-  /* ============================================
-     MOBILE-FIRST RESPONSIVE LAYOUT SYSTEM
-     ============================================ */
-  
-  .comms-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-  
-  /* Header */
-  .comms-header {
-    padding: 0.75rem 0;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+ /* ============================================
+ MOBILE-FIRST RESPONSIVE LAYOUT SYSTEM
+ ============================================ */
+ 
+ .comms-container {
+ max-width: 1400px;
+ margin: 0 auto;
+ padding: 1rem;
+ }
+ 
+ /* Header */
+ .comms-header {
+ padding: 0.75rem 0;
+ margin-bottom: 1rem;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 0.5rem;
+ }
 
-  .comms-header h1 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--charcoal-brown);
-    margin: 0;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
+ .comms-header h1 {
+ font-family: var(--font-heading);
+ font-size: 1.5rem;
+ color: var(--charcoal-brown);
+ margin: 0;
+ font-weight: 600;
+ letter-spacing: -0.02em;
+ }
 
-  .comms-header p {
-    font-size: 0.9rem;
-    color: var(--warm-gray);
-    margin: 0;
-  }
-  
-  /* Cards */
-  .comms-card {
-    background: var(--soft-white);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-xl);
-    padding: 1.25rem 1rem;
-    margin-bottom: 1rem;
-    box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+ .comms-header p {
+ font-size: 0.9rem;
+ color: var(--warm-gray);
+ margin: 0;
+ }
+ 
+ /* Cards */
+ .comms-card {
+ background: var(--soft-white);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: var(--border-radius-xl);
+ padding: 1.25rem 1rem;
+ margin-bottom: 1rem;
+ box-shadow: 0 2px 12px rgba(61, 46, 36, 0.06);
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ }
 
-  .comms-card h2 {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  
-  /* Template Grid */
-  .templates-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
-  
-  .template-card {
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
-    padding: 1.5rem;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-  }
-  
-  .template-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.12);
-    border-color: var(--olive-green);
-  }
-  
-  .template-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
-    gap: 1rem;
-  }
-  
-  .template-title {
-    font-weight: 600;
-    font-size: 1.125rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-  }
-  
-  .template-badges {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-  }
-  
-  .template-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: var(--border-radius-full);
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  
-  .badge-email {
-    background: rgba(107, 106, 69, 0.15);
-    color: var(--olive-green);
-  }
-  
-  .badge-text {
-    background: rgba(200, 180, 151, 0.3);
-    color: var(--charcoal-brown);
-  }
-  
-  .badge-lead { background: #E3F2FD; color: #1565C0; }
-  .badge-offer { background: #FFF3E0; color: #E65100; }
-  .badge-contract { background: #F3E5F5; color: #6A1B9A; }
-  .badge-closing { background: #E8F5E9; color: #2E7D32; }
-  .badge-followup { background: #FFF9C4; color: #F57F17; }
-  .badge-general { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
-  
-  .template-subject {
-    font-weight: 600;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-    font-size: 0.9375rem;
-  }
-  
-  .template-body {
-    color: var(--warm-gray);
-    line-height: 1.6;
-    font-size: 0.9375rem;
-    white-space: pre-wrap;
-    max-height: 150px;
-    overflow: hidden;
-    position: relative;
-  }
-  
-  .template-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(200, 180, 151, 0.2);
-  }
-  
-  .btn-template {
-    padding: 0.5rem 1.25rem;
-    border-radius: var(--border-radius-full);
-    font-size: 0.875rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .btn-use {
-    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
-    color: white;
-    box-shadow: 0 2px 8px rgba(107, 106, 69, 0.3);
-  }
-  
-  .btn-use:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.4);
-  }
-  
-  .btn-copy {
-    background: white;
-    color: var(--olive-green);
-    border: 2px solid var(--olive-green);
-  }
-  
-  .btn-copy:hover {
-    background: var(--olive-green);
-    color: white;
-  }
-  
-  /* Form Styling */
-  .comms-form {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-label {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--olive-green);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 0.625rem;
-  }
-  
-  .form-input,
-  .form-select,
-  .form-textarea {
-    width: 100%;
-    padding: 0.875rem 1rem;
-    border: 1px solid rgba(200, 180, 151, 0.3);
-    border-radius: var(--border-radius-lg);
-    font-size: 1rem;
-    font-family: var(--font-body);
-    color: var(--charcoal-brown);
-    background: white;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .form-input:focus,
-  .form-select:focus,
-  .form-textarea:focus {
-    outline: none;
-    border-color: var(--olive-green);
-    box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
-  }
-  
-  .form-textarea {
-    resize: vertical;
-    min-height: 120px;
-    line-height: 1.6;
-  }
-  
-  .btn-primary {
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-full);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-  
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(107, 106, 69, 0.4);
-  }
-  
-  /* Empty State */
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
-    border-radius: var(--border-radius-2xl);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-  }
-  
-  .empty-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    color: var(--olive-green);
-  }
-  
-  .empty-state h3 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .empty-state p {
-    color: var(--warm-gray);
-    line-height: 1.6;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-  
-  /* ============================================
-     TABLET BREAKPOINT (768px+)
-     ============================================ */
-  @media (min-width: 768px) {
-    .comms-container {
-      padding: 1.25rem 2rem;
-    }
+ .comms-card h2 {
+ font-family: var(--font-heading);
+ font-size: 1.15rem;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.75rem;
+ font-weight: 600;
+ letter-spacing: -0.02em;
+ }
+ 
+ /* Template Grid */
+ .templates-grid {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 1rem;
+ margin-top: 1.5rem;
+ }
+ 
+ .template-card {
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: var(--border-radius-lg);
+ padding: 1.5rem;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ cursor: pointer;
+ }
+ 
+ .template-card:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 24px rgba(107, 91, 77, 0.12);
+ border-color: var(--olive-green);
+ }
+ 
+ .template-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: start;
+ margin-bottom: 1rem;
+ gap: 1rem;
+ }
+ 
+ .template-title {
+ font-weight: 600;
+ font-size: 1.125rem;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.5rem;
+ }
+ 
+ .template-badges {
+ display: flex;
+ gap: 0.5rem;
+ flex-wrap: wrap;
+ margin-bottom: 0.75rem;
+ }
+ 
+ .template-badge {
+ padding: 0.25rem 0.75rem;
+ border-radius: var(--border-radius-full);
+ font-size: 0.75rem;
+ font-weight: 600;
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ }
+ 
+ .badge-email {
+ background: rgba(107, 91, 77, 0.15);
+ color: var(--olive-green);
+ }
+ 
+ .badge-text {
+ background: rgba(200, 180, 151, 0.3);
+ color: var(--charcoal-brown);
+ }
+ 
+ .badge-lead { background: #E3F2FD; color: #1565C0; }
+ .badge-offer { background: #FFF3E0; color: #E65100; }
+ .badge-contract { background: #F3E5F5; color: #6A1B9A; }
+ .badge-closing { background: #E8F5E9; color: #2E7D32; }
+ .badge-followup { background: #FFF9C4; color: #F57F17; }
+ .badge-general { background: rgba(200, 180, 151, 0.2); color: var(--charcoal-brown); }
+ 
+ .template-subject {
+ font-weight: 600;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.5rem;
+ font-size: 0.9375rem;
+ }
+ 
+ .template-body {
+ color: var(--warm-gray);
+ line-height: 1.6;
+ font-size: 0.9375rem;
+ white-space: pre-wrap;
+ max-height: 150px;
+ overflow: hidden;
+ position: relative;
+ }
+ 
+ .template-actions {
+ display: flex;
+ gap: 0.75rem;
+ margin-top: 1rem;
+ padding-top: 1rem;
+ border-top: 1px solid rgba(200, 180, 151, 0.2);
+ }
+ 
+ .btn-template {
+ padding: 0.5rem 1.25rem;
+ border-radius: var(--border-radius-full);
+ font-size: 0.875rem;
+ font-weight: 600;
+ border: none;
+ cursor: pointer;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ text-decoration: none;
+ display: inline-flex;
+ align-items: center;
+ gap: 0.5rem;
+ }
+ 
+ .btn-use {
+ background: linear-gradient(135deg, var(--olive-green) 0%, #5A4A3C 100%);
+ color: white;
+ box-shadow: 0 2px 8px rgba(107, 91, 77, 0.3);
+ }
+ 
+ .btn-use:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 4px 12px rgba(107, 91, 77, 0.4);
+ }
+ 
+ .btn-copy {
+ background: white;
+ color: var(--olive-green);
+ border: 2px solid var(--olive-green);
+ }
+ 
+ .btn-copy:hover {
+ background: var(--olive-green);
+ color: white;
+ }
+ 
+ /* Form Styling */
+ .comms-form {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 1.5rem;
+ max-width: 800px;
+ margin: 0 auto;
+ }
+ 
+ .form-group {
+ display: flex;
+ flex-direction: column;
+ }
+ 
+ .form-label {
+ display: block;
+ font-size: 0.85rem;
+ font-weight: 600;
+ color: var(--olive-green);
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ margin-bottom: 0.625rem;
+ }
+ 
+ .form-input,
+ .form-select,
+ .form-textarea {
+ width: 100%;
+ padding: 0.875rem 1rem;
+ border: 1px solid rgba(200, 180, 151, 0.3);
+ border-radius: var(--border-radius-lg);
+ font-size: 1rem;
+ font-family: var(--font-body);
+ color: var(--charcoal-brown);
+ background: white;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ }
+ 
+ .form-input:focus,
+ .form-select:focus,
+ .form-textarea:focus {
+ outline: none;
+ border-color: var(--olive-green);
+ box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
+ }
+ 
+ .form-textarea {
+ resize: vertical;
+ min-height: 120px;
+ line-height: 1.6;
+ }
+ 
+ .btn-primary {
+ padding: 1rem 2rem;
+ background: linear-gradient(135deg, var(--olive-green) 0%, #5A4A3C 100%);
+ color: white;
+ border: none;
+ border-radius: var(--border-radius-full);
+ font-size: 1rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ box-shadow: 0 4px 12px rgba(107, 91, 77, 0.3);
+ text-transform: uppercase;
+ letter-spacing: 0.05em;
+ }
+ 
+ .btn-primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 6px 16px rgba(107, 91, 77, 0.4);
+ }
+ 
+ /* Empty State */
+ .empty-state {
+ text-align: center;
+ padding: 4rem 2rem;
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
+ border-radius: var(--border-radius-2xl);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ }
+ 
+ .empty-icon {
+ width: 80px;
+ height: 80px;
+ margin: 0 auto 1rem;
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 2rem;
+ color: var(--olive-green);
+ }
+ 
+ .empty-state h3 {
+ font-family: var(--font-heading);
+ color: var(--charcoal-brown);
+ font-size: 1.5rem;
+ margin-bottom: 0.75rem;
+ }
+ 
+ .empty-state p {
+ color: var(--warm-gray);
+ line-height: 1.6;
+ max-width: 500px;
+ margin: 0 auto;
+ }
+ 
+ /* ============================================
+ TABLET BREAKPOINT (768px+)
+ ============================================ */
+ @media (min-width: 768px) {
+ .comms-container {
+ padding: 1.25rem 2rem;
+ }
 
-    .comms-header {
-      padding: 0.5rem 0;
-    }
+ .comms-header {
+ padding: 0.5rem 0;
+ }
 
-    .comms-header h1 {
-      font-size: 1.6rem;
-    }
+ .comms-header h1 {
+ font-size: 1.6rem;
+ }
 
-    .templates-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
+ .templates-grid {
+ grid-template-columns: repeat(2, 1fr);
+ gap: 1rem;
+ }
 
-    .comms-form {
-      grid-template-columns: repeat(2, 1fr);
-    }
+ .comms-form {
+ grid-template-columns: repeat(2, 1fr);
+ }
 
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
-  }
+ .form-group.full-width {
+ grid-column: 1 / -1;
+ }
+ }
 
-  @media (min-width: 1024px) {
-    .comms-container {
-      padding: 1.5rem 2rem;
-    }
+ @media (min-width: 1024px) {
+ .comms-container {
+ padding: 1.5rem 2rem;
+ }
 
-    .comms-header {
-      padding: 0.5rem 0;
-    }
+ .comms-header {
+ padding: 0.5rem 0;
+ }
 
-    .comms-header h1 {
-      font-size: 1.75rem;
-    }
+ .comms-header h1 {
+ font-size: 1.75rem;
+ }
 
-    .templates-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-    }
-  }
-  
-  /* ============================================
-     MOBILE OPTIMIZATIONS (Portrait Mode)
-     ============================================ */
-  @media (max-width: 767px) and (orientation: portrait) {
-    .comms-container {
-      padding: 1rem 0.875rem;
-    }
-    
-    .comms-header {
-      padding: 0.25rem 0;
-      margin-bottom: 0.75rem;
-    }
+ .templates-grid {
+ grid-template-columns: repeat(3, 1fr);
+ gap: 1.25rem;
+ }
+ }
+ 
+ /* ============================================
+ MOBILE OPTIMIZATIONS (Portrait Mode)
+ ============================================ */
+ @media (max-width: 767px) and (orientation: portrait) {
+ .comms-container {
+ padding: 1rem 0.875rem;
+ }
+ 
+ .comms-header {
+ padding: 0.25rem 0;
+ margin-bottom: 0.75rem;
+ }
 
-    .comms-header h1 {
-      font-size: 1.25rem;
-    }
+ .comms-header h1 {
+ font-size: 1.25rem;
+ }
 
-    .comms-header p {
-      font-size: 0.85rem;
-    }
+ .comms-header p {
+ font-size: 0.85rem;
+ }
 
-    .comms-card {
-      padding: 1rem 0.875rem;
-    }
+ .comms-card {
+ padding: 1rem 0.875rem;
+ }
 
-    .comms-card h2 {
-      font-size: 1rem;
-    }
-    
-    .template-card {
-      padding: 1.25rem 1rem;
-    }
-    
-    .template-title {
-      font-size: 1rem;
-    }
-    
-    .template-header {
-      flex-direction: column;
-    }
-    
-    .template-actions {
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    
-    .btn-template {
-      width: 100%;
-      justify-content: center;
-      min-height: 48px;
-    }
-    
-    .form-input,
-    .form-select,
-    .form-textarea {
-      min-height: 48px;
-      font-size: 16px; /* Prevents iOS zoom */
-    }
-    
-    .btn-primary {
-      width: 100%;
-      min-height: 52px;
-      padding: 1rem 1.5rem;
-    }
-    
-    .empty-state {
-      padding: 3rem 1.5rem;
-    }
-    
-    .empty-state h3 {
-      font-size: 1.25rem;
-    }
-  }
-  
-  /* Modal Styling */
-  .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(58, 53, 44, 0.7);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-  
-  .modal-content {
-    background: var(--soft-white);
-    border-radius: var(--border-radius-xl);
-    max-width: 700px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(58, 53, 44, 0.4);
-    animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2rem 2rem 1rem;
-    border-bottom: 1px solid rgba(200, 180, 151, 0.2);
-  }
-  
-  .modal-header h2 {
-    font-family: var(--font-heading);
-    font-size: 1.75rem;
-    color: var(--charcoal-brown);
-    margin: 0;
-  }
-  
-  .modal-close {
-    background: none;
-    border: none;
-    font-size: 2rem;
-    color: var(--warm-gray);
-    cursor: pointer;
-    transition: color 0.2s;
-    padding: 0;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .modal-close:hover {
-    color: var(--charcoal-brown);
-  }
-  
-  .modal .comms-form {
-    padding: 2rem;
-  }
-  
-  @keyframes modalSlideIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95) translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1) translateY(0);
-    }
-  }
+ .comms-card h2 {
+ font-size: 1rem;
+ }
+ 
+ .template-card {
+ padding: 1.25rem 1rem;
+ }
+ 
+ .template-title {
+ font-size: 1rem;
+ }
+ 
+ .template-header {
+ flex-direction: column;
+ }
+ 
+ .template-actions {
+ flex-direction: column;
+ gap: 0.75rem;
+ }
+ 
+ .btn-template {
+ width: 100%;
+ justify-content: center;
+ min-height: 48px;
+ }
+ 
+ .form-input,
+ .form-select,
+ .form-textarea {
+ min-height: 48px;
+ font-size: 16px; /* Prevents iOS zoom */
+ }
+ 
+ .btn-primary {
+ width: 100%;
+ min-height: 52px;
+ padding: 1rem 1.5rem;
+ }
+ 
+ .empty-state {
+ padding: 3rem 1.5rem;
+ }
+ 
+ .empty-state h3 {
+ font-size: 1.25rem;
+ }
+ }
+ 
+ /* Modal Styling */
+ .modal {
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ background: rgba(61, 46, 36, 0.7);
+ z-index: 1000;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ padding: 1rem;
+ }
+ 
+ .modal-content {
+ background: var(--soft-white);
+ border-radius: var(--border-radius-xl);
+ max-width: 700px;
+ width: 100%;
+ max-height: 90vh;
+ overflow-y: auto;
+ box-shadow: 0 20px 60px rgba(61, 46, 36, 0.4);
+ animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ }
+ 
+ .modal-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 2rem 2rem 1rem;
+ border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+ }
+ 
+ .modal-header h2 {
+ font-family: var(--font-heading);
+ font-size: 1.75rem;
+ color: var(--charcoal-brown);
+ margin: 0;
+ }
+ 
+ .modal-close {
+ background: none;
+ border: none;
+ font-size: 2rem;
+ color: var(--warm-gray);
+ cursor: pointer;
+ transition: color 0.2s;
+ padding: 0;
+ width: 32px;
+ height: 32px;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ }
+ 
+ .modal-close:hover {
+ color: var(--charcoal-brown);
+ }
+ 
+ .modal .comms-form {
+ padding: 2rem;
+ }
+ 
+ @keyframes modalSlideIn {
+ from {
+ opacity: 0;
+ transform: scale(0.95) translateY(20px);
+ }
+ to {
+ opacity: 1;
+ transform: scale(1) translateY(0);
+ }
+ }
 
-  /* Animation */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-in {
-    animation: fadeIn 0.5s ease-out;
-  }
+ /* Animation */
+ @keyframes fadeIn {
+ from {
+ opacity: 0;
+ transform: translateY(10px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
+ }
+ 
+ .animate-in {
+ animation: fadeIn 0.5s ease-out;
+ }
 </style>
 
 <div class="comms-container">
-  <!-- Header -->
-  <div class="comms-header animate-in">
-    <h1>Communication Hub</h1>
-    <p>Your templates, ready to go whenever you need them.</p>
-  </div>
+ <!-- Header -->
+ <div class="comms-header animate-in">
+ <h1>Communication Hub</h1>
+ <p>Your templates, ready to go whenever you need them.</p>
+ </div>
 
-  <!-- Send Message Modal -->
-  <div id="sendModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Send Message</h2>
-        <button class="modal-close" onclick="closeSendModal()">&times;</button>
-      </div>
-      <form id="sendForm" class="comms-form">
-        <div class="form-group full-width">
-          <label class="form-label">Channel</label>
-          <div style="display: flex; gap: 1rem;">
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-              <input type="radio" name="channel" value="email" checked onchange="toggleSubjectField()"> Email
-            </label>
-            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-              <input type="radio" name="channel" value="sms" onchange="toggleSubjectField()"> Text Message
-            </label>
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="recipient_name" class="form-label">Recipient Name</label>
-          <input id="recipient_name" name="recipient_name" class="form-input" placeholder="John Smith" required />
-        </div>
-        
-        <div class="form-group">
-          <label for="recipient_contact" class="form-label">Email or Phone</label>
-          <input id="recipient_contact" name="recipient_contact" class="form-input" placeholder="email@example.com or (555) 123-4567" required />
-        </div>
-        
-        <div class="form-group full-width" id="subject-field">
-          <label for="message_subject" class="form-label">Subject</label>
-          <input id="message_subject" name="subject" class="form-input" placeholder="Email subject line" />
-        </div>
-        
-        <div class="form-group full-width">
-          <label for="message_body" class="form-label">Message</label>
-          <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;">
-            <button type="button" onclick="aiWriteForMe()" style="display:inline-flex;align-items:center;gap:.3rem;background:#6B6A45;color:#fff;border:none;border-radius:5px;padding:.3rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer;letter-spacing:.02em;">✨ AI Draft for Me</button>
-            <span id="ai-comms-status" style="font-size:.72rem;color:#9A9472;font-style:italic;"></span>
-          </div>
-          <textarea id="message_body" name="body" class="form-textarea" rows="10" required></textarea>
-        </div>
+ <!-- Send Message Modal -->
+ <div id="sendModal" class="modal" style="display: none;">
+ <div class="modal-content">
+ <div class="modal-header">
+ <h2>Send Message</h2>
+ <button class="modal-close" onclick="closeSendModal()">&times;</button>
+ </div>
+ <form id="sendForm" class="comms-form">
+ <div class="form-group full-width">
+ <label class="form-label">Channel</label>
+ <div style="display: flex; gap: 1rem;">
+ <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+ <input type="radio" name="channel" value="email" checked onchange="toggleSubjectField()"> Email
+ </label>
+ <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+ <input type="radio" name="channel" value="sms" onchange="toggleSubjectField()"> Text Message
+ </label>
+ </div>
+ </div>
+ 
+ <div class="form-group">
+ <label for="recipient_name" class="form-label">Recipient Name</label>
+ <input id="recipient_name" name="recipient_name" class="form-input" placeholder="John Smith" required />
+ </div>
+ 
+ <div class="form-group">
+ <label for="recipient_contact" class="form-label">Email or Phone</label>
+ <input id="recipient_contact" name="recipient_contact" class="form-input" placeholder="email@example.com or (555) 123-4567" required />
+ </div>
+ 
+ <div class="form-group full-width" id="subject-field">
+ <label for="message_subject" class="form-label">Subject</label>
+ <input id="message_subject" name="subject" class="form-input" placeholder="Email subject line" />
+ </div>
+ 
+ <div class="form-group full-width">
+ <label for="message_body" class="form-label">Message</label>
+ <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;">
+ <button type="button" onclick="aiWriteForMe()" style="display:inline-flex;align-items:center;gap:.3rem;background:#6B5B4D;color:#fff;border:none;border-radius:5px;padding:.3rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer;letter-spacing:.02em;"> AI Draft for Me</button>
+ <span id="ai-comms-status" style="font-size:.72rem;color:#9A9472;font-style:italic;"></span>
+ </div>
+ <textarea id="message_body" name="body" class="form-textarea" rows="10" required></textarea>
+ </div>
 
-        <div class="form-group full-width">
-          <button class="btn-primary" type="submit">Send Message</button>
-        </div>
-      </form>
-    </div>
-  </div>
+ <div class="form-group full-width">
+ <button class="btn-primary" type="submit">Send Message</button>
+ </div>
+ </form>
+ </div>
+ </div>
 
-  <!-- Pre-Built Professional Templates -->
-  <div class="comms-card">
-    <h2>Professional Templates</h2>
-    <p style="color: var(--warm-gray); margin-bottom: 1rem; line-height: 1.6;">Tap any template to use it or copy it and make it your own. These were written to sound like a real person, because that is exactly what you are.</p>
-    
-    <!-- NEW LEAD TEMPLATES -->
-    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">New Lead</h3>
-    <div class="templates-grid">
-      <!-- New Lead 1: Initial Welcome -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Initial Welcome</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-lead">Lead</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Thank you for reaching out!</div>
-        <div class="template-body">Hi [Name],
+ <!-- Pre-Built Professional Templates -->
+ <div class="comms-card">
+ <h2>Professional Templates</h2>
+ <p style="color: var(--warm-gray); margin-bottom: 1rem; line-height: 1.6;">Tap any template to use it or copy it and make it your own. These were written to sound like a real person, because that is exactly what you are.</p>
+ 
+ <!-- NEW LEAD TEMPLATES -->
+ <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">New Lead</h3>
+ <div class="templates-grid">
+ <!-- New Lead 1: Initial Welcome -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Initial Welcome</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-lead">Lead</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Thank you for reaching out!</div>
+ <div class="template-body">Hi [Name],
 
 Thank you so much for reaching out! I'd love to help you with your real estate journey.
 
@@ -603,25 +603,25 @@ Looking forward to connecting!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- New Lead 2: Buyer Consultation -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Buyer Consultation Invite</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-lead">Lead</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Let's find your dream home together</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- New Lead 2: Buyer Consultation -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Buyer Consultation Invite</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-lead">Lead</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Let's find your dream home together</div>
+ <div class="template-body">Hi [Name],
 
 Thank you for your interest in working together! I'm excited to help you find the perfect home.
 
@@ -637,43 +637,43 @@ Looking forward to helping you find home!
 
 Warmly,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- New Lead 3: Quick Response Text -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Quick Lead Response</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-lead">Lead</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Hi [Name]! Thanks for reaching out. I'd love to help you with your home search. When would be a good time for a quick call this week? I have availability [Day/Time]. Looking forward to connecting!</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- New Lead 4: Listing Inquiry Response -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Listing Inquiry Response</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-lead">Lead</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Information about [Property Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- New Lead 3: Quick Response Text -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Quick Lead Response</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-lead">Lead</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Hi [Name]! Thanks for reaching out. I'd love to help you with your home search. When would be a good time for a quick call this week? I have availability [Day/Time]. Looking forward to connecting!</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- New Lead 4: Listing Inquiry Response -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Listing Inquiry Response</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-lead">Lead</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Information about [Property Address]</div>
+ <div class="template-body">Hi [Name],
 
 Thank you for your interest in [Property Address]! This is a wonderful property and I'd be happy to provide you with more details.
 
@@ -689,25 +689,25 @@ I'm also happy to send you additional listings that match what you're looking fo
 
 Best regards,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- New Lead 5: Seller Inquiry -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Seller Consultation</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-lead">Lead</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Let's discuss selling your home</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- New Lead 5: Seller Inquiry -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Seller Consultation</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-lead">Lead</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Let's discuss selling your home</div>
+ <div class="template-body">Hi [Name],
 
 Thank you for considering me to help sell your home! I'd love to discuss how we can get you the best possible outcome.
 
@@ -725,30 +725,30 @@ Looking forward to working with you!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- FOLLOW-UP TEMPLATES -->
-    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Follow-Up</h3>
-    <div class="templates-grid">
-      
-      <!-- Follow-Up 1: Open House Follow-Up -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Open House Follow-Up</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-followup">Follow-Up</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Great seeing you at [Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- FOLLOW-UP TEMPLATES -->
+ <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Follow-Up</h3>
+ <div class="templates-grid">
+ 
+ <!-- Follow-Up 1: Open House Follow-Up -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Open House Follow-Up</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-followup">Follow-Up</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Great seeing you at [Address]</div>
+ <div class="template-body">Hi [Name],
 
 It was wonderful meeting you at the open house for [Address] yesterday!
 
@@ -760,43 +760,43 @@ Feel free to call or text me anytime.
 
 Warm regards,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Follow-Up 2: Showing Follow-Up -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">After Showing Check-In</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-followup">Follow-Up</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Hi [Name]! What did you think of [Address]? I'd love to hear your thoughts. Any questions or want to see it again? Let me know!</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Follow-Up 3: Monthly Nurture -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Monthly Check-In</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-followup">Follow-Up</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Checking in - how's the home search going?</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Follow-Up 2: Showing Follow-Up -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">After Showing Check-In</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-followup">Follow-Up</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Hi [Name]! What did you think of [Address]? I'd love to hear your thoughts. Any questions or want to see it again? Let me know!</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Follow-Up 3: Monthly Nurture -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Monthly Check-In</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-followup">Follow-Up</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Checking in - how's the home search going?</div>
+ <div class="template-body">Hi [Name],
 
 I hope you're doing well! I wanted to check in and see how your home search is going.
 
@@ -808,25 +808,25 @@ Looking forward to hearing from you!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Follow-Up 4: New Listing Alert -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">New Listing Alert</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-followup">Follow-Up</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: New listing that matches your criteria</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Follow-Up 4: New Listing Alert -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">New Listing Alert</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-followup">Follow-Up</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: New listing that matches your criteria</div>
+ <div class="template-body">Hi [Name],
 
 I just came across a property that I think you'll love!
 
@@ -840,25 +840,25 @@ Let me know!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Follow-Up 5: Re-engagement -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Re-engagement</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-followup">Follow-Up</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Still thinking about making a move?</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Follow-Up 5: Re-engagement -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Re-engagement</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-followup">Follow-Up</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Still thinking about making a move?</div>
+ <div class="template-body">Hi [Name],
 
 I hope this message finds you well! It's been a while since we last connected, and I wanted to reach out.
 
@@ -869,48 +869,48 @@ No pressure at all - just wanted you to know I'm here if you need anything.
 Wishing you all the best!
 
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- OFFER TEMPLATES -->
-    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Offer Stage</h3>
-    <div class="templates-grid">
-      
-      <!-- Offer 1: Offer Submitted -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Offer Submitted</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-offer">Offer</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Hi [Name]! Great news - your offer has been submitted for [Address]. The listing agent will review and we should hear back within 24-48 hours. I'll keep you updated every step of the way!</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Offer 2: Preparing Offer -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Preparing Your Offer</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-offer">Offer</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Next steps for [Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- OFFER TEMPLATES -->
+ <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Offer Stage</h3>
+ <div class="templates-grid">
+ 
+ <!-- Offer 1: Offer Submitted -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Offer Submitted</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-offer">Offer</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Hi [Name]! Great news - your offer has been submitted for [Address]. The listing agent will review and we should hear back within 24-48 hours. I'll keep you updated every step of the way!</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Offer 2: Preparing Offer -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Preparing Your Offer</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-offer">Offer</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Next steps for [Address]</div>
+ <div class="template-body">Hi [Name],
 
 I'm excited to help you submit an offer on [Address]! Let's make this as strong as possible.
 
@@ -928,25 +928,25 @@ Let me know if you have any questions!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Offer 3: Counter Offer Received -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Counter Offer Received</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-offer">Offer</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Counter offer on [Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Offer 3: Counter Offer Received -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Counter Offer Received</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-offer">Offer</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Counter offer on [Address]</div>
+ <div class="template-body">Hi [Name],
 
 We received a counter offer on [Address]! The sellers are interested and came back with the following terms:
 
@@ -960,43 +960,43 @@ I'd like to discuss our options. When are you available for a call today?
 
 Talk soon,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Offer 4: Offer Accepted -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Offer Accepted!</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-offer">Offer</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">AMAZING NEWS! Your offer on [Address] has been accepted! Congratulations! Let's schedule a call to go over the next steps. When are you free today?</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Offer 5: Offer Declined -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Offer Not Accepted</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-offer">Offer</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Update on [Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Offer 4: Offer Accepted -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Offer Accepted!</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-offer">Offer</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">AMAZING NEWS! Your offer on [Address] has been accepted! Congratulations! Let's schedule a call to go over the next steps. When are you free today?</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Offer 5: Offer Declined -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Offer Not Accepted</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-offer">Offer</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Update on [Address]</div>
+ <div class="template-body">Hi [Name],
 
 I wanted to let you know that the seller accepted another offer on [Address].
 
@@ -1010,30 +1010,30 @@ We'll find your home - I promise.
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- UNDER CONTRACT TEMPLATES -->
-    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Under Contract</h3>
-    <div class="templates-grid">
-      
-      <!-- Contract 1: Under Contract Congratulations -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Under Contract Congrats</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-contract">Contract</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Congratulations! You're under contract!</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- UNDER CONTRACT TEMPLATES -->
+ <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Under Contract</h3>
+ <div class="templates-grid">
+ 
+ <!-- Contract 1: Under Contract Congratulations -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Under Contract Congrats</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-contract">Contract</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Congratulations! You're under contract!</div>
+ <div class="template-body">Hi [Name],
 
 Congratulations! Your offer has been accepted and we're officially under contract!
 
@@ -1047,43 +1047,43 @@ I'll be with you every step of the way to ensure a smooth closing. Let me know i
 
 Excited for you!
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Contract 2: Inspection Reminder -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Inspection Reminder</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-contract">Contract</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Hi [Name]! Reminder: Your home inspection is scheduled for [Date] at [Time] at [Address]. The inspector will be there about 2-3 hours. Feel free to attend if you'd like! Let me know if you have questions.</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Contract 3: Inspection Results -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Inspection Results</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-contract">Contract</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Your inspection report is ready</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Contract 2: Inspection Reminder -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Inspection Reminder</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-contract">Contract</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Hi [Name]! Reminder: Your home inspection is scheduled for [Date] at [Time] at [Address]. The inspector will be there about 2-3 hours. Feel free to attend if you'd like! Let me know if you have questions.</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Contract 3: Inspection Results -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Inspection Results</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-contract">Contract</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Your inspection report is ready</div>
+ <div class="template-body">Hi [Name],
 
 I've received your inspection report for [Address] and wanted to review the findings with you.
 
@@ -1100,43 +1100,43 @@ When are you available to talk?
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Contract 4: Appraisal Update -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Appraisal Update</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-contract">Contract</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Great news [Name]! The appraisal came in at $[Amount], right at our purchase price. We're one step closer to closing! Everything is moving smoothly.</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Contract 5: Final Walkthrough Scheduled -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Final Walkthrough</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-contract">Contract</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Final walkthrough scheduled for [Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Contract 4: Appraisal Update -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Appraisal Update</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-contract">Contract</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Great news [Name]! The appraisal came in at $[Amount], right at our purchase price. We're one step closer to closing! Everything is moving smoothly.</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Contract 5: Final Walkthrough Scheduled -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Final Walkthrough</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-contract">Contract</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Final walkthrough scheduled for [Address]</div>
+ <div class="template-body">Hi [Name],
 
 We're almost there! Your final walkthrough is scheduled for [Date] at [Time].
 
@@ -1152,30 +1152,30 @@ After this, we close the next day!
 
 See you soon,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- CLOSING TEMPLATES -->
-    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Closing</h3>
-    <div class="templates-grid">
-      
-      <!-- Closing 1: Closing Day Message -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Closing Day Message</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-closing">Closing</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Today's the day! Welcome home!</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- CLOSING TEMPLATES -->
+ <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Closing</h3>
+ <div class="templates-grid">
+ 
+ <!-- Closing 1: Closing Day Message -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Closing Day Message</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-closing">Closing</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Today's the day! Welcome home!</div>
+ <div class="template-body">Hi [Name],
 
 Today's the big day - CLOSING DAY!
 
@@ -1187,43 +1187,43 @@ Congratulations on your new home! This is such an exciting milestone.
 
 See you soon!
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Closing 2: Clear to Close -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Clear to Close</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-closing">Closing</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">FANTASTIC NEWS [Name]! You're officially clear to close! The lender has approved everything and we're good to go for closing on [Date]. Almost there!</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Closing 3: Closing Instructions -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Closing Instructions</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-closing">Closing</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Your closing details for [Address]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Closing 2: Clear to Close -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Clear to Close</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-closing">Closing</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">FANTASTIC NEWS [Name]! You're officially clear to close! The lender has approved everything and we're good to go for closing on [Date]. Almost there!</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Closing 3: Closing Instructions -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Closing Instructions</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-closing">Closing</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Your closing details for [Address]</div>
+ <div class="template-body">Hi [Name],
 
 Your closing is all set! Here are the details:
 
@@ -1243,25 +1243,25 @@ Please arrive 10 minutes early. I'll meet you there and walk you through everyth
 So excited for you!
 
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Closing 4: Congratulations Post-Closing -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Post-Closing Congrats</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-closing">Closing</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Welcome home!</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Closing 4: Congratulations Post-Closing -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Post-Closing Congrats</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-closing">Closing</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Welcome home!</div>
+ <div class="template-body">Hi [Name],
 
 CONGRATULATIONS! You are now officially a homeowner!
 
@@ -1281,25 +1281,25 @@ Congratulations again!
 
 With gratitude,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- Closing 5: Anniversary Check-In -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Home Anniversary</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-closing">Closing</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Happy 1-year home anniversary!</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- Closing 5: Anniversary Check-In -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Home Anniversary</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-closing">Closing</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Happy 1-year home anniversary!</div>
+ <div class="template-body">Hi [Name],
 
 I can't believe it's been a year since you closed on [Address]! Time flies!
 
@@ -1313,47 +1313,47 @@ Wishing you many more happy years in your home!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- GENERAL TEMPLATES -->
-    <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">General</h3>
-    <div class="templates-grid">
-      <!-- General 1: Showing Confirmation -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Showing Confirmed</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-general">General</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Hi [Name]! Your showing is confirmed for [Date] at [Time] at [Address]. I'll meet you there 5 minutes early. See you soon!</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- General 2: Referral Thank You -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Referral Thank You</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-general">General</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Thank you for the referral!</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- GENERAL TEMPLATES -->
+ <h3 style="font-size: 1.125rem; color: var(--olive-green); margin: 2rem 0 1rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">General</h3>
+ <div class="templates-grid">
+ <!-- General 1: Showing Confirmation -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Showing Confirmed</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-general">General</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Hi [Name]! Your showing is confirmed for [Date] at [Time] at [Address]. I'll meet you there 5 minutes early. See you soon!</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- General 2: Referral Thank You -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Referral Thank You</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-general">General</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Thank you for the referral!</div>
+ <div class="template-body">Hi [Name],
 
 Thank you so much for referring [Referral Name] to me! I truly appreciate your trust and confidence.
 
@@ -1363,43 +1363,43 @@ Your support means the world to me!
 
 Gratefully,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- General 3: Schedule Change -->
-      <div class="template-card" data-channel="sms">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Schedule Change</div>
-            <div class="template-badges">
-              <span class="template-badge badge-text">Text</span>
-              <span class="template-badge badge-general">General</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-body">Hi [Name], I need to reschedule our [appointment/showing] originally set for [Date/Time]. Are you available [New Date] at [New Time] instead? Sorry for the change!</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- General 4: Market Update -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Market Update</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-general">General</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: [Month] market update for [Area]</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- General 3: Schedule Change -->
+ <div class="template-card" data-channel="sms">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Schedule Change</div>
+ <div class="template-badges">
+ <span class="template-badge badge-text">Text</span>
+ <span class="template-badge badge-general">General</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-body">Hi [Name], I need to reschedule our [appointment/showing] originally set for [Date/Time]. Are you available [New Date] at [New Time] instead? Sorry for the change!</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- General 4: Market Update -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Market Update</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-general">General</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: [Month] market update for [Area]</div>
+ <div class="template-body">Hi [Name],
 
 I wanted to share a quick market update for [Area] this month:
 
@@ -1416,25 +1416,25 @@ Stay informed!
 
 Best,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-      
-      <!-- General 5: Birthday/Holiday Greeting -->
-      <div class="template-card" data-channel="email">
-        <div class="template-header">
-          <div style="flex: 1;">
-            <div class="template-title">Special Occasion</div>
-            <div class="template-badges">
-              <span class="template-badge badge-email">Email</span>
-              <span class="template-badge badge-general">General</span>
-            </div>
-          </div>
-        </div>
-        <div class="template-subject">Subject: Happy [Birthday/Holiday], [Name]!</div>
-        <div class="template-body">Hi [Name],
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ 
+ <!-- General 5: Birthday/Holiday Greeting -->
+ <div class="template-card" data-channel="email">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">Special Occasion</div>
+ <div class="template-badges">
+ <span class="template-badge badge-email">Email</span>
+ <span class="template-badge badge-general">General</span>
+ </div>
+ </div>
+ </div>
+ <div class="template-subject">Subject: Happy [Birthday/Holiday], [Name]!</div>
+ <div class="template-body">Hi [Name],
 
 Just wanted to take a moment to wish you a very happy [birthday/holiday]! I hope you have a wonderful day filled with joy and celebration.
 
@@ -1444,315 +1444,315 @@ If there's anything I can do for you, please don't hesitate to reach out.
 
 Warmest wishes,
 [Your Name]</div>
-        <div class="template-actions">
-          <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-          <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Create Custom Template -->
-  <div class="comms-card">
-    <h2>Create Custom Template</h2>
-    <form method="post" class="comms-form">
-      <div class="form-group">
-        <label for="label" class="form-label">Label</label>
-        <input id="label" name="label" class="form-input" placeholder="Example: New lead welcome" required />
-      </div>
-      
-      <div class="form-group">
-        <label for="category" class="form-label">Category</label>
-        <select id="category" name="category" class="form-select">
-          <option value="lead">Lead</option>
-          <option value="offer">Offer</option>
-          <option value="contract">Under Contract</option>
-          <option value="closing">Closing</option>
-          <option value="followup">Follow Up</option>
-          <option value="general">General</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="channel" class="form-label">Channel</label>
-        <select id="channel" name="channel" class="form-select">
-          <option value="email">Email</option>
-          <option value="text">Text</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="subject" class="form-label">Subject (for email)</label>
-        <input id="subject" name="subject" class="form-input" placeholder="Optional for text messages" />
-      </div>
-      
-      <div class="form-group full-width">
-        <label for="body" class="form-label">Body</label>
-        <textarea id="body" name="body" class="form-textarea" rows="8" placeholder="Your message template here..." required></textarea>
-      </div>
-      
-      <div class="form-group full-width">
-        <button class="btn-primary" type="submit">Save Template</button>
-      </div>
-    </form>
-  </div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ </div>
+ </div>
+ 
+ <!-- Create Custom Template -->
+ <div class="comms-card">
+ <h2>Create Custom Template</h2>
+ <form method="post" class="comms-form">
+ <div class="form-group">
+ <label for="label" class="form-label">Label</label>
+ <input id="label" name="label" class="form-input" placeholder="Example: New lead welcome" required />
+ </div>
+ 
+ <div class="form-group">
+ <label for="category" class="form-label">Category</label>
+ <select id="category" name="category" class="form-select">
+ <option value="lead">Lead</option>
+ <option value="offer">Offer</option>
+ <option value="contract">Under Contract</option>
+ <option value="closing">Closing</option>
+ <option value="followup">Follow Up</option>
+ <option value="general">General</option>
+ </select>
+ </div>
+ 
+ <div class="form-group">
+ <label for="channel" class="form-label">Channel</label>
+ <select id="channel" name="channel" class="form-select">
+ <option value="email">Email</option>
+ <option value="text">Text</option>
+ </select>
+ </div>
+ 
+ <div class="form-group">
+ <label for="subject" class="form-label">Subject (for email)</label>
+ <input id="subject" name="subject" class="form-input" placeholder="Optional for text messages" />
+ </div>
+ 
+ <div class="form-group full-width">
+ <label for="body" class="form-label">Body</label>
+ <textarea id="body" name="body" class="form-textarea" rows="8" placeholder="Your message template here..." required></textarea>
+ </div>
+ 
+ <div class="form-group full-width">
+ <button class="btn-primary" type="submit">Save Template</button>
+ </div>
+ </form>
+ </div>
 
-  <!-- Your Saved Templates -->
-  <div class="comms-card">
-    <h2>Your Saved Templates</h2>
+ <!-- Your Saved Templates -->
+ <div class="comms-card">
+ <h2>Your Saved Templates</h2>
 
-    {% if templates %}
-      <div class="templates-grid">
-        {% for t in templates %}
-          <div class="template-card">
-            <div class="template-header">
-              <div style="flex: 1;">
-                <div class="template-title">{{ t.label }}</div>
-                <div class="template-badges">
-                  <span class="template-badge badge-{{ t.channel }}">{{ t.channel|capitalize }}</span>
-                  <span class="template-badge badge-{{ t.category }}">{{ t.category|capitalize }}</span>
-                </div>
-              </div>
-            </div>
-            {% if t.subject %}
-              <div class="template-subject">Subject: {{ t.subject }}</div>
-            {% endif %}
-            <div class="template-body">{{ t.body }}</div>
-            <div class="template-actions">
-              <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
-              <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">✉</div>
-        <h3>No Custom Templates Yet</h3>
-        <p>When you are ready, create a template above or start with one of the professional ones to the right.</p>
-      </div>
-    {% endif %}
-  </div>
+ {% if templates %}
+ <div class="templates-grid">
+ {% for t in templates %}
+ <div class="template-card">
+ <div class="template-header">
+ <div style="flex: 1;">
+ <div class="template-title">{{ t.label }}</div>
+ <div class="template-badges">
+ <span class="template-badge badge-{{ t.channel }}">{{ t.channel|capitalize }}</span>
+ <span class="template-badge badge-{{ t.category }}">{{ t.category|capitalize }}</span>
+ </div>
+ </div>
+ </div>
+ {% if t.subject %}
+ <div class="template-subject">Subject: {{ t.subject }}</div>
+ {% endif %}
+ <div class="template-body">{{ t.body }}</div>
+ <div class="template-actions">
+ <button class="btn-template btn-use" onclick="useTemplate(this)">Use Template</button>
+ <button class="btn-template btn-copy" onclick="copyToClipboard(this)">Copy</button>
+ </div>
+ </div>
+ {% endfor %}
+ </div>
+ {% else %}
+ <div class="empty-state">
+ <div class="empty-icon"></div>
+ <h3>No Custom Templates Yet</h3>
+ <p>When you are ready, create a template above or start with one of the professional ones to the right.</p>
+ </div>
+ {% endif %}
+ </div>
 </div>
 
 <script>
 // Copy template to clipboard
 function copyToClipboard(button) {
-  const card = button.closest('.template-card');
-  const subject = card.querySelector('.template-subject');
-  const body = card.querySelector('.template-body');
-  
-  let text = '';
-  if (subject) {
-    text += subject.textContent.replace('Subject: ', '') + '\n\n';
-  }
-  text += body.textContent.trim();
-  
-  navigator.clipboard.writeText(text).then(() => {
-    const originalText = button.textContent;
-    button.textContent = 'Copied!';
-    button.style.background = '#4caf50';
-    button.style.borderColor = '#4caf50';
-    button.style.color = 'white';
-    
-    setTimeout(() => {
-      button.textContent = originalText;
-      button.style.background = '';
-      button.style.borderColor = '';
-      button.style.color = '';
-    }, 2000);
-  }).catch(err => {
-    alert('Failed to copy to clipboard');
-    console.error('Copy error:', err);
-  });
+ const card = button.closest('.template-card');
+ const subject = card.querySelector('.template-subject');
+ const body = card.querySelector('.template-body');
+ 
+ let text = '';
+ if (subject) {
+ text += subject.textContent.replace('Subject: ', '') + '\n\n';
+ }
+ text += body.textContent.trim();
+ 
+ navigator.clipboard.writeText(text).then(() => {
+ const originalText = button.textContent;
+ button.textContent = 'Copied!';
+ button.style.background = '#4caf50';
+ button.style.borderColor = '#4caf50';
+ button.style.color = 'white';
+ 
+ setTimeout(() => {
+ button.textContent = originalText;
+ button.style.background = '';
+ button.style.borderColor = '';
+ button.style.color = '';
+ }, 2000);
+ }).catch(err => {
+ alert('Failed to copy to clipboard');
+ console.error('Copy error:', err);
+ });
 }
 
 // Open send modal with template pre-filled
 function useTemplate(button) {
-  const card = button.closest('.template-card');
-  const subject = card.querySelector('.template-subject');
-  const body = card.querySelector('.template-body');
-  const channel = card.getAttribute('data-channel') || 'email';
-  
-  // Get the modal and form elements
-  const modal = document.getElementById('sendModal');
-  const subjectField = document.getElementById('message_subject');
-  const bodyField = document.getElementById('message_body');
-  const channelRadios = document.querySelectorAll('input[name="channel"]');
-  
-  // Set channel
-  channelRadios.forEach(radio => {
-    radio.checked = (radio.value === channel);
-  });
-  
-  // Pre-fill subject (if exists)
-  if (subject && subjectField) {
-    subjectField.value = subject.textContent.replace('Subject: ', '').trim();
-  } else if (subjectField) {
-    subjectField.value = '';
-  }
-  
-  // Pre-fill body
-  if (bodyField) {
-    bodyField.value = body.textContent.trim();
-  }
-  
-  // Toggle subject field visibility
-  toggleSubjectField();
-  
-  // Show modal
-  modal.style.display = 'flex';
-  
-  // Focus on recipient name field
-  setTimeout(() => {
-    document.getElementById('recipient_name').focus();
-  }, 100);
+ const card = button.closest('.template-card');
+ const subject = card.querySelector('.template-subject');
+ const body = card.querySelector('.template-body');
+ const channel = card.getAttribute('data-channel') || 'email';
+ 
+ // Get the modal and form elements
+ const modal = document.getElementById('sendModal');
+ const subjectField = document.getElementById('message_subject');
+ const bodyField = document.getElementById('message_body');
+ const channelRadios = document.querySelectorAll('input[name="channel"]');
+ 
+ // Set channel
+ channelRadios.forEach(radio => {
+ radio.checked = (radio.value === channel);
+ });
+ 
+ // Pre-fill subject (if exists)
+ if (subject && subjectField) {
+ subjectField.value = subject.textContent.replace('Subject: ', '').trim();
+ } else if (subjectField) {
+ subjectField.value = '';
+ }
+ 
+ // Pre-fill body
+ if (bodyField) {
+ bodyField.value = body.textContent.trim();
+ }
+ 
+ // Toggle subject field visibility
+ toggleSubjectField();
+ 
+ // Show modal
+ modal.style.display = 'flex';
+ 
+ // Focus on recipient name field
+ setTimeout(() => {
+ document.getElementById('recipient_name').focus();
+ }, 100);
 }
 
 // Close send modal
 function closeSendModal() {
-  const modal = document.getElementById('sendModal');
-  modal.style.display = 'none';
+ const modal = document.getElementById('sendModal');
+ modal.style.display = 'none';
 }
 
 // Toggle subject field based on channel
 function toggleSubjectField() {
-  const channelRadios = document.querySelectorAll('input[name="channel"]');
-  const subjectField = document.getElementById('subject-field');
-  const subjectInput = document.getElementById('message_subject');
-  
-  let selectedChannel = 'email';
-  channelRadios.forEach(radio => {
-    if (radio.checked) selectedChannel = radio.value;
-  });
-  
-  if (selectedChannel === 'sms') {
-    subjectField.style.display = 'none';
-    subjectInput.removeAttribute('required');
-  } else {
-    subjectField.style.display = 'flex';
-    subjectInput.setAttribute('required', 'required');
-  }
+ const channelRadios = document.querySelectorAll('input[name="channel"]');
+ const subjectField = document.getElementById('subject-field');
+ const subjectInput = document.getElementById('message_subject');
+ 
+ let selectedChannel = 'email';
+ channelRadios.forEach(radio => {
+ if (radio.checked) selectedChannel = radio.value;
+ });
+ 
+ if (selectedChannel === 'sms') {
+ subjectField.style.display = 'none';
+ subjectInput.removeAttribute('required');
+ } else {
+ subjectField.style.display = 'flex';
+ subjectInput.setAttribute('required', 'required');
+ }
 }
 
 // Close modal when clicking outside
 document.addEventListener('DOMContentLoaded', function() {
-  const modal = document.getElementById('sendModal');
-  if (modal) {
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        closeSendModal();
-      }
-    });
-  }
-  
-  // Handle form submission
-  const sendForm = document.getElementById('sendForm');
-  if (sendForm) {
-    sendForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      // Get form data
-      const formData = new FormData(sendForm);
-      const data = {
-        channel: formData.get('channel'),
-        recipient_name: formData.get('recipient_name'),
-        recipient_contact: formData.get('recipient_contact'),
-        subject: formData.get('subject'),
-        body: formData.get('body')
-      };
-      
-      // Here you would normally send this to your backend
-      // For now, we'll show a success message
-      console.log('Sending message:', data);
-      
-      // Show success message
-      alert(`Message ${data.channel === 'email' ? 'email' : 'text'} prepared for ${data.recipient_name}!\n\n(This would send via your integrated email/SMS system)`);
-      
-      // Close modal and reset form
-      closeSendModal();
-      sendForm.reset();
-    });
-  }
+ const modal = document.getElementById('sendModal');
+ if (modal) {
+ modal.addEventListener('click', function(e) {
+ if (e.target === modal) {
+ closeSendModal();
+ }
+ });
+ }
+ 
+ // Handle form submission
+ const sendForm = document.getElementById('sendForm');
+ if (sendForm) {
+ sendForm.addEventListener('submit', function(e) {
+ e.preventDefault();
+ 
+ // Get form data
+ const formData = new FormData(sendForm);
+ const data = {
+ channel: formData.get('channel'),
+ recipient_name: formData.get('recipient_name'),
+ recipient_contact: formData.get('recipient_contact'),
+ subject: formData.get('subject'),
+ body: formData.get('body')
+ };
+ 
+ // Here you would normally send this to your backend
+ // For now, we'll show a success message
+ console.log('Sending message:', data);
+ 
+ // Show success message
+ alert(`Message ${data.channel === 'email' ? 'email' : 'text'} prepared for ${data.recipient_name}!\n\n(This would send via your integrated email/SMS system)`);
+ 
+ // Close modal and reset form
+ closeSendModal();
+ sendForm.reset();
+ });
+ }
 });
 
 // Close modal with Escape key
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') {
-    const modal = document.getElementById('sendModal');
-    if (modal && modal.style.display === 'flex') {
-      closeSendModal();
-    }
-  }
+ if (e.key === 'Escape') {
+ const modal = document.getElementById('sendModal');
+ if (modal && modal.style.display === 'flex') {
+ closeSendModal();
+ }
+ }
 });
 
 /* ─── AI FEATURES ─────────────────────────────── */
 
-// Add "✨ AI Personalize" button to every template card
+// Add " AI Personalize" button to every template card
 document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.template-card').forEach(function(card) {
-    var actions = card.querySelector('.template-actions');
-    if (!actions) return;
-    var btn = document.createElement('button');
-    btn.className = 'btn-template';
-    btn.style.cssText = 'background:#6B6A45!important;color:#fff!important;border-color:#6B6A45!important;';
-    btn.textContent = '✨ Personalize';
-    btn.onclick = function(){ aiPersonalizeCard(card, btn); };
-    actions.appendChild(btn);
-  });
+ document.querySelectorAll('.template-card').forEach(function(card) {
+ var actions = card.querySelector('.template-actions');
+ if (!actions) return;
+ var btn = document.createElement('button');
+ btn.className = 'btn-template';
+ btn.style.cssText = 'background:#6B5B4D!important;color:#fff!important;border-color:#6B5B4D!important;';
+ btn.textContent = ' Personalize';
+ btn.onclick = function(){ aiPersonalizeCard(card, btn); };
+ actions.appendChild(btn);
+ });
 });
 
 function aiPersonalizeCard(card, btn) {
-  var bodyEl = card.querySelector('.template-body');
-  if (!bodyEl) return;
-  var templateText = bodyEl.textContent.trim();
-  var recipientName = document.getElementById('recipient_name') ? document.getElementById('recipient_name').value.trim() : '';
-  var contactName = recipientName || prompt('Personalize for which contact? (Enter their name)');
-  if (!contactName) return;
-  var origText = btn.textContent;
-  btn.textContent = '…thinking';
-  btn.disabled = true;
-  fetch('/api/ai/communications/personalize', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({template_text: templateText, contact_name: contactName, context: ''})
-  }).then(function(r){ return r.json(); }).then(function(d) {
-    if (d.personalized) {
-      bodyEl.textContent = d.personalized;
-      btn.textContent = '✓ Done';
-      setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
-    } else {
-      btn.textContent = origText; btn.disabled = false;
-      alert('AI could not personalize this template right now.');
-    }
-  }).catch(function(){
-    btn.textContent = origText; btn.disabled = false;
-    alert('AI unavailable. Please try again.');
-  });
+ var bodyEl = card.querySelector('.template-body');
+ if (!bodyEl) return;
+ var templateText = bodyEl.textContent.trim();
+ var recipientName = document.getElementById('recipient_name') ? document.getElementById('recipient_name').value.trim() : '';
+ var contactName = recipientName || prompt('Personalize for which contact? (Enter their name)');
+ if (!contactName) return;
+ var origText = btn.textContent;
+ btn.textContent = '…thinking';
+ btn.disabled = true;
+ fetch('/api/ai/communications/personalize', {
+ method: 'POST',
+ headers: {'Content-Type': 'application/json'},
+ body: JSON.stringify({template_text: templateText, contact_name: contactName, context: ''})
+ }).then(function(r){ return r.json(); }).then(function(d) {
+ if (d.personalized) {
+ bodyEl.textContent = d.personalized;
+ btn.textContent = ' Done';
+ setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
+ } else {
+ btn.textContent = origText; btn.disabled = false;
+ alert('AI could not personalize this template right now.');
+ }
+ }).catch(function(){
+ btn.textContent = origText; btn.disabled = false;
+ alert('AI unavailable. Please try again.');
+ });
 }
 
 function aiWriteForMe() {
-  var recipientName = (document.getElementById('recipient_name') || {}).value || '';
-  if (!recipientName.trim()) {
-    document.getElementById('recipient_name').focus();
-    document.getElementById('ai-comms-status').textContent = 'Enter recipient name first.';
-    return;
-  }
-  var statusEl = document.getElementById('ai-comms-status');
-  statusEl.textContent = '✨ Drafting…';
-  fetch('/api/ai/crm/draft-email', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({contact_name: recipientName, contact_stage: 'contacted', notes: '', context: 'general outreach'})
-  }).then(function(r){ return r.json(); }).then(function(d) {
-    var body = document.getElementById('message_body');
-    if (body) body.value = d.email || d.error || '';
-    statusEl.textContent = d.email ? '✓ Draft ready — review and edit before sending.' : 'Could not draft.';
-    setTimeout(function(){ statusEl.textContent = ''; }, 6000);
-  }).catch(function(){
-    statusEl.textContent = 'AI unavailable.';
-    setTimeout(function(){ statusEl.textContent = ''; }, 4000);
-  });
+ var recipientName = (document.getElementById('recipient_name') || {}).value || '';
+ if (!recipientName.trim()) {
+ document.getElementById('recipient_name').focus();
+ document.getElementById('ai-comms-status').textContent = 'Enter recipient name first.';
+ return;
+ }
+ var statusEl = document.getElementById('ai-comms-status');
+ statusEl.textContent = ' Drafting…';
+ fetch('/api/ai/crm/draft-email', {
+ method: 'POST',
+ headers: {'Content-Type': 'application/json'},
+ body: JSON.stringify({contact_name: recipientName, contact_stage: 'contacted', notes: '', context: 'general outreach'})
+ }).then(function(r){ return r.json(); }).then(function(d) {
+ var body = document.getElementById('message_body');
+ if (body) body.value = d.email || d.error || '';
+ statusEl.textContent = d.email ? ' Draft ready — review and edit before sending.' : 'Could not draft.';
+ setTimeout(function(){ statusEl.textContent = ''; }, 6000);
+ }).catch(function(){
+ statusEl.textContent = 'AI unavailable.';
+ setTimeout(function(){ statusEl.textContent = ''; }, 4000);
+ });
 }
 </script>
 

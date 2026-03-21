@@ -2,417 +2,417 @@
 
 {% block homeowner_content %}
 <style>
-  /* ========================================
-     PREMIUM PRINT LAYOUT - Legal Paper
-     8.5" × 14" Optimized for High-End Output
-     ======================================== */
+ /* ========================================
+ PREMIUM PRINT LAYOUT - Legal Paper
+ 8.5" × 14" Optimized for High-End Output
+ ======================================== */
 
-  body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Georgia', 'Playfair Display', serif;
-    color: #3A352C;
-  }
+ body, html {
+ margin: 0;
+ padding: 0;
+ font-family: 'Georgia', 'Playfair Display', serif;
+ color: #3D2E24;
+ }
 
-  /* Print Button - Visible on screen, hidden when printing */
-  .print-button-container {
-    text-align: right;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #E5DDD0;
-  }
+ /* Print Button - Visible on screen, hidden when printing */
+ .print-button-container {
+ text-align: right;
+ margin-bottom: 1.5rem;
+ padding-bottom: 1rem;
+ border-bottom: 1px solid #E5DDD0;
+ }
 
-  .print-button {
-    background: #6B6A45;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: 'Playfair Display', Georgia, serif;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+ .print-button {
+ background: #6B5B4D;
+ color: white;
+ border: none;
+ padding: 0.75rem 1.5rem;
+ border-radius: 6px;
+ font-size: 1rem;
+ font-weight: 600;
+ cursor: pointer;
+ transition: all 0.2s ease;
+ font-family: 'Playfair Display', Georgia, serif;
+ display: flex;
+ align-items: center;
+ gap: 0.5rem;
+ }
 
-  .print-button:hover {
-    background: #5a5939;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  }
+ .print-button:hover {
+ background: #5a5939;
+ transform: translateY(-1px);
+ box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+ }
 
-  .print-button:active {
-    transform: translateY(0);
-  }
+ .print-button:active {
+ transform: translateY(0);
+ }
 
-  .print-container {
-    max-width: 8.5in;
-    margin: 0 auto;
-    padding: 0.5in;
-    background: white;
-  }
+ .print-container {
+ max-width: 8.5in;
+ margin: 0 auto;
+ padding: 0.5in;
+ background: white;
+ }
 
-  /* Header */
-  .print-header {
-    text-align: center;
-    margin-bottom: 0.35in;
-    padding-bottom: 0.25in;
-    border-bottom: 2px solid #E5DDD0;
-  }
+ /* Header */
+ .print-header {
+ text-align: center;
+ margin-bottom: 0.35in;
+ padding-bottom: 0.25in;
+ border-bottom: 2px solid #E5DDD0;
+ }
 
-  .print-title {
-    font-size: 2.2rem;
-    margin: 0 0 0.15in;
-    color: #3A352C;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    font-family: 'Playfair Display', Georgia, serif;
-  }
+ .print-title {
+ font-size: 2.2rem;
+ margin: 0 0 0.15in;
+ color: #3D2E24;
+ font-weight: 400;
+ letter-spacing: -0.01em;
+ font-family: 'Playfair Display', Georgia, serif;
+ }
 
-  .print-vision {
-    font-size: 1rem;
-    color: #6B6A45;
-    font-style: italic;
-    margin: 0;
-    line-height: 1.5;
-    font-weight: 300;
-  }
+ .print-vision {
+ font-size: 1rem;
+ color: #6B5B4D;
+ font-style: italic;
+ margin: 0;
+ line-height: 1.5;
+ font-weight: 300;
+ }
 
-  /* Photo Grid - Optimized for Legal Paper */
-  .print-gallery {
-    margin-bottom: 0.3in;
-  }
+ /* Photo Grid - Optimized for Legal Paper */
+ .print-gallery {
+ margin-bottom: 0.3in;
+ }
 
-  .print-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.15in;
-    align-items: start;
-  }
+ .print-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 0.15in;
+ align-items: start;
+ }
 
-  .print-photo {
-    width: 100%;
-    height: auto;
-    max-height: 2.2in;
-    object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    display: block;
-    margin: 0;
-    padding: 0;
-    vertical-align: bottom;
-    background: #fafafa;
-  }
+ .print-photo {
+ width: 100%;
+ height: auto;
+ max-height: 2.2in;
+ object-fit: contain;
+ border-radius: 4px;
+ box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+ display: block;
+ margin: 0;
+ padding: 0;
+ vertical-align: bottom;
+ background: #fafafa;
+ }
 
-  /* Color Palette */
-  .print-colors {
-    display: flex;
-    justify-content: center;
-    gap: 0.2in;
-    margin: 0.3in 0 0.5in 0;
-    padding: 0.2in 0 0.35in 0;
-    border-top: 1px solid #E5DDD0;
-    border-bottom: 1px solid #E5DDD0;
-    position: relative;
-  }
+ /* Color Palette */
+ .print-colors {
+ display: flex;
+ justify-content: center;
+ gap: 0.2in;
+ margin: 0.3in 0 0.5in 0;
+ padding: 0.2in 0 0.35in 0;
+ border-top: 1px solid #E5DDD0;
+ border-bottom: 1px solid #E5DDD0;
+ position: relative;
+ }
 
-  .print-color-swatch {
-    width: 0.9in;
-    height: 0.9in;
-    border-radius: 50%;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    position: relative;
-    border: 2px solid white;
-    margin-bottom: 0.1in;
-  }
+ .print-color-swatch {
+ width: 0.9in;
+ height: 0.9in;
+ border-radius: 50%;
+ box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+ position: relative;
+ border: 2px solid white;
+ margin-bottom: 0.1in;
+ }
 
-  .print-color-hex {
-    position: absolute;
-    bottom: -0.4in;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.65rem;
-    color: #6B6A45;
-    font-weight: 500;
-    white-space: nowrap;
-    font-family: 'Playfair Display', Georgia, serif;
-    font-style: italic;
-    margin-top: 0.05in;
-  }
+ .print-color-hex {
+ position: absolute;
+ bottom: -0.4in;
+ left: 50%;
+ transform: translateX(-50%);
+ font-size: 0.65rem;
+ color: #6B5B4D;
+ font-weight: 500;
+ white-space: nowrap;
+ font-family: 'Playfair Display', Georgia, serif;
+ font-style: italic;
+ margin-top: 0.05in;
+ }
 
-  /* Notes */
-  .print-notes {
-    margin-top: 0.4in;
-  }
+ /* Notes */
+ .print-notes {
+ margin-top: 0.4in;
+ }
 
-  .print-notes-title {
-    font-size: 1.3rem;
-    margin: 0 0 0.2in;
-    color: #3A352C;
-    font-weight: 500;
-  }
+ .print-notes-title {
+ font-size: 1.3rem;
+ margin: 0 0 0.2in;
+ color: #3D2E24;
+ font-weight: 500;
+ }
 
-  .print-note {
-    background: #FAFAF8;
-    border-left: 4px solid #B79F82;
-    padding: 0.2in;
-    margin-bottom: 0.15in;
-    border-radius: 6px;
-  }
+ .print-note {
+ background: #FAFAF8;
+ border-left: 4px solid #B79F82;
+ padding: 0.2in;
+ margin-bottom: 0.15in;
+ border-radius: 6px;
+ }
 
-  .print-note-title {
-    font-size: 1rem;
-    margin: 0 0 0.1in;
-    color: #3A352C;
-    font-weight: 600;
-  }
+ .print-note-title {
+ font-size: 1rem;
+ margin: 0 0 0.1in;
+ color: #3D2E24;
+ font-weight: 600;
+ }
 
-  .print-note-content {
-    font-size: 0.9rem;
-    color: #555;
-    line-height: 1.5;
-    white-space: pre-wrap;
-  }
+ .print-note-content {
+ font-size: 0.9rem;
+ color: #555;
+ line-height: 1.5;
+ white-space: pre-wrap;
+ }
 
-  .print-note-date {
-    font-size: 0.75rem;
-    color: #999;
-    margin-top: 0.1in;
-  }
+ .print-note-date {
+ font-size: 0.75rem;
+ color: #999;
+ margin-top: 0.1in;
+ }
 
-  /* Footer */
-  .print-footer {
-    text-align: center;
-    margin-top: 0.35in;
-    padding-top: 0.25in;
-    border-top: 1px solid #E5DDD0;
-    font-size: 0.75rem;
-    color: #B8A89A;
-    font-style: italic;
-    font-family: 'Playfair Display', Georgia, serif;
-  }
+ /* Footer */
+ .print-footer {
+ text-align: center;
+ margin-top: 0.35in;
+ padding-top: 0.25in;
+ border-top: 1px solid #E5DDD0;
+ font-size: 0.75rem;
+ color: #B8A89A;
+ font-style: italic;
+ font-family: 'Playfair Display', Georgia, serif;
+ }
 
-  /* Board Details Section */
-  .print-details-section {
-    margin-top: 0.4in;
-    padding: 0.3in;
-    background: #FAFAF8;
-    border-left: 4px solid #B79F82;
-    border-radius: 6px;
-  }
+ /* Board Details Section */
+ .print-details-section {
+ margin-top: 0.4in;
+ padding: 0.3in;
+ background: #FAFAF8;
+ border-left: 4px solid #B79F82;
+ border-radius: 6px;
+ }
 
-  .print-details-title {
-    font-size: 1.2rem;
-    margin: 0 0 0.15in;
-    color: #3A352C;
-    font-weight: 600;
-  }
+ .print-details-title {
+ font-size: 1.2rem;
+ margin: 0 0 0.15in;
+ color: #3D2E24;
+ font-weight: 600;
+ }
 
-  .print-details-content {
-    font-size: 0.95rem;
-    color: #555;
-    line-height: 1.6;
-    white-space: pre-wrap;
-  }
+ .print-details-content {
+ font-size: 0.95rem;
+ color: #555;
+ line-height: 1.6;
+ white-space: pre-wrap;
+ }
 
-  /* Print-Specific Optimizations */
-  @media print {
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
+ /* Print-Specific Optimizations */
+ @media print {
+ * {
+ -webkit-print-color-adjust: exact !important;
+ print-color-adjust: exact !important;
+ color-adjust: exact !important;
+ }
 
-    @page {
-      size: letter landscape;
-      margin: 0.3in;
-    }
+ @page {
+ size: letter landscape;
+ margin: 0.3in;
+ }
 
-    body, html {
-      background: white !important;
-      width: 10.4in !important;
-    }
+ body, html {
+ background: white !important;
+ width: 10.4in !important;
+ }
 
-    .ylh-sidebar-nav,
-    [role="banner"],
-    nav,
-    .dashboard-main__header,
-    .print-button-container {
-      display: none !important;
-    }
+ .ylh-sidebar-nav,
+ [role="banner"],
+ nav,
+ .dashboard-main__header,
+ .print-button-container {
+ display: none !important;
+ }
 
-    .print-container {
-      padding: 0 !important;
-      max-width: 10.4in !important;
-    }
+ .print-container {
+ padding: 0 !important;
+ max-width: 10.4in !important;
+ }
 
-    .print-header {
-      margin-bottom: 0.3in !important;
-      padding-bottom: 0.2in !important;
-    }
+ .print-header {
+ margin-bottom: 0.3in !important;
+ padding-bottom: 0.2in !important;
+ }
 
-    .print-title {
-      font-size: 2rem !important;
-    }
+ .print-title {
+ font-size: 2rem !important;
+ }
 
-    .print-vision {
-      font-size: 0.9rem !important;
-    }
+ .print-vision {
+ font-size: 0.9rem !important;
+ }
 
-    .print-grid {
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 0.12in !important;
-    }
+ .print-grid {
+ grid-template-columns: repeat(3, 1fr) !important;
+ gap: 0.12in !important;
+ }
 
-    .print-photo {
-      height: auto !important;
-      max-height: 2in !important;
-      object-fit: contain !important;
-      page-break-inside: avoid;
-      margin: 0 !important;
-      padding: 0 !important;
-      vertical-align: bottom !important;
-    }
+ .print-photo {
+ height: auto !important;
+ max-height: 2in !important;
+ object-fit: contain !important;
+ page-break-inside: avoid;
+ margin: 0 !important;
+ padding: 0 !important;
+ vertical-align: bottom !important;
+ }
 
-    .print-note {
-      page-break-inside: avoid;
-    }
+ .print-note {
+ page-break-inside: avoid;
+ }
 
-    .print-colors {
-      page-break-inside: avoid;
-      gap: 0.1in !important;
-    }
+ .print-colors {
+ page-break-inside: avoid;
+ gap: 0.1in !important;
+ }
 
-    .print-color-swatch {
-      width: 0.8in !important;
-      height: 0.8in !important;
-    }
+ .print-color-swatch {
+ width: 0.8in !important;
+ height: 0.8in !important;
+ }
 
-    .print-notes {
-      margin-top: 0.25in !important;
-      padding-top: 0.2in !important;
-    }
+ .print-notes {
+ margin-top: 0.25in !important;
+ padding-top: 0.2in !important;
+ }
 
-    .print-notes-title {
-      font-size: 1rem !important;
-      margin-bottom: 0.12in !important;
-    }
+ .print-notes-title {
+ font-size: 1rem !important;
+ margin-bottom: 0.12in !important;
+ }
 
-    .print-note-content {
-      font-size: 0.85rem !important;
-      line-height: 1.6 !important;
-    }
+ .print-note-content {
+ font-size: 0.85rem !important;
+ line-height: 1.6 !important;
+ }
 
-    .print-details-section {
-      margin-top: 0.3in !important;
-      padding: 0.2in !important;
-    }
+ .print-details-section {
+ margin-top: 0.3in !important;
+ padding: 0.2in !important;
+ }
 
-    .print-details-content {
-      font-size: 0.85rem !important;
-    }
-  }
+ .print-details-content {
+ font-size: 0.85rem !important;
+ }
+ }
 </style>
 
 <div class="print-container">
-  <!-- Print Button -->
-  <div class="print-button-container">
-    <button class="print-button" onclick="window.print()">
-      🖨️ Print
-    </button>
-  </div>
+ <!-- Print Button -->
+ <div class="print-button-container">
+ <button class="print-button" onclick="window.print()">
+ Print
+ </button>
+ </div>
 
-  <!-- Header -->
-  <div class="print-header">
-    <h1 class="print-title">{{ selected_board }}</h1>
-    {% if selected_details.vision_statement %}
-      <p class="print-vision">"{{ selected_details.vision_statement }}"</p>
-    {% endif %}
-  </div>
+ <!-- Header -->
+ <div class="print-header">
+ <h1 class="print-title">{{ selected_board }}</h1>
+ {% if selected_details.vision_statement %}
+ <p class="print-vision">"{{ selected_details.vision_statement }}"</p>
+ {% endif %}
+ </div>
 
-  <!-- Photo Gallery -->
-  {% if selected_details.photos and selected_details.photos|length > 0 %}
-    <div class="print-gallery">
-      <div class="print-grid">
-        {% for photo in selected_details.photos %}
-          <img
-            src="{{ url_for('static', filename=photo) }}"
-            alt="Inspiration"
-            class="print-photo"
-          />
-        {% endfor %}
-        {% if selected_details.fixtures and selected_details.fixtures|length > 0 %}
-          {% for fixture in selected_details.fixtures %}
-            <img
-              src="{{ url_for('static', filename=fixture) }}"
-              alt="Fixture"
-              class="print-photo"
-            />
-          {% endfor %}
-        {% endif %}
-      </div>
-    </div>
-  {% elif selected_details.fixtures and selected_details.fixtures|length > 0 %}
-    <div class="print-gallery">
-      <div class="print-grid">
-        {% for fixture in selected_details.fixtures %}
-          <img
-            src="{{ url_for('static', filename=fixture) }}"
-            alt="Fixture"
-            class="print-photo"
-          />
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
+ <!-- Photo Gallery -->
+ {% if selected_details.photos and selected_details.photos|length > 0 %}
+ <div class="print-gallery">
+ <div class="print-grid">
+ {% for photo in selected_details.photos %}
+ <img
+ src="{{ url_for('static', filename=photo) }}"
+ alt="Inspiration"
+ class="print-photo"
+ />
+ {% endfor %}
+ {% if selected_details.fixtures and selected_details.fixtures|length > 0 %}
+ {% for fixture in selected_details.fixtures %}
+ <img
+ src="{{ url_for('static', filename=fixture) }}"
+ alt="Fixture"
+ class="print-photo"
+ />
+ {% endfor %}
+ {% endif %}
+ </div>
+ </div>
+ {% elif selected_details.fixtures and selected_details.fixtures|length > 0 %}
+ <div class="print-gallery">
+ <div class="print-grid">
+ {% for fixture in selected_details.fixtures %}
+ <img
+ src="{{ url_for('static', filename=fixture) }}"
+ alt="Fixture"
+ class="print-photo"
+ />
+ {% endfor %}
+ </div>
+ </div>
+ {% endif %}
 
-  <!-- Color Palette -->
-  {% if selected_details.color_palette and selected_details.color_palette|length > 0 %}
-    <div class="print-colors">
-      {% for color in selected_details.color_palette %}
-        <div class="print-color-swatch" style="background-color: {{ color }};">
-          <span class="print-color-hex">{{ hex_to_color_name(color) }}</span>
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+ <!-- Color Palette -->
+ {% if selected_details.color_palette and selected_details.color_palette|length > 0 %}
+ <div class="print-colors">
+ {% for color in selected_details.color_palette %}
+ <div class="print-color-swatch" style="background-color: {{ color }};">
+ <span class="print-color-hex">{{ hex_to_color_name(color) }}</span>
+ </div>
+ {% endfor %}
+ </div>
+ {% endif %}
 
-  <!-- Board Details (Cost, Dimensions, Notes, etc.) -->
-  {% if selected_details.details %}
-    <div class="print-notes">
-      <h2 class="print-notes-title">Project Details</h2>
-      <div class="print-note">
-        <div class="print-note-content">{{ selected_details.details }}</div>
-      </div>
-    </div>
-  {% endif %}
+ <!-- Board Details (Cost, Dimensions, Notes, etc.) -->
+ {% if selected_details.details %}
+ <div class="print-notes">
+ <h2 class="print-notes-title">Project Details</h2>
+ <div class="print-note">
+ <div class="print-note-content">{{ selected_details.details }}</div>
+ </div>
+ </div>
+ {% endif %}
 
 
-  <!-- Footer -->
-  <div class="print-footer">
-    ✨ Your Life • Your Home — Premium Mood Board Collection
-  </div>
+ <!-- Footer -->
+ <div class="print-footer">
+ Your Life • Your Home — Premium Mood Board Collection
+ </div>
 </div>
 
 </div>
 
 <script>
-  // Auto-focus print button for keyboard accessibility
-  document.addEventListener('DOMContentLoaded', function() {
-    const printButton = document.querySelector('.print-button');
-    if (printButton) {
-      // Optional: Add keyboard shortcut (Ctrl+P or Cmd+P)
-      document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-          e.preventDefault();
-          window.print();
-        }
-      });
-    }
-  });
+ // Auto-focus print button for keyboard accessibility
+ document.addEventListener('DOMContentLoaded', function() {
+ const printButton = document.querySelector('.print-button');
+ if (printButton) {
+ // Optional: Add keyboard shortcut (Ctrl+P or Cmd+P)
+ document.addEventListener('keydown', function(e) {
+ if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+ e.preventDefault();
+ window.print();
+ }
+ });
+ }
+ });
 </script>
 
 {% endblock %}

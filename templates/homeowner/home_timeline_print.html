@@ -15,10 +15,10 @@ h1 { font-size:2.2rem; margin-bottom:1rem; }
 
 {% for i in events %}
 <div class="card">
-  <h2>{{i.title}}</h2>
-  <p><strong>{{i.category}}</strong> · {{i.event_date}}</p>
-  {% if i.cost %}<p>Cost: {{i.cost}}</p>{% endif %}
-  {% if i.notes %}<p>{{i.notes}}</p>{% endif %}
+ <h2>{{i.title}}</h2>
+ <p><strong>{{i.category}}</strong> · {{i.event_date}}</p>
+ {% if i.cost %}<p>Cost: {{i.cost}}</p>{% endif %}
+ {% if i.notes %}<p>{{i.notes}}</p>{% endif %}
 </div>
 {% endfor %}
 </body>

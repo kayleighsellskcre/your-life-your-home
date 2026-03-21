@@ -3,592 +3,592 @@
 
 {% block lender_content %}
 <style>
-  /* ============================================
-     RESPONSIVE LAYOUT SYSTEM - MOBILE FIRST
-     Matches Agent Dashboard Design
-     ============================================ */
-  
-  .dashboard-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 1rem;
-  }
-  
-  /* Header Section */
-  .dashboard-header {
-    padding: 0.75rem 0;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
+ /* ============================================
+ RESPONSIVE LAYOUT SYSTEM - MOBILE FIRST
+ Matches Agent Dashboard Design
+ ============================================ */
+ 
+ .dashboard-container {
+ max-width: 1400px;
+ margin: 0 auto;
+ padding: 1rem;
+ }
+ 
+ /* Header Section */
+ .dashboard-header {
+ padding: 0.75rem 0;
+ margin-bottom: 1rem;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: 0.5rem;
+ }
 
-  .dashboard-header h1 {
-    font-family: var(--font-heading);
-    font-size: 1.5rem;
-    color: var(--charcoal-brown);
-    margin: 0;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
+ .dashboard-header h1 {
+ font-family: var(--font-heading);
+ font-size: 1.5rem;
+ color: var(--charcoal-brown);
+ margin: 0;
+ font-weight: 600;
+ letter-spacing: -0.02em;
+ }
 
-  .dashboard-header p {
-    font-size: 0.9rem;
-    color: var(--warm-gray);
-    margin: 0;
-  }
-  
-  /* Responsive Grid System */
-  .responsive-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  /* Cards */
-  .card {
-    background: var(--soft-white);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-xl);
-    padding: 1.25rem 1rem;
-    box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
+ .dashboard-header p {
+ font-size: 0.9rem;
+ color: var(--warm-gray);
+ margin: 0;
+ }
+ 
+ /* Responsive Grid System */
+ .responsive-grid {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 1rem;
+ margin-bottom: 1rem;
+ }
+ 
+ /* Cards */
+ .card {
+ background: var(--soft-white);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: var(--border-radius-xl);
+ padding: 1.25rem 1rem;
+ box-shadow: 0 2px 12px rgba(61, 46, 36, 0.06);
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ }
 
-  .card h2 {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  
-  /* Metric Cards */
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
+ .card h2 {
+ font-family: var(--font-heading);
+ font-size: 1.15rem;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.75rem;
+ font-weight: 600;
+ letter-spacing: -0.02em;
+ }
+ 
+ /* Metric Cards */
+ .metrics-grid {
+ display: grid;
+ grid-template-columns: repeat(3, 1fr);
+ gap: 0.75rem;
+ margin-bottom: 1rem;
+ }
 
-  .metric-card {
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
-    padding: 1rem 0.75rem;
-    text-align: center;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  
-  .metric-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.12);
-    border-color: var(--olive-green);
-  }
-  
-  .metric-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--olive-green);
-    line-height: 1;
-    margin-bottom: 0.25rem;
-    font-family: var(--font-heading);
-  }
+ .metric-card {
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: var(--border-radius-lg);
+ padding: 1rem 0.75rem;
+ text-align: center;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ }
+ 
+ .metric-card:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 24px rgba(107, 91, 77, 0.12);
+ border-color: var(--olive-green);
+ }
+ 
+ .metric-value {
+ font-size: 2rem;
+ font-weight: 700;
+ color: var(--olive-green);
+ line-height: 1;
+ margin-bottom: 0.25rem;
+ font-family: var(--font-heading);
+ }
 
-  .metric-label {
-    font-size: 0.8125rem;
-    color: var(--charcoal-brown);
-    font-weight: 600;
-    margin-bottom: 0.15rem;
-  }
-  
-  .metric-subtext {
-    font-size: 0.8125rem;
-    color: var(--warm-gray);
-  }
-  
-  /* Quick Actions Grid */
-  .actions-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .action-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
-    text-decoration: none;
-    color: var(--charcoal-brown);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 80px;
-  }
-  
-  .action-card:hover {
-    transform: translateX(4px);
-    border-color: var(--olive-green);
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
-    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.12);
-    text-decoration: none;
-    color: var(--charcoal-brown);
-  }
-  
-  .action-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: 700;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
-  }
-  
-  .action-content {
-    flex: 1;
-  }
-  
-  .action-title {
-    font-weight: 600;
-    font-size: 1.0625rem;
-    margin-bottom: 0.25rem;
-    color: var(--charcoal-brown);
-  }
-  
-  .action-desc {
-    font-size: 0.875rem;
-    color: var(--warm-gray);
-    line-height: 1.5;
-  }
-  
-  /* Loan List */
-  .loan-item {
-    display: block;
-    padding: 1.25rem;
-    margin-bottom: 0.75rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
-    text-decoration: none;
-    color: var(--charcoal-brown);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border-left: 4px solid var(--olive-green);
-  }
-  
-  .loan-item:hover {
-    transform: translateX(6px);
-    border-color: var(--olive-green);
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
-    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.12);
-  }
-  
-  .loan-name {
-    font-weight: 600;
-    font-size: 1.0625rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-  }
-  
-  .loan-details {
-    font-size: 0.875rem;
-    color: var(--warm-gray);
-  }
-  
-  /* Empty State */
-  .empty-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
-    border-radius: var(--border-radius-2xl);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-  }
-  
-  .empty-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-  }
-  
-  .empty-state h3 {
-    font-family: var(--font-heading);
-    color: var(--charcoal-brown);
-    font-size: 1.5rem;
-    margin-bottom: 0.75rem;
-  }
-  
-  .empty-state p {
-    color: var(--warm-gray);
-    line-height: 1.6;
-  }
-  
-  /* Buttons */
-  .btn-outline {
-    display: inline-block;
-    padding: 0.875rem 2rem;
-    background: white;
-    color: var(--olive-green);
-    border: 2px solid var(--olive-green);
-    border-radius: var(--border-radius-full);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9375rem;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    letter-spacing: 0.02em;
-  }
-  
-  .btn-outline:hover {
-    background: var(--olive-green);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.3);
-  }
-  
-  .btn-primary {
-    display: inline-block;
-    padding: 0.875rem 2rem;
-    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-full);
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.9375rem;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    letter-spacing: 0.02em;
-    box-shadow: 0 4px 15px rgba(107, 106, 69, 0.3);
-  }
-  
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.4);
-  }
-  
-  /* ============================================
-     TABLET BREAKPOINT (768px+)
-     ============================================ */
-  @media (min-width: 768px) {
-    .dashboard-container {
-      padding: 1.25rem 2rem;
-    }
+ .metric-label {
+ font-size: 0.8125rem;
+ color: var(--charcoal-brown);
+ font-weight: 600;
+ margin-bottom: 0.15rem;
+ }
+ 
+ .metric-subtext {
+ font-size: 0.8125rem;
+ color: var(--warm-gray);
+ }
+ 
+ /* Quick Actions Grid */
+ .actions-grid {
+ display: grid;
+ grid-template-columns: 1fr;
+ gap: 1rem;
+ }
+ 
+ .action-card {
+ display: flex;
+ align-items: center;
+ gap: 1rem;
+ padding: 1.25rem;
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: var(--border-radius-lg);
+ text-decoration: none;
+ color: var(--charcoal-brown);
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ min-height: 80px;
+ }
+ 
+ .action-card:hover {
+ transform: translateX(4px);
+ border-color: var(--olive-green);
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
+ box-shadow: 0 4px 16px rgba(107, 91, 77, 0.12);
+ text-decoration: none;
+ color: var(--charcoal-brown);
+ }
+ 
+ .action-icon {
+ width: 56px;
+ height: 56px;
+ border-radius: 50%;
+ background: linear-gradient(135deg, var(--olive-green) 0%, #5A4A3C 100%);
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ color: white;
+ font-weight: 700;
+ font-size: 1.5rem;
+ flex-shrink: 0;
+ box-shadow: 0 4px 12px rgba(107, 91, 77, 0.3);
+ }
+ 
+ .action-content {
+ flex: 1;
+ }
+ 
+ .action-title {
+ font-weight: 600;
+ font-size: 1.0625rem;
+ margin-bottom: 0.25rem;
+ color: var(--charcoal-brown);
+ }
+ 
+ .action-desc {
+ font-size: 0.875rem;
+ color: var(--warm-gray);
+ line-height: 1.5;
+ }
+ 
+ /* Loan List */
+ .loan-item {
+ display: block;
+ padding: 1.25rem;
+ margin-bottom: 0.75rem;
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ border-radius: var(--border-radius-lg);
+ text-decoration: none;
+ color: var(--charcoal-brown);
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ border-left: 4px solid var(--olive-green);
+ }
+ 
+ .loan-item:hover {
+ transform: translateX(6px);
+ border-color: var(--olive-green);
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
+ box-shadow: 0 4px 16px rgba(107, 91, 77, 0.12);
+ }
+ 
+ .loan-name {
+ font-weight: 600;
+ font-size: 1.0625rem;
+ color: var(--charcoal-brown);
+ margin-bottom: 0.5rem;
+ }
+ 
+ .loan-details {
+ font-size: 0.875rem;
+ color: var(--warm-gray);
+ }
+ 
+ /* Empty State */
+ .empty-state {
+ text-align: center;
+ padding: 4rem 2rem;
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
+ border-radius: var(--border-radius-2xl);
+ border: 1px solid rgba(200, 180, 151, 0.2);
+ }
+ 
+ .empty-icon {
+ font-size: 4rem;
+ margin-bottom: 1rem;
+ }
+ 
+ .empty-state h3 {
+ font-family: var(--font-heading);
+ color: var(--charcoal-brown);
+ font-size: 1.5rem;
+ margin-bottom: 0.75rem;
+ }
+ 
+ .empty-state p {
+ color: var(--warm-gray);
+ line-height: 1.6;
+ }
+ 
+ /* Buttons */
+ .btn-outline {
+ display: inline-block;
+ padding: 0.875rem 2rem;
+ background: white;
+ color: var(--olive-green);
+ border: 2px solid var(--olive-green);
+ border-radius: var(--border-radius-full);
+ text-decoration: none;
+ font-weight: 600;
+ font-size: 0.9375rem;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ text-align: center;
+ letter-spacing: 0.02em;
+ }
+ 
+ .btn-outline:hover {
+ background: var(--olive-green);
+ color: white;
+ transform: translateY(-2px);
+ box-shadow: 0 8px 24px rgba(107, 91, 77, 0.3);
+ }
+ 
+ .btn-primary {
+ display: inline-block;
+ padding: 0.875rem 2rem;
+ background: linear-gradient(135deg, var(--olive-green) 0%, #5A4A3C 100%);
+ color: white;
+ border: none;
+ border-radius: var(--border-radius-full);
+ text-decoration: none;
+ font-weight: 600;
+ font-size: 0.9375rem;
+ transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+ text-align: center;
+ letter-spacing: 0.02em;
+ box-shadow: 0 4px 15px rgba(107, 91, 77, 0.3);
+ }
+ 
+ .btn-primary:hover {
+ transform: translateY(-2px);
+ box-shadow: 0 8px 24px rgba(107, 91, 77, 0.4);
+ }
+ 
+ /* ============================================
+ TABLET BREAKPOINT (768px+)
+ ============================================ */
+ @media (min-width: 768px) {
+ .dashboard-container {
+ padding: 1.25rem 2rem;
+ }
 
-    .dashboard-header {
-      padding: 0.5rem 0;
-    }
+ .dashboard-header {
+ padding: 0.5rem 0;
+ }
 
-    .dashboard-header h1 {
-      font-size: 1.6rem;
-    }
+ .dashboard-header h1 {
+ font-size: 1.6rem;
+ }
 
-    .metrics-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
+ .metrics-grid {
+ grid-template-columns: repeat(3, 1fr);
+ gap: 1rem;
+ }
 
-    .actions-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
-    }
-  }
+ .actions-grid {
+ grid-template-columns: repeat(2, 1fr);
+ gap: 1.25rem;
+ }
+ }
 
-  @media (min-width: 1024px) {
-    .dashboard-container {
-      padding: 1.5rem 2rem;
-    }
+ @media (min-width: 1024px) {
+ .dashboard-container {
+ padding: 1.5rem 2rem;
+ }
 
-    .dashboard-header {
-      padding: 0.5rem 0;
-    }
+ .dashboard-header {
+ padding: 0.5rem 0;
+ }
 
-    .dashboard-header h1 {
-      font-size: 1.75rem;
-    }
+ .dashboard-header h1 {
+ font-size: 1.75rem;
+ }
 
-    .metrics-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
+ .metrics-grid {
+ grid-template-columns: repeat(3, 1fr);
+ gap: 1rem;
+ }
 
-    .responsive-grid {
-      grid-template-columns: 2fr 1fr;
-      gap: 1.25rem;
-    }
+ .responsive-grid {
+ grid-template-columns: 2fr 1fr;
+ gap: 1.25rem;
+ }
 
-    .actions-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
+ .actions-grid {
+ grid-template-columns: repeat(2, 1fr);
+ gap: 1rem;
+ }
 
-    .metric-card {
-      padding: 1rem 0.75rem;
-    }
+ .metric-card {
+ padding: 1rem 0.75rem;
+ }
 
-    .metric-value {
-      font-size: 2.25rem;
-    }
-  }
-  
-  /* ============================================
-     LARGE DESKTOP BREAKPOINT (1280px+)
-     ============================================ */
-  @media (min-width: 1280px) {
-    /* Actions: Full width cards on large desktop */
-    .actions-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  /* ============================================
-     MOBILE OPTIMIZATIONS (Portrait Mode)
-     ============================================ */
-  @media (max-width: 767px) and (orientation: portrait) {
-    .dashboard-container {
-      padding: 1rem 0.875rem;
-    }
-    
-    .dashboard-header {
-      padding: 1.25rem 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .dashboard-header h1 {
-      font-size: 1.75rem;
-    }
-    
-    .dashboard-header p {
-      font-size: 0.9375rem;
-    }
-    
-    .card {
-      padding: 1.5rem 1rem;
-    }
-    
-    .card h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
-    
-    .metric-card {
-      padding: 1.25rem 1rem;
-    }
-    
-    .metric-value {
-      font-size: 2.5rem;
-    }
-    
-    .action-card {
-      padding: 1rem;
-      min-height: auto;
-    }
-    
-    .action-icon {
-      width: 48px;
-      height: 48px;
-      font-size: 1.25rem;
-    }
-    
-    .action-title {
-      font-size: 1rem;
-    }
-    
-    .action-desc {
-      font-size: 0.8125rem;
-    }
-    
-    .btn-outline, .btn-primary {
-      width: 100%;
-      padding: 1rem 1.5rem;
-      min-height: 48px;
-    }
-    
-    .loan-item {
-      padding: 1rem;
-    }
-    
-    .loan-name {
-      font-size: 1rem;
-    }
-    
-    .loan-details {
-      font-size: 0.8125rem;
-    }
-    
-    .empty-state {
-      padding: 3rem 1.5rem;
-    }
-    
-    .empty-state h3 {
-      font-size: 1.25rem;
-    }
-  }
-  
-  /* Animation */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-in {
-    animation: fadeIn 0.5s ease-out;
-  }
+ .metric-value {
+ font-size: 2.25rem;
+ }
+ }
+ 
+ /* ============================================
+ LARGE DESKTOP BREAKPOINT (1280px+)
+ ============================================ */
+ @media (min-width: 1280px) {
+ /* Actions: Full width cards on large desktop */
+ .actions-grid {
+ grid-template-columns: 1fr;
+ }
+ }
+ 
+ /* ============================================
+ MOBILE OPTIMIZATIONS (Portrait Mode)
+ ============================================ */
+ @media (max-width: 767px) and (orientation: portrait) {
+ .dashboard-container {
+ padding: 1rem 0.875rem;
+ }
+ 
+ .dashboard-header {
+ padding: 1.25rem 1rem;
+ margin-bottom: 1.5rem;
+ }
+ 
+ .dashboard-header h1 {
+ font-size: 1.75rem;
+ }
+ 
+ .dashboard-header p {
+ font-size: 0.9375rem;
+ }
+ 
+ .card {
+ padding: 1.5rem 1rem;
+ }
+ 
+ .card h2 {
+ font-size: 1.25rem;
+ margin-bottom: 1.25rem;
+ }
+ 
+ .metric-card {
+ padding: 1.25rem 1rem;
+ }
+ 
+ .metric-value {
+ font-size: 2.5rem;
+ }
+ 
+ .action-card {
+ padding: 1rem;
+ min-height: auto;
+ }
+ 
+ .action-icon {
+ width: 48px;
+ height: 48px;
+ font-size: 1.25rem;
+ }
+ 
+ .action-title {
+ font-size: 1rem;
+ }
+ 
+ .action-desc {
+ font-size: 0.8125rem;
+ }
+ 
+ .btn-outline, .btn-primary {
+ width: 100%;
+ padding: 1rem 1.5rem;
+ min-height: 48px;
+ }
+ 
+ .loan-item {
+ padding: 1rem;
+ }
+ 
+ .loan-name {
+ font-size: 1rem;
+ }
+ 
+ .loan-details {
+ font-size: 0.8125rem;
+ }
+ 
+ .empty-state {
+ padding: 3rem 1.5rem;
+ }
+ 
+ .empty-state h3 {
+ font-size: 1.25rem;
+ }
+ }
+ 
+ /* Animation */
+ @keyframes fadeIn {
+ from {
+ opacity: 0;
+ transform: translateY(10px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
+ }
+ 
+ .animate-in {
+ animation: fadeIn 0.5s ease-out;
+ }
 </style>
 
 <div class="dashboard-container">
-  <!-- Header -->
-  <div class="dashboard-header animate-in">
-    <h1>Lender Dashboard</h1>
-    <p>Here is what is happening with your pipeline today.</p>
-  </div>
-  
-  <!-- AI Morning Briefing -->
-  <div id="ai-briefing-bar" style="background:linear-gradient(135deg,#F8F5F0 0%,#FDFBF7 100%);border:1px solid rgba(107,106,69,.18);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;">
-    <span style="font-size:1rem;">✨</span>
-    <span id="ai-briefing-text" style="flex:1;font-size:.82rem;color:#3A352C;line-height:1.5;font-style:italic;opacity:.6;">Loading your morning briefing…</span>
-    <button onclick="loadBriefing()" title="Refresh" style="background:none;border:none;color:#6B6A45;font-size:.8rem;cursor:pointer;font-weight:600;">↺</button>
-  </div>
+ <!-- Header -->
+ <div class="dashboard-header animate-in">
+ <h1>Lender Dashboard</h1>
+ <p>Here is what is happening with your pipeline today.</p>
+ </div>
+ 
+ <!-- AI Morning Briefing -->
+ <div id="ai-briefing-bar" style="background:linear-gradient(135deg,#F8F5F0 0%,#F5F0EB 100%);border:1px solid rgba(107,91,77,.18);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;">
+ <span style="font-size:1rem;"></span>
+ <span id="ai-briefing-text" style="flex:1;font-size:.82rem;color:#3D2E24;line-height:1.5;font-style:italic;opacity:.6;">Loading your morning briefing…</span>
+ <button onclick="loadBriefing()" title="Refresh" style="background:none;border:none;color:#6B5B4D;font-size:.8rem;cursor:pointer;font-weight:600;">↺</button>
+ </div>
 
-  <!-- Metrics Cards -->
-  <div class="metrics-grid">
-    <div class="metric-card">
-      <div class="metric-value">{{ metrics.new_applications|default(0) }}</div>
-      <div class="metric-label">New Applications</div>
-      <div class="metric-subtext">Just getting started</div>
-    </div>
+ <!-- Metrics Cards -->
+ <div class="metrics-grid">
+ <div class="metric-card">
+ <div class="metric-value">{{ metrics.new_applications|default(0) }}</div>
+ <div class="metric-label">New Applications</div>
+ <div class="metric-subtext">Just getting started</div>
+ </div>
 
-    <div class="metric-card">
-      <div class="metric-value">{{ metrics.loans_in_process|default(0) }}</div>
-      <div class="metric-label">Loans in Process</div>
-      <div class="metric-subtext">Moving right along</div>
-    </div>
+ <div class="metric-card">
+ <div class="metric-value">{{ metrics.loans_in_process|default(0) }}</div>
+ <div class="metric-label">Loans in Process</div>
+ <div class="metric-subtext">Moving right along</div>
+ </div>
 
-    <div class="metric-card">
-      <div class="metric-value">{{ metrics.nurture_contacts|default(0) }}</div>
-      <div class="metric-label">Nurture Contacts</div>
-      <div class="metric-subtext">Stay in touch</div>
-    </div>
-  </div>
-  
-  <!-- Responsive Grid Layout (Desktop: 2 columns, Mobile: Stacked) -->
-  <div class="responsive-grid">
-    <!-- Left Column: Active Loans -->
-    <div>
-      {% if loans and loans|length > 0 %}
-      <div class="card">
-        <h2>Active Loans</h2>
-        {% for loan in loans[:5] %}
-        <div class="loan-item">
-          <div class="loan-name">{{ loan.borrower_name or 'Borrower' }}</div>
-          <div class="loan-details">
-            {{ loan.loan_type|title if loan.loan_type else 'Loan' }} • 
-            {{ loan.status|title if loan.status else 'Active' }}
-            {% if loan.loan_amount %}
-            • ${{ "{:,.0f}".format(loan.loan_amount) }}
-            {% endif %}
-          </div>
-        </div>
-        {% endfor %}
-        <div style="margin-top: 1.5rem;">
-          <a href="{{ url_for('lender_loans') }}" class="btn-outline">View All Loans</a>
-        </div>
-      </div>
-      {% else %}
-      <div class="card">
-        <h2>Active Loans</h2>
-        <div class="empty-state">
-          <div class="empty-icon" style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, rgba(107, 106, 69, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--olive-green);">🏠</div>
-          <h3>No Active Loans Yet</h3>
-          <p>When you are ready to start tracking, your loans will show up right here.</p>
-          <a href="{{ url_for('lender_loans') }}" class="btn-primary" style="margin-top: 1.5rem;">Add Your First Loan</a>
-        </div>
-      </div>
-      {% endif %}
-    </div>
-    
-    <!-- Right Column: Quick Actions -->
-    <div>
-      <div class="card">
-        <h2>Quick Actions</h2>
-        <div class="actions-grid">
-          <a href="{{ url_for('lender_crm') }}" class="action-card">
-            <div class="action-icon">+</div>
-            <div class="action-content">
-              <div class="action-title">Add Borrower</div>
-              <div class="action-desc">Add to your borrower list</div>
-            </div>
-          </a>
-          
-          <a href="{{ url_for('lender_loans') }}" class="action-card">
-            <div class="action-icon">◉</div>
-            <div class="action-content">
-              <div class="action-title">Add New Loan</div>
-              <div class="action-desc">Start tracking a new file</div>
-            </div>
-          </a>
-          
-          <a href="{{ url_for('lender_messages') }}" class="action-card">
-            <div class="action-icon">@</div>
-            <div class="action-content">
-              <div class="action-title">Messages</div>
-              <div class="action-desc">Communicate with borrowers</div>
-            </div>
-          </a>
-          
-          <a href="{{ url_for('lender_marketing') }}" class="action-card">
-            <div class="action-icon">✎</div>
-            <div class="action-content">
-              <div class="action-title">Marketing Tools</div>
-              <div class="action-desc">Create marketing materials</div>
-            </div>
-          </a>
-          
-          <a href="{{ url_for('lender_calculator') }}" class="action-card">
-            <div class="action-icon">%</div>
-            <div class="action-content">
-              <div class="action-title">Rate Calculator</div>
-              <div class="action-desc">Calculate loan payments</div>
-            </div>
-          </a>
-          
-          <a href="{{ url_for('lender_settings_profile') }}" class="action-card">
-            <div class="action-icon">⚙</div>
-            <div class="action-content">
-              <div class="action-title">Settings</div>
-              <div class="action-desc">Update your profile</div>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+ <div class="metric-card">
+ <div class="metric-value">{{ metrics.nurture_contacts|default(0) }}</div>
+ <div class="metric-label">Nurture Contacts</div>
+ <div class="metric-subtext">Stay in touch</div>
+ </div>
+ </div>
+ 
+ <!-- Responsive Grid Layout (Desktop: 2 columns, Mobile: Stacked) -->
+ <div class="responsive-grid">
+ <!-- Left Column: Active Loans -->
+ <div>
+ {% if loans and loans|length > 0 %}
+ <div class="card">
+ <h2>Active Loans</h2>
+ {% for loan in loans[:5] %}
+ <div class="loan-item">
+ <div class="loan-name">{{ loan.borrower_name or 'Borrower' }}</div>
+ <div class="loan-details">
+ {{ loan.loan_type|title if loan.loan_type else 'Loan' }} • 
+ {{ loan.status|title if loan.status else 'Active' }}
+ {% if loan.loan_amount %}
+ • ${{ "{:,.0f}".format(loan.loan_amount) }}
+ {% endif %}
+ </div>
+ </div>
+ {% endfor %}
+ <div style="margin-top: 1.5rem;">
+ <a href="{{ url_for('lender_loans') }}" class="btn-outline">View All Loans</a>
+ </div>
+ </div>
+ {% else %}
+ <div class="card">
+ <h2>Active Loans</h2>
+ <div class="empty-state">
+ <div class="empty-icon" style="width: 80px; height: 80px; margin: 0 auto 1rem; background: linear-gradient(135deg, rgba(107, 91, 77, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--olive-green);"></div>
+ <h3>No Active Loans Yet</h3>
+ <p>When you are ready to start tracking, your loans will show up right here.</p>
+ <a href="{{ url_for('lender_loans') }}" class="btn-primary" style="margin-top: 1.5rem;">Add Your First Loan</a>
+ </div>
+ </div>
+ {% endif %}
+ </div>
+ 
+ <!-- Right Column: Quick Actions -->
+ <div>
+ <div class="card">
+ <h2>Quick Actions</h2>
+ <div class="actions-grid">
+ <a href="{{ url_for('lender_crm') }}" class="action-card">
+ <div class="action-icon">+</div>
+ <div class="action-content">
+ <div class="action-title">Add Borrower</div>
+ <div class="action-desc">Add to your borrower list</div>
+ </div>
+ </a>
+ 
+ <a href="{{ url_for('lender_loans') }}" class="action-card">
+ <div class="action-icon">◉</div>
+ <div class="action-content">
+ <div class="action-title">Add New Loan</div>
+ <div class="action-desc">Start tracking a new file</div>
+ </div>
+ </a>
+ 
+ <a href="{{ url_for('lender_messages') }}" class="action-card">
+ <div class="action-icon">@</div>
+ <div class="action-content">
+ <div class="action-title">Messages</div>
+ <div class="action-desc">Communicate with borrowers</div>
+ </div>
+ </a>
+ 
+ <a href="{{ url_for('lender_marketing') }}" class="action-card">
+ <div class="action-icon"></div>
+ <div class="action-content">
+ <div class="action-title">Marketing Tools</div>
+ <div class="action-desc">Create marketing materials</div>
+ </div>
+ </a>
+ 
+ <a href="{{ url_for('lender_calculator') }}" class="action-card">
+ <div class="action-icon">%</div>
+ <div class="action-content">
+ <div class="action-title">Rate Calculator</div>
+ <div class="action-desc">Calculate loan payments</div>
+ </div>
+ </a>
+ 
+ <a href="{{ url_for('lender_settings_profile') }}" class="action-card">
+ <div class="action-icon"></div>
+ <div class="action-content">
+ <div class="action-title">Settings</div>
+ <div class="action-desc">Update your profile</div>
+ </div>
+ </a>
+ </div>
+ </div>
+ </div>
+ </div>
 </div>
 
 <script>
 function loadBriefing(){
-  var el=document.getElementById('ai-briefing-text');
-  el.textContent='✨ Loading…';el.style.opacity='.6';el.style.fontStyle='italic';
-  fetch('/api/ai/dashboard-briefing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
-    .then(function(r){return r.json();}).then(function(d){
-      el.textContent=d.briefing||'Have a great day — go close some loans!';
-      el.style.opacity='1';el.style.fontStyle='normal';
-    }).catch(function(){el.textContent='Have a great day!';el.style.opacity='.7';el.style.fontStyle='normal';});
+ var el=document.getElementById('ai-briefing-text');
+ el.textContent=' Loading…';el.style.opacity='.6';el.style.fontStyle='italic';
+ fetch('/api/ai/dashboard-briefing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
+ .then(function(r){return r.json();}).then(function(d){
+ el.textContent=d.briefing||'Have a great day — go close some loans!';
+ el.style.opacity='1';el.style.fontStyle='normal';
+ }).catch(function(){el.textContent='Have a great day!';el.style.opacity='.7';el.style.fontStyle='normal';});
 }
 document.addEventListener('DOMContentLoaded',loadBriefing);
 </script>

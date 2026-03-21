@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Homebot Embed</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 1200px;
-      margin: 2rem auto;
-      padding: 2rem;
-      background: #f5f5f5;
-    }
-    h1 {
-      color: #333;
-      margin-bottom: 2rem;
-    }
-    #homebot_homeowner {
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      min-height: 600px;
-    }
-  </style>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Test Homebot Embed</title>
+ <style>
+ body {
+ font-family: Arial, sans-serif;
+ max-width: 1200px;
+ margin: 2rem auto;
+ padding: 2rem;
+ background: #f5f5f5;
+ }
+ h1 {
+ color: #333;
+ margin-bottom: 2rem;
+ }
+ #homebot_homeowner {
+ background: white;
+ padding: 2rem;
+ border-radius: 8px;
+ box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+ min-height: 600px;
+ }
+ </style>
 </head>
 <body>
 
@@ -33,58 +33,58 @@
 <div id="homebot_homeowner"></div>
 
 <script>
-  // Homebot embed code - EXACT format
-  (function (h, b) {
-    var w = window, d = document, s = 'script', x, y;
-    w['_hb_namespace'] = h;
-    w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
-    y = d.createElement(s); 
-    x = d.getElementsByTagName(s)[0];
-    y.async = 1;
-    y.src = 'https://embed.homebotapp.com/lgw/v1/widget.js';
-    x.parentNode.insertBefore(y, x);
-  })('Homebot');
+ // Homebot embed code - EXACT format
+ (function (h, b) {
+ var w = window, d = document, s = 'script', x, y;
+ w['_hb_namespace'] = h;
+ w[h] = w[h] || function () { (w[h].q = w[h].q || []).push(arguments); };
+ y = d.createElement(s); 
+ x = d.getElementsByTagName(s)[0];
+ y.async = 1;
+ y.src = 'https://embed.homebotapp.com/lgw/v1/widget.js';
+ x.parentNode.insertBefore(y, x);
+ })('Homebot');
 
-  // Get widget ID from the page
-  var widgetId = '{{ homebot_widget_id|e }}';
-  
-  if (widgetId && widgetId !== '') {
-    console.log('[TEST] Widget ID:', widgetId);
-    
-    // Wait for Homebot to load, then initialize
-    function initHomebot() {
-      if (typeof window.Homebot === 'function') {
-        console.log('[TEST] ✅ Homebot function found, initializing...');
-        try {
-          Homebot('#homebot_homeowner', widgetId);
-          console.log('[TEST] ✅ Homebot initialized successfully');
-          
-          // Verify iframe after delay
-          setTimeout(function() {
-            var iframe = document.querySelector('#homebot_homeowner iframe');
-            if (iframe) {
-              console.log('[TEST] ✅✅✅ Iframe created - widget should work!');
-              console.log('[TEST] Iframe src:', iframe.src);
-              iframe.style.pointerEvents = 'auto';
-            } else {
-              console.warn('[TEST] ⚠️ No iframe found');
-            }
-          }, 2000);
-        } catch (error) {
-          console.error('[TEST] ❌ Error initializing Homebot:', error);
-        }
-      } else {
-        console.log('[TEST] Waiting for Homebot to load...');
-        setTimeout(initHomebot, 100);
-      }
-    }
-    
-    // Start initialization
-    setTimeout(initHomebot, 500);
-  } else {
-    console.error('[TEST] ❌ No widget ID provided');
-    document.getElementById('homebot_homeowner').innerHTML = '<p style="color: red; padding: 2rem;">⚠️ No Homebot Widget ID found. Please check your agent/lender profile settings.</p>';
-  }
+ // Get widget ID from the page
+ var widgetId = '{{ homebot_widget_id|e }}';
+ 
+ if (widgetId && widgetId !== '') {
+ console.log('[TEST] Widget ID:', widgetId);
+ 
+ // Wait for Homebot to load, then initialize
+ function initHomebot() {
+ if (typeof window.Homebot === 'function') {
+ console.log('[TEST] Homebot function found, initializing...');
+ try {
+ Homebot('#homebot_homeowner', widgetId);
+ console.log('[TEST] Homebot initialized successfully');
+ 
+ // Verify iframe after delay
+ setTimeout(function() {
+ var iframe = document.querySelector('#homebot_homeowner iframe');
+ if (iframe) {
+ console.log('[TEST] Iframe created - widget should work!');
+ console.log('[TEST] Iframe src:', iframe.src);
+ iframe.style.pointerEvents = 'auto';
+ } else {
+ console.warn('[TEST] No iframe found');
+ }
+ }, 2000);
+ } catch (error) {
+ console.error('[TEST] Error initializing Homebot:', error);
+ }
+ } else {
+ console.log('[TEST] Waiting for Homebot to load...');
+ setTimeout(initHomebot, 100);
+ }
+ }
+ 
+ // Start initialization
+ setTimeout(initHomebot, 500);
+ } else {
+ console.error('[TEST] No widget ID provided');
+ document.getElementById('homebot_homeowner').innerHTML = '<p style="color: red; padding: 2rem;"> No Homebot Widget ID found. Please check your agent/lender profile settings.</p>';
+ }
 </script>
 
 </body>

@@ -1,213 +1,213 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <style>
-        @page {
-            size: 11in 8.5in;
-            margin: 0.125in;
-            background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            color: #2C2820;
-            background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
-        }
-        
-        .page {
-            width: 11in;
-            height: 8.5in;
-            display: grid;
-            grid-template-columns: 5.375in 5.375in;
-            grid-template-rows: 4.125in 4.125in;
-            gap: 0.25in;
-            padding: 0;
-            page-break-after: always;
-            background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
-        }
-        
-        .page:last-child {
-            page-break-after: auto;
-        }
-        
-        .card {
-            background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%);
-            border: 2px solid rgba(200, 180, 151, 0.3);
-            padding: 0.4in 0.5in 0.45in 0.5in;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            page-break-inside: avoid;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-            width: 5.375in;
-            height: 4.125in;
-        }
-        
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, rgba(107, 106, 69, 0.5) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.5) 100%);
-        }
-        
-        .card-header {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 0.15in;
-            width: 100%;
-        }
-        
-        .card-logo {
-            height: 28px;
-            max-width: 150px;
-            margin-bottom: 0.1in;
-            opacity: 0.9;
-            object-fit: contain;
-        }
-        
-        .card-agent {
-            font-size: 7.5pt;
-            color: rgba(107, 106, 69, 0.85);
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            flex: 1;
-            justify-content: center;
-            width: 100%;
-        }
-        
-        .card-room {
-            font-size: 7.5pt;
-            color: rgba(107, 106, 69, 0.75);
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            margin-bottom: 0.15in;
-            font-weight: 600;
-            font-family: 'Arial', sans-serif;
-            text-align: center;
-        }
-        
-        .card-title {
-            font-size: 18pt;
-            font-weight: 600;
-            color: #2C2820;
-            margin-bottom: 0.18in;
-            letter-spacing: -0.01em;
-            line-height: 1.25;
-            font-family: 'Georgia', serif;
-            text-align: center;
-            max-width: 90%;
-        }
-        
-        .card-divider {
-            width: 60px;
-            height: 2.5px;
-            background: linear-gradient(90deg, rgba(107, 106, 69, 0.3) 0%, rgba(107, 106, 69, 0.8) 50%, rgba(107, 106, 69, 0.3) 100%);
-            margin: 0 auto 0.18in auto;
-            border-radius: 2px;
-        }
-        
-        .card-description {
-            font-size: 10pt;
-            color: #3A352C;
-            line-height: 1.65;
-            font-family: 'Georgia', serif;
-            font-weight: 400;
-            text-align: center;
-            max-width: 92%;
-            margin: 0 auto;
-        }
-        
-        .print-button-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        
-        .print-button {
-            background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        .print-button:hover {
-            background: linear-gradient(135deg, #6B5D4A 0%, #8B7355 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-        }
-        
-        @media print {
-            .print-button-container {
-                display: none;
-            }
-        }
-    </style>
-    <script>
-        function printCards() {
-            window.print();
-        }
-    </script>
+ <meta charset="UTF-8">
+ <style>
+ @page {
+ size: 11in 8.5in;
+ margin: 0.125in;
+ background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+ }
+ 
+ * {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+ }
+ 
+ body {
+ font-family: 'Georgia', 'Times New Roman', serif;
+ color: #2C2820;
+ background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+ }
+ 
+ .page {
+ width: 11in;
+ height: 8.5in;
+ display: grid;
+ grid-template-columns: 5.375in 5.375in;
+ grid-template-rows: 4.125in 4.125in;
+ gap: 0.25in;
+ padding: 0;
+ page-break-after: always;
+ background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+ }
+ 
+ .page:last-child {
+ page-break-after: auto;
+ }
+ 
+ .card {
+ background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%);
+ border: 2px solid rgba(200, 180, 151, 0.3);
+ padding: 0.4in 0.5in 0.45in 0.5in;
+ display: flex;
+ flex-direction: column;
+ justify-content: space-between;
+ align-items: center;
+ page-break-inside: avoid;
+ box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+ position: relative;
+ overflow: hidden;
+ width: 5.375in;
+ height: 4.125in;
+ }
+ 
+ .card::before {
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ height: 4px;
+ background: linear-gradient(90deg, rgba(107, 91, 77, 0.5) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.5) 100%);
+ }
+ 
+ .card-header {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ margin-bottom: 0.15in;
+ width: 100%;
+ }
+ 
+ .card-logo {
+ height: 28px;
+ max-width: 150px;
+ margin-bottom: 0.1in;
+ opacity: 0.9;
+ object-fit: contain;
+ }
+ 
+ .card-agent {
+ font-size: 7.5pt;
+ color: rgba(107, 91, 77, 0.85);
+ font-weight: 500;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ font-family: 'Arial', sans-serif;
+ }
+ 
+ .card-content {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ text-align: center;
+ flex: 1;
+ justify-content: center;
+ width: 100%;
+ }
+ 
+ .card-room {
+ font-size: 7.5pt;
+ color: rgba(107, 91, 77, 0.75);
+ text-transform: uppercase;
+ letter-spacing: 0.18em;
+ margin-bottom: 0.15in;
+ font-weight: 600;
+ font-family: 'Arial', sans-serif;
+ text-align: center;
+ }
+ 
+ .card-title {
+ font-size: 18pt;
+ font-weight: 600;
+ color: #2C2820;
+ margin-bottom: 0.18in;
+ letter-spacing: -0.01em;
+ line-height: 1.25;
+ font-family: 'Georgia', serif;
+ text-align: center;
+ max-width: 90%;
+ }
+ 
+ .card-divider {
+ width: 60px;
+ height: 2.5px;
+ background: linear-gradient(90deg, rgba(107, 91, 77, 0.3) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.3) 100%);
+ margin: 0 auto 0.18in auto;
+ border-radius: 2px;
+ }
+ 
+ .card-description {
+ font-size: 10pt;
+ color: #3D2E24;
+ line-height: 1.65;
+ font-family: 'Georgia', serif;
+ font-weight: 400;
+ text-align: center;
+ max-width: 92%;
+ margin: 0 auto;
+ }
+ 
+ .print-button-container {
+ position: fixed;
+ top: 20px;
+ right: 20px;
+ z-index: 1000;
+ }
+ 
+ .print-button {
+ background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);
+ color: white;
+ border: none;
+ padding: 12px 24px;
+ border-radius: 8px;
+ font-size: 14px;
+ font-weight: 600;
+ cursor: pointer;
+ box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+ transition: all 0.3s ease;
+ font-family: 'Arial', sans-serif;
+ }
+ 
+ .print-button:hover {
+ background: linear-gradient(135deg, #6B5D4A 0%, #8B7355 100%);
+ transform: translateY(-2px);
+ box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+ }
+ 
+ @media print {
+ .print-button-container {
+ display: none;
+ }
+ }
+ </style>
+ <script>
+ function printCards() {
+ window.print();
+ }
+ </script>
 </head>
 <body>
-    <div class="print-button-container">
-        <button class="print-button" onclick="printCards()">Print Cards</button>
-    </div>
-    {% for feature in features %}
-        {% if loop.index0 % 4 == 0 %}
-            {% if loop.index0 > 0 %}
-                </div>
-            {% endif %}
-            <div class="page">
-        {% endif %}
-        
-        <div class="card">
-            <div class="card-header">
-                <img src="{{ brokerage_logo }}" alt="Brokerage Logo" class="card-logo" onerror="this.style.display='none'">
-                <div class="card-agent">Presented by {{ agent_name }}</div>
-            </div>
-            <div class="card-content">
-                <div class="card-room">{{ feature.room }}</div>
-                <div class="card-title">{{ feature.title }}</div>
-                <div class="card-divider"></div>
-                <div class="card-description">{{ feature.description }}</div>
-            </div>
-        </div>
-        
-        {% if loop.index0 % 4 == 3 or loop.last %}
-            </div>
-        {% endif %}
-    {% endfor %}
+ <div class="print-button-container">
+ <button class="print-button" onclick="printCards()">Print Cards</button>
+ </div>
+ {% for feature in features %}
+ {% if loop.index0 % 4 == 0 %}
+ {% if loop.index0 > 0 %}
+ </div>
+ {% endif %}
+ <div class="page">
+ {% endif %}
+ 
+ <div class="card">
+ <div class="card-header">
+ <img src="{{ brokerage_logo }}" alt="Brokerage Logo" class="card-logo" onerror="this.style.display='none'">
+ <div class="card-agent">Presented by {{ agent_name }}</div>
+ </div>
+ <div class="card-content">
+ <div class="card-room">{{ feature.room }}</div>
+ <div class="card-title">{{ feature.title }}</div>
+ <div class="card-divider"></div>
+ <div class="card-description">{{ feature.description }}</div>
+ </div>
+ </div>
+ 
+ {% if loop.index0 % 4 == 3 or loop.last %}
+ </div>
+ {% endif %}
+ {% endfor %}
 </body>
 </html>
 

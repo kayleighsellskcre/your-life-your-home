@@ -5,807 +5,807 @@
 
 {% block homeowner_content %}
 <div class="premium-header animate-in" style="margin-bottom: 3rem; display: block !important; text-align: center !important; justify-content: center !important;">
-  <div style="text-align: center; width: 100%;">
-    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center;">Material & Cost Estimator</h1>
-    <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Budget with confidence — Plan your next project with clarity</span>
-  </div>
+ <div style="text-align: center; width: 100%;">
+ <h1 style="font-size: 3rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; text-align: center;">Material & Cost Estimator</h1>
+ <span class="tagline" style="font-size: 1.15rem; font-style: italic; color: var(--olive-green); display: block; text-align: center;">Budget with confidence — Plan your next project with clarity</span>
+ </div>
 </div>
 
 <div class="dashboard-section" style="max-width: 1000px; margin: 0 auto;">
-  <!-- View Saved Projects Section -->
-  <div id="saved-projects-section" class="card-premium animate-in" style="animation-delay: 0.05s; padding: 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige); display: none;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <h2 style="font-family: var(--font-heading); font-size: 1.75rem; color: var(--charcoal-brown); margin: 0;">📋 Your Saved Projects</h2>
-      <button onclick="toggleSavedProjects()" class="btn-premium" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; background: var(--gradient-taupe);">
-        <span id="toggle-projects-text">Show</span> Projects
-      </button>
-    </div>
-    <div id="saved-projects-list" style="display: grid; gap: 1rem;"></div>
-    <div style="text-align: center; margin-top: 1.5rem;">
-      <a href="{{ url_for('homeowner_reno_planner') }}" class="btn-link" style="color: var(--olive-green); font-weight: 600; text-decoration: none; font-size: 1rem;">View All Projects in Renovation Planner →</a>
-    </div>
-  </div>
+ <!-- View Saved Projects Section -->
+ <div id="saved-projects-section" class="card-premium animate-in" style="animation-delay: 0.05s; padding: 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, #FFFFFF 0%, #F0EBE4 100%); border: 1px solid var(--taupe-beige); display: none;">
+ <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+ <h2 style="font-family: var(--font-heading); font-size: 1.75rem; color: var(--charcoal-brown); margin: 0;"> Your Saved Projects</h2>
+ <button onclick="toggleSavedProjects()" class="btn-premium" style="padding: 0.75rem 1.5rem; font-size: 0.95rem; background: var(--gradient-taupe);">
+ <span id="toggle-projects-text">Show</span> Projects
+ </button>
+ </div>
+ <div id="saved-projects-list" style="display: grid; gap: 1rem;"></div>
+ <div style="text-align: center; margin-top: 1.5rem;">
+ <a href="{{ url_for('homeowner_reno_planner') }}" class="btn-link" style="color: var(--olive-green); font-weight: 600; text-decoration: none; font-size: 1rem;">View All Projects in Renovation Planner →</a>
+ </div>
+ </div>
 
-  <form id="cost-estimator-form" class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige);">
-    <div class="form-group" style="margin-bottom: 2.5rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
-      <label for="board-name" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;">💾 Save to Mood Board</label>
-      <select id="board-name" name="board-name" class="form-control premium-select">
-        <option value="">Select a Mood Board...</option>
-        {% for board in board_names %}
-          <option value="{{ board }}">{{ board }}</option>
-        {% endfor %}
-        <option value="__new__">➕ Start New Board...</option>
-      </select>
-      <input type="text" id="new-board-name" class="form-control premium-input" placeholder="Enter new board name..." style="display:none; margin-top:0.75rem;" />
-    </div>
-    <script>
-    // Mood Board dropdown: show input for new board
-    const boardNameSelect = document.getElementById('board-name');
-    const newBoardInput = document.getElementById('new-board-name');
-    if (boardNameSelect && newBoardInput) {
-      boardNameSelect.addEventListener('change', function() {
-        if (this.value === '__new__') {
-          newBoardInput.style.display = 'block';
-          newBoardInput.focus();
-        } else {
-          newBoardInput.style.display = 'none';
-        }
-      });
-    }
-    </script>
-    <h2 style="margin-bottom: 2rem; font-family: var(--font-heading); font-size: 2rem; color: var(--charcoal-brown); text-align: center; position: relative; padding-bottom: 1rem;">
-      <span style="display: inline-block; position: relative;">
-        Estimate Your Project
-        <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
-      </span>
-    </h2>
-    <div class="dashboard-grid" style="gap: 1.5rem; margin-bottom: 2.5rem;">
-      <!-- Category Cards -->
-      <div class="category-card" data-category="painting">
-        <div class="category-icon" style="background: var(--gradient-olive);"><span>🎨</span></div>
-        <div class="category-title">Painting</div>
-        <div class="category-subtitle">Interior & Exterior</div>
-      </div>
-      <div class="category-card" data-category="flooring">
-        <div class="category-icon" style="background: var(--gradient-taupe);"><span>🪵</span></div>
-        <div class="category-title">Flooring</div>
-        <div class="category-subtitle">LVP, Carpet, Hardwood</div>
-      </div>
-      <div class="category-card" data-category="kitchen">
-        <div class="category-icon" style="background: var(--gradient-warm);"><span>🍽️</span></div>
-        <div class="category-title">Kitchen</div>
-        <div class="category-subtitle">Refresh & Remodel</div>
-      </div>
-      <div class="category-card" data-category="bathroom">
-        <div class="category-icon" style="background: linear-gradient(135deg, #6B6A45 0%, #C8B497 100%);"><span>🛁</span></div>
-        <div class="category-title">Bathroom</div>
-        <div class="category-subtitle">Refresh & Remodel</div>
-      </div>
-      <div class="category-card" data-category="outdoor">
-        <div class="category-icon" style="background: var(--gradient-taupe);"><span>🌳</span></div>
-        <div class="category-title">Outdoor</div>
-        <div class="category-subtitle">Deck, Patio, Fence</div>
-      </div>
-    </div>
-    <div id="project-details" style="margin-top: 2rem; padding: 2rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige); min-height: 120px; transition: all 0.3s ease;"></div>
-    <button type="submit" class="btn-premium" style="margin-top: 2rem; width: 100%; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center;">
-      <span>✨</span> Calculate Estimate
-    </button>
-  </form>
+ <form id="cost-estimator-form" class="card-premium animate-in" style="animation-delay: 0.1s; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F0EBE4 100%); border: 1px solid var(--taupe-beige);">
+ <div class="form-group" style="margin-bottom: 2.5rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
+ <label for="board-name" class="form-label" style="font-weight: 600; color: var(--olive-green); margin-bottom: 0.75rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.05em;"> Save to Mood Board</label>
+ <select id="board-name" name="board-name" class="form-control premium-select">
+ <option value="">Select a Mood Board...</option>
+ {% for board in board_names %}
+ <option value="{{ board }}">{{ board }}</option>
+ {% endfor %}
+ <option value="__new__"> Start New Board...</option>
+ </select>
+ <input type="text" id="new-board-name" class="form-control premium-input" placeholder="Enter new board name..." style="display:none; margin-top:0.75rem;" />
+ </div>
+ <script>
+ // Mood Board dropdown: show input for new board
+ const boardNameSelect = document.getElementById('board-name');
+ const newBoardInput = document.getElementById('new-board-name');
+ if (boardNameSelect && newBoardInput) {
+ boardNameSelect.addEventListener('change', function() {
+ if (this.value === '__new__') {
+ newBoardInput.style.display = 'block';
+ newBoardInput.focus();
+ } else {
+ newBoardInput.style.display = 'none';
+ }
+ });
+ }
+ </script>
+ <h2 style="margin-bottom: 2rem; font-family: var(--font-heading); font-size: 2rem; color: var(--charcoal-brown); text-align: center; position: relative; padding-bottom: 1rem;">
+ <span style="display: inline-block; position: relative;">
+ Estimate Your Project
+ <span style="position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background: var(--gradient-olive); border-radius: 2px;"></span>
+ </span>
+ </h2>
+ <div class="dashboard-grid" style="gap: 1.5rem; margin-bottom: 2.5rem;">
+ <!-- Category Cards -->
+ <div class="category-card" data-category="painting">
+ <div class="category-icon" style="background: var(--gradient-olive);"><span></span></div>
+ <div class="category-title">Painting</div>
+ <div class="category-subtitle">Interior & Exterior</div>
+ </div>
+ <div class="category-card" data-category="flooring">
+ <div class="category-icon" style="background: var(--gradient-taupe);"><span></span></div>
+ <div class="category-title">Flooring</div>
+ <div class="category-subtitle">LVP, Carpet, Hardwood</div>
+ </div>
+ <div class="category-card" data-category="kitchen">
+ <div class="category-icon" style="background: var(--gradient-warm);"><span></span></div>
+ <div class="category-title">Kitchen</div>
+ <div class="category-subtitle">Refresh & Remodel</div>
+ </div>
+ <div class="category-card" data-category="bathroom">
+ <div class="category-icon" style="background: linear-gradient(135deg, #6B5B4D 0%, #C2B1A1 100%);"><span></span></div>
+ <div class="category-title">Bathroom</div>
+ <div class="category-subtitle">Refresh & Remodel</div>
+ </div>
+ <div class="category-card" data-category="outdoor">
+ <div class="category-icon" style="background: var(--gradient-taupe);"><span></span></div>
+ <div class="category-title">Outdoor</div>
+ <div class="category-subtitle">Deck, Patio, Fence</div>
+ </div>
+ </div>
+ <div id="project-details" style="margin-top: 2rem; padding: 2rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige); min-height: 120px; transition: all 0.3s ease;"></div>
+ <button type="submit" class="btn-premium" style="margin-top: 2rem; width: 100%; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center;">
+ <span></span> Calculate Estimate
+ </button>
+ </form>
 
-  <div id="estimate-summary" class="card-premium animate-in" style="display:none; max-width: 800px; margin: 3rem auto 0 auto; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%); border: 1px solid var(--taupe-beige); animation-delay: 0.2s;">
-    <div style="text-align: center; margin-bottom: 2.5rem;">
-      <h3 style="font-family: var(--font-heading); font-size: 2.5rem; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Project Summary</h3>
-      <div style="width: 80px; height: 3px; background: var(--gradient-olive); margin: 0 auto; border-radius: 2px;"></div>
-    </div>
-    <div id="summary-details" style="font-size: 1.15rem; line-height: 1.8; color: var(--charcoal-brown); margin-bottom: 2rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light);"></div>
-    <div id="summary-card" style="margin-top: 1.5rem;"></div>
-    <div id="note-actions" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
-      <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Manage on Mood Board</h4>
-      <div style="display: flex; gap: 1rem;">
-        <a id="edit-note-link" href="#" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; font-size: 1rem; justify-content: center; background: var(--gradient-olive); text-decoration: none; display: inline-flex; align-items: center;">
-          <span>✏️</span> Edit Note
-        </a>
-        <button id="delete-note-btn" onclick="deleteNoteFromBoard()" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; font-size: 1rem; justify-content: center; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; cursor: pointer;">
-          <span>🗑️</span> Delete Note
-        </button>
-      </div>
-    </div>
-    <div id="summary-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
-      <button id="save-to-planner" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe);">
-        <span>💾</span> Save to Mood Board & Planner
-      </button>
-      <button id="edit-estimate" onclick="editEstimate()" class="btn-premium" style="padding: 1.25rem 1.5rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-olive); display: none;">
-        <span>✏️</span> Edit
-      </button>
-    </div>
-    <div id="save-success" style="display:none; color: #4a7c4a; text-align:center; margin-top:1rem; font-weight:600; font-size: 1.1rem; padding: 0.75rem; background: rgba(74, 124, 74, 0.1); border-radius: 8px;">✓ Successfully saved!</div>
-    <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="btn-link" style="display:block; margin-top:1.5rem; text-align:center; color: var(--olive-green); font-weight: 600; text-decoration: none; transition: all 0.3s ease;">📊 See ROI Guide →</a>
-  </div>
+ <div id="estimate-summary" class="card-premium animate-in" style="display:none; max-width: 800px; margin: 3rem auto 0 auto; padding: 3rem; background: linear-gradient(135deg, #FFFFFF 0%, #F0EBE4 100%); border: 1px solid var(--taupe-beige); animation-delay: 0.2s;">
+ <div style="text-align: center; margin-bottom: 2.5rem;">
+ <h3 style="font-family: var(--font-heading); font-size: 2.5rem; color: var(--charcoal-brown); margin-bottom: 0.5rem;">Project Summary</h3>
+ <div style="width: 80px; height: 3px; background: var(--gradient-olive); margin: 0 auto; border-radius: 2px;"></div>
+ </div>
+ <div id="summary-details" style="font-size: 1.15rem; line-height: 1.8; color: var(--charcoal-brown); margin-bottom: 2rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light);"></div>
+ <div id="summary-card" style="margin-top: 1.5rem;"></div>
+ <div id="note-actions" style="display: none; margin-top: 1.5rem; padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
+ <h4 style="font-family: var(--font-heading); font-size: 1.25rem; color: var(--charcoal-brown); margin-bottom: 1rem;">Manage on Mood Board</h4>
+ <div style="display: flex; gap: 1rem;">
+ <a id="edit-note-link" href="#" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; font-size: 1rem; justify-content: center; background: var(--gradient-olive); text-decoration: none; display: inline-flex; align-items: center;">
+ <span></span> Edit Note
+ </a>
+ <button id="delete-note-btn" onclick="deleteNoteFromBoard()" class="btn-premium" style="flex: 1; padding: 1rem 1.5rem; font-size: 1rem; justify-content: center; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; cursor: pointer;">
+ <span></span> Delete Note
+ </button>
+ </div>
+ </div>
+ <div id="summary-actions" style="display: flex; gap: 1rem; margin-top: 2rem;">
+ <button id="save-to-planner" class="btn-premium" style="flex: 1; padding: 1.25rem 2rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-taupe);">
+ <span></span> Save to Mood Board & Planner
+ </button>
+ <button id="edit-estimate" onclick="editEstimate()" class="btn-premium" style="padding: 1.25rem 1.5rem; font-size: 1.1rem; justify-content: center; background: var(--gradient-olive); display: none;">
+ <span></span> Edit
+ </button>
+ </div>
+ <div id="save-success" style="display:none; color: #4a7c4a; text-align:center; margin-top:1rem; font-weight:600; font-size: 1.1rem; padding: 0.75rem; background: rgba(74, 124, 74, 0.1); border-radius: 8px;"> Successfully saved!</div>
+ <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="btn-link" style="display:block; margin-top:1.5rem; text-align:center; color: var(--olive-green); font-weight: 600; text-decoration: none; transition: all 0.3s ease;"> See ROI Guide →</a>
+ </div>
 </div>
 
 <style>
 /* Premium Category Cards */
 .category-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow-premium);
-  padding: 2rem 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid transparent;
-  min-width: 140px;
-  position: relative;
-  overflow: hidden;
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ justify-content: center;
+ background: var(--white);
+ border-radius: 16px;
+ box-shadow: var(--shadow-premium);
+ padding: 2rem 1.5rem;
+ cursor: pointer;
+ transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+ border: 2px solid transparent;
+ min-width: 140px;
+ position: relative;
+ overflow: hidden;
 }
 
 .category-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.03) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+ content: '';
+ position: absolute;
+ top: 0;
+ left: 0;
+ right: 0;
+ bottom: 0;
+ background: linear-gradient(135deg, rgba(107, 91, 77, 0.03) 0%, rgba(200, 180, 151, 0.03) 100%);
+ opacity: 0;
+ transition: opacity 0.3s ease;
 }
 
 .category-card:hover::before {
-  opacity: 1;
+ opacity: 1;
 }
 
 .category-card.selected {
-  box-shadow: var(--shadow-premium-hover);
-  border: 2px solid var(--olive-green);
-  transform: translateY(-4px) scale(1.02);
-  background: linear-gradient(135deg, #FFFFFF 0%, #F6F2E8 100%);
+ box-shadow: var(--shadow-premium-hover);
+ border: 2px solid var(--olive-green);
+ transform: translateY(-4px) scale(1.02);
+ background: linear-gradient(135deg, #FFFFFF 0%, #F0EBE4 100%);
 }
 
 .category-card.selected::before {
-  opacity: 1;
+ opacity: 1;
 }
 
 .category-card:hover:not(.selected) {
-  box-shadow: var(--shadow-premium-hover);
-  transform: translateY(-2px) scale(1.01);
-  border-color: var(--taupe-beige);
+ box-shadow: var(--shadow-premium-hover);
+ transform: translateY(-2px) scale(1.01);
+ border-color: var(--taupe-beige);
 }
 
 .category-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(58, 53, 44, 0.15);
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
+ width: 64px;
+ height: 64px;
+ border-radius: 50%;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ font-size: 2.5rem;
+ margin-bottom: 1rem;
+ box-shadow: 0 4px 12px rgba(61, 46, 36, 0.15);
+ transition: all 0.3s ease;
+ position: relative;
+ z-index: 1;
 }
 
 .category-card.selected .category-icon {
-  transform: scale(1.1);
-  box-shadow: 0 6px 20px rgba(107, 106, 69, 0.3);
+ transform: scale(1.1);
+ box-shadow: 0 6px 20px rgba(107, 91, 77, 0.3);
 }
 
 .category-title {
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  color: var(--charcoal-brown);
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-  position: relative;
-  z-index: 1;
-  transition: color 0.3s ease;
+ font-family: var(--font-heading);
+ font-size: 1.25rem;
+ color: var(--charcoal-brown);
+ font-weight: 600;
+ margin-bottom: 0.25rem;
+ position: relative;
+ z-index: 1;
+ transition: color 0.3s ease;
 }
 
 .category-card.selected .category-title {
-  color: var(--olive-green);
+ color: var(--olive-green);
 }
 
 .category-subtitle {
-  font-size: 0.85rem;
-  color: var(--taupe-beige);
-  font-weight: 500;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-  transition: color 0.3s ease;
+ font-size: 0.85rem;
+ color: var(--taupe-beige);
+ font-weight: 500;
+ text-align: center;
+ position: relative;
+ z-index: 1;
+ transition: color 0.3s ease;
 }
 
 .category-card.selected .category-subtitle {
-  color: var(--olive-green);
+ color: var(--olive-green);
 }
 
 /* Premium Form Controls */
 .premium-select,
 .premium-input {
-  width: 100%;
-  padding: 1rem 1.25rem;
-  font-size: 1rem;
-  border: 2px solid var(--taupe-beige);
-  border-radius: 10px;
-  background: var(--white);
-  color: var(--charcoal-brown);
-  transition: all 0.3s ease;
-  font-family: var(--font-body);
+ width: 100%;
+ padding: 1rem 1.25rem;
+ font-size: 1rem;
+ border: 2px solid var(--taupe-beige);
+ border-radius: 10px;
+ background: var(--white);
+ color: var(--charcoal-brown);
+ transition: all 0.3s ease;
+ font-family: var(--font-body);
 }
 
 .premium-select:focus,
 .premium-input:focus {
-  outline: none;
-  border-color: var(--olive-green);
-  box-shadow: 0 0 0 3px rgba(107, 106, 69, 0.1);
-  transform: translateY(-1px);
+ outline: none;
+ border-color: var(--olive-green);
+ box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
+ transform: translateY(-1px);
 }
 
 .premium-select:hover {
-  border-color: var(--olive-green);
+ border-color: var(--olive-green);
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+ margin-bottom: 1.5rem;
 }
 
 .form-label {
-  display: block;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-  color: var(--charcoal-brown);
-  font-size: 0.95rem;
+ display: block;
+ margin-bottom: 0.75rem;
+ font-weight: 600;
+ color: var(--charcoal-brown);
+ font-size: 0.95rem;
 }
 
 /* Enhanced Summary Card */
 #summary-card > div {
-  background: linear-gradient(135deg, var(--white) 0%, var(--light-cream) 100%);
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: var(--shadow-premium);
-  border: 1px solid var(--taupe-beige);
-  margin-top: 1rem;
+ background: linear-gradient(135deg, var(--white) 0%, var(--light-cream) 100%);
+ border-radius: 16px;
+ padding: 2rem;
+ box-shadow: var(--shadow-premium);
+ border: 1px solid var(--taupe-beige);
+ margin-top: 1rem;
 }
 
 #summary-card ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 1.1rem;
-  line-height: 2;
+ list-style: none;
+ padding: 0;
+ margin: 0;
+ font-size: 1.1rem;
+ line-height: 2;
 }
 
 #summary-card li {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(200, 180, 151, 0.2);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+ padding: 0.75rem 0;
+ border-bottom: 1px solid rgba(200, 180, 151, 0.2);
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
 }
 
 #summary-card li:last-child {
-  border-bottom: none;
+ border-bottom: none;
 }
 
 #summary-card b {
-  color: var(--olive-green);
-  font-weight: 600;
-  font-family: var(--font-heading);
+ color: var(--olive-green);
+ font-weight: 600;
+ font-family: var(--font-heading);
 }
 
 /* Animation */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+ from {
+ opacity: 0;
+ transform: translateY(30px);
+ }
+ to {
+ opacity: 1;
+ transform: translateY(0);
+ }
 }
 
 .animate-in {
-  animation: fadeInUp 0.6s ease-out forwards;
-  opacity: 0;
+ animation: fadeInUp 0.6s ease-out forwards;
+ opacity: 0;
 }
 
 /* Responsive Grid */
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 1.5rem;
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+ gap: 1.5rem;
 }
 
 @media (max-width: 768px) {
-  .dashboard-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .category-card {
-    padding: 1.5rem 1rem;
-  }
-  
-  .category-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 2rem;
-  }
+ .dashboard-grid {
+ grid-template-columns: repeat(2, 1fr);
+ }
+ 
+ .category-card {
+ padding: 1.5rem 1rem;
+ }
+ 
+ .category-icon {
+ width: 56px;
+ height: 56px;
+ font-size: 2rem;
+ }
 }
 </style>
 
 <script>
 const detailsTemplates = {
-  painting: `
-    <div class="form-group">
-      <label for="area" class="form-label">🎨 Area to Paint (sq ft)</label>
-      <input type="number" id="area" name="area" min="1" required class="premium-input" placeholder="e.g. 500">
-    </div>
-    <div class="form-group">
-      <label for="finish" class="form-label">Paint Finish</label>
-      <select id="finish" name="finish" class="premium-select">
-        <option value="standard">Standard</option>
-        <option value="premium">Premium</option>
-      </select>
-    </div>
-  `,
-  flooring: `
-    <div class="form-group">
-      <label for="area" class="form-label">🪵 Flooring Area (sq ft)</label>
-      <input type="number" id="area" name="area" min="1" required class="premium-input" placeholder="e.g. 300">
-    </div>
-    <div class="form-group">
-      <label for="material" class="form-label">Material Type</label>
-      <select id="material" name="material" class="premium-select">
-        <option value="lvp">LVP (Luxury Vinyl Plank)</option>
-        <option value="carpet">Carpet</option>
-        <option value="hardwood">Hardwood</option>
-      </select>
-    </div>
-  `,
-  bathroom: `
-    <div class="form-group">
-      <label for="level" class="form-label">🛁 Refresh Level</label>
-      <select id="level" name="level" class="premium-select">
-        <option value="basic">Basic Refresh</option>
-        <option value="mid">Mid-Range</option>
-        <option value="premium">Premium Remodel</option>
-      </select>
-    </div>
-  `,
-  kitchen: `
-    <div class="form-group">
-      <label for="level" class="form-label">🍽️ Refresh Level</label>
-      <select id="level" name="level" class="premium-select">
-        <option value="basic">Basic Refresh</option>
-        <option value="mid">Mid-Range</option>
-        <option value="premium">Premium Remodel</option>
-      </select>
-    </div>
-  `,
-  outdoor: `
-    <div class="form-group">
-      <label for="type" class="form-label">🌳 Project Type</label>
-      <select id="type" name="type" class="premium-select">
-        <option value="deck">Deck</option>
-        <option value="patio">Patio</option>
-        <option value="fence">Fence</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="area" class="form-label">Area (sq ft)</label>
-      <input type="number" id="area" name="area" min="1" required class="premium-input" placeholder="e.g. 200">
-    </div>
-  `
+ painting: `
+ <div class="form-group">
+ <label for="area" class="form-label"> Area to Paint (sq ft)</label>
+ <input type="number" id="area" name="area" min="1" required class="premium-input" placeholder="e.g. 500">
+ </div>
+ <div class="form-group">
+ <label for="finish" class="form-label">Paint Finish</label>
+ <select id="finish" name="finish" class="premium-select">
+ <option value="standard">Standard</option>
+ <option value="premium">Premium</option>
+ </select>
+ </div>
+ `,
+ flooring: `
+ <div class="form-group">
+ <label for="area" class="form-label"> Flooring Area (sq ft)</label>
+ <input type="number" id="area" name="area" min="1" required class="premium-input" placeholder="e.g. 300">
+ </div>
+ <div class="form-group">
+ <label for="material" class="form-label">Material Type</label>
+ <select id="material" name="material" class="premium-select">
+ <option value="lvp">LVP (Luxury Vinyl Plank)</option>
+ <option value="carpet">Carpet</option>
+ <option value="hardwood">Hardwood</option>
+ </select>
+ </div>
+ `,
+ bathroom: `
+ <div class="form-group">
+ <label for="level" class="form-label"> Refresh Level</label>
+ <select id="level" name="level" class="premium-select">
+ <option value="basic">Basic Refresh</option>
+ <option value="mid">Mid-Range</option>
+ <option value="premium">Premium Remodel</option>
+ </select>
+ </div>
+ `,
+ kitchen: `
+ <div class="form-group">
+ <label for="level" class="form-label"> Refresh Level</label>
+ <select id="level" name="level" class="premium-select">
+ <option value="basic">Basic Refresh</option>
+ <option value="mid">Mid-Range</option>
+ <option value="premium">Premium Remodel</option>
+ </select>
+ </div>
+ `,
+ outdoor: `
+ <div class="form-group">
+ <label for="type" class="form-label"> Project Type</label>
+ <select id="type" name="type" class="premium-select">
+ <option value="deck">Deck</option>
+ <option value="patio">Patio</option>
+ <option value="fence">Fence</option>
+ </select>
+ </div>
+ <div class="form-group">
+ <label for="area" class="form-label">Area (sq ft)</label>
+ <input type="number" id="area" name="area" min="1" required class="premium-input" placeholder="e.g. 200">
+ </div>
+ `
 };
 
 // Category card click logic
 document.querySelectorAll('.category-card').forEach(card => {
-  card.addEventListener('click', function() {
-    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
-    this.classList.add('selected');
-    const cat = this.getAttribute('data-category');
-    document.getElementById('project-details').innerHTML = detailsTemplates[cat] || '';
-    document.getElementById('project-details').setAttribute('data-category', cat);
-  });
+ card.addEventListener('click', function() {
+ document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+ this.classList.add('selected');
+ const cat = this.getAttribute('data-category');
+ document.getElementById('project-details').innerHTML = detailsTemplates[cat] || '';
+ document.getElementById('project-details').setAttribute('data-category', cat);
+ });
 });
 
 let lastEstimate = null;
 document.getElementById('cost-estimator-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  // Determine selected category
-  const selectedCard = document.querySelector('.category-card.selected');
-  if (!selectedCard) {
-    alert('Please select a renovation category.');
-    return;
-  }
-  const type = selectedCard.getAttribute('data-category');
-  let summary = '';
-  let cost = 0;
-  let projectName = '';
-  let notes = '';
-  let materialBreakdown = '';
-  let laborBreakdown = '';
-  let timeline = '';
-  let difficulty = '';
-  let roi = '';
-  // Professional estimator logic - Median to slightly above median market rates (2024)
-  if (type === 'painting') {
-    const area = +document.getElementById('area').value;
-    const finish = document.getElementById('finish').value;
-    // Standard: $3.25/sq ft (median $2.50-$3.50), Premium: $4.75/sq ft (median $4.00-$5.50)
-    cost = area * (finish === 'premium' ? 4.75 : 3.25);
-    summary = `Painting ${area} sq ft with ${finish} finish.`;
-    projectName = 'Painting Project';
-    notes = `Area: ${area} sq ft, Finish: ${finish}`;
-    materialBreakdown = `$${(cost * 0.35).toLocaleString()} (materials)`;
-    laborBreakdown = `$${(cost * 0.65).toLocaleString()} (labor)`;
-    timeline = area < 400 ? '1-2 days' : '3-5 days';
-    difficulty = finish === 'premium' ? 'Medium' : 'Easy';
-    roi = '60-80%';
-  } else if (type === 'flooring') {
-    const area = +document.getElementById('area').value;
-    const material = document.getElementById('material').value;
-    // LVP: $6.50/sq ft (median $5-$8), Carpet: $4.50/sq ft (median $3-$6), Hardwood: $11/sq ft (median $8-$15)
-    const rates = { lvp: 6.50, carpet: 4.50, hardwood: 11.00 };
-    cost = area * (rates[material] || 6.50);
-    summary = `Flooring ${area} sq ft with ${material}.`;
-    projectName = 'Flooring Project';
-    notes = `Area: ${area} sq ft, Material: ${material}`;
-    materialBreakdown = `$${(cost * 0.55).toLocaleString()} (materials)`;
-    laborBreakdown = `$${(cost * 0.45).toLocaleString()} (labor)`;
-    timeline = area < 300 ? '1-2 days' : '3-6 days';
-    difficulty = material === 'hardwood' ? 'Hard' : 'Medium';
-    roi = '70-90%';
-  } else if (type === 'bathroom') {
-    const level = document.getElementById('level').value;
-    // Basic: $6,750 (median $5,000-$8,000), Mid: $12,500 (median $10,000-$15,000), Premium: $23,500 (median $20,000-$30,000)
-    const rates = { basic: 6750, mid: 12500, premium: 23500 };
-    cost = rates[level] || 6750;
-    summary = `Bathroom Refresh: ${level}.`;
-    projectName = 'Bathroom Refresh';
-    notes = `Level: ${level}`;
-    materialBreakdown = `$${(cost * 0.50).toLocaleString()} (materials)`;
-    laborBreakdown = `$${(cost * 0.50).toLocaleString()} (labor)`;
-    timeline = level === 'basic' ? '3-5 days' : (level === 'mid' ? '6-10 days' : '12-18 days');
-    difficulty = level === 'premium' ? 'Hard' : (level === 'mid' ? 'Medium' : 'Easy');
-    roi = '60-80%';
-  } else if (type === 'kitchen') {
-    const level = document.getElementById('level').value;
-    // Basic: $10,500 (median $8,000-$12,000), Mid: $21,000 (median $15,000-$25,000), Premium: $37,500 (median $30,000-$50,000)
-    const rates = { basic: 10500, mid: 21000, premium: 37500 };
-    cost = rates[level] || 10500;
-    summary = `Kitchen Refresh: ${level}.`;
-    projectName = 'Kitchen Refresh';
-    notes = `Level: ${level}`;
-    materialBreakdown = `$${(cost * 0.50).toLocaleString()} (materials)`;
-    laborBreakdown = `$${(cost * 0.50).toLocaleString()} (labor)`;
-    timeline = level === 'basic' ? '5-7 days' : (level === 'mid' ? '10-14 days' : '18-25 days');
-    difficulty = level === 'premium' ? 'Hard' : (level === 'mid' ? 'Medium' : 'Easy');
-    roi = '75-100%';
-  } else if (type === 'outdoor') {
-    const area = +document.getElementById('area').value;
-    const projType = document.getElementById('type').value;
-    // Deck: $36/sq ft (median $30-$45), Patio: $26/sq ft (median $20-$30), Fence: $19/sq ft (median $15-$25)
-    const rates = { deck: 36, patio: 26, fence: 19 };
-    cost = area * (rates[projType] || 26);
-    summary = `Outdoor ${projType} of ${area} sq ft.`;
-    projectName = `Outdoor ${projType.charAt(0).toUpperCase() + projType.slice(1)}`;
-    notes = `Area: ${area} sq ft, Type: ${projType}`;
-    materialBreakdown = `$${(cost * 0.50).toLocaleString()} (materials)`;
-    laborBreakdown = `$${(cost * 0.50).toLocaleString()} (labor)`;
-    timeline = area < 200 ? '2-4 days' : '5-10 days';
-    difficulty = projType === 'deck' ? 'Hard' : 'Medium';
-    roi = '60-85%';
-  }
-  // At-a-glance summary card with premium styling
-  document.getElementById('summary-details').innerHTML = `
-    <div style="text-align: center; margin-bottom: 1rem;">
-      <p style="font-size: 1.25rem; color: var(--charcoal-brown); margin-bottom: 1rem;">${summary}</p>
-      <div style="font-family: var(--font-heading); font-size: 2.5rem; font-weight: 700; color: var(--olive-green); margin: 1rem 0;">
-        $${cost.toLocaleString()}
-      </div>
-      <p style="font-size: 0.95rem; color: var(--taupe-beige); font-style: italic;">Total Estimated Cost</p>
-    </div>
-  `;
-  document.getElementById('summary-card').innerHTML = `
-    <div style="background: linear-gradient(135deg, var(--white) 0%, var(--light-cream) 100%); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-premium); border: 1px solid var(--taupe-beige); margin-top: 1rem;">
-      <h4 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--charcoal-brown); margin-bottom: 1.5rem; text-align: center; font-weight: 600;">Project Details</h4>
-      <ul style="list-style:none; padding:0; margin:0; font-size:1.1rem; line-height: 2;">
-        <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
-          <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Material:</b></span>
-          <span style="color: var(--charcoal-brown); font-weight: 500;">${materialBreakdown}</span>
-        </li>
-        <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
-          <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Labor:</b></span>
-          <span style="color: var(--charcoal-brown); font-weight: 500;">${laborBreakdown}</span>
-        </li>
-        <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
-          <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Timeline:</b></span>
-          <span style="color: var(--charcoal-brown); font-weight: 500;">${timeline}</span>
-        </li>
-        <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
-          <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Difficulty:</b></span>
-          <span style="color: var(--charcoal-brown); font-weight: 500;">${difficulty}</span>
-        </li>
-        <li style="padding: 0.75rem 0; display: flex; justify-content: space-between; align-items: center;">
-          <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">ROI Estimate:</b></span>
-          <span style="color: var(--olive-green); font-weight: 600;">${roi}</span>
-        </li>
-      </ul>
-    </div>
-  `;
-  document.getElementById('estimate-summary').style.display = 'block';
-  // Smooth scroll to summary
-  setTimeout(() => {
-    document.getElementById('estimate-summary').scrollIntoView({ 
-      behavior: 'smooth', 
-      block: 'nearest' 
-    });
-  }, 100);
-  lastEstimate = {
-    project_name: projectName,
-    project_budget: cost,
-    project_status: 'Planning',
-    project_notes: notes,
-    project_summary: summary + ` Estimated Cost: $${cost.toLocaleString()}`,
-    project_type: type,
-    project_category: type.charAt(0).toUpperCase() + type.slice(1)
-  };
-  
-  // Show edit button if estimate was previously saved
-  const editBtn = document.getElementById('edit-estimate');
-  if (editBtn) {
-    editBtn.style.display = 'none'; // Hide initially, will show after save
-  }
+ e.preventDefault();
+ // Determine selected category
+ const selectedCard = document.querySelector('.category-card.selected');
+ if (!selectedCard) {
+ alert('Please select a renovation category.');
+ return;
+ }
+ const type = selectedCard.getAttribute('data-category');
+ let summary = '';
+ let cost = 0;
+ let projectName = '';
+ let notes = '';
+ let materialBreakdown = '';
+ let laborBreakdown = '';
+ let timeline = '';
+ let difficulty = '';
+ let roi = '';
+ // Professional estimator logic - Median to slightly above median market rates (2024)
+ if (type === 'painting') {
+ const area = +document.getElementById('area').value;
+ const finish = document.getElementById('finish').value;
+ // Standard: $3.25/sq ft (median $2.50-$3.50), Premium: $4.75/sq ft (median $4.00-$5.50)
+ cost = area * (finish === 'premium' ? 4.75 : 3.25);
+ summary = `Painting ${area} sq ft with ${finish} finish.`;
+ projectName = 'Painting Project';
+ notes = `Area: ${area} sq ft, Finish: ${finish}`;
+ materialBreakdown = `$${(cost * 0.35).toLocaleString()} (materials)`;
+ laborBreakdown = `$${(cost * 0.65).toLocaleString()} (labor)`;
+ timeline = area < 400 ? '1-2 days' : '3-5 days';
+ difficulty = finish === 'premium' ? 'Medium' : 'Easy';
+ roi = '60-80%';
+ } else if (type === 'flooring') {
+ const area = +document.getElementById('area').value;
+ const material = document.getElementById('material').value;
+ // LVP: $6.50/sq ft (median $5-$8), Carpet: $4.50/sq ft (median $3-$6), Hardwood: $11/sq ft (median $8-$15)
+ const rates = { lvp: 6.50, carpet: 4.50, hardwood: 11.00 };
+ cost = area * (rates[material] || 6.50);
+ summary = `Flooring ${area} sq ft with ${material}.`;
+ projectName = 'Flooring Project';
+ notes = `Area: ${area} sq ft, Material: ${material}`;
+ materialBreakdown = `$${(cost * 0.55).toLocaleString()} (materials)`;
+ laborBreakdown = `$${(cost * 0.45).toLocaleString()} (labor)`;
+ timeline = area < 300 ? '1-2 days' : '3-6 days';
+ difficulty = material === 'hardwood' ? 'Hard' : 'Medium';
+ roi = '70-90%';
+ } else if (type === 'bathroom') {
+ const level = document.getElementById('level').value;
+ // Basic: $6,750 (median $5,000-$8,000), Mid: $12,500 (median $10,000-$15,000), Premium: $23,500 (median $20,000-$30,000)
+ const rates = { basic: 6750, mid: 12500, premium: 23500 };
+ cost = rates[level] || 6750;
+ summary = `Bathroom Refresh: ${level}.`;
+ projectName = 'Bathroom Refresh';
+ notes = `Level: ${level}`;
+ materialBreakdown = `$${(cost * 0.50).toLocaleString()} (materials)`;
+ laborBreakdown = `$${(cost * 0.50).toLocaleString()} (labor)`;
+ timeline = level === 'basic' ? '3-5 days' : (level === 'mid' ? '6-10 days' : '12-18 days');
+ difficulty = level === 'premium' ? 'Hard' : (level === 'mid' ? 'Medium' : 'Easy');
+ roi = '60-80%';
+ } else if (type === 'kitchen') {
+ const level = document.getElementById('level').value;
+ // Basic: $10,500 (median $8,000-$12,000), Mid: $21,000 (median $15,000-$25,000), Premium: $37,500 (median $30,000-$50,000)
+ const rates = { basic: 10500, mid: 21000, premium: 37500 };
+ cost = rates[level] || 10500;
+ summary = `Kitchen Refresh: ${level}.`;
+ projectName = 'Kitchen Refresh';
+ notes = `Level: ${level}`;
+ materialBreakdown = `$${(cost * 0.50).toLocaleString()} (materials)`;
+ laborBreakdown = `$${(cost * 0.50).toLocaleString()} (labor)`;
+ timeline = level === 'basic' ? '5-7 days' : (level === 'mid' ? '10-14 days' : '18-25 days');
+ difficulty = level === 'premium' ? 'Hard' : (level === 'mid' ? 'Medium' : 'Easy');
+ roi = '75-100%';
+ } else if (type === 'outdoor') {
+ const area = +document.getElementById('area').value;
+ const projType = document.getElementById('type').value;
+ // Deck: $36/sq ft (median $30-$45), Patio: $26/sq ft (median $20-$30), Fence: $19/sq ft (median $15-$25)
+ const rates = { deck: 36, patio: 26, fence: 19 };
+ cost = area * (rates[projType] || 26);
+ summary = `Outdoor ${projType} of ${area} sq ft.`;
+ projectName = `Outdoor ${projType.charAt(0).toUpperCase() + projType.slice(1)}`;
+ notes = `Area: ${area} sq ft, Type: ${projType}`;
+ materialBreakdown = `$${(cost * 0.50).toLocaleString()} (materials)`;
+ laborBreakdown = `$${(cost * 0.50).toLocaleString()} (labor)`;
+ timeline = area < 200 ? '2-4 days' : '5-10 days';
+ difficulty = projType === 'deck' ? 'Hard' : 'Medium';
+ roi = '60-85%';
+ }
+ // At-a-glance summary card with premium styling
+ document.getElementById('summary-details').innerHTML = `
+ <div style="text-align: center; margin-bottom: 1rem;">
+ <p style="font-size: 1.25rem; color: var(--charcoal-brown); margin-bottom: 1rem;">${summary}</p>
+ <div style="font-family: var(--font-heading); font-size: 2.5rem; font-weight: 700; color: var(--olive-green); margin: 1rem 0;">
+ $${cost.toLocaleString()}
+ </div>
+ <p style="font-size: 0.95rem; color: var(--taupe-beige); font-style: italic;">Total Estimated Cost</p>
+ </div>
+ `;
+ document.getElementById('summary-card').innerHTML = `
+ <div style="background: linear-gradient(135deg, var(--white) 0%, var(--light-cream) 100%); border-radius: 16px; padding: 2rem; box-shadow: var(--shadow-premium); border: 1px solid var(--taupe-beige); margin-top: 1rem;">
+ <h4 style="font-family: var(--font-heading); font-size: 1.5rem; color: var(--charcoal-brown); margin-bottom: 1.5rem; text-align: center; font-weight: 600;">Project Details</h4>
+ <ul style="list-style:none; padding:0; margin:0; font-size:1.1rem; line-height: 2;">
+ <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
+ <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Material:</b></span>
+ <span style="color: var(--charcoal-brown); font-weight: 500;">${materialBreakdown}</span>
+ </li>
+ <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
+ <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Labor:</b></span>
+ <span style="color: var(--charcoal-brown); font-weight: 500;">${laborBreakdown}</span>
+ </li>
+ <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
+ <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Timeline:</b></span>
+ <span style="color: var(--charcoal-brown); font-weight: 500;">${timeline}</span>
+ </li>
+ <li style="padding: 0.75rem 0; border-bottom: 1px solid rgba(200, 180, 151, 0.2); display: flex; justify-content: space-between; align-items: center;">
+ <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">Difficulty:</b></span>
+ <span style="color: var(--charcoal-brown); font-weight: 500;">${difficulty}</span>
+ </li>
+ <li style="padding: 0.75rem 0; display: flex; justify-content: space-between; align-items: center;">
+ <span><b style="color: var(--olive-green); font-weight: 600; font-family: var(--font-heading);">ROI Estimate:</b></span>
+ <span style="color: var(--olive-green); font-weight: 600;">${roi}</span>
+ </li>
+ </ul>
+ </div>
+ `;
+ document.getElementById('estimate-summary').style.display = 'block';
+ // Smooth scroll to summary
+ setTimeout(() => {
+ document.getElementById('estimate-summary').scrollIntoView({ 
+ behavior: 'smooth', 
+ block: 'nearest' 
+ });
+ }, 100);
+ lastEstimate = {
+ project_name: projectName,
+ project_budget: cost,
+ project_status: 'Planning',
+ project_notes: notes,
+ project_summary: summary + ` Estimated Cost: $${cost.toLocaleString()}`,
+ project_type: type,
+ project_category: type.charAt(0).toUpperCase() + type.slice(1)
+ };
+ 
+ // Show edit button if estimate was previously saved
+ const editBtn = document.getElementById('edit-estimate');
+ if (editBtn) {
+ editBtn.style.display = 'none'; // Hide initially, will show after save
+ }
 });
 
 function editEstimate() {
-  // Scroll back to form and allow editing
-  document.getElementById('cost-estimator-form').scrollIntoView({ behavior: 'smooth' });
-  // Re-populate form fields if needed
-  const selectedCard = document.querySelector('.category-card.selected');
-  if (selectedCard) {
-    // Form is already populated, user can modify and recalculate
-    alert('Modify your project details above and click "Calculate Estimate" to update.');
-  }
+ // Scroll back to form and allow editing
+ document.getElementById('cost-estimator-form').scrollIntoView({ behavior: 'smooth' });
+ // Re-populate form fields if needed
+ const selectedCard = document.querySelector('.category-card.selected');
+ if (selectedCard) {
+ // Form is already populated, user can modify and recalculate
+ alert('Modify your project details above and click "Calculate Estimate" to update.');
+ }
 }
 
 let currentNoteId = null;
 let currentBoardName = null;
 
 function showNoteActions(noteId, boardName) {
-  currentNoteId = noteId;
-  currentBoardName = boardName;
-  const noteActions = document.getElementById('note-actions');
-  const editLink = document.getElementById('edit-note-link');
-  if (noteActions && editLink) {
-    noteActions.style.display = 'block';
-    editLink.href = `/homeowner/design-boards/note/${noteId}/edit`;
-  }
+ currentNoteId = noteId;
+ currentBoardName = boardName;
+ const noteActions = document.getElementById('note-actions');
+ const editLink = document.getElementById('edit-note-link');
+ if (noteActions && editLink) {
+ noteActions.style.display = 'block';
+ editLink.href = `/homeowner/design-boards/note/${noteId}/edit`;
+ }
 }
 
 function deleteNoteFromBoard() {
-  if (!currentNoteId) return;
-  
-  if (!confirm('Are you sure you want to delete this note from the mood board? This action cannot be undone.')) {
-    return;
-  }
-  
-  fetch(`/homeowner/design-boards/note/${currentNoteId}/delete`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      alert('Note deleted successfully.');
-      if (data.board_name) {
-        window.location.href = `/homeowner/design-boards/${encodeURIComponent(data.board_name)}`;
-      } else {
-        location.reload();
-      }
-    } else {
-      alert('Could not delete note: ' + (data.error || 'Unknown error'));
-    }
-  })
-  .catch(() => alert('Could not delete note.'));
+ if (!currentNoteId) return;
+ 
+ if (!confirm('Are you sure you want to delete this note from the mood board? This action cannot be undone.')) {
+ return;
+ }
+ 
+ fetch(`/homeowner/design-boards/note/${currentNoteId}/delete`, {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' }
+ })
+ .then(res => res.json())
+ .then(data => {
+ if (data.success) {
+ alert('Note deleted successfully.');
+ if (data.board_name) {
+ window.location.href = `/homeowner/design-boards/${encodeURIComponent(data.board_name)}`;
+ } else {
+ location.reload();
+ }
+ } else {
+ alert('Could not delete note: ' + (data.error || 'Unknown error'));
+ }
+ })
+ .catch(() => alert('Could not delete note.'));
 }
 
 document.getElementById('save-to-planner').addEventListener('click', function() {
-  if (!lastEstimate) {
-    alert('Please calculate an estimate first.');
-    return;
-  }
-  let boardName = boardNameSelect.value;
-  if (boardName === '__new__') {
-    boardName = newBoardInput.value.trim();
-    if (!boardName) {
-      alert('Please enter a name for your new Mood Board.');
-      newBoardInput.focus();
-      return;
-    }
-  }
-  if (!boardName) {
-    alert('Please select or enter a Mood Board to save.');
-    return;
-  }
-  
-  // Disable button during save
-  const saveButton = document.getElementById('save-to-planner');
-  const originalText = saveButton.innerHTML;
-  saveButton.disabled = true;
-  saveButton.innerHTML = '<span>⏳</span> Saving...';
-  
-  const payload = { ...lastEstimate, board_name: boardName };
-  fetch('/homeowner/reno/planner/ajax-add', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  })
-  .then(res => {
-    if (!res.ok) {
-      return res.json().then(data => Promise.reject(data));
-    }
-    return res.json();
-  })
-  .then(data => {
-    if (data.success) {
-      const successMsg = document.getElementById('save-success');
-      if (data.saved_to_board && data.saved_to_planner) {
-        // Both saved successfully
-        successMsg.innerHTML = '✓ Successfully saved to Renovation Planner & Mood Board!';
-        successMsg.style.color = '#4a7c4a';
-        successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
-      } else if (data.warning) {
-        // Saved to planner but not board
-        successMsg.innerHTML = '✓ Saved to Planner ⚠️ ' + data.warning;
-        successMsg.style.color = '#856404';
-        successMsg.style.background = 'rgba(255, 193, 7, 0.1)';
-      } else if (data.message) {
-        // Custom message
-        successMsg.innerHTML = '✓ ' + data.message;
-        successMsg.style.color = '#4a7c4a';
-        successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
-      } else {
-        // Default success
-        successMsg.innerHTML = '✓ Successfully saved!';
-        successMsg.style.color = '#4a7c4a';
-        successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
-      }
-      successMsg.style.display = 'block';
-      setTimeout(() => { successMsg.style.display = 'none'; }, 5000);
-      
-      // Store project ID if returned for future editing
-      if (data.project_id) {
-        lastEstimate.project_id = data.project_id;
-      }
-      if (data.note_id) {
-        lastEstimate.note_id = data.note_id;
-        lastEstimate.board_name = boardName;
-        // Show edit/delete links for the note
-        showNoteActions(data.note_id, boardName);
-      }
-      if (data.project_id) {
-        // Show edit button for project
-        const editBtn = document.getElementById('edit-estimate');
-        if (editBtn) {
-          editBtn.style.display = 'inline-flex';
-          editBtn.onclick = () => {
-            window.location.href = `/homeowner/reno/planner/project/${data.project_id}/edit`;
-          };
-        }
-      }
-    } else {
-      alert('Could not save: ' + (data.error || 'Unknown error'));
-    }
-  })
-  .catch(error => {
-    console.error('Save error:', error);
-    alert('Could not save project: ' + (error.error || error.message || 'Unknown error'));
-  })
-  .finally(() => {
-    saveButton.disabled = false;
-    saveButton.innerHTML = originalText;
-  });
+ if (!lastEstimate) {
+ alert('Please calculate an estimate first.');
+ return;
+ }
+ let boardName = boardNameSelect.value;
+ if (boardName === '__new__') {
+ boardName = newBoardInput.value.trim();
+ if (!boardName) {
+ alert('Please enter a name for your new Mood Board.');
+ newBoardInput.focus();
+ return;
+ }
+ }
+ if (!boardName) {
+ alert('Please select or enter a Mood Board to save.');
+ return;
+ }
+ 
+ // Disable button during save
+ const saveButton = document.getElementById('save-to-planner');
+ const originalText = saveButton.innerHTML;
+ saveButton.disabled = true;
+ saveButton.innerHTML = '<span></span> Saving...';
+ 
+ const payload = { ...lastEstimate, board_name: boardName };
+ fetch('/homeowner/reno/planner/ajax-add', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify(payload)
+ })
+ .then(res => {
+ if (!res.ok) {
+ return res.json().then(data => Promise.reject(data));
+ }
+ return res.json();
+ })
+ .then(data => {
+ if (data.success) {
+ const successMsg = document.getElementById('save-success');
+ if (data.saved_to_board && data.saved_to_planner) {
+ // Both saved successfully
+ successMsg.innerHTML = ' Successfully saved to Renovation Planner & Mood Board!';
+ successMsg.style.color = '#4a7c4a';
+ successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+ } else if (data.warning) {
+ // Saved to planner but not board
+ successMsg.innerHTML = ' Saved to Planner ' + data.warning;
+ successMsg.style.color = '#856404';
+ successMsg.style.background = 'rgba(255, 193, 7, 0.1)';
+ } else if (data.message) {
+ // Custom message
+ successMsg.innerHTML = ' ' + data.message;
+ successMsg.style.color = '#4a7c4a';
+ successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+ } else {
+ // Default success
+ successMsg.innerHTML = ' Successfully saved!';
+ successMsg.style.color = '#4a7c4a';
+ successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+ }
+ successMsg.style.display = 'block';
+ setTimeout(() => { successMsg.style.display = 'none'; }, 5000);
+ 
+ // Store project ID if returned for future editing
+ if (data.project_id) {
+ lastEstimate.project_id = data.project_id;
+ }
+ if (data.note_id) {
+ lastEstimate.note_id = data.note_id;
+ lastEstimate.board_name = boardName;
+ // Show edit/delete links for the note
+ showNoteActions(data.note_id, boardName);
+ }
+ if (data.project_id) {
+ // Show edit button for project
+ const editBtn = document.getElementById('edit-estimate');
+ if (editBtn) {
+ editBtn.style.display = 'inline-flex';
+ editBtn.onclick = () => {
+ window.location.href = `/homeowner/reno/planner/project/${data.project_id}/edit`;
+ };
+ }
+ }
+ } else {
+ alert('Could not save: ' + (data.error || 'Unknown error'));
+ }
+ })
+ .catch(error => {
+ console.error('Save error:', error);
+ alert('Could not save project: ' + (error.error || error.message || 'Unknown error'));
+ })
+ .finally(() => {
+ saveButton.disabled = false;
+ saveButton.innerHTML = originalText;
+ });
 });
 
 // Load and display saved projects
 let savedProjectsVisible = false;
 function toggleSavedProjects() {
-  savedProjectsVisible = !savedProjectsVisible;
-  const section = document.getElementById('saved-projects-section');
-  const list = document.getElementById('saved-projects-list');
-  const toggleText = document.getElementById('toggle-projects-text');
-  
-  if (savedProjectsVisible) {
-    section.style.display = 'block';
-    toggleText.textContent = 'Hide';
-    loadSavedProjects();
-  } else {
-    section.style.display = 'none';
-    toggleText.textContent = 'Show';
-  }
+ savedProjectsVisible = !savedProjectsVisible;
+ const section = document.getElementById('saved-projects-section');
+ const list = document.getElementById('saved-projects-list');
+ const toggleText = document.getElementById('toggle-projects-text');
+ 
+ if (savedProjectsVisible) {
+ section.style.display = 'block';
+ toggleText.textContent = 'Hide';
+ loadSavedProjects();
+ } else {
+ section.style.display = 'none';
+ toggleText.textContent = 'Show';
+ }
 }
 
 function loadSavedProjects() {
-  fetch('/homeowner/reno/planner/projects/json')
-    .then(res => res.json())
-    .then(data => {
-      const list = document.getElementById('saved-projects-list');
-      if (data.projects && data.projects.length > 0) {
-        list.innerHTML = data.projects.slice(0, 5).map(project => {
-          let budget = 'Not set';
-          if (project.budget) {
-            try {
-              const budgetNum = typeof project.budget === 'string' ? parseFloat(project.budget.replace(/,/g, '')) : parseFloat(project.budget);
-              budget = isNaN(budgetNum) ? project.budget : budgetNum.toLocaleString();
-            } catch {
-              budget = project.budget;
-            }
-          }
-          const projectName = (project.name || 'Untitled Project').replace(/'/g, "\\'").replace(/"/g, '&quot;');
-          return `
-            <div style="padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
-                <h3 style="margin: 0; font-size: 1.25rem; color: var(--charcoal-brown);">${project.name || 'Untitled Project'}</h3>
-                <div style="display: flex; gap: 0.5rem;">
-                  <a href="/homeowner/reno/planner/project/${project.id}/edit" 
-                     style="padding: 0.5rem 1rem; font-size: 0.85rem; background: var(--olive-green); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
-                    ✏️ Edit
-                  </a>
-                  <button onclick="deleteProject(${project.id}, '${projectName}')" 
-                          style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
-                    🗑️ Delete
-                  </button>
-                </div>
-              </div>
-              <p style="margin: 0.5rem 0; color: var(--charcoal-brown);">
-                <strong>Status:</strong> ${project.status || 'Planning'} 
-                ${project.budget ? ` • <strong>Budget:</strong> $${budget}` : ''}
-                ${project.category && project.category !== 'Other' ? ` • <strong>Category:</strong> ${project.category}` : ''}
-              </p>
-              ${project.notes ? `<p style="margin-top: 0.75rem; color: var(--taupe-beige); font-size: 0.9rem;">${(project.notes || '').substring(0, 100).replace(/</g, '&lt;').replace(/>/g, '&gt;')}${(project.notes || '').length > 100 ? '...' : ''}</p>` : ''}
-            </div>
-          `;
-        }).join('');
-      } else {
-        list.innerHTML = '<p style="text-align: center; color: var(--taupe-beige); padding: 2rem;">No saved projects yet. Create an estimate and save it to see it here!</p>';
-      }
-    })
-    .catch(() => {
-      document.getElementById('saved-projects-list').innerHTML = '<p style="text-align: center; color: #b3574a; padding: 2rem;">Could not load projects.</p>';
-    });
+ fetch('/homeowner/reno/planner/projects/json')
+ .then(res => res.json())
+ .then(data => {
+ const list = document.getElementById('saved-projects-list');
+ if (data.projects && data.projects.length > 0) {
+ list.innerHTML = data.projects.slice(0, 5).map(project => {
+ let budget = 'Not set';
+ if (project.budget) {
+ try {
+ const budgetNum = typeof project.budget === 'string' ? parseFloat(project.budget.replace(/,/g, '')) : parseFloat(project.budget);
+ budget = isNaN(budgetNum) ? project.budget : budgetNum.toLocaleString();
+ } catch {
+ budget = project.budget;
+ }
+ }
+ const projectName = (project.name || 'Untitled Project').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+ return `
+ <div style="padding: 1.5rem; background: var(--white); border-radius: 12px; box-shadow: var(--shadow-light); border: 1px solid var(--taupe-beige);">
+ <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+ <h3 style="margin: 0; font-size: 1.25rem; color: var(--charcoal-brown);">${project.name || 'Untitled Project'}</h3>
+ <div style="display: flex; gap: 0.5rem;">
+ <a href="/homeowner/reno/planner/project/${project.id}/edit" 
+ style="padding: 0.5rem 1rem; font-size: 0.85rem; background: var(--olive-green); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+ Edit
+ </a>
+ <button onclick="deleteProject(${project.id}, '${projectName}')" 
+ style="padding: 0.5rem 1rem; font-size: 0.85rem; background: #f5f5f5; border: 1px solid #ddd; color: #b3574a; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+ Delete
+ </button>
+ </div>
+ </div>
+ <p style="margin: 0.5rem 0; color: var(--charcoal-brown);">
+ <strong>Status:</strong> ${project.status || 'Planning'} 
+ ${project.budget ? ` • <strong>Budget:</strong> $${budget}` : ''}
+ ${project.category && project.category !== 'Other' ? ` • <strong>Category:</strong> ${project.category}` : ''}
+ </p>
+ ${project.notes ? `<p style="margin-top: 0.75rem; color: var(--taupe-beige); font-size: 0.9rem;">${(project.notes || '').substring(0, 100).replace(/</g, '&lt;').replace(/>/g, '&gt;')}${(project.notes || '').length > 100 ? '...' : ''}</p>` : ''}
+ </div>
+ `;
+ }).join('');
+ } else {
+ list.innerHTML = '<p style="text-align: center; color: var(--taupe-beige); padding: 2rem;">No saved projects yet. Create an estimate and save it to see it here!</p>';
+ }
+ })
+ .catch(() => {
+ document.getElementById('saved-projects-list').innerHTML = '<p style="text-align: center; color: #b3574a; padding: 2rem;">Could not load projects.</p>';
+ });
 }
 
 function deleteProject(projectId, projectName) {
-  if (!confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
-    return;
-  }
-  
-  fetch(`/homeowner/reno/planner/project/${projectId}/delete`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      if (savedProjectsVisible) {
-        loadSavedProjects();
-      } else {
-        location.reload();
-      }
-    } else {
-      alert('Could not delete project: ' + (data.error || 'Unknown error'));
-    }
-  })
-  .catch(() => alert('Could not delete project.'));
+ if (!confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
+ return;
+ }
+ 
+ fetch(`/homeowner/reno/planner/project/${projectId}/delete`, {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' }
+ })
+ .then(res => res.json())
+ .then(data => {
+ if (data.success) {
+ if (savedProjectsVisible) {
+ loadSavedProjects();
+ } else {
+ location.reload();
+ }
+ } else {
+ alert('Could not delete project: ' + (data.error || 'Unknown error'));
+ }
+ })
+ .catch(() => alert('Could not delete project.'));
 }
 </script>
 {% endblock %}
