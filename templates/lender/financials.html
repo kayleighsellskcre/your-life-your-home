@@ -198,7 +198,7 @@
 <div class="fin-header">
   <div>
     <h1 class="fin-header-title">Financials Hub</h1>
-    <p class="fin-header-sub">Track loan revenue, pipeline, expenses, and income goals &mdash; powered by AI.</p>
+    <p class="fin-header-sub">Track loan revenue, pipeline, expenses, and income goals for {{ year }}.</p>
   </div>
   <div class="year-select">
     <span>Year</span>
@@ -251,7 +251,7 @@
 <!-- Charts -->
 <div class="chart-row">
   <div class="chart-card">
-    <h4>Monthly Revenue &mdash; {{ year }}</h4>
+    <h4>Monthly Revenue / {{ year }}</h4>
     <canvas id="monthlyChart" height="95"></canvas>
   </div>
   <div class="chart-card">
@@ -267,8 +267,7 @@
 <div class="ai-command-center">
   <div class="ai-cc-header">
     <div class="ai-cc-title">
-      <h3>AI Financial Command Center</h3>
-      <span class="ai-badge">AI Powered</span>
+      <h3>Financial Command Center</h3>
     </div>
     <div class="ai-cc-tabs">
       <button class="ai-cc-tab active" onclick="switchAiTab('insights',this)">Smart Insights</button>
@@ -347,10 +346,10 @@
       <tbody>
         {% for r in revenues %}
         <tr>
-          <td style="font-weight:600;">{{ r.borrower_name or '&mdash;' }}</td>
-          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.property_address or '&mdash;' }}</td>
-          <td style="text-transform:capitalize;">{{ r.loan_type or '&mdash;' }}</td>
-          <td>{{ r.close_date or '&mdash;' }}</td>
+          <td style="font-weight:600;">{{ r.borrower_name or '--' }}</td>
+          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.property_address or '--' }}</td>
+          <td style="text-transform:capitalize;">{{ r.loan_type or '--' }}</td>
+          <td>{{ r.close_date or '--' }}</td>
           <td>${{ "{:,.0f}".format(r.loan_amount or 0) }}</td>
           <td>{{ "{:.3f}".format(r.origination_fee_pct or 0) }}%</td>
           <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee_amt or 0) }}</td>
@@ -401,9 +400,9 @@
       <tbody>
         {% for e in expenses %}
         <tr>
-          <td>{{ e.expense_date or '&mdash;' }}</td>
+          <td>{{ e.expense_date or '--' }}</td>
           <td><span class="badge" style="background:rgba(107,106,69,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
-          <td>{{ e.description or '&mdash;' }}</td>
+          <td>{{ e.description or '--' }}</td>
           <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
           <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
           <td>
@@ -768,7 +767,7 @@ async function loadForecast() {
     const confClass = d.confidence || 'medium';
     document.getElementById('forecastCards').innerHTML = `
       <div class="ai-forecast-card">
-        <div class="val">${d.projected_revenue ? '$'+Math.round(d.projected_revenue).toLocaleString() : '&mdash;'}</div>
+        <div class="val">${d.projected_revenue ? '$'+Math.round(d.projected_revenue).toLocaleString() : '--'}</div>
         <div class="lbl">Projected Revenue</div>
         <div class="ai-confidence ${confClass}">${confClass} confidence</div>
       </div>
@@ -777,7 +776,7 @@ async function loadForecast() {
         <div class="lbl">Projected Loans</div>
       </div>
       <div class="ai-forecast-card">
-        <div class="val">${d.projected_loan_volume ? '$'+Math.round(d.projected_loan_volume/1000000*10)/10+'M' : '&mdash;'}</div>
+        <div class="val">${d.projected_loan_volume ? '$'+Math.round(d.projected_loan_volume/1000000*10)/10+'M' : '--'}</div>
         <div class="lbl">Projected Volume</div>
       </div>`;
     document.getElementById('forecastHeadline').textContent = d.headline || '';
@@ -803,7 +802,7 @@ async function loadPipeline() {
     const score = d.pipeline_score || 0;
     const scoreClass = score >= 75 ? 'high' : score >= 45 ? 'medium' : score > 0 ? 'low' : 'na';
     let html = `<div class="pipeline-score-ring">
-      <div class="score-circle ${scoreClass}">${score > 0 ? score : '&mdash;'}</div>
+      <div class="score-circle ${scoreClass}">${score > 0 ? score : '--'}</div>
       <div>
         <div style="font-size:.8rem;font-weight:700;color:var(--charcoal);margin-bottom:.25rem;">Pipeline Health Score</div>
         <div style="font-size:.82rem;color:var(--warm-gray);line-height:1.5;">${escHtml(d.summary || '')}</div>
@@ -835,7 +834,7 @@ async function loadCoach() {
   const btn = document.getElementById('btnCoach');
   const out = document.getElementById('aiCoachOutput');
   btn.disabled = true; btn.textContent = 'Analyzing your numbers\u2026';
-  out.classList.add('loading'); out.textContent = 'Your AI financial coach is reviewing your data\u2026';
+  out.classList.add('loading'); out.textContent = 'Reviewing your data and preparing a personalized coaching session\u2026';
   try {
     const resp = await fetch('/api/ai/financials/lender-coach', {
       method:'POST', headers:{'Content-Type':'application/json'},

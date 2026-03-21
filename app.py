@@ -273,6 +273,9 @@ from r2_storage import (
 
 # ---------------- FLASK APP INIT ----------------
 
+# Alias so financials routes can call get_db_connection()
+get_db_connection = get_connection
+
 # Initialize DBs so platform loads with no manual trigger
 init_db()
 
