@@ -3,11 +3,11 @@
    Quiet Luxury · Serenity · Nature-Grounded Elegance
    
    Palette:
-   --sage         #6B7A5A  Muted olive-sage   (primary accent)
-   --sage-dark    #4F5C42  Deep olive          (hover / depth)
-   --sage-deeper  #374530  Near-black olive    (header bg)
-   --sage-light   #9DAE8A  Soft sage           (light accents)
-   --sage-tint    #EBF0E3  Sage whisper        (section fills)
+   --sage         #8FA88A  Muted olive-sage   (primary accent)
+   --sage-dark    #5C7050  Deep olive          (hover / depth)
+   --sage-deeper  #5C7050  Near-black olive    (header bg)
+   --sage-light   #B0C9A0  Soft sage           (light accents)
+   --sage-tint    #ECF3E6  Sage whisper        (section fills)
    --sage-mist    #F3F7EE  Sage near-white     (page accents)
 
    Warm cream backgrounds and charcoal text are preserved —
@@ -16,26 +16,26 @@
 
 /* ── TOKENS ───────────────────────────────────────────────── */
 :root {
-  --sage:         #6B7A5A;
-  --sage-dark:    #4F5C42;
-  --sage-deeper:  #374530;
-  --sage-light:   #9DAE8A;
-  --sage-tint:    #EBF0E3;
+  --sage:         #8FA88A;
+  --sage-dark:    #5C7050;
+  --sage-deeper:  #5C7050;
+  --sage-light:   #B0C9A0;
+  --sage-tint:    #ECF3E6;
   --sage-mist:    #F3F7EE;
 
   /* Override semantic tokens so any component using --esp gets sage */
-  --esp:              #6B7A5A;
-  --esp-dark:         #4F5C42;
-  --btn-primary:      #6B7A5A;
-  --btn-primary-hover:#4F5C42;
-  --input-focus:      #6B7A5A;
-  --nav-active-bar:   #6B7A5A;
-  --header-bg:        linear-gradient(135deg, #4F5C42 0%, #374530 100%);
+  --esp:              #8FA88A;
+  --esp-dark:         #5C7050;
+  --btn-primary:      #8FA88A;
+  --btn-primary-hover:#5C7050;
+  --input-focus:      #8FA88A;
+  --nav-active-bar:   #8FA88A;
+  --header-bg:        linear-gradient(135deg, #8FA88A 0%, #5C7050 100%);
 
   /* Olive aliases (old templates reference these) */
-  --olive-green:        #6B7A5A;
-  --olive-green-dark:   #4F5C42;
-  --olive-green-light:  #9DAE8A;
+  --olive-green:        #8FA88A;
+  --olive-green-dark:   #5C7050;
+  --olive-green-light:  #B0C9A0;
 }
 
 
@@ -43,9 +43,9 @@
    SITE HEADER — deep olive, rich but serene
    ══════════════════════════════════════════════════════════════ */
 .site-header {
-  background: linear-gradient(135deg, #4F5C42 0%, #374530 100%) !important;
-  border-bottom: 1px solid rgba(55,69,48,0.45) !important;
-  box-shadow: 0 2px 12px rgba(55,69,48,0.2) !important;
+  background: linear-gradient(135deg, #8FA88A 0%, #5C7050 100%) !important;
+  border-bottom: 1px solid rgba(92,112,80,0.35) !important;
+  box-shadow: 0 2px 12px rgba(92,112,80,0.18) !important;
 }
 
 /* Keep brand logo cream-colored (same as before) */
@@ -63,7 +63,7 @@
 /* Mobile header */
 @media (max-width: 768px) {
   .site-header {
-    background: linear-gradient(135deg, #4F5C42 0%, #374530 100%) !important;
+    background: linear-gradient(135deg, #5C7050 0%, #5C7050 100%) !important;
   }
 }
 
@@ -76,115 +76,115 @@
 button[class*="btn-primary"],
 .btn-premium,
 input[type="submit"]:not(.crm-sf-submit) {
-  background: #6B7A5A !important;
+  background: #8FA88A !important;
   color: #F5F0EB !important;
 }
 .btn:hover,
 .btn-primary:hover,
 .btn-premium:hover,
 input[type="submit"]:not(.crm-sf-submit):hover {
-  background: #4F5C42 !important;
-  box-shadow: 0 4px 14px rgba(107,122,90,0.3) !important;
+  background: #5C7050 !important;
+  box-shadow: 0 4px 14px rgba(143,168,138,0.3) !important;
   color: #ffffff !important;
 }
 
 /* Financials / inline add buttons */
-.btn-add { background: linear-gradient(135deg,#6B7A5A,#4F5C42) !important; }
-.btn-add:hover { background: linear-gradient(135deg,#4F5C42,#374530) !important; }
-.btn-coach { background: linear-gradient(135deg,#6B7A5A,#4F5C42) !important; }
+.btn-add { background: linear-gradient(135deg,#8FA88A,#5C7050) !important; }
+.btn-add:hover { background: linear-gradient(135deg,#5C7050,#5C7050) !important; }
+.btn-coach { background: linear-gradient(135deg,#8FA88A,#5C7050) !important; }
 
 /* Secondary stays neutral — just give it a sage border */
 .btn-secondary,
 button[class*="btn-secondary"] {
-  color: #6B7A5A !important;
-  border-color: rgba(107,122,90,0.4) !important;
+  color: #8FA88A !important;
+  border-color: rgba(143,168,138,0.4) !important;
 }
 .btn-secondary:hover {
-  background: rgba(107,122,90,0.07) !important;
-  border-color: #6B7A5A !important;
-  color: #4F5C42 !important;
+  background: rgba(143,168,138,0.07) !important;
+  border-color: #8FA88A !important;
+  color: #5C7050 !important;
 }
 
 /* AI / gradient buttons — sage to soft gold for warmth */
 .btn-ai,
 [class*="ai-btn"],
 [class*="btn-ai"] {
-  background: linear-gradient(135deg, #6B7A5A 0%, #9DAE8A 100%) !important;
-  color: #374530 !important;
+  background: linear-gradient(135deg, #8FA88A 0%, #B0C9A0 100%) !important;
+  color: #5C7050 !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    AGENT HORIZONTAL NAV — cream bg, sage accents
    ══════════════════════════════════════════════════════════════ */
-.ylh-nav-title { color: #4F5C42 !important; }
-.ylh-nav-title:hover { color: #374530 !important; }
+.ylh-nav-title { color: #5C7050 !important; }
+.ylh-nav-title:hover { color: #5C7050 !important; }
 
 .ylh-nav-link,
 .ylh-nav-button {
-  color: #4F5C42 !important;
+  color: #5C7050 !important;
 }
 .ylh-nav-link:hover,
 .ylh-nav-button:hover {
-  background: rgba(107,122,90,0.08) !important;
-  color: #374530 !important;
-  border-bottom-color: rgba(107,122,90,0.4) !important;
+  background: rgba(143,168,138,0.08) !important;
+  color: #5C7050 !important;
+  border-bottom-color: rgba(143,168,138,0.4) !important;
 }
 .ylh-nav-link.active,
 .ylh-nav-button.active {
-  background: rgba(107,122,90,0.1) !important;
-  color: #374530 !important;
-  border-bottom-color: #6B7A5A !important;
+  background: rgba(143,168,138,0.1) !important;
+  color: #5C7050 !important;
+  border-bottom-color: #8FA88A !important;
   font-weight: 700 !important;
 }
 
 /* Dropdown */
 .ylh-dropdown-item:hover {
-  border-left-color: #9DAE8A !important;
+  border-left-color: #B0C9A0 !important;
 }
 .ylh-dropdown-item.active {
-  background: rgba(107,122,90,0.08) !important;
-  border-left-color: #6B7A5A !important;
+  background: rgba(143,168,138,0.08) !important;
+  border-left-color: #8FA88A !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    LENDER / HOMEOWNER SIDEBAR — sage active states
    ══════════════════════════════════════════════════════════════ */
-.dashboard-sidebar__title { color: #4F5C42 !important; }
+.dashboard-sidebar__title { color: #5C7050 !important; }
 
 .ylh-menu-button {
-  color: #4F5C42 !important;
+  color: #5C7050 !important;
 }
 .ylh-menu-button:hover {
-  background: rgba(107,122,90,0.06) !important;
-  color: #374530 !important;
-  border-left-color: rgba(107,122,90,0.35) !important;
+  background: rgba(143,168,138,0.06) !important;
+  color: #5C7050 !important;
+  border-left-color: rgba(143,168,138,0.35) !important;
 }
 .ylh-menu-button.is-open {
-  color: #374530 !important;
-  border-left-color: #6B7A5A !important;
-  background: rgba(107,122,90,0.08) !important;
+  color: #5C7050 !important;
+  border-left-color: #8FA88A !important;
+  background: rgba(143,168,138,0.08) !important;
 }
 
 .ylh-submenu-link {
-  color: #4F5C42 !important;
+  color: #5C7050 !important;
 }
 .ylh-submenu-link:hover {
-  background: rgba(107,122,90,0.06) !important;
-  color: #374530 !important;
+  background: rgba(143,168,138,0.06) !important;
+  color: #5C7050 !important;
 }
 .ylh-submenu-link.active {
-  background: rgba(107,122,90,0.12) !important;
-  color: #374530 !important;
-  border-left-color: #6B7A5A !important;
+  background: rgba(143,168,138,0.12) !important;
+  color: #5C7050 !important;
+  border-left-color: #8FA88A !important;
 }
-.ylh-submenu-bullet { background: #9DAE8A !important; }
+.ylh-submenu-bullet { background: #B0C9A0 !important; }
 
 /* Public-facing sidebar nav links */
-.sidebar-nav-link { color: #4F5C42 !important; }
-.sidebar-nav-link:hover { color: #374530 !important; background: rgba(107,122,90,.06) !important; }
-.sidebar-nav-link.active { color: #374530 !important; background: rgba(107,122,90,.1) !important; border-left-color: #6B7A5A !important; }
+.sidebar-nav-link { color: #5C7050 !important; }
+.sidebar-nav-link:hover { color: #5C7050 !important; background: rgba(143,168,138,.06) !important; }
+.sidebar-nav-link.active { color: #5C7050 !important; background: rgba(143,168,138,.1) !important; border-left-color: #8FA88A !important; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -195,15 +195,15 @@ select:focus,
 textarea:focus,
 .premium-input:focus,
 .premium-select:focus {
-  border-color: #6B7A5A !important;
-  box-shadow: 0 0 0 3px rgba(107,122,90,0.14) !important;
+  border-color: #8FA88A !important;
+  box-shadow: 0 0 0 3px rgba(143,168,138,0.14) !important;
 }
 *:focus-visible {
-  outline: 2px solid rgba(107,122,90,0.55) !important;
+  outline: 2px solid rgba(143,168,138,0.55) !important;
   outline-offset: 2px !important;
 }
 button:focus, input:focus, select:focus, textarea:focus, a:focus {
-  outline: 2px solid rgba(107,122,90,0.45) !important;
+  outline: 2px solid rgba(143,168,138,0.45) !important;
   outline-offset: 2px !important;
 }
 
@@ -215,40 +215,40 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 [class*="progress-fill"],
 [class*="bar-fill"],
 .progress-bar-fill {
-  background: linear-gradient(90deg, #6B7A5A, #9DAE8A) !important;
+  background: linear-gradient(90deg, #8FA88A, #B0C9A0) !important;
 }
 .progress-bar-container,
 .goal-bar-bg,
 [class*="progress-bg"] {
-  background: rgba(107,122,90,0.12) !important;
+  background: rgba(143,168,138,0.12) !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    LINKS — sage
    ══════════════════════════════════════════════════════════════ */
-a { color: #6B7A5A !important; }
-a:hover { color: #374530 !important; }
+a { color: #8FA88A !important; }
+a:hover { color: #5C7050 !important; }
 
 
 /* ══════════════════════════════════════════════════════════════
    FLASH / ALERT — success in sage green
    ══════════════════════════════════════════════════════════════ */
 .ylh-flash.success {
-  background: rgba(107,122,90,0.1) !important;
-  border-color: rgba(107,122,90,0.35) !important;
-  color: #4F5C42 !important;
+  background: rgba(143,168,138,0.1) !important;
+  border-color: rgba(143,168,138,0.35) !important;
+  color: #5C7050 !important;
 }
 .ylh-flash.info {
-  background: rgba(107,122,90,0.06) !important;
+  background: rgba(143,168,138,0.06) !important;
   border-color: rgba(157,174,138,0.4) !important;
-  color: #4F5C42 !important;
+  color: #5C7050 !important;
 }
 .flash-success,
 .alert-success {
-  background: rgba(107,122,90,0.1) !important;
-  border-color: rgba(107,122,90,0.3) !important;
-  color: #4F5C42 !important;
+  background: rgba(143,168,138,0.1) !important;
+  border-color: rgba(143,168,138,0.3) !important;
+  color: #5C7050 !important;
 }
 
 
@@ -260,9 +260,9 @@ a:hover { color: #374530 !important; }
 .status-active,
 .status-closed,
 .tbl-act-green {
-  color: #4F5C42 !important;
-  background: rgba(107,122,90,0.12) !important;
-  border-color: rgba(107,122,90,0.3) !important;
+  color: #5C7050 !important;
+  background: rgba(143,168,138,0.12) !important;
+  border-color: rgba(143,168,138,0.3) !important;
 }
 
 
@@ -271,15 +271,15 @@ a:hover { color: #374530 !important; }
    ══════════════════════════════════════════════════════════════ */
 .action-card:hover,
 [class*="quick-action"]:hover {
-  border-color: rgba(107,122,90,0.45) !important;
-  box-shadow: 0 4px 16px rgba(107,122,90,0.12) !important;
+  border-color: rgba(143,168,138,0.45) !important;
+  box-shadow: 0 4px 16px rgba(143,168,138,0.12) !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    AGENT FINANCIALS overrides — update the inline fin-* vars
    ══════════════════════════════════════════════════════════════ */
-.fin-tab.active { color: #4F5C42 !important; border-bottom-color: #6B7A5A !important; }
+.fin-tab.active { color: #5C7050 !important; border-bottom-color: #8FA88A !important; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -288,13 +288,13 @@ a:hover { color: #374530 !important; }
 .crm-abtn,
 .crm-act,
 .crm-cbtn {
-  border-color: rgba(107,122,90,0.4) !important;
-  color: #4F5C42 !important;
+  border-color: rgba(143,168,138,0.4) !important;
+  color: #5C7050 !important;
 }
 .crm-abtn:hover,
 .crm-act:hover {
-  background: rgba(107,122,90,0.08) !important;
-  color: #374530 !important;
+  background: rgba(143,168,138,0.08) !important;
+  color: #5C7050 !important;
 }
 
 
@@ -304,40 +304,40 @@ a:hover { color: #374530 !important; }
 .tx-act,
 .tx-btn,
 .action-btn--primary {
-  background: linear-gradient(135deg, #6B7A5A 0%, #4F5C42 100%) !important;
+  background: linear-gradient(135deg, #8FA88A 0%, #5C7050 100%) !important;
   color: #F5F0EB !important;
   border-color: transparent !important;
 }
 .action-btn--secondary {
-  border-color: rgba(107,122,90,0.45) !important;
-  color: #4F5C42 !important;
+  border-color: rgba(143,168,138,0.45) !important;
+  color: #5C7050 !important;
 }
 .action-btn--secondary:hover {
-  background: rgba(107,122,90,0.08) !important;
-  color: #374530 !important;
+  background: rgba(143,168,138,0.08) !important;
+  color: #5C7050 !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    MISC OLIVE ALIASES
    ══════════════════════════════════════════════════════════════ */
-.text-olive   { color: #6B7A5A !important; }
-.bg-olive     { background: #6B7A5A !important; }
-.border-olive { border-color: rgba(107,122,90,0.4) !important; }
+.text-olive   { color: #8FA88A !important; }
+.bg-olive     { background: #8FA88A !important; }
+.border-olive { border-color: rgba(143,168,138,0.4) !important; }
 
 /* Premium gradient — warm sage */
 .premium-gradient,
 [class*="premium-grad"] {
-  background: linear-gradient(135deg, #6B7A5A 0%, #9DAE8A 100%) !important;
+  background: linear-gradient(135deg, #8FA88A 0%, #B0C9A0 100%) !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    SCROLLBAR — sage thumb
    ══════════════════════════════════════════════════════════════ */
-::-webkit-scrollbar-thumb { background: rgba(107,122,90,0.35); }
-::-webkit-scrollbar-thumb:hover { background: rgba(107,122,90,0.55); }
-* { scrollbar-color: rgba(107,122,90,0.35) transparent; }
+::-webkit-scrollbar-thumb { background: rgba(143,168,138,0.35); }
+::-webkit-scrollbar-thumb:hover { background: rgba(143,168,138,0.55); }
+* { scrollbar-color: rgba(143,168,138,0.35) transparent; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -346,15 +346,15 @@ a:hover { color: #374530 !important; }
 /* Matches the inline active style applied in agent/layout.html */
 [style*="border-bottom: 3px solid #6B5B4D"],
 [style*="border-bottom:3px solid #6B5B4D"] {
-  border-bottom-color: #6B7A5A !important;
+  border-bottom-color: #8FA88A !important;
 }
 [style*="color: #6B5B4D"],
 [style*="color:#6B5B4D"] {
-  color: #6B7A5A !important;
+  color: #8FA88A !important;
 }
 [style*="background: #6B5B4D"],
 [style*="background:#6B5B4D"] {
-  background: #6B7A5A !important;
+  background: #8FA88A !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -363,6 +363,6 @@ a:hover { color: #374530 !important; }
 .agent-sub-nav .active,
 .agent-nav .active,
 .fin-tab.active {
-  border-bottom-color: #6B7A5A !important;
-  color: #374530 !important;
+  border-bottom-color: #8FA88A !important;
+  color: #5C7050 !important;
 }
