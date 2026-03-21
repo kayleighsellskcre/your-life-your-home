@@ -126,21 +126,22 @@ body {
 
 /* ══════════════════════════════════════════════════════════════
    CARDS — universal card component
+   Only targets explicit .card / .card-premium — does NOT wildcard
+   all [class*="card"] so custom dark/colored cards keep their backgrounds
    ══════════════════════════════════════════════════════════════ */
 .card,
 .card-premium,
-.feature-card,
-[class*="card"]:not(td):not(th) {
-  background: #FFFFFF !important;
+.feature-card {
+  background: #FFFFFF;
   border: 1px solid rgba(211,198,184,0.45) !important;
-  border-radius: 14px !important;
+  border-radius: 12px !important;
   box-shadow: 0 2px 8px rgba(107,91,77,0.06) !important;
   transition: box-shadow 0.25s ease, transform 0.25s ease !important;
 }
 .card:hover,
 .card-premium:hover,
 .feature-card:hover {
-  box-shadow: 0 6px 20px rgba(107,91,77,0.1) !important;
+  box-shadow: 0 5px 16px rgba(107,91,77,0.1) !important;
   transform: translateY(-1px) !important;
 }
 

@@ -1,7 +1,19 @@
 /* ===================================================================
    COMPACT / DAINTY PLATFORM STYLING
-   Smaller, lighter, less bulky - see more at a glance
+   Smaller, lighter, less bulky — see more at a glance
    =================================================================== */
+
+/* ============================================
+   GLOBAL — Body line-height & base font
+   ============================================ */
+body {
+  line-height: 1.5 !important;
+  font-size: 15px !important;
+}
+
+p, li, td, th, label, span, div {
+  line-height: 1.5;
+}
 
 /* ============================================
    GLOBAL - Base size reductions (non-CRM pages)
@@ -27,36 +39,65 @@
   font-size: 0.75rem !important;
 }
 
-/* Buttons - more compact on non-CRM pages */
+/* Buttons - more compact */
 .btn-primary,
 .btn,
 a.btn-premium {
-  padding: 0.5rem 1.25rem !important;
-  font-size: 0.813rem !important;
+  padding: 0.45rem 1.1rem !important;
+  font-size: 0.8rem !important;
 }
 
 .btn-secondary,
 .btn-outline {
-  padding: 0.5rem 1.25rem !important;
-  font-size: 0.813rem !important;
+  padding: 0.45rem 1.1rem !important;
+  font-size: 0.8rem !important;
 }
 
 .btn-sm {
-  padding: 0.375rem 1rem !important;
-  font-size: 0.75rem !important;
+  padding: 0.3rem 0.75rem !important;
+  font-size: 0.73rem !important;
 }
 
-/* Cards - tighter */
+/* Cards - tight padding, no fat margins */
 .card,
 .card-premium,
-.metric-card {
-  padding: 1rem 1.25rem !important;
-  border-radius: 0.5rem !important;
-}
-
+.metric-card,
+.stat-card,
+.summary-card,
+.dashboard-card,
+.info-card,
 .action-card,
 a.action-card {
-  padding: 1rem 1.25rem !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 10px !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.card-header {
+  padding: 0.5rem 0.75rem !important;
+  margin: -0.75rem -1rem 0.75rem !important;
+}
+
+.card-title {
+  font-size: 0.9rem !important;
+  margin: 0 !important;
+}
+
+.card-body,
+.card-content {
+  padding: 0.5rem 0 !important;
+  line-height: 1.45 !important;
+}
+
+/* Dashboard grid tighter */
+.dashboard-grid,
+.dashboard-cards,
+.stats-grid,
+.metrics-grid,
+.cards-grid,
+.grid {
+  gap: 0.625rem !important;
+  margin-top: 0.625rem !important;
 }
 
 /* ============================================
@@ -86,6 +127,92 @@ a.action-card {
 }
 
 /* ============================================
+   AGENT / LENDER CONTENT WRAPPER
+   ============================================ */
+
+/* Agent horizontal layout - tighter page wrapper */
+.agent-content-wrapper {
+  padding: 1.25rem 1.5rem !important;
+}
+
+/* Dashboard main content area */
+.dashboard-main {
+  padding: 0.75rem 1.25rem !important;
+}
+
+/* Dashboard sidebar */
+.dashboard-sidebar {
+  padding: 0.75rem 0 !important;
+}
+
+.dashboard-sidebar__header {
+  padding: 0.75rem 1rem !important;
+}
+
+/* ============================================
+   SECTION SPACING
+   ============================================ */
+
+.section,
+.section-alt,
+.dashboard-section,
+.panel,
+.widget {
+  padding: 0.625rem 0 !important;
+  margin-bottom: 0.625rem !important;
+}
+
+.section-header,
+.page-header-inner,
+.content-header {
+  padding: 0.5rem 0 0.75rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* ============================================
+   FORM ELEMENTS - tighter inputs
+   ============================================ */
+
+.form-group,
+.fmg {
+  margin-bottom: 0.625rem !important;
+}
+
+.form-label,
+label {
+  font-size: 0.75rem !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.form-control,
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+input[type="tel"],
+input[type="password"],
+select,
+textarea {
+  padding: 0.4rem 0.65rem !important;
+  font-size: 0.82rem !important;
+  line-height: 1.4 !important;
+}
+
+/* ============================================
+   TABLE ROWS
+   ============================================ */
+
+table th {
+  padding: 0.4rem 0.7rem !important;
+  font-size: 0.7rem !important;
+}
+
+table td {
+  padding: 0.35rem 0.7rem !important;
+  font-size: 0.8rem !important;
+}
+
+/* ============================================
    Badges & tags (global)
    ============================================ */
 
@@ -93,4 +220,105 @@ a.action-card {
 .tag {
   padding: 0.2rem 0.5rem !important;
   font-size: 0.65rem !important;
+}
+
+/* ============================================
+   MORNING BRIEFING / AI CARDS
+   Ensure dark gradient cards keep their own background
+   ============================================ */
+
+.briefing-card {
+  background: linear-gradient(135deg, #3D2E24 0%, #4F4A3E 60%, #5A4A3C 100%) !important;
+  padding: 0 !important;
+}
+
+.briefing-card-inner {
+  padding: 0.875rem 1.1rem !important;
+}
+
+#briefing-text {
+  min-height: 1.5rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.55 !important;
+}
+
+/* LUX cards — keep cream background, not pure white */
+.lux-card {
+  background: #F5F0EB !important;
+}
+
+.lux-card-body {
+  padding: 0.5rem 1rem 0.75rem !important;
+}
+
+.lux-card-header {
+  padding: 0.625rem 1rem 0 !important;
+}
+
+/* KPI cards — keep their subtle background */
+.kpi-card {
+  padding: 0.6rem 0.85rem 0.55rem !important;
+}
+
+.kpi-value {
+  font-size: 1.45rem !important;
+  line-height: 1.1 !important;
+}
+
+.kpi-label {
+  font-size: 0.65rem !important;
+}
+
+.kpi-sub {
+  font-size: 0.7rem !important;
+}
+
+/* Priority items */
+.priority-item {
+  padding: 0.625rem 0.875rem !important;
+}
+
+.priority-text {
+  font-size: 0.875rem !important;
+  line-height: 1.4 !important;
+}
+
+/* Quick action items */
+.qa-item {
+  padding: 0.625rem 0.875rem !important;
+}
+
+.qa-label {
+  font-size: 0.85rem !important;
+}
+
+.qa-sub {
+  font-size: 0.72rem !important;
+}
+
+/* Transaction list items */
+.tx-item {
+  padding: 0.625rem 0 !important;
+}
+
+/* ============================================
+   HOMEOWNER PORTAL PAGES — tighter padding
+   ============================================ */
+
+.homeowner-page-content,
+.homeowner-content-wrapper {
+  padding: 1rem 1.25rem !important;
+}
+
+/* Modal tighten */
+.modal-header {
+  padding: 0.625rem 1rem !important;
+}
+
+.modal-body {
+  padding: 0.75rem 1rem !important;
+}
+
+.modal-footer {
+  padding: 0.5rem 1rem !important;
 }
