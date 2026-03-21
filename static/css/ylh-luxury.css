@@ -1,0 +1,818 @@
+/* =============================================================
+   YOUR LIFE YOUR HOME — LUXURY PALETTE SYSTEM
+   Warm Taupe · Soft Cream · Misty Greige · Warm Gray · Espresso
+   Applied: March 2026
+   ============================================================= */
+
+/* ── NEW PALETTE TOKENS ── */
+:root {
+  --esp:         #6B5B4D;   /* Espresso     — primary, CTAs, active */
+  --esp-dark:    #5A4A3C;   /* Espresso dark — hover, deep shade    */
+  --esp-deeper:  #3D2E24;   /* Near-black brown — headings, body     */
+  --taupe:       #C2B1A1;   /* Warm Taupe   — accents, borders       */
+  --cream:       #E9E4D8;   /* Soft Cream   — nav bg, section fills  */
+  --cream-light: #F5F0EB;   /* Off-white    — page bg, card bg       */
+  --greige:      #D3C6B8;   /* Misty Greige — dividers, borders      */
+  --stone:       #B5A899;   /* Muted Stone  — mid accents            */
+  --wgray:       #A9A29A;   /* Warm Gray    — secondary text         */
+
+  /* Semantic overrides — replaces old olive-green palette */
+  --olive-green:       #6B5B4D;
+  --olive-green-dark:  #5A4A3C;
+  --olive-green-light: #8B7B6B;
+  --taupe-beige:       #C2B1A1;
+  --warm-cream:        #E9E4D8;
+  --cream-light:       #F5F0EB;
+  --beige-light:       #D3C6B8;
+  --charcoal-brown:    #3D2E24;
+  --warm-gray:         #A9A29A;
+  --light-cream:       #EDE8DF;
+
+  /* Component tokens */
+  --nav-bg:      linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%);
+  --nav-border:  rgba(211,198,184,0.5);
+  --nav-active-bar: #C2B1A1;
+  --card-bg:     #FFFFFF;
+  --card-border: rgba(211,198,184,0.4);
+  --btn-primary: #6B5B4D;
+  --btn-primary-hover: #5A4A3C;
+  --input-border: rgba(181,168,153,0.5);
+  --input-focus:  #6B5B4D;
+  --badge-bg:    rgba(107,91,77,0.1);
+  --flash-success-bg:  rgba(107,91,77,0.1);
+  --flash-error-bg:    rgba(160,65,61,0.1);
+  --header-bg:   linear-gradient(135deg, #6B5B4D 0%, #5A4A3C 100%);
+}
+
+
+/* ── GLOBAL BODY & BACKGROUND ── */
+body {
+  background-color: #F5F0EB !important;
+  color: #3D2E24 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SITE HEADER — top bar (Home · Dashboard · Sign Out)
+   ══════════════════════════════════════════════════════════════ */
+.site-header {
+  background: linear-gradient(135deg, #6B5B4D 0%, #5A4A3C 100%) !important;
+  border-bottom: 1px solid rgba(90,74,60,0.4) !important;
+  box-shadow: 0 2px 12px rgba(61,46,36,0.18) !important;
+}
+
+.brand-logo {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #F5F0EB !important;
+  font-weight: 400 !important;
+  font-size: 1.1rem !important;
+  letter-spacing: 0.03em !important;
+  opacity: 0.95 !important;
+  text-decoration: none !important;
+}
+.brand-logo:hover { opacity: 1 !important; color: #fff !important; }
+
+.main-nav ul li a {
+  color: rgba(245,240,235,0.85) !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 6px !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+.main-nav ul li a:hover {
+  background: rgba(255,255,255,0.12) !important;
+  color: #fff !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FLASH MESSAGES
+   ══════════════════════════════════════════════════════════════ */
+.ylh-flash {
+  border-radius: 10px !important;
+  padding: 0.85rem 1.2rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  margin: 0.5rem 1.5rem !important;
+  border: 1px solid transparent !important;
+}
+.ylh-flash.success {
+  background: rgba(107,91,77,0.1) !important;
+  border-color: rgba(194,177,161,0.5) !important;
+  color: #5A4A3C !important;
+}
+.ylh-flash.error {
+  background: rgba(160,65,61,0.08) !important;
+  border-color: rgba(160,65,61,0.25) !important;
+  color: #8B3532 !important;
+}
+.ylh-flash.warning {
+  background: rgba(184,134,11,0.08) !important;
+  border-color: rgba(184,134,11,0.25) !important;
+  color: #7a5800 !important;
+}
+.ylh-flash.info {
+  background: rgba(107,91,77,0.07) !important;
+  border-color: rgba(181,168,153,0.4) !important;
+  color: #5A4A3C !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   CARDS — universal card component
+   ══════════════════════════════════════════════════════════════ */
+.card,
+.card-premium,
+.feature-card,
+[class*="card"]:not(td):not(th) {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(211,198,184,0.45) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 8px rgba(107,91,77,0.06) !important;
+  transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+.card:hover,
+.card-premium:hover,
+.feature-card:hover {
+  box-shadow: 0 6px 20px rgba(107,91,77,0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   BUTTONS — primary / secondary / ghost
+   ══════════════════════════════════════════════════════════════ */
+.btn,
+.btn-primary,
+button[class*="btn-primary"],
+.btn-premium,
+input[type="submit"]:not(.crm-sf-submit) {
+  background: #6B5B4D !important;
+  color: #F5F0EB !important;
+  border: none !important;
+  border-radius: 9px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+  cursor: pointer !important;
+}
+.btn:hover,
+.btn-primary:hover,
+.btn-premium:hover,
+input[type="submit"]:not(.crm-sf-submit):hover {
+  background: #5A4A3C !important;
+  box-shadow: 0 4px 14px rgba(107,91,77,0.28) !important;
+  transform: translateY(-1px) !important;
+  color: #fff !important;
+}
+.btn:active,
+.btn-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
+
+.btn-secondary,
+button[class*="btn-secondary"] {
+  background: transparent !important;
+  color: #6B5B4D !important;
+  border: 1.5px solid rgba(194,177,161,0.7) !important;
+  border-radius: 9px !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+.btn-secondary:hover {
+  background: rgba(107,91,77,0.06) !important;
+  border-color: #6B5B4D !important;
+  color: #5A4A3C !important;
+}
+
+/* AI/Gradient buttons */
+.btn-ai,
+[class*="ai-btn"],
+[class*="btn-ai"] {
+  background: linear-gradient(135deg, #6B5B4D 0%, #8B7B6B 100%) !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   FORMS — inputs, selects, textareas
+   ══════════════════════════════════════════════════════════════ */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="search"],
+input[type="url"],
+select,
+textarea,
+.premium-input,
+.premium-select,
+.premium-textarea {
+  border: 1.5px solid rgba(181,168,153,0.5) !important;
+  border-radius: 9px !important;
+  background: #FDFAF7 !important;
+  color: #3D2E24 !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  font-family: inherit !important;
+}
+input:focus,
+select:focus,
+textarea:focus,
+.premium-input:focus,
+.premium-select:focus {
+  border-color: #6B5B4D !important;
+  box-shadow: 0 0 0 3px rgba(107,91,77,0.12) !important;
+  background: #fff !important;
+  outline: none !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #A9A29A !important;
+  opacity: 0.8 !important;
+}
+
+label,
+.form-label,
+.premium-label {
+  color: #3D2E24 !important;
+  font-weight: 600 !important;
+  font-size: 0.78rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   TABLES
+   ══════════════════════════════════════════════════════════════ */
+table {
+  border-collapse: collapse !important;
+}
+thead th {
+  background: rgba(233,228,216,0.6) !important;
+  color: #A9A29A !important;
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  padding: 0.65rem 0.9rem !important;
+  border-bottom: 1px solid rgba(211,198,184,0.5) !important;
+}
+tbody tr {
+  border-bottom: 1px solid rgba(211,198,184,0.2) !important;
+  transition: background 0.15s ease !important;
+}
+tbody tr:hover { background: rgba(233,228,216,0.3) !important; }
+tbody td {
+  padding: 0.8rem 0.9rem !important;
+  color: #3D2E24 !important;
+  font-size: 0.865rem !important;
+}
+tbody tr:last-child { border-bottom: none !important; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   BADGES / STATUS PILLS
+   ══════════════════════════════════════════════════════════════ */
+.badge,
+[class*="badge"],
+[class*="status-"] {
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  border-radius: 20px !important;
+  padding: 0.22rem 0.6rem !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   AGENT HORIZONTAL NAV
+   ══════════════════════════════════════════════════════════════ */
+.ylh-horizontal-nav {
+  background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%) !important;
+  border-bottom: 1.5px solid rgba(211,198,184,0.55) !important;
+  box-shadow: 0 2px 10px rgba(107,91,77,0.07) !important;
+}
+
+.ylh-nav-title {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #6B5B4D !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.025em !important;
+}
+.ylh-nav-title:hover { color: #3D2E24 !important; }
+
+.ylh-nav-link,
+.ylh-nav-button {
+  color: #6B5B4D !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.055em !important;
+  border-bottom: 3px solid transparent !important;
+  transition: all 0.22s ease !important;
+}
+.ylh-nav-link:hover,
+.ylh-nav-button:hover {
+  background: rgba(107,91,77,0.08) !important;
+  color: #3D2E24 !important;
+  border-bottom-color: rgba(194,177,161,0.6) !important;
+}
+.ylh-nav-link.active,
+.ylh-nav-button.active {
+  background: rgba(107,91,77,0.1) !important;
+  color: #3D2E24 !important;
+  border-bottom-color: #C2B1A1 !important;
+  font-weight: 600 !important;
+}
+
+/* Dropdown menu */
+.ylh-dropdown-menu {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(211,198,184,0.55) !important;
+  box-shadow: 0 10px 30px rgba(107,91,77,0.12) !important;
+  border-radius: 0 0 12px 12px !important;
+}
+.ylh-dropdown-item {
+  color: #3D2E24 !important;
+  border-left: 3px solid transparent !important;
+  font-size: 0.85rem !important;
+  transition: all 0.18s ease !important;
+}
+.ylh-dropdown-item:hover {
+  background: #F5F0EB !important;
+  border-left-color: #C2B1A1 !important;
+  padding-left: 1.75rem !important;
+}
+.ylh-dropdown-item.active {
+  background: rgba(194,177,161,0.12) !important;
+  border-left-color: #6B5B4D !important;
+  font-weight: 600 !important;
+}
+
+/* Admin & Upgrade pill buttons in nav */
+.ylh-nav-link[style*="667eea"],
+.ylh-nav-link[href*="admin"] {
+  background: linear-gradient(135deg, rgba(107,91,77,0.12) 0%, rgba(90,74,60,0.08) 100%) !important;
+  border-radius: 6px !important;
+  border-bottom: 3px solid #A9A29A !important;
+  color: #3D2E24 !important;
+}
+.ylh-nav-link[style*="b8973a"],
+.ylh-nav-link[href*="subscription"] {
+  background: linear-gradient(135deg, rgba(194,177,161,0.2) 0%, rgba(194,177,161,0.1) 100%) !important;
+  border-radius: 6px !important;
+  border-bottom: 3px solid #C2B1A1 !important;
+  color: #5A4A3C !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   LENDER SIDEBAR
+   ══════════════════════════════════════════════════════════════ */
+.dashboard-container {
+  background: #F5F0EB !important;
+}
+
+.dashboard-sidebar {
+  background: linear-gradient(180deg, #F0EBE4 0%, #EDE8DF 100%) !important;
+  border-right: 1px solid rgba(211,198,184,0.45) !important;
+  box-shadow: 2px 0 12px rgba(107,91,77,0.05) !important;
+}
+
+.dashboard-sidebar__header {
+  padding: 1.5rem 1.4rem 1rem !important;
+  border-bottom: 1px solid rgba(211,198,184,0.4) !important;
+}
+
+.dashboard-sidebar__title {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #6B5B4D !important;
+  font-size: 1.1rem !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.dashboard-sidebar__subtitle {
+  color: #A9A29A !important;
+  font-size: 0.78rem !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+}
+
+.ylh-menu-button {
+  background: none !important;
+  border: none !important;
+  color: #6B5B4D !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.07em !important;
+  padding: 0.85rem 1.4rem !important;
+  width: 100% !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border-left: 3px solid transparent !important;
+}
+.ylh-menu-button:hover {
+  background: rgba(107,91,77,0.06) !important;
+  color: #3D2E24 !important;
+  border-left-color: rgba(194,177,161,0.5) !important;
+}
+.ylh-menu-button.is-open {
+  color: #3D2E24 !important;
+  border-left-color: #C2B1A1 !important;
+  background: rgba(107,91,77,0.07) !important;
+}
+
+.ylh-submenu {
+  background: rgba(255,255,255,0.4) !important;
+  border-left: none !important;
+}
+
+.ylh-submenu-link {
+  color: #6B5B4D !important;
+  font-size: 0.83rem !important;
+  padding: 0.6rem 1.4rem 0.6rem 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  text-decoration: none !important;
+  transition: all 0.18s ease !important;
+  border-left: 3px solid transparent !important;
+}
+.ylh-submenu-link:hover {
+  background: rgba(107,91,77,0.07) !important;
+  color: #3D2E24 !important;
+  padding-left: 2.25rem !important;
+}
+.ylh-submenu-link.active {
+  background: rgba(194,177,161,0.15) !important;
+  color: #3D2E24 !important;
+  font-weight: 600 !important;
+  border-left-color: #C2B1A1 !important;
+}
+
+.ylh-submenu-bullet {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #C2B1A1 !important;
+  flex-shrink: 0 !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   DASHBOARD MAIN CONTENT AREA
+   ══════════════════════════════════════════════════════════════ */
+.dashboard-main {
+  background: #F5F0EB !important;
+}
+
+.dashboard-main__header {
+  background: transparent !important;
+}
+
+.dashboard-main__header h1,
+.dashboard-main__header .dashboard-tagline + h1 {
+  color: #3D2E24 !important;
+}
+
+/* Stat cards / KPI cards */
+.stat-card,
+.kpi-card,
+.stats-card,
+[class*="stat-card"],
+[class*="kpi-"] {
+  background: #fff !important;
+  border: 1px solid rgba(211,198,184,0.4) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 8px rgba(107,91,77,0.06) !important;
+}
+
+.card-value,
+[class*="card-value"] {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  color: #3D2E24 !important;
+}
+
+.card-label,
+.card-title,
+[class*="card-label"] {
+  color: #A9A29A !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   AI PANELS — Financials Hub, Concierge, Marketing Hub, etc.
+   ══════════════════════════════════════════════════════════════ */
+[class*="ai-panel"],
+[class*="ai-coach"],
+[class*="ai-section"],
+.ai-response-panel,
+.concierge-panel {
+  background: linear-gradient(135deg, #FDFAF7 0%, #F5F0EB 100%) !important;
+  border: 1px solid rgba(211,198,184,0.45) !important;
+  border-radius: 14px !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MODALS — all popups
+   ══════════════════════════════════════════════════════════════ */
+.fin-modal,
+[class*="modal-content"],
+[id*="modal"] > div {
+  background: #FDFAF7 !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(211,198,184,0.3) !important;
+}
+
+.fin-modal-overlay,
+[id*="modal-overlay"],
+[class*="modal-overlay"] {
+  background: rgba(61,46,36,0.42) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION DIVIDERS & BORDERS
+   ══════════════════════════════════════════════════════════════ */
+hr,
+.divider,
+[class*="divider"] {
+  border-color: rgba(211,198,184,0.45) !important;
+}
+
+.border,
+[class*="border-"] {
+  border-color: rgba(211,198,184,0.45) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   HOMEOWNER OVERVIEW — team/transaction panels
+   ══════════════════════════════════════════════════════════════ */
+.hw-team-card,
+.hw-tx-card,
+[class*="homeowner-card"] {
+  background: #fff !important;
+  border: 1px solid rgba(211,198,184,0.4) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 3px 12px rgba(107,91,77,0.07) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   PROGRESS / GOAL BARS
+   ══════════════════════════════════════════════════════════════ */
+.goal-bar-bg,
+[class*="progress-bg"],
+[class*="bar-bg"] {
+  background: rgba(211,198,184,0.3) !important;
+}
+.goal-bar-fill,
+[class*="progress-fill"],
+[class*="bar-fill"] {
+  background: linear-gradient(90deg, #6B5B4D, #C2B1A1) !important;
+}
+.goal-bar-fill.danger {
+  background: linear-gradient(90deg, #A0413D, #e08280) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   TRANSACTION STAGE BADGES
+   ══════════════════════════════════════════════════════════════ */
+.stage-badge,
+[class*="stage-"] {
+  border-radius: 20px !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  padding: 0.25rem 0.65rem !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   QUICK-ACTION / SHORTCUT CARDS (agent dashboard)
+   ══════════════════════════════════════════════════════════════ */
+.action-card,
+[class*="action-card"],
+[class*="quick-action"] {
+  background: #fff !important;
+  border: 1px solid rgba(211,198,184,0.4) !important;
+  border-radius: 12px !important;
+  transition: all 0.22s ease !important;
+}
+.action-card:hover {
+  background: #F5F0EB !important;
+  border-color: rgba(194,177,161,0.6) !important;
+  box-shadow: 0 4px 16px rgba(107,91,77,0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   AGENT FINANCIALS — override the inline palette vars
+   ══════════════════════════════════════════════════════════════ */
+/* These map the financials page's :root vars to the new palette */
+.fin-header h1                { color: #3D2E24 !important; }
+.fin-card                     { background: #fff !important; border-color: rgba(211,198,184,0.4) !important; }
+.fin-tab                      { color: #A9A29A !important; }
+.fin-tab:hover                { color: #3D2E24 !important; }
+.fin-tab.active               { color: #5A4A3C !important; border-bottom-color: #C2B1A1 !important; }
+.fin-tabs                     { border-bottom-color: rgba(211,198,184,0.5) !important; }
+.btn-add                      { background: #6B5B4D !important; }
+.btn-add:hover                { background: #5A4A3C !important; }
+.fin-table th                 { color: #A9A29A !important; border-bottom-color: rgba(211,198,184,0.5) !important; }
+.fin-table tr:hover td        { background: rgba(233,228,216,0.35) !important; }
+.ai-coach-panel               { background: linear-gradient(135deg, #fff 0%, #F5F0EB 100%) !important; border-color: rgba(211,198,184,0.4) !important; }
+.btn-coach                    { background: linear-gradient(135deg, #6B5B4D, #5A4A3C) !important; }
+.goal-card                    { background: #F5F0EB !important; border-color: rgba(211,198,184,0.35) !important; }
+.year-select select           { background: #FDFAF7 !important; border-color: rgba(181,168,153,0.5) !important; color: #3D2E24 !important; }
+.chart-card                   { background: #fff !important; border-color: rgba(211,198,184,0.4) !important; }
+.tbl-act-green                { color: #4A7C59 !important; border-color: rgba(74,124,89,0.35) !important; }
+.tbl-act-red                  { color: #A0413D !important; border-color: rgba(160,65,61,0.3) !important; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   MARKETING HUB — panels
+   ══════════════════════════════════════════════════════════════ */
+[class*="ai-panel"],
+[class*="marketing-panel"] {
+  background: #F5F0EB !important;
+  border-color: rgba(211,198,184,0.4) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   LENDER DASHBOARD — override inline rgba(107,106,69,...) refs
+   ══════════════════════════════════════════════════════════════ */
+/* Catch any element that still uses the old olive-green variable */
+[style*="rgba(107, 106, 69"],
+[style*="rgba(107,106,69"] {
+  /* Cannot override inline styles with pure CSS — handled in template updates */
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   SCROLLBAR — subtle, refined
+   ══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(181,168,153,0.45); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(107,91,77,0.5); }
+
+* { scrollbar-width: thin; scrollbar-color: rgba(181,168,153,0.4) transparent; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   FOCUS STATES — accessible, elegant
+   ══════════════════════════════════════════════════════════════ */
+*:focus-visible {
+  outline: 2px solid rgba(107,91,77,0.5) !important;
+  outline-offset: 2px !important;
+}
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+a:focus {
+  outline: 2px solid rgba(107,91,77,0.4) !important;
+  outline-offset: 2px !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   LINK COLORS
+   ══════════════════════════════════════════════════════════════ */
+a { color: #6B5B4D !important; }
+a:hover { color: #3D2E24 !important; }
+
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION & PAGE HEADERS
+   ══════════════════════════════════════════════════════════════ */
+h1, h2, h3, h4, h5, h6 {
+  color: #3D2E24 !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+p, span, li, td, th {
+  color: #3D2E24;
+}
+.subtext,
+.subtitle,
+.muted,
+[class*="-sub"],
+[class*="muted"] {
+  color: #A9A29A !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MOBILE NAV — mobile dropdown sheet
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .ylh-dropdown-menu {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F5F0EB 100%) !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+  .ylh-dropdown.active::before {
+    background: rgba(61,46,36,0.38) !important;
+    backdrop-filter: blur(4px) !important;
+  }
+  .site-header {
+    background: linear-gradient(135deg, #6B5B4D 0%, #5A4A3C 100%) !important;
+  }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   CRM PAGE — preserve compact style, update colors
+   ══════════════════════════════════════════════════════════════ */
+.crm-topbar,
+.crm-bar {
+  background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%) !important;
+  border-color: rgba(211,198,184,0.5) !important;
+}
+.crm-abtn,
+.crm-act,
+.crm-cbtn {
+  border-color: rgba(181,168,153,0.5) !important;
+  color: #6B5B4D !important;
+}
+.crm-abtn:hover,
+.crm-act:hover {
+  background: rgba(107,91,77,0.08) !important;
+  color: #3D2E24 !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   TRANSACTION PAGES
+   ══════════════════════════════════════════════════════════════ */
+.tx-act,
+.tx-btn,
+[class*="tx-"] {
+  border-color: rgba(181,168,153,0.5) !important;
+  color: #6B5B4D !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   MISC OVERRIDES — catch remaining old olive refs
+   ══════════════════════════════════════════════════════════════ */
+[class*="olive"],
+[class*="ylh-olive"] {
+  color: #6B5B4D !important;
+}
+.text-olive { color: #6B5B4D !important; }
+.bg-olive   { background: #6B5B4D !important; }
+.border-olive { border-color: rgba(107,91,77,0.4) !important; }
+
+/* Ensure premium/AI gradients look right */
+.premium-gradient,
+[class*="premium-grad"] {
+  background: linear-gradient(135deg, #6B5B4D 0%, #C2B1A1 100%) !important;
+}
+
+/* Contest page */
+[class*="contest-"] {
+  border-color: rgba(211,198,184,0.4) !important;
+}
+
+/* Login / Auth pages */
+.auth-card,
+.login-card,
+[class*="auth-"] {
+  background: #FDFAF7 !important;
+  border: 1px solid rgba(211,198,184,0.35) !important;
+  border-radius: 18px !important;
+}
+
+/* Public landing page */
+.hero-section,
+[class*="hero-"] {
+  background: linear-gradient(160deg, #F5F0EB 0%, #E9E4D8 100%) !important;
+}
