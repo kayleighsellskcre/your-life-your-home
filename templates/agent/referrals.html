@@ -2,317 +2,484 @@
 
 {% block agent_content %}
 <style>
- .referrals-container {
- max-width: 1200px;
- margin: 0 auto;
- }
- 
- .referrals-header {
- display: flex;
- align-items: center;
- justify-content: space-between;
- flex-wrap: wrap;
- gap: 0.5rem;
- margin-bottom: 1rem;
- }
+/* ── Reset so no global button/input overrides wreck this page ── */
+#referrals-page, #referrals-page * { box-sizing: border-box; }
 
- .referrals-header h1 {
- font-family: var(--font-heading);
- font-size: 1.5rem;
- color: var(--charcoal-brown);
- margin: 0;
- }
+#referrals-page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #3D2E24;
+  background: #F8F5F0;
+  padding: 0;
+}
 
- .referrals-header p {
- color: var(--charcoal-brown);
- opacity: 0.8;
- font-size: 0.9rem;
- margin: 0;
- }
- 
- .referral-section {
- background: var(--white);
- border: var(--border-light);
- border-radius: var(--border-radius-lg);
- padding: 1.25rem 1rem;
- margin-bottom: 1rem;
- box-shadow: var(--shadow-light);
- }
+/* ── Page wrapper ── */
+.ref-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 3rem;
+}
 
- .referral-section h2 {
- font-family: var(--font-heading);
- font-size: 1.15rem;
- color: var(--olive-green);
- margin-bottom: 1rem;
- padding-bottom: 0.5rem;
- border-bottom: 2px solid var(--taupe-beige);
- }
- 
- .referral-link-box {
- background: var(--gradient-warm);
- border: 2px solid var(--olive-green);
- border-radius: var(--border-radius-lg);
- padding: 1.5rem;
- margin-bottom: 1.5rem;
- }
- 
- .referral-link-box h3 {
- font-family: var(--font-heading);
- color: var(--charcoal-brown);
- margin-bottom: 1rem;
- font-size: 1.2rem;
- }
- 
- .referral-link-display {
- display: flex;
- gap: 0.75rem;
- align-items: center;
- margin-bottom: 1rem;
- }
- 
- .referral-link-display input {
- flex: 1;
- padding: 0.75rem 1rem;
- border: var(--border-light);
- border-radius: var(--border-radius);
- background: var(--white);
- color: var(--charcoal-brown);
- font-size: 0.95rem;
- font-family: monospace;
- }
- 
- .btn-copy {
- background: var(--olive-green);
- color: var(--white);
- border: none;
- padding: 0.75rem 1.5rem;
- border-radius: var(--border-radius);
- font-weight: 600;
- cursor: pointer;
- transition: all var(--transition-base);
- }
- 
- .btn-copy:hover {
- background: #5A6D47;
- transform: translateY(-2px);
- }
- 
- .stats-grid {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
- gap: 1.5rem;
- margin-top: 1.5rem;
- }
- 
- .stat-card {
- background: var(--warm-cream);
- border: var(--border-light);
- border-radius: var(--border-radius);
- padding: 1.5rem;
- text-align: center;
- }
- 
- .stat-card h3 {
- font-family: var(--font-heading);
- color: var(--olive-green);
- font-size: 2rem;
- margin: 0 0 0.5rem;
- }
- 
- .stat-card p {
- color: var(--charcoal-brown);
- opacity: 0.8;
- margin: 0;
- font-size: 0.9rem;
- }
- 
- .share-buttons {
- display: flex;
- gap: 1rem;
- flex-wrap: wrap;
- margin-top: 1rem;
- }
- 
- .btn-share {
- background: var(--taupe-beige);
- color: var(--charcoal-brown);
- border: var(--border-light);
- padding: 0.75rem 1.5rem;
- border-radius: var(--border-radius);
- font-weight: 600;
- cursor: pointer;
- transition: all var(--transition-base);
- text-decoration: none;
- display: inline-flex;
- align-items: center;
- gap: 0.5rem;
- }
- 
- .btn-share:hover {
- background: var(--clay-beige);
- transform: translateY(-2px);
- }
- 
- .ad-purchase-section {
- background: linear-gradient(135deg, rgba(107, 91, 77, 0.1) 0%, rgba(200, 180, 151, 0.1) 100%);
- border: 2px dashed var(--olive-green);
- border-radius: var(--border-radius-lg);
- padding: 2rem;
- text-align: center;
- }
- 
- .ad-purchase-section h3 {
- font-family: var(--font-heading);
- color: var(--olive-green);
- margin-bottom: 1rem;
- }
- 
- .btn-purchase-ad {
- background: var(--olive-green);
- color: var(--white);
- border: none;
- padding: 1rem 2.5rem;
- border-radius: var(--border-radius);
- font-size: 1rem;
- font-weight: 600;
- cursor: pointer;
- transition: all var(--transition-base);
- margin-top: 1rem;
- }
- 
- .btn-purchase-ad:hover {
- background: #5A6D47;
- transform: translateY(-2px);
- box-shadow: var(--shadow-medium);
- }
+/* ── Hero ── */
+.ref-hero {
+  background: linear-gradient(135deg, rgba(140,158,120,.12) 0%, rgba(248,244,236,.7) 60%, rgba(255,255,255,.45) 100%);
+  border: 1px solid rgba(140,158,120,.22);
+  border-radius: 18px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 12px rgba(44,58,40,.06);
+}
+.ref-hero__eyebrow {
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #8C9E78;
+  margin-bottom: .35rem;
+}
+.ref-hero__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 700;
+  color: #2E3D25;
+  margin: 0 0 .35rem;
+  line-height: 1.2;
+}
+.ref-hero__sub {
+  font-size: .88rem;
+  color: #8A7B6F;
+  margin: 0;
+}
+.ref-hero__actions {
+  display: flex;
+  gap: .75rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+/* ── Stats strip ── */
+.ref-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.ref-stat {
+  background: #fff;
+  border: 1px solid rgba(140,158,120,.2);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(44,58,40,.05);
+  transition: transform .2s, box-shadow .2s;
+}
+.ref-stat:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(44,58,40,.09); }
+.ref-stat__num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #2E3D25;
+  line-height: 1;
+  margin-bottom: .3rem;
+}
+.ref-stat__label {
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #8A7B6F;
+}
+
+/* ── Cards ── */
+.ref-card {
+  background: #fff;
+  border: 1px solid rgba(200,180,151,.25);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  box-shadow: 0 2px 10px rgba(44,58,40,.05);
+  margin-bottom: 1.5rem;
+}
+.ref-card__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2E3D25;
+  margin: 0 0 1.25rem;
+  padding-bottom: .875rem;
+  border-bottom: 1px solid rgba(200,180,151,.2);
+}
+
+/* ── Link box ── */
+.ref-link-box {
+  background: linear-gradient(135deg, rgba(140,158,120,.08) 0%, rgba(248,244,236,.5) 100%);
+  border: 1.5px solid rgba(140,158,120,.28);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.ref-link-label {
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #8C9E78;
+  margin-bottom: .75rem;
+  display: block;
+}
+.ref-link-row {
+  display: flex;
+  gap: .75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ref-link-input {
+  flex: 1;
+  min-width: 200px;
+  padding: .75rem 1rem !important;
+  border: 1.5px solid rgba(140,158,120,.3) !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  color: #3D2E24 !important;
+  font-size: .85rem !important;
+  font-family: 'Courier New', monospace !important;
+  outline: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: auto !important;
+}
+.ref-link-input:focus {
+  border-color: #8C9E78 !important;
+  box-shadow: 0 0 0 3px rgba(140,158,120,.12) !important;
+}
+.ref-btn-copy {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .4rem !important;
+  padding: .75rem 1.5rem !important;
+  background: linear-gradient(135deg, #8C9E78 0%, #5E6E4A 100%) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-size: .85rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all .2s !important;
+  white-space: nowrap !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 2px 8px rgba(140,158,120,.3) !important;
+  letter-spacing: .02em !important;
+  text-decoration: none !important;
+}
+.ref-btn-copy:hover {
+  background: linear-gradient(135deg, #5E6E4A 0%, #8C9E78 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 5px 14px rgba(140,158,120,.35) !important;
+  color: #fff !important;
+}
+.ref-link-note {
+  font-size: .8rem;
+  color: #8A7B6F;
+  margin: .875rem 0 0;
+  line-height: 1.55;
+}
+
+/* ── Share buttons ── */
+.ref-share-label {
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #8A7B6F;
+  margin: 1.25rem 0 .6rem;
+  display: block;
+}
+.ref-share-row {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+.ref-btn-share {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: .35rem !important;
+  padding: .55rem 1.1rem !important;
+  background: #fff !important;
+  color: #5E6E4A !important;
+  border: 1.5px solid rgba(140,158,120,.32) !important;
+  border-radius: 10px !important;
+  font-size: .8rem !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all .2s !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  width: auto !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 1px 4px rgba(44,58,40,.06) !important;
+  letter-spacing: .02em !important;
+}
+.ref-btn-share:hover {
+  background: rgba(140,158,120,.1) !important;
+  border-color: #8C9E78 !important;
+  color: #3D2E24 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(44,58,40,.1) !important;
+}
+
+/* ── Promote section ── */
+.ref-promote {
+  background: linear-gradient(135deg, rgba(140,158,120,.08) 0%, rgba(248,244,236,.6) 100%);
+  border: 1.5px dashed rgba(140,158,120,.35);
+  border-radius: 14px;
+  padding: 2rem;
+  text-align: center;
+}
+.ref-promote__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #2E3D25;
+  margin: 0 0 .75rem;
+}
+.ref-promote__sub {
+  font-size: .87rem;
+  color: #8A7B6F;
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.ref-promote__note {
+  font-size: .78rem;
+  color: #A09080;
+  margin-top: .75rem;
+  font-style: italic;
+}
+
+/* ── How it works ── */
+.ref-steps {
+  display: grid;
+  gap: .875rem;
+}
+.ref-step {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(135deg, rgba(140,158,120,.06) 0%, rgba(248,244,236,.4) 100%);
+  border: 1px solid rgba(140,158,120,.15);
+  border-radius: 12px;
+  transition: box-shadow .2s;
+}
+.ref-step:hover { box-shadow: 0 4px 14px rgba(44,58,40,.08); }
+.ref-step__num {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8C9E78 0%, #5E6E4A 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(140,158,120,.3);
+}
+.ref-step__title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: .95rem;
+  font-weight: 600;
+  color: #2E3D25;
+  margin: 0 0 .3rem;
+}
+.ref-step__body {
+  font-size: .83rem;
+  color: #8A7B6F;
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .ref-page { padding: 1rem; }
+  .ref-hero { padding: 1.25rem; flex-direction: column; }
+  .ref-hero__actions { width: 100%; }
+  .ref-btn-copy { width: 100% !important; justify-content: center !important; }
+  .ref-stats { grid-template-columns: 1fr 1fr; }
+}
 </style>
 
-<div class="referrals-container ylh-page" style="padding-top:1.25rem;">
- <div class="ylh-hero">
- <div class="ylh-hero__text">
- <div class="ylh-hero__eyebrow">Growth Tools</div>
- <h1 class="ylh-hero__title">Referral &amp; Growth</h1>
- <p class="ylh-hero__subtitle">Share your link and new clients will be connected to you automatically.</p>
- </div>
- <div class="ylh-hero__actions">
- <button class="ylh-btn ylh-btn-primary" onclick="copyReferralLink()">Copy My Link</button>
- </div>
- </div>
+<div id="referrals-page">
+<div class="ref-page">
 
- <!-- Referral Link Section -->
- <div class="referral-section">
- <h2> Your Unique Link</h2>
- 
- <div class="referral-link-box">
- <h3>Share this link with clients:</h3>
- <div class="referral-link-display">
- <input type="text" id="referralLink" value="{{ referral_url }}" readonly>
- <button class="btn-copy" onclick="copyReferralLink()"> Copy Link</button>
- </div>
- <p style="color: var(--charcoal-brown); opacity: 0.7; font-size: 0.85rem; margin: 0;">
- When someone signs up using this link, they'll automatically see your information on their dashboard.
- </p>
- 
- <div class="share-buttons">
- <a href="mailto:?subject=Check%20out%20Your%20Life%20Your%20Home&body={{ referral_url|urlencode }}" class="btn-share"> Email</a>
- <a href="https://www.facebook.com/sharer/sharer.php?u={{ referral_url|urlencode }}" target="_blank" rel="noopener" class="btn-share"> Facebook</a>
- <a href="https://twitter.com/intent/tweet?url={{ referral_url|urlencode }}&text=Get%20your%20free%20home%20equity%20report!" target="_blank" rel="noopener" class="btn-share"> Twitter</a>
- <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ referral_url|urlencode }}" target="_blank" rel="noopener" class="btn-share"> LinkedIn</a>
- <button class="btn-share" onclick="copyReferralLink()"> Copy</button>
- </div>
- </div>
- 
- <!-- Stats -->
- <div class="ylh-stats" style="margin-top:1.25rem;margin-bottom:0;">
- <div class="ylh-stat">
- <div class="ylh-stat__value">{{ stats.total_clients }}</div>
- <div class="ylh-stat__label">Total Clients</div>
- </div>
- <div class="ylh-stat">
- <div class="ylh-stat__value">{{ stats.clients_this_month }}</div>
- <div class="ylh-stat__label">New This Month</div>
- </div>
- </div>
- </div>
+  <!-- Hero -->
+  <div class="ref-hero">
+    <div>
+      <div class="ref-hero__eyebrow">Growth Tools</div>
+      <h1 class="ref-hero__title">Referral &amp; Growth</h1>
+      <p class="ref-hero__sub">Share your link and new clients connect to you automatically.</p>
+    </div>
+    <div class="ref-hero__actions">
+      <button class="ref-btn-copy" onclick="copyReferralLink(this)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy My Link
+      </button>
+    </div>
+  </div>
 
- <!-- Ad Purchase Section -->
- <div class="referral-section">
- <div class="ad-purchase-section">
- <h3> Promote Your Link with Ads</h3>
- <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 1rem;">
- Drive traffic to your referral link and help potential clients discover their home equity instantly. 
- Your ads will direct people to sign up and get an instant home-equity report.
- </p>
- <button class="btn-purchase-ad" onclick="openAdPurchaseModal()">
- Purchase Ads
- </button>
- <p style="color: var(--charcoal-brown); opacity: 0.7; font-size: 0.85rem; margin-top: 1rem;">
- Coming soon: Targeted ad campaigns to reach homeowners in your area
- </p>
- </div>
- </div>
+  <!-- Stats -->
+  <div class="ref-stats">
+    <div class="ref-stat">
+      <div class="ref-stat__num">{{ stats.total_clients }}</div>
+      <div class="ref-stat__label">Total Clients</div>
+    </div>
+    <div class="ref-stat">
+      <div class="ref-stat__num">{{ stats.clients_this_month }}</div>
+      <div class="ref-stat__label">New This Month</div>
+    </div>
+  </div>
 
- <!-- How It Works -->
- <div class="referral-section">
- <h2> How It Works</h2>
- <div style="display: grid; gap: 1rem;">
- <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
- <div style="font-size: 2rem; flex-shrink: 0;">1</div>
- <div>
- <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">Share Your Link</h4>
- <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">Share your unique referral link via email, social media, or ads.</p>
- </div>
- </div>
- <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
- <div style="font-size: 2rem; flex-shrink: 0;">2</div>
- <div>
- <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">Client Signs Up</h4>
- <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">When they create an account, they're automatically connected to you.</p>
- </div>
- </div>
- <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
- <div style="font-size: 2rem; flex-shrink: 0;">3</div>
- <div>
- <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">They See Your Info</h4>
- <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">Your photo, contact info, and call/schedule buttons appear at the top of their dashboard.</p>
- </div>
- </div>
- <div style="display: flex; gap: 1rem; padding: 1rem; background: var(--warm-cream); border-radius: var(--border-radius);">
- <div style="font-size: 2rem; flex-shrink: 0;">4</div>
- <div>
- <h4 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin: 0 0 0.5rem;">Instant Home Equity Report</h4>
- <p style="color: var(--charcoal-brown); opacity: 0.8; margin: 0;">They get an instant home-equity report, and you can follow up to help them with their next steps.</p>
- </div>
- </div>
- </div>
- </div>
+  <!-- Your Link Card -->
+  <div class="ref-card">
+    <h2 class="ref-card__title">Your Unique Link</h2>
+
+    <div class="ref-link-box">
+      <span class="ref-link-label">Share this link with clients</span>
+      <div class="ref-link-row">
+        <input type="text" id="referralLink" class="ref-link-input" value="{{ referral_url }}" readonly>
+        <button class="ref-btn-copy" onclick="copyReferralLink(this)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy Link
+        </button>
+      </div>
+      <p class="ref-link-note">When someone signs up using this link, they will automatically see your contact information at the top of their dashboard.</p>
+    </div>
+
+    <span class="ref-share-label">Share via</span>
+    <div class="ref-share-row">
+      <a href="mailto:?subject=Check%20out%20Your%20Life%20Your%20Home&body={{ referral_url|urlencode }}" class="ref-btn-share">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email
+      </a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u={{ referral_url|urlencode }}" target="_blank" rel="noopener" class="ref-btn-share">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        Facebook
+      </a>
+      <a href="https://twitter.com/intent/tweet?url={{ referral_url|urlencode }}&text=Get%20your%20free%20home%20equity%20report!" target="_blank" rel="noopener" class="ref-btn-share">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.7 5.5 4.4 9 4.4A5.5 5.5 0 0 1 22 4z"/></svg>
+        Twitter
+      </a>
+      <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ referral_url|urlencode }}" target="_blank" rel="noopener" class="ref-btn-share">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        LinkedIn
+      </a>
+      <button class="ref-btn-share" onclick="copyReferralLink(this)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Link
+      </button>
+    </div>
+  </div>
+
+  <!-- Promote -->
+  <div class="ref-card">
+    <h2 class="ref-card__title">Promote Your Link</h2>
+    <div class="ref-promote">
+      <div class="ref-promote__title">Drive Traffic with Targeted Ads</div>
+      <p class="ref-promote__sub">Help potential clients discover their home equity instantly. Ads drive people to sign up and receive a complimentary home-equity report, connected directly to you.</p>
+      <button class="ref-btn-copy" onclick="openAdPurchaseModal()">
+        Purchase Ads
+      </button>
+      <p class="ref-promote__note">Coming soon: Targeted campaigns to reach homeowners in your area</p>
+    </div>
+  </div>
+
+  <!-- How It Works -->
+  <div class="ref-card">
+    <h2 class="ref-card__title">How It Works</h2>
+    <div class="ref-steps">
+      <div class="ref-step">
+        <div class="ref-step__num">1</div>
+        <div>
+          <p class="ref-step__title">Share Your Link</p>
+          <p class="ref-step__body">Send your unique referral link via email, text, social media, or add it to your website and email signature.</p>
+        </div>
+      </div>
+      <div class="ref-step">
+        <div class="ref-step__num">2</div>
+        <div>
+          <p class="ref-step__title">Client Signs Up</p>
+          <p class="ref-step__body">When they create an account, they are automatically connected to you as their agent.</p>
+        </div>
+      </div>
+      <div class="ref-step">
+        <div class="ref-step__num">3</div>
+        <div>
+          <p class="ref-step__title">They See Your Info</p>
+          <p class="ref-step__body">Your photo, contact info, and call or schedule buttons appear at the top of their dashboard every time they log in.</p>
+        </div>
+      </div>
+      <div class="ref-step">
+        <div class="ref-step__num">4</div>
+        <div>
+          <p class="ref-step__title">Instant Home Equity Report</p>
+          <p class="ref-step__body">They receive a complimentary home-equity report, giving you a natural, valuable conversation starter to follow up with.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <script>
-function copyReferralLink() {
- const linkInput = document.getElementById('referralLink');
- linkInput.select();
- linkInput.setSelectionRange(0, 99999); // For mobile devices
- 
- try {
- document.execCommand('copy');
- const btn = event.target;
- const originalText = btn.textContent;
- btn.textContent = ' Copied!';
- btn.style.background = '#5A6D47';
- 
- setTimeout(() => {
- btn.textContent = originalText;
- btn.style.background = '';
- }, 2000);
- } catch (err) {
- alert('Failed to copy. Please copy manually.');
- }
+function copyReferralLink(btn) {
+  var input = document.getElementById('referralLink');
+  if (!input) return;
+
+  // Modern clipboard API
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(input.value).then(function(){
+      showCopied(btn);
+    }).catch(function(){
+      fallbackCopy(input, btn);
+    });
+  } else {
+    fallbackCopy(input, btn);
+  }
+}
+
+function fallbackCopy(input, btn) {
+  input.select();
+  input.setSelectionRange(0, 99999);
+  try {
+    document.execCommand('copy');
+    showCopied(btn);
+  } catch(e) {
+    alert('Please copy manually: ' + input.value);
+  }
+}
+
+function showCopied(btn) {
+  if (!btn) return;
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+  btn.style.background = 'linear-gradient(135deg, #5E6E4A 0%, #3A4D2C 100%)';
+  setTimeout(function(){
+    btn.innerHTML = orig;
+    btn.style.background = '';
+  }, 2200);
 }
 
 function openAdPurchaseModal() {
- alert('Ad purchase feature coming soon! This will allow you to create targeted ad campaigns that drive traffic to your referral link.');
+  alert('Ad campaigns coming soon. Targeted ads will drive homeowners in your area directly to your referral link.');
 }
 </script>
 {% endblock %}
-
