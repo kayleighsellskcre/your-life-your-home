@@ -4,7 +4,6 @@
 <style>
 #fin { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; }
 
-/* ── TOP BAR ── */
 .fin-topbar {
   display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: .75rem;
@@ -17,7 +16,6 @@
 .fin-topbar p  { font-size: .75rem; color: #6B5B4D; margin: .15rem 0 0; }
 .year-select { border: 1px solid rgba(107,91,77,.25); border-radius: 7px; padding: .35rem .65rem; font-size: .8rem; background: white; color: #3D2E24; cursor: pointer; }
 
-/* ── KPI ROW ── */
 .kpi-row { display: grid; grid-template-columns: repeat(6,1fr); gap: .625rem; margin-bottom: 1rem; }
 @media(max-width:1100px){ .kpi-row { grid-template-columns: repeat(3,1fr); } }
 @media(max-width:640px) { .kpi-row { grid-template-columns: repeat(2,1fr); } }
@@ -36,13 +34,11 @@
 .kpi__val.green { color: #2e7d32; }
 .kpi__lbl { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6B5B4D; margin-top: .2rem; }
 
-/* ── GRID ── */
 .fin-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1rem; align-items: start; }
 @media(max-width:1100px){ .fin-grid { grid-template-columns: 1fr; } }
 .fin-left  { display: flex; flex-direction: column; gap: 1rem; }
 .fin-right { display: flex; flex-direction: column; gap: 1rem; }
 
-/* ── PANELS ── */
 .panel { background: white; border: 1px solid rgba(107,91,77,.12); border-radius: 10px; overflow: hidden; }
 .panel-hd {
   display: flex; align-items: center; justify-content: space-between;
@@ -54,7 +50,6 @@
 }
 .panel-body { padding: .875rem 1rem; }
 
-/* ── ADD FORM (collapsible) ── */
 .add-form-toggle {
   background: rgba(107,91,77,.08); border: 1px solid rgba(107,91,77,.2);
   border-radius: 7px; padding: .35rem .75rem; font-size: .75rem; font-weight: 600;
@@ -78,7 +73,6 @@
 }
 .btn-add:hover { background: linear-gradient(135deg,#5A4A3C,#6B5B4D); }
 
-/* ── TABLES ── */
 .data-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
 .data-table th { background: rgba(107,91,77,.06); color: #6B5B4D; font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: .4rem .65rem; text-align: left; border-bottom: 1px solid rgba(107,91,77,.1); }
 .data-table td { padding: .4rem .65rem; border-bottom: 1px solid rgba(107,91,77,.07); color: #3D2E24; vertical-align: middle; }
@@ -91,8 +85,9 @@
 .btn-paid { background: rgba(46,125,50,.1); border: none; color: #2e7d32; font-size: .7rem; font-weight: 600; cursor: pointer; padding: .15rem .5rem; border-radius: 5px; white-space: nowrap; }
 .btn-paid:hover { background: rgba(46,125,50,.2); }
 .empty-row td { text-align: center; color: #9e9e9e; padding: 1.25rem; font-style: italic; font-size: .78rem; }
+.tx-link { font-size: .7rem; color: #6B5B4D; text-decoration: none; border-bottom: 1px solid rgba(107,91,77,.3); white-space: nowrap; }
+.tx-link:hover { color: #3D2E24; }
 
-/* ── GOALS PANEL ── */
 .goal-row { display: flex; align-items: center; justify-content: space-between; padding: .4rem 0; border-bottom: 1px solid rgba(107,91,77,.07); font-size: .82rem; }
 .goal-row:last-child { border-bottom: none; }
 .goal-lbl { color: #6B5B4D; font-weight: 500; }
@@ -100,7 +95,6 @@
 .progress-bar-wrap { height: 5px; background: rgba(107,91,77,.1); border-radius: 3px; margin-top: .2rem; overflow: hidden; }
 .progress-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg,#6B5B4D,#8B7B6B); transition: width .6s ease; }
 
-/* ── AI PANEL ── */
 .ai-card { background: linear-gradient(135deg,#3D2E24,#5A4A3C); border-radius: 10px; padding: .875rem 1rem; margin-bottom: .625rem; }
 .ai-card .ai-lbl { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: rgba(200,180,151,.7); margin-bottom: .35rem; }
 .ai-card .ai-body { font-size: .82rem; color: rgba(255,255,255,.88); line-height: 1.5; }
@@ -115,10 +109,8 @@
 .skeleton { height: .85rem; background: linear-gradient(90deg,rgba(255,255,255,.06) 0%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.06) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: .4rem; }
 @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
-/* ── CHARTS ── */
 .chart-wrap { position: relative; height: 180px; }
 
-/* ── FLASH ── */
 .flash-success { background:#e8f5e9; border:1px solid rgba(46,125,50,.3); color:#2e7d32; padding:.5rem 1rem; border-radius:7px; font-size:.8rem; margin-bottom:.75rem; }
 .flash-error   { background:#ffebee; border:1px solid rgba(192,57,43,.3); color:#c0392b; padding:.5rem 1rem; border-radius:7px; font-size:.8rem; margin-bottom:.75rem; }
 </style>
@@ -128,8 +120,8 @@
 <!-- TOP BAR -->
 <div class="fin-topbar">
   <div>
-    <h1>💰 Financials Hub</h1>
-    <p>Commissions · Expenses · Mileage · Goals · AI Insights</p>
+    <h1>Financials Hub</h1>
+    <p>Commissions &middot; Expenses &middot; Mileage &middot; Goals &middot; AI Insights</p>
   </div>
   <form method="get" action="{{ url_for('agent_financials') }}" style="display:flex;align-items:center;gap:.5rem">
     <label style="font-size:.75rem;font-weight:600;color:#6B5B4D">Year:</label>
@@ -171,24 +163,23 @@
   </div>
   <div class="kpi k-ded">
     <div class="kpi__val">${{ "{:,.0f}".format(mileage_deduction) }}</div>
-    <div class="kpi__lbl">Mile Deduction</div>
+    <div class="kpi__lbl">Mileage Deduction</div>
   </div>
 </div>
 
 <!-- MAIN GRID -->
 <div class="fin-grid">
 
-<!-- ═══════ LEFT COLUMN ═══════ -->
+<!-- LEFT COLUMN -->
 <div class="fin-left">
 
   <!-- COMMISSIONS -->
   <div class="panel">
     <div class="panel-hd">
-      <span>🏠 Commissions ({{ commissions|length }})</span>
+      <span>Commissions ({{ commissions|length }})</span>
       <button class="add-form-toggle" onclick="toggle('add-commission')">+ Add Commission</button>
     </div>
     <div class="panel-body">
-      <!-- Add Form -->
       <div id="add-commission" class="add-form">
         <form method="post" action="{{ url_for('agent_financials_commission_add') }}">
           <div class="form-row">
@@ -214,15 +205,15 @@
             </div>
             <div>
               <label class="form-lbl">Sale Price ($)</label>
-              <input type="number" name="sale_price" placeholder="400000" min="0" step="1000">
+              <input type="number" id="new-sale-price" name="sale_price" placeholder="400000" min="0" step="1000" oninput="calcCommission()">
             </div>
             <div>
               <label class="form-lbl">Comm Rate (%)</label>
-              <input type="number" name="commission_rate" placeholder="3.0" step=".1" value="3.0">
+              <input type="number" id="new-comm-rate" name="commission_rate" placeholder="3.0" step=".1" value="3.0" oninput="calcCommission()">
             </div>
             <div>
               <label class="form-lbl">Brokerage Split (%)</label>
-              <input type="number" name="brokerage_split_pct" placeholder="30" step=".1" value="0">
+              <input type="number" id="new-split-pct" name="brokerage_split_pct" placeholder="30" step=".1" value="0" oninput="calcCommission()">
             </div>
             <div>
               <label class="form-lbl">Status</label>
@@ -231,6 +222,9 @@
                 <option value="paid">Paid</option>
               </select>
             </div>
+          </div>
+          <div style="background:white;border:1px solid rgba(107,91,77,.15);border-radius:7px;padding:.5rem .75rem;margin-bottom:.5rem;font-size:.78rem;color:#6B5B4D;">
+            Estimated Net Commission: <strong id="est-net" style="color:#3D2E24">$0</strong>
           </div>
           <div class="form-row" style="grid-template-columns:1fr">
             <div>
@@ -241,19 +235,18 @@
           <button type="submit" class="btn-add">Save Commission</button>
         </form>
       </div>
-      <!-- Table -->
       <table class="data-table">
         <thead>
           <tr>
             <th>Property</th><th>Client</th><th>Close</th><th>Side</th>
-            <th>Sale Price</th><th>Net Comm</th><th>Status</th><th></th>
+            <th>Sale Price</th><th>Net Comm</th><th>Status</th><th>Transaction</th><th></th>
           </tr>
         </thead>
         <tbody>
           {% if commissions %}
           {% for c in commissions %}
           <tr>
-            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.property_address or '—' }}</td>
+            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.property_address or '—' }}</td>
             <td>{{ c.client_name or '—' }}</td>
             <td style="white-space:nowrap">{{ c.close_date or '—' }}</td>
             <td style="text-transform:capitalize">{{ c.transaction_side or '—' }}</td>
@@ -266,20 +259,25 @@
               <span class="badge-projected">Projected</span>
               {% endif %}
             </td>
+            <td>
+              {% if c.transaction_id %}
+              <a href="{{ url_for('agent_transaction_detail', tx_id=c.transaction_id) }}" class="tx-link">View Tx</a>
+              {% else %}<span style="color:#ccc;font-size:.7rem">—</span>{% endif %}
+            </td>
             <td style="white-space:nowrap">
               {% if c.status != 'paid' %}
               <form method="post" action="{{ url_for('agent_financials_commission_mark_paid', cid=c.id) }}" style="display:inline">
-                <button type="submit" class="btn-paid" title="Mark Paid">✓ Paid</button>
+                <button type="submit" class="btn-paid">Mark Paid</button>
               </form>
               {% endif %}
               <form method="post" action="{{ url_for('agent_financials_commission_delete', cid=c.id) }}" style="display:inline" onsubmit="return confirm('Delete this commission?')">
-                <button type="submit" class="btn-del" title="Delete">✕</button>
+                <button type="submit" class="btn-del">Remove</button>
               </form>
             </td>
           </tr>
           {% endfor %}
           {% else %}
-          <tr class="empty-row"><td colspan="8">No commissions logged for {{ year }} yet — add your first one above.</td></tr>
+          <tr class="empty-row"><td colspan="9">No commissions logged for {{ year }}. Add one above or log commission details on any transaction.</td></tr>
           {% endif %}
         </tbody>
       </table>
@@ -289,7 +287,7 @@
   <!-- EXPENSES -->
   <div class="panel">
     <div class="panel-hd">
-      <span>💳 Expenses ({{ expenses|length }})</span>
+      <span>Expenses ({{ expenses|length }})</span>
       <button class="add-form-toggle" onclick="toggle('add-expense')">+ Log Expense</button>
     </div>
     <div class="panel-body">
@@ -302,7 +300,7 @@
             </div>
             <div>
               <label class="form-lbl">Category</label>
-              <select name="category">
+              <select name="category" id="expense-category">
                 <option>Marketing</option><option>MLS / Dues</option><option>Technology</option>
                 <option>Office</option><option>Education</option><option>Gifts</option>
                 <option>Travel</option><option>Signs / Lockboxes</option><option>Other</option>
@@ -310,7 +308,7 @@
             </div>
             <div>
               <label class="form-lbl">Description</label>
-              <input type="text" name="description" placeholder="What was this for?" required>
+              <input type="text" id="expense-desc" name="description" placeholder="What was this for?" required oninput="autoCategory(this.value)">
             </div>
             <div>
               <label class="form-lbl">Amount ($)</label>
@@ -340,7 +338,7 @@
             <td style="font-weight:600;color:#A0522D">${{ "{:,.2f}".format(e.amount or 0) }}</td>
             <td>
               <form method="post" action="{{ url_for('agent_financials_expense_delete', eid=e.id) }}" style="display:inline" onsubmit="return confirm('Delete this expense?')">
-                <button type="submit" class="btn-del" title="Delete">✕</button>
+                <button type="submit" class="btn-del">Remove</button>
               </form>
             </td>
           </tr>
@@ -356,7 +354,7 @@
   <!-- MILEAGE -->
   <div class="panel">
     <div class="panel-hd">
-      <span>🚗 Mileage Log ({{ mileage_logs|length }})</span>
+      <span>Mileage Log ({{ mileage_logs|length }})</span>
       <button class="add-form-toggle" onclick="toggle('add-mileage')">+ Log Trip</button>
     </div>
     <div class="panel-body">
@@ -381,34 +379,37 @@
             </div>
             <div>
               <label class="form-lbl">Miles</label>
-              <input type="number" name="miles" placeholder="0.0" step=".1" min="0" required>
+              <input type="number" name="miles" placeholder="0.0" step=".1" min="0" required oninput="updateDeduction(this.value)">
             </div>
+          </div>
+          <div style="background:white;border:1px solid rgba(107,91,77,.15);border-radius:7px;padding:.5rem .75rem;margin-bottom:.5rem;font-size:.78rem;color:#6B5B4D;">
+            IRS Deduction (@ ${{ irs_rate }}/mile): <strong id="est-deduction" style="color:#6a1b9a">$0.00</strong>
           </div>
           <button type="submit" class="btn-add">Save Trip</button>
         </form>
       </div>
       <table class="data-table">
         <thead>
-          <tr><th>Date</th><th>From → To</th><th>Purpose</th><th>Miles</th><th>Deduction</th><th></th></tr>
+          <tr><th>Date</th><th>From / To</th><th>Purpose</th><th>Miles</th><th>Deduction</th><th></th></tr>
         </thead>
         <tbody>
           {% if mileage_logs %}
           {% for m in mileage_logs %}
           <tr>
             <td style="white-space:nowrap">{{ m.trip_date or '—' }}</td>
-            <td style="font-size:.73rem">{{ m.from_location or '—' }} → {{ m.to_location or '—' }}</td>
+            <td style="font-size:.73rem">{{ m.from_location or '—' }} &rarr; {{ m.to_location or '—' }}</td>
             <td>{{ m.purpose or '—' }}</td>
             <td>{{ "{:,.1f}".format(m.miles or 0) }}</td>
             <td style="color:#6a1b9a;font-weight:600">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
             <td>
               <form method="post" action="{{ url_for('agent_financials_mileage_delete', mid=m.id) }}" style="display:inline" onsubmit="return confirm('Delete this entry?')">
-                <button type="submit" class="btn-del">✕</button>
+                <button type="submit" class="btn-del">Remove</button>
               </form>
             </td>
           </tr>
           {% endfor %}
           {% else %}
-          <tr class="empty-row"><td colspan="6">No mileage logged for {{ year }} yet. IRS rate: ${{ irs_rate }}/mile.</td></tr>
+          <tr class="empty-row"><td colspan="6">No mileage logged for {{ year }}. IRS rate: ${{ irs_rate }}/mile.</td></tr>
           {% endif %}
         </tbody>
       </table>
@@ -417,7 +418,7 @@
 
   <!-- MONTHLY GCI CHART -->
   <div class="panel">
-    <div class="panel-hd">📊 Monthly GCI — {{ year }}</div>
+    <div class="panel-hd">Monthly GCI &mdash; {{ year }}</div>
     <div class="panel-body">
       <div class="chart-wrap"><canvas id="gciChart"></canvas></div>
     </div>
@@ -425,18 +426,17 @@
 
 </div><!-- /fin-left -->
 
-<!-- ═══════ RIGHT COLUMN ═══════ -->
+<!-- RIGHT COLUMN -->
 <div class="fin-right">
 
   <!-- GOALS -->
   <div class="panel">
     <div class="panel-hd">
-      <span>🎯 {{ year }} Goals</span>
+      <span>{{ year }} Goals</span>
       <button class="add-form-toggle" onclick="toggle('edit-goals')">Edit Goals</button>
     </div>
     <div class="panel-body">
       {% set goal = goals[0] if goals else none %}
-      <!-- Edit form -->
       <div id="edit-goals" class="add-form">
         <form method="post" action="{{ url_for('agent_financials_goal_save') }}">
           <input type="hidden" name="goal_year" value="{{ year }}">
@@ -467,7 +467,6 @@
           <button type="submit" class="btn-add">Save Goals</button>
         </form>
       </div>
-      <!-- Progress display -->
       {% if goal %}
       {% set gci_raw = (ytd_gci / goal.gross_commission_goal * 100) if goal.gross_commission_goal else 0 %}
       {% set gci_pct = gci_raw if gci_raw < 100 else 100 %}
@@ -481,9 +480,8 @@
         <span class="goal-val">${{ "{:,.0f}".format(ytd_gci) }} / ${{ "{:,.0f}".format(goal.gross_commission_goal or 0) }}</span>
       </div>
       <div class="progress-bar-wrap" style="margin-bottom:.5rem">
-        <div class="progress-bar-fill" style="width:{{ gci_pct }}%;background:linear-gradient(90deg,#6B5B4D,#8B7B6B)"></div>
+        <div class="progress-bar-fill" style="width:{{ gci_pct }}%"></div>
       </div>
-
       <div class="goal-row">
         <span class="goal-lbl">Net Income Goal</span>
         <span class="goal-val">${{ "{:,.0f}".format(net_income) }} / ${{ "{:,.0f}".format(goal.net_income_goal or 0) }}</span>
@@ -491,7 +489,6 @@
       <div class="progress-bar-wrap" style="margin-bottom:.5rem">
         <div class="progress-bar-fill" style="width:{{ net_pct }}%;background:linear-gradient(90deg,#2e7d32,#4caf50)"></div>
       </div>
-
       <div class="goal-row">
         <span class="goal-lbl">Expenses Budget</span>
         <span class="goal-val" style="color:{% if exp_pct > 90 %}#c0392b{% else %}#3D2E24{% endif %}">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(goal.expenses_budget or 0) }}</span>
@@ -499,7 +496,6 @@
       <div class="progress-bar-wrap" style="margin-bottom:.5rem">
         <div class="progress-bar-fill" style="width:{{ exp_pct }}%;background:linear-gradient(90deg,#A0522D,#c0392b)"></div>
       </div>
-
       <div class="goal-row">
         <span class="goal-lbl">Transactions Goal</span>
         <span class="goal-val">{{ commissions|length }} / {{ goal.transactions_goal or 0 }}</span>
@@ -512,7 +508,7 @@
       {% else %}
       <div style="text-align:center;color:#9e9e9e;font-size:.78rem;padding:1.25rem 0">
         No goals set for {{ year }} yet.<br>
-        <button class="add-form-toggle" onclick="toggle('edit-goals')" style="margin-top:.5rem">Set Goals →</button>
+        <button class="add-form-toggle" onclick="toggle('edit-goals')" style="margin-top:.5rem">Set Goals</button>
       </div>
       {% endif %}
     </div>
@@ -521,14 +517,14 @@
   <!-- AI INSIGHTS -->
   <div class="panel">
     <div class="panel-hd">
-      <span>🤖 AI Financial Insights</span>
-      <button class="btn-ai" onclick="loadInsights()" id="insights-btn">Refresh</button>
+      <span>AI Financial Insights</span>
+      <button class="btn-ai" onclick="loadInsights()" id="insights-btn" style="color:#6B5B4D;background:rgba(107,91,77,.08);border-color:rgba(107,91,77,.2)">Refresh</button>
     </div>
     <div class="panel-body">
       <div id="insights-container">
-        <div class="ai-card" style="padding:.6rem .875rem;margin-bottom:.5rem">
-          <div class="skeleton" style="width:80%"></div>
-          <div class="skeleton" style="width:60%"></div>
+        <div style="background:linear-gradient(135deg,#F6F2E8,#F0EBE0);border-radius:8px;padding:.75rem;margin-bottom:.5rem">
+          <div style="height:.8rem;background:rgba(107,91,77,.15);border-radius:4px;width:80%;margin-bottom:.4rem"></div>
+          <div style="height:.8rem;background:rgba(107,91,77,.1);border-radius:4px;width:60%"></div>
         </div>
       </div>
     </div>
@@ -537,19 +533,19 @@
   <!-- AI COACH -->
   <div class="panel">
     <div class="panel-hd">
-      <span>💡 AI Coach</span>
-      <button class="btn-ai" onclick="loadCoach()" id="coach-btn">Get Coaching</button>
+      <span>AI Financial Coach</span>
+      <button class="btn-ai" onclick="loadCoach()" id="coach-btn" style="color:#6B5B4D;background:rgba(107,91,77,.08);border-color:rgba(107,91,77,.2)">Get Coaching</button>
     </div>
     <div class="panel-body">
       <div id="coach-container" style="font-size:.82rem;color:#6B5B4D;line-height:1.55;min-height:2rem">
-        <em style="color:#9e9e9e">Click "Get Coaching" for personalized financial tips based on your data.</em>
+        <span style="color:#9e9e9e;font-style:italic">Click "Get Coaching" for personalized financial tips based on your data.</span>
       </div>
     </div>
   </div>
 
   <!-- EXPENSE CHART -->
   <div class="panel">
-    <div class="panel-hd">🧾 Expenses by Category</div>
+    <div class="panel-hd">Expenses by Category</div>
     <div class="panel-body">
       {% if expense_by_cat %}
       <div class="chart-wrap" style="height:160px"><canvas id="expChart"></canvas></div>
@@ -560,77 +556,95 @@
   </div>
 
 </div><!-- /fin-right -->
-
 </div><!-- /fin-grid -->
 </div><!-- /#fin -->
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// ── Monthly GCI Chart ──
+// Monthly GCI Chart
 (function(){
   var ctx = document.getElementById('gciChart');
   if (!ctx) return;
-  var data = {{ monthly_gci_list | tojson }};
   new Chart(ctx, {
     type: 'bar',
     data: {
       labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-      datasets: [{
-        label: 'GCI ($)',
-        data: data,
-        backgroundColor: 'rgba(107,91,77,0.7)',
-        borderColor: 'rgba(107,91,77,1)',
-        borderWidth: 1,
-        borderRadius: 4,
-      }]
+      datasets: [{ label: 'GCI ($)', data: {{ monthly_gci_list | tojson }},
+        backgroundColor: 'rgba(107,91,77,0.7)', borderColor: 'rgba(107,91,77,1)',
+        borderWidth: 1, borderRadius: 4 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-        y: {
-          grid: { color: 'rgba(107,91,77,0.06)' },
-          ticks: {
-            font: { size: 10 },
-            callback: function(v){ return '$' + (v>=1000 ? (v/1000).toFixed(0)+'k' : v); }
-          }
+        y: { grid: { color: 'rgba(107,91,77,0.06)' },
+          ticks: { font:{size:10}, callback: function(v){ return '$'+(v>=1000?(v/1000).toFixed(0)+'k':v); } }
         }
       }
     }
   });
 })();
 
-// ── Expense Donut Chart ──
+// Expense Chart
 (function(){
   var ctx = document.getElementById('expChart');
   if (!ctx) return;
   var cats = {{ expense_by_cat | tojson }};
-  var labels = Object.keys(cats);
-  var vals   = Object.values(cats);
-  var colors = ['#6B5B4D','#A0522D','#B8860B','#2e7d32','#1565c0','#6a1b9a','#c0392b','#009688','#607d8b'];
   new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: labels,
-      datasets: [{ data: vals, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }]
+      labels: Object.keys(cats),
+      datasets: [{ data: Object.values(cats),
+        backgroundColor: ['#6B5B4D','#A0522D','#B8860B','#2e7d32','#1565c0','#6a1b9a','#c0392b','#009688','#607d8b'],
+        borderWidth: 2, borderColor: '#fff' }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'right', labels: { font: { size: 10 }, padding: 8, boxWidth: 12 } }
-      }
+      plugins: { legend: { position:'right', labels:{ font:{size:10}, padding:8, boxWidth:12 } } }
     }
   });
 })();
 
-// ── Toggle forms ──
-function toggle(id) {
-  var el = document.getElementById(id);
-  el.classList.toggle('open');
+function toggle(id) { document.getElementById(id).classList.toggle('open'); }
+
+// Auto-calculate commission estimate
+function calcCommission() {
+  var price = parseFloat(document.getElementById('new-sale-price').value) || 0;
+  var rate  = parseFloat(document.getElementById('new-comm-rate').value) || 0;
+  var split = parseFloat(document.getElementById('new-split-pct').value) || 0;
+  var gross = price * rate / 100;
+  var net   = gross - gross * split / 100;
+  document.getElementById('est-net').textContent = '$' + net.toLocaleString('en-US', {minimumFractionDigits:0,maximumFractionDigits:0});
 }
 
-// ── Build context string for AI ──
+// Auto-calculate mileage deduction
+function updateDeduction(miles) {
+  var rate = {{ irs_rate }};
+  var ded = (parseFloat(miles) || 0) * rate;
+  document.getElementById('est-deduction').textContent = '$' + ded.toFixed(2);
+}
+
+// AI: auto-categorize expense
+var categoryMap = {
+  'mls': 'MLS / Dues', 'dues': 'MLS / Dues', 'association': 'MLS / Dues',
+  'facebook': 'Marketing', 'google': 'Marketing', 'ad': 'Marketing', 'zillow': 'Marketing',
+  'sign': 'Signs / Lockboxes', 'lockbox': 'Signs / Lockboxes', 'rider': 'Signs / Lockboxes',
+  'gas': 'Travel', 'uber': 'Travel', 'hotel': 'Travel', 'flight': 'Travel', 'parking': 'Travel',
+  'zoom': 'Technology', 'software': 'Technology', 'subscription': 'Technology', 'crm': 'Technology',
+  'class': 'Education', 'course': 'Education', 'seminar': 'Education', 'training': 'Education',
+  'gift': 'Gifts', 'closing gift': 'Gifts', 'card': 'Gifts',
+  'office': 'Office', 'supplies': 'Office', 'print': 'Office', 'paper': 'Office'
+};
+function autoCategory(desc) {
+  if (!desc) return;
+  var lower = desc.toLowerCase();
+  var sel = document.getElementById('expense-category');
+  for (var key in categoryMap) {
+    if (lower.indexOf(key) !== -1) { sel.value = categoryMap[key]; return; }
+  }
+}
+
 function buildContext() {
   return [
     'Year: {{ year }}',
@@ -639,66 +653,53 @@ function buildContext() {
     'YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}',
     'Net Income: ${{ "{:,.0f}".format(net_income) }}',
     'Miles driven: {{ "{:,.0f}".format(ytd_miles) }}',
-    'Mileage deduction: ${{ "{:,.0f}".format(mileage_deduction) }}',
     'Commissions logged: {{ commissions|length }}',
     {% if goals %}'GCI Goal: ${{ "{:,.0f}".format(goals[0].gross_commission_goal or 0) }}',{% endif %}
-    'Month: ' + new Date().toLocaleString('default',{month:'long'}),
+    'Current month: ' + new Date().toLocaleString('default',{month:'long'}),
   ].join('\n');
 }
 
-// ── AI Insights ──
 function loadInsights() {
   var container = document.getElementById('insights-container');
   var btn = document.getElementById('insights-btn');
-  container.innerHTML = '<div class="ai-card" style="padding:.6rem .875rem;margin-bottom:.5rem"><div class="skeleton" style="width:85%"></div><div class="skeleton" style="width:65%"></div></div>';
+  container.innerHTML = '<div style="background:linear-gradient(135deg,#F6F2E8,#F0EBE0);border-radius:8px;padding:.75rem;margin-bottom:.5rem"><div style="height:.8rem;background:rgba(107,91,77,.15);border-radius:4px;width:80%;margin-bottom:.4rem"></div><div style="height:.8rem;background:rgba(107,91,77,.1);border-radius:4px;width:60%"></div></div>';
   if (btn) btn.disabled = true;
   fetch('/api/ai/financials/agent-insights', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({context: buildContext()})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
+  }).then(function(r){ return r.json(); }).then(function(d){
     var insights = d.insights || [];
     if (!insights.length) {
       container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Ready when you are</div><div class="ai-ins-body">Add commissions and expenses to unlock personalized AI insights.</div></div>';
     } else {
       container.innerHTML = insights.map(function(ins){
-        return '<div class="ai-insight ' + (ins.type||'info') + '"><div class="ai-ins-title">' + ins.title + '</div><div class="ai-ins-body">' + ins.body + '</div></div>';
+        return '<div class="ai-insight '+(ins.type||'info')+'"><div class="ai-ins-title">'+ins.title+'</div><div class="ai-ins-body">'+ins.body+'</div></div>';
       }).join('');
     }
     if (btn) btn.disabled = false;
-  })
-  .catch(function(){
+  }).catch(function(){
     container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Unavailable</div><div class="ai-ins-body">Could not load insights. Try again shortly.</div></div>';
     if (btn) btn.disabled = false;
   });
 }
 
-// ── AI Coach ──
 function loadCoach() {
   var el = document.getElementById('coach-container');
   var btn = document.getElementById('coach-btn');
-  el.innerHTML = '<div style="color:#9e9e9e;font-size:.78rem">Generating coaching tips…</div>';
+  el.innerHTML = '<span style="color:#9e9e9e;font-size:.78rem">Generating coaching tips...</span>';
   if (btn) btn.disabled = true;
   fetch('/api/ai/financials/agent-coach', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    method: 'POST', headers: {'Content-Type':'application/json'},
     body: JSON.stringify({context: buildContext()})
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    var text = d.coach_response || 'No coaching available right now.';
-    el.innerHTML = text.replace(/\n/g,'<br>');
+  }).then(function(r){ return r.json(); }).then(function(d){
+    el.innerHTML = (d.coach_response || 'No coaching available.').replace(/\n/g,'<br>');
     if (btn) btn.disabled = false;
-  })
-  .catch(function(){
-    el.innerHTML = '<em style="color:#9e9e9e">Could not load coaching tips. Try again shortly.</em>';
+  }).catch(function(){
+    el.innerHTML = '<span style="color:#9e9e9e;font-style:italic">Could not load coaching tips.</span>';
     if (btn) btn.disabled = false;
   });
 }
 
-// Auto-load insights on page load
 document.addEventListener('DOMContentLoaded', function(){ loadInsights(); });
 </script>
 {% endblock %}

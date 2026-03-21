@@ -82,7 +82,7 @@ def remove_white_background(image_path):
         return True
 
     except Exception as e:
-        print(f"✗ Failed: {Path(image_path).name} - {e}")
+        print(f" Failed: {Path(image_path).name} - {e}")
         return False
 
 
@@ -693,18 +693,18 @@ def homeowner_reno_planner_ajax_add():
         if budget:
             try:
                 budget_float = float(budget) if budget else 0
-                note_details_parts.append(f"\n\n💰 Estimated Cost: ${budget_float:,.0f}")
+                note_details_parts.append(f"\n\n Estimated Cost: ${budget_float:,.0f}")
             except (ValueError, TypeError):
                 if budget_str:
-                    note_details_parts.append(f"\n\n💰 Estimated Cost: ${budget_str}")
+                    note_details_parts.append(f"\n\n Estimated Cost: ${budget_str}")
         
         # Add status
         if status:
-            note_details_parts.append(f"\n📋 Status: {status}")
+            note_details_parts.append(f"\n Status: {status}")
         
         # Add category if available
         if category and category != "Other":
-            note_details_parts.append(f"\n📁 Category: {category}")
+            note_details_parts.append(f"\n Category: {category}")
         
         note_details = "\n".join(note_details_parts)
         
@@ -987,7 +987,7 @@ def send_reminder_email(to_email, subject, body):
         print(f"[OK] Email sent to {to_email}")
         return True
     except Exception as e:
-        print(f"✗ Failed to send email to {to_email}: {e}")
+        print(f" Failed to send email to {to_email}: {e}")
         return False
 
 
@@ -1025,7 +1025,7 @@ def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referr
         from flask import request
         base_url = request.url_root.rstrip('/') if hasattr(request, 'url_root') else 'https://itsyourlifeyourhome.com'
         
-        subject = f"🎉 New Lead: {homeowner_name} signed up!"
+        subject = f" New Lead: {homeowner_name} signed up!"
         
         body = f"""New Lead Notification
 
@@ -1034,12 +1034,12 @@ A new homeowner has signed up and been added to your CRM!
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 LEAD INFORMATION:
-• Name: {homeowner_name}
-• Email: {homeowner_email}
-• Signup Date: {signup_timestamp or 'Just now'}
+- Name: {homeowner_name}
+- Email: {homeowner_email}
+- Signup Date: {signup_timestamp or 'Just now'}
 
 REFERRAL SOURCE:
-• Referral Token: {referral_token if referral_token and referral_token != 'default' else 'Default Assignment'}
+- Referral Token: {referral_token if referral_token and referral_token != 'default' else 'Default Assignment'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1050,7 +1050,7 @@ You can view and manage this contact in your CRM dashboard:
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-This is an automated notification from Your Life • Your Home.
+This is an automated notification from Your Life - Your Home.
 """
         
         # Send the email
@@ -1071,7 +1071,7 @@ This is an automated notification from Your Life • Your Home.
         
     except Exception as e:
         import traceback
-        print(f"✗ Error sending new lead notification: {e}")
+        print(f" Error sending new lead notification: {e}")
         print(traceback.format_exc())
         return False
 
@@ -1208,7 +1208,7 @@ def send_birthday_emails():
     
     contacts = get_birthday_contacts()
     for contact in contacts:
-        subject = f"🎂 Happy Birthday, {contact['name']}!"
+        subject = f" Happy Birthday, {contact['name']}!"
         body = f"""Hi {contact['name']},
 
 Wishing you a wonderful birthday filled with joy and happiness!
@@ -1233,7 +1233,7 @@ def send_anniversary_emails():
     contacts = get_anniversary_contacts()
     for contact in contacts:
         property_info = f" at {contact.get('property_address', 'your home')}" if contact.get('property_address') else ""
-        subject = f"🏠 Happy Home Anniversary, {contact['name']}!"
+        subject = f" Happy Home Anniversary, {contact['name']}!"
         body = f"""Hi {contact['name']},
 
 Congratulations on your home anniversary{property_info}!
@@ -1263,47 +1263,47 @@ def send_seasonal_checklists():
     if month in [12, 1, 2]:
         season = "Winter"
         checklist = """Winter Home Maintenance Checklist:
-• Check heating system and change filters
-• Inspect roof for ice dams
-• Seal windows and doors
-• Test smoke and carbon monoxide detectors
-• Clean gutters and downspouts
-• Insulate pipes to prevent freezing
-• Check weatherstripping
-• Service snow removal equipment"""
+- Check heating system and change filters
+- Inspect roof for ice dams
+- Seal windows and doors
+- Test smoke and carbon monoxide detectors
+- Clean gutters and downspouts
+- Insulate pipes to prevent freezing
+- Check weatherstripping
+- Service snow removal equipment"""
     elif month in [3, 4, 5]:
         season = "Spring"
         checklist = """Spring Home Maintenance Checklist:
-• Clean gutters and downspouts
-• Inspect roof for winter damage
-• Service air conditioning system
-• Check exterior paint and siding
-• Clean windows and screens
-• Inspect deck and patio
-• Fertilize lawn and garden
-• Check irrigation system"""
+- Clean gutters and downspouts
+- Inspect roof for winter damage
+- Service air conditioning system
+- Check exterior paint and siding
+- Clean windows and screens
+- Inspect deck and patio
+- Fertilize lawn and garden
+- Check irrigation system"""
     elif month in [6, 7, 8]:
         season = "Summer"
         checklist = """Summer Home Maintenance Checklist:
-• Service air conditioning
-• Check and clean outdoor spaces
-• Inspect and clean pool/spa if applicable
-• Check for pest issues
-• Maintain landscaping
-• Inspect exterior for damage
-• Check outdoor lighting
-• Prepare for storm season"""
+- Service air conditioning
+- Check and clean outdoor spaces
+- Inspect and clean pool/spa if applicable
+- Check for pest issues
+- Maintain landscaping
+- Inspect exterior for damage
+- Check outdoor lighting
+- Prepare for storm season"""
     else:  # 9, 10, 11
         season = "Fall"
         checklist = """Fall Home Maintenance Checklist:
-• Clean gutters and downspouts
-• Inspect roof and chimney
-• Service heating system
-• Seal windows and doors
-• Check insulation
-• Winterize outdoor plumbing
-• Rake leaves and maintain yard
-• Test smoke detectors"""
+- Clean gutters and downspouts
+- Inspect roof and chimney
+- Service heating system
+- Seal windows and doors
+- Check insulation
+- Winterize outdoor plumbing
+- Rake leaves and maintain yard
+- Test smoke detectors"""
     
     # Get contacts with seasonal emails enabled
     contacts = []
@@ -1346,7 +1346,7 @@ def send_seasonal_checklists():
     
     # Send to all contacts (only once per season - you may want to track this)
     for contact in contacts:
-        subject = f"🍂 {season} Home Maintenance Checklist"
+        subject = f" {season} Home Maintenance Checklist"
         body = f"""Hi {contact['name']},
 
 Here's your {season.lower()} home maintenance checklist to keep your home in great shape:
@@ -1450,7 +1450,7 @@ def send_equity_updates():
     for contact in contacts:
         equity = contact.get('equity_estimate', 0)
         property_val = contact.get('property_value', 0)
-        subject = f"💰 Your Home Equity Update - {today.strftime('%B %Y')}"
+        subject = f" Your Home Equity Update - {today.strftime('%B %Y')}"
         body = f"""Hi {contact['name']},
 
 Here's your monthly equity update:
@@ -1531,7 +1531,7 @@ def send_holiday_greetings():
     conn.close()
     
     for contact in contacts:
-        subject = f"🎄 {holiday}, {contact['name']}!"
+        subject = f" {holiday}, {contact['name']}!"
         body = f"""Hi {contact['name']},
 
 {holiday}! We hope you have a wonderful celebration with family and friends.
@@ -3396,7 +3396,7 @@ def homeowner_saved_notes():
                 fresh_boards = get_design_boards_for_user(user_id)
                 print(f"[BOARD CREATE] Fresh boards query after creation: {list(fresh_boards.keys())}")
                 
-                flash("✨ Beautiful board created!", "success")
+                flash(" Beautiful board created!", "success")
                 return redirect(url_for("homeowner_saved_notes", view=board_name))
             except ValueError as ve:
                 print(f"[BOARD CREATE VALIDATION ERROR] {str(ve)}")
@@ -3958,7 +3958,7 @@ def homeowner_design_board_duplicate(board_name):
 
     try:
         duplicate_design_board(user_id, board_name, new_name)
-        flash(f"✨ Board duplicated as '{new_name}'!", "success")
+        flash(f" Board duplicated as '{new_name}'!", "success")
         return redirect(url_for("homeowner_design_board_view", board_name=new_name))
     except Exception:
         flash("Could not duplicate board.", "error")
@@ -6020,17 +6020,17 @@ def agent_crm_invite_to_portal(contact_id):
     referral_url = url_for("referral_landing", referral_code=token, _external=True)
     agent_name = user.get("name", "Your Agent")
     client_first = contact.get("name", "").split()[0] if contact.get("name") else "there"
-    subject = f"🏠 {agent_name} invited you to your free homeowner portal"
+    subject = f" {agent_name} invited you to your free homeowner portal"
     body = f"""Hi {client_first},
 
 {agent_name} has set up a personal homeowner portal for you through Your Life, Your Home — and it's completely free.
 
 Your portal gives you:
-• 📊 Real-time home value & equity tracking
-• 🏠 Home care reminders & seasonal checklists
-• 📄 Secure document storage
-• 💡 AI-powered insights about your home's finances
-• 🔗 Direct connection with {agent_name}
+-  Real-time home value & equity tracking
+-  Home care reminders & seasonal checklists
+-  Secure document storage
+-  AI-powered insights about your home's finances
+-  Direct connection with {agent_name}
 
 Click the link below to create your account — it only takes 2 minutes:
 
@@ -6043,9 +6043,9 @@ Looking forward to supporting you,
 {agent_name}
 """
     if send_reminder_email(email, subject, body):
-        flash(f"✅ Portal invite sent to {email}!", "success")
+        flash(f" Portal invite sent to {email}!", "success")
     else:
-        flash(f"⚠️ Could not send email — please check your email settings.", "error")
+        flash(f" Could not send email — please check your email settings.", "error")
     return redirect(url_for("agent_crm"))
 
 
@@ -6153,7 +6153,7 @@ def agent_crm_import():
                 # Default stage if not mapped
                 default_stage = request.form.get('default_stage', 'new').strip()
                 
-                # Smart sync: match → update, no match → add. No duplicates.
+                # Smart sync: match -> update, no match -> add. No duplicates.
                 imported = 0
                 updated = 0
                 errors = []
@@ -6421,17 +6421,90 @@ def agent_transaction_detail(tx_id):
     timeline = get_transaction_timeline(tx_id)
     doc_status = get_transaction_document_status(tx_id)
 
+    # Agent-only: load any existing commission record for this transaction
+    tx_commission = None
+    try:
+        conn = get_db_connection()
+        row = conn.execute(
+            "SELECT * FROM agent_commissions WHERE transaction_id=? AND agent_user_id=?",
+            (tx_id, user["id"])
+        ).fetchone()
+        conn.close()
+        if row:
+            tx_commission = dict(row)
+    except Exception:
+        pass
+
     return render_template(
         "agent/transaction_detail.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         transaction=transaction,
-        tx=transaction,  # Also provide as 'tx' for backward compatibility
+        tx=transaction,
         documents=documents,
         participants=participants,
         timeline=timeline,
         doc_status=doc_status,
+        tx_commission=tx_commission,
     )
+
+
+@app.route("/agent/transactions/<int:tx_id>/commission", methods=["POST"])
+def agent_transaction_commission_save(tx_id):
+    """Save agent commission details for a transaction. Agent-only, never visible to client."""
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("Transaction not found.", "error")
+        return redirect(url_for("agent_transactions"))
+
+    f = request.form
+    sale_price   = float(f.get("sale_price") or transaction.get("purchase_price") or 0)
+    comm_rate    = float(f.get("commission_rate") or 3.0)
+    split_pct    = float(f.get("brokerage_split_pct") or 0)
+    gross        = round(sale_price * comm_rate / 100, 2)
+    split_amt    = round(gross * split_pct / 100, 2)
+    net          = round(gross - split_amt, 2)
+    status       = f.get("status", "projected")
+    close_date   = f.get("close_date") or transaction.get("target_close_date") or ""
+    notes        = f.get("notes", "")
+    tx_side      = f.get("transaction_side") or transaction.get("side") or "buyer"
+    client_name  = transaction.get("client_name") or ""
+    prop_addr    = transaction.get("property_address") or ""
+
+    conn = get_db_connection()
+    existing = conn.execute(
+        "SELECT id FROM agent_commissions WHERE transaction_id=? AND agent_user_id=?",
+        (tx_id, user["id"])
+    ).fetchone()
+
+    if existing:
+        conn.execute("""
+            UPDATE agent_commissions SET
+              property_address=?, client_name=?, close_date=?, transaction_side=?,
+              sale_price=?, commission_rate=?, gross_commission=?, brokerage_split_pct=?,
+              brokerage_split_amt=?, net_commission=?, status=?, notes=?
+            WHERE id=?
+        """, (prop_addr, client_name, close_date, tx_side,
+              sale_price, comm_rate, gross, split_pct, split_amt, net, status, notes,
+              existing["id"]))
+    else:
+        conn.execute("""
+            INSERT INTO agent_commissions
+            (agent_user_id, transaction_id, property_address, client_name, close_date,
+             transaction_side, sale_price, commission_rate, gross_commission,
+             brokerage_split_pct, brokerage_split_amt, net_commission, status, notes)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (user["id"], tx_id, prop_addr, client_name, close_date,
+              tx_side, sale_price, comm_rate, gross, split_pct, split_amt, net, status, notes))
+
+    conn.commit()
+    conn.close()
+    flash("Commission details saved to Financials Hub.", "success")
+    return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
 
 @app.route("/agent/transactions/<int:tx_id>/add-client-to-crm", methods=["POST"])
@@ -6642,7 +6715,7 @@ def agent_transaction_change_stage(tx_id):
                     except Exception:
                         pass
                 _thr.Thread(target=_ai_gen_tasks, daemon=True).start()
-                flash("✨ AI is generating recommended tasks for this stage.", "info")
+                flash(" AI is generating recommended tasks for this stage.", "info")
             except Exception:
                 pass
             # When a transaction closes, schedule a review request
@@ -7120,7 +7193,7 @@ def agent_feature_spotlight_cards_generate(tx_id):
         )
         print(f"[OK] Card set '{set_name}' saved successfully for user {user['id']}, tx {tx_id}")
     except Exception as e:
-        print(f"✗ Error saving card set: {e}")
+        print(f" Error saving card set: {e}")
         import traceback
         traceback.print_exc()
 
@@ -7872,22 +7945,22 @@ def agent_invoice_print(inv_id):
 def _get_checklist_data(season: str, role: str) -> dict:
     """Return homeowner seasonal checklist content."""
     palette = {
-        "spring": {"accent": "#6B8F5E", "light": "#EEF4EB", "icon": "🌸", "label": "Spring"},
-        "summer": {"accent": "#8B7A2F", "light": "#F7F3E3", "icon": "☀️", "label": "Summer"},
-        "fall":   {"accent": "#8B5A2B", "light": "#F5EDE3", "icon": "🍂", "label": "Fall"},
-        "winter": {"accent": "#4A6580", "light": "#E8EFF5", "icon": "❄️", "label": "Winter"},
+        "spring": {"accent": "#6B8F5E", "light": "#EEF4EB", "icon": "", "label": "Spring"},
+        "summer": {"accent": "#8B7A2F", "light": "#F7F3E3", "icon": "", "label": "Summer"},
+        "fall":   {"accent": "#8B5A2B", "light": "#F5EDE3", "icon": "", "label": "Fall"},
+        "winter": {"accent": "#4A6580", "light": "#E8EFF5", "icon": "", "label": "Winter"},
     }
     p = palette.get(season, palette["spring"])
 
     # Year-round homeowner maintenance plan — balanced so no task is overdone or missed.
     # Key system lifecycles woven throughout:
-    #   Irrigation: Spring (start up) → Summer (adjust) → Fall (drain & shut off)
-    #   HVAC: Spring (tune-up + filter) → Summer (monthly filter check) → Fall (furnace + filter) → Winter (monthly filter check)
-    #   Roof/Gutters: Spring (winter damage) → Fall (pre-winter)
-    #   Smoke/CO: Spring (annual battery + test) → Winter (mid-season test)
-    #   Caulking/Sealing: Spring (repair freeze damage) → Fall (prep for winter cold)
+    #   Irrigation: Spring (start up) -> Summer (adjust) -> Fall (drain & shut off)
+    #   HVAC: Spring (tune-up + filter) -> Summer (monthly filter check) -> Fall (furnace + filter) -> Winter (monthly filter check)
+    #   Roof/Gutters: Spring (winter damage) -> Fall (pre-winter)
+    #   Smoke/CO: Spring (annual battery + test) -> Winter (mid-season test)
+    #   Caulking/Sealing: Spring (repair freeze damage) -> Fall (prep for winter cold)
     #   Deck/Fence: Summer (UV re-seal, one time per year)
-    #   Lawn: Summer (grubs/weeds) → Fall (aerate, overseed, fertilize)
+    #   Lawn: Summer (grubs/weeds) -> Fall (aerate, overseed, fertilize)
     homeowner = {
         "spring": {
             "title": "Spring Home Refresh",
@@ -8639,7 +8712,7 @@ def admin_toggle_premium():
             )
             conn.commit()
             conn.close()
-            flash("✨ Premium features enabled!", "success")
+            flash(" Premium features enabled!", "success")
         elif action == "downgrade":
             cur.execute(
                 "UPDATE users SET subscription_tier = ? WHERE id = ?",
@@ -10567,7 +10640,7 @@ def homeowner_support_get_help():
     )
 
 
-# Redirect old individual support URLs → unified page
+# Redirect old individual support URLs -> unified page
 @app.route("/homeowner/support/ask-question-old")
 def homeowner_support_ask_question_legacy():
     return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
@@ -11960,7 +12033,7 @@ def agent_contest_send_invites(cid):
         flash("Contest not found.", "error")
         return redirect(url_for("agent_contests"))
     count = _send_contest_invites_for(contest, user)
-    flash(f"✅ Invites sent to {count} clients!", "success")
+    flash(f" Invites sent to {count} clients!", "success")
     return redirect(url_for("agent_contests"))
 
 
@@ -11989,7 +12062,7 @@ def _send_contest_invites_for(contest, agent_user):
         return 0
     contacts = list_agent_contacts(agent_user["id"])
     type_label = "NFL Playoffs" if contest["contest_type"] == "nfl_playoffs" else "NCAA March Madness"
-    type_emoji = "🏈" if contest["contest_type"] == "nfl_playoffs" else "🏀"
+    type_emoji = "" if contest["contest_type"] == "nfl_playoffs" else ""
     agent_name = agent_user.get("name", "Your Agent")
     count = 0
     for c in contacts:
@@ -11999,9 +12072,9 @@ def _send_contest_invites_for(contest, agent_user):
         client_name = c.get("name", "Friend").split()[0]
         cbs_line = ""
         if contest.get("cbs_group_link"):
-            cbs_line = f"\n🔗 Join the group here: {contest['cbs_group_link']}"
+            cbs_line = f"\n Join the group here: {contest['cbs_group_link']}"
         if contest.get("cbs_group_code"):
-            cbs_line += f"\n🔑 Group Code: {contest['cbs_group_code']}"
+            cbs_line += f"\n Group Code: {contest['cbs_group_code']}"
         deadline_line = ""
         if contest.get("deadline_date"):
             deadline_line = f"\n⏰ Bracket deadline: {contest['deadline_date']}"
@@ -12014,7 +12087,7 @@ It's that time of year again — and I'm doing something fun for my clients!
 
 I'm hosting a FREE bracket contest for my clients this year, and I'd love for you to join!
 
-🏆 Prize: {contest.get('prize_description', '$25 Amazon Gift Card')} for the winner{cbs_line}{deadline_line}
+ Prize: {contest.get('prize_description', '$25 Amazon Gift Card')} for the winner{cbs_line}{deadline_line}
 
 How to join:
 1. Download the CBS Sports app (free on iPhone or Android)
@@ -12023,7 +12096,7 @@ How to join:
 
 {contest.get('notes', '').strip() + chr(10) if contest.get('notes') else ''}This is just my small way of having some fun with the people I care about. Thanks for being such a great client — I'm grateful for you!
 
-Good luck! 🤞
+Good luck! 
 
 {agent_name}
 """
