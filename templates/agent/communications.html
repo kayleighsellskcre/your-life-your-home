@@ -1747,7 +1747,7 @@ function aiWriteForMe() {
  }).then(function(r){ return r.json(); }).then(function(d) {
  var body = document.getElementById('message_body');
  if (body) body.value = d.email || d.error || '';
- statusEl.textContent = d.email ? ' Draft ready — review and edit before sending.' : 'Could not draft.';
+ statusEl.textContent = d.email ? ' Draft ready, review and edit before sending.' : 'Could not draft.';
  setTimeout(function(){ statusEl.textContent = ''; }, 6000);
  }).catch(function(){
  statusEl.textContent = 'AI unavailable.';

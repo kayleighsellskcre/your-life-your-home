@@ -246,10 +246,10 @@
           {% if commissions %}
           {% for c in commissions %}
           <tr>
-            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.property_address or '—' }}</td>
-            <td>{{ c.client_name or '—' }}</td>
-            <td style="white-space:nowrap">{{ c.close_date or '—' }}</td>
-            <td style="text-transform:capitalize">{{ c.transaction_side or '—' }}</td>
+            <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.property_address or '-' }}</td>
+            <td>{{ c.client_name or '-' }}</td>
+            <td style="white-space:nowrap">{{ c.close_date or '-' }}</td>
+            <td style="text-transform:capitalize">{{ c.transaction_side or '-' }}</td>
             <td>${{ "{:,.0f}".format(c.sale_price or 0) }}</td>
             <td style="font-weight:600;color:{% if c.status == 'paid' %}#2e7d32{% else %}#f57f17{% endif %}">${{ "{:,.0f}".format(c.net_commission or 0) }}</td>
             <td>
@@ -262,7 +262,7 @@
             <td>
               {% if c.transaction_id %}
               <a href="{{ url_for('agent_transaction_detail', tx_id=c.transaction_id) }}" class="tx-link">View Tx</a>
-              {% else %}<span style="color:#ccc;font-size:.7rem">—</span>{% endif %}
+              {% else %}<span style="color:#ccc;font-size:.7rem"> - </span>{% endif %}
             </td>
             <td style="white-space:nowrap">
               {% if c.status != 'paid' %}
@@ -332,9 +332,9 @@
           {% if expenses %}
           {% for e in expenses %}
           <tr>
-            <td style="white-space:nowrap">{{ e.expense_date or '—' }}</td>
-            <td>{{ e.category or '—' }}</td>
-            <td>{{ e.description or '—' }}</td>
+            <td style="white-space:nowrap">{{ e.expense_date or '-' }}</td>
+            <td>{{ e.category or '-' }}</td>
+            <td>{{ e.description or '-' }}</td>
             <td style="font-weight:600;color:#A0522D">${{ "{:,.2f}".format(e.amount or 0) }}</td>
             <td>
               <form method="post" action="{{ url_for('agent_financials_expense_delete', eid=e.id) }}" style="display:inline" onsubmit="return confirm('Delete this expense?')">
@@ -396,9 +396,9 @@
           {% if mileage_logs %}
           {% for m in mileage_logs %}
           <tr>
-            <td style="white-space:nowrap">{{ m.trip_date or '—' }}</td>
-            <td style="font-size:.73rem">{{ m.from_location or '—' }} &rarr; {{ m.to_location or '—' }}</td>
-            <td>{{ m.purpose or '—' }}</td>
+            <td style="white-space:nowrap">{{ m.trip_date or '-' }}</td>
+            <td style="font-size:.73rem">{{ m.from_location or '-' }} &rarr; {{ m.to_location or '-' }}</td>
+            <td>{{ m.purpose or '-' }}</td>
             <td>{{ "{:,.1f}".format(m.miles or 0) }}</td>
             <td style="color:#6a1b9a;font-weight:600">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
             <td>

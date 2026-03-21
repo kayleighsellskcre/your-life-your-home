@@ -93,7 +93,7 @@
 <div class="form-wrap">
  <div class="form-header">
  <h1>{{ ' Edit Contest' if contest else ' New Contest' }}</h1>
- <p>{{ 'Update your contest details.' if contest else 'Set it up once — the platform handles the annual invites automatically.' }}</p>
+ <p>{{ 'Update your contest details.' if contest else 'Set it up once, the platform handles the annual invites automatically.' }}</p>
  </div>
 
  <form method="POST" action="{{ url_for('agent_contest_edit', cid=contest.id) if contest else url_for('agent_contest_new') }}">

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
  <meta charset="utf-8">
- <title>Print Address Labels – Your Life Your Home</title>
+ <title>Print Address Labels - Your Life Your Home</title>
  <style>
  /* Screen: show back button and print button */
  @media screen {
@@ -151,7 +151,7 @@
  background: #4a6d4a;
  }
 
- /* Missing address warning – screen only */
+ /* Missing address warning - screen only */
  @media screen {
  .missing-banner {
  background: #fffbe6;
@@ -242,7 +242,7 @@
  {% set incomplete = labels | selectattr('missing_csz', 'equalto', true) | list %}
  {% if incomplete %}
  <div class="missing-banner">
- <h3> {{ incomplete | length }} contact(s) missing City, State, or ZIP — click to edit:</h3>
+ <h3> {{ incomplete | length }} contact(s) missing City, State, or ZIP, click to edit:</h3>
  <ul class="missing-list">
  {% for item in incomplete %}
  {% if item.id %}

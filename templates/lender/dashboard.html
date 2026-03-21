@@ -586,7 +586,7 @@ function loadBriefing(){
  el.textContent=' Loading…';el.style.opacity='.6';el.style.fontStyle='italic';
  fetch('/api/ai/dashboard-briefing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})})
  .then(function(r){return r.json();}).then(function(d){
- el.textContent=d.briefing||'Have a great day — go close some loans!';
+ el.textContent=d.briefing||'Have a great day, go close some loans!';
  el.style.opacity='1';el.style.fontStyle='normal';
  }).catch(function(){el.textContent='Have a great day!';el.style.opacity='.7';el.style.fontStyle='normal';});
 }

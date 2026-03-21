@@ -244,7 +244,7 @@
  <div class="contests-header">
  <div>
  <h1> Client Contests</h1>
- <p>Run annual bracket contests for your clients — fully automated every year.</p>
+ <p>Run annual bracket contests for your clients, fully automated every year.</p>
  </div>
  <a href="{{ url_for('agent_contest_new') }}" class="btn-primary">+ New Contest</a>
  </div>
@@ -253,27 +253,27 @@
  <div class="info-panel">
  <h4> How the Automation Works</h4>
  <ul>
- <li>Set up a contest once — it remembers your CBS group link, prize, and invite date.</li>
+ <li>Set up a contest once, it remembers your CBS group link, prize, and invite date.</li>
  <li>On your chosen <strong>invite date</strong>, the platform automatically emails <em>every client in your CRM</em> with a personalized invite.</li>
  <li>Need to send right now? Hit <strong>Send Invites Now</strong> on any contest card below.</li>
- <li>Copy the contest next year in seconds — just update the year and date.</li>
+ <li>Copy the contest next year in seconds, just update the year and date.</li>
  </ul>
 
  <div class="cal-grid" style="margin-top:.85rem;">
  <div class="cal-card">
- <strong> NFL Playoffs — Suggested Dates</strong>
+ <strong> NFL Playoffs, Suggested Dates</strong>
  Set invite date around <strong>Jan 3</strong> (Wild Card weekend).<br>
  Add a Google Calendar reminder Dec 28 as a heads-up.
  </div>
  <div class="cal-card">
- <strong> NCAA March Madness — Suggested Dates</strong>
+ <strong> NCAA March Madness, Suggested Dates</strong>
  Set invite date around <strong>Mar 14</strong> (Selection Sunday).<br>
  Add a Google Calendar reminder Mar 7 as a heads-up.
  </div>
  </div>
 
  <div style="margin-top:.75rem;padding:.65rem .9rem;background:#fff;border:1px solid rgba(200,180,151,.25);border-radius:8px;font-size:.79rem;color:rgba(61,46,36,.7);">
- <strong>Google Calendar backup:</strong> Create a <em>recurring annual</em> calendar event titled "NFL Contest Setup" on Dec 28 and "NCAA Contest Setup" on Mar 7 — set to repeat every year. That way you get an iPhone notification even if you're away from email.
+ <strong>Google Calendar backup:</strong> Create a <em>recurring annual</em> calendar event titled "NFL Contest Setup" on Dec 28 and "NCAA Contest Setup" on Mar 7, set to repeat every year. That way you get an iPhone notification even if you're away from email.
  </div>
  </div>
 
@@ -303,7 +303,7 @@
  {% elif c.invite_date %}
  <div class="invite-status status-scheduled"> Scheduled for {{ c.invite_date }}</div>
  {% else %}
- <div class="invite-status status-draft"> Draft — set an invite date</div>
+ <div class="invite-status status-draft"> Draft, set an invite date</div>
  {% endif %}
 
  <!-- CBS Info -->
@@ -351,7 +351,7 @@
  <div class="trophy"></div>
  <h3>No contests yet</h3>
  <p style="max-width:420px;margin:.5rem auto 1.25rem;">
- Create your first bracket contest — NFL Playoffs or NCAA March Madness. Set it up once and the platform sends client invites automatically every year.
+ Create your first bracket contest, NFL Playoffs or NCAA March Madness. Set it up once and the platform sends client invites automatically every year.
  </p>
  <a href="{{ url_for('agent_contest_new') }}" class="btn-primary">+ Create First Contest</a>
  </div>

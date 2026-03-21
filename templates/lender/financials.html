@@ -723,7 +723,7 @@ Loans Funded: {{ revenues|selectattr('status','equalto','funded')|list|length }}
 Loans in Pipeline: {{ revenues|selectattr('status','equalto','projected')|list|length }}
 YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}
 Net Income: ${{ "{:,.0f}".format(net_income) }}
-{% if goals %}Goals — Revenue: ${{ "{:,.0f}".format(goals[0].revenue_goal or 0) }}, Loans: {{ goals[0].loan_count_goal or 0 }}, Volume: ${{ "{:,.0f}".format(goals[0].loan_volume_goal or 0) }}, Expense Budget: ${{ "{:,.0f}".format(goals[0].expenses_budget or 0) }}{% else %}No goals set yet.{% endif %}
+{% if goals %}Goals, Revenue: ${{ "{:,.0f}".format(goals[0].revenue_goal or 0) }}, Loans: {{ goals[0].loan_count_goal or 0 }}, Volume: ${{ "{:,.0f}".format(goals[0].loan_volume_goal or 0) }}, Expense Budget: ${{ "{:,.0f}".format(goals[0].expenses_budget or 0) }}{% else %}No goals set yet.{% endif %}
 Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None logged' }}`;
 
 // Auto-load insights

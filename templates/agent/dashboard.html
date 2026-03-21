@@ -3,7 +3,7 @@
 {% block agent_content %}
 <style>
  /* ============================================================
- LUXURY AGENT DASHBOARD — Design System
+ LUXURY AGENT DASHBOARD, Design System
  Matches platform vars: --olive, --cream, --charcoal, etc.
  ============================================================ */
 
@@ -826,13 +826,13 @@ function loadBriefing(){
  .then(function(r){ return r.json(); })
  .then(function(d){
  el.innerHTML = '';
- el.textContent = d.briefing || 'Have a great day — your pipeline is ready for you.';
+ el.textContent = d.briefing || 'Have a great day, your pipeline is ready for you.';
  el.style.opacity = '1';
  if(btn) btn.disabled = false;
  })
  .catch(function(){
  el.innerHTML = '';
- el.textContent = 'Have a great day — your pipeline is ready for you.';
+ el.textContent = 'Have a great day, your pipeline is ready for you.';
  if(btn) btn.disabled = false;
  });
 }

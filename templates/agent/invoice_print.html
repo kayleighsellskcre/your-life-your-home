@@ -3,7 +3,7 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>Invoice {{ invoice.invoice_number }} – Kayleigh Biggs Custom Cabinetry</title>
+ <title>Invoice {{ invoice.invoice_number }} - Kayleigh Biggs Custom Cabinetry</title>
  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
  <style>
  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -392,11 +392,11 @@
  <div style="margin-top:.75rem;">
  <div class="inv-meta-row">
  <div class="inv-label">Issue Date</div>
- <div class="inv-meta-val">{{ invoice.issue_date or '—' }}</div>
+ <div class="inv-meta-val">{{ invoice.issue_date or '-' }}</div>
  </div>
  <div class="inv-meta-row">
  <div class="inv-label">Due Date</div>
- <div class="inv-meta-val" style="{% if invoice.status == 'overdue' %}color:#b94040{% endif %}">{{ invoice.due_date or '—' }}</div>
+ <div class="inv-meta-val" style="{% if invoice.status == 'overdue' %}color:#b94040{% endif %}">{{ invoice.due_date or '-' }}</div>
  </div>
  {% if invoice.paid_date %}
  <div class="inv-meta-row">
@@ -479,7 +479,7 @@
  {% if invoice.discount_amount %}
  <div class="tot-row">
  <span class="tot-label">Discount</span>
- <span class="tot-val" style="color:var(--green)">–${{ "{:,.2f}".format(invoice.discount_amount or 0) }}</span>
+ <span class="tot-val" style="color:var(--green)">-${{ "{:,.2f}".format(invoice.discount_amount or 0) }}</span>
  </div>
  {% endif %}
  <div class="tot-row tot-row--total">

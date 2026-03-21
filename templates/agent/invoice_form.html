@@ -149,7 +149,7 @@
  <div class="if-field">
  <label>Pull from CRM Contact</label>
  <select id="contactSelect" onchange="fillFromContact(this.value)">
- <option value="">— Select contact (optional) —</option>
+ <option value=""> -  Select contact (optional)  - </option>
  {% for c in contacts %}
  <option value="{{ c.id }}"
  data-name="{{ c.name or '' }}"
@@ -228,7 +228,7 @@
  {% if items %}
  {% for item in items %}
  <tr class="item-row">
- <td><input type="text" name="item_desc[]" class="item-input" value="{{ item.description }}" placeholder="e.g. Custom Cabinet Design – Kitchen" required></td>
+ <td><input type="text" name="item_desc[]" class="item-input" value="{{ item.description }}" placeholder="e.g. Custom Cabinet Design - Kitchen" required></td>
  <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="{{ item.quantity }}" min="0" step="0.01" oninput="calcRow(this)"></td>
  <td><input type="number" name="item_price[]" class="item-input item-input--price" value="{{ item.unit_price }}" min="0" step="0.01" oninput="calcRow(this)"></td>
  <td><span class="item-amount">${{ "{:,.2f}".format(item.amount) }}</span></td>
@@ -238,7 +238,7 @@
  {% else %}
  <!-- Default rows for new invoice -->
  <tr class="item-row">
- <td><input type="text" name="item_desc[]" class="item-input" placeholder="e.g. 3D Layout Design – Full Home" required></td>
+ <td><input type="text" name="item_desc[]" class="item-input" placeholder="e.g. 3D Layout Design - Full Home" required></td>
  <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="1" min="0" step="0.01" oninput="calcRow(this)"></td>
  <td><input type="number" name="item_price[]" class="item-input item-input--price" value="" min="0" step="0.01" placeholder="0.00" oninput="calcRow(this)"></td>
  <td><span class="item-amount">$0.00</span></td>
@@ -321,9 +321,9 @@
  <div class="if-card__body" style="display:flex;flex-direction:column;gap:.28rem;">
 
  <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.1rem 0 .25rem;">Base Package</div>
- <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Client Base Package – includes initial design meeting, 2 revision meetings &amp; final PDF', 1, 150)"><span>Client Base Package</span><span style="color:#9A9472;">$150</span></button>
- <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring – 1 room included', 1, 50)"><span>Onsite Measuring (1 room)</span><span style="color:#9A9472;">$50</span></button>
- <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring – Additional Room', 1, 20)"><span>Onsite Measuring (add. room)</span><span style="color:#9A9472;">$20</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Client Base Package - includes initial design meeting, 2 revision meetings &amp; final PDF', 1, 150)"><span>Client Base Package</span><span style="color:#9A9472;">$150</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring - 1 room included', 1, 50)"><span>Onsite Measuring (1 room)</span><span style="color:#9A9472;">$50</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Onsite Measuring - Additional Room', 1, 20)"><span>Onsite Measuring (add. room)</span><span style="color:#9A9472;">$20</span></button>
 
  <div style="font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;padding:.35rem 0 .25rem;">Rooms</div>
  <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Kitchen Design', 1, 900)"><span>Kitchen</span><span style="color:#9A9472;">$900</span></button>
@@ -348,7 +348,7 @@
  <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional Revisions', 1, 50)"><span>Additional Revisions (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
  <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional Virtual Meeting', 1, 50)"><span>Additional Virtual Meeting (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
  <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Additional In-Person Meeting', 1, 50)"><span>Additional In-Person Meeting (per hr)</span><span style="color:#9A9472;">$50/hr</span></button>
- <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Custom Design – TBD', 1, 0)"><span>Custom (price TBD)</span><span style="color:#9A9472;">TBD</span></button>
+ <button type="button" class="add-item-btn" style="font-size:.7rem;justify-content:space-between;" onclick="addPreset('Custom Design - TBD', 1, 0)"><span>Custom (price TBD)</span><span style="color:#9A9472;">TBD</span></button>
 
  </div>
  </div>

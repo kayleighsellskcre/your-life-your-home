@@ -124,7 +124,7 @@
  <div class="inv-stats">
  <div class="inv-stat">
  <div class="inv-stat__label">Total Invoices</div>
- <div class="inv-stat__val">{{ invoices|length if not status_filter else '—' }}</div>
+ <div class="inv-stat__val">{{ invoices|length if not status_filter else ' - ' }}</div>
  </div>
  <div class="inv-stat">
  <div class="inv-stat__label">Outstanding</div>
@@ -180,11 +180,11 @@
  <tr id="inv-row-{{ inv.id }}">
  <td class="inv-td inv-td--bold"><a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" style="color:#6B5B4D;">{{ inv.invoice_number }}</a></td>
  <td class="inv-td">
- <div style="font-weight:600;">{{ inv.client_name or '—' }}</div>
+ <div style="font-weight:600;">{{ inv.client_name or '-' }}</div>
  {% if inv.client_email %}<div style="font-size:.68rem;color:#9A9472;">{{ inv.client_email }}</div>{% endif %}
  </td>
- <td class="inv-td inv-td--muted">{{ inv.issue_date or '—' }}</td>
- <td class="inv-td inv-td--muted {% if inv.status == 'overdue' %}inv-td--bold{% endif %}" style="{% if inv.status == 'overdue' %}color:#b94040{% endif %}">{{ inv.due_date or '—' }}</td>
+ <td class="inv-td inv-td--muted">{{ inv.issue_date or '-' }}</td>
+ <td class="inv-td inv-td--muted {% if inv.status == 'overdue' %}inv-td--bold{% endif %}" style="{% if inv.status == 'overdue' %}color:#b94040{% endif %}">{{ inv.due_date or '-' }}</td>
  <td class="inv-td inv-td--bold">${{ "{:,.2f}".format(inv.total or 0) }}</td>
  <td class="inv-td">
  <span class="s-badge s-badge--{{ inv.status }}">{{ inv.status }}</span>

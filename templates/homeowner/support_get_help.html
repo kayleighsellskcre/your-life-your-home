@@ -333,7 +333,7 @@
  <!-- Hero -->
  <div class="gh-hero">
  <h1>Get Help</h1>
- <p>Whatever you need — a quick answer, a real conversation, or a resource to read at your own pace — it's all right here.</p>
+ <p>Whatever you need, a quick answer, a real conversation, or a resource to read at your own pace, it's all right here.</p>
  </div>
 
  <!-- Tabs -->
@@ -352,7 +352,7 @@
  <div class="gh-contact-card">
  <div class="icon"></div>
  <h3>Ask a Question</h3>
- <p>Send a written question anytime. A real person will review it and respond with care — no bots, no scripted replies.</p>
+ <p>Send a written question anytime. A real person will review it and respond with care, no bots, no scripted replies.</p>
  <button class="gh-btn" onclick="showTab('ask', document.querySelectorAll('.gh-tab')[1])">Ask Now</button>
  </div>
  <div class="gh-contact-card">
@@ -378,7 +378,7 @@
  <div class="gh-contact-card">
  <div class="icon"></div>
  <h3>Schedule a Call</h3>
- <p>Book a focused conversation at a time that works for you. No pressure — just clarity.</p>
+ <p>Book a focused conversation at a time that works for you. No pressure, just clarity.</p>
  <button class="gh-btn" onclick="showTab('schedule', document.querySelectorAll('.gh-tab')[2])">Book Time</button>
  </div>
  </div>
@@ -404,7 +404,7 @@
  {% endif %}
  <div class="gh-form-card">
  <h2>Ask a Question</h2>
- <p>No question is too big or too small. Your agent and lender are here to help — not judge.</p>
+ <p>No question is too big or too small. Your agent and lender are here to help, not judge.</p>
  <form method="post" action="{{ url_for('homeowner_support_ask_question') }}">
  <input type="hidden" name="_redirect_to" value="{{ url_for('homeowner_support_get_help') }}?tab=ask&sent=1">
  <div class="gh-form-group">
@@ -413,7 +413,7 @@
  </div>
  <div class="gh-form-group">
  <label>Your Question</label>
- <textarea name="question" rows="6" required placeholder="Type what's on your mind. You don't need perfect wording — just share what you need help with."></textarea>
+ <textarea name="question" rows="6" required placeholder="Type what's on your mind. You don't need perfect wording, just share what you need help with."></textarea>
  </div>
  <button type="submit" class="gh-submit">Send My Question</button>
  </form>
@@ -423,7 +423,7 @@
  <!-- Schedule a Chat Tab -->
  <div id="tab-schedule" class="gh-panel">
  <div class="gh-schedule-wrap">
- <p>Pick a time that works for you and book a focused conversation with your agent or lender. No pressure, no sales pitch — just clarity.</p>
+ <p>Pick a time that works for you and book a focused conversation with your agent or lender. No pressure, no sales pitch, just clarity.</p>
  {% if professionals %}
  {% for prof in professionals %}
  {% if (prof.get('professional_role') == 'agent' or prof.get('role') == 'agent') and prof.get('calendly_url') %}
@@ -453,7 +453,7 @@
  <div class="gh-resource-card">
  <span class="gh-resource-category">Selling</span>
  <h3>Step-by-Step Selling Checklist</h3>
- <p>From prep to closing — everything you need to sell your home with confidence.</p>
+ <p>From prep to closing, everything you need to sell your home with confidence.</p>
  <div class="gh-resource-meta"><span>12 min read</span><span>·</span><span>Intermediate</span></div>
  </div>
  <div class="gh-resource-card">
@@ -465,7 +465,7 @@
  <div class="gh-resource-card">
  <span class="gh-resource-category">Finance</span>
  <h3>Understanding Your Home Equity</h3>
- <p>How equity builds, when to tap it, and how refinancing or HELOCs work — in simple terms.</p>
+ <p>How equity builds, when to tap it, and how refinancing or HELOCs work, in simple terms.</p>
  <div class="gh-resource-meta"><span>7 min read</span><span>·</span><span>Beginner</span></div>
  </div>
  <div class="gh-resource-card">
@@ -477,7 +477,7 @@
  <div class="gh-resource-card">
  <span class="gh-resource-category">Moving</span>
  <h3>Stress-Free Moving Guide</h3>
- <p>A timeline and checklist that takes the chaos out of moving day — for buyers and sellers alike.</p>
+ <p>A timeline and checklist that takes the chaos out of moving day, for buyers and sellers alike.</p>
  <div class="gh-resource-meta"><span>9 min read</span><span>·</span><span>All Levels</span></div>
  </div>
  </div>
@@ -486,7 +486,7 @@
  <!-- Meet the Team Tab -->
  <div id="tab-team" class="gh-panel">
  <div class="gh-team-section">
- <p>Real people stand behind this platform. You're not navigating your home alone — there's a team that wants to help you move forward with clarity and confidence.</p>
+ <p>Real people stand behind this platform. You're not navigating your home alone, there's a team that wants to help you move forward with clarity and confidence.</p>
  <div class="gh-team-cards">
  {% if professionals %}
  {% for prof in professionals %}
@@ -501,7 +501,7 @@
  <div class="gh-team-card">
  <h3>Your Life, Your Home Team</h3>
  <div class="role">Your Support Team</div>
- <p>Real people who care about your home and your peace of mind — not just transactions. Your agent and lender will appear here once connected.</p>
+ <p>Real people who care about your home and your peace of mind, not just transactions. Your agent and lender will appear here once connected.</p>
  </div>
  {% endif %}
  </div>
@@ -533,7 +533,7 @@
  </div>
  <div class="gh-faq-item">
  <div class="gh-faq-q" onclick="toggleFaq(this)">What's the difference between this platform and my agent just texting me? <span class="arr">▾</span></div>
- <div class="gh-faq-a">This platform gives you a permanent home for all your property data, documents, equity tracking, renovation plans, and more — so nothing gets lost in a text thread. Your agent can still text you, but now you also have everything organized in one place.</div>
+ <div class="gh-faq-a">This platform gives you a permanent home for all your property data, documents, equity tracking, renovation plans, and more, so nothing gets lost in a text thread. Your agent can still text you, but now you also have everything organized in one place.</div>
  </div>
  </div>
  </div>

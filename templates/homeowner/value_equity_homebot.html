@@ -782,7 +782,7 @@
  {% if snapshot and snapshot.get('value_estimate') %}
  ${{ "{:,}".format(snapshot.get('value_estimate')|int) }}
  {% else %}
- —
+  - 
  {% endif %}
  </div>
  <div class="snapshot-card-sublabel">Your home's current market value</div>
@@ -802,7 +802,7 @@
  {% elif snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
  ${{ "{:,}".format((snapshot.get('value_estimate') - snapshot.get('loan_balance'))|int) }}
  {% else %}
- —
+  - 
  {% endif %}
  </div>
  <div class="snapshot-card-sublabel">Value minus loan balance</div>
@@ -824,7 +824,7 @@
  {% if snapshot and snapshot.get('loan_balance') %}
  ${{ "{:,}".format(snapshot.get('loan_balance')|int) }}
  {% else %}
- —
+  - 
  {% endif %}
  </div>
  <div class="snapshot-card-sublabel">Current mortgage balance</div>
@@ -863,7 +863,7 @@
  {% if snapshot and snapshot.get('value_estimate') %}
  ${{ "{:,}".format((snapshot.get('value_estimate') * 1.15)|int) }}
  {% else %}
- —
+  - 
  {% endif %}
  </div>
  </div>
@@ -873,7 +873,7 @@
  {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
  ${{ "{:,}".format(((snapshot.get('value_estimate') * 1.15) - (snapshot.get('loan_balance') * 0.85))|int) }}
  {% else %}
- —
+  - 
  {% endif %}
  </div>
  </div>
@@ -883,7 +883,7 @@
  {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
  ${{ "{:,}".format((((snapshot.get('value_estimate') * 1.15) - (snapshot.get('loan_balance') * 0.85)) - (snapshot.get('value_estimate') - snapshot.get('loan_balance')))|int) }}
  {% else %}
- —
+  - 
  {% endif %}
  </div>
  </div>
@@ -929,7 +929,7 @@
  <strong style="font-size: 1.5rem; color: var(--olive-green);">{{ "%.1f"|format(ltv) }}%</strong><br>
  Lower is better. Below 80% unlocks better rates.
  {% else %}
- —
+  - 
  {% endif %}
  </p>
  </div>
@@ -941,7 +941,7 @@
  <strong style="font-size: 1.5rem; color: var(--olive-green);">{{ "%.2f"|format(snapshot.get('loan_rate')) }}%</strong><br>
  Your current mortgage rate
  {% else %}
- —
+  - 
  {% endif %}
  </p>
  </div>
@@ -953,7 +953,7 @@
  <strong style="font-size: 1.5rem; color: var(--olive-green);">${{ "{:,}".format(snapshot.get('loan_payment')|int) }}</strong><br>
  Principal + Interest
  {% else %}
- —
+  - 
  {% endif %}
  </p>
  </div>
@@ -1002,7 +1002,7 @@
  if (ctx) {
  const dates = historyData.map(h => {
  const d = h.snapshot_date ? h.snapshot_date.substring(0, 10) : '';
- return d || '—';
+ return d || ' - ';
  }).reverse();
  const values = historyData.map(h => h.value_estimate || 0).reverse();
  const balances = historyData.map(h => h.loan_balance || 0).reverse();

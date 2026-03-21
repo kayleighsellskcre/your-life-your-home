@@ -43,7 +43,7 @@
  {% endif %}
  </div>
  <div style="flex:1;min-width:0;">
- <div style="font-size:.88rem;font-weight:700;color:#3D2E24;">{{ prof.get('name','—') }}</div>
+ <div style="font-size:.88rem;font-weight:700;color:#3D2E24;">{{ prof.get('name',' - ') }}</div>
  <div style="font-size:.74rem;color:#6B5B4D;text-transform:capitalize;font-weight:600;margin:.08rem 0 .3rem;">
  {{ ' Your Agent' if role == 'agent' else ' Your Lender' }}{% if prof.get('brokerage_name') %} · {{ prof.brokerage_name }}{% endif %}
  </div>
@@ -88,7 +88,7 @@
  <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6B5B4D;margin-bottom:.85rem;padding-bottom:.5rem;border-bottom:1px solid rgba(107,91,77,.12);">
  My Active Transaction
  </div>
- <div style="font-size:1rem;font-weight:700;color:#3D2E24;margin-bottom:.25rem;">{{ tx.get('property_address','—') }}</div>
+ <div style="font-size:1rem;font-weight:700;color:#3D2E24;margin-bottom:.25rem;">{{ tx.get('property_address',' - ') }}</div>
  <div style="font-size:.78rem;color:rgba(61,46,36,.6);margin-bottom:.8rem;">
  {% if tx.get('side') %}{{ tx.side | capitalize }}{% endif %}{% if tx.get('close_date') %} · Closing {{ tx.close_date }}{% endif %}
  </div>
@@ -127,14 +127,14 @@
 
  <div class="card" style="text-align:center;">
  <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
- {% if snapshot and snapshot.get('value_estimate') %}${{ "{:,.0f}".format(snapshot.get('value_estimate')) }}{% else %}—{% endif %}
+ {% if snapshot and snapshot.get('value_estimate') %}${{ "{:,.0f}".format(snapshot.get('value_estimate')) }}{% else %} - {% endif %}
  </div>
  <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Current Home Value</div>
  </div>
 
  <div class="card" style="text-align:center;">
  <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
- {% if snapshot and snapshot.get('equity_estimate') %}${{ "{:,.0f}".format(snapshot.get('equity_estimate')) }}{% else %}—{% endif %}
+ {% if snapshot and snapshot.get('equity_estimate') %}${{ "{:,.0f}".format(snapshot.get('equity_estimate')) }}{% else %} - {% endif %}
  </div>
  <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Total Equity</div>
  {% if snapshot and snapshot.get('value_estimate') and snapshot.get('equity_estimate') %}
@@ -146,14 +146,14 @@
 
  <div class="card" style="text-align:center;">
  <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
- {% if snapshot and snapshot.get('loan_payment') %}${{ "{:,.0f}".format(snapshot.get('loan_payment')) }}{% else %}—{% endif %}
+ {% if snapshot and snapshot.get('loan_payment') %}${{ "{:,.0f}".format(snapshot.get('loan_payment')) }}{% else %} - {% endif %}
  </div>
  <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Monthly Payment</div>
  </div>
 
  <div class="card" style="text-align:center;">
  <div style="font-size:var(--text-3xl);font-family:var(--font-heading);color:var(--olive-green);margin-bottom:var(--space-sm);">
- {% if snapshot and snapshot.get('loan_rate') %}{{ "{:.2f}".format(snapshot.get('loan_rate')) }}%{% else %}—{% endif %}
+ {% if snapshot and snapshot.get('loan_rate') %}{{ "{:.2f}".format(snapshot.get('loan_rate')) }}%{% else %} - {% endif %}
  </div>
  <div style="font-size:var(--text-sm);text-transform:uppercase;letter-spacing:0.1em;color:var(--warm-gray);font-weight:var(--weight-medium);">Interest Rate</div>
  </div>

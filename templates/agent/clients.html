@@ -132,7 +132,7 @@
  <div class="page-header">
  <div>
  <h1>My Clients</h1>
- <p>All linked homeowner clients — live portal data at a glance</p>
+ <p>All linked homeowner clients, live portal data at a glance</p>
  </div>
  <div class="search-bar">
  <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)">
@@ -157,7 +157,7 @@
  <div class="client-avatar">{{ (client.name or 'C')[0]|upper }}</div>
  <div>
  <p class="client-name">{{ client.name or 'Unnamed Client' }}</p>
- <p class="client-email">{{ client.email or '—' }}</p>
+ <p class="client-email">{{ client.email or '-' }}</p>
  </div>
  {% if client.crm_stage %}
  <div style="margin-left:auto">
@@ -169,7 +169,7 @@
  <div class="client-card__body">
  <div class="data-row">
  <span class="data-row__label"> Property</span>
- <span class="data-row__val">{{ client.property_address or '—' }}</span>
+ <span class="data-row__val">{{ client.property_address or '-' }}</span>
  </div>
  <div class="data-row">
  <span class="data-row__label"> Est. Value</span>
@@ -192,7 +192,7 @@
  {% if client.loan_balance %}
  <span class="data-row__val">${{ "{:,.0f}".format(client.loan_balance) }}</span>
  {% else %}
- <span class="data-row__val muted">—</span>
+ <span class="data-row__val muted"> - </span>
  {% endif %}
  </div>
  {% if client.next_action_date %}

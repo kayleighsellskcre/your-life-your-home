@@ -60,7 +60,7 @@
  <div class="page-header">
  <div>
  <h1>My Clients</h1>
- <p>All linked homeowner clients — live portal data at a glance</p>
+ <p>All linked homeowner clients, live portal data at a glance</p>
  </div>
  <div class="search-bar">
  <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)">
@@ -84,7 +84,7 @@
  <div class="client-avatar">{{ (client.name or 'C')[0]|upper }}</div>
  <div style="flex:1">
  <p class="client-name">{{ client.name or 'Unnamed Client' }}</p>
- <p class="client-email">{{ client.email or '—' }}</p>
+ <p class="client-email">{{ client.email or '-' }}</p>
  {% if client.agent_name %}
  <span class="agent-badge"> Agent: {{ client.agent_name }}</span>
  {% endif %}
@@ -94,7 +94,7 @@
  <div class="client-card__body">
  <div class="data-row">
  <span class="data-row__label"> Property</span>
- <span class="data-row__val">{{ client.property_address or '—' }}</span>
+ <span class="data-row__val">{{ client.property_address or '-' }}</span>
  </div>
  <div class="data-row">
  <span class="data-row__label"> Home Value</span>
@@ -109,12 +109,12 @@
  <div class="data-row">
  <span class="data-row__label"> Loan Balance</span>
  {% if client.loan_balance %}<span class="data-row__val">${{ "{:,.0f}".format(client.loan_balance) }}</span>
- {% else %}<span class="data-row__val muted">—</span>{% endif %}
+ {% else %}<span class="data-row__val muted"> - </span>{% endif %}
  </div>
  <div class="data-row">
  <span class="data-row__label"> Rate</span>
  {% if client.loan_rate %}<span class="data-row__val">{{ client.loan_rate }}%</span>
- {% else %}<span class="data-row__val muted">—</span>{% endif %}
+ {% else %}<span class="data-row__val muted"> - </span>{% endif %}
  </div>
  {% if client.crm_status %}
  <div class="data-row">

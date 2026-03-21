@@ -460,8 +460,8 @@
  {{ (tx.side or 'buyer')|capitalize }}
  </span>
  </td>
- <td class="tx-td tx-td--muted">{{ tx.target_close_date or '—' }}</td>
- <td class="tx-td tx-td--muted">{{ tx.created_at[:10] if tx.created_at else '—' }}</td>
+ <td class="tx-td tx-td--muted">{{ tx.target_close_date or '-' }}</td>
+ <td class="tx-td tx-td--muted">{{ tx.created_at[:10] if tx.created_at else ' - ' }}</td>
  <td class="tx-td tx-td--actions" onclick="event.stopPropagation()">
  <div class="tx-actions">
  <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-act">Open</a>

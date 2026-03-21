@@ -7,7 +7,7 @@
  All info visible · Zero waste · Elegant rows
  ───────────────────────────────────────────── */
 
-/* Hard reset — ID beats every global !important */
+/* Hard reset, ID beats every global !important */
 #crm,#crm *{box-sizing:border-box;}
 #crm button,#crm a,#crm input,#crm select,#crm textarea,#crm form,
 #crm label{
@@ -179,7 +179,7 @@
  min-height:calc(100vh - 200px);
 }
 
-/* ── QUICK-ADD SIDEBAR (hidden — now a modal) ─ */
+/* ── QUICK-ADD SIDEBAR (hidden, now a modal) ─ */
 .qa-panel{ display:none!important; }
 
 /* ── CONTACT LIST ────────────────────────── */
@@ -456,7 +456,7 @@
  {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
  {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
  <select name="sort" class="t-sel" onchange="this.form.submit()">
- <option value="name" {% if sort_by=='name' %}selected{% endif %}>A–Z Name</option>
+ <option value="name" {% if sort_by=='name' %}selected{% endif %}>A-Z Name</option>
  <option value="stage" {% if sort_by=='stage' %}selected{% endif %}>By Stage</option>
  <option value="last_touch" {% if sort_by=='last_touch' %}selected{% endif %}>Last Touch</option>
  <option value="created_at" {% if sort_by=='created_at' %}selected{% endif %}>Newest</option>
@@ -554,20 +554,20 @@
  <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}</td>
  <td class="c-td"><span class="s-badge s-badge--{{ contact.stage }}">{{ contact.stage }}</span></td>
  <td class="c-td">
- {% if contact.email %}<a href="mailto:{{ contact.email }}" onclick="event.stopPropagation()" title="{{ contact.email }}">{{ contact.email }}</a>{% else %}<span class="c-td--muted">—</span>{% endif %}
+ {% if contact.email %}<a href="mailto:{{ contact.email }}" onclick="event.stopPropagation()" title="{{ contact.email }}">{{ contact.email }}</a>{% else %}<span class="c-td--muted"> - </span>{% endif %}
  </td>
  <td class="c-td">
- {% if contact.phone %}<a href="tel:{{ contact.phone }}" onclick="event.stopPropagation()">{{ contact.phone }}</a>{% else %}<span class="c-td--muted">—</span>{% endif %}
+ {% if contact.phone %}<a href="tel:{{ contact.phone }}" onclick="event.stopPropagation()">{{ contact.phone }}</a>{% else %}<span class="c-td--muted"> - </span>{% endif %}
  </td>
  <td class="c-td c-td--muted" title="{% if contact.address %}{{ contact.address }}{% if contact.city %}, {{ contact.city }}{% endif %}{% if contact.state %} {{ contact.state }}{% endif %}{% if contact.zip_code %} {{ contact.zip_code }}{% endif %}{% endif %}">
  {% if contact.address or contact.city %}
  {{ contact.address or '' }}{% if contact.city %}, {{ contact.city }}{% endif %}{% if contact.state %} {{ contact.state }}{% endif %}{% if contact.zip_code %} {{ contact.zip_code }}{% endif %}
- {% else %}—{% endif %}
+ {% else %} - {% endif %}
  </td>
- <td class="c-td c-td--muted">{{ contact.birthday or '—' }}</td>
+ <td class="c-td c-td--muted">{{ contact.birthday or '-' }}</td>
  <td class="c-td" onclick="event.stopPropagation()" title="Click to edit last touch">
  <div class="lt-wrap">
- <span class="lt-display" id="lt-disp-{{ contact.id }}" onclick="startLtEdit({{ contact.id }})">{{ contact.last_touch or '—' }}</span>
+ <span class="lt-display" id="lt-disp-{{ contact.id }}" onclick="startLtEdit({{ contact.id }})">{{ contact.last_touch or '-' }}</span>
  <input type="text" class="lt-inp" id="lt-inp-{{ contact.id }}"
  value="{{ contact.last_touch or '' }}" placeholder="e.g. 01/15/2026"
  onblur="saveLt({{ contact.id }})"
@@ -707,11 +707,11 @@
  <option value="website">Website Contact Form</option>
  <option value="website_booking">Website Booking Page</option>
  <option value="zillow">Zillow / Realtor.com</option>
- <option value="referral_client">Referral — Client</option>
- <option value="referral_agent">Referral — Agent</option>
- <option value="social_instagram">Social Media — Instagram</option>
- <option value="social_facebook">Social Media — Facebook</option>
- <option value="social_other">Social Media — Other</option>
+ <option value="referral_client">Referral, Client</option>
+ <option value="referral_agent">Referral, Agent</option>
+ <option value="social_instagram">Social Media, Instagram</option>
+ <option value="social_facebook">Social Media, Facebook</option>
+ <option value="social_other">Social Media, Other</option>
  <option value="open_house">Open House</option>
  <option value="sphere">Cold Outreach / Sphere</option>
  <option value="sign_call">Sign Call</option>
@@ -767,11 +767,11 @@
  <option value="website">Website Contact Form</option>
  <option value="website_booking">Website Booking Page</option>
  <option value="zillow">Zillow / Realtor.com</option>
- <option value="referral_client">Referral — Client</option>
- <option value="referral_agent">Referral — Agent</option>
- <option value="social_instagram">Social Media — Instagram</option>
- <option value="social_facebook">Social Media — Facebook</option>
- <option value="social_other">Social Media — Other</option>
+ <option value="referral_client">Referral, Client</option>
+ <option value="referral_agent">Referral, Agent</option>
+ <option value="social_instagram">Social Media, Instagram</option>
+ <option value="social_facebook">Social Media, Facebook</option>
+ <option value="social_other">Social Media, Other</option>
  <option value="open_house">Open House</option>
  <option value="sphere">Cold Outreach / Sphere</option>
  <option value="sign_call">Sign Call</option>
@@ -905,7 +905,7 @@ function saveLt(id){
  var disp=document.getElementById('lt-disp-'+id);
  inp.style.display='none';
  disp.style.display='';
- disp.textContent=val||'—';
+ disp.textContent=val||' - ';
  var body='contact_id='+encodeURIComponent(id)+'&field=last_touch&value='+encodeURIComponent(val);
  fetch('/agent/crm/quick-update',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
  .then(function(r){if(!r.ok)disp.style.color='#c00';else disp.style.color='';});
@@ -1054,7 +1054,7 @@ function aiNextAction(id){
  '<span style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:'+
  (urgencyColor[u]||'#8FA88A')+';margin-right:.4rem;">'+u.toUpperCase()+'</span>'+
  '<strong>'+escHtml(d.action||'')+'</strong>'+
- (d.reason?'<span style="opacity:.65;margin-left:.4rem;">— '+escHtml(d.reason)+'</span>':'');
+ (d.reason?'<span style="opacity:.65;margin-left:.4rem;"> -  '+escHtml(d.reason)+'</span>':'');
  }).catch(function(){
  strip.innerHTML='<span style="opacity:.5;">AI unavailable.</span>';
  });

@@ -62,7 +62,7 @@
  <div class="big-avatar">{{ (homeowner.name or 'C')[0]|upper }}</div>
  <div>
  <h1 class="detail-header__name">{{ homeowner.name or 'Client' }}</h1>
- <p class="detail-header__sub">{{ homeowner.email }} · Member since {{ homeowner.created_at[:10] if homeowner.created_at else '—' }}</p>
+ <p class="detail-header__sub">{{ homeowner.email }} · Member since {{ homeowner.created_at[:10] if homeowner.created_at else ' - ' }}</p>
  </div>
  </div>
  <div style="display:flex;gap:.625rem;align-items:center;flex-wrap:wrap">
@@ -73,19 +73,19 @@
 
  <div class="kpi-row">
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %}—{% endif %}</div>
+ <div class="kpi-box__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Home Value</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val green">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %}—{% endif %}</div>
+ <div class="kpi-box__val green">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Equity</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %}—{% endif %}</div>
+ <div class="kpi-box__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Loan Balance</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %}—{% endif %}</div>
+ <div class="kpi-box__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Rate</div>
  </div>
  <div class="kpi-box">
@@ -104,13 +104,13 @@
  <div class="panel">
  <div class="panel__title"> Property & Loan Data</div>
  <div class="panel__body">
- <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '—' }}</span></div>
- <div class="data-row"><span class="data-row__label">Est. Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %}—{% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#2e7d32">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %}—{% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %}—{% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %}—{% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %}—{% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Loan Term</span><span class="data-row__val">{% if profile.loan_term_years %}{{ profile.loan_term_years }} yrs{% else %}—{% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '-' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Est. Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#2e7d32">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Loan Term</span><span class="data-row__val">{% if profile.loan_term_years %}{{ profile.loan_term_years }} yrs{% else %} - {% endif %}</span></div>
  </div>
  </div>
 
@@ -119,10 +119,10 @@
  <div class="panel__title"> CRM Borrower Record</div>
  <div class="panel__body">
  {% if crm_borrower %}
- <div class="data-row"><span class="data-row__label">Status</span><span class="data-row__val">{{ crm_borrower.status or '—' }}</span></div>
- <div class="data-row"><span class="data-row__label">Loan Type</span><span class="data-row__val">{{ crm_borrower.loan_type or '—' }}</span></div>
- <div class="data-row"><span class="data-row__label">Last Touch</span><span class="data-row__val">{{ crm_borrower.last_touch or '—' }}</span></div>
- <div class="data-row"><span class="data-row__label">Tags</span><span class="data-row__val">{{ crm_borrower.tags or '—' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Status</span><span class="data-row__val">{{ crm_borrower.status or '-' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Loan Type</span><span class="data-row__val">{{ crm_borrower.loan_type or '-' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Last Touch</span><span class="data-row__val">{{ crm_borrower.last_touch or '-' }}</span></div>
+ <div class="data-row"><span class="data-row__label">Tags</span><span class="data-row__val">{{ crm_borrower.tags or '-' }}</span></div>
  {% if crm_borrower.notes %}<div style="margin-top:.75rem;padding:.625rem;background:#F8F5F0;border-radius:6px;font-size:.78rem;color:#6B5B4D">{{ crm_borrower.notes }}</div>{% endif %}
  <div style="margin-top:.875rem"><a href="{{ url_for('lender_crm') }}" style="font-size:.78rem;color:#6B5B4D;text-decoration:underline">Open in CRM →</a></div>
  {% else %}
@@ -140,7 +140,7 @@
  <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem 0;border-bottom:1px solid rgba(107,91,77,.07)">
  <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6B5B4D,#8B8A5A);display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;font-weight:600;flex-shrink:0">{{ (prof.name or 'P')[0]|upper }}</div>
  <div>
- <div style="font-size:.82rem;font-weight:600;color:#3D2E24">{{ prof.name or '—' }}</div>
+ <div style="font-size:.82rem;font-weight:600;color:#3D2E24">{{ prof.name or '-' }}</div>
  <div style="font-size:.72rem;color:#6B5B4D">{{ (prof.professional_role or '')|capitalize }} · {{ prof.email or '' }}</div>
  </div>
  </div>
@@ -165,7 +165,7 @@
  <div style="font-size:.75rem;color:#6B5B4D">
  {% if tx.purchase_price %}${{ "{:,.0f}".format(tx.purchase_price) }} · {% endif %}
  {% if tx.agent_name %}Agent: {{ tx.agent_name }} · {% endif %}
- Close: {{ tx.target_close_date or '—' }}
+ Close: {{ tx.target_close_date or '-' }}
  </div>
  </div>
  {% endfor %}
@@ -183,7 +183,7 @@
  <ul class="item-list">
  {% for snap in snapshot_history %}
  <li>
- <span class="item-name">{{ snap.snapshot_date or '—' }}</span>
+ <span class="item-name">{{ snap.snapshot_date or '-' }}</span>
  <span class="item-meta">
  {% if snap.value_estimate %}${{ "{:,.0f}".format(snap.value_estimate) }}{% endif %}
  {% if snap.equity_estimate %} · ${{ "{:,.0f}".format(snap.equity_estimate) }} equity{% endif %}
@@ -227,7 +227,7 @@
  <div class="activity-item">
  <div class="activity-dot"></div>
  <div>
- <div class="activity-title">{{ act.title or '—' }}</div>
+ <div class="activity-title">{{ act.title or '-' }}</div>
  <div class="activity-date">{{ (act.created_at or '')[:10] }} · {{ act.type|capitalize }}</div>
  </div>
  </div>
