@@ -2,585 +2,888 @@
 
 {% block agent_content %}
 <style>
-  /* ============================================
-     RESPONSIVE LAYOUT SYSTEM - MOBILE FIRST
-     ============================================ */
-  
-  .dashboard-container {
+  /* ============================================================
+     LUXURY AGENT DASHBOARD — Design System
+     Matches platform vars: --olive, --cream, --charcoal, etc.
+  ============================================================ */
+
+  .dash {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 1.5rem 2rem;
   }
-  
-  /* Header Section */
-  .dashboard-header {
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
+
+  /* ── PAGE HEADER ── */
+  .dash-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+
+  .dash-header-left h1 {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--charcoal-brown);
+    margin: 0 0 0.2rem;
+    letter-spacing: -0.03em;
+  }
+
+  .dash-header-left p {
+    font-size: 0.9375rem;
+    color: var(--warm-gray);
+    margin: 0;
+  }
+
+  .dash-date-badge {
+    background: linear-gradient(135deg, rgba(107,106,69,.08) 0%, rgba(200,180,151,.12) 100%);
+    border: 1px solid rgba(200,180,151,.3);
+    border-radius: 999px;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--charcoal-brown);
+    white-space: nowrap;
+  }
+
+  /* ── SHARED CARD BASE ── */
+  .lux-card {
+    background: var(--soft-white, #FDFBF7);
+    border: 1px solid rgba(200,180,151,.2);
+    border-radius: 20px;
+    box-shadow: 0 2px 16px rgba(58,53,44,.06);
+    overflow: hidden;
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+
+  .lux-card:hover {
+    box-shadow: 0 8px 32px rgba(58,53,44,.1);
+  }
+
+  .lux-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
+    padding: 1.25rem 1.5rem 0;
+    gap: 0.75rem;
+  }
+
+  .lux-card-title {
+    font-family: var(--font-heading);
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--charcoal-brown);
+    letter-spacing: -0.01em;
+    margin: 0;
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
   }
 
-  .dashboard-header h1 {
-    font-family: var(--font-heading);
+  .lux-card-title svg {
+    opacity: 0.75;
+    flex-shrink: 0;
+  }
+
+  .lux-card-body {
+    padding: 1.25rem 1.5rem 1.5rem;
+  }
+
+  /* ── AI MORNING BRIEFING ── */
+  .briefing-card {
+    background: linear-gradient(135deg, #3A352C 0%, #4F4A3E 60%, #5A5938 100%);
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(58,53,44,.25);
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .briefing-card::before {
+    content: '';
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(200,180,151,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .briefing-card-inner {
+    padding: 1.75rem 2rem;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .briefing-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255,255,255,.12);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 1.5rem;
-    color: var(--charcoal-brown);
-    margin: 0;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    flex-shrink: 0;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,.15);
   }
 
-  .dashboard-header p {
-    font-size: 0.9rem;
-    color: var(--warm-gray);
-    margin: 0;
-  }
-  
-  /* Responsive Grid System */
-  .responsive-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  /* Cards */
-  .card {
-    background: var(--soft-white);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-xl);
-    padding: 1.25rem 1rem;
-    box-shadow: 0 2px 12px rgba(58, 53, 44, 0.06);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .briefing-content {
+    flex: 1;
+    min-width: 0;
   }
 
-  .card h2 {
-    font-family: var(--font-heading);
-    font-size: 1.15rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-  }
-  
-  .card h3 {
-    font-size: 0.9375rem;
-    color: var(--olive-green);
-    margin-bottom: 0.75rem;
-    font-weight: 600;
+  .briefing-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    color: rgba(200,180,151,.8);
+    margin-bottom: 0.5rem;
   }
-  
-  /* Metric Cards */
-  .metrics-grid {
+
+  #briefing-text {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: rgba(255,255,255,.92);
+    min-height: 2.5rem;
+  }
+
+  .briefing-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .briefing-refresh-btn {
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    color: rgba(255,255,255,.8);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(4px);
+  }
+
+  .briefing-refresh-btn:hover {
+    background: rgba(255,255,255,.18);
+    color: white;
+  }
+
+  .briefing-skeleton {
+    height: 1rem;
+    background: linear-gradient(90deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.06) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* ── KPI METRIC CARDS ── */
+  .metrics-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
 
-  .metric-card {
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.05) 0%, rgba(200, 180, 151, 0.08) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
-    padding: 1rem 0.75rem;
-    text-align: center;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  .kpi-card {
+    background: var(--soft-white, #FDFBF7);
+    border: 1px solid rgba(200,180,151,.2);
+    border-radius: 16px;
+    padding: 1.25rem 1.25rem 1rem;
+    box-shadow: 0 2px 12px rgba(58,53,44,.05);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
   }
-  
-  .metric-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.12);
-    border-color: var(--olive-green);
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
   }
-  
-  .metric-value {
-    font-size: 2rem;
+
+  .kpi-card.kpi-olive::before  { background: var(--olive-green, #6B6A45); }
+  .kpi-card.kpi-gold::before   { background: #B8860B; }
+  .kpi-card.kpi-rust::before   { background: #A0522D; }
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(58,53,44,.1);
+  }
+
+  .kpi-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.875rem;
+  }
+
+  .kpi-olive .kpi-icon  { background: rgba(107,106,69,.12); color: #6B6A45; }
+  .kpi-gold .kpi-icon   { background: rgba(184,134,11,.1);  color: #B8860B; }
+  .kpi-rust .kpi-icon   { background: rgba(160,82,45,.1);   color: #A0522D; }
+
+  .kpi-value {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
     font-weight: 700;
-    color: var(--olive-green);
     line-height: 1;
     margin-bottom: 0.25rem;
-    font-family: var(--font-heading);
-  }
-
-  .metric-label {
-    font-size: 0.8125rem;
     color: var(--charcoal-brown);
-    font-weight: 600;
-    margin-bottom: 0.15rem;
   }
 
-  .metric-subtext {
+  .kpi-label {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .kpi-sub {
     font-size: 0.75rem;
     color: var(--warm-gray);
   }
-  
-  /* Quick Actions Grid */
-  .actions-grid {
+
+  /* ── MAIN 2-COL LAYOUT ── */
+  .dash-main {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: 1fr 340px;
+    gap: 1.25rem;
+    align-items: start;
   }
-  
-  .action-card {
+
+  .dash-left { display: flex; flex-direction: column; gap: 1.25rem; }
+  .dash-right { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  /* ── TODAY'S PRIORITIES ── */
+  .priorities-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  .priority-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, rgba(107,106,69,.04) 0%, rgba(200,180,151,.06) 100%);
+    border: 1px solid rgba(200,180,151,.18);
+    border-radius: 12px;
+    transition: all 0.2s;
+  }
+
+  .priority-item:hover {
+    border-color: var(--olive-green);
+    background: linear-gradient(135deg, rgba(107,106,69,.08) 0%, rgba(200,180,151,.1) 100%);
+    transform: translateX(3px);
+  }
+
+  .priority-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.05rem;
+    box-shadow: 0 2px 8px rgba(107,106,69,.3);
+  }
+
+  .priority-text {
+    font-size: 0.9375rem;
+    color: var(--charcoal-brown);
+    line-height: 1.45;
+    font-weight: 500;
+  }
+
+  .priority-skeleton {
+    height: 54px;
+    background: linear-gradient(90deg, rgba(107,106,69,.06) 0%, rgba(107,106,69,.1) 50%, rgba(107,106,69,.06) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 12px;
+  }
+
+  /* ── TRANSACTIONS ── */
+  .tx-item {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.25rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(200,180,151,.15);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .tx-item:last-child { border-bottom: none; }
+
+  .tx-item:hover .tx-address { color: var(--olive-green); }
+  .tx-item:hover { transform: translateX(4px); }
+
+  .tx-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--olive-green);
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(107,106,69,.15);
+  }
+
+  .tx-info { flex: 1; min-width: 0; }
+
+  .tx-address {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    color: var(--charcoal-brown);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s;
+  }
+
+  .tx-meta {
+    font-size: 0.8125rem;
+    color: var(--warm-gray);
+  }
+
+  .tx-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.25rem 0.625rem;
+    border-radius: 999px;
+    background: rgba(107,106,69,.1);
+    color: var(--olive-green);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .tx-arrow {
+    color: var(--warm-gray);
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: color 0.2s;
+  }
+
+  .tx-item:hover .tx-arrow { color: var(--olive-green); }
+
+  /* ── QUICK ACTIONS ── */
+  .qa-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .qa-item {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.875rem 1rem;
+    background: linear-gradient(135deg, rgba(107,106,69,.03) 0%, rgba(200,180,151,.05) 100%);
+    border: 1px solid rgba(200,180,151,.18);
+    border-radius: 12px;
     text-decoration: none;
     color: var(--charcoal-brown);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: 80px;
+    transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
   }
-  
-  .action-card:hover {
-    transform: translateX(4px);
+
+  .qa-item:hover {
     border-color: var(--olive-green);
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
-    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.12);
+    background: linear-gradient(135deg, rgba(107,106,69,.08) 0%, rgba(200,180,151,.09) 100%);
+    transform: translateX(3px);
+    box-shadow: 0 4px 14px rgba(107,106,69,.1);
   }
-  
-  .action-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
+
+  .qa-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     background: linear-gradient(135deg, var(--olive-green) 0%, #5A5938 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-weight: 700;
-    font-size: 1.5rem;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(107, 106, 69, 0.3);
+    box-shadow: 0 3px 8px rgba(107,106,69,.25);
   }
-  
-  .action-content {
-    flex: 1;
-  }
-  
-  .action-title {
+
+  .qa-label {
+    font-size: 0.9rem;
     font-weight: 600;
-    font-size: 1.0625rem;
-    margin-bottom: 0.25rem;
     color: var(--charcoal-brown);
   }
-  
-  .action-desc {
-    font-size: 0.875rem;
+
+  .qa-sub {
+    font-size: 0.775rem;
     color: var(--warm-gray);
-    line-height: 1.5;
+    margin-top: 0.1rem;
   }
-  
-  /* Transaction List */
-  .transaction-item {
-    display: block;
-    padding: 1.25rem;
-    margin-bottom: 0.75rem;
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.03) 0%, rgba(200, 180, 151, 0.05) 100%);
-    border: 1px solid rgba(200, 180, 151, 0.2);
-    border-radius: var(--border-radius-lg);
-    text-decoration: none;
-    color: var(--charcoal-brown);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .qa-arrow {
+    margin-left: auto;
+    color: var(--warm-gray);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    transition: color 0.2s;
   }
-  
-  .transaction-item:hover {
-    transform: translateX(6px);
-    border-color: var(--olive-green);
-    background: linear-gradient(135deg, rgba(107, 106, 69, 0.08) 0%, rgba(200, 180, 151, 0.08) 100%);
-    box-shadow: 0 4px 16px rgba(107, 106, 69, 0.12);
+
+  .qa-item:hover .qa-arrow { color: var(--olive-green); }
+
+  /* ── SECTION LABEL ── */
+  .section-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--warm-gray);
+    margin-bottom: 0.625rem;
   }
-  
-  .transaction-header {
-    display: flex;
-    justify-content: space-between;
+
+  /* ── VIEW ALL LINK ── */
+  .view-all-link {
+    display: inline-flex;
     align-items: center;
-    gap: 1rem;
-  }
-  
-  .transaction-address {
-    font-weight: 600;
-    font-size: 1.0625rem;
-    color: var(--charcoal-brown);
-    margin-bottom: 0.5rem;
-  }
-  
-  .transaction-meta {
+    gap: 0.375rem;
     font-size: 0.875rem;
-    color: var(--warm-gray);
-  }
-  
-  .transaction-arrow {
-    color: var(--olive-green);
-    font-size: 1.5rem;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  
-  /* Buttons */
-  .btn-outline {
-    display: inline-block;
-    padding: 0.875rem 2rem;
-    background: white;
-    color: var(--olive-green);
-    border: 2px solid var(--olive-green);
-    border-radius: var(--border-radius-full);
-    text-decoration: none;
     font-weight: 600;
-    font-size: 0.9375rem;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    letter-spacing: 0.02em;
+    color: var(--olive-green);
+    text-decoration: none;
+    margin-top: 1rem;
+    transition: gap 0.2s;
   }
-  
-  .btn-outline:hover {
+
+  .view-all-link:hover { gap: 0.6rem; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--warm-gray);
+    font-size: 0.9375rem;
+  }
+
+  .empty-state a {
+    display: inline-block;
+    margin-top: 0.875rem;
+    padding: 0.625rem 1.5rem;
     background: var(--olive-green);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(107, 106, 69, 0.3);
+    border-radius: 999px;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: opacity 0.2s;
   }
-  
-  /* ============================================
-     TABLET BREAKPOINT (768px+)
-     ============================================ */
-  @media (min-width: 768px) {
-    .dashboard-container {
-      padding: 1.25rem 2rem;
-    }
 
-    .dashboard-header {
-      padding: 0.5rem 0;
-    }
+  .empty-state a:hover { opacity: 0.85; }
 
-    .dashboard-header h1 {
-      font-size: 1.6rem;
-    }
-
-    /* Metrics: 3 columns on tablet */
-    .metrics-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-
-    /* Actions: 2 columns on tablet */
-    .actions-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.25rem;
-    }
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-  
-  /* ============================================
-     DESKTOP BREAKPOINT (1024px+)
-     ============================================ */
-  @media (min-width: 1024px) {
-    .dashboard-container {
-      padding: 1.5rem 2rem;
-    }
 
-    .dashboard-header {
-      padding: 0.5rem 0;
-    }
+  .fade-up { animation: fadeUp 0.45s ease-out both; }
+  .fade-up-1 { animation-delay: 0.05s; }
+  .fade-up-2 { animation-delay: 0.1s; }
+  .fade-up-3 { animation-delay: 0.15s; }
+  .fade-up-4 { animation-delay: 0.2s; }
+  .fade-up-5 { animation-delay: 0.25s; }
 
-    .dashboard-header h1 {
-      font-size: 1.75rem;
-    }
-
-    /* Metrics: 3 columns on desktop */
-    .metrics-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-    }
-
-    /* Two-column layout for main content */
-    .responsive-grid {
-      grid-template-columns: 2fr 1fr;
-      gap: 1.25rem;
-    }
-
-    /* Actions: 2 columns on desktop */
-    .actions-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-    }
-
-    .metric-card {
-      padding: 1rem 0.75rem;
-    }
-
-    .metric-value {
-      font-size: 2.25rem;
-    }
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .dash-main { grid-template-columns: 1fr; }
+    .dash-right { flex-direction: row; flex-wrap: wrap; }
+    .dash-right > * { flex: 1 1 320px; }
   }
-  
-  /* ============================================
-     LARGE DESKTOP BREAKPOINT (1280px+)
-     ============================================ */
-  @media (min-width: 1280px) {
-    .actions-grid {
-      grid-template-columns: 1fr;
-    }
+
+  @media (max-width: 768px) {
+    .dash { padding: 1rem; }
+    .dash-header-left h1 { font-size: 1.5rem; }
+    .metrics-row { grid-template-columns: repeat(3, 1fr); gap: 0.625rem; }
+    .kpi-value { font-size: 1.75rem; }
+    .briefing-card-inner { padding: 1.25rem 1.25rem; }
+    .lux-card-body { padding: 1rem 1.125rem 1.25rem; }
   }
-  
-  /* ============================================
-     MOBILE OPTIMIZATIONS (Portrait Mode)
-     ============================================ */
-  @media (max-width: 767px) {
-    .dashboard-container {
-      padding: 0.75rem;
-    }
 
-    .dashboard-header {
-      padding: 0.25rem 0;
-      margin-bottom: 0.75rem;
-    }
-
-    .dashboard-header h1 {
-      font-size: 1.25rem;
-    }
-
-    .metrics-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0.5rem;
-    }
-
-    .metric-card {
-      padding: 0.75rem 0.5rem;
-    }
-
-    .metric-value {
-      font-size: 1.6rem;
-    }
-
-    .metric-label {
-      font-size: 0.7rem;
-    }
-
-    .metric-subtext {
-      font-size: 0.65rem;
-    }
-
-    .card {
-      padding: 1rem 0.875rem;
-    }
-
-    .card h2 {
-      font-size: 1rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .action-card {
-      padding: 0.875rem;
-      min-height: auto;
-    }
-
-    .action-icon {
-      width: 40px;
-      height: 40px;
-      font-size: 1rem;
-    }
-
-    .action-title {
-      font-size: 0.9375rem;
-    }
-
-    .action-desc {
-      font-size: 0.8rem;
-    }
-
-    .btn-outline {
-      width: 100%;
-      padding: 0.75rem 1.25rem;
-    }
-
-    .transaction-item {
-      padding: 0.875rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .transaction-address {
-      font-size: 0.9375rem;
-    }
-
-    .transaction-meta {
-      font-size: 0.8rem;
-    }
-  }
-  
-  /* Animation */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-in {
-    animation: fadeIn 0.5s ease-out;
+  @media (max-width: 480px) {
+    .metrics-row { grid-template-columns: 1fr; }
+    .dash-right { flex-direction: column; }
   }
 </style>
 
-<div class="dashboard-container">
-  <!-- Header -->
-  <div class="dashboard-header animate-in">
-    <h1>Agent Dashboard</h1>
-    <p>Here is what is happening with your business today.</p>
-  </div>
+<div class="dash">
 
-  <!-- AI Morning Briefing -->
-  <div id="ai-briefing-bar" style="
-    background:linear-gradient(135deg,#F8F5F0 0%,#FDFBF7 100%);
-    border:1px solid rgba(107,106,69,.18);border-radius:10px;
-    padding:.6rem 1rem;margin-bottom:.875rem;
-    display:flex;align-items:center;gap:.625rem;
-    font-size:.82rem;color:#3A352C;line-height:1.45;
-  ">
-    <span style="font-size:1rem;flex-shrink:0;opacity:.7;">✨</span>
-    <span id="ai-briefing-text" style="flex:1;font-style:italic;opacity:.6;">Loading your morning briefing…</span>
-    <button onclick="loadBriefing()" id="ai-briefing-refresh"
-      style="flex-shrink:0;background:none;border:none;font-size:.8rem;color:#6B6A45;cursor:pointer;opacity:.6;padding:0;">
-      ↺
-    </button>
-  </div>
-
-  <!-- Metrics Cards -->
-  <div class="metrics-grid">
-    <div class="metric-card">
-      <div class="metric-value">{{ metrics.new_leads|default(0) }}</div>
-      <div class="metric-label">New Leads</div>
-      <div class="metric-subtext">Ready for your call</div>
+  <!-- ── HEADER ── -->
+  <div class="dash-header fade-up">
+    <div class="dash-header-left">
+      <h1 id="dash-greeting">Good morning, {{ (user.name or 'Agent').split()[0] }}</h1>
+      <p>Here is what is happening with your business today.</p>
     </div>
-
-    <div class="metric-card">
-      <div class="metric-value">{{ transactions|length if transactions else 0 }}</div>
-      <div class="metric-label">Active Deals</div>
-      <div class="metric-subtext">Moving right along</div>
-    </div>
-
-    <div class="metric-card">
-      <div class="metric-value">{{ metrics.followups_today|default(0) }}</div>
-      <div class="metric-label">Follow-ups Today</div>
-      <div class="metric-subtext">Time to reach out</div>
+    <div class="dash-date-badge">
+      <span id="today-date">{{ today_date if today_date else "" }}</span>
     </div>
   </div>
-  
-  <!-- Responsive Grid Layout (Desktop: 2 columns, Mobile: Stacked) -->
-  <div class="responsive-grid">
-    <!-- Left Column: Recent Transactions -->
-    <div>
-      {% if transactions %}
-      <div class="card">
-        <h2>Recent Transactions</h2>
-        {% for tx in transactions[:5] %}
-        <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="transaction-item">
-          <div class="transaction-header">
-            <div>
-              <div class="transaction-address">{{ tx.property_address or 'Property' }}</div>
-              <div class="transaction-meta">
-                {{ tx.client_name }} &nbsp;|&nbsp; {{ tx.current_stage|replace('_', ' ')|title if tx.current_stage else 'New' }}
-              </div>
-            </div>
-            <div class="transaction-arrow">→</div>
+
+  <!-- ── AI MORNING BRIEFING ── -->
+  <div class="briefing-card fade-up fade-up-1">
+    <div class="briefing-card-inner">
+      <div class="briefing-icon">✨</div>
+      <div class="briefing-content">
+        <div class="briefing-label">AI Morning Briefing</div>
+        <div id="briefing-text">
+          <div class="briefing-skeleton" style="width:90%"></div>
+          <div class="briefing-skeleton" style="width:70%;margin-top:.4rem"></div>
+        </div>
+        <div class="briefing-actions">
+          <button class="briefing-refresh-btn" onclick="loadBriefing()" id="briefing-refresh-btn">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-0.35.35z"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KPI CARDS ── -->
+  <div class="metrics-row">
+    <div class="kpi-card kpi-olive fade-up fade-up-2">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="kpi-value">{{ metrics.new_leads|default(0) }}</div>
+      <div class="kpi-label">New Leads</div>
+      <div class="kpi-sub">Ready for your call</div>
+    </div>
+
+    <div class="kpi-card kpi-gold fade-up fade-up-2">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="kpi-value">{{ transactions|length if transactions else 0 }}</div>
+      <div class="kpi-label">Active Deals</div>
+      <div class="kpi-sub">In your pipeline</div>
+    </div>
+
+    <div class="kpi-card kpi-rust fade-up fade-up-2">
+      <div class="kpi-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+        </svg>
+      </div>
+      <div class="kpi-value">{{ metrics.followups_today|default(0) }}</div>
+      <div class="kpi-label">Follow-ups</div>
+      <div class="kpi-sub">Due today</div>
+    </div>
+  </div>
+
+  <!-- ── MAIN CONTENT ── -->
+  <div class="dash-main">
+
+    <!-- LEFT COLUMN -->
+    <div class="dash-left">
+
+      <!-- AI Today's Priorities -->
+      <div class="lux-card fade-up fade-up-3">
+        <div class="lux-card-header">
+          <h2 class="lux-card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--olive-green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+            AI Today's Priorities
+          </h2>
+          <button onclick="loadPriorities()" id="priorities-refresh-btn"
+            style="background:none;border:none;cursor:pointer;font-size:0.8125rem;color:var(--warm-gray);font-weight:600;display:flex;align-items:center;gap:0.3rem;padding:0;transition:color 0.2s;"
+            onmouseover="this.style.color='var(--olive-green)'" onmouseout="this.style.color='var(--warm-gray)'">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-0.35.35z"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div class="lux-card-body">
+          <div id="priorities-list" class="priorities-list">
+            <div class="priority-skeleton"></div>
+            <div class="priority-skeleton" style="margin-top:.625rem"></div>
+            <div class="priority-skeleton" style="margin-top:.625rem"></div>
           </div>
-        </a>
-        {% endfor %}
-        <div style="margin-top: 1rem;">
-          <a href="{{ url_for('agent_transactions') }}" class="btn-outline">See All Transactions</a>
         </div>
       </div>
-      {% else %}
-      <div class="card">
-        <h2>Recent Transactions</h2>
-        <p style="color: var(--warm-gray); text-align: center; padding: 1rem 0;">No transactions yet. When you are ready to start tracking a deal, we are here for you.</p>
-        <div style="margin-top: 1rem;">
-          <a href="{{ url_for('agent_transactions') }}" class="btn-outline">Start Your First Deal</a>
+
+      <!-- Recent Transactions -->
+      <div class="lux-card fade-up fade-up-4">
+        <div class="lux-card-header">
+          <h2 class="lux-card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--olive-green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="1" y="3" width="15" height="13" rx="2"/>
+              <path d="M16 8h4l3 5v3h-7V8z"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            Active Transactions
+          </h2>
+          {% if transactions %}
+          <a href="{{ url_for('agent_transactions') }}" style="font-size:0.8125rem;font-weight:600;color:var(--olive-green);text-decoration:none;opacity:0.85;">
+            View all →
+          </a>
+          {% endif %}
+        </div>
+        <div class="lux-card-body" style="padding-top:0.625rem;">
+          {% if transactions %}
+            {% for tx in transactions[:6] %}
+            <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-item">
+              <div class="tx-dot"></div>
+              <div class="tx-info">
+                <div class="tx-address">{{ tx.property_address or 'Property' }}</div>
+                <div class="tx-meta">{{ tx.client_name }}</div>
+              </div>
+              <div class="tx-badge">{{ (tx.current_stage or 'new')|replace('_',' ')|title }}</div>
+              <div class="tx-arrow">→</div>
+            </a>
+            {% endfor %}
+          {% else %}
+          <div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(107,106,69,.3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto .75rem;display:block">
+              <rect x="1" y="3" width="15" height="13" rx="2"/>
+              <path d="M16 8h4l3 5v3h-7V8z"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            No active transactions yet. Start tracking your first deal today.
+            <br>
+            <a href="{{ url_for('agent_transactions') }}">Start Your First Deal</a>
+          </div>
+          {% endif %}
         </div>
       </div>
-      {% endif %}
+
     </div>
-    
-    <!-- Right Column: Quick Actions -->
-    <div>
-      <div class="card">
-        <h2>Quick Actions</h2>
-        <div class="actions-grid">
-          <a href="{{ url_for('agent_crm') }}" class="action-card">
-            <div class="action-icon">+</div>
-            <div class="action-content">
-              <div class="action-title">Add a Contact</div>
-              <div class="action-desc">Drop a new lead straight into your CRM</div>
-            </div>
-          </a>
 
-          <a href="{{ url_for('agent_transactions') }}" class="action-card">
-            <div class="action-icon">TX</div>
-            <div class="action-content">
-              <div class="action-title">New Transaction</div>
-              <div class="action-desc">Start tracking a deal from day one</div>
-            </div>
-          </a>
+    <!-- RIGHT COLUMN -->
+    <div class="dash-right">
 
-          <a href="{{ url_for('agent_communications') }}" class="action-card">
-            <div class="action-icon">@</div>
-            <div class="action-content">
-              <div class="action-title">Send a Message</div>
-              <div class="action-desc">Use one of your saved email or text templates</div>
-            </div>
-          </a>
+      <!-- Quick Actions -->
+      <div class="lux-card fade-up fade-up-3">
+        <div class="lux-card-header">
+          <h2 class="lux-card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--olive-green)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+            Quick Actions
+          </h2>
+        </div>
+        <div class="lux-card-body">
+          <div class="qa-grid">
 
-          <a href="{{ url_for('agent_marketing') }}" class="action-card">
-            <div class="action-icon">✎</div>
-            <div class="action-content">
-              <div class="action-title">Create Content</div>
-              <div class="action-desc">Generate beautiful marketing in seconds</div>
-            </div>
-          </a>
+            <a href="{{ url_for('agent_crm') }}" class="qa-item">
+              <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </div>
+              <div>
+                <div class="qa-label">Add a Contact</div>
+                <div class="qa-sub">Drop a new lead in your CRM</div>
+              </div>
+              <div class="qa-arrow">›</div>
+            </a>
 
-          <a href="{{ url_for('agent_settings_profile') }}" class="action-card">
-            <div class="action-icon">⚙</div>
-            <div class="action-content">
-              <div class="action-title">Your Settings</div>
-              <div class="action-desc">Keep your profile looking great</div>
-            </div>
-          </a>
+            <a href="{{ url_for('agent_transactions') }}" class="qa-item">
+              <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              </div>
+              <div>
+                <div class="qa-label">New Transaction</div>
+                <div class="qa-sub">Track a deal from day one</div>
+              </div>
+              <div class="qa-arrow">›</div>
+            </a>
+
+            <a href="{{ url_for('agent_communications') }}" class="qa-item">
+              <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div>
+                <div class="qa-label">Send a Message</div>
+                <div class="qa-sub">Email and text templates</div>
+              </div>
+              <div class="qa-arrow">›</div>
+            </a>
+
+            <a href="{{ url_for('agent_marketing') }}" class="qa-item">
+              <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div>
+                <div class="qa-label">Create Content</div>
+                <div class="qa-sub">AI marketing in seconds</div>
+              </div>
+              <div class="qa-arrow">›</div>
+            </a>
+
+            <a href="{{ url_for('agent_financials') }}" class="qa-item">
+              <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+              <div>
+                <div class="qa-label">Financials Hub</div>
+                <div class="qa-sub">Income, goals & AI insights</div>
+              </div>
+              <div class="qa-arrow">›</div>
+            </a>
+
+            <a href="{{ url_for('agent_settings_profile') }}" class="qa-item">
+              <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              </div>
+              <div>
+                <div class="qa-label">Settings</div>
+                <div class="qa-sub">Profile & preferences</div>
+              </div>
+              <div class="qa-arrow">›</div>
+            </a>
+
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
 
 <script>
+// ── Inject greeting + date ──
+(function(){
+  var h = new Date().getHours();
+  var greeting = h < 12 ? 'morning' : (h < 17 ? 'afternoon' : 'evening');
+  var gEl = document.getElementById('dash-greeting');
+  if(gEl) gEl.textContent = gEl.textContent.replace('morning', greeting);
+  var dEl = document.getElementById('today-date');
+  if(dEl && !dEl.textContent.trim()){
+    dEl.textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+})();
+
+// ── AI Morning Briefing ──
 function loadBriefing(){
-  var el=document.getElementById('ai-briefing-text');
-  var btn=document.getElementById('ai-briefing-refresh');
-  if(!el)return;
-  el.textContent='Thinking…';
-  el.style.opacity='.5';
-  if(btn)btn.style.opacity='.3';
-  fetch('/api/ai/dashboard-briefing',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'})
-    .then(function(r){return r.json();})
-    .then(function(d){
-      el.style.fontStyle='normal';
-      el.style.opacity='1';
-      el.textContent=d.briefing||'Have a great day!';
-      if(btn)btn.style.opacity='.5';
-    })
-    .catch(function(){
-      el.textContent='Have a great day — your pipeline is ready for you.';
-      el.style.opacity='.7';
-      if(btn)btn.style.opacity='.5';
-    });
+  var el = document.getElementById('briefing-text');
+  var btn = document.getElementById('briefing-refresh-btn');
+  if(!el) return;
+  el.innerHTML = '<div class="briefing-skeleton" style="width:90%"></div><div class="briefing-skeleton" style="width:70%;margin-top:.4rem"></div>';
+  if(btn) btn.disabled = true;
+  fetch('/api/ai/dashboard-briefing', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: '{}'
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    el.innerHTML = '';
+    el.textContent = d.briefing || 'Have a great day — your pipeline is ready for you.';
+    el.style.opacity = '1';
+    if(btn) btn.disabled = false;
+  })
+  .catch(function(){
+    el.innerHTML = '';
+    el.textContent = 'Have a great day — your pipeline is ready for you.';
+    if(btn) btn.disabled = false;
+  });
 }
-document.addEventListener('DOMContentLoaded',function(){ loadBriefing(); });
+
+// ── AI Today's Priorities ──
+function loadPriorities(){
+  var list = document.getElementById('priorities-list');
+  var btn = document.getElementById('priorities-refresh-btn');
+  if(!list) return;
+  list.innerHTML = '<div class="priority-skeleton"></div><div class="priority-skeleton" style="margin-top:.625rem"></div><div class="priority-skeleton" style="margin-top:.625rem"></div>';
+  if(btn) btn.disabled = true;
+  fetch('/api/ai/dashboard-priorities', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: '{}'
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    list.innerHTML = '';
+    var items = d.priorities || [];
+    if(!items.length){
+      items = ['Review your active deals for next steps','Follow up with your top leads today','Add notes after your last client calls'];
+    }
+    items.slice(0,3).forEach(function(p, i){
+      var div = document.createElement('div');
+      div.className = 'priority-item';
+      div.style.animationDelay = (i * 0.08) + 's';
+      div.innerHTML = '<div class="priority-num">' + (i+1) + '</div><div class="priority-text">' + escapeHtml(p) + '</div>';
+      list.appendChild(div);
+    });
+    if(btn) btn.disabled = false;
+  })
+  .catch(function(){
+    list.innerHTML = '';
+    var defaults = ['Review your active deals for next steps','Follow up with your top leads today','Add notes after your last client calls'];
+    defaults.forEach(function(p, i){
+      var div = document.createElement('div');
+      div.className = 'priority-item';
+      div.innerHTML = '<div class="priority-num">' + (i+1) + '</div><div class="priority-text">' + escapeHtml(p) + '</div>';
+      list.appendChild(div);
+    });
+    if(btn) btn.disabled = false;
+  });
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Auto-load on page open ──
+document.addEventListener('DOMContentLoaded', function(){
+  loadBriefing();
+  loadPriorities();
+});
 </script>
 {% endblock %}

@@ -11367,6 +11367,51 @@ def ai_dashboard_briefing_endpoint():
     return jsonify({"briefing": briefing})
 
 
+@app.route("/api/ai/dashboard-priorities", methods=["POST"])
+def ai_dashboard_priorities_endpoint():
+    """Return 3 AI-prioritized action items for the agent's day."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    from ai_platform import ai_complete
+    from database import get_user_profile, get_contacts_needing_followup
+    profile = get_user_profile(user["id"]) or {}
+    profile_d = dict(profile) if profile else {}
+    agent_name = (profile_d.get("full_name") or user.get("name") or "there").split()[0]
+    metrics = get_agent_dashboard_metrics(user["id"]) if user.get("role") == "agent" else {}
+    followup_contacts = get_contacts_needing_followup(user["id"], days_threshold=14)
+    followup_names = [c.get("name", "") for c in followup_contacts[:5] if c.get("name")]
+    followup_str = ", ".join(followup_names) if followup_names else "none"
+    prompt = (
+        f"You are a real estate business coach for {agent_name}. "
+        f"Pipeline: {metrics.get('new_leads', 0)} new leads, "
+        f"{metrics.get('active_transactions', 0)} active deals, "
+        f"{metrics.get('followups_today', 0)} follow-ups due. "
+        f"Contacts needing follow-up: {followup_str}. "
+        f"Give exactly 3 specific, high-impact action items for today. "
+        f"Each item must start with a strong action verb. Keep each under 12 words. "
+        f"Format as JSON array: [\"action 1\", \"action 2\", \"action 3\"]. "
+        f"Output only the JSON array, nothing else."
+    )
+    result = ai_complete(prompt, system="You are a real estate productivity coach. Be specific and direct.", max_tokens=120, temperature=0.5)
+    import re as _re
+    result = _re.sub(r"^```[a-z]*\n?", "", result.strip())
+    result = _re.sub(r"\n?```$", "", result.strip())
+    try:
+        import json as _json
+        priorities = _json.loads(result)
+        if not isinstance(priorities, list):
+            raise ValueError
+        priorities = [str(p) for p in priorities[:3]]
+    except Exception:
+        priorities = [
+            f"Follow up with {followup_names[0]}" if followup_names else "Call your top lead today",
+            "Review your active transactions for next steps",
+            "Add 2 new contacts to your CRM pipeline",
+        ]
+    return jsonify({"priorities": priorities})
+
+
 @app.route("/api/ai/crm/draft-email", methods=["POST"])
 def ai_crm_draft_email():
     """Draft a personalized email for a CRM contact."""
