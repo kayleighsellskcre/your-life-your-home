@@ -4,419 +4,452 @@
   :root {
     --olive: #6B6A45;
     --olive-dark: #5a593a;
+    --olive-light: rgba(107,106,69,.08);
     --cream: #F8F5F0;
     --cream2: #FDFBF7;
     --charcoal: #3A352C;
-    --warm-gray: rgba(58,53,44,.55);
+    --warm-gray: rgba(58,53,44,.52);
     --accent: #C8B497;
     --green: #15803d;
     --red: #dc2626;
-    --border: rgba(200,180,151,.3);
-  }
-  .fin-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-bottom: 1.75rem;
-  }
-  .fin-header h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.75rem;
-    color: var(--charcoal);
-    margin: 0 0 .2rem;
-  }
-  .fin-header p { color: var(--warm-gray); font-size: .88rem; margin: 0; }
-  .year-select {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    font-size: .82rem;
-    color: var(--olive);
-    font-weight: 600;
-  }
-  .year-select select {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: .35rem .7rem;
-    font-size: .82rem;
-    color: var(--charcoal);
-    background: var(--cream2);
-    cursor: pointer;
-    outline: none;
+    --amber: #b45309;
+    --blue: #1d4ed8;
+    --purple: #7c3aed;
+    --border: rgba(200,180,151,.28);
+    --shadow-sm: 0 2px 8px rgba(58,53,44,.07);
+    --shadow-md: 0 8px 32px rgba(58,53,44,.10);
+    --shadow-lg: 0 20px 60px rgba(58,53,44,.14);
+    --radius: 16px;
+    --radius-sm: 10px;
   }
 
-  /* Summary cards */
+  /* ── Page Header ── */
+  .fin-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .fin-header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem; color: var(--charcoal); margin: 0 0 .25rem;
+    letter-spacing: -.02em;
+  }
+  .fin-header-sub { color: var(--warm-gray); font-size: .88rem; margin: 0; }
+  .year-select {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .82rem; color: var(--olive); font-weight: 600;
+  }
+  .year-select select {
+    border: 1.5px solid var(--border); border-radius: 9px;
+    padding: .38rem .75rem; font-size: .82rem; color: var(--charcoal);
+    background: #fff; cursor: pointer; outline: none;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ── KPI Cards ── */
   .fin-cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 1rem; margin-bottom: 2rem;
   }
   .fin-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem 1.4rem;
-    position: relative;
-    overflow: hidden;
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.3rem 1.5rem;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-sm); transition: transform .2s, box-shadow .2s;
   }
+  .fin-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
   .fin-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
   }
-  .fin-card.green::before { background: linear-gradient(90deg,#15803d,#4ade80); }
-  .fin-card.amber::before { background: linear-gradient(90deg,#b45309,#fbbf24); }
-  .fin-card.red::before   { background: linear-gradient(90deg,#dc2626,#f87171); }
-  .fin-card.blue::before  { background: linear-gradient(90deg,#1d4ed8,#60a5fa); }
-  .fin-card.purple::before{ background: linear-gradient(90deg,#7c3aed,#c084fc); }
+  .fin-card.green::before  { background: linear-gradient(90deg,#15803d,#4ade80); }
+  .fin-card.amber::before  { background: linear-gradient(90deg,#b45309,#fbbf24); }
+  .fin-card.red::before    { background: linear-gradient(90deg,#dc2626,#f87171); }
+  .fin-card.blue::before   { background: linear-gradient(90deg,#1d4ed8,#60a5fa); }
+  .fin-card.purple::before { background: linear-gradient(90deg,#7c3aed,#c084fc); }
+  .fin-card-icon {
+    position: absolute; top: 1.1rem; right: 1.1rem;
+    width: 34px; height: 34px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .fin-card.green .fin-card-icon  { background: rgba(21,128,61,.1); }
+  .fin-card.amber .fin-card-icon  { background: rgba(180,83,9,.1); }
+  .fin-card.red .fin-card-icon    { background: rgba(220,38,38,.09); }
+  .fin-card.blue .fin-card-icon   { background: rgba(29,78,216,.09); }
+  .fin-card.purple .fin-card-icon { background: rgba(124,58,237,.09); }
   .fin-card-label {
-    font-size: .68rem;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--warm-gray);
-    font-weight: 700;
-    margin-bottom: .45rem;
+    font-size: .66rem; text-transform: uppercase; letter-spacing: .09em;
+    color: var(--warm-gray); font-weight: 700; margin-bottom: .5rem;
   }
   .fin-card-value {
     font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    color: var(--charcoal);
-    font-weight: 700;
-    line-height: 1;
+    font-size: 1.65rem; color: var(--charcoal); font-weight: 700;
+    line-height: 1; margin-bottom: .3rem;
   }
-  .fin-card-sub {
-    font-size: .72rem;
-    color: var(--warm-gray);
-    margin-top: .3rem;
-  }
+  .fin-card-sub { font-size: .71rem; color: var(--warm-gray); }
 
-  /* Tabs */
-  .fin-tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 2px solid var(--border);
-    margin-bottom: 1.5rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .fin-tabs::-webkit-scrollbar { display: none; }
-  .fin-tab {
-    padding: .65rem 1.2rem;
-    font-size: .8rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--warm-gray);
-    cursor: pointer;
-    border: none;
-    background: none;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    white-space: nowrap;
-    transition: all .2s;
-  }
-  .fin-tab:hover { color: var(--charcoal); }
-  .fin-tab.active {
-    color: var(--olive-dark);
-    border-bottom-color: var(--olive);
-  }
-  .fin-panel { display: none; }
-  .fin-panel.active { display: block; }
-
-  /* Section headers */
-  .sec-hdr {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-  }
-  .sec-hdr h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    color: var(--charcoal);
-    margin: 0;
-  }
-  .btn-add {
-    background: var(--olive);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: .45rem 1rem;
-    font-size: .8rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background .2s;
-  }
-  .btn-add:hover { background: var(--olive-dark); }
-
-  /* Data table */
-  .fin-table-wrap { overflow-x: auto; }
-  .fin-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: .82rem;
-  }
-  .fin-table th {
-    text-align: left;
-    padding: .6rem .8rem;
-    font-size: .68rem;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    color: var(--warm-gray);
-    border-bottom: 1px solid var(--border);
-    font-weight: 700;
-    white-space: nowrap;
-  }
-  .fin-table td {
-    padding: .7rem .8rem;
-    border-bottom: 1px solid rgba(200,180,151,.12);
-    color: var(--charcoal);
-    vertical-align: middle;
-  }
-  .fin-table tr:last-child td { border-bottom: none; }
-  .fin-table tr:hover td { background: rgba(107,106,69,.03); }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: .2rem .55rem;
-    border-radius: 20px;
-    font-size: .68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-  .badge-paid  { background: rgba(21,128,61,.12);  color: #15803d; }
-  .badge-proj  { background: rgba(180,83,9,.12);   color: #b45309; }
-  .badge-lost  { background: rgba(220,38,38,.1);   color: #dc2626; }
-  .empty-msg {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--warm-gray);
-    font-size: .88rem;
-  }
-  .empty-msg .big { font-size: 2rem; margin-bottom: .5rem; }
-
-  /* Action buttons in table */
-  .tbl-act {
-    display: inline-flex;
-    align-items: center;
-    gap: .3rem;
-    font-size: .72rem;
-    font-weight: 600;
-    padding: .22rem .55rem;
-    border-radius: 6px;
-    border: 1px solid;
-    cursor: pointer;
-    background: none;
-    text-decoration: none;
-    transition: all .15s;
-  }
-  .tbl-act-green { color: var(--green); border-color: rgba(21,128,61,.35); }
-  .tbl-act-green:hover { background: rgba(21,128,61,.08); }
-  .tbl-act-red   { color: var(--red);   border-color: rgba(220,38,38,.3); }
-  .tbl-act-red:hover { background: rgba(220,38,38,.07); }
-
-  /* Progress goals */
-  .goal-card {
-    background: var(--cream2);
+  /* ── AI Command Center ── */
+  .ai-command-center {
+    background: linear-gradient(135deg, #fff 0%, var(--cream) 100%);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.2rem 1.4rem;
-    margin-bottom: 1rem;
+    border-radius: var(--radius);
+    padding: 1.75rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    position: relative; overflow: hidden;
   }
-  .goal-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: .8rem;
-    font-weight: 600;
-    color: var(--charcoal);
-    margin-bottom: .5rem;
+  .ai-command-center::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--olive), var(--accent), var(--olive-dark));
   }
-  .goal-bar-bg {
-    height: 10px;
-    background: rgba(107,106,69,.12);
-    border-radius: 5px;
-    overflow: hidden;
+  .ai-cc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: .75rem; margin-bottom: 1.5rem;
   }
-  .goal-bar-fill {
-    height: 100%;
-    border-radius: 5px;
-    background: linear-gradient(90deg,var(--olive),var(--accent));
-    transition: width .6s ease;
+  .ai-cc-title {
+    display: flex; align-items: center; gap: .6rem;
   }
-  .goal-bar-fill.danger { background: linear-gradient(90deg,#dc2626,#f87171); }
-  .goal-sub {
-    font-size: .7rem;
-    color: var(--warm-gray);
-    margin-top: .35rem;
-    text-align: right;
+  .ai-cc-title h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem; color: var(--charcoal); margin: 0;
+  }
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: linear-gradient(135deg, var(--olive), var(--olive-dark));
+    color: #fff; font-size: .65rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase;
+    padding: .22rem .6rem; border-radius: 20px;
+  }
+  .ai-cc-tabs {
+    display: flex; gap: .5rem; flex-wrap: wrap;
+  }
+  .ai-cc-tab {
+    padding: .4rem .9rem; font-size: .76rem; font-weight: 600;
+    border-radius: 20px; border: 1.5px solid var(--border);
+    background: #fff; color: var(--charcoal); cursor: pointer;
+    transition: all .15s; white-space: nowrap;
+  }
+  .ai-cc-tab:hover { border-color: var(--olive); color: var(--olive); }
+  .ai-cc-tab.active {
+    background: var(--olive); color: #fff; border-color: var(--olive);
+  }
+  .ai-cc-panel { display: none; }
+  .ai-cc-panel.active { display: block; }
+
+  /* Insights cards */
+  .ai-insights-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .ai-insight-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1.1rem 1.2rem;
+    position: relative; overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform .15s;
+  }
+  .ai-insight-card:hover { transform: translateY(-1px); }
+  .ai-insight-card.positive::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--green); }
+  .ai-insight-card.warning::before  { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--amber); }
+  .ai-insight-card.info::before     { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--blue); }
+  .ai-insight-title {
+    font-size: .78rem; font-weight: 700; color: var(--charcoal);
+    margin-bottom: .35rem; text-transform: uppercase; letter-spacing: .05em;
+  }
+  .ai-insight-body { font-size: .83rem; color: var(--charcoal); line-height: 1.6; }
+  .ai-insights-loading {
+    display: flex; align-items: center; gap: .75rem;
+    padding: 1.25rem; color: var(--warm-gray); font-size: .85rem;
+  }
+  .ai-spinner {
+    width: 20px; height: 20px; border: 2px solid var(--border);
+    border-top-color: var(--olive); border-radius: 50%;
+    animation: spin .7s linear infinite; flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Forecast panel */
+  .ai-forecast-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem; margin-bottom: 1rem;
+  }
+  .ai-forecast-card {
+    background: var(--cream2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1rem 1.1rem; text-align: center;
+  }
+  .ai-forecast-card .val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.45rem; color: var(--charcoal); font-weight: 700;
+    margin-bottom: .2rem;
+  }
+  .ai-forecast-card .lbl {
+    font-size: .66rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--warm-gray); font-weight: 700;
+  }
+  .ai-confidence {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .72rem; font-weight: 600; padding: .2rem .6rem;
+    border-radius: 20px; margin-top: .5rem;
+  }
+  .ai-confidence.high   { background: rgba(21,128,61,.1); color: #15803d; }
+  .ai-confidence.medium { background: rgba(180,83,9,.1);  color: #b45309; }
+  .ai-confidence.low    { background: rgba(107,106,69,.1); color: var(--olive); }
+  .ai-forecast-headline {
+    font-size: .88rem; color: var(--charcoal); line-height: 1.5;
+    font-style: italic; margin-bottom: .5rem;
+  }
+  .ai-forecast-action {
+    background: rgba(107,106,69,.07); border-radius: 9px;
+    padding: .7rem 1rem; font-size: .82rem; color: var(--charcoal);
+    border-left: 3px solid var(--olive);
   }
 
-  /* AI coach panel */
-  .ai-coach-panel {
-    background: linear-gradient(135deg,#fff 0%,var(--cream) 100%);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.5rem;
-    margin-top: 2rem;
+  /* Tax panel */
+  .ai-tax-saving {
+    display: flex; align-items: center; gap: 1rem;
+    background: linear-gradient(135deg,rgba(21,128,61,.08),rgba(21,128,61,.04));
+    border: 1px solid rgba(21,128,61,.2); border-radius: var(--radius-sm);
+    padding: 1rem 1.25rem; margin-bottom: 1rem;
   }
-  .ai-coach-panel h3 {
+  .ai-tax-saving .big-num {
+    font-family: 'Playfair Display', serif; font-size: 2rem;
+    color: var(--green); font-weight: 700; white-space: nowrap;
+  }
+  .ai-tax-tip-item {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: .9rem 1.1rem;
+    margin-bottom: .6rem;
+    display: flex; align-items: flex-start; gap: .75rem;
+  }
+  .ai-tax-tip-savings {
     font-family: 'Playfair Display', serif;
-    font-size: 1.15rem;
-    color: var(--charcoal);
-    margin: 0 0 .4rem;
+    font-size: 1rem; color: var(--green); font-weight: 700;
+    white-space: nowrap; min-width: 70px; text-align: right;
   }
-  .ai-coach-panel .sub { font-size: .8rem; color: var(--warm-gray); margin-bottom: 1rem; }
+  .ai-tax-tip-title {
+    font-size: .8rem; font-weight: 700; color: var(--charcoal);
+    margin-bottom: .2rem;
+  }
+  .ai-tax-tip-detail { font-size: .79rem; color: var(--warm-gray); line-height: 1.5; }
+  .ai-disclaimer {
+    font-size: .7rem; color: var(--warm-gray); margin-top: .75rem;
+    font-style: italic;
+  }
+
+  /* Coach panel */
   .ai-response {
-    background: var(--cream2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1rem 1.2rem;
-    font-size: .85rem;
-    line-height: 1.7;
-    color: var(--charcoal);
-    min-height: 80px;
-    white-space: pre-wrap;
+    background: var(--cream2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1rem 1.2rem;
+    font-size: .85rem; line-height: 1.75; color: var(--charcoal);
+    min-height: 80px; white-space: pre-wrap;
   }
   .ai-response.loading { color: var(--warm-gray); font-style: italic; }
   .btn-coach {
     margin-top: .85rem;
-    background: linear-gradient(135deg,var(--olive),var(--olive-dark));
-    color: #fff;
-    border: none;
-    border-radius: 9px;
-    padding: .65rem 1.4rem;
-    font-size: .85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity .2s;
+    background: linear-gradient(135deg, var(--olive), var(--olive-dark));
+    color: #fff; border: none; border-radius: 9px;
+    padding: .65rem 1.4rem; font-size: .85rem; font-weight: 600;
+    cursor: pointer; transition: opacity .2s;
   }
   .btn-coach:hover { opacity: .88; }
   .btn-coach:disabled { opacity: .5; cursor: default; }
 
-  /* Modal */
+  /* ── Charts ── */
+  .chart-row {
+    display: grid; grid-template-columns: 2fr 1fr;
+    gap: 1.25rem; margin-bottom: 2rem;
+  }
+  .chart-card {
+    background: #fff; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.4rem 1.5rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .chart-card h4 {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--warm-gray); font-weight: 700; margin: 0 0 1.1rem;
+  }
+
+  /* ── Tabs ── */
+  .fin-tabs {
+    display: flex; gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.75rem; overflow-x: auto; scrollbar-width: none;
+  }
+  .fin-tabs::-webkit-scrollbar { display: none; }
+  .fin-tab {
+    padding: .7rem 1.3rem; font-size: .78rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em;
+    color: var(--warm-gray); cursor: pointer; border: none;
+    background: none; border-bottom: 3px solid transparent;
+    margin-bottom: -2px; white-space: nowrap; transition: all .18s;
+  }
+  .fin-tab:hover { color: var(--charcoal); }
+  .fin-tab.active { color: var(--olive-dark); border-bottom-color: var(--olive); }
+  .fin-panel { display: none; }
+  .fin-panel.active { display: block; }
+
+  /* ── Section headers ── */
+  .sec-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.1rem;
+  }
+  .sec-hdr h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem; color: var(--charcoal); margin: 0;
+  }
+  .btn-add {
+    background: var(--olive); color: #fff; border: none;
+    border-radius: 9px; padding: .45rem 1.1rem;
+    font-size: .8rem; font-weight: 700; cursor: pointer;
+    transition: background .18s; letter-spacing: .02em;
+  }
+  .btn-add:hover { background: var(--olive-dark); }
+
+  /* ── Data tables ── */
+  .fin-table-wrap { overflow-x: auto; border-radius: var(--radius-sm); }
+  .fin-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  .fin-table th {
+    text-align: left; padding: .65rem .9rem;
+    font-size: .66rem; text-transform: uppercase; letter-spacing: .08em;
+    color: var(--warm-gray); border-bottom: 1px solid var(--border);
+    font-weight: 700; white-space: nowrap; background: var(--cream2);
+  }
+  .fin-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+  .fin-table th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+  .fin-table td {
+    padding: .75rem .9rem; border-bottom: 1px solid rgba(200,180,151,.1);
+    color: var(--charcoal); vertical-align: middle;
+  }
+  .fin-table tr:last-child td { border-bottom: none; }
+  .fin-table tr:hover td { background: rgba(107,106,69,.025); }
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: .22rem .6rem; border-radius: 20px;
+    font-size: .66rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .badge-paid   { background: rgba(21,128,61,.12);  color: #15803d; }
+  .badge-proj   { background: rgba(180,83,9,.12);   color: #b45309; }
+  .badge-lost   { background: rgba(220,38,38,.1);   color: #dc2626; }
+  .empty-msg {
+    text-align: center; padding: 3.5rem 1rem;
+    color: var(--warm-gray); font-size: .88rem; line-height: 1.7;
+  }
+  .empty-msg .big { font-size: 2.5rem; margin-bottom: .75rem; }
+
+  /* Action buttons */
+  .tbl-act {
+    display: inline-flex; align-items: center; gap: .25rem;
+    font-size: .71rem; font-weight: 700; padding: .2rem .55rem;
+    border-radius: 6px; border: 1px solid; cursor: pointer;
+    background: none; text-decoration: none; transition: all .12s;
+    letter-spacing: .02em;
+  }
+  .tbl-act-green { color: var(--green); border-color: rgba(21,128,61,.3); }
+  .tbl-act-green:hover { background: rgba(21,128,61,.08); }
+  .tbl-act-red   { color: var(--red);   border-color: rgba(220,38,38,.25); }
+  .tbl-act-red:hover   { background: rgba(220,38,38,.07); }
+
+  /* ── Goals ── */
+  .goal-card {
+    background: var(--cream2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem 1.4rem; margin-bottom: .85rem;
+  }
+  .goal-label {
+    display: flex; justify-content: space-between;
+    font-size: .8rem; font-weight: 700; color: var(--charcoal);
+    margin-bottom: .55rem;
+  }
+  .goal-bar-bg {
+    height: 10px; background: rgba(107,106,69,.12);
+    border-radius: 5px; overflow: hidden;
+  }
+  .goal-bar-fill {
+    height: 100%; border-radius: 5px;
+    background: linear-gradient(90deg, var(--olive), var(--accent));
+    transition: width .8s cubic-bezier(.4,0,.2,1);
+  }
+  .goal-bar-fill.danger { background: linear-gradient(90deg, #dc2626, #f87171); }
+  .goal-sub { font-size: .69rem; color: var(--warm-gray); margin-top: .35rem; text-align: right; }
+
+  /* ── Modals ── */
   .fin-modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(58,53,44,.45);
-    z-index: 9000;
-    align-items: center;
-    justify-content: center;
+    display: none; position: fixed; inset: 0;
+    background: rgba(30,24,18,.5); z-index: 9000;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(2px);
   }
   .fin-modal-overlay.open { display: flex; }
   .fin-modal {
-    background: #fff;
-    border-radius: 16px;
-    padding: 1.75rem 2rem;
-    width: 100%;
-    max-width: 540px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,.18);
+    background: #fff; border-radius: 20px;
+    padding: 2rem 2.25rem; width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modal-in .2s ease;
   }
+  @keyframes modal-in { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
   .fin-modal h2 {
     font-family: 'Playfair Display', serif;
-    font-size: 1.25rem;
-    color: var(--charcoal);
-    margin: 0 0 1.25rem;
+    font-size: 1.3rem; color: var(--charcoal); margin: 0 0 1.4rem;
   }
   .fmg { margin-bottom: 1rem; }
   .fmg label {
-    display: block;
-    font-size: .76rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .05em;
-    color: var(--charcoal);
-    margin-bottom: .3rem;
+    display: block; font-size: .74rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+    color: var(--charcoal); margin-bottom: .3rem;
   }
   .fmg input, .fmg select, .fmg textarea {
-    width: 100%;
-    border: 1px solid rgba(107,106,69,.3);
-    border-radius: 8px;
-    padding: .5rem .75rem;
-    font-size: .85rem;
-    color: var(--charcoal);
-    background: var(--cream2);
-    box-sizing: border-box;
-    outline: none;
-    font-family: inherit;
-    transition: border-color .15s;
+    width: 100%; border: 1.5px solid rgba(107,106,69,.25);
+    border-radius: 9px; padding: .52rem .8rem; font-size: .85rem;
+    color: var(--charcoal); background: var(--cream2);
+    box-sizing: border-box; outline: none; font-family: inherit;
+    transition: border-color .15s, background .15s;
   }
   .fmg input:focus, .fmg select:focus, .fmg textarea:focus {
-    border-color: var(--olive);
-    background: #fff;
+    border-color: var(--olive); background: #fff;
   }
   .fm-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
   .fm-actions {
-    display: flex;
-    gap: .75rem;
-    margin-top: 1.25rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border);
+    display: flex; gap: .75rem; margin-top: 1.4rem;
+    padding-top: 1.1rem; border-top: 1px solid var(--border);
   }
   .fm-submit {
-    background: var(--olive);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: .6rem 1.4rem;
-    font-size: .88rem;
-    font-weight: 600;
-    cursor: pointer;
+    background: linear-gradient(135deg, var(--olive), var(--olive-dark));
+    color: #fff; border: none; border-radius: 9px;
+    padding: .62rem 1.5rem; font-size: .88rem; font-weight: 700;
+    cursor: pointer; transition: opacity .15s;
   }
+  .fm-submit:hover { opacity: .9; }
   .fm-cancel {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--olive);
-    border-radius: 8px;
-    padding: .6rem 1rem;
-    font-size: .88rem;
-    font-weight: 600;
-    cursor: pointer;
+    background: none; border: 1.5px solid var(--border); color: var(--olive);
+    border-radius: 9px; padding: .62rem 1.1rem;
+    font-size: .88rem; font-weight: 600; cursor: pointer;
   }
-  .chart-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 1.25rem;
-    margin-bottom: 1.75rem;
-  }
-  .chart-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem 1.4rem;
-  }
-  .chart-card h4 {
-    font-size: .78rem;
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    color: var(--warm-gray);
-    font-weight: 700;
-    margin: 0 0 1rem;
-  }
-  @media(max-width:700px) {
+
+  /* ── Responsive ── */
+  @media(max-width:768px) {
     .fin-cards { grid-template-columns: 1fr 1fr; }
     .chart-row { grid-template-columns: 1fr; }
     .fm-row { grid-template-columns: 1fr; }
+    .ai-insights-grid { grid-template-columns: 1fr; }
+    .ai-forecast-grid { grid-template-columns: 1fr 1fr; }
   }
-  @media(max-width:420px) {
+  @media(max-width:480px) {
     .fin-cards { grid-template-columns: 1fr; }
+    .ai-forecast-grid { grid-template-columns: 1fr; }
   }
 </style>
 
-<!-- Header -->
+<!-- Page Header -->
 <div class="fin-header">
   <div>
-    <h1>💰 Financials Hub</h1>
-    <p>Track commissions, expenses, mileage, and hit your income goals — better than Realtyzam.</p>
+    <h1 class="fin-header-title">Financials Hub</h1>
+    <p class="fin-header-sub">Track commissions, expenses, mileage, and income goals — powered by AI.</p>
   </div>
   <div class="year-select">
-    <span>Year:</span>
+    <span>Year</span>
     <select onchange="window.location.href='?year='+this.value">
       {% for y in available_years %}
       <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
@@ -425,58 +458,124 @@
   </div>
 </div>
 
-<!-- Summary Cards -->
+<!-- KPI Summary Cards -->
 <div class="fin-cards">
   <div class="fin-card green">
-    <div class="fin-card-label">YTD Net Commission (Paid)</div>
+    <div class="fin-card-icon">&#x2713;</div>
+    <div class="fin-card-label">YTD Net Commission</div>
     <div class="fin-card-value">${{ "{:,.0f}".format(ytd_gci) }}</div>
     {% if ytd_projected > 0 %}
     <div class="fin-card-sub">+ ${{ "{:,.0f}".format(ytd_projected) }} projected</div>
+    {% else %}
+    <div class="fin-card-sub">Paid & closed {{ year }}</div>
     {% endif %}
   </div>
   <div class="fin-card red">
+    <div class="fin-card-icon">&#x2212;</div>
     <div class="fin-card-label">YTD Expenses</div>
     <div class="fin-card-value">${{ "{:,.0f}".format(ytd_expenses) }}</div>
-    <div class="fin-card-sub">{{ expenses|length }} expense{{ 's' if expenses|length != 1 else '' }}</div>
+    <div class="fin-card-sub">{{ expenses|length }} entr{{ 'ies' if expenses|length != 1 else 'y' }} logged</div>
   </div>
   <div class="fin-card {% if net_income >= 0 %}green{% else %}red{% endif %}">
+    <div class="fin-card-icon">&#x3d;</div>
     <div class="fin-card-label">Net Income</div>
-    <div class="fin-card-value">${{ "{:,.0f}".format(net_income) }}</div>
-    <div class="fin-card-sub">Paid commissions − expenses</div>
+    <div class="fin-card-value">{% if net_income < 0 %}-{% endif %}${{ "{:,.0f}".format(net_income|abs) }}</div>
+    <div class="fin-card-sub">Commissions minus expenses</div>
   </div>
   <div class="fin-card blue">
-    <div class="fin-card-label">Mileage ({{ year }})</div>
-    <div class="fin-card-value">{{ "{:,.0f}".format(ytd_miles) }} mi</div>
-    <div class="fin-card-sub">${{ "{:,.0f}".format(mileage_deduction) }} tax deduction @ ${{ irs_rate }}/mi</div>
+    <div class="fin-card-icon">&#x2192;</div>
+    <div class="fin-card-label">Mileage Deduction</div>
+    <div class="fin-card-value">${{ "{:,.0f}".format(mileage_deduction) }}</div>
+    <div class="fin-card-sub">{{ "{:,.0f}".format(ytd_miles) }} mi @ ${{ irs_rate }}/mi</div>
   </div>
   <div class="fin-card amber">
-    <div class="fin-card-label">Total Closings</div>
+    <div class="fin-card-icon">&#x23;</div>
+    <div class="fin-card-label">Closings</div>
     <div class="fin-card-value">{{ commissions|length }}</div>
-    <div class="fin-card-sub">{{ commissions|selectattr('status','equalto','paid')|list|length }} paid · {{ commissions|selectattr('status','equalto','projected')|list|length }} projected</div>
+    <div class="fin-card-sub">{{ commissions|selectattr('status','equalto','paid')|list|length }} paid &middot; {{ commissions|selectattr('status','equalto','projected')|list|length }} projected</div>
   </div>
 </div>
 
-<!-- Charts row -->
+<!-- Charts -->
 <div class="chart-row">
   <div class="chart-card">
-    <h4>Monthly Net Commission — {{ year }}</h4>
-    <canvas id="monthlyChart" height="100"></canvas>
+    <h4>Monthly Net Commission &mdash; {{ year }}</h4>
+    <canvas id="monthlyChart" height="95"></canvas>
   </div>
   <div class="chart-card">
     <h4>Expenses by Category</h4>
-    <canvas id="expenseChart" height="160"></canvas>
+    <canvas id="expenseChart" height="155"></canvas>
     {% if not expense_by_cat %}
-    <div style="text-align:center;color:var(--warm-gray);font-size:.8rem;padding:1rem 0;">No expense data yet</div>
+    <div style="text-align:center;color:var(--warm-gray);font-size:.8rem;padding:1.5rem 0;">No expense data yet</div>
     {% endif %}
   </div>
 </div>
 
-<!-- Tabs -->
+<!-- AI Command Center -->
+<div class="ai-command-center">
+  <div class="ai-cc-header">
+    <div class="ai-cc-title">
+      <h3>AI Financial Command Center</h3>
+      <span class="ai-badge">AI Powered</span>
+    </div>
+    <div class="ai-cc-tabs">
+      <button class="ai-cc-tab active" onclick="switchAiTab('insights', this)">Smart Insights</button>
+      <button class="ai-cc-tab" onclick="switchAiTab('forecast', this)">Year-End Forecast</button>
+      <button class="ai-cc-tab" onclick="switchAiTab('tax', this)">Tax Optimizer</button>
+      <button class="ai-cc-tab" onclick="switchAiTab('coach', this)">Full Coaching</button>
+    </div>
+  </div>
+
+  <!-- Smart Insights -->
+  <div class="ai-cc-panel active" id="ai-insights">
+    <div id="insightsLoading" class="ai-insights-loading">
+      <div class="ai-spinner"></div>
+      Analyzing your {{ year }} financials&hellip;
+    </div>
+    <div id="insightsGrid" class="ai-insights-grid" style="display:none;"></div>
+  </div>
+
+  <!-- Year-End Forecast -->
+  <div class="ai-cc-panel" id="ai-forecast">
+    <div id="forecastLoading" class="ai-insights-loading" style="display:none;">
+      <div class="ai-spinner"></div>
+      Building your year-end projection&hellip;
+    </div>
+    <div id="forecastContent" style="display:none;">
+      <div class="ai-forecast-grid" id="forecastCards"></div>
+      <p class="ai-forecast-headline" id="forecastHeadline"></p>
+      <div class="ai-forecast-action" id="forecastAction"></div>
+    </div>
+    <div id="forecastEmpty" style="text-align:center;padding:1.5rem;color:var(--warm-gray);font-size:.85rem;">
+      <button class="btn-coach" onclick="loadForecast()">Generate Year-End Forecast</button>
+    </div>
+  </div>
+
+  <!-- Tax Optimizer -->
+  <div class="ai-cc-panel" id="ai-tax">
+    <div id="taxLoading" class="ai-insights-loading" style="display:none;">
+      <div class="ai-spinner"></div>
+      Analyzing your deduction opportunities&hellip;
+    </div>
+    <div id="taxContent" style="display:none;"></div>
+    <div id="taxEmpty" style="text-align:center;padding:1.5rem;color:var(--warm-gray);font-size:.85rem;">
+      <button class="btn-coach" onclick="loadTaxOptimizer()">Run Tax Optimizer</button>
+    </div>
+  </div>
+
+  <!-- Full Coaching -->
+  <div class="ai-cc-panel" id="ai-coach">
+    <div class="ai-response" id="aiCoachOutput">Click below to receive a personalized financial coaching session based on your {{ year }} numbers.</div>
+    <button class="btn-coach" id="btnCoach" onclick="loadCoach()">Get Full Coaching Session</button>
+  </div>
+</div>
+
+<!-- Data Tabs -->
 <div class="fin-tabs">
-  <button class="fin-tab active" onclick="switchTab('commissions',this)">🏡 Commissions</button>
-  <button class="fin-tab" onclick="switchTab('expenses',this)">💳 Expenses</button>
-  <button class="fin-tab" onclick="switchTab('mileage',this)">🚗 Mileage</button>
-  <button class="fin-tab" onclick="switchTab('goals',this)">🎯 Goals</button>
+  <button class="fin-tab active" onclick="switchTab('commissions',this)">Commissions</button>
+  <button class="fin-tab" onclick="switchTab('expenses',this)">Expenses</button>
+  <button class="fin-tab" onclick="switchTab('mileage',this)">Mileage</button>
+  <button class="fin-tab" onclick="switchTab('goals',this)">Goals</button>
 </div>
 
 <!-- COMMISSIONS PANEL -->
@@ -490,41 +589,31 @@
     <table class="fin-table">
       <thead>
         <tr>
-          <th>Property</th>
-          <th>Client</th>
-          <th>Side</th>
-          <th>Close Date</th>
-          <th>Sale Price</th>
-          <th>Rate</th>
-          <th>Gross GCI</th>
-          <th>Brokerage Split</th>
-          <th>Net GCI</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th>Property</th><th>Client</th><th>Side</th><th>Close Date</th>
+          <th>Sale Price</th><th>Rate</th><th>Gross GCI</th>
+          <th>Brokerage Split</th><th>Net GCI</th><th>Status</th><th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for c in commissions %}
         <tr>
-          <td style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.property_address or '—' }}</td>
-          <td>{{ c.client_name or '—' }}</td>
-          <td style="text-transform:capitalize;">{{ c.transaction_side or '—' }}</td>
-          <td>{{ c.close_date or '—' }}</td>
+          <td style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.property_address or '&mdash;' }}</td>
+          <td>{{ c.client_name or '&mdash;' }}</td>
+          <td style="text-transform:capitalize;">{{ c.transaction_side or '&mdash;' }}</td>
+          <td>{{ c.close_date or '&mdash;' }}</td>
           <td>${{ "{:,.0f}".format(c.sale_price or 0) }}</td>
           <td>{{ "{:.2f}".format(c.commission_rate or 0) }}%</td>
           <td>${{ "{:,.0f}".format(c.gross_commission or 0) }}</td>
           <td>{{ "{:.0f}".format(c.brokerage_split_pct or 0) }}% (${{ "{:,.0f}".format(c.brokerage_split_amt or 0) }})</td>
           <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(c.net_commission or 0) }}</td>
           <td>
-            <span class="badge {% if c.status=='paid' %}badge-paid{% elif c.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">
-              {{ c.status or 'projected' }}
-            </span>
+            <span class="badge {% if c.status=='paid' %}badge-paid{% elif c.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">{{ c.status or 'projected' }}</span>
           </td>
           <td>
             <div style="display:flex;gap:.3rem;flex-wrap:wrap;">
               {% if c.status != 'paid' %}
               <form method="POST" action="{{ url_for('agent_financials_commission_mark_paid', cid=c.id) }}" style="display:inline;">
-                <button type="submit" class="tbl-act tbl-act-green">✓ Paid</button>
+                <button type="submit" class="tbl-act tbl-act-green">Mark Paid</button>
               </form>
               {% endif %}
               <form method="POST" action="{{ url_for('agent_financials_commission_delete', cid=c.id) }}" onsubmit="return confirm('Remove this commission?');" style="display:inline;">
@@ -542,9 +631,9 @@
   </div>
   {% else %}
   <div class="empty-msg">
-    <div class="big">🏡</div>
+    <div class="big">&#x1f3e1;</div>
     No commissions logged for {{ year }} yet.<br>
-    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-commission').classList.add('open')">Log Your First Commission</button>
+    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-commission').classList.add('open')">Log Your First Commission</button>
   </div>
   {% endif %}
 </div>
@@ -559,21 +648,14 @@
   <div class="fin-table-wrap">
     <table class="fin-table">
       <thead>
-        <tr>
-          <th>Date</th>
-          <th>Category</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Notes</th>
-          <th>Action</th>
-        </tr>
+        <tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Notes</th><th>Action</th></tr>
       </thead>
       <tbody>
         {% for e in expenses %}
         <tr>
-          <td>{{ e.expense_date or '—' }}</td>
+          <td>{{ e.expense_date or '&mdash;' }}</td>
           <td><span class="badge" style="background:rgba(107,106,69,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
-          <td>{{ e.description or '—' }}</td>
+          <td>{{ e.description or '&mdash;' }}</td>
           <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
           <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
           <td>
@@ -587,13 +669,13 @@
     </table>
   </div>
   <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
-    Total expenses: <strong style="color:var(--red);">-${{ "{:,.2f}".format(ytd_expenses) }}</strong>
+    Total: <strong style="color:var(--red);">-${{ "{:,.2f}".format(ytd_expenses) }}</strong>
   </div>
   {% else %}
   <div class="empty-msg">
-    <div class="big">💳</div>
+    <div class="big">&#x1f4b3;</div>
     No expenses logged for {{ year }} yet.<br>
-    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-expense').classList.add('open')">Log Your First Expense</button>
+    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-expense').classList.add('open')">Log Your First Expense</button>
   </div>
   {% endif %}
 </div>
@@ -604,44 +686,33 @@
     <h3>Mileage Tracker <span style="font-size:.78rem;font-weight:400;color:var(--warm-gray);">(IRS rate: ${{ irs_rate }}/mile)</span></h3>
     <button class="btn-add" onclick="document.getElementById('modal-mileage').classList.add('open')">+ Log Trip</button>
   </div>
-
-  <!-- Mileage summary -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.85rem;margin-bottom:1.25rem;">
-    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;text-align:center;">
-      <div style="font-size:1.3rem;font-family:'Playfair Display',serif;color:var(--charcoal);font-weight:700;">{{ "{:,.1f}".format(ytd_miles) }}</div>
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--warm-gray);font-weight:700;">Total Miles</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.85rem;margin-bottom:1.25rem;">
+    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;">
+      <div style="font-size:1.35rem;font-family:'Playfair Display',serif;color:var(--charcoal);font-weight:700;">{{ "{:,.1f}".format(ytd_miles) }}</div>
+      <div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--warm-gray);font-weight:700;margin-top:.2rem;">Total Miles</div>
     </div>
-    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;text-align:center;">
-      <div style="font-size:1.3rem;font-family:'Playfair Display',serif;color:var(--green);font-weight:700;">${{ "{:,.2f}".format(mileage_deduction) }}</div>
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--warm-gray);font-weight:700;">Tax Deduction</div>
+    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;">
+      <div style="font-size:1.35rem;font-family:'Playfair Display',serif;color:var(--green);font-weight:700;">${{ "{:,.2f}".format(mileage_deduction) }}</div>
+      <div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--warm-gray);font-weight:700;margin-top:.2rem;">Tax Deduction</div>
     </div>
-    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;text-align:center;">
-      <div style="font-size:1.3rem;font-family:'Playfair Display',serif;color:var(--charcoal);font-weight:700;">{{ mileage_logs|length }}</div>
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--warm-gray);font-weight:700;">Trips Logged</div>
+    <div style="background:var(--cream2);border:1px solid var(--border);border-radius:12px;padding:1rem;text-align:center;">
+      <div style="font-size:1.35rem;font-family:'Playfair Display',serif;color:var(--charcoal);font-weight:700;">{{ mileage_logs|length }}</div>
+      <div style="font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--warm-gray);font-weight:700;margin-top:.2rem;">Trips Logged</div>
     </div>
   </div>
-
   {% if mileage_logs %}
   <div class="fin-table-wrap">
     <table class="fin-table">
       <thead>
-        <tr>
-          <th>Date</th>
-          <th>From</th>
-          <th>To</th>
-          <th>Purpose</th>
-          <th>Miles</th>
-          <th>Deduction</th>
-          <th>Action</th>
-        </tr>
+        <tr><th>Date</th><th>From</th><th>To</th><th>Purpose</th><th>Miles</th><th>Deduction</th><th>Action</th></tr>
       </thead>
       <tbody>
         {% for m in mileage_logs %}
         <tr>
-          <td>{{ m.trip_date or '—' }}</td>
-          <td>{{ m.from_location or '—' }}</td>
-          <td>{{ m.to_location or '—' }}</td>
-          <td>{{ m.purpose or '—' }}</td>
+          <td>{{ m.trip_date or '&mdash;' }}</td>
+          <td>{{ m.from_location or '&mdash;' }}</td>
+          <td>{{ m.to_location or '&mdash;' }}</td>
+          <td>{{ m.purpose or '&mdash;' }}</td>
           <td>{{ "{:,.1f}".format(m.miles or 0) }}</td>
           <td style="color:var(--green);font-weight:700;">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
           <td>
@@ -656,10 +727,10 @@
   </div>
   {% else %}
   <div class="empty-msg">
-    <div class="big">🚗</div>
+    <div class="big">&#x1f697;</div>
     No trips logged for {{ year }} yet.<br>
-    Every mile counts — each one is worth ${{ irs_rate }} in deductions!<br>
-    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-mileage').classList.add('open')">Log First Trip</button>
+    Every mile is worth ${{ irs_rate }} in deductions &mdash; don't leave money on the table!<br>
+    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-mileage').classList.add('open')">Log First Trip</button>
   </div>
   {% endif %}
 </div>
@@ -669,17 +740,15 @@
   <div class="sec-hdr">
     <h3>{{ year }} Income Goals</h3>
     <button class="btn-add" onclick="document.getElementById('modal-goals').classList.add('open')">
-      {% if goals %}✏️ Edit Goals{% else %}+ Set Goals{% endif %}
+      {% if goals %}Edit Goals{% else %}+ Set Goals{% endif %}
     </button>
   </div>
-
   {% if goals %}
   {% set g = goals[0] %}
   {% set gci_pct = [((ytd_gci / g.gross_commission_goal * 100) if g.gross_commission_goal > 0 else 0), 100]|min %}
   {% set exp_pct = [((ytd_expenses / g.expenses_budget * 100) if g.expenses_budget > 0 else 0), 100]|min %}
   {% set net_pct = [((net_income / g.net_income_goal * 100) if g.net_income_goal > 0 else 0), 100]|min %}
   {% set tx_pct  = [((commissions|length / g.transactions_goal * 100) if g.transactions_goal > 0 else 0), 100]|min %}
-
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
     <div class="goal-card">
       <div class="goal-label">
@@ -691,7 +760,7 @@
     </div>
     <div class="goal-card">
       <div class="goal-label">
-        <span>🎯 Transactions</span>
+        <span>Transactions</span>
         <span>{{ commissions|length }} / {{ g.transactions_goal }}</span>
       </div>
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ tx_pct|int }}%;"></div></div>
@@ -699,51 +768,40 @@
     </div>
     <div class="goal-card">
       <div class="goal-label">
-        <span>💳 Expense Budget</span>
-        <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(g.expenses_budget) }}</span>
+        <span>Expense Budget</span>
+        <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(g.expenses_budget or 0) }}</span>
       </div>
       <div class="goal-bar-bg"><div class="goal-bar-fill {% if exp_pct >= 90 %}danger{% endif %}" style="width:{{ exp_pct|int }}%;"></div></div>
       <div class="goal-sub">{{ "{:.0f}".format(exp_pct) }}% of budget used</div>
     </div>
     <div class="goal-card">
       <div class="goal-label">
-        <span>💰 Net Income Goal</span>
-        <span style="color:{% if net_income >= 0 %}var(--green){% else %}var(--red){% endif %};">${{ "{:,.0f}".format(net_income) }} / ${{ "{:,.0f}".format(g.net_income_goal) }}</span>
+        <span>Net Income Goal</span>
+        <span style="color:{% if net_income >= 0 %}var(--green){% else %}var(--red){% endif %};">${{ "{:,.0f}".format(net_income) }} / ${{ "{:,.0f}".format(g.net_income_goal or 0) }}</span>
       </div>
       <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ net_pct|int }}%;"></div></div>
       <div class="goal-sub">{{ "{:.0f}".format(net_pct) }}% complete</div>
     </div>
   </div>
   {% if g.notes %}
-  <div style="margin-top:1rem;padding:.85rem 1rem;background:rgba(107,106,69,.06);border-radius:10px;font-size:.82rem;color:var(--charcoal);">
-    📝 {{ g.notes }}
-  </div>
+  <div style="margin-top:1rem;padding:.9rem 1.1rem;background:rgba(107,106,69,.06);border-radius:10px;font-size:.83rem;color:var(--charcoal);line-height:1.6;">{{ g.notes }}</div>
   {% endif %}
-
   {% else %}
   <div class="empty-msg">
-    <div class="big">🎯</div>
+    <div class="big">&#x1f3af;</div>
     No goals set for {{ year }} yet.<br>
     Set your GCI target, transaction count, and budget to track progress all year long.<br>
-    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-goals').classList.add('open')">Set {{ year }} Goals</button>
+    <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-goals').classList.add('open')">Set {{ year }} Goals</button>
   </div>
   {% endif %}
 </div>
 
-<!-- AI Coach -->
-<div class="ai-coach-panel">
-  <h3>🤖 AI Financial Coach</h3>
-  <p class="sub">Get personalized coaching based on your {{ year }} numbers — income pace, expense ratios, and how to close the gap to your goals.</p>
-  <div class="ai-response" id="aiCoachOutput">Click "Get Coaching" to receive personalized financial insights from your AI coach.</div>
-  <button class="btn-coach" id="btnCoach" onclick="getAiCoaching()">✨ Get Coaching</button>
-</div>
+<!-- =================== MODALS =================== -->
 
-<!-- MODALS -->
-
-<!-- Add Commission Modal -->
+<!-- Add Commission -->
 <div class="fin-modal-overlay" id="modal-commission" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="fin-modal">
-    <h2>🏡 Add Commission</h2>
+    <h2>Add Commission</h2>
     <form method="POST" action="{{ url_for('agent_financials_commission_add') }}">
       <div class="fmg">
         <label>Property Address *</label>
@@ -794,7 +852,7 @@
         </div>
         <div class="fmg">
           <label>Calculated Net GCI</label>
-          <input type="text" id="calcNetGci" readonly style="background:#f0f0f0;font-weight:700;color:var(--green);" placeholder="$0">
+          <input type="text" id="calcNetGci" readonly style="background:#f4f4f4;font-weight:700;color:var(--green);" placeholder="$0">
         </div>
       </div>
       <div class="fmg">
@@ -809,10 +867,10 @@
   </div>
 </div>
 
-<!-- Add Expense Modal -->
+<!-- Add Expense -->
 <div class="fin-modal-overlay" id="modal-expense" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="fin-modal">
-    <h2>💳 Log Expense</h2>
+    <h2>Log Expense</h2>
     <form method="POST" action="{{ url_for('agent_financials_expense_add') }}">
       <div class="fm-row">
         <div class="fmg">
@@ -827,18 +885,18 @@
       <div class="fmg">
         <label>Category</label>
         <select name="category">
-          <option>Marketing & Advertising</option>
-          <option>MLS & Association Dues</option>
-          <option>Office & Supplies</option>
-          <option>Technology & Software</option>
-          <option>Photography & Staging</option>
+          <option>Marketing &amp; Advertising</option>
+          <option>MLS &amp; Association Dues</option>
+          <option>Office &amp; Supplies</option>
+          <option>Technology &amp; Software</option>
+          <option>Photography &amp; Staging</option>
           <option>Continuing Education</option>
-          <option>Client Gifts & Events</option>
+          <option>Client Gifts &amp; Events</option>
           <option>Professional Services</option>
-          <option>Phone & Internet</option>
+          <option>Phone &amp; Internet</option>
           <option>Insurance</option>
-          <option>Auto & Transportation</option>
-          <option>Meals & Entertainment</option>
+          <option>Auto &amp; Transportation</option>
+          <option>Meals &amp; Entertainment</option>
           <option>Other</option>
         </select>
       </div>
@@ -858,10 +916,10 @@
   </div>
 </div>
 
-<!-- Add Mileage Modal -->
+<!-- Log Mileage -->
 <div class="fin-modal-overlay" id="modal-mileage" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="fin-modal">
-    <h2>🚗 Log Trip</h2>
+    <h2>Log Trip</h2>
     <form method="POST" action="{{ url_for('agent_financials_mileage_add') }}">
       <div class="fm-row">
         <div class="fmg">
@@ -887,8 +945,8 @@
         <label>Purpose / Client</label>
         <input type="text" name="purpose" placeholder="e.g. Showing — Smith family, Listing appt, Open house">
       </div>
-      <div style="background:rgba(21,128,61,.08);border-radius:8px;padding:.7rem 1rem;font-size:.8rem;color:var(--green);margin-bottom:.5rem;">
-        💡 IRS rate for {{ year }}: <strong>${{ irs_rate }}/mile</strong> — automatically calculated as tax deduction.
+      <div style="background:rgba(21,128,61,.07);border-radius:9px;padding:.7rem 1rem;font-size:.79rem;color:var(--green);margin-bottom:.5rem;">
+        IRS rate for {{ year }}: <strong>${{ irs_rate }}/mile</strong> &mdash; deduction calculated automatically.
       </div>
       <div class="fm-actions">
         <button type="submit" class="fm-submit">Log Trip</button>
@@ -898,10 +956,10 @@
   </div>
 </div>
 
-<!-- Goals Modal -->
+<!-- Set Goals -->
 <div class="fin-modal-overlay" id="modal-goals" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="fin-modal">
-    <h2>🎯 Set {{ year }} Goals</h2>
+    <h2>Set {{ year }} Goals</h2>
     <form method="POST" action="{{ url_for('agent_financials_goal_save') }}">
       <input type="hidden" name="goal_year" value="{{ year }}">
       <div class="fm-row">
@@ -933,68 +991,64 @@
         <textarea name="notes" rows="2" placeholder="What will you achieve this year?">{{ goals[0].notes if goals else '' }}</textarea>
       </div>
       <div class="fm-actions">
-        <button type="submit" class="fm-submit">💾 Save Goals</button>
+        <button type="submit" class="fm-submit">Save Goals</button>
         <button type="button" class="fm-cancel" onclick="document.getElementById('modal-goals').classList.remove('open')">Cancel</button>
       </div>
     </form>
   </div>
 </div>
 
+<!-- =================== SCRIPTS =================== -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-// Tab switching
+// ── Tab switching ──────────────────────────────
 function switchTab(name, btn) {
   document.querySelectorAll('.fin-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.fin-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('panel-' + name).classList.add('active');
   btn.classList.add('active');
 }
+function switchAiTab(name, btn) {
+  document.querySelectorAll('.ai-cc-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ai-cc-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('ai-' + name).classList.add('active');
+  btn.classList.add('active');
+}
 
-// Commission calculator
+// ── Commission calculator ──────────────────────
 function calcCommission() {
   const price = parseFloat(document.querySelector('[name=sale_price]').value) || 0;
   const rate  = parseFloat(document.querySelector('[name=commission_rate]').value) || 0;
   const split = parseFloat(document.querySelector('[name=brokerage_split_pct]').value) || 0;
   const gross = price * rate / 100;
-  const splitAmt = gross * split / 100;
-  const net = gross - splitAmt;
+  const net   = gross - (gross * split / 100);
   document.getElementById('calcNetGci').value = '$' + net.toLocaleString('en-US', {minimumFractionDigits:0,maximumFractionDigits:0});
 }
 
-// Monthly GCI chart
+// ── Charts ─────────────────────────────────────
 const monthlyData = {{ monthly_gci_list | tojson }};
 const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const ctx = document.getElementById('monthlyChart').getContext('2d');
-new Chart(ctx, {
+new Chart(document.getElementById('monthlyChart').getContext('2d'), {
   type: 'bar',
   data: {
     labels: months,
     datasets: [{
       label: 'Net Commission ($)',
       data: monthlyData,
-      backgroundColor: 'rgba(107,106,69,0.65)',
-      borderColor: '#6B6A45',
-      borderWidth: 1,
-      borderRadius: 4,
+      backgroundColor: monthlyData.map(v => v > 0 ? 'rgba(107,106,69,0.7)' : 'rgba(220,38,38,0.25)'),
+      borderColor: monthlyData.map(v => v > 0 ? '#6B6A45' : '#dc2626'),
+      borderWidth: 1, borderRadius: 5,
     }]
   },
   options: {
     responsive: true,
     plugins: { legend: { display: false } },
     scales: {
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: v => '$' + (v >= 1000 ? (v/1000).toFixed(0)+'k' : v),
-          font: { size: 10 }
-        }
-      },
-      x: { ticks: { font: { size: 10 } } }
+      y: { beginAtZero: true, ticks: { callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'k':v), font:{size:10} }, grid: { color: 'rgba(200,180,151,.15)' } },
+      x: { ticks: { font: { size: 10 } }, grid: { display: false } }
     }
   }
 });
-
-// Expense donut chart
 {% if expense_by_cat %}
 const expCtx = document.getElementById('expenseChart').getContext('2d');
 const expLabels = {{ expense_by_cat.keys() | list | tojson }};
@@ -1002,59 +1056,157 @@ const expVals   = {{ expense_by_cat.values() | list | tojson }};
 const palette = ['#6B6A45','#C8B497','#8B8A5A','#b45309','#15803d','#1d4ed8','#7c3aed','#dc2626','#0891b2','#be185d','#92400e','#374151'];
 new Chart(expCtx, {
   type: 'doughnut',
-  data: {
-    labels: expLabels,
-    datasets: [{
-      data: expVals,
-      backgroundColor: palette.slice(0, expLabels.length),
-      borderWidth: 2,
-      borderColor: '#fff'
-    }]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } }
-    },
-    cutout: '60%'
-  }
+  data: { labels: expLabels, datasets: [{ data: expVals, backgroundColor: palette.slice(0,expLabels.length), borderWidth: 2, borderColor: '#fff' }] },
+  options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } } }, cutout: '60%' }
 });
 {% endif %}
 
-// AI Coach
-async function getAiCoaching() {
-  const btn = document.getElementById('btnCoach');
-  const out = document.getElementById('aiCoachOutput');
-  btn.disabled = true;
-  btn.textContent = '⏳ Analyzing your numbers...';
-  out.classList.add('loading');
-  out.textContent = 'Your AI coach is reviewing your financials...';
-
-  const context = `Year: {{ year }}
+// ── AI Data Context ────────────────────────────
+const AI_CONTEXT = `Year: {{ year }}
 YTD Net Commission (paid): ${{ "{:,.0f}".format(ytd_gci) }}
 YTD Projected Commission: ${{ "{:,.0f}".format(ytd_projected) }}
 YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}
 YTD Net Income: ${{ "{:,.0f}".format(net_income) }}
-Total Closings: {{ commissions|length }} ({{ commissions|selectattr('status','equalto','paid')|list|length }} paid)
+Total Closings: {{ commissions|length }} ({{ commissions|selectattr('status','equalto','paid')|list|length }} paid, {{ commissions|selectattr('status','equalto','projected')|list|length }} projected)
 Mileage: {{ "{:,.0f}".format(ytd_miles) }} miles (${{ "{:,.0f}".format(mileage_deduction) }} deduction)
-{% if goals %}Goals — GCI: ${{ "{:,.0f}".format(goals[0].gross_commission_goal) }}, Transactions: {{ goals[0].transactions_goal }}, Net Income: ${{ "{:,.0f}".format(goals[0].net_income_goal) }}{% else %}No goals set yet.{% endif %}
-Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None' }}`;
+Current month: {{ "now"|strftime("%B") if false else "" }}{% set cur_month = [] %}{{ range(1,13)|list|length }}
+{% if goals %}Annual Goals — GCI: ${{ "{:,.0f}".format(goals[0].gross_commission_goal) }}, Transactions: {{ goals[0].transactions_goal }}, Expense Budget: ${{ "{:,.0f}".format(goals[0].expenses_budget or 0) }}, Net Income: ${{ "{:,.0f}".format(goals[0].net_income_goal) }}{% else %}No annual goals set yet.{% endif %}
+Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None logged' }}`;
 
+// ── AI: Smart Insights (auto-loads) ───────────
+async function loadInsights() {
+  try {
+    const resp = await fetch('/api/ai/financials/agent-insights', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ context: AI_CONTEXT })
+    });
+    const data = await resp.json();
+    document.getElementById('insightsLoading').style.display = 'none';
+    const grid = document.getElementById('insightsGrid');
+    if (data.insights && data.insights.length) {
+      grid.innerHTML = data.insights.map(i => `
+        <div class="ai-insight-card ${i.type || 'info'}">
+          <div class="ai-insight-title">${escHtml(i.title)}</div>
+          <div class="ai-insight-body">${escHtml(i.body)}</div>
+        </div>`).join('');
+      grid.style.display = 'grid';
+    } else {
+      grid.innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Add more data to unlock personalized insights.</div>';
+      grid.style.display = 'block';
+    }
+  } catch(e) {
+    document.getElementById('insightsLoading').style.display = 'none';
+    document.getElementById('insightsGrid').innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Unable to load insights right now.</div>';
+    document.getElementById('insightsGrid').style.display = 'block';
+  }
+}
+
+// ── AI: Year-End Forecast ──────────────────────
+async function loadForecast() {
+  document.getElementById('forecastEmpty').style.display = 'none';
+  document.getElementById('forecastLoading').style.display = 'flex';
+  try {
+    const resp = await fetch('/api/ai/financials/agent-forecast', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ context: AI_CONTEXT })
+    });
+    const d = await resp.json();
+    document.getElementById('forecastLoading').style.display = 'none';
+    const cards = document.getElementById('forecastCards');
+    const confClass = d.confidence || 'medium';
+    cards.innerHTML = `
+      <div class="ai-forecast-card">
+        <div class="val">${d.projected_gci ? '$'+Math.round(d.projected_gci).toLocaleString() : '&mdash;'}</div>
+        <div class="lbl">Projected GCI</div>
+        <div class="ai-confidence ${confClass}">${confClass} confidence</div>
+      </div>
+      <div class="ai-forecast-card">
+        <div class="val">${d.projected_net ? '$'+Math.round(d.projected_net).toLocaleString() : '&mdash;'}</div>
+        <div class="lbl">Projected Net Income</div>
+      </div>
+      <div class="ai-forecast-card">
+        <div class="val">${d.projected_transactions || '&mdash;'}</div>
+        <div class="lbl">Projected Closings</div>
+      </div>`;
+    document.getElementById('forecastHeadline').textContent = d.headline || '';
+    document.getElementById('forecastAction').textContent = d.action ? 'Next best action: ' + d.action : '';
+    document.getElementById('forecastContent').style.display = 'block';
+  } catch(e) {
+    document.getElementById('forecastLoading').style.display = 'none';
+    document.getElementById('forecastEmpty').innerHTML = '<p style="color:var(--warm-gray);font-size:.85rem;">Unable to generate forecast right now.</p><button class="btn-coach" onclick="loadForecast()">Try Again</button>';
+    document.getElementById('forecastEmpty').style.display = 'block';
+  }
+}
+
+// ── AI: Tax Optimizer ──────────────────────────
+async function loadTaxOptimizer() {
+  document.getElementById('taxEmpty').style.display = 'none';
+  document.getElementById('taxLoading').style.display = 'flex';
+  try {
+    const resp = await fetch('/api/ai/financials/agent-tax-optimizer', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ context: AI_CONTEXT })
+    });
+    const d = await resp.json();
+    document.getElementById('taxLoading').style.display = 'none';
+    let html = '';
+    if (d.estimated_tax_savings > 0) {
+      html += `<div class="ai-tax-saving">
+        <div class="big-num">$${Math.round(d.estimated_tax_savings).toLocaleString()}</div>
+        <div><div style="font-size:.8rem;font-weight:700;color:var(--charcoal);">Estimated Annual Tax Savings</div>
+        <div style="font-size:.75rem;color:var(--warm-gray);margin-top:.2rem;">Based on your current expense profile</div></div>
+      </div>`;
+    }
+    if (d.tips && d.tips.length) {
+      d.tips.forEach(t => {
+        html += `<div class="ai-tax-tip-item">
+          <div style="flex:1;">
+            <div class="ai-tax-tip-title">${escHtml(t.title)}</div>
+            <div class="ai-tax-tip-detail">${escHtml(t.detail)}</div>
+          </div>
+          ${t.potential_savings > 0 ? `<div class="ai-tax-tip-savings">$${Math.round(t.potential_savings).toLocaleString()}</div>` : ''}
+        </div>`;
+      });
+    }
+    if (d.disclaimer) {
+      html += `<div class="ai-disclaimer">${escHtml(d.disclaimer)}</div>`;
+    }
+    document.getElementById('taxContent').innerHTML = html;
+    document.getElementById('taxContent').style.display = 'block';
+  } catch(e) {
+    document.getElementById('taxLoading').style.display = 'none';
+    document.getElementById('taxEmpty').innerHTML = '<p style="color:var(--warm-gray);font-size:.85rem;">Unable to run tax optimizer right now.</p><button class="btn-coach" onclick="loadTaxOptimizer()">Try Again</button>';
+    document.getElementById('taxEmpty').style.display = 'block';
+  }
+}
+
+// ── AI: Full Coaching ──────────────────────────
+async function loadCoach() {
+  const btn = document.getElementById('btnCoach');
+  const out = document.getElementById('aiCoachOutput');
+  btn.disabled = true; btn.textContent = 'Analyzing your numbers\u2026';
+  out.classList.add('loading'); out.textContent = 'Your AI financial coach is reviewing your data\u2026';
   try {
     const resp = await fetch('/api/ai/financials/agent-coach', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ context })
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ context: AI_CONTEXT })
     });
     const data = await resp.json();
     out.classList.remove('loading');
     out.textContent = data.coach_response || 'No response received.';
   } catch(e) {
     out.classList.remove('loading');
-    out.textContent = 'Unable to connect to AI coach right now. Please try again.';
+    out.textContent = 'Unable to connect right now. Please try again.';
   }
-  btn.disabled = false;
-  btn.textContent = '✨ Refresh Coaching';
+  btn.disabled = false; btn.textContent = 'Refresh Coaching Session';
 }
+
+// ── Util ───────────────────────────────────────
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-load insights on page open
+loadInsights();
 </script>
 {% endblock %}

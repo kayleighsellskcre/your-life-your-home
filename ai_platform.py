@@ -49,6 +49,10 @@ def ai_complete(
         return ""
 
 
+# Backwards-compat alias used by financials routes
+call_ai = ai_complete
+
+
 # ─────────────────────────────────────────────────────────────
 # HIGH-LEVEL AI FUNCTIONS
 # Each function is domain-specific and called from app.py routes
