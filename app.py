@@ -5148,11 +5148,13 @@ def agent_dashboard():
         transactions = []
 
     from datetime import datetime as _dt
-    today_label = _dt.now().strftime("%A, %B %-d") if hasattr(_dt.now(), 'strftime') else ""
+    _now = _dt.now()
     try:
-        today_label = _dt.now().strftime("%A, %B %-d")
+        today_label = _now.strftime("%A, %B %-d")   # Linux/Mac
+    except ValueError:
+        today_label = _now.strftime("%A, %B %#d")   # Windows (%#d strips leading zero)
     except Exception:
-        today_label = _dt.now().strftime("%A, %B %d").replace(" 0", " ")
+        today_label = _now.strftime("%A, %B %d").lstrip("0").replace(" 0", " ")
 
     return render_template(
         "agent/dashboard.html",
@@ -11483,6 +11485,28 @@ def agent_concierge_conversation_detail(conversation_id):
 # All AI features across the platform route through here.
 # Powered by ai_platform.py — one module, one key, one model standard.
 # ─────────────────────────────────────────────────────────────────────────────
+
+@app.route("/api/agent/dashboard-metrics", methods=["GET"])
+def api_agent_dashboard_metrics_refresh():
+    """Return live KPI metrics for the agent dashboard without a full page reload."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        metrics = get_agent_dashboard_metrics(user["id"])
+        txns = get_agent_transactions(user["id"]) or []
+        resp = jsonify({
+            "new_leads":      metrics.get("new_leads", 0),
+            "active_deals":   len(txns),
+            "followups_today": metrics.get("followups_today", 0),
+        })
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+        resp.headers["Pragma"] = "no-cache"
+        return resp
+    except Exception as e:
+        print(f"[dashboard-metrics] Error: {e}")
+        return jsonify({"new_leads": 0, "active_deals": 0, "followups_today": 0})
+
 
 @app.route("/api/ai/dashboard-briefing", methods=["POST"])
 def ai_dashboard_briefing_endpoint():

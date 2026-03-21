@@ -599,7 +599,7 @@
  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
  </svg>
  </div>
- <div class="kpi-value">{{ metrics.new_leads|default(0) }}</div>
+ <div class="kpi-value" id="kpi-new-leads">{{ metrics.new_leads|default(0) }}</div>
  <div class="kpi-label">New Leads</div>
  <div class="kpi-sub">Ready for your call</div>
  </div>
@@ -611,7 +611,7 @@
  <polyline points="9 22 9 12 15 12 15 22"/>
  </svg>
  </div>
- <div class="kpi-value">{{ transactions|length if transactions else 0 }}</div>
+ <div class="kpi-value" id="kpi-active-deals">{{ transactions|length if transactions else 0 }}</div>
  <div class="kpi-label">Active Deals</div>
  <div class="kpi-sub">In your pipeline</div>
  </div>
@@ -622,7 +622,7 @@
  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
  </svg>
  </div>
- <div class="kpi-value">{{ metrics.followups_today|default(0) }}</div>
+ <div class="kpi-value" id="kpi-followups">{{ metrics.followups_today|default(0) }}</div>
  <div class="kpi-label">Follow-ups</div>
  <div class="kpi-sub">Due today</div>
  </div>
@@ -828,46 +828,75 @@ function setRefreshing(btn, state){
  if(svg) svg.style.animation = state ? 'spin 0.7s linear infinite' : '';
 }
 
-// ── AI Morning Briefing ──
+// ── Live KPI metric refresh ──
+function refreshMetrics(){
+ fetch('/api/agent/dashboard-metrics', {cache:'no-store'})
+ .then(function(r){ return r.json(); })
+ .then(function(d){
+ var nl = document.getElementById('kpi-new-leads');
+ var ad = document.getElementById('kpi-active-deals');
+ var fu = document.getElementById('kpi-followups');
+ if(nl && d.new_leads !== undefined) nl.textContent = d.new_leads;
+ if(ad && d.active_deals !== undefined) ad.textContent = d.active_deals;
+ if(fu && d.followups_today !== undefined) fu.textContent = d.followups_today;
+ })
+ .catch(function(){});
+}
+
+// ── Morning Briefing ──
 function loadBriefing(){
  var el  = document.getElementById('briefing-text');
  var btn = document.getElementById('briefing-refresh-btn');
  if(!el) return;
  el.innerHTML = '<div class="briefing-skeleton" style="width:90%"></div><div class="briefing-skeleton" style="width:70%;margin-top:.4rem"></div>';
  setRefreshing(btn, true);
+
+ var ctrl = new AbortController();
+ var tid  = setTimeout(function(){ ctrl.abort(); }, 18000); // 18s client timeout
+
  fetch('/api/ai/dashboard-briefing', {
  method: 'POST',
- headers: {'Content-Type':'application/json', 'Cache-Control':'no-cache'},
- body: JSON.stringify({t: Date.now()})
+ headers: {'Content-Type':'application/json','Cache-Control':'no-cache'},
+ body: JSON.stringify({t: Date.now()}),
+ signal: ctrl.signal
  })
- .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+ .then(function(r){ clearTimeout(tid); if(!r.ok) throw new Error(r.status); return r.json(); })
  .then(function(d){
  el.innerHTML = '';
  el.textContent = d.briefing || 'Your pipeline is ready. Make today count!';
  el.style.opacity = '1';
  setRefreshing(btn, false);
+ refreshMetrics(); // update KPI numbers at the same time
  })
- .catch(function(){
+ .catch(function(err){
+ clearTimeout(tid);
  el.innerHTML = '';
- el.textContent = 'Briefing unavailable right now. Your pipeline is ready when you are!';
- el.style.opacity = '0.65';
+ el.textContent = (err && err.name === 'AbortError')
+ ? 'Taking a moment to load. Click Refresh to try again.'
+ : 'Your pipeline is ready. Make today count!';
+ el.style.opacity = '0.72';
  setRefreshing(btn, false);
  });
 }
 
-// ── AI Today's Priorities ──
+// ── Today's Priorities ──
 function loadPriorities(){
  var list = document.getElementById('priorities-list');
  var btn  = document.getElementById('priorities-refresh-btn');
  if(!list) return;
  list.innerHTML = '<div class="priority-skeleton"></div><div class="priority-skeleton" style="margin-top:.625rem"></div><div class="priority-skeleton" style="margin-top:.625rem"></div>';
  setRefreshing(btn, true);
+
+ var ctrl = new AbortController();
+ var tid  = setTimeout(function(){ ctrl.abort(); }, 18000);
+
  fetch('/api/ai/dashboard-priorities', {
  method: 'POST',
- headers: {'Content-Type':'application/json', 'Cache-Control':'no-cache'},
- body: JSON.stringify({t: Date.now()})
+ headers: {'Content-Type':'application/json','Cache-Control':'no-cache'},
+ body: JSON.stringify({t: Date.now()}),
+ signal: ctrl.signal
  })
- .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
+ .then(function(r){ clearTimeout(tid); if(!r.ok) throw new Error(r.status); return r.json(); })
  .then(function(d){
  list.innerHTML = '';
  var items = (d.priorities && d.priorities.length) ? d.priorities : [
@@ -884,9 +913,11 @@ function loadPriorities(){
  });
  setRefreshing(btn, false);
  })
- .catch(function(){
+ .catch(function(err){
+ clearTimeout(tid);
  list.innerHTML = '';
- ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline'].forEach(function(p,i){
+ ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline']
+ .forEach(function(p,i){
  var div = document.createElement('div');
  div.className = 'priority-item';
  div.innerHTML = '<div class="priority-num">'+(i+1)+'</div><div class="priority-text">'+escapeHtml(p)+'</div>';
@@ -896,11 +927,19 @@ function loadPriorities(){
  });
 }
 
-// ── Auto-load ──
+// ── Auto-load on page ready ──
+function initDashboard(){
+ loadBriefing();
+ loadPriorities();
+ refreshMetrics();
+ // Re-check metrics every 2 minutes silently
+ setInterval(refreshMetrics, 120000);
+}
+
 if(document.readyState === 'loading'){
- document.addEventListener('DOMContentLoaded', function(){ loadBriefing(); loadPriorities(); });
+ document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
- loadBriefing(); loadPriorities();
+ initDashboard();
 }
 </script>
 {% endblock %}

@@ -33,7 +33,8 @@ def ai_complete(
         return ""
     try:
         from openai import OpenAI
-        client = OpenAI(api_key=key)
+        # 20-second hard timeout — prevents the server from hanging when OpenAI is slow
+        client = OpenAI(api_key=key, timeout=20.0)
         response = client.chat.completions.create(
             model=model,
             messages=[
