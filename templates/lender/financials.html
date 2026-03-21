@@ -1,0 +1,708 @@
+{% extends "lender/layout.html" %}
+{% block lender_content %}
+<style>
+  :root {
+    --olive: #6B6A45;
+    --olive-dark: #5a593a;
+    --cream: #F8F5F0;
+    --cream2: #FDFBF7;
+    --charcoal: #3A352C;
+    --warm-gray: rgba(58,53,44,.55);
+    --accent: #C8B497;
+    --green: #15803d;
+    --red: #dc2626;
+    --border: rgba(200,180,151,.3);
+  }
+  .fin-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+  }
+  .fin-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.75rem;
+    color: var(--charcoal);
+    margin: 0 0 .2rem;
+  }
+  .fin-header p { color: var(--warm-gray); font-size: .88rem; margin: 0; }
+  .year-select {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .82rem;
+    color: var(--olive);
+    font-weight: 600;
+  }
+  .year-select select {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .35rem .7rem;
+    font-size: .82rem;
+    color: var(--charcoal);
+    background: var(--cream2);
+    cursor: pointer;
+    outline: none;
+  }
+
+  .fin-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .fin-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .fin-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .fin-card.green::before  { background: linear-gradient(90deg,#15803d,#4ade80); }
+  .fin-card.amber::before  { background: linear-gradient(90deg,#b45309,#fbbf24); }
+  .fin-card.red::before    { background: linear-gradient(90deg,#dc2626,#f87171); }
+  .fin-card.blue::before   { background: linear-gradient(90deg,#1d4ed8,#60a5fa); }
+  .fin-card.purple::before { background: linear-gradient(90deg,#7c3aed,#c084fc); }
+  .fin-card-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); font-weight:700; margin-bottom:.45rem; }
+  .fin-card-value { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--charcoal); font-weight:700; line-height:1; }
+  .fin-card-sub   { font-size:.72rem; color:var(--warm-gray); margin-top:.3rem; }
+
+  .fin-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .fin-tabs::-webkit-scrollbar { display: none; }
+  .fin-tab {
+    padding: .65rem 1.2rem;
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--warm-gray);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: all .2s;
+  }
+  .fin-tab:hover { color: var(--charcoal); }
+  .fin-tab.active { color: var(--olive-dark); border-bottom-color: var(--olive); }
+  .fin-panel { display: none; }
+  .fin-panel.active { display: block; }
+
+  .sec-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+  .sec-hdr h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--charcoal); margin:0; }
+  .btn-add {
+    background: var(--olive); color: #fff; border: none;
+    border-radius: 8px; padding: .45rem 1rem;
+    font-size: .8rem; font-weight: 600; cursor: pointer; transition: background .2s;
+  }
+  .btn-add:hover { background: var(--olive-dark); }
+
+  .fin-table-wrap { overflow-x: auto; }
+  .fin-table { width:100%; border-collapse:collapse; font-size:.82rem; }
+  .fin-table th {
+    text-align:left; padding:.6rem .8rem;
+    font-size:.68rem; text-transform:uppercase; letter-spacing:.07em;
+    color:var(--warm-gray); border-bottom:1px solid var(--border); font-weight:700; white-space:nowrap;
+  }
+  .fin-table td { padding:.7rem .8rem; border-bottom:1px solid rgba(200,180,151,.12); color:var(--charcoal); vertical-align:middle; }
+  .fin-table tr:last-child td { border-bottom:none; }
+  .fin-table tr:hover td { background:rgba(107,106,69,.03); }
+
+  .badge { display:inline-flex; align-items:center; padding:.2rem .55rem; border-radius:20px; font-size:.68rem; font-weight:700; text-transform:uppercase; }
+  .badge-funded  { background:rgba(21,128,61,.12);  color:#15803d; }
+  .badge-proj    { background:rgba(180,83,9,.12);   color:#b45309; }
+  .badge-lost    { background:rgba(220,38,38,.1);   color:#dc2626; }
+
+  .tbl-act { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600; padding:.22rem .55rem; border-radius:6px; border:1px solid; cursor:pointer; background:none; text-decoration:none; transition:all .15s; }
+  .tbl-act-green { color:var(--green); border-color:rgba(21,128,61,.35); }
+  .tbl-act-green:hover { background:rgba(21,128,61,.08); }
+  .tbl-act-red   { color:var(--red);   border-color:rgba(220,38,38,.3); }
+  .tbl-act-red:hover { background:rgba(220,38,38,.07); }
+
+  .empty-msg { text-align:center; padding:3rem 1rem; color:var(--warm-gray); font-size:.88rem; }
+  .empty-msg .big { font-size:2rem; margin-bottom:.5rem; }
+
+  .goal-card { background:var(--cream2); border:1px solid var(--border); border-radius:12px; padding:1.2rem 1.4rem; margin-bottom:1rem; }
+  .goal-label { display:flex; justify-content:space-between; font-size:.8rem; font-weight:600; color:var(--charcoal); margin-bottom:.5rem; }
+  .goal-bar-bg { height:10px; background:rgba(107,106,69,.12); border-radius:5px; overflow:hidden; }
+  .goal-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--olive),var(--accent)); transition:width .6s ease; }
+  .goal-bar-fill.danger { background:linear-gradient(90deg,#dc2626,#f87171); }
+  .goal-sub { font-size:.7rem; color:var(--warm-gray); margin-top:.35rem; text-align:right; }
+
+  .ai-coach-panel { background:linear-gradient(135deg,#fff 0%,var(--cream) 100%); border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-top:2rem; }
+  .ai-coach-panel h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:var(--charcoal); margin:0 0 .4rem; }
+  .ai-coach-panel .sub { font-size:.8rem; color:var(--warm-gray); margin-bottom:1rem; }
+  .ai-response { background:var(--cream2); border:1px solid var(--border); border-radius:10px; padding:1rem 1.2rem; font-size:.85rem; line-height:1.7; color:var(--charcoal); min-height:80px; white-space:pre-wrap; }
+  .ai-response.loading { color:var(--warm-gray); font-style:italic; }
+  .btn-coach { margin-top:.85rem; background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; border:none; border-radius:9px; padding:.65rem 1.4rem; font-size:.85rem; font-weight:600; cursor:pointer; transition:opacity .2s; }
+  .btn-coach:hover { opacity:.88; }
+  .btn-coach:disabled { opacity:.5; cursor:default; }
+
+  .fin-modal-overlay { display:none; position:fixed; inset:0; background:rgba(58,53,44,.45); z-index:9000; align-items:center; justify-content:center; }
+  .fin-modal-overlay.open { display:flex; }
+  .fin-modal { background:#fff; border-radius:16px; padding:1.75rem 2rem; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,.18); }
+  .fin-modal h2 { font-family:'Playfair Display',serif; font-size:1.25rem; color:var(--charcoal); margin:0 0 1.25rem; }
+  .fmg { margin-bottom:1rem; }
+  .fmg label { display:block; font-size:.76rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--charcoal); margin-bottom:.3rem; }
+  .fmg input, .fmg select, .fmg textarea { width:100%; border:1px solid rgba(107,106,69,.3); border-radius:8px; padding:.5rem .75rem; font-size:.85rem; color:var(--charcoal); background:var(--cream2); box-sizing:border-box; outline:none; font-family:inherit; transition:border-color .15s; }
+  .fmg input:focus, .fmg select:focus, .fmg textarea:focus { border-color:var(--olive); background:#fff; }
+  .fm-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
+  .fm-actions { display:flex; gap:.75rem; margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border); }
+  .fm-submit { background:var(--olive); color:#fff; border:none; border-radius:8px; padding:.6rem 1.4rem; font-size:.88rem; font-weight:600; cursor:pointer; }
+  .fm-cancel { background:none; border:1px solid var(--border); color:var(--olive); border-radius:8px; padding:.6rem 1rem; font-size:.88rem; font-weight:600; cursor:pointer; }
+
+  .chart-row { display:grid; grid-template-columns:2fr 1fr; gap:1.25rem; margin-bottom:1.75rem; }
+  .chart-card { background:#fff; border:1px solid var(--border); border-radius:14px; padding:1.25rem 1.4rem; }
+  .chart-card h4 { font-size:.78rem; text-transform:uppercase; letter-spacing:.07em; color:var(--warm-gray); font-weight:700; margin:0 0 1rem; }
+
+  @media(max-width:700px) {
+    .fin-cards { grid-template-columns:1fr 1fr; }
+    .chart-row { grid-template-columns:1fr; }
+    .fm-row { grid-template-columns:1fr; }
+  }
+</style>
+
+<div class="dashboard-main__header" style="margin-bottom:1.5rem;">
+  <div class="fin-header">
+    <div>
+      <h1>💰 Financials Hub</h1>
+      <p>Track loan revenue, expenses, pipeline value, and hit your income goals.</p>
+    </div>
+    <div class="year-select">
+      <span>Year:</span>
+      <select onchange="window.location.href='?year='+this.value">
+        {% for y in available_years %}
+        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="fin-cards">
+  <div class="fin-card green">
+    <div class="fin-card-label">YTD Revenue (Funded)</div>
+    <div class="fin-card-value">${{ "{:,.0f}".format(ytd_revenue) }}</div>
+    {% if ytd_projected > 0 %}
+    <div class="fin-card-sub">+ ${{ "{:,.0f}".format(ytd_projected) }} projected</div>
+    {% endif %}
+  </div>
+  <div class="fin-card blue">
+    <div class="fin-card-label">YTD Loan Volume</div>
+    <div class="fin-card-value">${{ "{:,.0f}".format(ytd_loan_volume // 1000) }}k</div>
+    <div class="fin-card-sub">Total funded loan volume</div>
+  </div>
+  <div class="fin-card red">
+    <div class="fin-card-label">YTD Expenses</div>
+    <div class="fin-card-value">${{ "{:,.0f}".format(ytd_expenses) }}</div>
+    <div class="fin-card-sub">{{ expenses|length }} expense{{ 's' if expenses|length != 1 else '' }}</div>
+  </div>
+  <div class="fin-card {% if net_income >= 0 %}green{% else %}red{% endif %}">
+    <div class="fin-card-label">Net Income</div>
+    <div class="fin-card-value">${{ "{:,.0f}".format(net_income) }}</div>
+    <div class="fin-card-sub">Revenue − expenses</div>
+  </div>
+  <div class="fin-card amber">
+    <div class="fin-card-label">Loans Funded</div>
+    <div class="fin-card-value">{{ revenues|selectattr('status','equalto','funded')|list|length }}</div>
+    <div class="fin-card-sub">{{ revenues|selectattr('status','equalto','projected')|list|length }} in pipeline</div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="chart-row">
+  <div class="chart-card">
+    <h4>Monthly Revenue — {{ year }}</h4>
+    <canvas id="monthlyChart" height="100"></canvas>
+  </div>
+  <div class="chart-card">
+    <h4>Expenses by Category</h4>
+    <canvas id="expenseChart" height="160"></canvas>
+    {% if not expense_by_cat %}
+    <div style="text-align:center;color:var(--warm-gray);font-size:.8rem;padding:1rem 0;">No expense data yet</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="fin-tabs">
+  <button class="fin-tab active" onclick="switchTab('revenue',this)">🏦 Loan Revenue</button>
+  <button class="fin-tab" onclick="switchTab('expenses',this)">💳 Expenses</button>
+  <button class="fin-tab" onclick="switchTab('goals',this)">🎯 Goals</button>
+</div>
+
+<!-- REVENUE PANEL -->
+<div id="panel-revenue" class="fin-panel active">
+  <div class="sec-hdr">
+    <h3>Loan Revenue Tracker</h3>
+    <button class="btn-add" onclick="document.getElementById('modal-revenue').classList.add('open')">+ Add Loan</button>
+  </div>
+
+  {% if revenues %}
+  <div class="fin-table-wrap">
+    <table class="fin-table">
+      <thead>
+        <tr>
+          <th>Borrower</th>
+          <th>Property</th>
+          <th>Loan Type</th>
+          <th>Close Date</th>
+          <th>Loan Amount</th>
+          <th>Orig. %</th>
+          <th>Revenue</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in revenues %}
+        <tr>
+          <td style="font-weight:600;">{{ r.borrower_name or '—' }}</td>
+          <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.property_address or '—' }}</td>
+          <td style="text-transform:capitalize;">{{ r.loan_type or '—' }}</td>
+          <td>{{ r.close_date or '—' }}</td>
+          <td>${{ "{:,.0f}".format(r.loan_amount or 0) }}</td>
+          <td>{{ "{:.3f}".format(r.origination_pct or 0) }}%</td>
+          <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee or 0) }}</td>
+          <td>
+            <span class="badge {% if r.status=='funded' %}badge-funded{% elif r.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">
+              {{ r.status or 'projected' }}
+            </span>
+          </td>
+          <td>
+            <div style="display:flex;gap:.3rem;flex-wrap:wrap;">
+              {% if r.status != 'funded' %}
+              <form method="POST" action="{{ url_for('lender_financials_revenue_mark_funded', rid=r.id) }}" style="display:inline;">
+                <button type="submit" class="tbl-act tbl-act-green">✓ Funded</button>
+              </form>
+              {% endif %}
+              <form method="POST" action="{{ url_for('lender_financials_revenue_delete', rid=r.id) }}" onsubmit="return confirm('Remove this loan?');" style="display:inline;">
+                <button type="submit" class="tbl-act tbl-act-red">Delete</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
+    Total revenue logged: <strong style="color:var(--charcoal);">${{ "{:,.0f}".format(revenues|sum(attribute='origination_fee')) }}</strong>
+  </div>
+  {% else %}
+  <div class="empty-msg">
+    <div class="big">🏦</div>
+    No loans logged for {{ year }} yet.<br>
+    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-revenue').classList.add('open')">Log Your First Loan</button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- EXPENSES PANEL -->
+<div id="panel-expenses" class="fin-panel">
+  <div class="sec-hdr">
+    <h3>Expense Log</h3>
+    <button class="btn-add" onclick="document.getElementById('modal-expense').classList.add('open')">+ Add Expense</button>
+  </div>
+  {% if expenses %}
+  <div class="fin-table-wrap">
+    <table class="fin-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Notes</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in expenses %}
+        <tr>
+          <td>{{ e.expense_date or '—' }}</td>
+          <td><span class="badge" style="background:rgba(107,106,69,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
+          <td>{{ e.description or '—' }}</td>
+          <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
+          <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
+          <td>
+            <form method="POST" action="{{ url_for('lender_financials_expense_delete', eid=e.id) }}" onsubmit="return confirm('Remove this expense?');" style="display:inline;">
+              <button type="submit" class="tbl-act tbl-act-red">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
+    Total expenses: <strong style="color:var(--red);">-${{ "{:,.2f}".format(ytd_expenses) }}</strong>
+  </div>
+  {% else %}
+  <div class="empty-msg">
+    <div class="big">💳</div>
+    No expenses logged for {{ year }} yet.<br>
+    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-expense').classList.add('open')">Log Your First Expense</button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- GOALS PANEL -->
+<div id="panel-goals" class="fin-panel">
+  <div class="sec-hdr">
+    <h3>{{ year }} Revenue Goals</h3>
+    <button class="btn-add" onclick="document.getElementById('modal-goals').classList.add('open')">
+      {% if goals %}✏️ Edit Goals{% else %}+ Set Goals{% endif %}
+    </button>
+  </div>
+
+  {% if goals %}
+  {% set g = goals[0] %}
+  {% set rev_pct  = [((ytd_revenue / g.revenue_goal * 100) if g.revenue_goal > 0 else 0), 100]|min %}
+  {% set loan_pct = [((revenues|selectattr('status','equalto','funded')|list|length / g.loan_count_goal * 100) if g.loan_count_goal > 0 else 0), 100]|min %}
+  {% set vol_pct  = [((ytd_loan_volume / g.loan_volume_goal * 100) if g.loan_volume_goal > 0 else 0), 100]|min %}
+  {% set exp_pct  = [((ytd_expenses / g.expenses_budget * 100) if g.expenses_budget > 0 else 0), 100]|min %}
+  {% set net_pct  = [((net_income / g.net_income_goal * 100) if g.net_income_goal > 0 else 0), 100]|min %}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    <div class="goal-card">
+      <div class="goal-label">
+        <span>💰 Revenue Goal</span>
+        <span style="color:var(--green);">${{ "{:,.0f}".format(ytd_revenue) }} / ${{ "{:,.0f}".format(g.revenue_goal) }}</span>
+      </div>
+      <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ rev_pct|int }}%;"></div></div>
+      <div class="goal-sub">{{ "{:.0f}".format(rev_pct) }}% complete</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">
+        <span>🏦 Loans Funded</span>
+        <span>{{ revenues|selectattr('status','equalto','funded')|list|length }} / {{ g.loan_count_goal }}</span>
+      </div>
+      <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ loan_pct|int }}%;"></div></div>
+      <div class="goal-sub">{{ "{:.0f}".format(loan_pct) }}% complete</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">
+        <span>📊 Loan Volume</span>
+        <span>${{ "{:,.0f}".format(ytd_loan_volume // 1000) }}k / ${{ "{:,.0f}".format(g.loan_volume_goal // 1000) }}k</span>
+      </div>
+      <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ vol_pct|int }}%;"></div></div>
+      <div class="goal-sub">{{ "{:.0f}".format(vol_pct) }}% complete</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">
+        <span>💳 Expense Budget</span>
+        <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(g.expenses_budget) }}</span>
+      </div>
+      <div class="goal-bar-bg"><div class="goal-bar-fill {% if exp_pct >= 90 %}danger{% endif %}" style="width:{{ exp_pct|int }}%;"></div></div>
+      <div class="goal-sub">{{ "{:.0f}".format(exp_pct) }}% of budget used</div>
+    </div>
+  </div>
+  {% if g.notes %}
+  <div style="margin-top:1rem;padding:.85rem 1rem;background:rgba(107,106,69,.06);border-radius:10px;font-size:.82rem;color:var(--charcoal);">
+    📝 {{ g.notes }}
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="empty-msg">
+    <div class="big">🎯</div>
+    No goals set for {{ year }} yet.<br>
+    Set your revenue target, loan count, and volume goal to track progress all year.<br>
+    <button class="btn-add" style="margin-top:.75rem;" onclick="document.getElementById('modal-goals').classList.add('open')">Set {{ year }} Goals</button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- AI Coach -->
+<div class="ai-coach-panel">
+  <h3>🤖 AI Financial Coach</h3>
+  <p class="sub">Get personalized coaching on your {{ year }} pipeline, revenue pace, and how to close more loans and hit your goals.</p>
+  <div class="ai-response" id="aiCoachOutput">Click "Get Coaching" to receive personalized insights from your AI financial coach.</div>
+  <button class="btn-coach" id="btnCoach" onclick="getAiCoaching()">✨ Get Coaching</button>
+</div>
+
+<!-- MODALS -->
+
+<!-- Add Revenue Modal -->
+<div class="fin-modal-overlay" id="modal-revenue" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="fin-modal">
+    <h2>🏦 Add Loan</h2>
+    <form method="POST" action="{{ url_for('lender_financials_revenue_add') }}">
+      <div class="fm-row">
+        <div class="fmg">
+          <label>Borrower Name *</label>
+          <input type="text" name="borrower_name" required placeholder="John & Jane Smith">
+        </div>
+        <div class="fmg">
+          <label>Loan Type</label>
+          <select name="loan_type">
+            <option value="purchase">Purchase</option>
+            <option value="refinance">Refinance</option>
+            <option value="cash_out_refi">Cash-Out Refi</option>
+            <option value="heloc">HELOC</option>
+            <option value="construction">Construction</option>
+            <option value="fha">FHA</option>
+            <option value="va">VA</option>
+            <option value="jumbo">Jumbo</option>
+          </select>
+        </div>
+      </div>
+      <div class="fmg">
+        <label>Property Address</label>
+        <input type="text" name="property_address" placeholder="123 Main St, City, State">
+      </div>
+      <div class="fm-row">
+        <div class="fmg">
+          <label>Loan Amount ($) *</label>
+          <input type="number" name="loan_amount" step="1000" min="0" required placeholder="400000" oninput="calcRevenue()">
+        </div>
+        <div class="fmg">
+          <label>Origination % (points)</label>
+          <input type="number" name="origination_pct" step="0.125" min="0" max="5" value="1.0" oninput="calcRevenue()">
+        </div>
+      </div>
+      <div class="fm-row">
+        <div class="fmg">
+          <label>Estimated Revenue</label>
+          <input type="text" id="calcRevAmt" readonly style="background:#f0f0f0;font-weight:700;color:var(--green);" placeholder="$0">
+          <input type="hidden" name="origination_fee" id="hiddenOrigFee" value="0">
+        </div>
+        <div class="fmg">
+          <label>Close Date</label>
+          <input type="date" name="close_date">
+        </div>
+      </div>
+      <div class="fmg">
+        <label>Status</label>
+        <select name="status">
+          <option value="projected">In Pipeline (Projected)</option>
+          <option value="funded">Funded / Closed</option>
+          <option value="lost">Lost / Fallen Out</option>
+        </select>
+      </div>
+      <div class="fmg">
+        <label>Notes</label>
+        <textarea name="notes" rows="2" placeholder="Loan details, referral source, etc."></textarea>
+      </div>
+      <div class="fm-actions">
+        <button type="submit" class="fm-submit">Save Loan</button>
+        <button type="button" class="fm-cancel" onclick="document.getElementById('modal-revenue').classList.remove('open')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Expense Modal -->
+<div class="fin-modal-overlay" id="modal-expense" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="fin-modal">
+    <h2>💳 Log Expense</h2>
+    <form method="POST" action="{{ url_for('lender_financials_expense_add') }}">
+      <div class="fm-row">
+        <div class="fmg">
+          <label>Date *</label>
+          <input type="date" name="expense_date" required>
+        </div>
+        <div class="fmg">
+          <label>Amount ($) *</label>
+          <input type="number" name="amount" step="0.01" min="0" required placeholder="0.00">
+        </div>
+      </div>
+      <div class="fmg">
+        <label>Category</label>
+        <select name="category">
+          <option>Marketing & Lead Generation</option>
+          <option>NMLS & Licensing</option>
+          <option>Technology & Software (LOS, CRM)</option>
+          <option>Appraisal & Third-Party Fees</option>
+          <option>Office & Supplies</option>
+          <option>Professional Development</option>
+          <option>Referral Partner Gifts & Events</option>
+          <option>Phone & Internet</option>
+          <option>Professional Services</option>
+          <option>Auto & Transportation</option>
+          <option>Meals & Entertainment</option>
+          <option>Insurance & E&O</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="fmg">
+        <label>Description *</label>
+        <input type="text" name="description" required placeholder="What was this expense for?">
+      </div>
+      <div class="fmg">
+        <label>Notes</label>
+        <textarea name="notes" rows="2" placeholder="Vendor, receipt details, etc."></textarea>
+      </div>
+      <div class="fm-actions">
+        <button type="submit" class="fm-submit">Log Expense</button>
+        <button type="button" class="fm-cancel" onclick="document.getElementById('modal-expense').classList.remove('open')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Goals Modal -->
+<div class="fin-modal-overlay" id="modal-goals" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="fin-modal">
+    <h2>🎯 Set {{ year }} Goals</h2>
+    <form method="POST" action="{{ url_for('lender_financials_goal_save') }}">
+      <input type="hidden" name="goal_year" value="{{ year }}">
+      <div class="fm-row">
+        <div class="fmg">
+          <label>Revenue Goal ($)</label>
+          <input type="number" name="revenue_goal" step="1000" min="0"
+            value="{{ goals[0].revenue_goal if goals else '' }}" placeholder="200000">
+        </div>
+        <div class="fmg">
+          <label>Loans Funded (#)</label>
+          <input type="number" name="loan_count_goal" min="0"
+            value="{{ goals[0].loan_count_goal if goals else '' }}" placeholder="60">
+        </div>
+      </div>
+      <div class="fm-row">
+        <div class="fmg">
+          <label>Loan Volume Goal ($)</label>
+          <input type="number" name="loan_volume_goal" step="100000" min="0"
+            value="{{ goals[0].loan_volume_goal if goals else '' }}" placeholder="20000000">
+        </div>
+        <div class="fmg">
+          <label>Expense Budget ($)</label>
+          <input type="number" name="expenses_budget" step="500" min="0"
+            value="{{ goals[0].expenses_budget if goals else '' }}" placeholder="50000">
+        </div>
+      </div>
+      <div class="fmg">
+        <label>Net Income Goal ($)</label>
+        <input type="number" name="net_income_goal" step="1000" min="0"
+          value="{{ goals[0].net_income_goal if goals else '' }}" placeholder="150000">
+      </div>
+      <div class="fmg">
+        <label>Notes / Affirmations</label>
+        <textarea name="notes" rows="2" placeholder="What will you achieve this year?">{{ goals[0].notes if goals else '' }}</textarea>
+      </div>
+      <div class="fm-actions">
+        <button type="submit" class="fm-submit">💾 Save Goals</button>
+        <button type="button" class="fm-cancel" onclick="document.getElementById('modal-goals').classList.remove('open')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.fin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.fin-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function calcRevenue() {
+  const amt = parseFloat(document.querySelector('[name=loan_amount]').value) || 0;
+  const pct = parseFloat(document.querySelector('[name=origination_pct]').value) || 0;
+  const rev = amt * pct / 100;
+  document.getElementById('calcRevAmt').value = '$' + rev.toLocaleString('en-US', {minimumFractionDigits:0,maximumFractionDigits:0});
+  document.getElementById('hiddenOrigFee').value = rev.toFixed(2);
+}
+
+const monthlyData = {{ monthly_revenue_list | tojson }};
+const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const ctx = document.getElementById('monthlyChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [{
+      label: 'Revenue ($)',
+      data: monthlyData,
+      backgroundColor: 'rgba(107,106,69,0.65)',
+      borderColor: '#6B6A45',
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'k':v), font:{size:10} } },
+      x: { ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+{% if expense_by_cat %}
+const expCtx = document.getElementById('expenseChart').getContext('2d');
+const expLabels = {{ expense_by_cat.keys() | list | tojson }};
+const expVals   = {{ expense_by_cat.values() | list | tojson }};
+const palette = ['#6B6A45','#C8B497','#8B8A5A','#b45309','#15803d','#1d4ed8','#7c3aed','#dc2626','#0891b2','#be185d','#92400e','#374151'];
+new Chart(expCtx, {
+  type: 'doughnut',
+  data: {
+    labels: expLabels,
+    datasets: [{ data: expVals, backgroundColor: palette.slice(0,expLabels.length), borderWidth:2, borderColor:'#fff' }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { position:'bottom', labels:{ font:{size:10}, padding:8 } } },
+    cutout: '60%'
+  }
+});
+{% endif %}
+
+async function getAiCoaching() {
+  const btn = document.getElementById('btnCoach');
+  const out = document.getElementById('aiCoachOutput');
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyzing your numbers...';
+  out.classList.add('loading');
+  out.textContent = 'Your AI coach is reviewing your financials...';
+
+  const context = `Year: {{ year }}
+YTD Revenue (funded): ${{ "{:,.0f}".format(ytd_revenue) }}
+YTD Projected Revenue: ${{ "{:,.0f}".format(ytd_projected) }}
+YTD Loan Volume: ${{ "{:,.0f}".format(ytd_loan_volume) }}
+Loans Funded: {{ revenues|selectattr('status','equalto','funded')|list|length }}
+Loans in Pipeline: {{ revenues|selectattr('status','equalto','projected')|list|length }}
+YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}
+Net Income: ${{ "{:,.0f}".format(net_income) }}
+{% if goals %}Goals — Revenue: ${{ "{:,.0f}".format(goals[0].revenue_goal) }}, Loans: {{ goals[0].loan_count_goal }}, Volume: ${{ "{:,.0f}".format(goals[0].loan_volume_goal) }}{% else %}No goals set yet.{% endif %}
+Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None' }}`;
+
+  try {
+    const resp = await fetch('/api/ai/financials/lender-coach', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ context })
+    });
+    const data = await resp.json();
+    out.classList.remove('loading');
+    out.textContent = data.coach_response || 'No response received.';
+  } catch(e) {
+    out.classList.remove('loading');
+    out.textContent = 'Unable to connect to AI coach right now. Please try again.';
+  }
+  btn.disabled = false;
+  btn.textContent = '✨ Refresh Coaching';
+}
+</script>
+{% endblock %}

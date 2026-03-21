@@ -11981,3 +11981,499 @@ def send_contest_invites_scheduled():
             count = _send_contest_invites_for(contest, agent_user)
             print(f"[CONTESTS] Sent {count} invites for contest '{contest['contest_name']}' (agent {agent_user.get('name')})")
 
+
+
+# ============================================================
+# AGENT FINANCIALS HUB  (Realtyzam-equivalent)
+# ============================================================
+
+@app.route("/agent/financials", methods=["GET"])
+def agent_financials():
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    uid = user["id"]
+    conn = get_db_connection()
+
+    # Year filter
+    year = request.args.get("year", str(datetime.datetime.now().year))
+    try:
+        year = int(year)
+    except Exception:
+        year = datetime.datetime.now().year
+
+    # Commissions
+    commissions = [dict(r) for r in conn.execute(
+        "SELECT * FROM agent_commissions WHERE agent_user_id=? AND (close_date LIKE ? OR close_date='') ORDER BY close_date DESC",
+        (uid, f"{year}%")
+    ).fetchall()]
+
+    # Expenses
+    expenses = [dict(r) for r in conn.execute(
+        "SELECT * FROM agent_expenses WHERE agent_user_id=? AND expense_date LIKE ? ORDER BY expense_date DESC",
+        (uid, f"{year}%")
+    ).fetchall()]
+
+    # Mileage
+    mileage_logs = [dict(r) for r in conn.execute(
+        "SELECT * FROM agent_mileage WHERE agent_user_id=? AND trip_date LIKE ? ORDER BY trip_date DESC",
+        (uid, f"{year}%")
+    ).fetchall()]
+
+    # Goals
+    goals = [dict(r) for r in conn.execute(
+        "SELECT * FROM agent_financial_goals WHERE agent_user_id=? AND goal_year=?",
+        (uid, year)
+    ).fetchall()]
+
+    conn.close()
+
+    # Computed summaries
+    ytd_gci = sum(c.get("net_commission", 0) or 0 for c in commissions if c.get("status") == "paid")
+    ytd_projected = sum(c.get("net_commission", 0) or 0 for c in commissions if c.get("status") == "projected")
+    ytd_expenses = sum(e.get("amount", 0) or 0 for e in expenses)
+    ytd_miles = sum(m.get("miles", 0) or 0 for m in mileage_logs)
+    irs_rate = 0.70
+    mileage_deduction = round(ytd_miles * irs_rate, 2)
+    net_income = ytd_gci - ytd_expenses
+
+    # Monthly GCI for chart
+    monthly_gci = {}
+    for c in commissions:
+        if c.get("status") == "paid" and c.get("close_date"):
+            try:
+                mo = int(c["close_date"].split("-")[1])
+                monthly_gci[mo] = monthly_gci.get(mo, 0) + (c.get("net_commission", 0) or 0)
+            except Exception:
+                pass
+    monthly_gci_list = [monthly_gci.get(m, 0) for m in range(1, 13)]
+
+    # Expense categories breakdown
+    expense_by_cat = {}
+    for e in expenses:
+        cat = e.get("category", "Other") or "Other"
+        expense_by_cat[cat] = expense_by_cat.get(cat, 0) + (e.get("amount", 0) or 0)
+
+    available_years = list(range(datetime.datetime.now().year, 2023, -1))
+
+    return render_template("agent/financials.html",
+        user=user,
+        year=year,
+        available_years=available_years,
+        commissions=commissions,
+        expenses=expenses,
+        mileage_logs=mileage_logs,
+        goals=goals,
+        ytd_gci=ytd_gci,
+        ytd_projected=ytd_projected,
+        ytd_expenses=ytd_expenses,
+        ytd_miles=ytd_miles,
+        mileage_deduction=mileage_deduction,
+        net_income=net_income,
+        monthly_gci_list=monthly_gci_list,
+        expense_by_cat=expense_by_cat,
+        irs_rate=irs_rate,
+    )
+
+
+@app.route("/agent/financials/commission/add", methods=["POST"])
+def agent_financials_commission_add():
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    uid = user["id"]
+    f = request.form
+    sale_price = float(f.get("sale_price") or 0)
+    comm_rate = float(f.get("commission_rate") or 3.0)
+    split_pct = float(f.get("brokerage_split_pct") or 0)
+    gross = round(sale_price * comm_rate / 100, 2)
+    split_amt = round(gross * split_pct / 100, 2)
+    net = round(gross - split_amt, 2)
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO agent_commissions
+        (agent_user_id, property_address, client_name, close_date, transaction_side,
+         sale_price, commission_rate, gross_commission, brokerage_split_pct,
+         brokerage_split_amt, net_commission, status, notes)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+    """, (uid,
+          f.get("property_address",""),
+          f.get("client_name",""),
+          f.get("close_date",""),
+          f.get("transaction_side","buyer"),
+          sale_price, comm_rate, gross, split_pct, split_amt, net,
+          f.get("status","projected"),
+          f.get("notes","")))
+    conn.commit()
+    conn.close()
+    flash("Commission added!", "success")
+    year = (f.get("close_date") or "")[:4] or str(datetime.datetime.now().year)
+    return redirect(url_for("agent_financials", year=year))
+
+
+@app.route("/agent/financials/commission/<int:cid>/delete", methods=["POST"])
+def agent_financials_commission_delete(cid):
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM agent_commissions WHERE id=? AND agent_user_id=?", (cid, user["id"]))
+    conn.commit()
+    conn.close()
+    flash("Commission removed.", "success")
+    return redirect(url_for("agent_financials"))
+
+
+@app.route("/agent/financials/commission/<int:cid>/mark-paid", methods=["POST"])
+def agent_financials_commission_mark_paid(cid):
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    conn = get_db_connection()
+    conn.execute("UPDATE agent_commissions SET status='paid' WHERE id=? AND agent_user_id=?", (cid, user["id"]))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("agent_financials"))
+
+
+@app.route("/agent/financials/expense/add", methods=["POST"])
+def agent_financials_expense_add():
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    uid = user["id"]
+    f = request.form
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO agent_expenses
+        (agent_user_id, expense_date, category, description, amount, receipt_url, notes)
+        VALUES (?,?,?,?,?,?,?)
+    """, (uid, f.get("expense_date",""), f.get("category","Other"),
+          f.get("description",""), float(f.get("amount") or 0),
+          f.get("receipt_url",""), f.get("notes","")))
+    conn.commit()
+    conn.close()
+    flash("Expense logged!", "success")
+    year = (f.get("expense_date") or "")[:4] or str(datetime.datetime.now().year)
+    return redirect(url_for("agent_financials", year=year))
+
+
+@app.route("/agent/financials/expense/<int:eid>/delete", methods=["POST"])
+def agent_financials_expense_delete(eid):
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM agent_expenses WHERE id=? AND agent_user_id=?", (eid, user["id"]))
+    conn.commit()
+    conn.close()
+    flash("Expense removed.", "success")
+    return redirect(url_for("agent_financials"))
+
+
+@app.route("/agent/financials/mileage/add", methods=["POST"])
+def agent_financials_mileage_add():
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    uid = user["id"]
+    f = request.form
+    miles = float(f.get("miles") or 0)
+    irs_rate = 0.70
+    deduction = round(miles * irs_rate, 2)
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO agent_mileage
+        (agent_user_id, trip_date, from_location, to_location, purpose, miles, irs_rate, deduction_value)
+        VALUES (?,?,?,?,?,?,?,?)
+    """, (uid, f.get("trip_date",""), f.get("from_location",""),
+          f.get("to_location",""), f.get("purpose",""),
+          miles, irs_rate, deduction))
+    conn.commit()
+    conn.close()
+    flash("Mileage logged!", "success")
+    year = (f.get("trip_date") or "")[:4] or str(datetime.datetime.now().year)
+    return redirect(url_for("agent_financials", year=year))
+
+
+@app.route("/agent/financials/mileage/<int:mid>/delete", methods=["POST"])
+def agent_financials_mileage_delete(mid):
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM agent_mileage WHERE id=? AND agent_user_id=?", (mid, user["id"]))
+    conn.commit()
+    conn.close()
+    flash("Mileage entry removed.", "success")
+    return redirect(url_for("agent_financials"))
+
+
+@app.route("/agent/financials/goal/save", methods=["POST"])
+def agent_financials_goal_save():
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login", role="agent"))
+    uid = user["id"]
+    f = request.form
+    year = int(f.get("goal_year", datetime.datetime.now().year))
+    conn = get_db_connection()
+    existing = conn.execute(
+        "SELECT id FROM agent_financial_goals WHERE agent_user_id=? AND goal_year=?", (uid, year)
+    ).fetchone()
+    if existing:
+        conn.execute("""
+            UPDATE agent_financial_goals SET
+            gci_goal=?, transactions_goal=?, expenses_budget=?, net_income_goal=?, notes=?
+            WHERE agent_user_id=? AND goal_year=?
+        """, (float(f.get("gci_goal") or 0), int(f.get("transactions_goal") or 0),
+              float(f.get("expenses_budget") or 0), float(f.get("net_income_goal") or 0),
+              f.get("notes",""), uid, year))
+    else:
+        conn.execute("""
+            INSERT INTO agent_financial_goals
+            (agent_user_id, goal_year, gci_goal, transactions_goal, expenses_budget, net_income_goal, notes)
+            VALUES (?,?,?,?,?,?,?)
+        """, (uid, year, float(f.get("gci_goal") or 0), int(f.get("transactions_goal") or 0),
+              float(f.get("expenses_budget") or 0), float(f.get("net_income_goal") or 0),
+              f.get("notes","")))
+    conn.commit()
+    conn.close()
+    flash("Goals saved!", "success")
+    return redirect(url_for("agent_financials", year=year))
+
+
+@app.route("/api/ai/financials/agent-coach", methods=["POST"])
+def agent_financials_ai_coach():
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        context = data.get("context", "")
+        prompt = f"""You are a top real estate financial coach. Analyze this agent's financial data and give 3-5 specific, actionable coaching tips to help them increase their income, reduce expenses, and hit their goals. Be encouraging but direct. Use specific numbers when given. Keep it under 250 words.
+
+Agent Data:
+{context}"""
+        from ai_platform import call_ai
+        response = call_ai(prompt)
+        return jsonify({"coach_response": response})
+    except Exception as e:
+        return jsonify({"coach_response": "Unable to generate coaching tips right now. Please try again shortly."})
+
+
+# ============================================================
+# LENDER FINANCIALS HUB
+# ============================================================
+
+@app.route("/lender/financials", methods=["GET"])
+def lender_financials():
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    uid = user["id"]
+    conn = get_db_connection()
+
+    year = request.args.get("year", str(datetime.datetime.now().year))
+    try:
+        year = int(year)
+    except Exception:
+        year = datetime.datetime.now().year
+
+    # Revenue (closed loans)
+    revenues = [dict(r) for r in conn.execute(
+        "SELECT * FROM lender_loan_revenue WHERE lender_user_id=? AND close_date LIKE ? ORDER BY close_date DESC",
+        (uid, f"{year}%")
+    ).fetchall()]
+
+    # Expenses
+    expenses = [dict(r) for r in conn.execute(
+        "SELECT * FROM lender_expenses WHERE lender_user_id=? AND expense_date LIKE ? ORDER BY expense_date DESC",
+        (uid, f"{year}%")
+    ).fetchall()]
+
+    # Goals
+    goals = [dict(r) for r in conn.execute(
+        "SELECT * FROM lender_financial_goals WHERE lender_user_id=? AND goal_year=?",
+        (uid, year)
+    ).fetchall()]
+
+    conn.close()
+
+    ytd_revenue = sum(r.get("origination_fee", 0) or 0 for r in revenues if r.get("status") == "funded")
+    ytd_projected = sum(r.get("origination_fee", 0) or 0 for r in revenues if r.get("status") == "projected")
+    ytd_expenses = sum(e.get("amount", 0) or 0 for e in expenses)
+    ytd_loan_volume = sum(r.get("loan_amount", 0) or 0 for r in revenues if r.get("status") == "funded")
+    net_income = ytd_revenue - ytd_expenses
+
+    monthly_revenue = {}
+    for r in revenues:
+        if r.get("status") == "funded" and r.get("close_date"):
+            try:
+                mo = int(r["close_date"].split("-")[1])
+                monthly_revenue[mo] = monthly_revenue.get(mo, 0) + (r.get("origination_fee", 0) or 0)
+            except Exception:
+                pass
+    monthly_revenue_list = [monthly_revenue.get(m, 0) for m in range(1, 13)]
+
+    expense_by_cat = {}
+    for e in expenses:
+        cat = e.get("category", "Other") or "Other"
+        expense_by_cat[cat] = expense_by_cat.get(cat, 0) + (e.get("amount", 0) or 0)
+
+    available_years = list(range(datetime.datetime.now().year, 2023, -1))
+
+    return render_template("lender/financials.html",
+        user=user,
+        year=year,
+        available_years=available_years,
+        revenues=revenues,
+        expenses=expenses,
+        goals=goals,
+        ytd_revenue=ytd_revenue,
+        ytd_projected=ytd_projected,
+        ytd_expenses=ytd_expenses,
+        ytd_loan_volume=ytd_loan_volume,
+        net_income=net_income,
+        monthly_revenue_list=monthly_revenue_list,
+        expense_by_cat=expense_by_cat,
+    )
+
+
+@app.route("/lender/financials/revenue/add", methods=["POST"])
+def lender_financials_revenue_add():
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    uid = user["id"]
+    f = request.form
+    loan_amount = float(f.get("loan_amount") or 0)
+    orig_pct = float(f.get("origination_pct") or 1.0)
+    orig_fee = float(f.get("origination_fee") or round(loan_amount * orig_pct / 100, 2))
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO lender_loan_revenue
+        (lender_user_id, borrower_name, property_address, loan_type, loan_amount,
+         origination_pct, origination_fee, close_date, status, notes)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+    """, (uid, f.get("borrower_name",""), f.get("property_address",""),
+          f.get("loan_type","purchase"), loan_amount, orig_pct, orig_fee,
+          f.get("close_date",""), f.get("status","projected"), f.get("notes","")))
+    conn.commit()
+    conn.close()
+    flash("Loan revenue added!", "success")
+    year = (f.get("close_date") or "")[:4] or str(datetime.datetime.now().year)
+    return redirect(url_for("lender_financials", year=year))
+
+
+@app.route("/lender/financials/revenue/<int:rid>/delete", methods=["POST"])
+def lender_financials_revenue_delete(rid):
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM lender_loan_revenue WHERE id=? AND lender_user_id=?", (rid, user["id"]))
+    conn.commit()
+    conn.close()
+    flash("Revenue entry removed.", "success")
+    return redirect(url_for("lender_financials"))
+
+
+@app.route("/lender/financials/revenue/<int:rid>/mark-funded", methods=["POST"])
+def lender_financials_revenue_mark_funded(rid):
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    conn = get_db_connection()
+    conn.execute("UPDATE lender_loan_revenue SET status='funded' WHERE id=? AND lender_user_id=?", (rid, user["id"]))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("lender_financials"))
+
+
+@app.route("/lender/financials/expense/add", methods=["POST"])
+def lender_financials_expense_add():
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    uid = user["id"]
+    f = request.form
+    conn = get_db_connection()
+    conn.execute("""
+        INSERT INTO lender_expenses
+        (lender_user_id, expense_date, category, description, amount, receipt_url, notes)
+        VALUES (?,?,?,?,?,?,?)
+    """, (uid, f.get("expense_date",""), f.get("category","Other"),
+          f.get("description",""), float(f.get("amount") or 0),
+          f.get("receipt_url",""), f.get("notes","")))
+    conn.commit()
+    conn.close()
+    flash("Expense logged!", "success")
+    year = (f.get("expense_date") or "")[:4] or str(datetime.datetime.now().year)
+    return redirect(url_for("lender_financials", year=year))
+
+
+@app.route("/lender/financials/expense/<int:eid>/delete", methods=["POST"])
+def lender_financials_expense_delete(eid):
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    conn = get_db_connection()
+    conn.execute("DELETE FROM lender_expenses WHERE id=? AND lender_user_id=?", (eid, user["id"]))
+    conn.commit()
+    conn.close()
+    flash("Expense removed.", "success")
+    return redirect(url_for("lender_financials"))
+
+
+@app.route("/lender/financials/goal/save", methods=["POST"])
+def lender_financials_goal_save():
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    uid = user["id"]
+    f = request.form
+    year = int(f.get("goal_year", datetime.datetime.now().year))
+    conn = get_db_connection()
+    existing = conn.execute(
+        "SELECT id FROM lender_financial_goals WHERE lender_user_id=? AND goal_year=?", (uid, year)
+    ).fetchone()
+    if existing:
+        conn.execute("""
+            UPDATE lender_financial_goals SET
+            revenue_goal=?, loan_count_goal=?, loan_volume_goal=?, expenses_budget=?, net_income_goal=?, notes=?
+            WHERE lender_user_id=? AND goal_year=?
+        """, (float(f.get("revenue_goal") or 0), int(f.get("loan_count_goal") or 0),
+              float(f.get("loan_volume_goal") or 0), float(f.get("expenses_budget") or 0),
+              float(f.get("net_income_goal") or 0), f.get("notes",""), uid, year))
+    else:
+        conn.execute("""
+            INSERT INTO lender_financial_goals
+            (lender_user_id, goal_year, revenue_goal, loan_count_goal, loan_volume_goal, expenses_budget, net_income_goal, notes)
+            VALUES (?,?,?,?,?,?,?,?)
+        """, (uid, year, float(f.get("revenue_goal") or 0), int(f.get("loan_count_goal") or 0),
+              float(f.get("loan_volume_goal") or 0), float(f.get("expenses_budget") or 0),
+              float(f.get("net_income_goal") or 0), f.get("notes","")))
+    conn.commit()
+    conn.close()
+    flash("Goals saved!", "success")
+    return redirect(url_for("lender_financials", year=year))
+
+
+@app.route("/api/ai/financials/lender-coach", methods=["POST"])
+def lender_financials_ai_coach():
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        data = request.get_json(force=True) or {}
+        context = data.get("context", "")
+        prompt = f"""You are a top mortgage lending financial coach. Analyze this lender's financial data and give 3-5 specific, actionable coaching tips to help them fund more loans, increase revenue, control expenses, and hit their annual goals. Be encouraging but direct. Use specific numbers when given. Keep it under 250 words.
+
+Lender Data:
+{context}"""
+        from ai_platform import call_ai
+        response = call_ai(prompt)
+        return jsonify({"coach_response": response})
+    except Exception as e:
+        return jsonify({"coach_response": f"Unable to generate coaching tips right now. Please try again shortly."})

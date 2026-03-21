@@ -16,6 +16,7 @@
       or path.startswith('/lender/settings/profile')
       or path.startswith('/lender/referrals')
       or path.startswith('/lender/subscription')
+      or path.startswith('/lender/financials')
     %}
     {% set open_borrowers = path.startswith('/lender/crm')
       or path.startswith('/lender/loans')
@@ -74,6 +75,15 @@
             >
               <span class="ylh-submenu-bullet"></span>
               Profile and Branding
+            </a>
+          </li>
+          <li class="ylh-submenu-item">
+            <a
+              href="{{ url_for('lender_financials') }}"
+              class="ylh-submenu-link {% if path.startswith('/lender/financials') %}active{% endif %}"
+            >
+              <span class="ylh-submenu-bullet"></span>
+              💰 Financials Hub
             </a>
           </li>
           <li class="ylh-submenu-item">

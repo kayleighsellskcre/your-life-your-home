@@ -1436,6 +1436,126 @@ def init_db() -> None:
     )
     print("[DATABASE] Contest tables created/verified")
 
+    # ── AGENT FINANCIAL TABLES ─────────────────────────────────────────────────
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS agent_commissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            transaction_id INTEGER REFERENCES transactions(id) ON DELETE SET NULL,
+            property_address TEXT NOT NULL,
+            client_name TEXT DEFAULT '',
+            close_date TEXT DEFAULT '',
+            transaction_side TEXT DEFAULT 'buyer',
+            sale_price REAL DEFAULT 0,
+            commission_rate REAL DEFAULT 3.0,
+            gross_commission REAL DEFAULT 0,
+            brokerage_split_pct REAL DEFAULT 0,
+            brokerage_split_amt REAL DEFAULT 0,
+            net_commission REAL DEFAULT 0,
+            status TEXT DEFAULT 'projected',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS agent_expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            expense_date TEXT NOT NULL,
+            category TEXT NOT NULL,
+            description TEXT NOT NULL,
+            amount REAL NOT NULL DEFAULT 0,
+            tax_deductible INTEGER DEFAULT 1,
+            receipt_url TEXT DEFAULT '',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS agent_mileage (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            trip_date TEXT NOT NULL,
+            from_location TEXT DEFAULT '',
+            to_location TEXT DEFAULT '',
+            purpose TEXT DEFAULT '',
+            miles REAL NOT NULL DEFAULT 0,
+            irs_rate REAL DEFAULT 0.70,
+            deduction_amount REAL DEFAULT 0,
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS agent_financial_goals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            agent_user_id INTEGER NOT NULL,
+            goal_year INTEGER NOT NULL,
+            gross_commission_goal REAL DEFAULT 0,
+            net_income_goal REAL DEFAULT 0,
+            transactions_goal INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(agent_user_id, goal_year),
+            FOREIGN KEY (agent_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    print("[DATABASE] Agent financial tables created/verified")
+
+    # ── LENDER FINANCIAL TABLES ────────────────────────────────────────────────
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lender_loan_revenue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lender_user_id INTEGER NOT NULL,
+            borrower_name TEXT NOT NULL,
+            property_address TEXT DEFAULT '',
+            loan_amount REAL DEFAULT 0,
+            loan_type TEXT DEFAULT 'conventional',
+            origination_fee_pct REAL DEFAULT 1.0,
+            origination_fee_amt REAL DEFAULT 0,
+            other_fees REAL DEFAULT 0,
+            total_revenue REAL DEFAULT 0,
+            close_date TEXT DEFAULT '',
+            status TEXT DEFAULT 'pipeline',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (lender_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lender_expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lender_user_id INTEGER NOT NULL,
+            expense_date TEXT NOT NULL,
+            category TEXT NOT NULL,
+            description TEXT NOT NULL,
+            amount REAL NOT NULL DEFAULT 0,
+            tax_deductible INTEGER DEFAULT 1,
+            receipt_url TEXT DEFAULT '',
+            notes TEXT DEFAULT '',
+            created_at TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (lender_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS lender_financial_goals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lender_user_id INTEGER NOT NULL,
+            goal_year INTEGER NOT NULL,
+            loan_volume_goal REAL DEFAULT 0,
+            revenue_goal REAL DEFAULT 0,
+            loan_count_goal INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT (datetime('now')),
+            updated_at TEXT DEFAULT (datetime('now')),
+            UNIQUE(lender_user_id, goal_year),
+            FOREIGN KEY (lender_user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    """)
+    print("[DATABASE] Lender financial tables created/verified")
+
     conn.commit()
     conn.close()
 
