@@ -349,16 +349,20 @@
  }
 </style>
 
-<div class="vendors-container">
- <div class="vendors-header">
- <h1>Trusted Vendors</h1>
- <p>Your go-to network of professionals, ready to share with clients anytime.</p>
+<div class="vendors-container ylh-page" style="padding-top:1.25rem;">
+
+ <div class="ylh-hero">
+ <div class="ylh-hero__text">
+ <div class="ylh-hero__eyebrow">Vendor Network</div>
+ <h1 class="ylh-hero__title">Trusted Vendors</h1>
+ <p class="ylh-hero__subtitle">Your go-to network of professionals, ready to share with clients anytime.</p>
  </div>
- 
- <div class="vendors-actions">
- <button class="btn-primary" onclick="openVendorModal()">
- Add New Vendor
+ <div class="ylh-hero__actions">
+ <button class="ylh-btn ylh-btn-primary" onclick="openVendorModal()">
+ <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+ Add Vendor
  </button>
+ </div>
  </div>
  
  {% if vendors %}
@@ -375,13 +379,13 @@
  </div>
  <div class="vendor-actions">
  <button class="btn-icon" onclick="editVendor({{ vendor.id }})" title="Edit">
- 
+ <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M10.5 2L13 4.5l-8 8H2.5V10l8-8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
  </button>
  <form method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to remove this vendor?');">
  <input type="hidden" name="action" value="delete">
  <input type="hidden" name="vendor_id" value="{{ vendor.id }}">
  <button type="submit" class="btn-icon" title="Remove">
- 
+ <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2 4h11M5 4V2h5v2M6 7v5M9 7v5M3 4l1 9h7l1-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
  </button>
  </form>
  </div>
@@ -436,7 +440,9 @@
  {% endfor %}
  {% else %}
  <div class="empty-state">
- <div class="empty-state-icon"></div>
+ <div class="empty-state-icon">
+ <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="opacity:.35"><rect x="8" y="16" width="40" height="30" rx="4" stroke="#8FA382" stroke-width="2"/><path d="M18 16V12a4 4 0 018 0v4M30 16V12a4 4 0 018 0v4M28 30v4M24 34h8" stroke="#8FA382" stroke-width="2" stroke-linecap="round"/></svg>
+ </div>
  <h3>No vendors yet</h3>
  <p>Start building your trusted network by adding your first vendor.</p>
  <button class="btn-primary" onclick="openVendorModal()">

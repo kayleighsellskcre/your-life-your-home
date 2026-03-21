@@ -44,10 +44,10 @@
  .booking-section h2 {
  font-family: var(--font-heading);
  font-size: 1.15rem;
- color: #4a5240;
+ color: var(--charcoal-brown);
  margin-bottom: 1rem;
  padding-bottom: 0.75rem;
- border-bottom: 2px solid #b8973a;
+ border-bottom: 2px solid rgba(143,163,130,0.4);
  }
 
  .setup-steps {
@@ -68,7 +68,7 @@
  }
 
  .step-number {
- background: #b8973a;
+ background: var(--sage, #8FA382);
  color: white;
  width: 40px;
  height: 40px;
@@ -111,15 +111,15 @@
  }
 
  .info-box {
- background: linear-gradient(135deg, rgba(184, 151, 58, 0.1) 0%, rgba(184, 151, 58, 0.05) 100%);
- border-left: 4px solid #b8973a;
+ background: linear-gradient(135deg, rgba(143,163,130,0.1) 0%, rgba(143,163,130,0.05) 100%);
+ border-left: 4px solid var(--sage, #8FA382);
  border-radius: var(--border-radius);
  padding: 1.5rem;
  margin-bottom: 1.5rem;
  }
 
  .info-box h4 {
- color: #4a5240;
+ color: var(--charcoal-brown);
  margin-bottom: 0.5rem;
  font-weight: 600;
  }
@@ -151,7 +151,7 @@
  }
 
  .btn-primary {
- background: #4a5240;
+ background: var(--sage, #8FA382);
  color: var(--white);
  border: none;
  padding: 0.875rem 2rem;
@@ -165,14 +165,14 @@
  }
 
  .btn-primary:hover {
- background: #3a3f31;
+ background: var(--sage-dark, #6b8a5e);
  transform: translateY(-2px);
- box-shadow: 0 4px 12px rgba(74, 82, 64, 0.2);
+ box-shadow: 0 4px 12px rgba(143,163,130,0.3);
  }
 
  .coming-soon {
- background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
- border: 2px solid #667eea;
+ background: linear-gradient(135deg, rgba(143,163,130,0.1) 0%, rgba(246,242,232,0.5) 100%);
+ border: 2px solid rgba(143,163,130,0.35);
  border-radius: var(--border-radius-lg);
  padding: 2rem;
  text-align: center;
@@ -180,7 +180,7 @@
  }
 
  .coming-soon h3 {
- color: #667eea;
+ color: var(--sage, #8FA382);
  margin-bottom: 0.5rem;
  }
 
@@ -191,10 +191,18 @@
  }
 </style>
 
-<div class="booking-container">
- <div class="booking-hero">
- <h1>Booking &amp; Calendar</h1>
- <p>Let your clients self-schedule at a time that works for everyone.</p>
+<div class="booking-container ylh-page" style="padding-top:1.25rem;">
+ <div class="ylh-hero" style="margin-bottom:1.5rem;">
+ <div class="ylh-hero__text">
+ <div class="ylh-hero__eyebrow">Scheduling</div>
+ <h1 class="ylh-hero__title">Booking &amp; Calendar</h1>
+ <p class="ylh-hero__subtitle">Let your clients self-schedule at a time that works for everyone.</p>
+ </div>
+ {% if profile and profile.schedule_url %}
+ <div class="ylh-hero__actions">
+ <a href="{{ url_for('agent_settings_profile') }}" class="ylh-btn ylh-btn-ghost">Edit Calendar Link</a>
+ </div>
+ {% endif %}
  </div>
 
  {% if profile and profile.schedule_url %}
@@ -235,7 +243,7 @@
  <div class="step-number">1</div>
  <div class="step-content">
  <h3>Create a Free Calendly Account</h3>
- <p>Go to <a href="https://calendly.com" target="_blank" style="color:#b8973a;">calendly.com</a> and sign up with your Google or Outlook account. Takes about 2 minutes.</p>
+ <p>Go to <a href="https://calendly.com" target="_blank" style="color:var(--sage,#8FA382);">calendly.com</a> and sign up with your Google or Outlook account. Takes about 2 minutes.</p>
  </div>
  </li>
  <li>
@@ -249,7 +257,7 @@
  <div class="step-number">3</div>
  <div class="step-content">
  <h3>Paste Your Link into Settings</h3>
- <p>Copy your Calendly link (it looks like calendly.com/yourname) and paste it into the Schedule URL field in your <a href="{{ url_for('agent_settings_profile') }}" style="color:#b8973a;">Profile Settings</a>. Save, and your calendar goes live here instantly.</p>
+ <p>Copy your Calendly link (it looks like calendly.com/yourname) and paste it into the Schedule URL field in your <a href="{{ url_for('agent_settings_profile') }}" style="color:var(--sage,#8FA382);">Profile Settings</a>. Save, and your calendar goes live here instantly.</p>
  </div>
  </li>
  </ol>

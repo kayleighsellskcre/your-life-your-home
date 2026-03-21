@@ -187,10 +187,16 @@
  }
 </style>
 
-<div class="referrals-container">
- <div class="referrals-header">
- <h1>Your Referral Link</h1>
- <p>Share your link and new clients will be connected to you automatically.</p>
+<div class="referrals-container ylh-page" style="padding-top:1.25rem;">
+ <div class="ylh-hero">
+ <div class="ylh-hero__text">
+ <div class="ylh-hero__eyebrow">Growth Tools</div>
+ <h1 class="ylh-hero__title">Referral &amp; Growth</h1>
+ <p class="ylh-hero__subtitle">Share your link and new clients will be connected to you automatically.</p>
+ </div>
+ <div class="ylh-hero__actions">
+ <button class="ylh-btn ylh-btn-primary" onclick="copyReferralLink()">Copy My Link</button>
+ </div>
  </div>
 
  <!-- Referral Link Section -->
@@ -217,14 +223,14 @@
  </div>
  
  <!-- Stats -->
- <div class="stats-grid">
- <div class="stat-card">
- <h3>{{ stats.total_clients }}</h3>
- <p>Total Clients</p>
+ <div class="ylh-stats" style="margin-top:1.25rem;margin-bottom:0;">
+ <div class="ylh-stat">
+ <div class="ylh-stat__value">{{ stats.total_clients }}</div>
+ <div class="ylh-stat__label">Total Clients</div>
  </div>
- <div class="stat-card">
- <h3>{{ stats.clients_this_month }}</h3>
- <p>New This Month</p>
+ <div class="ylh-stat">
+ <div class="ylh-stat__value">{{ stats.clients_this_month }}</div>
+ <div class="ylh-stat__label">New This Month</div>
  </div>
  </div>
  </div>

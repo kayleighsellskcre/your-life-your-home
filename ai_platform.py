@@ -298,3 +298,59 @@ def ai_vendor_recommendation(transaction_stage: str, property_type: str, side: s
         max_tokens=150,
         temperature=0.5
     )
+
+
+def ai_client_portfolio_insight(agent_name: str, total_clients: int, clients_with_data: int,
+                                 clients_needing_followup: list, inactive_count: int) -> str:
+    """
+    Generate a concise portfolio intelligence summary for the clients page.
+    Highlights who needs attention and what the agent should prioritize.
+    """
+    followup_str = ", ".join(clients_needing_followup[:4]) if clients_needing_followup else "none identified"
+    prompt = (
+        f"Write a 2-sentence portfolio intelligence summary for {agent_name}, a real estate agent. "
+        f"Portfolio: {total_clients} total clients, {clients_with_data} with home data on file, "
+        f"{len(clients_needing_followup)} needing follow-up, {inactive_count} with no recent activity. "
+        f"Clients needing follow-up: {followup_str}. "
+        f"Be direct and actionable. Mention who to prioritize if names are available. "
+        f"Do not use em dashes or bullet points. No greeting."
+    )
+    return ai_complete(
+        prompt,
+        system="You are a real estate business coach giving a crisp portfolio summary.",
+        max_tokens=140,
+        temperature=0.6
+    )
+
+
+def ai_transaction_coordinator_summary(agent_name: str, transactions: list) -> str:
+    """
+    Generate a transaction coordinator summary highlighting urgent items.
+    transactions: list of dicts with keys: address, stage, client_name, close_date, side
+    Returns a 2-3 sentence summary of what needs attention.
+    """
+    if not transactions:
+        return ""
+    tx_lines = []
+    for t in transactions[:6]:
+        parts = [t.get("address", "Unknown address")]
+        if t.get("stage"):
+            parts.append(f"stage: {t['stage']}")
+        if t.get("close_date"):
+            parts.append(f"closes: {t['close_date']}")
+        if t.get("client_name"):
+            parts.append(f"client: {t['client_name']}")
+        tx_lines.append(" | ".join(parts))
+    tx_str = "; ".join(tx_lines)
+    prompt = (
+        f"You are a transaction coordinator for {agent_name}. "
+        f"Active transactions: {tx_str}. "
+        f"In 2-3 sentences, summarize what needs the most urgent attention today and flag any deals "
+        f"that are close to closing or stuck in an early stage. Be specific. No bullet points. No em dashes."
+    )
+    return ai_complete(
+        prompt,
+        system="You are a detail-oriented real estate transaction coordinator.",
+        max_tokens=160,
+        temperature=0.55
+    )

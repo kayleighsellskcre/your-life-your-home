@@ -11553,6 +11553,71 @@ def ai_dashboard_priorities_endpoint():
     return resp
 
 
+@app.route("/api/ai/clients/insights", methods=["POST"])
+def ai_clients_insights_endpoint():
+    """Return an AI portfolio intelligence summary for the clients page."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    from database import get_agent_clients, get_user_profile, get_contacts_needing_followup
+    from ai_platform import ai_client_portfolio_insight
+    profile = get_user_profile(user["id"]) or {}
+    profile_d = dict(profile) if profile else {}
+    agent_name = (profile_d.get("full_name") or user.get("name") or "there").split()[0]
+    clients = get_agent_clients(user["id"]) or []
+    clients_list = [dict(c) for c in clients]
+    total = len(clients_list)
+    with_data = sum(1 for c in clients_list if c.get("value_estimate"))
+    inactive = sum(1 for c in clients_list if not c.get("doc_count") and not c.get("project_count"))
+    followup_contacts = get_contacts_needing_followup(user["id"], days_threshold=21)
+    followup_names = [c.get("name", "") for c in followup_contacts[:4] if c.get("name")]
+    insight = ai_client_portfolio_insight(agent_name, total, with_data, followup_names, inactive)
+    if not insight:
+        insight = (
+            f"You have {total} clients, {with_data} with home data on file. "
+            + (f"Priority follow-ups: {', '.join(followup_names)}." if followup_names else "Stay consistent with monthly check-ins.")
+        )
+    resp = jsonify({"insight": insight})
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
+
+
+@app.route("/api/ai/transactions/coordinator", methods=["POST"])
+def ai_transactions_coordinator_endpoint():
+    """Return an AI transaction coordinator summary for the transactions page."""
+    user = get_current_user()
+    if not user:
+        return jsonify({"error": "Unauthorized"}), 401
+    from database import list_agent_transactions, get_user_profile
+    from ai_platform import ai_transaction_coordinator_summary
+    profile = get_user_profile(user["id"]) or {}
+    profile_d = dict(profile) if profile else {}
+    agent_name = (profile_d.get("full_name") or user.get("name") or "there").split()[0]
+    raw_txns = list_agent_transactions(user["id"]) or []
+    txns = []
+    for t in raw_txns[:8]:
+        td = dict(t) if not isinstance(t, dict) else t
+        txns.append({
+            "address": td.get("property_address") or "Unknown",
+            "stage": td.get("stage") or "",
+            "client_name": td.get("client_name") or "",
+            "close_date": td.get("close_date") or "",
+            "side": td.get("side") or "buyer",
+        })
+    summary = ai_transaction_coordinator_summary(agent_name, txns)
+    if not summary:
+        open_count = len(txns)
+        summary = (
+            f"You have {open_count} active transaction{'s' if open_count != 1 else ''}. "
+            "Review each for upcoming deadlines and make sure all parties are aligned."
+        ) if open_count else "No active transactions. A great time to prospect and grow your pipeline."
+    resp = jsonify({"summary": summary})
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
+
+
 @app.route("/api/ai/crm/draft-email", methods=["POST"])
 def ai_crm_draft_email():
     """Draft a personalized email for a CRM contact."""

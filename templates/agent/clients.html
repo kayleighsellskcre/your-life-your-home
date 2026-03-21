@@ -4,28 +4,9 @@
 <style>
 #clients-page { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; background: #F8F5F0; }
 
-.page-header {
- background: linear-gradient(135deg, #F0EBE4 0%, #EDE8DC 100%);
- border-bottom: 1px solid rgba(107,91,77,.18);
- padding: 1.25rem 1.5rem;
- display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem;
-}
-.page-header h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 400; color: #3D2E24; margin: 0; }
-.page-header p { font-size: .8rem; color: #6B5B4D; margin: .25rem 0 0; }
-
-.stat-bar {
- display: flex; gap: 1rem; padding: 1rem 1.5rem; background: white;
- border-bottom: 1px solid rgba(107,91,77,.1); flex-wrap: wrap;
-}
-.stat-pill {
- background: #F0EBE4; border-radius: 20px; padding: .3rem .875rem;
- font-size: .75rem; color: #6B5B4D; font-weight: 500;
-}
-.stat-pill strong { color: #3D2E24; }
-
 .client-grid {
  display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
- gap: 1rem; padding: 1.25rem 1.5rem;
+ gap: 1rem; padding: 0;
 }
 
 .client-card {
@@ -122,32 +103,57 @@
 .search-input:focus { border-color: #6B5B4D; }
 
 @media (max-width: 768px) {
- .client-grid { grid-template-columns: 1fr; padding: .875rem; }
- .page-header { padding: .875rem; }
- .stat-bar { padding: .75rem .875rem; }
+ .client-grid { grid-template-columns: 1fr; }
 }
 </style>
 
-<div id="clients-page">
- <div class="page-header">
- <div>
- <h1>My Clients</h1>
- <p>All linked homeowner clients, live portal data at a glance</p>
+<div id="clients-page" class="ylh-page">
+
+ <!-- Hero -->
+ <div class="ylh-hero">
+ <div class="ylh-hero__text">
+ <div class="ylh-hero__eyebrow">Client Portfolio</div>
+ <h1 class="ylh-hero__title">My Clients</h1>
+ <p class="ylh-hero__subtitle">All linked homeowner clients, live portal data at a glance</p>
  </div>
- <div class="search-bar">
- <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)">
- <a href="{{ url_for('agent_referrals') }}" class="btn-view" style="white-space:nowrap">+ Invite Client</a>
+ <div class="ylh-hero__actions">
+ <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)" style="border:1px solid rgba(143,163,130,.3);border-radius:10px;padding:.55rem .9rem;font-size:.82rem;background:white;color:#3D2E24;outline:none;min-width:200px;">
+ <a href="{{ url_for('agent_referrals') }}" class="ylh-btn ylh-btn-primary">+ Invite Client</a>
  </div>
  </div>
 
  {% if clients %}
- <div class="stat-bar">
- <div class="stat-pill"><strong>{{ clients|length }}</strong> Total Clients</div>
- <div class="stat-pill"><strong>{{ clients|selectattr('value_estimate')|list|length }}</strong> With Home Data</div>
- <div class="stat-pill"><strong>{{ clients|selectattr('doc_count', 'gt', 0)|list|length }}</strong> With Documents</div>
- <div class="stat-pill"><strong>{{ clients|selectattr('project_count', 'gt', 0)|list|length }}</strong> Active Projects</div>
+ <!-- Stats -->
+ <div class="ylh-stats">
+ <div class="ylh-stat">
+ <div class="ylh-stat__value">{{ clients|length }}</div>
+ <div class="ylh-stat__label">Total Clients</div>
+ </div>
+ <div class="ylh-stat">
+ <div class="ylh-stat__value">{{ clients|selectattr('value_estimate')|list|length }}</div>
+ <div class="ylh-stat__label">With Home Data</div>
+ </div>
+ <div class="ylh-stat">
+ <div class="ylh-stat__value">{{ clients|selectattr('doc_count', 'gt', 0)|list|length }}</div>
+ <div class="ylh-stat__label">Documents On File</div>
+ </div>
+ <div class="ylh-stat">
+ <div class="ylh-stat__value">{{ clients|selectattr('project_count', 'gt', 0)|list|length }}</div>
+ <div class="ylh-stat__label">Active Projects</div>
+ </div>
  </div>
  {% endif %}
+
+ <!-- AI Attention Panel -->
+ <div class="ylh-ai-panel" id="clientAiWrap">
+ <div class="ylh-ai-panel__header">
+ <span class="ylh-ai-panel__label">AI Client Intelligence</span>
+ <button class="ylh-btn ylh-btn-ghost" style="font-size:.75rem;padding:.35rem .85rem;" onclick="loadClientInsights(true)" id="clientAiRefreshBtn">Refresh</button>
+ </div>
+ <div class="ylh-ai-panel__content loading" id="clientAiContent">
+ <span class="ylh-spin"></span> Analyzing your client portfolio...
+ </div>
+ </div>
 
  {% if clients %}
  <div class="client-grid" id="clientGrid">
@@ -239,5 +245,32 @@ function filterClients(q) {
  card.style.display = (!q || name.includes(q) || addr.includes(q)) ? '' : 'none';
  });
 }
+
+function loadClientInsights(forceRefresh) {
+ var el = document.getElementById('clientAiContent');
+ var btn = document.getElementById('clientAiRefreshBtn');
+ if (!el) return;
+ el.className = 'ylh-ai-panel__content loading';
+ el.innerHTML = '<span class="ylh-spin"></span> Analyzing your client portfolio...';
+ if (btn) btn.disabled = true;
+ fetch('/api/ai/clients/insights', {
+ method: 'POST',
+ headers: {'Content-Type': 'application/json'},
+ body: JSON.stringify({t: Date.now()})
+ })
+ .then(function(r){ return r.json(); })
+ .then(function(d){
+ el.className = 'ylh-ai-panel__content';
+ el.textContent = d.insight || 'Your client portfolio looks good. Stay consistent with follow-ups to keep relationships strong.';
+ if (btn) btn.disabled = false;
+ })
+ .catch(function(){
+ el.className = 'ylh-ai-panel__content';
+ el.textContent = 'Client intelligence unavailable right now. Check back in a moment.';
+ if (btn) btn.disabled = false;
+ });
+}
+
+document.addEventListener('DOMContentLoaded', function(){ loadClientInsights(); });
 </script>
 {% endblock %}
