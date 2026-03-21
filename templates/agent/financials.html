@@ -446,7 +446,7 @@
 <div class="fin-header">
   <div>
     <h1 class="fin-header-title">Financials Hub</h1>
-    <p class="fin-header-sub">Track commissions, expenses, mileage, and income goals — powered by AI.</p>
+    <p class="fin-header-sub">Track commissions, expenses, mileage, and income goals for {{ year }}.</p>
   </div>
   <div class="year-select">
     <span>Year</span>
@@ -499,7 +499,7 @@
 <!-- Charts -->
 <div class="chart-row">
   <div class="chart-card">
-    <h4>Monthly Net Commission &mdash; {{ year }}</h4>
+    <h4>Monthly Net Commission / {{ year }}</h4>
     <canvas id="monthlyChart" height="95"></canvas>
   </div>
   <div class="chart-card">
@@ -515,8 +515,7 @@
 <div class="ai-command-center">
   <div class="ai-cc-header">
     <div class="ai-cc-title">
-      <h3>AI Financial Command Center</h3>
-      <span class="ai-badge">AI Powered</span>
+      <h3>Financial Command Center</h3>
     </div>
     <div class="ai-cc-tabs">
       <button class="ai-cc-tab active" onclick="switchAiTab('insights', this)">Smart Insights</button>
@@ -597,10 +596,10 @@
       <tbody>
         {% for c in commissions %}
         <tr>
-          <td style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.property_address or '&mdash;' }}</td>
-          <td>{{ c.client_name or '&mdash;' }}</td>
-          <td style="text-transform:capitalize;">{{ c.transaction_side or '&mdash;' }}</td>
-          <td>{{ c.close_date or '&mdash;' }}</td>
+          <td style="font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ c.property_address or '--' }}</td>
+          <td>{{ c.client_name or '--' }}</td>
+          <td style="text-transform:capitalize;">{{ c.transaction_side or '--' }}</td>
+          <td>{{ c.close_date or '--' }}</td>
           <td>${{ "{:,.0f}".format(c.sale_price or 0) }}</td>
           <td>{{ "{:.2f}".format(c.commission_rate or 0) }}%</td>
           <td>${{ "{:,.0f}".format(c.gross_commission or 0) }}</td>
@@ -653,9 +652,9 @@
       <tbody>
         {% for e in expenses %}
         <tr>
-          <td>{{ e.expense_date or '&mdash;' }}</td>
+          <td>{{ e.expense_date or '--' }}</td>
           <td><span class="badge" style="background:rgba(107,106,69,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
-          <td>{{ e.description or '&mdash;' }}</td>
+          <td>{{ e.description or '--' }}</td>
           <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
           <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
           <td>
@@ -709,10 +708,10 @@
       <tbody>
         {% for m in mileage_logs %}
         <tr>
-          <td>{{ m.trip_date or '&mdash;' }}</td>
-          <td>{{ m.from_location or '&mdash;' }}</td>
-          <td>{{ m.to_location or '&mdash;' }}</td>
-          <td>{{ m.purpose or '&mdash;' }}</td>
+          <td>{{ m.trip_date or '--' }}</td>
+          <td>{{ m.from_location or '--' }}</td>
+          <td>{{ m.to_location or '--' }}</td>
+          <td>{{ m.purpose or '--' }}</td>
           <td>{{ "{:,.1f}".format(m.miles or 0) }}</td>
           <td style="color:var(--green);font-weight:700;">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
           <td>
@@ -729,7 +728,7 @@
   <div class="empty-msg">
     <div class="big">&#x1f697;</div>
     No trips logged for {{ year }} yet.<br>
-    Every mile is worth ${{ irs_rate }} in deductions &mdash; don't leave money on the table!<br>
+    Every mile is worth ${{ irs_rate }} in deductions. Don't leave money on the table!<br>
     <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-mileage').classList.add('open')">Log First Trip</button>
   </div>
   {% endif %}
@@ -946,7 +945,7 @@
         <input type="text" name="purpose" placeholder="e.g. Showing — Smith family, Listing appt, Open house">
       </div>
       <div style="background:rgba(21,128,61,.07);border-radius:9px;padding:.7rem 1rem;font-size:.79rem;color:var(--green);margin-bottom:.5rem;">
-        IRS rate for {{ year }}: <strong>${{ irs_rate }}/mile</strong> &mdash; deduction calculated automatically.
+        IRS rate for {{ year }}: <strong>${{ irs_rate }}/mile</strong>. Deduction calculated automatically.
       </div>
       <div class="fm-actions">
         <button type="submit" class="fm-submit">Log Trip</button>
@@ -1116,12 +1115,12 @@ async function loadForecast() {
     const confClass = d.confidence || 'medium';
     cards.innerHTML = `
       <div class="ai-forecast-card">
-        <div class="val">${d.projected_gci ? '$'+Math.round(d.projected_gci).toLocaleString() : '&mdash;'}</div>
+        <div class="val">${d.projected_gci ? '$'+Math.round(d.projected_gci).toLocaleString() : '--'}</div>
         <div class="lbl">Projected GCI</div>
         <div class="ai-confidence ${confClass}">${confClass} confidence</div>
       </div>
       <div class="ai-forecast-card">
-        <div class="val">${d.projected_net ? '$'+Math.round(d.projected_net).toLocaleString() : '&mdash;'}</div>
+        <div class="val">${d.projected_net ? '$'+Math.round(d.projected_net).toLocaleString() : '--'}</div>
         <div class="lbl">Projected Net Income</div>
       </div>
       <div class="ai-forecast-card">
