@@ -306,6 +306,37 @@ app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
 
+# ── Custom Jinja2 filters ────────────────────────────────────────────────────
+@app.template_filter("min")
+def jinja_min(value):
+    """Return the minimum of an iterable (Jinja2 doesn't have |min built-in)."""
+    try:
+        return min(value)
+    except Exception:
+        return value
+
+@app.template_filter("max")
+def jinja_max(value):
+    """Return the maximum of an iterable."""
+    try:
+        return max(value)
+    except Exception:
+        return value
+
+@app.template_filter("strftime")
+def jinja_strftime(value, fmt="%b %d, %Y"):
+    """Format a date string or datetime object using strftime."""
+    if not value:
+        return ""
+    try:
+        if isinstance(value, str):
+            import dateutil.parser as _dp
+            value = _dp.parse(value)
+        return value.strftime(fmt)
+    except Exception:
+        return str(value)
+# ─────────────────────────────────────────────────────────────────────────────
+
 # Context processor to make professionals available to all homeowner templates
 def hex_to_color_name(hex_code):
     """Convert hex color code to official Sherwin-Williams color name."""
