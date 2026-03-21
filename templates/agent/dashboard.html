@@ -799,93 +799,108 @@
 </div>
 
 <script>
-// ── Inject greeting + date ──
+// ── Greeting + date (client-side correction) ──
 (function(){
  var h = new Date().getHours();
- var greeting = h < 12 ? 'morning' : (h < 17 ? 'afternoon' : 'evening');
+ var part = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
  var gEl = document.getElementById('dash-greeting');
- if(gEl) gEl.textContent = gEl.textContent.replace('morning', greeting);
+ if(gEl) gEl.textContent = gEl.textContent.replace(/Good \w+,/, 'Good ' + part + ',');
  var dEl = document.getElementById('today-date');
- if(dEl && !dEl.textContent.trim()){
+ if(dEl && !dEl.textContent.trim())
  dEl.textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
- }
 })();
+
+function escapeHtml(s){
+ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Spin animation for refresh buttons ──
+(function(){
+ var s = document.createElement('style');
+ s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+ document.head.appendChild(s);
+})();
+
+function setRefreshing(btn, state){
+ if(!btn) return;
+ var svg = btn.querySelector('svg');
+ btn.disabled = state;
+ if(svg) svg.style.animation = state ? 'spin 0.7s linear infinite' : '';
+}
 
 // ── AI Morning Briefing ──
 function loadBriefing(){
- var el = document.getElementById('briefing-text');
+ var el  = document.getElementById('briefing-text');
  var btn = document.getElementById('briefing-refresh-btn');
  if(!el) return;
  el.innerHTML = '<div class="briefing-skeleton" style="width:90%"></div><div class="briefing-skeleton" style="width:70%;margin-top:.4rem"></div>';
- if(btn) btn.disabled = true;
+ setRefreshing(btn, true);
  fetch('/api/ai/dashboard-briefing', {
  method: 'POST',
- headers: {'Content-Type':'application/json'},
- body: '{}'
+ headers: {'Content-Type':'application/json', 'Cache-Control':'no-cache'},
+ body: JSON.stringify({t: Date.now()})
  })
- .then(function(r){ return r.json(); })
+ .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
  .then(function(d){
  el.innerHTML = '';
- el.textContent = d.briefing || 'Have a great day, your pipeline is ready for you.';
+ el.textContent = d.briefing || 'Your pipeline is ready. Make today count!';
  el.style.opacity = '1';
- if(btn) btn.disabled = false;
+ setRefreshing(btn, false);
  })
  .catch(function(){
  el.innerHTML = '';
- el.textContent = 'Have a great day, your pipeline is ready for you.';
- if(btn) btn.disabled = false;
+ el.textContent = 'AI briefing unavailable right now. Your pipeline is ready when you are!';
+ el.style.opacity = '0.65';
+ setRefreshing(btn, false);
  });
 }
 
 // ── AI Today's Priorities ──
 function loadPriorities(){
  var list = document.getElementById('priorities-list');
- var btn = document.getElementById('priorities-refresh-btn');
+ var btn  = document.getElementById('priorities-refresh-btn');
  if(!list) return;
  list.innerHTML = '<div class="priority-skeleton"></div><div class="priority-skeleton" style="margin-top:.625rem"></div><div class="priority-skeleton" style="margin-top:.625rem"></div>';
- if(btn) btn.disabled = true;
+ setRefreshing(btn, true);
  fetch('/api/ai/dashboard-priorities', {
  method: 'POST',
- headers: {'Content-Type':'application/json'},
- body: '{}'
+ headers: {'Content-Type':'application/json', 'Cache-Control':'no-cache'},
+ body: JSON.stringify({t: Date.now()})
  })
- .then(function(r){ return r.json(); })
+ .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); })
  .then(function(d){
  list.innerHTML = '';
- var items = d.priorities || [];
- if(!items.length){
- items = ['Review your active deals for next steps','Follow up with your top leads today','Add notes after your last client calls'];
- }
+ var items = (d.priorities && d.priorities.length) ? d.priorities : [
+ 'Review your active deals for next steps',
+ 'Follow up with your top leads today',
+ 'Add 2 new contacts to your CRM pipeline'
+ ];
  items.slice(0,3).forEach(function(p, i){
  var div = document.createElement('div');
  div.className = 'priority-item';
  div.style.animationDelay = (i * 0.08) + 's';
- div.innerHTML = '<div class="priority-num">' + (i+1) + '</div><div class="priority-text">' + escapeHtml(p) + '</div>';
+ div.innerHTML = '<div class="priority-num">'+(i+1)+'</div><div class="priority-text">'+escapeHtml(p)+'</div>';
  list.appendChild(div);
  });
- if(btn) btn.disabled = false;
+ setRefreshing(btn, false);
  })
  .catch(function(){
  list.innerHTML = '';
- var defaults = ['Review your active deals for next steps','Follow up with your top leads today','Add notes after your last client calls'];
- defaults.forEach(function(p, i){
+ ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline'].forEach(function(p,i){
  var div = document.createElement('div');
  div.className = 'priority-item';
- div.innerHTML = '<div class="priority-num">' + (i+1) + '</div><div class="priority-text">' + escapeHtml(p) + '</div>';
+ div.innerHTML = '<div class="priority-num">'+(i+1)+'</div><div class="priority-text">'+escapeHtml(p)+'</div>';
  list.appendChild(div);
  });
- if(btn) btn.disabled = false;
+ setRefreshing(btn, false);
  });
 }
 
-function escapeHtml(s){
- return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+// ── Auto-load ──
+if(document.readyState === 'loading'){
+ document.addEventListener('DOMContentLoaded', function(){ loadBriefing(); loadPriorities(); });
+} else {
+ loadBriefing(); loadPriorities();
 }
-
-// ── Auto-load on page open ──
-document.addEventListener('DOMContentLoaded', function(){
- loadBriefing();
- loadPriorities();
-});
 </script>
 {% endblock %}

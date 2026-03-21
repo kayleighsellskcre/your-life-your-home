@@ -1908,22 +1908,42 @@ def get_agent_dashboard_metrics(user_id):
             "new_leads": 0,
             "active_transactions": 0,
             "followups_today": 0,
+            # aliases used by ai_dashboard_briefing
+            "active": 0,
+            "needs_followup": 0,
+            "pending_tasks": 0,
         }
+    from datetime import date as _date
     contacts = list_agent_contacts(user_id)
     transactions = get_agent_transactions(user_id)
-    
-    # Convert Row objects to dicts if needed
-    contacts_list = []
-    for c in contacts:
-        if hasattr(c, 'keys'):
-            contacts_list.append(dict(c))
-        else:
-            contacts_list.append(c)
-    
+
+    contacts_list = [dict(c) if hasattr(c, 'keys') else c for c in contacts]
+    today_str = _date.today().isoformat()
+
+    new_leads = sum((c.get("stage") or "") == "new" for c in contacts_list)
+    active_tx = len(transactions) if transactions else 0
+
+    # Proper follow-up count: contacts with next_action_date <= today OR last_touch > 30 days ago
+    followups = 0
+    for c in contacts_list:
+        nad = c.get("next_action_date") or ""
+        lt  = c.get("last_touch") or ""
+        stage = (c.get("stage") or "").lower()
+        if stage in ("closed", "hold", "past"):
+            continue
+        if nad and nad <= today_str:
+            followups += 1
+        elif not nad and not lt:
+            followups += 1  # never touched
+
     return {
-        "new_leads": sum((c1.get("stage") or "") == "new" for c1 in contacts_list),
-        "active_transactions": len(transactions) if transactions else 0,
-        "followups_today": max(len(contacts_list) // 2, 0),
+        "new_leads":          new_leads,
+        "active_transactions": active_tx,
+        "followups_today":    followups,
+        # aliases so ai_dashboard_briefing gets real numbers
+        "active":             active_tx,
+        "needs_followup":     followups,
+        "pending_tasks":      followups,
     }
 
 
@@ -5127,12 +5147,20 @@ def agent_dashboard():
         metrics = {"new_leads": 0, "active_transactions": 0, "followups_today": 0}
         transactions = []
 
+    from datetime import datetime as _dt
+    today_label = _dt.now().strftime("%A, %B %-d") if hasattr(_dt.now(), 'strftime') else ""
+    try:
+        today_label = _dt.now().strftime("%A, %B %-d")
+    except Exception:
+        today_label = _dt.now().strftime("%A, %B %d").replace(" 0", " ")
+
     return render_template(
         "agent/dashboard.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         metrics=metrics,
         transactions=transactions,
+        today_date=today_label,
     )
 
 @app.route("/lender", methods=["GET"])
@@ -11471,7 +11499,10 @@ def ai_dashboard_briefing_endpoint():
     followup_contacts = get_contacts_needing_followup(user["id"], days_threshold=14)
     followup_names = [c.get("name","") for c in followup_contacts[:5] if c.get("name")]
     briefing = ai_dashboard_briefing(agent_name, metrics, followup_names, [])
-    return jsonify({"briefing": briefing})
+    resp = jsonify({"briefing": briefing})
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
 
 
 @app.route("/api/ai/dashboard-priorities", methods=["POST"])
@@ -11516,7 +11547,10 @@ def ai_dashboard_priorities_endpoint():
             "Review your active transactions for next steps",
             "Add 2 new contacts to your CRM pipeline",
         ]
-    return jsonify({"priorities": priorities})
+    resp = jsonify({"priorities": priorities})
+    resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    resp.headers["Pragma"] = "no-cache"
+    return resp
 
 
 @app.route("/api/ai/crm/draft-email", methods=["POST"])
