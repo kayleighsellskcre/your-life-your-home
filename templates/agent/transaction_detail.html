@@ -946,7 +946,7 @@
 <!-- AI Task Suggestions Panel -->
 <div id="ai-task-panel" style="display:none;background:linear-gradient(135deg,#F8F5F0 0%,#F5F0EB 100%);border:1px solid rgba(107,91,77,.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;">
  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
- <span style="font-size:.8rem;font-weight:700;color:#6B5B4D;text-transform:uppercase;letter-spacing:.06em;"> AI Recommended Tasks</span>
+ <span style="font-size:.8rem;font-weight:700;color:#6B5B4D;text-transform:uppercase;letter-spacing:.06em;"> Recommended Tasks</span>
  <button onclick="document.getElementById('ai-task-panel').style.display='none'" style="background:none;border:none;font-size:1rem;color:#9A9472;cursor:pointer;">×</button>
  </div>
  <div id="ai-task-list" style="font-size:.82rem;color:#3D2E24;line-height:1.7;"></div>
@@ -1369,7 +1369,7 @@ function aiSuggestTasks() {
  + '<span>'+t+'</span></div>';
  }).join('');
  }).catch(function(){
- list.innerHTML = '<span style="opacity:.5;">AI unavailable. Please try again.</span>';
+ list.innerHTML = '<span style="opacity:.5;">Unavailable right now. Please try again.</span>';
  });
  }
 </script>

@@ -312,7 +312,7 @@
  onclick="event.preventDefault();this.closest('.ylh-dropdown').classList.toggle('active-drop');">Tools &#9662;</a>
  <div class="ylh-dropdown-menu">
  <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
- <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">AI Concierge</a>
+ <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">Concierge</a>
  </div>
  </div>
 
@@ -350,7 +350,7 @@
  <a href="{{ url_for('agent_financials') }}" class="ylh-mob-item {% if request.path.startswith('/agent/financials') %}active{% endif %}">Financials</a>
  <div class="ylh-mob-section">Tools</div>
  <a href="{{ url_for('agent_power_tools') }}" class="ylh-mob-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
- <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-mob-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">AI Concierge</a>
+ <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-mob-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">Concierge</a>
  <div class="ylh-mob-section">Account</div>
  <a href="{{ url_for('agent_settings_profile') }}" class="ylh-mob-item {% if request.path.startswith('/agent/settings') %}active{% endif %}">Settings</a>
  <a href="{{ url_for('agent_subscription') }}" class="ylh-mob-item" style="color:#8B6914;font-weight:600;">Upgrade Plan</a>

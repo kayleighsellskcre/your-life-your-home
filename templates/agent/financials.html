@@ -121,7 +121,7 @@
 <div class="fin-topbar">
   <div>
     <h1>Financials Hub</h1>
-    <p>Commissions &middot; Expenses &middot; Mileage &middot; Goals &middot; AI Insights</p>
+    <p>Commissions &middot; Expenses &middot; Mileage &middot; Goals &middot; Insights</p>
   </div>
   <form method="get" action="{{ url_for('agent_financials') }}" style="display:flex;align-items:center;gap:.5rem">
     <label style="font-size:.75rem;font-weight:600;color:#6B5B4D">Year:</label>
@@ -517,7 +517,7 @@
   <!-- AI INSIGHTS -->
   <div class="panel">
     <div class="panel-hd">
-      <span>AI Financial Insights</span>
+      <span>Financial Insights</span>
       <button class="btn-ai" onclick="loadInsights()" id="insights-btn" style="color:#6B5B4D;background:rgba(107,91,77,.08);border-color:rgba(107,91,77,.2)">Refresh</button>
     </div>
     <div class="panel-body">
@@ -533,7 +533,7 @@
   <!-- AI COACH -->
   <div class="panel">
     <div class="panel-hd">
-      <span>AI Financial Coach</span>
+      <span>Your Financial Coach</span>
       <button class="btn-ai" onclick="loadCoach()" id="coach-btn" style="color:#6B5B4D;background:rgba(107,91,77,.08);border-color:rgba(107,91,77,.2)">Get Coaching</button>
     </div>
     <div class="panel-body">
@@ -670,7 +670,7 @@ function loadInsights() {
   }).then(function(r){ return r.json(); }).then(function(d){
     var insights = d.insights || [];
     if (!insights.length) {
-      container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Ready when you are</div><div class="ai-ins-body">Add commissions and expenses to unlock personalized AI insights.</div></div>';
+      container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Ready when you are</div><div class="ai-ins-body">Add commissions and expenses to unlock personalized insights.</div></div>';
     } else {
       container.innerHTML = insights.map(function(ins){
         return '<div class="ai-insight '+(ins.type||'info')+'"><div class="ai-ins-title">'+ins.title+'</div><div class="ai-ins-body">'+ins.body+'</div></div>';

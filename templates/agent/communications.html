@@ -567,7 +567,7 @@
  <div class="form-group full-width">
  <label for="message_body" class="form-label">Message</label>
  <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;">
- <button type="button" onclick="aiWriteForMe()" style="display:inline-flex;align-items:center;gap:.3rem;background:#6B5B4D;color:#fff;border:none;border-radius:5px;padding:.3rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer;letter-spacing:.02em;"> AI Draft for Me</button>
+ <button type="button" onclick="aiWriteForMe()" style="display:inline-flex;align-items:center;gap:.3rem;background:#6B5B4D;color:#fff;border:none;border-radius:5px;padding:.3rem .75rem;font-size:.75rem;font-weight:600;cursor:pointer;letter-spacing:.02em;"> Write for Me</button>
  <span id="ai-comms-status" style="font-size:.72rem;color:#9A9472;font-style:italic;"></span>
  </div>
  <textarea id="message_body" name="body" class="form-textarea" rows="10" required></textarea>
@@ -1697,7 +1697,7 @@ document.addEventListener('keydown', function(e) {
 
 /* ─── AI FEATURES ─────────────────────────────── */
 
-// Add " AI Personalize" button to every template card
+// Add " Personalize" button to every template card
 document.addEventListener('DOMContentLoaded', function() {
  document.querySelectorAll('.template-card').forEach(function(card) {
  var actions = card.querySelector('.template-actions');
@@ -1732,11 +1732,11 @@ function aiPersonalizeCard(card, btn) {
  setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
  } else {
  btn.textContent = origText; btn.disabled = false;
- alert('AI could not personalize this template right now.');
+ alert('Could not personalize this template right now.');
  }
  }).catch(function(){
  btn.textContent = origText; btn.disabled = false;
- alert('AI unavailable. Please try again.');
+ alert('Unavailable right now. Please try again.');
  });
 }
 
@@ -1759,7 +1759,7 @@ function aiWriteForMe() {
  statusEl.textContent = d.email ? ' Draft ready, review and edit before sending.' : 'Could not draft.';
  setTimeout(function(){ statusEl.textContent = ''; }, 6000);
  }).catch(function(){
- statusEl.textContent = 'AI unavailable.';
+ statusEl.textContent = 'Unavailable right now.';
  setTimeout(function(){ statusEl.textContent = ''; }, 4000);
  });
 }

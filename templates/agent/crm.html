@@ -679,7 +679,7 @@
 <div id="aiEmailModal" class="cmod">
  <div class="cmod-box" style="max-width:560px;">
  <div class="cmod-head">
- AI Draft Email
+ Write Email
  <button class="cmod-x" onclick="document.getElementById('aiEmailModal').classList.remove('open')">×</button>
  </div>
  <div style="padding:1rem 1.25rem;">
@@ -1090,7 +1090,7 @@ function aiNextAction(id){
  '<strong>'+escHtml(d.action||'')+'</strong>'+
  (d.reason?'<span style="opacity:.65;margin-left:.4rem;"> -  '+escHtml(d.reason)+'</span>':'');
  }).catch(function(){
- strip.innerHTML='<span style="opacity:.5;">AI unavailable.</span>';
+ strip.innerHTML='<span style="opacity:.5;">Unavailable right now.</span>';
  });
 }
 

@@ -401,7 +401,7 @@
  <!-- AI Coordinator Panel -->
  <div class="ylh-ai-panel" id="txAiWrap" style="margin-bottom:1rem;">
  <div class="ylh-ai-panel__header">
- <span class="ylh-ai-panel__label">AI Transaction Coordinator</span>
+ <span class="ylh-ai-panel__label">Transaction Coordinator</span>
  <button class="ylh-btn ylh-btn-ghost" style="font-size:.75rem;padding:.35rem .85rem;" onclick="loadTxCoordinator(true)" id="txAiRefreshBtn">Refresh</button>
  </div>
  <div class="ylh-ai-panel__content loading" id="txAiContent">
@@ -473,7 +473,7 @@
  {% for tx in transactions %}
  <tr class="tx-row {% if loop.index is odd %}tx-row--odd{% endif %}"
  onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'"
- title="Open AI Transaction Coordinator">
+ title="Open Transaction Coordinator">
  <td class="tx-td tx-td--addr" title="{{ tx.property_address }}">{{ tx.property_address }}</td>
  <td class="tx-td" title="{{ tx.client_name }}">{{ tx.client_name }}</td>
  <td class="tx-td">
@@ -579,7 +579,7 @@ document.getElementById('addTxModal').addEventListener('click', function(e){
 // Check URL param to auto-open modal
 if(new URLSearchParams(window.location.search).get('add') === '1') openAddTx();
 
-// AI Transaction Coordinator
+// Transaction Coordinator
 function loadTxCoordinator(forceRefresh) {
  var el = document.getElementById('txAiContent');
  var btn = document.getElementById('txAiRefreshBtn');

@@ -296,11 +296,11 @@
  </div>
  </div>
 
- <!-- AI Listing Description -->
+ <!-- Listing Description -->
  <div style="background:linear-gradient(135deg,#F8F5F0 0%,#F5F0EB 100%);border:1px solid rgba(107,91,77,.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
  <div>
- <div style="font-size:.9rem;font-weight:700;color:#3D2E24;margin-bottom:.15rem;"> AI Listing Description Generator</div>
+ <div style="font-size:.9rem;font-weight:700;color:#3D2E24;margin-bottom:.15rem;"> Listing Description Generator</div>
  <div style="font-size:.78rem;color:#9A9472;">Generate a compelling, professional MLS description in seconds.</div>
  </div>
  <button onclick="document.getElementById('aiListingModal').style.display='flex'" style="display:inline-flex;align-items:center;gap:.35rem;background:#6B5B4D;color:#fff;border:none;border-radius:6px;padding:.45rem 1rem;font-size:.8rem;font-weight:600;cursor:pointer;letter-spacing:.02em;white-space:nowrap;"> Generate Description</button>
@@ -493,11 +493,11 @@
  copyBtn.style.display = 'inline-flex';
  document.getElementById('aiListingModal').style.display = 'none';
  } else {
- alert('AI could not generate a description. Please try again.');
+ alert('Could not generate a description. Please try again.');
  }
  }).catch(function(){
  btn.textContent = ' Generate'; btn.disabled = false;
- alert('AI unavailable. Please try again.');
+ alert('Unavailable right now. Please try again.');
  });
  });
 
@@ -511,11 +511,11 @@
  });
 </script>
 
-<!-- AI Listing Description Modal -->
+<!-- Listing Description Modal -->
 <div id="aiListingModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
  <div style="background:#fff;border-radius:10px;padding:1.5rem;max-width:520px;width:92%;max-height:90vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.15);">
  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
- <span style="font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;font-weight:500;color:#3D2E24;"> AI Listing Description</span>
+ <span style="font-family:'Playfair Display',Georgia,serif;font-size:1.1rem;font-weight:500;color:#3D2E24;"> Listing Description</span>
  <button onclick="document.getElementById('aiListingModal').style.display='none'" style="background:none;border:none;font-size:1.2rem;color:#9A9472;cursor:pointer;">×</button>
  </div>
  <form id="aiListingForm">
