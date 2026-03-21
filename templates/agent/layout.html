@@ -4,470 +4,378 @@
 
 {% block content %}
 <style>
- /* Integrated Header + Dashboard Navigation */
+ /* ── AGENT SUB-NAV ─────────────────────────────────────────── */
  .ylh-horizontal-nav {
- background: linear-gradient(135deg, #F0EBE4 0%, #E9E4D8 100%);
- border-bottom: 2px solid rgba(143, 168, 138, 0.15);
- box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+ background: linear-gradient(180deg, #F4F8F0 0%, #EDF4E7 100%);
+ border-bottom: 1.5px solid rgba(143,168,138,.22);
+ box-shadow: 0 2px 10px rgba(44,58,40,.06);
  position: sticky;
- top: 50px;
+ top: 48px;
  z-index: 999;
  }
  
+ /* ── NAV CONTAINER ───────────────────────────────────────────── */
  .ylh-nav-container {
  max-width: 1600px;
  margin: 0 auto;
  display: flex;
- align-items: center;
- justify-content: space-between;
- padding: 0 1rem;
- height: 60px;
+ align-items: stretch;
+ padding: 0 1.25rem;
+ height: 44px;
+ gap: 0;
  }
- 
+
+ /* ── DASHBOARD LABEL ─────────────────────────────────────────── */
  .ylh-nav-title {
  font-family: 'Playfair Display', Georgia, serif;
- font-size: 1.25rem;
- color: #8FA88A;
- font-weight: 400;
- letter-spacing: 0.02em;
- margin: 0 0 0 4rem;
+ font-size: 0.875rem;
+ color: #5C7050;
+ font-weight: 600;
+ letter-spacing: 0.01em;
  white-space: nowrap;
- transition: all 0.3s ease;
  flex-shrink: 0;
+ text-decoration: none;
+ display: flex;
+ align-items: center;
+ padding: 0 1.125rem 0 0;
+ margin-right: 0.5rem;
+ border-right: 1px solid rgba(143,168,138,.25);
+ transition: color .2s;
  }
- 
- .ylh-nav-title:hover {
- color: #3D2E24;
- transform: translateX(2px);
- }
- 
+ .ylh-nav-title:hover { color: #1E2A1A; }
+
+ /* ── SCROLLABLE ITEMS STRIP ──────────────────────────────────── */
  .ylh-nav-items {
  display: flex;
- align-items: center;
- gap: 0;
+ align-items: stretch;
  flex: 1;
- justify-content: flex-end;
- margin-right: 0.5rem;
- overflow: visible;
- position: relative;
+ overflow-x: auto;
+ overflow-y: hidden;
+ scrollbar-width: none;
+ -ms-overflow-style: none;
+ gap: 0;
  }
- 
+ .ylh-nav-items::-webkit-scrollbar { display: none; }
+
+ /* ── NAV LINKS ───────────────────────────────────────────────── */
+ .ylh-nav-link,
  .ylh-nav-button {
- background: transparent;
- border: none;
- color: #8FA88A;
- padding: 0.75rem 0.875rem;
- font-size: 0.7rem;
- font-weight: 500;
- text-transform: uppercase;
- letter-spacing: 0.05em;
- cursor: pointer;
- transition: all 0.3s ease;
- white-space: nowrap;
- border-bottom: 3px solid transparent;
- position: relative;
- min-height: 44px;
- display: flex;
+ display: inline-flex;
  align-items: center;
- }
- 
- .ylh-nav-button:hover {
- background: rgba(143, 168, 138, 0.1);
- color: #3D2E24;
- border-bottom-color: rgba(143, 168, 138, 0.5);
- }
- 
- .ylh-nav-button.active {
- background: rgba(143, 168, 138, 0.15);
- color: #3D2E24;
- border-bottom-color: #8FA88A;
+ color: #6A7D64;
+ padding: 0 .75rem;
+ font-size: .625rem;
  font-weight: 600;
- }
- 
- .ylh-nav-link {
- color: #8FA88A;
- padding: 0.75rem 0.875rem;
- font-size: 0.7rem;
- font-weight: 500;
  text-transform: uppercase;
- letter-spacing: 0.05em;
+ letter-spacing: .09em;
  text-decoration: none;
- transition: all 0.3s ease;
  white-space: nowrap;
- border-bottom: 3px solid transparent;
- display: inline-block;
+ flex-shrink: 0;
+ border: none;
+ background: transparent;
+ cursor: pointer;
+ border-bottom: 2.5px solid transparent;
+ transition: color .15s, border-color .15s, background .15s;
+ height: 44px;
  }
- 
- .ylh-nav-link:hover {
- background: rgba(143, 168, 138, 0.1);
- color: #3D2E24;
- border-bottom-color: rgba(143, 168, 138, 0.5);
+ .ylh-nav-link:hover,
+ .ylh-nav-button:hover {
+ color: #1E2A1A;
+ background: rgba(143,168,138,.1);
+ border-bottom-color: rgba(143,168,138,.45);
  }
- 
- .ylh-nav-link.active {
- background: rgba(143, 168, 138, 0.15);
- color: #3D2E24;
- border-bottom-color: #8FA88A;
- font-weight: 600;
+ .ylh-nav-link.active,
+ .ylh-nav-button.active {
+ color: #1E2A1A;
+ background: rgba(143,168,138,.14);
+ border-bottom-color: #5C7050;
+ font-weight: 700;
  }
- 
- /* Dropdown styles */
- .ylh-dropdown {
- position: relative;
+
+ /* ── SPECIAL BADGES ──────────────────────────────────────────── */
+ .ylh-nav-upgrade {
+ background: linear-gradient(135deg, rgba(184,151,58,.18) 0%, rgba(184,151,58,.08) 100%) !important;
+ border-bottom-color: #b8973a !important;
+ color: #8B6914 !important;
+ border-radius: 4px;
+ margin: auto .25rem;
+ height: 30px !important;
+ padding: 0 .75rem !important;
  }
- 
+ .ylh-nav-upgrade:hover { color: #6A4F0A !important; }
+
+ .ylh-nav-admin {
+ background: linear-gradient(135deg, rgba(102,126,234,.15) 0%, rgba(118,75,162,.12) 100%) !important;
+ border-bottom-color: #667eea !important;
+ color: #4a5fc1 !important;
+ border-radius: 4px;
+ margin: auto .25rem;
+ height: 30px !important;
+ padding: 0 .75rem !important;
+ }
+
+ /* ── DROPDOWN ────────────────────────────────────────────────── */
+ .ylh-dropdown { position: relative; display: inline-flex; align-items: stretch; }
  .ylh-dropdown-menu {
  position: absolute;
- top: 100%;
- left: 0;
- background: white;
- min-width: 220px;
- box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+ top: calc(100% + 2px);
+ right: 0;
+ background: #fff;
+ min-width: 190px;
+ border: 1px solid rgba(143,168,138,.25);
  border-radius: 0 0 8px 8px;
+ box-shadow: 0 8px 24px rgba(44,58,40,.12);
  opacity: 0;
  visibility: hidden;
- transform: translateY(-10px);
- transition: all 0.3s ease;
- z-index: 1000;
- overflow: visible;
+ transform: translateY(-6px);
+ transition: all .2s ease;
+ z-index: 1001;
  }
- 
- .ylh-dropdown:hover .ylh-dropdown-menu {
- opacity: 1;
- visibility: visible;
- transform: translateY(0);
+ .ylh-dropdown.active-drop .ylh-dropdown-menu {
+ opacity: 1; visibility: visible; transform: translateY(0);
  }
- 
  .ylh-dropdown-item {
  display: block;
- padding: 1rem 1.5rem;
- color: #3D2E24;
+ padding: .75rem 1.25rem;
+ color: #2C3A28;
  text-decoration: none;
- font-size: 0.85rem;
+ font-size: .8rem;
  font-weight: 400;
- letter-spacing: 0.03em;
- transition: all 0.2s ease;
+ letter-spacing: .02em;
+ transition: all .15s;
  border-left: 3px solid transparent;
  }
- 
  .ylh-dropdown-item:hover {
- background: #F0EBE4;
+ background: #F0F7EA;
  border-left-color: #8FA88A;
- padding-left: 1.75rem;
+ padding-left: 1.5rem;
  }
- 
  .ylh-dropdown-item.active {
- background: rgba(143, 168, 138, 0.1);
- border-left-color: #8FA88A;
+ background: rgba(143,168,138,.12);
+ border-left-color: #5C7050;
  font-weight: 600;
  }
- 
- /* Large Desktop - More Spacing */
+
+ /* ── MOBILE HAMBURGER ────────────────────────────────────────── */
+ .ylh-hamburger {
+ display: none;
+ align-items: center;
+ justify-content: center;
+ width: 36px;
+ height: 36px;
+ background: transparent;
+ border: 1px solid rgba(143,168,138,.3);
+ border-radius: 6px;
+ cursor: pointer;
+ flex-shrink: 0;
+ margin: auto 0;
+ gap: 0;
+ flex-direction: column;
+ transition: all .15s;
+ }
+ .ylh-hamburger span {
+ display: block;
+ width: 16px;
+ height: 1.5px;
+ background: #5C7050;
+ transition: all .2s;
+ border-radius: 2px;
+ margin: 2px 0;
+ }
+ .ylh-hamburger:hover { background: rgba(143,168,138,.12); }
+
+ /* ── MOBILE DRAWER ───────────────────────────────────────────── */
+ .ylh-mob-overlay {
+ display: none;
+ position: fixed;
+ inset: 0;
+ background: rgba(30,42,26,.45);
+ z-index: 9998;
+ backdrop-filter: blur(3px);
+ }
+ .ylh-mob-overlay.open { display: block; }
+
+ .ylh-mob-drawer {
+ position: fixed;
+ bottom: 0; left: 0; right: 0;
+ background: #fff;
+ border-radius: 18px 18px 0 0;
+ box-shadow: 0 -6px 30px rgba(44,58,40,.18);
+ z-index: 9999;
+ max-height: 75vh;
+ overflow-y: auto;
+ transform: translateY(100%);
+ transition: transform .28s cubic-bezier(.4,0,.2,1);
+ padding-bottom: env(safe-area-inset-bottom, 16px);
+ }
+ .ylh-mob-drawer.open { transform: translateY(0); }
+
+ .ylh-mob-drawer-handle {
+ width: 36px; height: 4px;
+ background: rgba(143,168,138,.4);
+ border-radius: 2px;
+ margin: 10px auto 14px;
+ }
+
+ .ylh-mob-drawer-title {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.1rem; font-weight: 600;
+ color: #1E2A1A;
+ padding: 0 1.25rem .875rem;
+ border-bottom: 1px solid rgba(143,168,138,.15);
+ margin: 0;
+ }
+
+ .ylh-mob-item {
+ display: flex; align-items: center;
+ padding: .875rem 1.25rem;
+ color: #2C3A28;
+ text-decoration: none;
+ font-size: .9rem; font-weight: 500;
+ border-bottom: 1px solid rgba(143,168,138,.08);
+ transition: background .12s;
+ }
+ .ylh-mob-item:hover { background: #F0F7EA; }
+ .ylh-mob-item.active {
+ background: #EBF4E3;
+ color: #1E2A1A;
+ font-weight: 700;
+ border-left: 3px solid #5C7050;
+ padding-left: calc(1.25rem - 3px);
+ }
+ .ylh-mob-item:last-child { border-bottom: none; }
+
+ .ylh-mob-section {
+ font-size: .6rem; font-weight: 700;
+ text-transform: uppercase; letter-spacing: .1em;
+ color: #8FA88A;
+ padding: .875rem 1.25rem .25rem;
+ }
+
+ /* ── RESPONSIVE ──────────────────────────────────────────────── */
  @media (min-width: 1400px) {
- .ylh-nav-link,
- .ylh-nav-button {
- padding: 0.75rem 1rem;
- font-size: 0.75rem;
+ .ylh-nav-link, .ylh-nav-button { font-size: .68rem; padding: 0 .875rem; }
+ .ylh-nav-title { font-size: .95rem; }
+ .ylh-nav-container { padding: 0 1.75rem; }
  }
- 
- .ylh-nav-title {
- font-size: 1.5rem;
- margin: 0 0 0 5rem;
- }
- 
- .ylh-nav-container {
- padding: 0 2rem;
- }
- }
- 
- /* Medium Desktop - Compact but Readable */
- @media (min-width: 1024px) and (max-width: 1399px) {
- .ylh-nav-link,
- .ylh-nav-button {
- padding: 0.75rem 0.75rem;
- font-size: 0.68rem;
- }
- }
- 
- /* Small Desktop / Large Tablet - Very Compact */
- @media (min-width: 769px) and (max-width: 1023px) {
- .ylh-nav-link,
- .ylh-nav-button {
- padding: 0.75rem 0.625rem;
- font-size: 0.65rem;
- letter-spacing: 0.03em;
- }
- 
- .ylh-nav-title {
- font-size: 1.1rem;
- margin: 0 0 0 3.75rem;
- }
- 
- .ylh-nav-container {
- padding: 0 0.75rem;
- }
- }
- 
- /* Mobile Responsive - Ultra Skinny & Luxurious */
+
  @media (max-width: 768px) {
- .ylh-horizontal-nav {
- top: 0 !important;
- border-bottom: 1px solid rgba(143, 168, 138, 0.15) !important;
- box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
- background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%) !important;
+ .ylh-horizontal-nav { top: 44px !important; }
+ .ylh-nav-container { height: 42px; padding: 0 .875rem; }
+ .ylh-nav-items { display: none !important; }
+ .ylh-hamburger { display: inline-flex !important; }
  }
- 
- .ylh-nav-container {
- padding: 0.375rem 0.875rem !important;
- flex-direction: row !important;
- height: 44px !important;
- min-height: 44px !important;
- max-height: 44px !important;
- align-items: center !important;
- justify-content: space-between !important;
- gap: 0.5rem !important;
- }
- 
- .ylh-nav-title {
- font-size: 0.875rem !important;
- font-weight: 600 !important;
- margin: 0 !important;
- color: #8FA88A !important;
- letter-spacing: 0.03em !important;
- white-space: nowrap !important;
- flex-shrink: 0 !important;
- }
- 
- .ylh-nav-items {
- width: auto !important;
- flex: 1 !important;
- justify-content: flex-end !important;
- flex-wrap: nowrap !important;
- gap: 0.25rem !important;
- overflow-x: auto !important;
- overflow-y: hidden !important;
- -webkit-overflow-scrolling: touch !important;
- scrollbar-width: none !important;
- -ms-overflow-style: none !important;
- }
- 
- .ylh-nav-items::-webkit-scrollbar {
- display: none !important;
- }
- 
- .ylh-nav-button,
- .ylh-nav-link {
- padding: 0.375rem 0.625rem !important;
- font-size: 0.7rem !important;
- letter-spacing: 0.04em !important;
- min-height: 32px !important;
- height: 32px !important;
- border-bottom: 2px solid transparent !important;
- white-space: nowrap !important;
- flex-shrink: 0 !important;
- border-radius: 6px !important;
- transition: all 0.2s ease !important;
- }
- 
- .ylh-nav-button:hover,
- .ylh-nav-link:hover {
- background: rgba(143, 168, 138, 0.08) !important;
- border-bottom-color: transparent !important;
- }
- 
- .ylh-nav-button.active,
- .ylh-nav-link.active {
- background: rgba(143, 168, 138, 0.12) !important;
- border-bottom-color: #8FA88A !important;
- font-weight: 600 !important;
- }
- 
- /* Dropdowns - Mobile Friendly */
- .ylh-dropdown {
- position: relative !important;
- }
- 
- .ylh-dropdown-menu {
- position: fixed !important;
- top: auto !important;
- bottom: 0 !important;
- left: 0 !important;
- right: 0 !important;
- width: 100% !important;
- min-width: 100% !important;
- max-height: 60vh !important;
- border-radius: 16px 16px 0 0 !important;
- box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15) !important;
- transform: translateY(100%) !important;
- opacity: 1 !important;
- visibility: visible !important;
- overflow-y: auto !important;
- z-index: 10000 !important;
- background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%) !important;
- backdrop-filter: blur(20px) !important;
- }
- 
- .ylh-dropdown.active .ylh-dropdown-menu {
- transform: translateY(0) !important;
- }
- 
- /* Backdrop overlay for mobile dropdowns */
- .ylh-dropdown.active::before {
- content: '' !important;
- position: fixed !important;
- top: 0 !important;
- left: 0 !important;
- right: 0 !important;
- bottom: 0 !important;
- background: rgba(61, 46, 36, 0.4) !important;
- z-index: 9999 !important;
- backdrop-filter: blur(4px) !important;
- }
- 
- .ylh-dropdown-item {
- padding: 1rem 1.25rem !important;
- font-size: 0.9rem !important;
- min-height: 52px !important;
- border-left: none !important;
- border-bottom: 1px solid rgba(143, 168, 138, 0.1) !important;
- }
- 
- .ylh-dropdown-item:last-child {
- border-bottom: none !important;
- }
- }
- 
- /* Extra Small - Even Skinnier */
+
  @media (max-width: 480px) {
- .ylh-nav-container {
- padding: 0.3125rem 0.75rem !important;
- height: 40px !important;
- min-height: 40px !important;
- max-height: 40px !important;
- }
- 
- .ylh-nav-title {
- font-size: 0.8rem !important;
- }
- 
- .ylh-nav-button,
- .ylh-nav-link {
- padding: 0.3125rem 0.5rem !important;
- font-size: 0.65rem !important;
- min-height: 28px !important;
- height: 28px !important;
- }
+ .ylh-nav-title { font-size: .8rem; }
+ .ylh-nav-container { padding: 0 .75rem; height: 40px; }
  }
 </style>
 
-<nav class="ylh-horizontal-nav">
+<nav class="ylh-horizontal-nav" id="agentNav">
  <div class="ylh-nav-container">
- <a href="{{ url_for('agent_dashboard') }}" class="ylh-nav-title" style="text-decoration: none; cursor: pointer;">
- Agent Dashboard
- </a>
- 
+ <a href="{{ url_for('agent_dashboard') }}" class="ylh-nav-title">Agent Dashboard</a>
+
  <div class="ylh-nav-items">
- <a href="{{ url_for('agent_crm') }}" 
- class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">
- CRM
- </a>
+ <a href="{{ url_for('agent_crm') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/crm') %}active{% endif %}">CRM</a>
 
  <a href="{{ url_for('agent_clients') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/clients') %}active{% endif %}"
- style="{% if request.path.startswith('/agent/clients') %}{% else %}position:relative{% endif %}">
- Clients
- </a>
- 
- <a href="{{ url_for('agent_transactions') }}" 
- class="ylh-nav-link {% if request.path.startswith('/agent/transactions') %}active{% endif %}">
- Transactions
- </a>
- 
- <a href="{{ url_for('agent_communications') }}" 
- class="ylh-nav-link {% if request.path.startswith('/agent/communications') %}active{% endif %}">
- Communications
- </a>
- 
- <a href="{{ url_for('agent_marketing_hub_global') }}" 
- class="ylh-nav-link {% if request.path == url_for('agent_marketing_hub_global') or 'marketing-hub' in request.path %}active{% endif %}">
- Marketing Hub
- </a>
- 
+ class="ylh-nav-link {% if request.path.startswith('/agent/clients') %}active{% endif %}">Clients</a>
+
+ <a href="{{ url_for('agent_transactions') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/transactions') %}active{% endif %}">Transactions</a>
+
+ <a href="{{ url_for('agent_communications') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/communications') %}active{% endif %}">Communications</a>
+
+ <a href="{{ url_for('agent_marketing_hub_global') }}"
+ class="ylh-nav-link {% if 'marketing-hub' in request.path or request.path == url_for('agent_marketing_hub_global') %}active{% endif %}">Marketing Hub</a>
+
  <a href="{{ url_for('agent_referrals') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">
- Referrals
- </a>
+ class="ylh-nav-link {% if request.path.startswith('/agent/referrals') %}active{% endif %}">Referrals</a>
 
  <a href="{{ url_for('agent_vendors') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/vendors') %}active{% endif %}">
- Vendors
- </a>
+ class="ylh-nav-link {% if request.path.startswith('/agent/vendors') %}active{% endif %}">Vendors</a>
 
  <a href="{{ url_for('agent_booking') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/booking') %}active{% endif %}">
- Booking
- </a>
+ class="ylh-nav-link {% if request.path.startswith('/agent/booking') %}active{% endif %}">Booking</a>
 
  <a href="{{ url_for('agent_contests') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/contests') %}active{% endif %}">
- Contests
- </a>
+ class="ylh-nav-link {% if request.path.startswith('/agent/contests') %}active{% endif %}">Contests</a>
 
  <a href="{{ url_for('agent_financials') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/financials') %}active{% endif %}">
- Financials
- </a>
+ class="ylh-nav-link {% if request.path.startswith('/agent/financials') %}active{% endif %}">Financials</a>
 
- <!-- Tools dropdown: Power Tools + AI Concierge -->
- <div class="ylh-dropdown" style="display:inline-block;position:relative;">
+ <div class="ylh-dropdown">
  <a href="#" class="ylh-nav-link {% if request.path == url_for('agent_power_tools') or request.path.startswith('/agent/concierge') %}active{% endif %}"
- onclick="event.preventDefault();this.parentElement.classList.toggle('active-drop');"
- style="user-select:none;">
- Tools ▾
- </a>
- <div class="ylh-dropdown-menu" style="right:0;left:auto;min-width:200px;">
- <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">
- Power Tools
- </a>
- <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">
- AI Concierge
- </a>
+ onclick="event.preventDefault();this.closest('.ylh-dropdown').classList.toggle('active-drop');">Tools &#9662;</a>
+ <div class="ylh-dropdown-menu">
+ <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
+ <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">AI Concierge</a>
  </div>
  </div>
- 
- {% if current_user and current_user.get('role') == 'admin' %}
- <a href="{{ url_for('admin_settings') }}"
- class="ylh-nav-link {% if 'admin' in request.path %}active{% endif %}"
- style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%); border-radius: 4px; border-bottom: 3px solid #667eea;">
- Admin
- </a>
- {% endif %}
-
- <a href="{{ url_for('agent_subscription') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/subscription') %}active{% endif %}"
- style="background: linear-gradient(135deg, rgba(184, 151, 58, 0.15) 0%, rgba(184, 151, 58, 0.08) 100%); border-radius: 4px; border-bottom: 3px solid #b8973a;">
- Upgrade
- </a>
 
  <a href="{{ url_for('agent_settings_profile') }}"
- class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">
- Settings
- </a>
+ class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">Settings</a>
+
+ {% if current_user and current_user.get('role') == 'admin' %}
+ <a href="{{ url_for('admin_settings') }}" class="ylh-nav-link ylh-nav-admin {% if 'admin' in request.path %}active{% endif %}">Admin</a>
+ {% endif %}
+
+ <a href="{{ url_for('agent_subscription') }}" class="ylh-nav-link ylh-nav-upgrade {% if request.path.startswith('/agent/subscription') %}active{% endif %}">Upgrade</a>
  </div>
+
+ <!-- Mobile hamburger -->
+ <button class="ylh-hamburger" id="agentHamburger" aria-label="Open menu">
+ <span></span><span></span><span></span>
+ </button>
  </div>
 </nav>
 
+<!-- Mobile overlay + drawer -->
+<div class="ylh-mob-overlay" id="mobOverlay"></div>
+<div class="ylh-mob-drawer" id="mobDrawer">
+ <div class="ylh-mob-drawer-handle"></div>
+ <p class="ylh-mob-drawer-title">Agent Dashboard</p>
+ <a href="{{ url_for('agent_crm') }}" class="ylh-mob-item {% if request.path.startswith('/agent/crm') %}active{% endif %}">CRM</a>
+ <a href="{{ url_for('agent_clients') }}" class="ylh-mob-item {% if request.path.startswith('/agent/clients') %}active{% endif %}">Clients</a>
+ <a href="{{ url_for('agent_transactions') }}" class="ylh-mob-item {% if request.path.startswith('/agent/transactions') %}active{% endif %}">Transactions</a>
+ <a href="{{ url_for('agent_communications') }}" class="ylh-mob-item {% if request.path.startswith('/agent/communications') %}active{% endif %}">Communications</a>
+ <a href="{{ url_for('agent_marketing_hub_global') }}" class="ylh-mob-item {% if 'marketing-hub' in request.path %}active{% endif %}">Marketing Hub</a>
+ <a href="{{ url_for('agent_referrals') }}" class="ylh-mob-item {% if request.path.startswith('/agent/referrals') %}active{% endif %}">Referrals</a>
+ <a href="{{ url_for('agent_vendors') }}" class="ylh-mob-item {% if request.path.startswith('/agent/vendors') %}active{% endif %}">Vendors</a>
+ <a href="{{ url_for('agent_booking') }}" class="ylh-mob-item {% if request.path.startswith('/agent/booking') %}active{% endif %}">Booking</a>
+ <a href="{{ url_for('agent_contests') }}" class="ylh-mob-item {% if request.path.startswith('/agent/contests') %}active{% endif %}">Contests</a>
+ <a href="{{ url_for('agent_financials') }}" class="ylh-mob-item {% if request.path.startswith('/agent/financials') %}active{% endif %}">Financials</a>
+ <div class="ylh-mob-section">Tools</div>
+ <a href="{{ url_for('agent_power_tools') }}" class="ylh-mob-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
+ <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-mob-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">AI Concierge</a>
+ <div class="ylh-mob-section">Account</div>
+ <a href="{{ url_for('agent_settings_profile') }}" class="ylh-mob-item {% if request.path.startswith('/agent/settings') %}active{% endif %}">Settings</a>
+ <a href="{{ url_for('agent_subscription') }}" class="ylh-mob-item" style="color:#8B6914;font-weight:600;">Upgrade Plan</a>
+ {% if current_user and current_user.get('role') == 'admin' %}
+ <a href="{{ url_for('admin_settings') }}" class="ylh-mob-item">Admin</a>
+ {% endif %}
+</div>
+
 <script>
-/* Close Tools dropdown when clicking outside */
-document.addEventListener('click', function(e) {
- document.querySelectorAll('.ylh-dropdown.active-drop').forEach(function(d) {
- if (!d.contains(e.target)) d.classList.remove('active-drop');
+(function(){
+ var btn = document.getElementById('agentHamburger');
+ var overlay = document.getElementById('mobOverlay');
+ var drawer = document.getElementById('mobDrawer');
+ function openDrawer(){ overlay.classList.add('open'); drawer.classList.add('open'); }
+ function closeDrawer(){ overlay.classList.remove('open'); drawer.classList.remove('open'); }
+ if(btn){ btn.addEventListener('click', function(){ drawer.classList.contains('open') ? closeDrawer() : openDrawer(); }); }
+ if(overlay){ overlay.addEventListener('click', closeDrawer); }
+
+ /* Close desktop dropdowns on outside click */
+ document.addEventListener('click', function(e){
+ document.querySelectorAll('.ylh-dropdown.active-drop').forEach(function(d){
+ if(!d.contains(e.target)) d.classList.remove('active-drop');
  });
-});
-/* Show dropdown menu when active-drop */
-document.querySelectorAll('.ylh-dropdown').forEach(function(d) {
- d.addEventListener('mouseleave', function(){ d.classList.remove('active-drop'); });
-});
+ });
+})();
 </script>
 
 <div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;" class="agent-content-wrapper">
