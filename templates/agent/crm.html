@@ -919,6 +919,8 @@ function closeAddModal(){
 document.getElementById('addModal').addEventListener('click', function(e){
  if(e.target===this) closeAddModal();
 });
+// Auto-open add modal when arriving from ?add=1 (e.g. from Transactions page)
+if(new URLSearchParams(window.location.search).get('add') === '1') openAddModal();
 
 /* ── Inline Last-Touch Edit ── */
 function startLtEdit(id){

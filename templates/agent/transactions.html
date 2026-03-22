@@ -392,6 +392,7 @@
  <p class="ylh-page-hd__sub">All active and recent deals, organized by stage</p>
  <div class="ylh-page-hd__actions">
  <span style="font-size:.78rem;color:#9A9472;font-weight:600;background:rgba(107,91,77,.1);border-radius:10px;padding:.2rem .7rem;">{{ transactions|length if transactions else 0 }} deals</span>
+ <a href="{{ url_for('agent_crm') }}?add=1" class="t-btn" style="height:34px;padding:0 1rem;font-size:.8rem;background:#fff;color:#5C7050;border-color:rgba(143,168,138,.5);">+ Add Client to CRM</a>
  <button class="t-btn t-btn--solid" style="height:34px;padding:0 1rem;font-size:.8rem;" onclick="openAddTx()">+ New Transaction</button>
  </div>
  </div>
