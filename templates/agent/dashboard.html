@@ -42,40 +42,34 @@
 }
 .lux-card:hover { box-shadow: 0 6px 28px rgba(68,60,54,.1); }
 
-.lux-card-hd {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: .9rem 1.1rem .65rem;
-  border-bottom: 1px solid rgba(159,129,90,.12);
-  text-align: center;
-  gap: .3rem;
-}
-.lux-card-title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2rem;
-  font-weight: 600;
-  color: #443c36;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: .45rem;
-  letter-spacing: -.01em;
-}
-.lux-card-body { padding: .75rem 1.1rem 1rem; }
-
-/* ── TODAY'S PRIORITIES ── */
+.lux-card-hd,
 .priorities-hd {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  min-height: 82px;
   padding: .9rem 1.1rem .65rem;
-  border-bottom: 1px solid rgba(200,180,151,.12);
+  border-bottom: 1px solid rgba(159,129,90,.12);
   text-align: center;
+  gap: .3rem;
+  box-sizing: border-box;
 }
+.lux-card-title {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 2rem !important;
+  font-weight: 600 !important;
+  color: #443c36 !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .45rem !important;
+  letter-spacing: -.01em !important;
+}
+.lux-card-body { padding: .75rem 1.1rem 1rem; }
+
+/* ── TODAY'S PRIORITIES ── */
 .priority-skeleton {
   height: 50px;
   background: linear-gradient(90deg,rgba(159,129,90,.06) 0%,rgba(159,129,90,.11) 50%,rgba(159,129,90,.06) 100%);
