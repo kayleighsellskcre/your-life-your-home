@@ -101,41 +101,57 @@
 
 /* ── TOOLBAR ─────────────────────────────── */
 .toolbar{
- background:linear-gradient(135deg,#faf6f0 0%,#f5f0e6 60%,#fff 100%);
- border-bottom:1px solid rgba(159,129,90,.14);
- padding:.75rem 1.5rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;
- box-shadow:0 2px 6px rgba(68,60,54,.04);
+ background:#faf8f4;
+ border-bottom:1px solid rgba(159,129,90,.1);
+ padding:.7rem 1.5rem;
+ display:flex;gap:.5rem;align-items:center;flex-wrap:nowrap;
 }
-.toolbar-search{display:flex!important;gap:.375rem!important;flex:1!important;min-width:200px!important;}
-.t-inp{
- height:38px!important;padding:0 .9rem!important;
- border:1.5px solid rgba(159,129,90,.28)!important;border-radius:10px!important;
- font-size:.82rem!important;color:#443c36!important;background:#fff!important;
- outline:none!important;flex:1!important;min-width:160px!important;
- box-shadow:0 1px 4px rgba(68,60,54,.04)!important;
- transition:border-color .2s,box-shadow .2s!important;
+.toolbar-search{
+ display:flex!important;gap:0!important;
+ flex:1!important;min-width:0!important;max-width:520px!important;
+ background:#fff!important;
+ border:1.5px solid rgba(159,129,90,.28)!important;
+ border-radius:999px!important;
+ overflow:hidden!important;
+ box-shadow:0 1px 6px rgba(68,60,54,.05)!important;
+ transition:box-shadow .2s,border-color .2s!important;
 }
-.t-inp:focus{border-color:#9f815a!important;box-shadow:0 0 0 3px rgba(159,129,90,.12)!important;}
-.t-sel{
+.toolbar-search:focus-within{
+ border-color:#9f815a!important;
+ box-shadow:0 0 0 3px rgba(159,129,90,.1)!important;
+}
+/* ID-level specificity to beat the hard reset on inputs */
+#crm .t-inp{
+ height:40px!important;padding:0 1rem!important;
+ border:none!important;border-radius:0!important;
+ font-size:.85rem!important;color:#443c36!important;background:transparent!important;
+ outline:none!important;flex:1!important;min-width:0!important;
+ box-shadow:none!important;white-space:normal!important;
+}
+#crm .t-inp::placeholder{ color:#a89880!important; }
+#crm .t-go{
+ height:40px!important;padding:0 1.25rem!important;
+ background:#9f815a!important;
+ color:#f0ebe0!important;border:none!important;
+ border-radius:999px!important;font-size:.8rem!important;font-weight:700!important;
+ cursor:pointer!important;flex-shrink:0!important;
+ letter-spacing:.04em!important;transition:background .2s!important;
+ width:auto!important;min-height:unset!important;text-transform:uppercase!important;
+}
+#crm .t-go:hover{ background:#8a6e4a!important; }
+.toolbar-selects{ display:flex;gap:.4rem;flex-shrink:0;align-items:center;margin-left:auto; }
+/* ID-level specificity to beat the hard reset on selects */
+#crm .t-sel{
  height:38px!important;padding:0 .75rem!important;
- border:1.5px solid rgba(159,129,90,.28)!important;border-radius:10px!important;
- font-size:.8rem!important;color:#443c36!important;
+ border:1.5px solid rgba(159,129,90,.25)!important;border-radius:999px!important;
+ font-size:.78rem!important;color:#5c4e42!important;
  background:#fff!important;
  cursor:pointer!important;outline:none!important;flex-shrink:0!important;
  box-shadow:0 1px 4px rgba(68,60,54,.04)!important;
- transition:border-color .2s!important;
+ transition:border-color .2s!important;width:auto!important;
+ font-weight:600!important;
 }
-.t-sel:focus{border-color:#9f815a!important;box-shadow:0 0 0 3px rgba(159,129,90,.1)!important;}
-.t-go{
- height:38px!important;padding:0 1.2rem!important;
- background:#9f815a!important;
- color:#f0ebe0!important;border:none!important;
- border-radius:10px!important;font-size:.8rem!important;font-weight:700!important;
- cursor:pointer!important;flex-shrink:0!important;
- box-shadow:0 2px 8px rgba(159,129,90,.25)!important;
- transition:all .2s!important;letter-spacing:.02em!important;
-}
-.t-go:hover{background:#8a6e4a!important;transform:translateY(-1px)!important;}
+#crm .t-sel:focus{ border-color:#9f815a!important;box-shadow:0 0 0 3px rgba(159,129,90,.1)!important; }
 
 .filter-chip{
  display:inline-flex!important;align-items:center!important;gap:.2rem!important;
@@ -153,30 +169,31 @@
 
 /* ── STAGE PILLS ─────────────────────────── */
 .pills-bar{
- background:#faf6f0;border-bottom:1px solid rgba(159,129,90,.12);
- padding:.55rem 1.5rem;display:flex;gap:.4rem;overflow-x:auto;
+ background:#faf6f0;border-bottom:1px solid rgba(159,129,90,.1);
+ padding:.65rem 1.5rem;display:flex;gap:.45rem;overflow-x:auto;
  -webkit-overflow-scrolling:touch;align-items:center;
 }
 .pills-bar::-webkit-scrollbar{display:none;}
 .stg-pill{
  display:inline-flex!important;align-items:center!important;gap:.3rem!important;
- height:34px!important;padding:0 1.2rem!important;border-radius:999px!important;
- border:1.5px solid rgba(159,129,90,.32)!important;
- font-size:.68rem!important;font-weight:600!important;letter-spacing:.05em!important;
- text-transform:uppercase!important;color:#5c4e42!important;
+ height:36px!important;padding:0 1.1rem!important;border-radius:999px!important;
+ border:1.5px solid rgba(159,129,90,.35)!important;
+ font-size:.76rem!important;font-weight:700!important;letter-spacing:.04em!important;
+ text-transform:uppercase!important;color:#443c36!important;
  text-decoration:none!important;transition:all .18s!important;
  background:#fff!important;white-space:nowrap!important;flex-shrink:0!important;cursor:pointer!important;
- box-shadow:0 1px 4px rgba(68,60,54,.05)!important;
+ box-shadow:0 1px 5px rgba(68,60,54,.06)!important;
  width:auto!important;min-height:unset!important;min-width:unset!important;max-height:unset!important;margin:0!important;
 }
 .stg-pill:hover{
- background:rgba(159,129,90,.07)!important;border-color:#9f815a!important;
- transform:translateY(-1px)!important;box-shadow:0 3px 8px rgba(68,60,54,.08)!important;
+ background:rgba(159,129,90,.08)!important;border-color:#9f815a!important;color:#3a332d!important;
+ transform:translateY(-1px)!important;box-shadow:0 4px 10px rgba(68,60,54,.09)!important;
 }
 .stg-pill--on{
- background:#9f815a!important;
- color:#f0ebe0!important;border-color:transparent!important;
- box-shadow:0 2px 8px rgba(159,129,90,.28)!important;
+ background:linear-gradient(135deg,#9f815a,#8a6e4a)!important;
+ color:#f5ede0!important;border-color:transparent!important;
+ box-shadow:0 3px 10px rgba(159,129,90,.32)!important;
+ font-weight:700!important;
 }
 .stg-pill-x{
  display:inline-flex!important;align-items:center!important;justify-content:center!important;
@@ -465,12 +482,13 @@
  align-items: center;
 }
 
-/* Toolbar inside card — remove its own background */
+/* Toolbar inside card — clean, no double border */
 .toolbar {
- background: transparent !important;
+ background: #faf8f4 !important;
  border-bottom: 1px solid rgba(159,129,90,.1) !important;
  box-shadow: none !important;
- padding: .75rem 1.5rem !important;
+ padding: .7rem 1.5rem !important;
+ flex-wrap: nowrap !important;
 }
 
 /* Pills bar inside card — match inner border */
@@ -712,45 +730,48 @@
 
 <!-- ── TOOLBAR ────────────────────────────────── -->
 <div class="toolbar">
+
+ <!-- Search pill -->
  <form method="get" class="toolbar-search">
- <input type="text" name="search" value="{{ search_query }}" placeholder="Search name, email, phone, address…" class="t-inp">
- {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
- {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
- {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
- <button type="submit" class="t-go">Go</button>
+  <input type="text" name="search" value="{{ search_query }}" placeholder="Search by name, email, phone, address…" class="t-inp">
+  {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+  {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+  {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+  <button type="submit" class="t-go">Search</button>
  </form>
- <form method="get" id="sortForm">
- {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
- {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
- {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
- <select name="sort" class="t-sel" onchange="this.form.submit()">
- <option value="name" {% if sort_by=='name' %}selected{% endif %}>A-Z Name</option>
- <option value="stage" {% if sort_by=='stage' %}selected{% endif %}>By Stage</option>
- <option value="last_touch" {% if sort_by=='last_touch' %}selected{% endif %}>Last Touch</option>
- <option value="created_at" {% if sort_by=='created_at' %}selected{% endif %}>Newest</option>
- </select>
- </form>
- {% if all_tags %}
- <form method="get" id="tagForm">
- {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
- {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
- {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
- <select name="tag" class="t-sel" onchange="this.form.submit()">
- <option value="">All Tags</option>
- {% for tag in all_tags %}<option value="{{ tag }}" {% if tag_filter==tag %}selected{% endif %}>{{ tag }}</option>{% endfor %}
- </select>
- </form>
- {% endif %}
- {% if search_query %}
- <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="filter-chip">
- "{{ search_query }}" <span class="filter-chip-x">×</span>
- </a>
- {% endif %}
- {% if tag_filter %}
- <a href="?stage={{ stage_filter or '' }}&search={{ search_query or '' }}&sort={{ sort_by }}" class="filter-chip">
- {{ tag_filter }} <span class="filter-chip-x">×</span>
- </a>
- {% endif %}
+
+ <!-- Sort + Tag selects on the right -->
+ <div class="toolbar-selects">
+  <form method="get" id="sortForm" style="margin:0!important;padding:0!important;">
+   {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+   {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+   {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
+   <select name="sort" class="t-sel" onchange="this.form.submit()">
+    <option value="name" {% if sort_by=='name' %}selected{% endif %}>A–Z Name</option>
+    <option value="stage" {% if sort_by=='stage' %}selected{% endif %}>By Stage</option>
+    <option value="last_touch" {% if sort_by=='last_touch' %}selected{% endif %}>Last Touch</option>
+    <option value="created_at" {% if sort_by=='created_at' %}selected{% endif %}>Newest First</option>
+   </select>
+  </form>
+  {% if all_tags %}
+  <form method="get" id="tagForm" style="margin:0!important;padding:0!important;">
+   {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
+   {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
+   {% if sort_by %}<input type="hidden" name="sort" value="{{ sort_by }}">{% endif %}
+   <select name="tag" class="t-sel" onchange="this.form.submit()">
+    <option value="">All Tags</option>
+    {% for tag in all_tags %}<option value="{{ tag }}" {% if tag_filter==tag %}selected{% endif %}>{{ tag }}</option>{% endfor %}
+   </select>
+  </form>
+  {% endif %}
+  {% if search_query %}
+  <a href="?stage={{ stage_filter or '' }}&tag={{ tag_filter or '' }}&sort={{ sort_by }}" class="filter-chip">"{{ search_query }}" <span class="filter-chip-x">×</span></a>
+  {% endif %}
+  {% if tag_filter %}
+  <a href="?stage={{ stage_filter or '' }}&search={{ search_query or '' }}&sort={{ sort_by }}" class="filter-chip">{{ tag_filter }} <span class="filter-chip-x">×</span></a>
+  {% endif %}
+ </div>
+
 </div>
 
 <!-- ── STAGE PILLS ────────────────────────────── -->
