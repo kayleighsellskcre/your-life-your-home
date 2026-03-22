@@ -45,19 +45,23 @@
 
 .lux-card-hd {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: .9rem 1.1rem .6rem;
+  justify-content: center;
+  padding: .9rem 1.1rem .65rem;
   border-bottom: 1px solid rgba(200,180,151,.12);
+  text-align: center;
+  gap: .3rem;
 }
 .lux-card-title {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: 1rem;
+  font-size: 1.08rem;
   font-weight: 600;
   color: #3D2E24;
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: .45rem;
   letter-spacing: -.01em;
 }
@@ -69,7 +73,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: .9rem 1.1rem .6rem;
+  padding: .9rem 1.1rem .65rem;
   border-bottom: 1px solid rgba(200,180,151,.12);
   text-align: center;
 }
@@ -257,11 +261,12 @@
   margin-bottom: .55rem;
 }
 .view-all {
-  font-size: .78rem;
+  font-size: .7rem;
   font-weight: 600;
   color: #6B8A5E;
   text-decoration: none;
-  opacity: .85;
+  opacity: .8;
+  letter-spacing: .04em;
   transition: opacity .2s;
 }
 .view-all:hover { opacity: 1; }
@@ -444,9 +449,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8FA88A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           Active Transactions
         </h2>
-        {% if transactions %}
-        <a href="{{ url_for('agent_transactions') }}" class="view-all">View all →</a>
-        {% endif %}
+        {% if transactions %}<a href="{{ url_for('agent_transactions') }}" class="view-all">View all</a>{% endif %}
       </div>
       <div class="lux-card-body" style="padding-top:.5rem;">
         {% if transactions %}
