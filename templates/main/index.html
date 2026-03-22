@@ -164,16 +164,18 @@
 }
 
 .role-card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: rgba(143,168,138,.18);
-  border: 1px solid rgba(143,168,138,.3);
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1.125rem;
-  font-size: 1.1rem;
+  margin-bottom: 1.25rem;
+  padding: .5rem 0 .25rem;
+}
+.role-card-icon img {
+  width: 60px;
+  height: auto;
+  opacity: .72;
+  display: block;
 }
 
 .role-card-title {
@@ -338,7 +340,7 @@
 
       <!-- Homeowner Card -->
       <article class="role-card featured">
-        <div class="role-card-icon">&#8962;</div>
+        <div class="role-card-icon"><img src="{{ url_for('static', filename='img/ornament.png') }}" alt=""></div>
         <h3 class="role-card-title">Homeowners</h3>
         <p class="role-card-description">
           Your free sanctuary: value snapshots, equity tracking, renovation planning,
@@ -353,7 +355,7 @@
 
       <!-- Agent Card -->
       <article class="role-card">
-        <div class="role-card-icon">&#10022;</div>
+        <div class="role-card-icon"><img src="{{ url_for('static', filename='img/ornament.png') }}" alt=""></div>
         <h3 class="role-card-title">Real Estate Agents</h3>
         <p class="role-card-description">
           Elegant CRM, client dashboards, smart coordinator, document center,
@@ -368,7 +370,7 @@
 
       <!-- Lender Card -->
       <article class="role-card">
-        <div class="role-card-icon">&#9670;</div>
+        <div class="role-card-icon"><img src="{{ url_for('static', filename='img/ornament.png') }}" alt=""></div>
         <h3 class="role-card-title">Loan Officers</h3>
         <p class="role-card-description">
           Professional profile, borrower CRM, live loan tracking, marketing suite,
