@@ -21,78 +21,6 @@
   margin-bottom: 1.25rem;
 }
 
-.kpi-card {
-  background: #fff;
-  border: 1px solid rgba(200,180,151,.22);
-  border-radius: 16px;
-  padding: 1.1rem 1.25rem 1rem;
-  box-shadow: 0 2px 14px rgba(61,46,36,.055);
-  position: relative;
-  overflow: hidden;
-  transition: box-shadow .25s, transform .25s;
-  cursor: default;
-}
-.kpi-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(200,180,151,.06) 0%, transparent 60%);
-  pointer-events: none;
-}
-.kpi-card:hover {
-  box-shadow: 0 8px 28px rgba(61,46,36,.10);
-  transform: translateY(-2px);
-}
-.kpi-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: 16px 16px 0 0;
-}
-.kpi-olive::before  { background: linear-gradient(90deg,#6B8A5E,#8FA88A); }
-.kpi-gold::before   { background: linear-gradient(90deg,#C49A1A,#E0B840); }
-.kpi-rust::before   { background: linear-gradient(90deg,#A0522D,#C46A3A); }
-.kpi-slate::before  { background: linear-gradient(90deg,#4A6580,#6B8FA0); }
-
-.kpi-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: .6rem;
-}
-.kpi-icon {
-  width: 34px; height: 34px;
-  border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-}
-.kpi-olive .kpi-icon  { background: rgba(107,138,94,.12); color: #5A7A4A; }
-.kpi-gold .kpi-icon   { background: rgba(196,154,26,.12); color: #9A7A10; }
-.kpi-rust .kpi-icon   { background: rgba(160,82,45,.12); color: #904020; }
-.kpi-slate .kpi-icon  { background: rgba(74,101,128,.12); color: #3A5570; }
-
-.kpi-value {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1;
-  color: #3D2E24;
-  margin-bottom: .18rem;
-}
-.kpi-label {
-  font-size: .7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .06em;
-  color: #6B5B4D;
-}
-.kpi-sub {
-  font-size: .75rem;
-  color: #9A8A7E;
-  margin-top: .08rem;
-}
-
 /* ── AI BRIEFING — compact single-line strip ── */
 .briefing-card {
   background: linear-gradient(135deg, #2C2018 0%, #3D2E24 55%, #4A3C30 100%);
@@ -460,49 +388,57 @@
   <!-- ── KPI STRIP ── -->
   <div class="kpi-strip fu fu2">
 
-    <div class="kpi-card kpi-olive">
-      <div class="kpi-top">
-        <div class="kpi-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-      </div>
-      <div class="kpi-value" id="kpi-new-leads">{{ metrics.new_leads|default(0) }}</div>
-      <div class="kpi-label">New Leads</div>
-      <div class="kpi-sub">Ready for your call</div>
-    </div>
+    {% set kpis = [
+      { 'id':'kpi-new-leads',      'value': metrics.new_leads|default(0),              'accent':'#6B8A5E', 'icon_bg':'rgba(107,138,94,.13)',  'icon_color':'#5A7A4A', 'label':'New Leads',      'sub':'Ready for your call',  'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+      { 'id':'kpi-active-deals',   'value': transactions|length if transactions else 0, 'accent':'#C49A1A', 'icon_bg':'rgba(196,154,26,.13)',  'icon_color':'#9A7A10', 'label':'Active Deals',   'sub':'In your pipeline',     'svg':'<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
+      { 'id':'kpi-followups',      'value': metrics.followups_today|default(0),         'accent':'#A0522D', 'icon_bg':'rgba(160,82,45,.13)',   'icon_color':'#904020', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
+      { 'id':'kpi-total-contacts', 'value': metrics.total_contacts|default(0),          'accent':'#4A6580', 'icon_bg':'rgba(74,101,128,.13)',  'icon_color':'#3A5570', 'label':'Total Contacts', 'sub':'In your CRM',          'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
+    ] %}
 
-    <div class="kpi-card kpi-gold">
-      <div class="kpi-top">
-        <div class="kpi-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-        </div>
-      </div>
-      <div class="kpi-value" id="kpi-active-deals">{{ transactions|length if transactions else 0 }}</div>
-      <div class="kpi-label">Active Deals</div>
-      <div class="kpi-sub">In your pipeline</div>
-    </div>
+    {% for k in kpis %}
+    <div style="
+      background:#fff;
+      border:1px solid rgba(200,180,151,.22);
+      border-radius:18px;
+      padding:1.2rem 1.3rem 1rem;
+      box-shadow:0 2px 14px rgba(61,46,36,.055);
+      position:relative;
+      overflow:hidden;
+      transition:box-shadow .25s,transform .25s;
+    " onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(61,46,36,.10)'"
+       onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(61,46,36,.055)'">
 
-    <div class="kpi-card kpi-rust">
-      <div class="kpi-top">
-        <div class="kpi-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-        </div>
-      </div>
-      <div class="kpi-value" id="kpi-followups">{{ metrics.followups_today|default(0) }}</div>
-      <div class="kpi-label">Follow-ups</div>
-      <div class="kpi-sub">Due today</div>
-    </div>
+      <!-- top accent bar -->
+      <div style="position:absolute;top:0;left:0;right:0;height:3px;background:{{ k.accent }};border-radius:18px 18px 0 0;"></div>
 
-    <div class="kpi-card kpi-slate">
-      <div class="kpi-top">
-        <div class="kpi-icon">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-        </div>
+      <!-- icon -->
+      <div style="
+        width:36px;height:36px;border-radius:10px;
+        background:{{ k.icon_bg }};
+        display:flex;align-items:center;justify-content:center;
+        margin-bottom:.75rem;
+      ">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{ k.icon_color }}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">{{ k.svg|safe }}</svg>
       </div>
-      <div class="kpi-value" id="kpi-total-contacts">{{ metrics.total_contacts|default(0) }}</div>
-      <div class="kpi-label">Total Contacts</div>
-      <div class="kpi-sub">In your CRM</div>
+
+      <!-- value -->
+      <div id="{{ k.id }}" style="
+        font-family:'Playfair Display',Georgia,serif;
+        font-size:2.1rem;font-weight:700;line-height:1;
+        color:#3D2E24;margin-bottom:.22rem;
+      ">{{ k.value }}</div>
+
+      <!-- label -->
+      <div style="
+        font-size:.68rem;font-weight:700;text-transform:uppercase;
+        letter-spacing:.07em;color:#6B5B4D;margin-bottom:.1rem;
+      ">{{ k.label }}</div>
+
+      <!-- sub -->
+      <div style="font-size:.75rem;color:#9A8A7E;">{{ k.sub }}</div>
+
     </div>
+    {% endfor %}
 
   </div><!-- /kpi-strip -->
 
