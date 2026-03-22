@@ -1399,11 +1399,11 @@ a.action-card {
   padding: 0.75rem 1rem !important;
 }
 
+/* #briefing-text font-size and max-height are controlled by dashboard.html —
+   do NOT override here. The quote must be 2.2rem per design spec. */
 #briefing-text {
-  max-height: 120px !important;
-  overflow: hidden !important;
-  font-size: 0.82rem !important;
-  line-height: 1.5 !important;
+  overflow: visible !important;
+  max-height: none !important;
 }
 
 .briefing-label {
@@ -1531,9 +1531,7 @@ a.action-card {
     font-size: 1.5rem !important;
   }
 
-  #briefing-text {
-    max-height: 80px !important;
-  }
+  /* #briefing-text max-height intentionally removed — quote must not be clipped */
 }
 
 @media (max-width: 480px) {
