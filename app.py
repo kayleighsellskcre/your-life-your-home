@@ -6199,7 +6199,6 @@ def agent_crm_import():
                     'equity_estimate': request.form.get('map_equity', '').strip(),
                     'notes': request.form.get('map_notes', '').strip(),
                     'tags': request.form.get('map_tags', '').strip(),
-                    'lead_source': request.form.get('map_lead_source', '').strip(),
                 }
                 
                 print(f"\n=== IMPORT DEBUG ===", flush=True)
@@ -6242,23 +6241,7 @@ def agent_crm_import():
                         email = safe_get(row.get(mappings['email'])) if mappings['email'] else ''
                         phone = safe_get(row.get(mappings['phone'])) if mappings['phone'] else ''
                         stage_value = safe_get(row.get(mappings['stage'])) if mappings['stage'] else ''
-                        # Normalize stage labels/slugs to internal values
-                        _stage_raw = (stage_value if stage_value else default_stage).strip().lower()
-                        _stage_map = {
-                            'new lead': 'new', 'new': 'new',
-                            'attempted': 'attempted', 'attempted contact': 'attempted', 'attempt': 'attempted',
-                            'contacted': 'contacted',
-                            'appt set': 'appt_set', 'appt_set': 'appt_set', 'appointment set': 'appt_set',
-                            'appt done': 'appt_done', 'appt_done': 'appt_done', 'appointment done': 'appt_done', 'appointment complete': 'appt_done',
-                            'active': 'active', 'active buyer': 'active', 'active seller': 'active', 'active buyer/seller': 'active',
-                            'under contract': 'under_contract', 'under_contract': 'under_contract', 'in contract': 'under_contract',
-                            'closed': 'closed',
-                            'past client': 'past', 'past': 'past',
-                            'nurture': 'nurture',
-                            'sphere': 'sphere', 'sphere of influence': 'sphere', 'soi': 'sphere',
-                            'hold': 'hold', 'on hold': 'hold',
-                        }
-                        stage = _stage_map.get(_stage_raw, _stage_raw)
+                        stage = (stage_value if stage_value else default_stage).strip().lower()
                         birthday = safe_get(row.get(mappings['birthday'])) if mappings['birthday'] else ''
                         home_anniversary = safe_get(row.get(mappings['home_anniversary'])) if mappings['home_anniversary'] else ''
                         address = safe_get(row.get(mappings['address'])) if mappings['address'] else ''
@@ -6278,7 +6261,6 @@ def agent_crm_import():
                                 city, state, zip_code = pc, ps or state, pz or zip_code
                         notes = safe_get(row.get(mappings['notes'])) if mappings['notes'] else ''
                         tags = safe_get(row.get(mappings['tags'])) if mappings['tags'] else ''
-                        lead_source = safe_get(row.get(mappings.get('lead_source', ''))) if mappings.get('lead_source') else ''
                         
                         # Parse numeric values
                         property_value = None
@@ -6348,8 +6330,6 @@ def agent_crm_import():
                                 updates["notes"] = notes
                             if tags:
                                 updates["tags"] = tags
-                            if lead_source:
-                                updates["lead_source"] = lead_source
                             if property_value is not None:
                                 updates["property_value"] = property_value
                             if equity_estimate is not None:
@@ -6364,8 +6344,7 @@ def agent_crm_import():
                             user["id"], name, email, phone, stage, email or phone, "",
                             birthday, home_anniversary, address, notes, tags,
                             property_address, property_value, equity_estimate,
-                            city=city, state=state, zip_code=zip_code,
-                            lead_source=lead_source or 'import'
+                            city=city, state=state, zip_code=zip_code
                         )
                         imported += 1
                         # Refresh cache so next rows can match this contact (prevent same-file duplicates)
@@ -6867,40 +6846,47 @@ def extract_features_from_notes(notes):
             from openai import OpenAI
             client = OpenAI(api_key=openai_api_key)
             
-            prompt = f"""You are helping create property feature spotlight cards from walkthrough notes.
+            prompt = f"""You are helping a real estate agent create property feature spotlight cards to highlight every notable update and feature of a home.
 
 Walkthrough Notes:
 {notes}
 
-Extract ALL notable features that would make great spotlight cards. For each feature:
-1. Identify the room/area
-2. Create a short, catchy title
-3. Write a natural, conversational description (1-2 sentences)
-4. Use simple everyday words with subtle luxury
-5. Focus on what buyers care about
+Your job is to create ONE spotlight card for EVERY distinct item, update, or feature mentioned. Do not skip any item — every line or bullet in the notes should become its own card.
 
-Return ONLY a valid JSON array of features. Each feature must have: "room", "title", "description"
+For each feature:
+1. room/area: Use the most relevant label (e.g., HOME, KITCHEN, PRIMARY BATH, BACKYARD, BASEMENT, HOA, etc.)
+2. title: Short, catchy, buyer-focused title (4-7 words)
+3. description: 1-2 warm, natural sentences a buyer would appreciate. Include the year if mentioned.
 
-Example format:
-[
-  {{"room": "KITCHEN", "title": "Custom Walk-In Pantry", "description": "Beautiful custom shelving offers generous storage space and keeps counters clear for easy meal prep."}},
-  {{"room": "MASTER BATH", "title": "Spa-Style Walk-In Shower", "description": "Spacious walk-in shower with elegant rainfall head and frameless glass makes every morning feel like a retreat."}}
-]
+IMPORTANT: Return a JSON object with a single key "features" whose value is an array. Do not truncate. Include every single item. No markdown, no explanation.
 
-Extract as many features as you can find in the notes. Be thorough!"""
+Example:
+{{
+  "features": [
+    {{"room": "KITCHEN", "title": "Black Quartzite Countertops with New Sink", "description": "Upgraded in 2021, sleek black quartzite countertops paired with a new sink and faucet bring a bold, modern elegance to the kitchen."}},
+    {{"room": "HOME", "title": "New Roof (2024)", "description": "A brand-new roof installed in July 2024 gives buyers peace of mind and years of worry-free ownership."}}
+  ]
+}}"""
 
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that extracts property features from notes. Return only valid JSON arrays."},
+                    {"role": "system", "content": "You are a real estate feature writer. Extract every single item from the notes as its own spotlight card. Return ONLY a complete, valid JSON array with no truncation."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.7,
-                max_tokens=1500
+                temperature=0.5,
+                max_tokens=4000,
+                response_format={"type": "json_object"}
             )
             
             import json
-            result = json.loads(response.choices[0].message.content.strip())
+            raw = response.choices[0].message.content.strip()
+            parsed = json.loads(raw)
+            # Handle both {"features": [...]} wrapper and bare array
+            if isinstance(parsed, dict):
+                result = parsed.get("features") or parsed.get("items") or list(parsed.values())[0]
+            else:
+                result = parsed
             
             # Validate result is a list
             if isinstance(result, list) and len(result) > 0:
@@ -6922,36 +6908,28 @@ Extract as many features as you can find in the notes. Be thorough!"""
             import openai
             openai.api_key = openai_api_key
             
-            prompt = f"""You are helping create property feature spotlight cards from walkthrough notes.
+            prompt = f"""You are helping a real estate agent create property feature spotlight cards to highlight every notable update and feature of a home.
 
 Walkthrough Notes:
 {notes}
 
-Extract ALL notable features that would make great spotlight cards. For each feature:
-1. Identify the room/area
-2. Create a short, catchy title
-3. Write a natural, conversational description (1-2 sentences)
-4. Use simple everyday words with subtle luxury
-5. Focus on what buyers care about
+Your job is to create ONE spotlight card for EVERY distinct item, update, or feature mentioned. Do not skip any item.
 
-Return ONLY a valid JSON array of features. Each feature must have: "room", "title", "description"
+For each feature:
+1. room/area: Use the most relevant label (e.g., HOME, KITCHEN, PRIMARY BATH, BACKYARD, BASEMENT, HOA, etc.)
+2. title: Short, catchy, buyer-focused title (4-7 words)
+3. description: 1-2 warm, natural sentences a buyer would appreciate. Include the year if mentioned.
 
-Example format:
-[
-  {{"room": "KITCHEN", "title": "Custom Walk-In Pantry", "description": "Beautiful custom shelving offers generous storage space and keeps counters clear for easy meal prep."}},
-  {{"room": "MASTER BATH", "title": "Spa-Style Walk-In Shower", "description": "Spacious walk-in shower with elegant rainfall head and frameless glass makes every morning feel like a retreat."}}
-]
-
-Extract as many features as you can find in the notes. Be thorough!"""
+IMPORTANT: Return ONLY a valid JSON array. Do not truncate. Include every single item. No markdown, no explanation."""
 
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-3.5-turbo-16k",
                 messages=[
-                    {"role": "system", "content": "You are a helpful assistant that extracts property features from notes. Return only valid JSON arrays."},
+                    {"role": "system", "content": "You are a real estate feature writer. Extract every single item from the notes as its own spotlight card. Return ONLY a complete, valid JSON array with no truncation."},
                     {"role": "user", "content": prompt}
                 ],
-                temperature=0.7,
-                max_tokens=1500
+                temperature=0.5,
+                max_tokens=4000
             )
             
             import json
