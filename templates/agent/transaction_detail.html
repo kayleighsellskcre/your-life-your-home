@@ -2,1376 +2,1003 @@
 
 {% block agent_content %}
 <style>
- /* ============================================
- TRANSACTION DETAIL PAGE - LUXURY REDESIGN
- Clean, elegant, fully responsive
- ============================================ */
- 
- :root {
- --txd-spacing-xs: 0.5rem;
- --txd-spacing-sm: 1rem;
- --txd-spacing-md: 1.5rem;
- --txd-spacing-lg: 2rem;
- --txd-spacing-xl: 3rem;
- }
-
- /* Main Wrapper */
- .transaction-detail-page {
- max-width: 1400px;
- margin: 0 auto;
- padding: var(--txd-spacing-md);
- }
-
- /* Transaction Header */
- .tx-header {
- background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
- border: 1px solid rgba(200, 180, 151, 0.2);
- border-radius: 16px;
- padding: var(--txd-spacing-lg);
- margin-bottom: var(--txd-spacing-lg);
- position: relative;
- overflow: hidden;
- }
-
- .tx-header__top {
- display: flex;
- justify-content: space-between;
- align-items: center;
- margin-bottom: var(--txd-spacing-md);
- gap: var(--txd-spacing-md);
- }
-
- .tx-header__left {
- display: flex;
- align-items: center;
- gap: var(--txd-spacing-md);
- flex: 1;
- }
-
- .tx-header__stage-badge {
- background: linear-gradient(135deg, var(--olive-green), #5A4A3C);
- color: #FFFFFF;
- padding: 0.5rem 1rem;
- border-radius: 8px;
- font-weight: 600;
- font-size: 0.75rem;
- text-transform: uppercase;
- letter-spacing: 0.1em;
- box-shadow: 0 2px 10px rgba(107, 91, 77, 0.3);
- white-space: nowrap;
- }
-
- .tx-header__address {
- font-family: var(--font-heading);
- font-size: 1.5rem;
- color: var(--charcoal-brown);
- margin: 0;
- font-weight: 600;
- letter-spacing: -0.01em;
- }
-
- .tx-header__actions {
- display: flex;
- gap: 0.5rem;
- }
-
- .tx-action-btn {
- padding: 0.5rem 1rem;
- border-radius: 6px;
- font-weight: 600;
- font-size: 0.813rem;
- cursor: pointer;
- transition: all 0.2s ease;
- text-decoration: none;
- display: inline-flex;
- align-items: center;
- border: none;
- }
-
- .tx-action-btn--primary {
- background: linear-gradient(135deg, var(--olive-green), #5A4A3C);
- color: #FFFFFF;
- box-shadow: 0 2px 8px rgba(107, 91, 77, 0.2);
- }
-
- .tx-action-btn--primary:hover {
- transform: translateY(-2px);
- box-shadow: 0 4px 12px rgba(107, 91, 77, 0.3);
- }
-
- .tx-action-btn--danger {
- background: rgba(198, 107, 61, 0.9);
- color: #FFFFFF;
- box-shadow: 0 2px 8px rgba(198, 107, 61, 0.2);
- }
-
- .tx-action-btn--danger:hover {
- background: #C66B3D;
- transform: translateY(-2px);
- box-shadow: 0 4px 12px rgba(198, 107, 61, 0.3);
- }
-
- .tx-header__grid {
- display: grid;
- grid-template-columns: 2fr 1fr;
- gap: var(--txd-spacing-lg);
- }
-
- .tx-clients {
- display: flex;
- flex-direction: column;
- gap: 0.75rem;
- }
-
- .tx-client-card {
- padding: var(--txd-spacing-sm);
- background: rgba(255, 255, 255, 0.95);
- border-radius: 10px;
- border: 1px solid rgba(200, 180, 151, 0.2);
- box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
- }
-
- .tx-client-card__label {
- font-weight: 600;
- color: var(--olive-green);
- font-size: 0.7rem;
- margin-bottom: 0.5rem;
- text-transform: uppercase;
- letter-spacing: 0.08em;
- }
-
- .tx-client-card__name {
- font-weight: 600;
- color: var(--charcoal-brown);
- font-size: 1rem;
- margin-bottom: 0.25rem;
- }
-
- .tx-client-card__contact {
- font-size: 0.85rem;
- color: rgba(61, 46, 36, 0.7);
- line-height: 1.5;
- }
-
- .tx-details-card {
- padding: var(--txd-spacing-sm);
- background: rgba(255, 255, 255, 0.95);
- border-radius: 10px;
- border: 1px solid rgba(200, 180, 151, 0.2);
- box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
- }
-
- .tx-detail-row {
- margin-bottom: var(--txd-spacing-sm);
- }
-
- .tx-detail-row:last-child {
- margin-bottom: 0;
- }
-
- .tx-detail-row__label {
- font-size: 0.7rem;
- font-weight: 600;
- color: var(--olive-green);
- text-transform: uppercase;
- letter-spacing: 0.08em;
- margin-bottom: 0.25rem;
- }
-
- .tx-detail-row__value {
- font-size: 0.95rem;
- color: var(--charcoal-brown);
- font-weight: 500;
- }
-
- .tx-detail-row__value--large {
- font-size: 1.1rem;
- font-weight: 600;
- }
-
- /* Progress Section */
- .progress-section {
- background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
- padding: var(--txd-spacing-md);
- border-radius: 12px;
- margin-bottom: var(--txd-spacing-md);
- border: 1px solid rgba(200, 180, 151, 0.2);
- box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
- }
-
- .progress-section__title {
- margin: 0 0 0.75rem 0;
- color: var(--charcoal-brown);
- font-size: 1rem;
- font-weight: 600;
- text-align: center;
- }
-
- .progress-bar-container {
- height: 8px;
- background: rgba(200, 180, 151, 0.15);
- border-radius: 10px;
- overflow: hidden;
- margin: 0.75rem 0;
- box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
- }
-
- .progress-bar-fill {
- height: 100%;
- background: linear-gradient(90deg, var(--olive-green) 0%, rgba(107, 91, 77, 0.85) 100%);
- transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
- box-shadow: 0 1px 4px rgba(107, 91, 77, 0.3);
- border-radius: 10px;
- }
-
- .progress-text {
- text-align: center;
- color: var(--charcoal-brown);
- font-size: 0.875rem;
- margin-top: 0.5rem;
- font-weight: 500;
- }
-
- /* Action Buttons */
- .action-buttons {
- display: flex;
- flex-wrap: wrap;
- gap: 0.75rem;
- justify-content: center;
- margin-bottom: var(--txd-spacing-lg);
- }
-
- .action-btn {
- padding: 0.75rem 1.5rem;
- border-radius: 8px;
- font-weight: 600;
- font-size: 0.875rem;
- cursor: pointer;
- transition: all 0.3s ease;
- text-decoration: none;
- display: inline-flex;
- align-items: center;
- justify-content: center;
- border: none;
- white-space: nowrap;
- }
-
- .action-btn--primary {
- background: linear-gradient(135deg, var(--olive-green), #5A4A3C);
- color: #FFFFFF;
- box-shadow: 0 2px 8px rgba(107, 91, 77, 0.25);
- }
-
- .action-btn--primary:hover {
- background: linear-gradient(135deg, #5A4A3C, var(--olive-green));
- box-shadow: 0 4px 16px rgba(107, 91, 77, 0.35);
- transform: translateY(-1px);
- }
-
- .action-btn--secondary {
- background: #FFFFFF;
- color: var(--olive-green);
- border: 1.5px solid rgba(107, 91, 77, 0.3);
- box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
- }
-
- .action-btn--secondary:hover {
- background: rgba(107, 91, 77, 0.05);
- border-color: var(--olive-green);
- box-shadow: 0 2px 8px rgba(107, 91, 77, 0.15);
- transform: translateY(-1px);
- }
-
- /* Tabs */
- .tabs {
- display: flex;
- gap: 0.5rem;
- border-bottom: 1.5px solid rgba(200, 180, 151, 0.2);
- margin-bottom: var(--txd-spacing-lg);
- overflow-x: auto;
- -webkit-overflow-scrolling: touch;
- scrollbar-width: none;
- }
-
- .tabs::-webkit-scrollbar {
- display: none;
- }
-
- .tab {
- padding: 0.875rem 1.5rem;
- background: transparent;
- border: none;
- color: rgba(61, 46, 36, 0.7);
- font-weight: 600;
- cursor: pointer;
- border-bottom: 2.5px solid transparent;
- transition: all 0.3s ease;
- font-size: 0.875rem;
- white-space: nowrap;
- }
-
- .tab.active {
- color: var(--olive-green);
- border-bottom-color: var(--olive-green);
- }
-
- .tab:hover {
- color: var(--olive-green);
- background: rgba(107, 91, 77, 0.03);
- }
-
- /* Tab Content */
- .tab-content {
- display: none;
- }
-
- .tab-content.active {
- display: block;
- }
-
- .tab-content__title {
- font-family: var(--font-heading);
- font-size: 2rem;
- color: var(--charcoal-brown);
- text-align: center;
- margin: 0 0 var(--txd-spacing-lg) 0;
- font-weight: 700;
- }
-
- .tab-content__grid {
- display: flex;
- gap: var(--txd-spacing-xl);
- justify-content: center;
- align-items: flex-start;
- }
-
- .tab-content__column {
- flex: 1;
- max-width: 520px;
- background: #FFFFFF;
- border-radius: 12px;
- box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
- padding: var(--txd-spacing-lg);
- }
-
- .tab-content__column-title {
- margin: 0 0 1.2rem 0;
- color: var(--olive-green);
- font-size: 1.15rem;
- font-weight: 600;
- }
-
- /* Document Checklist */
- .checklist-item {
- background: #FFFFFF;
- padding: var(--txd-spacing-sm);
- border-radius: 8px;
- margin-bottom: 0.5rem;
- border: 1px solid rgba(200, 180, 151, 0.2);
- transition: all 0.3s ease;
- display: flex;
- justify-content: space-between;
- align-items: center;
- }
-
- .checklist-item.completed {
- background: rgba(76, 175, 80, 0.1);
- border-color: #4CAF50;
- }
-
- .checklist-item.pending {
- background: rgba(255, 193, 7, 0.1);
- border-color: #ffc107;
- }
-
- .checklist-item:hover {
- border-color: var(--olive-green);
- transform: translateX(4px);
- }
-
- .checklist-item__info {
- flex: 1;
- }
-
- .checklist-item__title {
- font-weight: 600;
- color: var(--charcoal-brown);
- margin-bottom: 0.1rem;
- font-size: 0.95rem;
- }
-
- .checklist-item__desc {
- color: #666;
- font-size: 0.8rem;
- }
-
- /* Timeline */
- .timeline {
- position: relative;
- display: flex;
- flex-direction: column;
- gap: 0.5rem;
- }
-
- .timeline-item {
- display: flex;
- align-items: center;
- min-height: 48px;
- position: relative;
- }
-
- .timeline-status {
- width: 110px;
- text-align: left;
- font-weight: bold;
- font-size: 0.875rem;
- }
-
- .timeline-status--done {
- color: #4CAF50;
- }
-
- .timeline-status--in-progress {
- color: #FFD600;
- }
-
- .timeline-status--next {
- color: #AAA;
- }
-
- .timeline-name {
- flex: 1;
- font-weight: 600;
- padding-left: 1.2rem;
- }
-
- .timeline-dot-wrapper {
- display: flex;
- flex-direction: column;
- align-items: center;
- position: relative;
- width: 32px;
- }
-
- .timeline-dot {
- width: 18px;
- height: 18px;
- border-radius: 50%;
- background: #FFFFFF;
- border: 3px solid #E5E5E5;
- z-index: 1;
- }
-
- .timeline-dot--done {
- border-color: #4CAF50;
- }
-
- .timeline-dot--in-progress {
- border-color: #FFD600;
- }
-
- .timeline-line {
- position: absolute;
- top: 24px;
- left: 50%;
- transform: translateX(-50%);
- width: 4px;
- height: 100%;
- background: #E5E5E5;
- z-index: 0;
- }
-
- /* Participants */
- .participant-list {
- max-width: 800px;
- margin: 0 auto;
- }
-
- .participant-card {
- background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
- padding: var(--txd-spacing-md);
- border-radius: 8px;
- margin-bottom: var(--txd-spacing-sm);
- border: 1px solid rgba(200, 180, 151, 0.2);
- display: flex;
- justify-content: space-between;
- align-items: center;
- }
-
- .participant-info {
- display: flex;
- align-items: center;
- gap: var(--txd-spacing-sm);
- }
-
- .participant-avatar {
- width: 50px;
- height: 50px;
- border-radius: 50%;
- background: var(--olive-green);
- color: #FFFFFF;
- display: flex;
- align-items: center;
- justify-content: center;
- font-weight: 600;
- font-size: 1.2rem;
- }
-
- .participant-details h4 {
- margin: 0 0 0.25rem 0;
- color: var(--charcoal-brown);
- }
-
- .participant-details p {
- margin: 0;
- color: #666;
- font-size: 0.85rem;
- }
-
- .participant-badge {
- background: var(--warm-cream);
- padding: 0.3rem 0.75rem;
- border-radius: 6px;
- font-size: 0.75rem;
- font-weight: 600;
- color: var(--olive-green);
- }
-
- /* Modal */
- .modal {
- display: none;
- position: fixed;
- inset: 0;
- background: rgba(0, 0, 0, 0.5);
- z-index: 9999;
- align-items: center;
- justify-content: center;
- padding: 2rem;
- }
-
- .modal.active {
- display: flex;
- }
-
- .modal-content {
- background: #FFFFFF;
- border-radius: 12px;
- padding: 2rem;
- max-width: 600px;
- width: 100%;
- max-height: 90vh;
- overflow-y: auto;
- box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
- }
-
- .modal-header {
- display: flex;
- justify-content: space-between;
- align-items: center;
- margin-bottom: var(--txd-spacing-lg);
- }
-
- .modal-title {
- font-family: var(--font-heading);
- font-size: 1.5rem;
- color: var(--charcoal-brown);
- margin: 0;
- font-weight: 600;
- }
-
- .modal-close {
- background: transparent;
- border: none;
- font-size: 2rem;
- cursor: pointer;
- color: #888;
- line-height: 1;
- padding: 0;
- }
-
- .modal-close:hover {
- color: var(--charcoal-brown);
- }
-
- /* Form */
- .modal-form {
- display: grid;
- gap: var(--txd-spacing-md);
- }
-
- .modal-form-group {
- display: flex;
- flex-direction: column;
- }
-
- .modal-form-label {
- display: block;
- font-weight: 600;
- color: var(--olive-green);
- margin-bottom: 0.5rem;
- font-size: 0.875rem;
- }
-
- .modal-form-input,
- .modal-form-select {
- width: 100%;
- padding: 0.75rem;
- border: 1px solid rgba(200, 180, 151, 0.4);
- border-radius: 6px;
- font-size: 1rem;
- }
-
- .modal-form-input:focus,
- .modal-form-select:focus {
- outline: none;
- border-color: var(--olive-green);
- box-shadow: 0 0 0 3px rgba(107, 91, 77, 0.1);
- }
-
- .modal-form-buttons {
- display: flex;
- gap: var(--txd-spacing-sm);
- margin-top: var(--txd-spacing-sm);
- }
-
- /* Drop Zone */
- .drop-zone {
- border: 3px dashed #E5E5E5;
- border-radius: 12px;
- padding: 3rem;
- text-align: center;
- cursor: pointer;
- transition: all 0.3s ease;
- background: #F9F9F9;
- }
-
- .drop-zone:hover,
- .drop-zone.dragover {
- border-color: var(--olive-green);
- background: #F0EBE4;
- }
-
- .drop-zone h3 {
- margin: 0 0 0.5rem 0;
- color: var(--charcoal-brown);
- }
-
- .drop-zone p {
- margin: 0;
- color: #666;
- }
-
- /* ============================================
- RESPONSIVE BREAKPOINTS
- ============================================ */
-
- /* Desktop (1024px+) */
- @media (min-width: 1024px) {
- .transaction-detail-page {
- padding: var(--txd-spacing-xl) var(--txd-spacing-lg);
- }
- }
-
- /* Mobile Optimizations */
- @media (max-width: 767px) {
- .transaction-detail-page {
- padding: 1rem 0.875rem;
- }
-
- .tx-header {
- padding: var(--txd-spacing-md) var(--txd-spacing-sm);
- }
-
- .tx-header__top {
- flex-direction: column;
- align-items: stretch;
- }
-
- .tx-header__left {
- flex-direction: column;
- align-items: flex-start;
- }
-
- .tx-header__address {
- font-size: 1.25rem;
- }
-
- .tx-header__actions {
- width: 100%;
- flex-direction: column;
- }
-
- .tx-action-btn {
- width: 100%;
- padding: 0.75rem 1rem;
- min-height: 44px;
- justify-content: center;
- }
-
- .tx-header__grid {
- grid-template-columns: 1fr;
- }
-
- .progress-section {
- padding: var(--txd-spacing-sm);
- }
-
- .action-buttons {
- flex-direction: column;
- width: 100%;
- }
-
- .action-btn {
- width: 100%;
- min-height: 48px;
- }
-
- .tab {
- flex-shrink: 0;
- padding: 0.75rem 1rem;
- font-size: 0.85rem;
- }
-
- .tab-content__grid {
- flex-direction: column;
- gap: var(--txd-spacing-md);
- }
-
- .tab-content__column {
- max-width: 100%;
- }
-
- .tab-content__title {
- font-size: 1.5rem;
- }
-
- .modal-content {
- width: 100%;
- max-width: 100%;
- margin: 0;
- padding: 1.5rem 1rem;
- border-radius: 12px 12px 0 0;
- max-height: 95vh;
- }
-
- .modal-form-buttons {
- flex-direction: column;
- }
-
- .modal-form-buttons button,
- .modal-form-buttons a {
- width: 100%;
- }
-
- /* Prevent iOS zoom on inputs */
- input, select, textarea, button {
- font-size: 16px !important;
- }
- }
+/* =============================================
+   TRANSACTION DETAIL — 3-COLUMN CONDENSED
+   Desktop: left | center | right
+   Mobile: stacks top-to-bottom
+   ============================================= */
+
+.txd {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 2rem;
+}
+
+/* ── COMPACT HEADER BAR ── */
+.txd-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid rgba(200,180,151,.2);
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.txd-bar__badge {
+  background: linear-gradient(135deg, var(--olive-green), #5A4A3C);
+  color: #fff;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.txd-bar__address {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--charcoal-brown);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.txd-bar__meta {
+  display: flex;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+.txd-bar__meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.txd-bar__meta-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--olive-green);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.txd-bar__meta-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--charcoal-brown);
+}
+.txd-bar__actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+.txd-btn {
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition: all .2s;
+}
+.txd-btn--primary { background: linear-gradient(135deg, var(--olive-green), #5A4A3C); color: #fff; }
+.txd-btn--danger  { background: rgba(198,107,61,.9); color: #fff; }
+.txd-btn--ghost   { background: rgba(107,91,77,.07); color: var(--olive-green); border: 1px solid rgba(107,91,77,.2); }
+.txd-btn:hover    { opacity: .85; transform: translateY(-1px); }
+
+/* ── PROGRESS BAR (slim, below header) ── */
+.txd-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 1px solid rgba(200,180,151,.2);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+}
+.txd-progress__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--olive-green);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.txd-progress__bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(200,180,151,.2);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.txd-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--olive-green), #5A4A3C);
+  border-radius: 10px;
+  transition: width .8s ease;
+}
+.txd-progress__pct {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--charcoal-brown);
+  white-space: nowrap;
+}
+
+/* ── 3-COLUMN GRID ── */
+.txd-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr 260px;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+/* ── SHARED CARD ── */
+.txd-card {
+  background: #fff;
+  border: 1px solid rgba(200,180,151,.18);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.txd-card__head {
+  padding: 0.45rem 0.85rem;
+  background: linear-gradient(135deg, #F8F5F0, #F2EDE4);
+  border-bottom: 1px solid rgba(200,180,151,.18);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #6B5B4D;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+}
+.txd-card__body {
+  padding: 0.75rem 0.85rem;
+}
+
+/* ── LEFT COLUMN ── */
+.txd-client-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(200,180,151,.15);
+}
+.txd-client-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.txd-client-name { font-weight: 700; font-size: 0.82rem; color: var(--charcoal-brown); }
+.txd-client-contact { font-size: 0.72rem; color: rgba(61,46,36,.65); }
+
+.txd-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0;
+}
+.txd-detail-item {}
+.txd-detail-item__label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--olive-green);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.txd-detail-item__value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--charcoal-brown);
+}
+
+/* Quick Actions */
+.txd-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.txd-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: all .2s;
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+.txd-action-btn--primary {
+  background: linear-gradient(135deg, var(--olive-green), #5A4A3C);
+  color: #fff;
+}
+.txd-action-btn--secondary {
+  background: rgba(107,91,77,.06);
+  color: var(--olive-green);
+  border: 1px solid rgba(107,91,77,.2);
+}
+.txd-action-btn--muted {
+  background: rgba(107,91,77,.04);
+  color: #6B5B4D;
+  border: 1px solid rgba(107,91,77,.13);
+}
+.txd-action-btn:hover { opacity: .85; transform: translateX(2px); }
+
+/* Commission compact */
+.txd-comm-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.85rem;
+  border-bottom: 1px solid rgba(200,180,151,.15);
+}
+.txd-comm-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.72rem;
+  color: #3D2E24;
+}
+.txd-comm-form { padding: 0.75rem 0.85rem; }
+.txd-comm-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+.txd-comm-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #6B5B4D;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  display: block;
+  margin-bottom: 0.1rem;
+}
+.txd-comm-input {
+  border: 1px solid rgba(107,91,77,.25);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+  color: #3D2E24;
+  background: white;
+  width: 100%;
+}
+
+/* ── CENTER COLUMN ── */
+.txd-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(200,180,151,.15);
+  margin-bottom: 0.35rem;
+  transition: all .2s;
+  background: #fff;
+}
+.txd-checklist-item:hover { border-color: var(--olive-green); background: #FAFAF8; }
+.txd-checklist-item.done { background: rgba(76,175,80,.06); border-color: rgba(76,175,80,.4); }
+.txd-check-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(107,91,77,.3);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.txd-check-icon.done { background: #4CAF50; border-color: #4CAF50; color: #fff; font-size: 10px; }
+.txd-checklist-name { font-size: 0.75rem; font-weight: 600; color: var(--charcoal-brown); flex: 1; }
+.txd-checklist-tags { display: flex; gap: 0.25rem; flex-shrink: 0; }
+.txd-checklist-tag {
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.txd-checklist-tag--req { background: rgba(198,107,61,.12); color: #C66B3D; }
+.txd-checklist-tag--auto { background: rgba(107,91,77,.1); color: #6B5B4D; }
+
+/* Upload area */
+.txd-drop {
+  border: 2px dashed rgba(200,180,151,.4);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  color: #888;
+  font-size: 0.78rem;
+  transition: all .2s;
+  margin-bottom: 0.75rem;
+}
+.txd-drop:hover { border-color: var(--olive-green); background: #F8F5F0; color: var(--olive-green); }
+
+/* AI task panel */
+.txd-ai-panel {
+  display: none;
+  background: linear-gradient(135deg, #F8F5F0, #F5F0EB);
+  border: 1px solid rgba(107,91,77,.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ── RIGHT COLUMN ── */
+/* Stage tracker */
+.txd-stage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.txd-stage-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  position: relative;
+}
+.txd-stage-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  background: #fff;
+  flex-shrink: 0;
+  z-index: 1;
+  position: relative;
+}
+.txd-stage-dot.done { border-color: #4CAF50; background: #4CAF50; }
+.txd-stage-dot.active { border-color: var(--olive-green); background: var(--olive-green); box-shadow: 0 0 0 3px rgba(107,91,77,.15); }
+.txd-stage-line {
+  position: absolute;
+  left: 5px;
+  top: 50%;
+  width: 2px;
+  height: 100%;
+  background: #e5e5e5;
+  z-index: 0;
+}
+.txd-stage-row.done .txd-stage-line { background: #4CAF50; }
+.txd-stage-name { font-size: 0.75rem; font-weight: 600; color: #aaa; }
+.txd-stage-name.done { color: #4CAF50; }
+.txd-stage-name.active { color: var(--charcoal-brown); }
+
+/* Participants */
+.txd-participant {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(200,180,151,.12);
+}
+.txd-participant:last-child { border-bottom: none; }
+.txd-pav {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--olive-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.txd-pname { font-size: 0.75rem; font-weight: 600; color: var(--charcoal-brown); }
+.txd-prole {
+  font-size: 0.62rem;
+  color: rgba(61,46,36,.55);
+  margin-top: 0.05rem;
+}
+.txd-pbadge {
+  margin-left: auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: rgba(107,91,77,.08);
+  color: var(--olive-green);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+/* ── MODALS ── */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+.modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+.modal-head h2 { font-size: 1.15rem; font-weight: 700; color: var(--charcoal-brown); margin: 0; }
+.modal-head button { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888; line-height: 1; padding: 0; }
+.modal-field { margin-bottom: 0.85rem; }
+.modal-label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.3rem; }
+.modal-input, .modal-select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid rgba(200,180,151,.4);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  color: var(--charcoal-brown);
+}
+.modal-input:focus, .modal-select:focus { outline: none; border-color: var(--olive-green); }
+.modal-btns { display: flex; gap: 0.5rem; margin-top: 1rem; }
+.modal-btns > * { flex: 1; }
+
+/* ── MOBILE ── */
+@media (max-width: 900px) {
+  .txd-grid { grid-template-columns: 1fr; }
+  .txd-bar__meta { display: none; }
+  .txd-bar__address { font-size: 0.95rem; }
+}
+@media (max-width: 640px) {
+  .txd { padding: 0.5rem 0.5rem 2rem; }
+  .txd-bar { gap: 0.5rem; padding: 0.5rem 0.75rem; }
+  .txd-comm-form-grid { grid-template-columns: 1fr; }
+  .modal-content { border-radius: 12px 12px 0 0; margin-top: auto; max-height: 92vh; }
+  .modal { align-items: flex-end; padding: 0; }
+  input, select, textarea, button { font-size: 16px !important; }
+}
 </style>
 
-<!-- Transaction Header -->
-<div class="transaction-detail-page">
- <div class="tx-header">
- <div class="tx-header__top">
- <div class="tx-header__left">
- <div class="tx-header__stage-badge">{{ (transaction.current_stage or transaction.get('current_stage', 'unknown'))|replace('_', ' ')|title }}</div>
- <h1 class="tx-header__address">{{ transaction.property_address or transaction.get('property_address', 'N/A') }}</h1>
- </div>
- <div class="tx-header__actions">
- <a href="{{ url_for('agent_transaction_edit', tx_id=transaction.id or transaction.get('id')) }}" class="tx-action-btn tx-action-btn--primary">
- Edit
- </a>
- <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=transaction.id or transaction.get('id')) }}" onsubmit="return confirm('Are you sure you want to delete this transaction? This cannot be undone.')" style="margin: 0;">
- <button type="submit" class="tx-action-btn tx-action-btn--danger">
- Delete
- </button>
- </form>
- </div>
- </div>
- 
- <div class="tx-header__grid">
- <div class="tx-clients">
- <div class="tx-client-card">
- <div class="tx-client-card__label">Primary Client</div>
- <div class="tx-client-card__name">{{ transaction.client_name or transaction.get('client_name', 'N/A') }}</div>
- {% if transaction.client_email or transaction.get('client_email') %}
- <div class="tx-client-card__contact">{{ transaction.client_email or transaction.get('client_email') }}</div>
- {% endif %}
- {% if transaction.client_phone or transaction.get('client_phone') %}
- <div class="tx-client-card__contact">{{ transaction.client_phone or transaction.get('client_phone') }}</div>
- {% endif %}
- </div>
- 
- {% if participants %}
- {% for participant in participants %}
- {% set participant_dict = participant if participant is mapping else dict(participant) %}
- {% if participant_dict.get('participant_type') == 'client' and participant_dict.get('status') != 'removed' %}
- <div class="tx-client-card">
- <div class="tx-client-card__label">Additional Client</div>
- <div class="tx-client-card__name">{{ participant_dict.get('name', 'N/A') }}</div>
- {% if participant_dict.get('email') %}
- <div class="tx-client-card__contact">{{ participant_dict.get('email') }}</div>
- {% endif %}
- {% if participant_dict.get('phone') %}
- <div class="tx-client-card__contact">{{ participant_dict.get('phone') }}</div>
- {% endif %}
- </div>
- {% endif %}
- {% endfor %}
- {% endif %}
- </div>
- 
- <div class="tx-details-card">
- <div class="tx-detail-row">
- <div class="tx-detail-row__label">Side</div>
- <div class="tx-detail-row__value">{{ (transaction.side or transaction.get('side', 'N/A'))|capitalize }}</div>
- </div>
- <div class="tx-detail-row">
- <div class="tx-detail-row__label">Purchase Price</div>
- <div class="tx-detail-row__value tx-detail-row__value--large">${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}</div>
- </div>
- <div class="tx-detail-row">
- <div class="tx-detail-row__label">Target Close Date</div>
- <div class="tx-detail-row__value">{{ transaction.target_close_date or transaction.get('target_close_date', 'Not set') }}</div>
- </div>
- </div>
- </div>
- </div>
+<div class="txd">
 
- <!-- Progress Section -->
- <div class="progress-section">
- <h3 class="progress-section__title">Transaction Progress</h3>
- <div class="progress-bar-container">
- <div class="progress-bar-fill" style="width: {{ doc_status.progress_percentage|round(0) }}%;"></div>
- </div>
- <div class="progress-text">
- <strong>{{ doc_status.progress_percentage|round(0) }}% Complete</strong> • {{ doc_status.completed }} of {{ doc_status.total }} documents uploaded
- </div>
- </div>
-
- <!-- Action Buttons -->
- <div class="action-buttons">
- <button class="action-btn action-btn--primary" onclick="document.getElementById('share-modal').style.display='flex'">
- Share with Client
- </button>
- <button class="action-btn action-btn--primary" onclick="document.getElementById('add-participant-modal').style.display='flex'">
- Add Participant
- </button>
- <button class="action-btn action-btn--secondary" onclick="document.getElementById('change-stage-modal').style.display='flex'">
- Change Stage
- </button>
- <a href="{{ url_for('agent_feature_spotlight_cards', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn action-btn--primary">
- Feature Spotlight Cards
- </a>
- <a href="{{ url_for('agent_marketing_hub', tx_id=transaction.id or transaction.get('id')) }}" class="action-btn action-btn--primary" style="background: linear-gradient(135deg, #8B7355 0%, #6B5D4A 100%);">
- Marketing Hub
- </a>
- <button class="action-btn action-btn--primary" onclick="aiSuggestTasks()" style="background:linear-gradient(135deg,#6B5B4D 0%,#5A4A3C 100%);">
-  Suggest Tasks
- </button>
- </div>
-
-<!-- ── AGENT-ONLY COMMISSION DETAILS ── (never shown to homeowner/client) -->
-<div style="background:linear-gradient(135deg,#F8F5F0,#F2EDE4);border:1px solid rgba(107,91,77,.18);border-radius:10px;margin-bottom:1rem;overflow:hidden;">
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:.625rem 1rem;border-bottom:1px solid rgba(107,91,77,.12);">
-    <span style="font-size:.75rem;font-weight:700;color:#6B5B4D;text-transform:uppercase;letter-spacing:.06em;">Commission Details &mdash; Agent Only</span>
-    <button onclick="toggleCommPanel()" id="comm-toggle-btn" style="background:rgba(107,91,77,.08);border:1px solid rgba(107,91,77,.2);border-radius:6px;padding:.25rem .7rem;font-size:.72rem;font-weight:600;color:#6B5B4D;cursor:pointer;">
-      {% if tx_commission %}Edit{% else %}+ Add{% endif %}
-    </button>
+  <!-- ── COMPACT HEADER BAR ── -->
+  <div class="txd-bar">
+    <span class="txd-bar__badge">{{ (transaction.current_stage or 'unknown')|replace('_',' ')|title }}</span>
+    <div class="txd-bar__address">{{ transaction.property_address or 'N/A' }}</div>
+    <div class="txd-bar__meta">
+      <div class="txd-bar__meta-item">
+        <span class="txd-bar__meta-label">Side</span>
+        <span class="txd-bar__meta-value">{{ (transaction.side or 'N/A')|capitalize }}</span>
+      </div>
+      <div class="txd-bar__meta-item">
+        <span class="txd-bar__meta-label">Price</span>
+        <span class="txd-bar__meta-value">${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}</span>
+      </div>
+      <div class="txd-bar__meta-item">
+        <span class="txd-bar__meta-label">Close</span>
+        <span class="txd-bar__meta-value">{{ transaction.target_close_date or 'TBD' }}</span>
+      </div>
+    </div>
+    <div class="txd-bar__actions">
+      <a href="{{ url_for('agent_transaction_edit', tx_id=transaction.id) }}" class="txd-btn txd-btn--primary">Edit</a>
+      <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=transaction.id) }}" onsubmit="return confirm('Delete this transaction?')" style="margin:0">
+        <button type="submit" class="txd-btn txd-btn--danger">Delete</button>
+      </form>
+    </div>
   </div>
 
-  <!-- Summary row if commission exists -->
-  {% if tx_commission %}
-  <div style="display:flex;gap:1.5rem;flex-wrap:wrap;padding:.625rem 1rem;font-size:.8rem;color:#3D2E24;" id="comm-summary">
-    <span><strong>${{ "{:,.0f}".format(tx_commission.sale_price or 0) }}</strong> sale price</span>
-    <span><strong>{{ tx_commission.commission_rate or 0 }}%</strong> rate</span>
-    <span><strong>${{ "{:,.0f}".format(tx_commission.gross_commission or 0) }}</strong> gross</span>
-    <span><strong>${{ "{:,.0f}".format(tx_commission.net_commission or 0) }}</strong> net</span>
-    <span style="background:{% if tx_commission.status=='paid' %}#e8f5e9{% else %}#fff8e1{% endif %};color:{% if tx_commission.status=='paid' %}#2e7d32{% else %}#f57f17{% endif %};border-radius:10px;padding:.1rem .5rem;font-weight:700;font-size:.65rem;text-transform:uppercase;">{{ tx_commission.status or 'projected' }}</span>
-    <a href="{{ url_for('agent_financials') }}" style="color:#6B5B4D;font-size:.72rem;text-decoration:none;border-bottom:1px solid rgba(107,91,77,.3);">View in Financials</a>
+  <!-- ── SLIM PROGRESS BAR ── -->
+  <div class="txd-progress">
+    <span class="txd-progress__label">Documents</span>
+    <div class="txd-progress__bar">
+      <div class="txd-progress__fill" style="width:{{ doc_status.progress_percentage|round(0) }}%"></div>
+    </div>
+    <span class="txd-progress__pct">{{ doc_status.completed }}/{{ doc_status.total }} &nbsp;{{ doc_status.progress_percentage|round(0)|int }}%</span>
   </div>
-  {% endif %}
 
-  <!-- Commission Form (collapsed by default if already exists) -->
-  <div id="comm-form-panel" style="{% if tx_commission %}display:none{% else %}display:block{% endif %};padding:.875rem 1rem;">
-    <form method="post" action="{{ url_for('agent_transaction_commission_save', tx_id=transaction.id or transaction.get('id')) }}">
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.5rem;margin-bottom:.5rem;">
-        <div>
-          <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Sale Price ($)</label>
-          <input type="number" name="sale_price" value="{{ tx_commission.sale_price if tx_commission else (transaction.purchase_price or '') }}" placeholder="{{ transaction.purchase_price or '400000' }}" min="0" step="1000" oninput="calcTxComm()" id="tx-sale-price" style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
-        </div>
-        <div>
-          <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Comm Rate (%)</label>
-          <input type="number" name="commission_rate" value="{{ tx_commission.commission_rate if tx_commission else '3.0' }}" step=".1" oninput="calcTxComm()" id="tx-comm-rate" style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
-        </div>
-        <div>
-          <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Brokerage Split (%)</label>
-          <input type="number" name="brokerage_split_pct" value="{{ tx_commission.brokerage_split_pct if tx_commission else '0' }}" step=".1" oninput="calcTxComm()" id="tx-split-pct" style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
-        </div>
-        <div>
-          <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Close Date</label>
-          <input type="date" name="close_date" value="{{ tx_commission.close_date if tx_commission else (transaction.target_close_date or '') }}" style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
-        </div>
-        <div>
-          <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Side</label>
-          <select name="transaction_side" style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
-            <option value="buyer" {% if (tx_commission and tx_commission.transaction_side=='buyer') or (not tx_commission and (transaction.side or '')=='buyer') %}selected{% endif %}>Buyer</option>
-            <option value="seller" {% if (tx_commission and tx_commission.transaction_side=='seller') or (not tx_commission and (transaction.side or '')=='seller') %}selected{% endif %}>Seller</option>
-            <option value="dual" {% if (tx_commission and tx_commission.transaction_side=='dual') %}selected{% endif %}>Dual Agency</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Status</label>
-          <select name="status" style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
-            <option value="projected" {% if not tx_commission or tx_commission.status=='projected' %}selected{% endif %}>Projected</option>
-            <option value="paid" {% if tx_commission and tx_commission.status=='paid' %}selected{% endif %}>Paid</option>
-          </select>
+  <!-- ── 3-COLUMN GRID ── -->
+  <div class="txd-grid">
+
+    <!-- ══ LEFT COLUMN ══ -->
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+
+      <!-- Client -->
+      <div class="txd-card">
+        <div class="txd-card__head">Client</div>
+        <div class="txd-card__body">
+          <div class="txd-client-row">
+            <span class="txd-client-name">{{ transaction.client_name or 'N/A' }}</span>
+            {% if transaction.client_email %}<span class="txd-client-contact">{{ transaction.client_email }}</span>{% endif %}
+            {% if transaction.client_phone %}<span class="txd-client-contact">{{ transaction.client_phone }}</span>{% endif %}
+          </div>
+          {% for p in participants %}
+          {% if (p.participant_type or '') == 'client' %}
+          <div class="txd-client-row">
+            <span class="txd-client-name">{{ p.name or p.email or '—' }}</span>
+            {% if p.email %}<span class="txd-client-contact">{{ p.email }}</span>{% endif %}
+            {% if p.phone %}<span class="txd-client-contact">{{ p.phone }}</span>{% endif %}
+          </div>
+          {% endif %}
+          {% endfor %}
         </div>
       </div>
-      <div style="background:white;border:1px solid rgba(107,91,77,.15);border-radius:7px;padding:.45rem .75rem;margin-bottom:.5rem;font-size:.78rem;color:#6B5B4D;">
-        Estimated Net Commission: <strong id="tx-est-net" style="color:#3D2E24">${{ "{:,.0f}".format(tx_commission.net_commission if tx_commission else 0) }}</strong>
+
+      <!-- Transaction Details -->
+      <div class="txd-card">
+        <div class="txd-card__head">Details</div>
+        <div class="txd-card__body">
+          <div class="txd-detail-grid">
+            <div class="txd-detail-item">
+              <div class="txd-detail-item__label">Side</div>
+              <div class="txd-detail-item__value">{{ (transaction.side or 'N/A')|capitalize }}</div>
+            </div>
+            <div class="txd-detail-item">
+              <div class="txd-detail-item__label">Price</div>
+              <div class="txd-detail-item__value">${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}</div>
+            </div>
+            <div class="txd-detail-item" style="grid-column:span 2">
+              <div class="txd-detail-item__label">Target Close</div>
+              <div class="txd-detail-item__value">{{ transaction.target_close_date or 'Not set' }}</div>
+            </div>
+            {% if transaction.notes %}
+            <div class="txd-detail-item" style="grid-column:span 2">
+              <div class="txd-detail-item__label">Notes</div>
+              <div class="txd-detail-item__value" style="font-size:.7rem;font-weight:400;color:rgba(61,46,36,.7)">{{ transaction.notes }}</div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
-      <div style="margin-bottom:.5rem">
-        <label style="font-size:.68rem;font-weight:600;color:#6B5B4D;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.15rem">Notes (private)</label>
-        <input type="text" name="notes" value="{{ tx_commission.notes if tx_commission else '' }}" placeholder="Private notes about this commission..." style="border:1px solid rgba(107,91,77,.25);border-radius:7px;padding:.35rem .6rem;font-size:.78rem;color:#3D2E24;background:white;width:100%">
+
+      <!-- Quick Actions -->
+      <div class="txd-card">
+        <div class="txd-card__head">Actions</div>
+        <div class="txd-card__body">
+          <div class="txd-actions">
+            <button class="txd-action-btn txd-action-btn--primary" onclick="document.getElementById('upload-modal').style.display='flex'">
+              ↑ Upload Document
+            </button>
+            <button class="txd-action-btn txd-action-btn--primary" onclick="document.getElementById('share-modal').style.display='flex'">
+              ✉ Share with Client
+            </button>
+            <button class="txd-action-btn txd-action-btn--secondary" onclick="document.getElementById('add-participant-modal').style.display='flex'">
+              + Add Participant
+            </button>
+            <button class="txd-action-btn txd-action-btn--secondary" onclick="document.getElementById('change-stage-modal').style.display='flex'">
+              ⇄ Change Stage
+            </button>
+            <a href="{{ url_for('agent_feature_spotlight_cards', tx_id=transaction.id) }}" class="txd-action-btn txd-action-btn--muted">
+              ✦ Feature Cards
+            </a>
+            <a href="{{ url_for('agent_marketing_hub', tx_id=transaction.id) }}" class="txd-action-btn txd-action-btn--muted">
+              ◈ Marketing Hub
+            </a>
+            <button class="txd-action-btn txd-action-btn--muted" onclick="aiSuggestTasks()">
+              ◎ Suggest Tasks
+            </button>
+          </div>
+        </div>
       </div>
-      <button type="submit" style="background:linear-gradient(135deg,#6B5B4D,#5A4A3C);color:white;border:none;border-radius:7px;padding:.4rem 1rem;font-size:.78rem;font-weight:600;cursor:pointer;">
-        Save to Financials Hub
-      </button>
+
+      <!-- Commission (agent-only) -->
+      <div class="txd-card">
+        <div class="txd-comm-bar">
+          <span style="font-size:.62rem;font-weight:700;color:#6B5B4D;text-transform:uppercase;letter-spacing:.06em;">Commission — Agent Only</span>
+          <button onclick="toggleCommPanel()" id="comm-toggle-btn" class="txd-btn txd-btn--ghost" style="font-size:.68rem;padding:.2rem .55rem;">
+            {% if tx_commission %}Edit{% else %}+ Add{% endif %}
+          </button>
+        </div>
+        {% if tx_commission %}
+        <div class="txd-comm-summary" id="comm-summary">
+          <span><strong>${{ "{:,.0f}".format(tx_commission.sale_price or 0) }}</strong> sale</span>
+          <span><strong>{{ tx_commission.commission_rate or 0 }}%</strong></span>
+          <span><strong>${{ "{:,.0f}".format(tx_commission.gross_commission or 0) }}</strong> gross</span>
+          <span><strong>${{ "{:,.0f}".format(tx_commission.net_commission or 0) }}</strong> net</span>
+          <span style="background:{% if tx_commission.status=='paid' %}#e8f5e9;color:#2e7d32{% else %}#fff8e1;color:#f57f17{% endif %};border-radius:8px;padding:.1rem .4rem;font-size:.6rem;font-weight:700;text-transform:uppercase">{{ tx_commission.status or 'projected' }}</span>
+          <a href="{{ url_for('agent_financials') }}" style="color:#6B5B4D;font-size:.65rem;text-decoration:underline">Financials →</a>
+        </div>
+        {% endif %}
+        <div id="comm-form-panel" class="txd-comm-form" style="{% if tx_commission %}display:none{% else %}display:block{% endif %}">
+          <form method="post" action="{{ url_for('agent_transaction_commission_save', tx_id=transaction.id) }}">
+            <div class="txd-comm-form-grid">
+              <div>
+                <label class="txd-comm-label">Sale Price ($)</label>
+                <input class="txd-comm-input" type="number" name="sale_price" value="{{ tx_commission.sale_price if tx_commission else (transaction.purchase_price or '') }}" oninput="calcTxComm()" id="tx-sale-price" min="0" step="1000">
+              </div>
+              <div>
+                <label class="txd-comm-label">Rate (%)</label>
+                <input class="txd-comm-input" type="number" name="commission_rate" value="{{ tx_commission.commission_rate if tx_commission else '3.0' }}" oninput="calcTxComm()" id="tx-comm-rate" step=".1">
+              </div>
+              <div>
+                <label class="txd-comm-label">Split (%)</label>
+                <input class="txd-comm-input" type="number" name="brokerage_split_pct" value="{{ tx_commission.brokerage_split_pct if tx_commission else '0' }}" oninput="calcTxComm()" id="tx-split-pct" step=".1">
+              </div>
+              <div>
+                <label class="txd-comm-label">Close Date</label>
+                <input class="txd-comm-input" type="date" name="close_date" value="{{ tx_commission.close_date if tx_commission else (transaction.target_close_date or '') }}">
+              </div>
+              <div>
+                <label class="txd-comm-label">Side</label>
+                <select name="transaction_side" class="txd-comm-input">
+                  <option value="buyer" {% if (tx_commission and tx_commission.transaction_side=='buyer') or (not tx_commission and (transaction.side or '')=='buyer') %}selected{% endif %}>Buyer</option>
+                  <option value="seller" {% if (tx_commission and tx_commission.transaction_side=='seller') or (not tx_commission and (transaction.side or '')=='seller') %}selected{% endif %}>Seller</option>
+                  <option value="dual" {% if tx_commission and tx_commission.transaction_side=='dual' %}selected{% endif %}>Dual</option>
+                </select>
+              </div>
+              <div>
+                <label class="txd-comm-label">Status</label>
+                <select name="status" class="txd-comm-input">
+                  <option value="projected" {% if not tx_commission or tx_commission.status=='projected' %}selected{% endif %}>Projected</option>
+                  <option value="paid" {% if tx_commission and tx_commission.status=='paid' %}selected{% endif %}>Paid</option>
+                </select>
+              </div>
+            </div>
+            <div style="font-size:.72rem;color:#6B5B4D;margin-bottom:.4rem">
+              Est. Net: <strong id="tx-est-net" style="color:#3D2E24">${{ "{:,.0f}".format(tx_commission.net_commission if tx_commission else 0) }}</strong>
+            </div>
+            <div style="margin-bottom:.4rem">
+              <label class="txd-comm-label">Notes (private)</label>
+              <input class="txd-comm-input" type="text" name="notes" value="{{ tx_commission.notes if tx_commission else '' }}" placeholder="Private notes...">
+            </div>
+            <button type="submit" class="txd-btn txd-btn--primary" style="width:100%;padding:.4rem .75rem;font-size:.75rem;">Save to Financials</button>
+          </form>
+        </div>
+      </div>
+
+    </div><!-- /left -->
+
+    <!-- ══ CENTER COLUMN ══ -->
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+
+      <!-- AI task panel (hidden until triggered) -->
+      <div id="ai-task-panel" class="txd-ai-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem">
+          <span style="font-size:.7rem;font-weight:700;color:#6B5B4D;text-transform:uppercase;letter-spacing:.06em">Suggested Tasks</span>
+          <button onclick="document.getElementById('ai-task-panel').style.display='none'" style="background:none;border:none;font-size:1rem;color:#9A9472;cursor:pointer;line-height:1">×</button>
+        </div>
+        <div id="ai-task-list" style="font-size:.78rem;color:#3D2E24;line-height:1.7"></div>
+      </div>
+
+      <!-- Document Checklist -->
+      <div class="txd-card">
+        <div class="txd-card__head" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Document Checklist</span>
+          <button class="txd-btn txd-btn--primary" onclick="document.getElementById('upload-modal').style.display='flex'" style="font-size:.65rem;padding:.2rem .55rem">+ Upload</button>
+        </div>
+        <div class="txd-card__body" style="padding:.6rem .85rem">
+          {% if doc_status.checklist %}
+            {% for item in doc_status.checklist %}
+            <div class="txd-checklist-item{% if item.completed %} done{% endif %}">
+              <div class="txd-check-icon{% if item.completed %} done{% endif %}">{% if item.completed %}✓{% endif %}</div>
+              <span class="txd-checklist-name">{{ item.display_name or item.document_type }}</span>
+              <div class="txd-checklist-tags">
+                {% if item.is_required %}<span class="txd-checklist-tag txd-checklist-tag--req">Req</span>{% endif %}
+                {% if item.triggers_stage_change %}<span class="txd-checklist-tag txd-checklist-tag--auto">Auto</span>{% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          {% else %}
+          <div style="font-size:.78rem;color:#aaa;text-align:center;padding:.75rem 0">No checklist items for this stage.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Uploaded Documents -->
+      {% if documents %}
+      <div class="txd-card">
+        <div class="txd-card__head">Uploaded Documents ({{ documents|length }})</div>
+        <div class="txd-card__body" style="padding:.5rem .85rem">
+          {% for doc in documents %}
+          <div style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px solid rgba(200,180,151,.12)">
+            <span style="font-size:1rem">📄</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.75rem;font-weight:600;color:var(--charcoal-brown);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ doc.document_name or doc.document_type }}</div>
+              <div style="font-size:.62rem;color:#aaa">{{ (doc.document_type or '')|replace('_',' ')|title }}{% if doc.uploader_name %} · {{ doc.uploader_name }}{% endif %}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div><!-- /center -->
+
+    <!-- ══ RIGHT COLUMN ══ -->
+    <div style="display:flex;flex-direction:column;gap:.75rem;">
+
+      <!-- Stage Tracker -->
+      <div class="txd-card">
+        <div class="txd-card__head">Stage Tracker</div>
+        <div class="txd-card__body" style="padding:.6rem .85rem">
+          {% set cs = (transaction.current_stage or 'pre_contract')|lower %}
+          {% set stage_order = {'pre_contract':0,'under_contract':2,'in_escrow':4,'clear_to_close':6,'closed':8,'cancelled':-1} %}
+          {% set cs_order = stage_order.get(cs, 0) %}
+          {% set stages = [
+            ('Summary','pre_contract',0),
+            ('Showings','pre_contract',1),
+            ('Under Contract','under_contract',2),
+            ('Earnest Money','under_contract',3),
+            ('Inspections','in_escrow',4),
+            ('Appraisal','in_escrow',5),
+            ('Final Walkthrough','clear_to_close',6),
+            ('Clear to Close','clear_to_close',7),
+            ('Closed','closed',8)
+          ] %}
+          <div class="txd-stage-list">
+            {% for label, stage_db, idx in stages %}
+            {% set s_order = stage_order.get(stage_db, 999) %}
+            {% set is_done = cs_order > s_order %}
+            {% set is_active = cs_order == s_order %}
+            <div class="txd-stage-row{% if is_done %} done{% endif %}" style="position:relative">
+              {% if not loop.last %}
+              <div style="position:absolute;left:5px;top:50%;width:2px;height:100%;background:{% if is_done %}#4CAF50{% else %}#e5e5e5{% endif %};z-index:0;transform:translateY(50%)"></div>
+              {% endif %}
+              <div class="txd-stage-dot{% if is_done %} done{% elif is_active %} active{% endif %}"></div>
+              <span class="txd-stage-name{% if is_done %} done{% elif is_active %} active{% endif %}">{{ label }}</span>
+              {% if is_done %}<span style="font-size:.65rem;color:#4CAF50;margin-left:auto">✓</span>
+              {% elif is_active %}<span style="font-size:.6rem;color:var(--olive-green);margin-left:auto;font-weight:700">NOW</span>{% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Participants -->
+      <div class="txd-card">
+        <div class="txd-card__head" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Participants</span>
+          <button onclick="document.getElementById('add-participant-modal').style.display='flex'" class="txd-btn txd-btn--ghost" style="font-size:.65rem;padding:.2rem .5rem">+ Add</button>
+        </div>
+        <div class="txd-card__body" style="padding:.5rem .85rem">
+          <!-- Primary client always shown -->
+          <div class="txd-participant">
+            <div class="txd-pav">{{ ((transaction.client_name or '?')[:2])|upper }}</div>
+            <div>
+              <div class="txd-pname">{{ transaction.client_name or 'Client' }}</div>
+              <div class="txd-prole">{{ transaction.client_email or '' }}</div>
+            </div>
+            <span class="txd-pbadge">Client</span>
+          </div>
+          {% for p in participants %}
+          {% if (p.participant_type or '') != 'client' %}
+          <div class="txd-participant">
+            <div class="txd-pav">{{ ((p.name or p.email or '?')[:2])|upper }}</div>
+            <div>
+              <div class="txd-pname">{{ p.name or p.email or 'Participant' }}</div>
+              <div class="txd-prole">{{ p.email or p.user_email or '' }}</div>
+            </div>
+            <span class="txd-pbadge">{{ (p.participant_type or 'other')|replace('_',' ')|title }}</span>
+          </div>
+          {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Activity Log (from timeline) -->
+      {% if timeline %}
+      <div class="txd-card">
+        <div class="txd-card__head">Recent Activity</div>
+        <div class="txd-card__body" style="padding:.5rem .85rem">
+          {% for event in timeline[:8] %}
+          <div style="display:flex;gap:.5rem;padding:.3rem 0;border-bottom:1px solid rgba(200,180,151,.1)">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.72rem;color:var(--charcoal-brown);font-weight:500">{{ event.description or event.event_type }}</div>
+              <div style="font-size:.6rem;color:#aaa">{{ event.created_at or '' }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div><!-- /right -->
+  </div><!-- /grid -->
+</div><!-- /txd -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- Upload Document -->
+<div id="upload-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-head">
+      <h2>Upload Document</h2>
+      <button onclick="document.getElementById('upload-modal').style.display='none'">&times;</button>
+    </div>
+    <form class="modal-form" style="display:grid;gap:.85rem">
+      <div class="modal-field">
+        <label class="modal-label">Document Type</label>
+        <select class="modal-select">
+          <option>Purchase Agreement</option>
+          <option>Earnest Money Receipt</option>
+          <option>Seller Disclosures</option>
+          <option>Home Inspection Report</option>
+          <option>Appraisal Report</option>
+          <option>Title Report</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="txd-drop" onclick="document.getElementById('file-input').click()">
+        <div style="font-size:1.5rem;margin-bottom:.25rem">↑</div>
+        <div style="font-weight:600;margin-bottom:.2rem">Drag & drop or click to upload</div>
+        <div style="font-size:.72rem">PDF, DOC, DOCX, JPG, PNG</div>
+        <input type="file" id="file-input" style="display:none">
+      </div>
+      <div class="modal-btns">
+        <button type="submit" class="txd-btn txd-btn--primary" style="padding:.6rem;font-size:.82rem">Upload</button>
+        <button type="button" class="txd-btn txd-btn--ghost" onclick="document.getElementById('upload-modal').style.display='none'" style="padding:.6rem;font-size:.82rem">Cancel</button>
+      </div>
     </form>
   </div>
 </div>
 
-<!-- AI Task Suggestions Panel -->
-<div id="ai-task-panel" style="display:none;background:linear-gradient(135deg,#F8F5F0 0%,#F5F0EB 100%);border:1px solid rgba(107,91,77,.2);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem;">
- <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;">
- <span style="font-size:.8rem;font-weight:700;color:#6B5B4D;text-transform:uppercase;letter-spacing:.06em;"> Recommended Tasks</span>
- <button onclick="document.getElementById('ai-task-panel').style.display='none'" style="background:none;border:none;font-size:1rem;color:#9A9472;cursor:pointer;">×</button>
- </div>
- <div id="ai-task-list" style="font-size:.82rem;color:#3D2E24;line-height:1.7;"></div>
- </div>
-
- <!-- Tabs -->
- <div class="tabs">
- <button class="tab active" onclick="showTab('documents')">Documents</button>
- <button class="tab" onclick="showTab('participants')">Participants</button>
- <button class="tab" onclick="showTab('details')">Details</button>
- </div>
-
- <!-- Documents Tab -->
- <div id="documents-tab" class="tab-content active">
- <h2 class="tab-content__title">Transaction Overview</h2>
- <div class="tab-content__grid">
- <div class="tab-content__column">
- <h3 class="tab-content__column-title">Documents</h3>
- <button class="action-btn action-btn--primary" style="margin-bottom: 1.2rem; width: 100%;" onclick="document.getElementById('upload-modal').style.display='flex'">
- Upload Document
- </button>
- <div style="display: flex; flex-direction: column; gap: 0.7rem;">
- {% for item in doc_status.checklist %}
- <div class="checklist-item{% if item.completed %} completed{% elif item.status == 'pending' %} pending{% endif %}">
- <div class="checklist-item__info">
-                <div class="checklist-item__title">{{ item.display_name or item.document_name or item.document_type }}</div>
-                <div class="checklist-item__desc">
-                {{ item.description or '' }}
-                {% if item.is_required or item.required %} • <strong>Required</strong>{% endif %}
- {% if item.triggers_stage_change %} • <strong>Auto-advances stage</strong>{% endif %}
- </div>
- </div>
- </div>
- {% endfor %}
- </div>
- </div>
- 
- <div class="tab-content__column">
- <h3 class="tab-content__column-title">Activity Timeline</h3>
- <div class="timeline">
- {% set current_stage_db = (transaction.current_stage or transaction.get('current_stage', 'pre_contract'))|lower %}
- {% set display_stages = [
- ('Summary', 'pre_contract', 0),
- ('Showings', 'pre_contract', 1),
- ('Under Contract', 'under_contract', 2),
- ('EMD', 'under_contract', 3),
- ('Inspections', 'in_escrow', 4),
- ('Appraisal', 'in_escrow', 5),
- ('Final Walkthrough', 'clear_to_close', 6),
- ('Closing', 'closed', 7)
- ] %}
- {% set stage_order = {
- 'pre_contract': 0,
- 'under_contract': 2,
- 'in_escrow': 4,
- 'clear_to_close': 6,
- 'closed': 7,
- 'cancelled': -1
- } %}
- {% set current_stage_order = stage_order.get(current_stage_db, 0) %}
- {% for stage_name, stage_db, stage_index in display_stages %}
- {% set status = 'next' %}
- {% set stage_order_value = stage_order.get(stage_db, 999) %}
- {% if current_stage_order >= 0 %}
- {% if stage_order_value < current_stage_order %}
- {% set status = 'done' %}
- {% elif stage_order_value == current_stage_order and stage_index == 0 %}
- {% set status = 'in_progress' %}
- {% endif %}
- {% endif %}
- <div class="timeline-item">
- <div class="timeline-status timeline-status--{{ status.replace('_', '-') }}">
- {% if status == 'done' %}
- <span style="display: flex; align-items: center;"><span style="font-size: 1.2rem;"></span> <span style="margin-left: 0.4rem;">Done</span></span>
- {% elif status == 'in_progress' %}
- In Progress
- {% else %}
- Next
- {% endif %}
- </div>
- <div class="timeline-name" style="color: {% if status == 'done' %}#4CAF50{% elif status == 'in_progress' %}#FFD600{% else %}#AAA{% endif %};">
- {{ stage_name }}
- </div>
- <div class="timeline-dot-wrapper">
- {% if not loop.last %}
- <div class="timeline-line"></div>
- {% endif %}
- <div class="timeline-dot {% if status == 'done' %}timeline-dot--done{% elif status == 'in_progress' %}timeline-dot--in-progress{% endif %}"></div>
- </div>
- </div>
- {% endfor %}
- </div>
- </div>
- </div>
- </div>
-
- <!-- Participants Tab -->
- <div id="participants-tab" class="tab-content">
- <h2 class="tab-content__title">Transaction Participants</h2>
- <div class="participant-list">
- {% for p in participants %}
- <div class="participant-card">
- <div class="participant-info">
-            <div class="participant-avatar">
-              {{ ((p.name or p.email or '?')[:2])|upper }}
-            </div>
-            <div class="participant-details">
-              <h4>{{ p.name or p.email or 'Participant' }}</h4>
-              <p>{{ p.email or p.user_email or '' }}{% if p.phone %} &bull; {{ p.phone }}{% endif %}</p>
-            </div>
- </div>
- <span class="participant-badge">{{ (p.participant_type or p.get('participant_type', 'participant') or 'participant')|replace('_', ' ')|title }}</span>
- </div>
- {% endfor %}
- </div>
- </div>
-
- <!-- Details Tab -->
- <div id="details-tab" class="tab-content">
- <h2 class="tab-content__title">Transaction Details</h2>
- <div style="max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; border: 1px solid rgba(200, 180, 151, 0.2);">
- <div style="display: grid; gap: 1.5rem;">
- <div>
- <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Property Address</label>
- <input type="text" value="{{ transaction.property_address or transaction.get('property_address', 'N/A') }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
- </div>
- 
- <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
- <div>
- <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Purchase Price</label>
- <input type="text" value="${{ "{:,.0f}".format(transaction.purchase_price) if transaction.purchase_price else 'N/A' }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
- </div>
- <div>
- <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Side</label>
- <input type="text" value="{{ (transaction.side or transaction.get('side', 'N/A'))|capitalize }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
- </div>
- </div>
- 
- <div>
- <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Target Close Date</label>
- <input type="text" value="{{ transaction.target_close_date or transaction.get('target_close_date', 'Not set') }}" readonly style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9;">
- </div>
- 
- {% if transaction.notes or transaction.get('notes') %}
- <div>
- <label style="display: block; font-weight: 600; color: var(--olive-green); margin-bottom: 0.5rem; font-size: 0.875rem;">Notes</label>
- <textarea readonly rows="4" style="width: 100%; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px; background: #F9F9F9; resize: vertical;">{{ transaction.notes or transaction.get('notes', '') }}</textarea>
- </div>
- {% endif %}
- </div>
- </div>
- </div>
-</div>
-
-<!-- Upload Document Modal -->
-<div id="upload-modal" class="modal">
- <div class="modal-content">
- <div class="modal-header">
- <h2 class="modal-title">Upload Document</h2>
- <button class="modal-close" onclick="document.getElementById('upload-modal').style.display='none'">&times;</button>
- </div>
- 
- <form class="modal-form">
- <div class="modal-form-group">
- <label class="modal-form-label">Document Type</label>
- <select class="modal-form-select">
- <option>Purchase Agreement</option>
- <option>Earnest Money Receipt</option>
- <option>Seller Disclosures</option>
- <option>Home Inspection Report</option>
- <option>Appraisal Report</option>
- <option>Title Report</option>
- <option>Other</option>
- </select>
- </div>
- 
- <div class="drop-zone" onclick="document.getElementById('file-input').click()">
- <h3>Drag & Drop or Click to Upload</h3>
- <p>Supports PDF, DOC, DOCX, JPG, PNG</p>
- <input type="file" id="file-input" style="display: none;">
- </div>
- 
- <div class="modal-form-buttons">
- <button type="submit" class="action-btn action-btn--primary" style="flex: 1;">
- Upload Document
- </button>
- <button type="button" class="action-btn action-btn--secondary" onclick="document.getElementById('upload-modal').style.display='none'" style="flex: 1;">
- Cancel
- </button>
- </div>
- </form>
- </div>
-</div>
-
-<!-- Share with Client Modal -->
+<!-- Share with Client -->
 <div id="share-modal" class="modal">
- <div class="modal-content">
- <div class="modal-header">
- <h2 class="modal-title">Share with Client</h2>
- <button class="modal-close" onclick="document.getElementById('share-modal').style.display='none'">&times;</button>
- </div>
- 
- <div style="background: #F0EBE4; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
- <p style="margin: 0 0 1rem 0; color: #666;">Your client will receive a secure link to view this transaction.</p>
- <div style="display: flex; gap: 1rem;">
- <input type="email" placeholder="client@email.com" style="flex: 1; padding: 0.75rem; border: 1px solid #E5E5E5; border-radius: 6px;">
- <button class="action-btn action-btn--primary">Send Invite</button>
- </div>
- </div>
- </div>
+  <div class="modal-content">
+    <div class="modal-head">
+      <h2>Share with Client</h2>
+      <button onclick="document.getElementById('share-modal').style.display='none'">&times;</button>
+    </div>
+    <p style="font-size:.82rem;color:#666;margin:0 0 1rem">Your client will receive a secure link to view this transaction.</p>
+    <div style="display:flex;gap:.5rem">
+      <input type="email" placeholder="client@email.com" class="modal-input" style="flex:1">
+      <button class="txd-btn txd-btn--primary" style="padding:.6rem .85rem;font-size:.82rem">Send</button>
+    </div>
+  </div>
 </div>
 
-<!-- Add Participant Modal -->
+<!-- Add Participant -->
 <div id="add-participant-modal" class="modal">
- <div class="modal-content">
- <div class="modal-header">
- <h2 class="modal-title">Add Participant</h2>
- <button class="modal-close" onclick="document.getElementById('add-participant-modal').style.display='none'">&times;</button>
- </div>
- 
- <form class="modal-form">
- <div class="modal-form-group">
- <label class="modal-form-label">Participant Type</label>
- <select class="modal-form-select">
- <option>Lender</option>
- <option>Title Company</option>
- <option>Inspector</option>
- <option>Appraiser</option>
- <option>Attorney</option>
- <option>Other</option>
- </select>
- </div>
- 
- <div class="modal-form-group">
- <label class="modal-form-label">Name</label>
- <input type="text" placeholder="Full Name" class="modal-form-input">
- </div>
- 
- <div class="modal-form-group">
- <label class="modal-form-label">Email</label>
- <input type="email" placeholder="email@company.com" class="modal-form-input">
- </div>
- 
- <div class="modal-form-buttons">
- <button type="submit" class="action-btn action-btn--primary" style="flex: 1;">
- Add Participant
- </button>
- <button type="button" class="action-btn action-btn--secondary" onclick="document.getElementById('add-participant-modal').style.display='none'" style="flex: 1;">
- Cancel
- </button>
- </div>
- </form>
- </div>
+  <div class="modal-content">
+    <div class="modal-head">
+      <h2>Add Participant</h2>
+      <button onclick="document.getElementById('add-participant-modal').style.display='none'">&times;</button>
+    </div>
+    <form style="display:grid;gap:.85rem">
+      <div class="modal-field">
+        <label class="modal-label">Type</label>
+        <select class="modal-select">
+          <option>Lender</option><option>Title Company</option><option>Inspector</option>
+          <option>Appraiser</option><option>Attorney</option><option>Other</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Name</label>
+        <input type="text" placeholder="Full Name" class="modal-input">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Email</label>
+        <input type="email" placeholder="email@company.com" class="modal-input">
+      </div>
+      <div class="modal-btns">
+        <button type="submit" class="txd-btn txd-btn--primary" style="padding:.6rem;font-size:.82rem">Add</button>
+        <button type="button" class="txd-btn txd-btn--ghost" onclick="document.getElementById('add-participant-modal').style.display='none'" style="padding:.6rem;font-size:.82rem">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
-<!-- Change Stage Modal -->
+<!-- Change Stage -->
 <div id="change-stage-modal" class="modal">
- <div class="modal-content">
- <div class="modal-header">
- <h2 class="modal-title">Change Transaction Stage</h2>
- <button class="modal-close" onclick="document.getElementById('change-stage-modal').style.display='none'">&times;</button>
- </div>
- 
- <form method="POST" action="{{ url_for('agent_transaction_change_stage', tx_id=transaction.id or transaction.get('id')) }}" class="modal-form">
- <div class="modal-form-group">
- <label class="modal-form-label">Current Stage</label>
- {% set current_stage_display = (transaction.current_stage or transaction.get('current_stage', 'unknown'))|lower %}
- {% if current_stage_display == 'pre_contract' %}
- {% set current_stage_display = 'Summary' %}
- {% else %}
- {% set current_stage_display = current_stage_display|replace('_', ' ')|title %}
- {% endif %}
- <div style="padding: 0.75rem; background: #F0EBE4; border-radius: 6px; color: var(--charcoal-brown);">
- {{ current_stage_display }}
- </div>
- </div>
- 
- <div class="modal-form-group">
- <label class="modal-form-label">New Stage</label>
- <select name="new_stage" id="new_stage_select" required class="modal-form-select">
- <option value="pre_contract:summary">Summary</option>
- <option value="pre_contract:showings">Showings</option>
- <option value="under_contract">Under Contract</option>
- <option value="in_escrow">In Escrow</option>
- <option value="clear_to_close">Clear to Close</option>
- <option value="closed">Closed</option>
- <option value="cancelled">Cancelled</option>
- </select>
- <input type="hidden" name="sub_stage" id="sub_stage_input" value="">
- </div>
- 
- <div class="modal-form-buttons">
- <button type="submit" class="action-btn action-btn--primary" style="flex: 1;">
- Update Stage
- </button>
- <button type="button" class="action-btn action-btn--secondary" onclick="document.getElementById('change-stage-modal').style.display='none'" style="flex: 1;">
- Cancel
- </button>
- </div>
- </form>
- </div>
+  <div class="modal-content">
+    <div class="modal-head">
+      <h2>Change Stage</h2>
+      <button onclick="document.getElementById('change-stage-modal').style.display='none'">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('agent_transaction_change_stage', tx_id=transaction.id) }}" style="display:grid;gap:.85rem">
+      <div class="modal-field">
+        <label class="modal-label">Current</label>
+        <div style="padding:.6rem .75rem;background:#F0EBE4;border-radius:7px;font-size:.82rem;color:var(--charcoal-brown)">
+          {{ (transaction.current_stage or 'unknown')|replace('_',' ')|title }}
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">New Stage</label>
+        <select name="new_stage" id="new_stage_select" required class="modal-select">
+          <option value="pre_contract:summary">Summary</option>
+          <option value="pre_contract:showings">Showings</option>
+          <option value="under_contract">Under Contract</option>
+          <option value="in_escrow">In Escrow</option>
+          <option value="clear_to_close">Clear to Close</option>
+          <option value="closed">Closed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <input type="hidden" name="sub_stage" id="sub_stage_input" value="">
+      </div>
+      <div class="modal-btns">
+        <button type="submit" class="txd-btn txd-btn--primary" style="padding:.6rem;font-size:.82rem">Update</button>
+        <button type="button" class="txd-btn txd-btn--ghost" onclick="document.getElementById('change-stage-modal').style.display='none'" style="padding:.6rem;font-size:.82rem">Cancel</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <script>
- function showTab(tabName) {
- // Hide all tabs
- document.querySelectorAll('.tab-content').forEach(tab => {
- tab.classList.remove('active');
- });
- // Remove active class from all tab buttons
- document.querySelectorAll('.tab').forEach(btn => {
- btn.classList.remove('active');
- });
- // Show selected tab
- document.getElementById(tabName + '-tab').classList.add('active');
- // Add active class to clicked button
- event.target.classList.add('active');
- }
+/* Stage select sub-stage handling */
+document.addEventListener('DOMContentLoaded', function() {
+  var sel = document.getElementById('new_stage_select');
+  var sub = document.getElementById('sub_stage_input');
+  if (sel && '{{ transaction.current_stage|lower }}' === 'pre_contract') sel.value = 'pre_contract:summary';
+  if (sel) sel.closest('form').addEventListener('submit', function() {
+    if (sel.value.includes(':')) {
+      var p = sel.value.split(':');
+      sel.value = p[0]; sub.value = p[1];
+    }
+  });
+});
 
- // Handle stage selection change
- document.addEventListener('DOMContentLoaded', function() {
- const stageSelect = document.getElementById('new_stage_select');
- const subStageInput = document.getElementById('sub_stage_input');
- const changeStageForm = stageSelect ? stageSelect.closest('form') : null;
- 
- if (stageSelect && subStageInput && changeStageForm) {
- const currentStage = '{{ (transaction.current_stage or transaction.get("current_stage", ""))|lower }}';
- if (currentStage === 'pre_contract') {
- stageSelect.value = 'pre_contract:summary';
- }
- 
- changeStageForm.addEventListener('submit', function(e) {
- const value = stageSelect.value;
- if (value.includes(':')) {
- const parts = value.split(':');
- stageSelect.value = parts[0];
- subStageInput.value = parts[1];
- }
- });
- }
- });
-
- // Drag and drop functionality
- const dropZone = document.querySelector('.drop-zone');
- if (dropZone) {
- ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
- dropZone.addEventListener(eventName, preventDefaults, false);
- });
- function preventDefaults(e) {
- e.preventDefault();
- e.stopPropagation();
- }
- ['dragenter', 'dragover'].forEach(eventName => {
- dropZone.addEventListener(eventName, () => {
- dropZone.classList.add('dragover');
- }, false);
- });
- ['dragleave', 'drop'].forEach(eventName => {
- dropZone.addEventListener(eventName, () => {
- dropZone.classList.remove('dragover');
- }, false);
- });
- dropZone.addEventListener('drop', handleDrop, false);
- function handleDrop(e) {
- const dt = e.dataTransfer;
- const files = dt.files;
- if (files.length > 0) {
- alert('File ready to upload: ' + files[0].name);
- }
- }
- }
-
-/* ─── COMMISSION PANEL ─────────────────────── */
+/* Commission panel toggle */
 function toggleCommPanel() {
   var panel = document.getElementById('comm-form-panel');
-  var summary = document.getElementById('comm-summary');
-  var btn = document.getElementById('comm-toggle-btn');
+  var sum   = document.getElementById('comm-summary');
+  var btn   = document.getElementById('comm-toggle-btn');
   if (panel.style.display === 'none') {
     panel.style.display = 'block';
-    if (summary) summary.style.display = 'none';
+    if (sum) sum.style.display = 'none';
     btn.textContent = 'Close';
   } else {
     panel.style.display = 'none';
-    if (summary) summary.style.display = 'flex';
+    if (sum) sum.style.display = 'flex';
     btn.textContent = 'Edit';
   }
 }
+
+/* Commission calculator */
 function calcTxComm() {
   var price = parseFloat(document.getElementById('tx-sale-price').value) || 0;
-  var rate  = parseFloat(document.getElementById('tx-comm-rate').value) || 0;
-  var split = parseFloat(document.getElementById('tx-split-pct').value) || 0;
-  var net = (price * rate / 100) * (1 - split / 100);
-  document.getElementById('tx-est-net').textContent = '$' + net.toLocaleString('en-US', {minimumFractionDigits:0,maximumFractionDigits:0});
+  var rate  = parseFloat(document.getElementById('tx-comm-rate').value)  || 0;
+  var split = parseFloat(document.getElementById('tx-split-pct').value)  || 0;
+  var net   = (price * rate / 100) * (1 - split / 100);
+  document.getElementById('tx-est-net').textContent = '$' + net.toLocaleString('en-US', {maximumFractionDigits:0});
 }
-// Auto-populate sale price from transaction purchase price
 document.addEventListener('DOMContentLoaded', function() {
   var sp = document.getElementById('tx-sale-price');
-  if (sp && !sp.value) {
-    var pp = '{{ transaction.purchase_price or "" }}';
-    if (pp) { sp.value = pp; calcTxComm(); }
-  } else if (sp) { calcTxComm(); }
+  if (sp && !sp.value) { sp.value = '{{ transaction.purchase_price or "" }}'; }
+  if (sp) calcTxComm();
 });
 
-/* ─── AI TASK SUGGESTIONS ─────────────────────── */
+/* Drag & drop */
+var dz = document.querySelector('.txd-drop');
+if (dz) {
+  ['dragenter','dragover','dragleave','drop'].forEach(function(e){ dz.addEventListener(e,function(ev){ev.preventDefault();ev.stopPropagation();}); });
+  ['dragenter','dragover'].forEach(function(e){ dz.addEventListener(e,function(){ dz.classList.add('dragover'); }); });
+  ['dragleave','drop'].forEach(function(e){ dz.addEventListener(e,function(){ dz.classList.remove('dragover'); }); });
+  dz.addEventListener('drop', function(e){ var f=e.dataTransfer.files; if(f.length) alert('Ready: '+f[0].name); });
+}
+
+/* AI task suggestions */
 function aiSuggestTasks() {
- var panel = document.getElementById('ai-task-panel');
- var list = document.getElementById('ai-task-list');
- panel.style.display = 'block';
- list.innerHTML = '<span style="opacity:.55;font-style:italic;"> Analyzing your transaction…</span>';
- fetch('/api/ai/transaction/suggest-tasks', {
- method: 'POST',
- headers: {'Content-Type': 'application/json'},
- body: JSON.stringify({tx_id: {{ transaction.id or transaction.get('id') }} })
- }).then(function(r){ return r.json(); }).then(function(d) {
- var tasks = d.tasks || [];
- if (!tasks.length) { list.innerHTML = '<span style="opacity:.5;">No suggestions available.</span>'; return; }
- list.innerHTML = tasks.map(function(t,i){
- return '<div style="display:flex;align-items:flex-start;gap:.5rem;padding:.3rem 0;border-bottom:1px solid rgba(107,91,77,.08);">'
- + '<span style="min-width:18px;height:18px;border:1.5px solid #6B5B4D;border-radius:3px;display:inline-block;flex-shrink:0;margin-top:.15rem;"></span>'
- + '<span>'+t+'</span></div>';
- }).join('');
- }).catch(function(){
- list.innerHTML = '<span style="opacity:.5;">Unavailable right now. Please try again.</span>';
- });
- }
+  var panel = document.getElementById('ai-task-panel');
+  var list  = document.getElementById('ai-task-list');
+  panel.style.display = 'block';
+  list.innerHTML = '<span style="opacity:.5;font-style:italic">Analyzing transaction…</span>';
+  fetch('/api/ai/transaction/suggest-tasks', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({tx_id: {{ transaction.id }} })
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    var tasks = d.tasks || [];
+    if (!tasks.length) { list.innerHTML = '<span style="opacity:.5">No suggestions available.</span>'; return; }
+    list.innerHTML = tasks.map(function(t){
+      return '<div style="display:flex;gap:.4rem;padding:.25rem 0;border-bottom:1px solid rgba(107,91,77,.08)">'
+           + '<span style="width:14px;height:14px;border:1.5px solid #6B5B4D;border-radius:3px;flex-shrink:0;margin-top:.15rem;display:inline-block"></span>'
+           + '<span>'+t+'</span></div>';
+    }).join('');
+  }).catch(function(){ list.innerHTML = '<span style="opacity:.5">Unavailable right now.</span>'; });
+}
 </script>
 
 {% endblock %}
