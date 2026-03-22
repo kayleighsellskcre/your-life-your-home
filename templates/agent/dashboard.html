@@ -332,24 +332,40 @@
     </div>
   </div>
 
-  <!-- ── DAILY INSPIRATION STRIP ── -->
-  <div class="fu fu1" style="background:linear-gradient(108deg,#8C6070 0%,#A8808E 48%,#C0A0AE 100%);border-radius:12px;padding:.45rem 1.1rem;margin-bottom:1.1rem;box-shadow:0 3px 16px rgba(110,60,80,.18);display:flex;align-items:center;gap:.8rem;">
-    <div style="flex:1;min-width:0;">
-      <div id="briefing-text" style="font-size:.8rem;font-style:italic;font-weight:500;color:#fff;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Loading your daily inspiration...</div>
-      <div id="kindness-text" style="font-size:.65rem;color:rgba(255,255,255,.78);line-height:1.25;margin-top:.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+  <!-- ── DAILY BRIEF CARD ── -->
+  <div class="fu fu1" style="
+    background:linear-gradient(130deg,#D4B0C4 0%,#DFC0D2 45%,#EAD0DC 100%);
+    border-radius:16px;
+    padding:1.25rem 1.5rem 1rem;
+    margin-bottom:1.2rem;
+    box-shadow:0 4px 20px rgba(150,90,120,.14);
+    position:relative;
+  ">
+    <!-- Quote + kindness — centered -->
+    <div style="text-align:center;margin-bottom:.9rem;">
+      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;font-style:italic;font-weight:600;color:#3D2028;line-height:1.4;">Loading your daily inspiration...</div>
+      <div id="kindness-text" style="font-size:.72rem;color:rgba(80,40,55,.72);margin-top:.35rem;line-height:1.3;"></div>
     </div>
-    <span onclick="shuffleBriefing()" title="New quote" role="button" style="
-      display:inline-flex;align-items:center;justify-content:center;
-      width:24px;height:24px;flex-shrink:0;
-      border-radius:50%;
-      background:rgba(255,255,255,.18);
-      border:1px solid rgba(255,255,255,.35);
-      color:#fff;cursor:pointer;
-      transition:background .2s,transform .3s;
-    " onmouseover="this.style.background='rgba(255,255,255,.3)';this.style.transform='rotate(180deg)'"
-       onmouseout="this.style.background='rgba(255,255,255,.18)';this.style.transform='rotate(0deg)'">
-      <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
-    </span>
+
+    <!-- Divider -->
+    <div style="height:1px;background:rgba(120,60,90,.15);margin-bottom:.85rem;"></div>
+
+    <!-- Today's 3 Priorities -->
+    <div id="strip-priorities" style="display:flex;flex-direction:column;gap:.45rem;"></div>
+
+    <!-- Footer: shuffle + refresh priorities -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;">
+      <span onclick="loadPriorities(true)" role="button" title="Refresh priorities" style="font-size:.68rem;font-weight:600;color:rgba(80,40,55,.6);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
+        onmouseover="this.style.color='rgba(80,40,55,.9)'" onmouseout="this.style.color='rgba(80,40,55,.6)'">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
+        Refresh Priorities
+      </span>
+      <span onclick="shuffleBriefing()" role="button" title="New quote" style="font-size:.68rem;font-weight:600;color:rgba(80,40,55,.6);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
+        onmouseover="this.style.color='rgba(80,40,55,.9)'" onmouseout="this.style.color='rgba(80,40,55,.6)'">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
+        New Quote
+      </span>
+    </div>
   </div>
 
   <!-- ── KPI STRIP ── -->
@@ -826,12 +842,34 @@ function buildPriorityItem(text, i, done){
   return div;
 }
 
+function renderStripPriorities(items){
+  var strip = document.getElementById('strip-priorities');
+  if(!strip) return;
+  strip.innerHTML = '';
+  items.slice(0,3).forEach(function(text, i){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:.6rem;';
+    var num = document.createElement('div');
+    num.style.cssText = 'width:20px;height:20px;border-radius:50%;background:rgba(80,40,55,.18);color:#3D2028;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+    num.textContent = i+1;
+    var lnk = document.createElement('a');
+    lnk.href = priorityLink(text);
+    lnk.style.cssText = 'font-size:.78rem;color:#3D2028;font-weight:500;text-decoration:none;line-height:1.35;';
+    lnk.textContent = text;
+    lnk.onmouseover = function(){ this.style.textDecoration='underline'; };
+    lnk.onmouseout  = function(){ this.style.textDecoration='none'; };
+    row.appendChild(num);
+    row.appendChild(lnk);
+    strip.appendChild(row);
+  });
+}
+
 function loadPriorities(force){
   var list = document.getElementById('priorities-list');
   var btn  = document.getElementById('priorities-refresh-btn');
   if(!list) return;
   list.innerHTML = '<div class="priority-skeleton"></div><div class="priority-skeleton"></div><div class="priority-skeleton"></div>';
-  setRefreshing(btn, true);
+  if(btn) setRefreshing(btn, true);
   var ctrl = new AbortController();
   var tid  = setTimeout(function(){ ctrl.abort(); }, 18000);
   if(force){ try{ localStorage.removeItem(PRIORITY_KEY); }catch(e){} }
@@ -850,18 +888,20 @@ function loadPriorities(force){
       'Follow up with your top leads today',
       'Add 2 new contacts to your CRM pipeline'
     ];
-    items.slice(0,4).forEach(function(p, i){
+    items.slice(0,3).forEach(function(p, i){
       list.appendChild(buildPriorityItem(p, i, done));
     });
-    setRefreshing(btn, false);
+    renderStripPriorities(items);
+    if(btn) setRefreshing(btn, false);
   })
   .catch(function(err){
     clearTimeout(tid);
     list.innerHTML = '';
     var done = loadDone();
-    ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline']
-    .forEach(function(p,i){ list.appendChild(buildPriorityItem(p, i, done)); });
-    setRefreshing(btn, false);
+    var fallback = ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline'];
+    fallback.forEach(function(p,i){ list.appendChild(buildPriorityItem(p, i, done)); });
+    renderStripPriorities(fallback);
+    if(btn) setRefreshing(btn, false);
   });
 }
 
