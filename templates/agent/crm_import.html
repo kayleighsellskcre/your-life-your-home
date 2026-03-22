@@ -1,144 +1,330 @@
 {% extends "agent/layout.html" %}
-
 {% block agent_content %}
 <style>
- .import-container {
- max-width: 800px;
- margin: 0 auto;
- }
- .import-card {
- background: linear-gradient(135deg, var(--light-cream) 0%, var(--soft-tan) 100%);
- border-radius: var(--border-radius);
- padding: 2rem;
- box-shadow: var(--shadow-medium);
- border: var(--border-light);
- margin-bottom: 2rem;
- }
- .upload-area {
- border: 3px dashed var(--taupe-beige);
- border-radius: var(--border-radius);
- padding: 0.75rem;
- text-align: center;
- background: var(--white);
- transition: var(--transition-base);
- cursor: pointer;
- }
- .upload-area:hover {
- border-color: var(--olive-green);
- background: var(--warm-cream);
- }
- .upload-area.dragover {
- border-color: var(--olive-green);
- background: rgba(107, 91, 77, 0.1);
- }
- .file-input {
- display: none;
- }
- .instructions {
- background: var(--warm-cream);
- border-radius: var(--border-radius);
- padding: 1.5rem;
- border: var(--border-light);
- margin-top: 2rem;
- }
- .instructions h3 {
- font-family: var(--font-heading);
- color: var(--charcoal-brown);
- margin-bottom: 1rem;
- }
- .instructions ul {
- margin-left: 1.5rem;
- color: var(--charcoal-brown);
- opacity: 0.9;
- }
- .instructions li {
- margin-bottom: 0.5rem;
- }
+/* ══ IMPORT PAGE — Dashboard Luxury Style ════════ */
+.imp-wrap { padding: 0 1.75rem 2.5rem; }
+
+@keyframes impFadeUp {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.ifu  { animation: impFadeUp .42s ease-out both; }
+.ifu1 { animation-delay:.06s; }
+.ifu2 { animation-delay:.12s; }
+.ifu3 { animation-delay:.18s; }
+
+/* Lux card */
+.imp-card {
+  background:#fff;
+  border:1px solid rgba(159,129,90,.18);
+  border-radius:18px;
+  box-shadow:0 2px 16px rgba(68,60,54,.06);
+  overflow:hidden;
+  margin-bottom:1.25rem;
+}
+.imp-card-hd {
+  padding:1rem 1.5rem .85rem;
+  border-bottom:1px solid rgba(159,129,90,.1);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+}
+.imp-card-title {
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:1.25rem;font-weight:600;color:#443c36;margin:0;
+}
+.imp-card-sub {
+  font-size:.7rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:#7a6855;margin:.1rem 0 0;
+}
+.imp-card-body { padding:1.5rem; }
+
+/* Upload zone */
+.upload-zone {
+  border:2.5px dashed rgba(159,129,90,.35);
+  border-radius:14px;padding:2.5rem 1.5rem;
+  text-align:center;background:#faf8f4;
+  transition:all .2s;cursor:pointer;
+}
+.upload-zone:hover, .upload-zone.dragover {
+  border-color:#9f815a;background:rgba(159,129,90,.05);
+}
+.upload-zone h3 {
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:1.15rem;font-weight:600;color:#443c36;margin:.75rem 0 .35rem;
+}
+.upload-zone p { font-size:.82rem;color:#7a6855;margin:0; }
+#fileChosen {
+  margin-top:.75rem;font-size:.8rem;font-weight:600;
+  color:#9f815a;display:none;
+}
+.upload-icon {
+  width:52px;height:52px;border-radius:14px;
+  background:linear-gradient(135deg,rgba(159,129,90,.12),rgba(159,129,90,.06));
+  border:1.5px solid rgba(159,129,90,.22);
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-bottom:.5rem;
+}
+
+/* Template download button */
+.tpl-btn {
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.6rem 1.2rem;border-radius:999px;
+  background:#fff;border:1.5px solid rgba(159,129,90,.35);
+  color:#5c4e42;font-size:.78rem;font-weight:700;cursor:pointer;
+  text-decoration:none;transition:all .18s;
+  box-shadow:0 1px 5px rgba(68,60,54,.06);
+}
+.tpl-btn:hover { background:#f5f0e6;border-color:#9f815a;color:#443c36; }
+
+/* Submit button */
+.imp-submit {
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.7rem 2rem;border-radius:999px;
+  background:#9f815a;color:#f0ebe0;
+  border:none;font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:all .2s;letter-spacing:.03em;
+  box-shadow:0 3px 12px rgba(159,129,90,.28);
+}
+.imp-submit:hover { background:#8a6e4a;transform:translateY(-1px); }
+.imp-submit:disabled { opacity:.6;cursor:not-allowed;transform:none; }
+
+/* Stage reference grid */
+.stage-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:.55rem;
+}
+.stage-item {
+  display:flex;align-items:flex-start;gap:.6rem;
+  background:#faf8f4;border:1px solid rgba(159,129,90,.12);
+  border-radius:10px;padding:.6rem .75rem;
+}
+.stage-dot {
+  width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:.28rem;
+}
+.stage-name { font-size:.78rem;font-weight:700;color:#443c36;display:block; }
+.stage-code { font-size:.65rem;color:#9f815a;font-family:monospace;letter-spacing:.03em; }
+.stage-desc { font-size:.7rem;color:#7a6855;line-height:1.35;margin-top:.15rem; }
+
+/* Field chips */
+.field-chips { display:flex;flex-wrap:wrap;gap:.35rem; }
+.field-chip {
+  background:rgba(159,129,90,.1);border:1px solid rgba(159,129,90,.22);
+  border-radius:999px;padding:.2rem .65rem;
+  font-size:.72rem;font-weight:600;color:#5c4e42;
+}
+.field-chip--req { background:rgba(68,60,54,.1);border-color:rgba(68,60,54,.2);color:#3a332d; }
+
+@media(max-width:768px){ .imp-wrap { padding:0 1rem 2rem; } }
 </style>
 
-<div class="ylh-page-hd">
- <div class="ylh-page-hd__label">CRM</div>
- <h1 class="ylh-page-hd__title">Import Contacts</h1>
- <p class="ylh-page-hd__sub">Upload your Excel or CSV — map columns once and we'll add or update contacts without duplicates.</p>
-</div>
+<div class="imp-wrap">
 
-<div class="import-container">
- <div class="import-card">
- <form method="post" enctype="multipart/form-data" id="uploadForm">
- <input type="hidden" name="action" value="upload">
- 
- <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
- <div style="font-size: 3rem; margin-bottom: 1rem;"></div>
- <h3 style="font-family: var(--font-heading); color: var(--charcoal-brown); margin-bottom: 0.5rem;">
- Click to Upload or Drag & Drop
- </h3>
- <p style="color: var(--charcoal-brown); opacity: 0.8; margin-bottom: 1rem;">
- Supports Excel (.xlsx, .xls) and CSV files
- </p>
- <input type="file" name="file" id="fileInput" class="file-input" accept=".xlsx,.xls,.csv" required>
- <div id="fileName" style="font-weight: 600; color: var(--olive-green); margin-top: 1rem; display: none;"></div>
- </div>
- 
- <div style="margin-top: 1.5rem; text-align: center;">
- <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">
- Continue to Column Mapping →
- </button>
- </div>
- </form>
- </div>
+  <!-- Page Header -->
+  <div class="ylh-page-hd ifu">
+    <h1 class="ylh-page-hd__title">Import Contacts</h1>
+    <p class="ylh-page-hd__sub">Upload your spreadsheet — we'll map your columns and sync everything without duplicates.</p>
+    <div class="ylh-page-hd__actions">
+      <a href="{{ url_for('agent_crm') }}" style="display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:600;color:#5c4e42;text-decoration:none;padding:.45rem 1rem;border-radius:999px;border:1.5px solid rgba(159,129,90,.3);background:#fff;transition:all .18s;" onmouseover="this.style.background='#f5f0e6'" onmouseout="this.style.background='#fff'">
+        ← Back to CRM
+      </a>
+    </div>
+  </div>
 
- <div class="instructions">
- <h3> How it works</h3>
- <ul>
- <li><strong>Any structure:</strong> We adapt to your column names (Name, Full Name, Contact, and so on).</li>
- <li><strong>Smart sync:</strong> Matches by name, email, or phone and updates existing records. New people get added automatically.</li>
- <li><strong>No duplicates:</strong> Same person won't be added twice.</li>
- <li><strong>Formats:</strong> Excel (.xlsx, .xls) or CSV. First row = headers.</li>
- </ul>
- </div>
+  <!-- Upload Card -->
+  <div class="imp-card ifu ifu1">
+    <div class="imp-card-hd">
+      <div>
+        <h2 class="imp-card-title">Upload Your File</h2>
+        <p class="imp-card-sub">Excel or CSV &middot; Any column structure</p>
+      </div>
+      <button onclick="downloadTemplate()" class="tpl-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Blank Template
+      </button>
+    </div>
+    <div class="imp-card-body">
+      <form method="post" enctype="multipart/form-data" id="uploadForm">
+        <input type="hidden" name="action" value="upload">
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9f815a" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <h3>Click to Upload or Drag &amp; Drop</h3>
+          <p>Excel (.xlsx, .xls) or CSV &middot; First row must be headers</p>
+          <div id="fileChosen"></div>
+          <input type="file" name="file" id="fileInput" style="display:none;" accept=".xlsx,.xls,.csv" required>
+        </div>
+        <div style="margin-top:1.25rem;text-align:center;">
+          <button type="submit" class="imp-submit" id="submitBtn" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            Continue to Map Columns →
+          </button>
+          <p style="font-size:.72rem;color:#9a8878;margin-top:.5rem;">Select a file above to continue</p>
+        </div>
+      </form>
+    </div>
+  </div>
 
- <div style="margin-top: 2rem; text-align: center;">
- <a href="{{ url_for('agent_crm') }}" class="btn" style="background: var(--taupe-beige); color: var(--charcoal-brown);">
- ← Back to CRM
- </a>
- </div>
-</div>
+  <!-- Stage Reference Card -->
+  <div class="imp-card ifu ifu2">
+    <div class="imp-card-hd">
+      <div>
+        <h2 class="imp-card-title">Stage Values for Your Spreadsheet</h2>
+        <p class="imp-card-sub">Use these exact values in your "Stage" column</p>
+      </div>
+    </div>
+    <div class="imp-card-body">
+      <p style="font-size:.82rem;color:#5c4e42;margin-bottom:1rem;line-height:1.55;">
+        Add a column called <strong>Stage</strong> to your spreadsheet and use any of these values. If a contact has no stage, you can set a default during import.
+      </p>
+      <div class="stage-grid">
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#9f815a;"></div>
+          <div><span class="stage-name">New Lead</span><span class="stage-code">new</span><p class="stage-desc">Just entered your pipeline, not yet contacted</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#c69270;"></div>
+          <div><span class="stage-name">Attempted</span><span class="stage-code">attempted</span><p class="stage-desc">Reached out but haven't connected yet</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#8b6773;"></div>
+          <div><span class="stage-name">Contacted</span><span class="stage-code">contacted</span><p class="stage-desc">Made first contact, conversation started</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#7a8b6e;"></div>
+          <div><span class="stage-name">Appt Set</span><span class="stage-code">appt_set</span><p class="stage-desc">Appointment scheduled and confirmed</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#6e8b7a;"></div>
+          <div><span class="stage-name">Appt Done</span><span class="stage-code">appt_done</span><p class="stage-desc">Met with client, appointment completed</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#443c36;"></div>
+          <div><span class="stage-name">Active</span><span class="stage-code">active</span><p class="stage-desc">Actively working together on a deal</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#3a5568;"></div>
+          <div><span class="stage-name">Under Contract</span><span class="stage-code">under_contract</span><p class="stage-desc">Deal is in contract, heading to close</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#3d5a3e;"></div>
+          <div><span class="stage-name">Closed</span><span class="stage-code">closed</span><p class="stage-desc">Transaction successfully closed</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#9f815a;opacity:.7"></div>
+          <div><span class="stage-name">Past Client</span><span class="stage-code">past</span><p class="stage-desc">Closed before — nurture for referrals</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#a08870;"></div>
+          <div><span class="stage-name">Nurture</span><span class="stage-code">nurture</span><p class="stage-desc">Long-term lead, not ready yet</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#7b8fa0;"></div>
+          <div><span class="stage-name">Sphere</span><span class="stage-code">sphere</span><p class="stage-desc">Personal network, referral sources</p></div>
+        </div>
+        <div class="stage-item">
+          <div class="stage-dot" style="background:#b0a898;"></div>
+          <div><span class="stage-name">Hold</span><span class="stage-code">hold</span><p class="stage-desc">Paused — will revisit later</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fields Reference Card -->
+  <div class="imp-card ifu ifu3">
+    <div class="imp-card-hd">
+      <div>
+        <h2 class="imp-card-title">All Supported Fields</h2>
+        <p class="imp-card-sub">Every column your spreadsheet can include</p>
+      </div>
+    </div>
+    <div class="imp-card-body">
+      <p style="font-size:.82rem;color:#5c4e42;margin-bottom:1rem;line-height:1.55;">
+        Your column names don't have to match exactly — we auto-detect common variations. <span style="background:rgba(68,60,54,.08);border-radius:4px;padding:.05rem .35rem;font-weight:700;">Bold</span> = required.
+      </p>
+      <div class="field-chips">
+        <span class="field-chip field-chip--req">Name *</span>
+        <span class="field-chip">Last Name</span>
+        <span class="field-chip">Email</span>
+        <span class="field-chip">Phone</span>
+        <span class="field-chip">Stage</span>
+        <span class="field-chip" style="background:rgba(139,103,115,.1);border-color:rgba(139,103,115,.22);color:#5a3545;">Birthday (MM/DD)</span>
+        <span class="field-chip">Home Anniversary</span>
+        <span class="field-chip">Address</span>
+        <span class="field-chip">City</span>
+        <span class="field-chip">State</span>
+        <span class="field-chip">ZIP</span>
+        <span class="field-chip">Property Address</span>
+        <span class="field-chip">Property Value</span>
+        <span class="field-chip">Equity Estimate</span>
+        <span class="field-chip">Lead Source</span>
+        <span class="field-chip">Notes</span>
+        <span class="field-chip">Tags</span>
+      </div>
+      <div style="margin-top:1.1rem;background:#faf8f4;border:1px solid rgba(159,129,90,.12);border-radius:10px;padding:.75rem 1rem;">
+        <p style="font-size:.78rem;color:#5c4e42;margin:0;line-height:1.6;">
+          <strong>Smart sync:</strong> Matches existing contacts by email, phone, or name — updates them instead of creating duplicates.
+          &nbsp;&middot;&nbsp; <strong>Birthday format:</strong> Use MM/DD (e.g. 03/15 for March 15).
+          &nbsp;&middot;&nbsp; <strong>First row:</strong> Must be column headers.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /imp-wrap -->
 
 <script>
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const fileName = document.getElementById('fileName');
+const uploadZone = document.getElementById('uploadZone');
+const fileInput  = document.getElementById('fileInput');
+const fileChosen = document.getElementById('fileChosen');
+const submitBtn  = document.getElementById('submitBtn');
+const submitNote = submitBtn.nextElementSibling;
 
-fileInput.addEventListener('change', function(e) {
- if (e.target.files.length > 0) {
- fileName.textContent = `Selected: ${e.target.files[0].name}`;
- fileName.style.display = 'block';
- uploadArea.style.borderColor = 'var(--olive-green)';
- }
+fileInput.addEventListener('change', function(){
+  if(this.files.length > 0){
+    fileChosen.textContent = '✓ ' + this.files[0].name;
+    fileChosen.style.display = 'block';
+    uploadZone.style.borderColor = '#9f815a';
+    submitBtn.disabled = false;
+    if(submitNote) submitNote.style.display = 'none';
+  }
 });
 
-// Drag and drop
-uploadArea.addEventListener('dragover', function(e) {
- e.preventDefault();
- uploadArea.classList.add('dragover');
+uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); this.classList.add('dragover'); });
+uploadZone.addEventListener('dragleave', function(){ this.classList.remove('dragover'); });
+uploadZone.addEventListener('drop', function(e){
+  e.preventDefault(); this.classList.remove('dragover');
+  if(e.dataTransfer.files.length > 0){
+    fileInput.files = e.dataTransfer.files;
+    fileChosen.textContent = '✓ ' + e.dataTransfer.files[0].name;
+    fileChosen.style.display = 'block';
+    this.style.borderColor = '#9f815a';
+    submitBtn.disabled = false;
+    if(submitNote) submitNote.style.display = 'none';
+  }
 });
 
-uploadArea.addEventListener('dragleave', function(e) {
- e.preventDefault();
- uploadArea.classList.remove('dragover');
-});
-
-uploadArea.addEventListener('drop', function(e) {
- e.preventDefault();
- uploadArea.classList.remove('dragover');
- 
- if (e.dataTransfer.files.length > 0) {
- fileInput.files = e.dataTransfer.files;
- fileName.textContent = `Selected: ${e.dataTransfer.files[0].name}`;
- fileName.style.display = 'block';
- uploadArea.style.borderColor = 'var(--olive-green)';
- }
-});
+function downloadTemplate(){
+  var headers = [
+    'First Name','Last Name','Email','Phone','Stage',
+    'Birthday (MM/DD)','Home Anniversary','Address','City','State','ZIP',
+    'Property Address','Property Value','Equity Estimate','Lead Source','Notes','Tags'
+  ];
+  var stageNote = [
+    '(e.g. John)','(e.g. Smith)','(e.g. john@email.com)','(e.g. 555-867-5309)',
+    '(new / attempted / contacted / appt_set / appt_done / active / under_contract / closed / past / nurture / sphere / hold)',
+    '(MM/DD e.g. 03/15)','(MM/DD/YYYY e.g. 06/01/2020)',
+    '(Street address)','(City)','(2-letter e.g. WA)','(e.g. 98101)',
+    '(Investment/property addr)','(e.g. 450000)','(e.g. 120000)',
+    '(referral_client / open_house / zillow / sphere / website / other)',
+    '(Any notes)','(comma-separated e.g. VIP, Investor)'
+  ];
+  var csvRows = [headers.join(','), stageNote.map(function(v){ return '"'+v+'"'; }).join(',')];
+  var blob = new Blob([csvRows.join('\n')], {type:'text/csv'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ylh_crm_import_template.csv';
+  a.click();
+}
 </script>
 {% endblock %}
-

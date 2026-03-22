@@ -6199,6 +6199,7 @@ def agent_crm_import():
                     'equity_estimate': request.form.get('map_equity', '').strip(),
                     'notes': request.form.get('map_notes', '').strip(),
                     'tags': request.form.get('map_tags', '').strip(),
+                    'lead_source': request.form.get('map_lead_source', '').strip(),
                 }
                 
                 print(f"\n=== IMPORT DEBUG ===", flush=True)
@@ -6241,7 +6242,23 @@ def agent_crm_import():
                         email = safe_get(row.get(mappings['email'])) if mappings['email'] else ''
                         phone = safe_get(row.get(mappings['phone'])) if mappings['phone'] else ''
                         stage_value = safe_get(row.get(mappings['stage'])) if mappings['stage'] else ''
-                        stage = (stage_value if stage_value else default_stage).strip().lower()
+                        # Normalize stage labels/slugs to internal values
+                        _stage_raw = (stage_value if stage_value else default_stage).strip().lower()
+                        _stage_map = {
+                            'new lead': 'new', 'new': 'new',
+                            'attempted': 'attempted', 'attempted contact': 'attempted', 'attempt': 'attempted',
+                            'contacted': 'contacted',
+                            'appt set': 'appt_set', 'appt_set': 'appt_set', 'appointment set': 'appt_set',
+                            'appt done': 'appt_done', 'appt_done': 'appt_done', 'appointment done': 'appt_done', 'appointment complete': 'appt_done',
+                            'active': 'active', 'active buyer': 'active', 'active seller': 'active', 'active buyer/seller': 'active',
+                            'under contract': 'under_contract', 'under_contract': 'under_contract', 'in contract': 'under_contract',
+                            'closed': 'closed',
+                            'past client': 'past', 'past': 'past',
+                            'nurture': 'nurture',
+                            'sphere': 'sphere', 'sphere of influence': 'sphere', 'soi': 'sphere',
+                            'hold': 'hold', 'on hold': 'hold',
+                        }
+                        stage = _stage_map.get(_stage_raw, _stage_raw)
                         birthday = safe_get(row.get(mappings['birthday'])) if mappings['birthday'] else ''
                         home_anniversary = safe_get(row.get(mappings['home_anniversary'])) if mappings['home_anniversary'] else ''
                         address = safe_get(row.get(mappings['address'])) if mappings['address'] else ''
@@ -6261,6 +6278,7 @@ def agent_crm_import():
                                 city, state, zip_code = pc, ps or state, pz or zip_code
                         notes = safe_get(row.get(mappings['notes'])) if mappings['notes'] else ''
                         tags = safe_get(row.get(mappings['tags'])) if mappings['tags'] else ''
+                        lead_source = safe_get(row.get(mappings.get('lead_source', ''))) if mappings.get('lead_source') else ''
                         
                         # Parse numeric values
                         property_value = None
@@ -6330,6 +6348,8 @@ def agent_crm_import():
                                 updates["notes"] = notes
                             if tags:
                                 updates["tags"] = tags
+                            if lead_source:
+                                updates["lead_source"] = lead_source
                             if property_value is not None:
                                 updates["property_value"] = property_value
                             if equity_estimate is not None:
@@ -6344,7 +6364,8 @@ def agent_crm_import():
                             user["id"], name, email, phone, stage, email or phone, "",
                             birthday, home_anniversary, address, notes, tags,
                             property_address, property_value, equity_estimate,
-                            city=city, state=state, zip_code=zip_code
+                            city=city, state=state, zip_code=zip_code,
+                            lead_source=lead_source or 'import'
                         )
                         imported += 1
                         # Refresh cache so next rows can match this contact (prevent same-file duplicates)
