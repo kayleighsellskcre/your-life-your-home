@@ -506,6 +506,54 @@
 /* Responsive */
 @media(max-width:900px){ #crm { padding: 0 1rem 2rem !important; } }
 @media(max-width:640px){ #crm { padding: 0 .875rem 1.5rem !important; } }
+
+/* ── INLINE ADD ROW ────────────────────────────── */
+.add-row {
+ background: linear-gradient(135deg,rgba(159,129,90,.05),rgba(200,180,151,.08)) !important;
+ border-bottom: 2px solid rgba(159,129,90,.18) !important;
+}
+.add-row td { vertical-align: middle !important; padding: .42rem .5rem !important; }
+.add-row td:first-child { padding-left: .75rem !important; }
+.add-row-icon {
+ display:inline-flex;align-items:center;justify-content:center;
+ width:22px;height:22px;border-radius:50%;
+ background:linear-gradient(135deg,#9f815a,#8a6e4a);
+ color:#f0ebe0;font-size:.8rem;font-weight:700;flex-shrink:0;
+ box-shadow:0 2px 6px rgba(159,129,90,.22);
+}
+/* Override the hard reset for inline-add inputs/selects */
+#crm .ar-inp,#crm .ar-sel {
+ width:100%!important;
+ height:28px!important;
+ padding:0 .42rem!important;
+ border:1.5px solid rgba(159,129,90,.22)!important;
+ border-radius:7px!important;
+ font-size:.75rem!important;
+ color:#443c36!important;
+ background:#fff!important;
+ outline:none!important;
+ white-space:normal!important;
+ font-family:inherit!important;
+ font-weight:normal!important;
+ letter-spacing:normal!important;
+ cursor:text!important;
+ text-transform:none!important;
+}
+#crm .ar-inp:focus,#crm .ar-sel:focus {
+ border-color:#9f815a!important;
+ box-shadow:0 0 0 3px rgba(159,129,90,.11)!important;
+}
+#crm .ar-inp::placeholder { color:#b8a898!important; font-style:italic!important; }
+#crm .ar-sel { cursor:pointer!important; padding:0 .3rem!important; }
+.ar-save {
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ height:26px!important;padding:0 .7rem!important;border-radius:999px!important;
+ background:#9f815a!important;color:#f0ebe0!important;
+ border:none!important;font-size:.7rem!important;font-weight:700!important;
+ cursor:pointer!important;white-space:nowrap!important;flex-shrink:0!important;
+ letter-spacing:.03em!important;transition:background .15s!important;
+}
+.ar-save:hover { background:#8a6e4a!important; }
 </style>
 
 <div id="crm">
@@ -660,9 +708,13 @@
  <a href="{{ url_for('agent_crm_import') }}" class="qa-link">↑ Import from Excel</a>
  </aside>
 
+ <!-- Inline-add form (referenced by inputs via form="quick-add-form") -->
+ <form id="quick-add-form" method="post" action="/agent/crm">
+  <input type="hidden" name="action" value="add">
+ </form>
+
  <!-- Contact List -->
  <div class="list-area">
- {% if contacts %}
  <table class="c-table">
  <colgroup>
  <col><col><col><col><col><col><col><col><col>
@@ -681,6 +733,38 @@
  </tr>
  </thead>
  <tbody>
+
+ <!-- ── INLINE QUICK-ADD ROW ── -->
+ <tr class="add-row" id="inline-add-row">
+  <td class="c-td"><span class="add-row-icon">+</span></td>
+  <td class="c-td"><input type="text" name="name" form="quick-add-form" class="ar-inp" id="ar-name" placeholder="Full name…" required></td>
+  <td class="c-td">
+   <select name="stage" form="quick-add-form" class="ar-sel" id="ar-stage">
+    <option value="new"{% if stage_filter=='new' %} selected{% endif %}>New Lead</option>
+    <option value="attempted"{% if stage_filter=='attempted' %} selected{% endif %}>Attempted</option>
+    <option value="contacted"{% if stage_filter=='contacted' %} selected{% endif %}>Contacted</option>
+    <option value="appt_set"{% if stage_filter=='appt_set' %} selected{% endif %}>Appt Set</option>
+    <option value="appt_done"{% if stage_filter=='appt_done' %} selected{% endif %}>Appt Done</option>
+    <option value="active"{% if stage_filter=='active' %} selected{% endif %}>Active</option>
+    <option value="under_contract"{% if stage_filter=='under_contract' %} selected{% endif %}>Under Contract</option>
+    <option value="closed"{% if stage_filter=='closed' %} selected{% endif %}>Closed</option>
+    <option value="past"{% if stage_filter=='past' %} selected{% endif %}>Past Client</option>
+    <option value="nurture"{% if stage_filter=='nurture' %} selected{% endif %}>Nurture</option>
+    <option value="sphere"{% if stage_filter=='sphere' %} selected{% endif %}>Sphere</option>
+    <option value="hold"{% if stage_filter=='hold' %} selected{% endif %}>Hold</option>
+   </select>
+  </td>
+  <td class="c-td"><input type="email" name="email" form="quick-add-form" class="ar-inp" placeholder="Email…"></td>
+  <td class="c-td"><input type="tel" name="phone" form="quick-add-form" class="ar-inp" placeholder="Phone…"></td>
+  <td class="c-td"><input type="text" name="address" form="quick-add-form" class="ar-inp" placeholder="Address…"></td>
+  <td class="c-td"><input type="text" name="birthday" form="quick-add-form" class="ar-inp" placeholder="MM/DD"></td>
+  <td class="c-td"></td>
+  <td class="c-td" style="text-align:right;padding-right:.5rem;">
+   <button type="submit" form="quick-add-form" class="ar-save">Add</button>
+  </td>
+ </tr>
+
+ {% if contacts %}
  {% for contact in contacts %}
  <tr class="c-row {% if loop.index is odd %}c-row--odd{% endif %}" id="row-{{ contact.id }}" onclick="toggleRow({{ contact.id }},event)">
  <td class="c-td" onclick="event.stopPropagation()">
@@ -759,18 +843,18 @@
  </td>
  </tr>
  {% endfor %}
+ {% else %}
+ <tr><td colspan="9">
+  <div class="c-empty">
+  <p>{% if search_query or stage_filter or tag_filter %}No contacts match your current filters.{% else %}No contacts yet. Use the row above to add your first contact.{% endif %}</p>
+  {% if search_query or stage_filter or tag_filter %}
+  <a href="{{ url_for('agent_crm') }}" class="t-btn t-btn--solid" style="display:inline-flex;margin:0 auto;">Clear Filters</a>
+  {% endif %}
+  </div>
+ </td></tr>
+ {% endif %}
  </tbody>
  </table>
-
- {% else %}
- <div class="c-empty">
- <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;"></div>
- <p>{% if search_query or stage_filter or tag_filter %}No contacts match your current filters.{% else %}No contacts yet. Tap <strong>+ Add</strong> to bring in your first contact.{% endif %}</p>
- {% if search_query or stage_filter or tag_filter %}
- <a href="{{ url_for('agent_crm') }}" class="t-btn t-btn--solid" style="display:inline-flex;margin:0 auto;">Clear Filters</a>
- {% endif %}
- </div>
- {% endif %}
  </div>
 
 </div><!-- /main-layout -->
@@ -1177,6 +1261,34 @@ function doExport(){
 document.getElementById('qaForm').addEventListener('submit',function(e){
  if(!document.getElementById('qaName').value.trim()){e.preventDefault();alert('Please enter a name.');}
 });
+
+/* ── Inline add row: Enter to submit, validation ── */
+document.getElementById('quick-add-form').addEventListener('submit',function(e){
+ var name = document.getElementById('ar-name');
+ if(!name || !name.value.trim()){
+  e.preventDefault();
+  name.focus();
+  name.style.borderColor='#a0413d';
+  name.placeholder='Name is required';
+  setTimeout(function(){ name.style.borderColor=''; name.placeholder='Full name…'; }, 2000);
+ }
+});
+/* Tab through row naturally; Enter on any field submits */
+(function(){
+ var row = document.getElementById('inline-add-row');
+ if(!row) return;
+ var inputs = row.querySelectorAll('.ar-inp, .ar-sel');
+ inputs.forEach(function(inp){
+  inp.addEventListener('keydown', function(e){
+   if(e.key === 'Enter'){
+    e.preventDefault();
+    document.getElementById('quick-add-form').requestSubmit
+      ? document.getElementById('quick-add-form').requestSubmit()
+      : document.getElementById('quick-add-form').submit();
+   }
+  });
+ });
+})();
 
 /* ─── AI FEATURES ─────────────────────────────── */
 function aiDraftEmail(id){
