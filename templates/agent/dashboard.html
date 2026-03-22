@@ -128,6 +128,15 @@
 .lux-card-body { padding: .75rem 1.1rem 1rem; }
 
 /* ── TODAY'S PRIORITIES ── */
+.priorities-hd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: .9rem 1.1rem .6rem;
+  border-bottom: 1px solid rgba(200,180,151,.12);
+  text-align: center;
+}
 .priority-skeleton {
   height: 50px;
   background: linear-gradient(90deg,rgba(107,91,77,.06) 0%,rgba(107,91,77,.11) 50%,rgba(107,91,77,.06) 100%);
@@ -138,9 +147,9 @@
 }
 .priority-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: .75rem;
-  padding: .8rem .9rem;
+  padding: .75rem .9rem;
   background: linear-gradient(135deg,rgba(107,91,77,.03),rgba(200,180,151,.055));
   border: 1px solid rgba(200,180,151,.16);
   border-radius: 12px;
@@ -148,10 +157,13 @@
   transition: all .2s;
 }
 .priority-item:last-child { margin-bottom: 0; }
-.priority-item:hover {
+.priority-item:not(.p-done):hover {
   border-color: rgba(107,138,94,.35);
   background: linear-gradient(135deg,rgba(107,91,77,.07),rgba(200,180,151,.1));
-  transform: translateX(3px);
+}
+.priority-item.p-done {
+  opacity: .52;
+  background: rgba(200,180,151,.06);
 }
 .priority-num {
   width: 24px; height: 24px;
@@ -162,14 +174,55 @@
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  margin-top: .05rem;
   box-shadow: 0 2px 6px rgba(107,91,77,.28);
+  transition: background .2s;
 }
-.priority-text {
+.priority-item.p-done .priority-num {
+  background: #9A8A7E;
+}
+.priority-link {
+  flex: 1;
   font-size: .875rem;
   color: #3D2E24;
   line-height: 1.45;
   font-weight: 500;
+  text-decoration: none;
+  transition: color .15s;
+}
+.priority-link:hover { color: #5A7A4A; text-decoration: underline; }
+.priority-item.p-done .priority-link {
+  text-decoration: line-through;
+  color: #9A8A7E;
+}
+.priority-check {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(107,138,94,.4);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all .2s;
+  padding: 0;
+  min-height: unset !important;
+  width: 22px !important;
+  margin: 0 !important;
+}
+.priority-check:hover { border-color: #6B8A5E; background: rgba(107,138,94,.08); }
+.priority-item.p-done .priority-check {
+  background: #6B8A5E;
+  border-color: #6B8A5E;
+}
+.priority-check-icon { display: none; }
+.priority-item.p-done .priority-check-icon { display: block; }
+.priority-check-ring { display: block; }
+.priority-item.p-done .priority-check-ring { display: none; }
+.priority-refresh-footer {
+  display: flex;
+  justify-content: center;
+  padding: .75rem 1.1rem .9rem;
+  border-top: 1px solid rgba(200,180,151,.12);
+  margin-top: .25rem;
 }
 
 /* ── TRANSACTIONS LIST ── */
@@ -435,17 +488,11 @@
 
     <!-- COL 1 — Today's Priorities (AI) -->
     <div class="lux-card fu fu3">
-      <div class="lux-card-hd">
+      <div class="priorities-hd">
         <h2 class="lux-card-title">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8FA88A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           Today's Priorities
         </h2>
-        <button onclick="loadPriorities()" id="priorities-refresh-btn"
-          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#9A8A7E;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
-          onmouseover="this.style.color='#6B8A5E'" onmouseout="this.style.color='#9A8A7E'">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
-          Refresh
-        </button>
       </div>
       <div class="lux-card-body">
         <div id="priorities-list">
@@ -453,6 +500,14 @@
           <div class="priority-skeleton"></div>
           <div class="priority-skeleton"></div>
         </div>
+      </div>
+      <div class="priority-refresh-footer">
+        <button onclick="loadPriorities(true)" id="priorities-refresh-btn"
+          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#9A8A7E;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
+          onmouseover="this.style.color='#6B8A5E'" onmouseout="this.style.color='#9A8A7E'">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
+          Refresh Priorities
+        </button>
       </div>
     </div>
 
@@ -627,7 +682,58 @@ function loadBriefing(){
 }
 
 /* ── Today's Priorities ── */
-function loadPriorities(){
+var PRIORITY_KEY = 'ylh_priority_done_' + new Date().toISOString().slice(0,10);
+
+function priorityLink(text){
+  /* Route to transactions page for deal/transaction keywords, CRM for everything else */
+  var lower = text.toLowerCase();
+  if(lower.indexOf('transaction') !== -1 || lower.indexOf('deal') !== -1 || lower.indexOf('closing') !== -1 || lower.indexOf('listing') !== -1){
+    return '/agent/transactions';
+  }
+  return '/agent/crm';
+}
+
+function saveDone(doneSet){
+  try { localStorage.setItem(PRIORITY_KEY, JSON.stringify(Array.from(doneSet))); } catch(e){}
+}
+function loadDone(){
+  try { return new Set(JSON.parse(localStorage.getItem(PRIORITY_KEY) || '[]')); } catch(e){ return new Set(); }
+}
+
+function togglePriority(btn){
+  var item = btn.closest('.priority-item');
+  if(!item) return;
+  var idx  = item.dataset.idx;
+  var done = loadDone();
+  if(item.classList.contains('p-done')){
+    item.classList.remove('p-done');
+    done.delete(idx);
+  } else {
+    item.classList.add('p-done');
+    done.add(idx);
+  }
+  saveDone(done);
+}
+
+function buildPriorityItem(text, i, done){
+  var isDone = done.has(String(i));
+  var href   = priorityLink(text);
+  var div    = document.createElement('div');
+  div.className  = 'priority-item' + (isDone ? ' p-done' : '');
+  div.dataset.idx = String(i);
+  div.innerHTML  =
+    '<div class="priority-num">' +
+      '<svg class="priority-check-icon" width="12" height="12" viewBox="0 0 16 16" fill="white"><polyline points="2,8 6,12 14,4" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+      '<span class="priority-check-ring">' + (i+1) + '</span>' +
+    '</div>' +
+    '<a href="' + href + '" class="priority-link">' + escapeHtml(text) + '</a>' +
+    '<button class="priority-check" onclick="togglePriority(this)" title="Mark done">' +
+      '<svg class="priority-check-icon" width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>' +
+    '</button>';
+  return div;
+}
+
+function loadPriorities(force){
   var list = document.getElementById('priorities-list');
   var btn  = document.getElementById('priorities-refresh-btn');
   if(!list) return;
@@ -635,6 +741,7 @@ function loadPriorities(){
   setRefreshing(btn, true);
   var ctrl = new AbortController();
   var tid  = setTimeout(function(){ ctrl.abort(); }, 18000);
+  if(force){ try{ localStorage.removeItem(PRIORITY_KEY); }catch(e){} }
   fetch('/api/ai/dashboard-priorities',{
     method:'POST',
     headers:{'Content-Type':'application/json','Cache-Control':'no-cache'},
@@ -644,29 +751,23 @@ function loadPriorities(){
   .then(function(r){ clearTimeout(tid); if(!r.ok) throw new Error(r.status); return r.json(); })
   .then(function(d){
     list.innerHTML = '';
+    var done  = loadDone();
     var items = (d.priorities && d.priorities.length) ? d.priorities : [
       'Review your active deals for next steps',
       'Follow up with your top leads today',
       'Add 2 new contacts to your CRM pipeline'
     ];
     items.slice(0,4).forEach(function(p, i){
-      var div = document.createElement('div');
-      div.className = 'priority-item';
-      div.innerHTML = '<div class="priority-num">'+(i+1)+'</div><div class="priority-text">'+escapeHtml(p)+'</div>';
-      list.appendChild(div);
+      list.appendChild(buildPriorityItem(p, i, done));
     });
     setRefreshing(btn, false);
   })
   .catch(function(err){
     clearTimeout(tid);
     list.innerHTML = '';
+    var done = loadDone();
     ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline']
-    .forEach(function(p,i){
-      var div = document.createElement('div');
-      div.className = 'priority-item';
-      div.innerHTML = '<div class="priority-num">'+(i+1)+'</div><div class="priority-text">'+escapeHtml(p)+'</div>';
-      list.appendChild(div);
-    });
+    .forEach(function(p,i){ list.appendChild(buildPriorityItem(p, i, done)); });
     setRefreshing(btn, false);
   });
 }
