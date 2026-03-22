@@ -8,8 +8,11 @@
    ══════════════════════════════════════════════════ */
 
 #crm,#crm *{box-sizing:border-box;}
-#crm button,#crm a,#crm input,#crm select,#crm textarea,#crm form,
-#crm label{
+
+/* Hard reset — excludes every styled component class so pills/buttons keep their look */
+#crm button:not(.stg-pill):not(.mbtn):not(.x-btn):not(.c-act):not(.cmod-x):not(.filter-chip-x):not(.t-go),
+#crm a:not(.stg-pill):not(.t-btn):not(.x-btn):not(.c-act):not(.exp-tag):not(.filter-chip):not(.s-stat),
+#crm input,#crm select,#crm textarea,#crm form,#crm label{
  width:auto!important;min-height:unset!important;max-width:none!important;
  margin:0!important;padding:0!important;
  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif!important;
