@@ -7,7 +7,7 @@
    ═══════════════════════════════════════════════ */
 
 /* ── Wrapper ── */
-.dash {
+ .dash {
   width: 100%;
   padding: 0 1.75rem 2.5rem;
   box-sizing: border-box;
@@ -32,21 +32,21 @@
 }
 
 /* ── SHARED CARD ── */
-.lux-card {
+ .lux-card {
   background: #fff;
   border: 1px solid rgba(159,129,90,.18);
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(68,60,54,.06);
-  overflow: hidden;
+ overflow: hidden;
   transition: box-shadow .3s;
 }
 .lux-card:hover { box-shadow: 0 6px 28px rgba(68,60,54,.1); }
 
 .lux-card-hd,
 .priorities-hd {
-  display: flex;
+ display: flex;
   flex-direction: column;
-  align-items: center;
+ align-items: center;
   justify-content: center;
   min-height: 82px;
   padding: .9rem 1.1rem .65rem;
@@ -55,7 +55,7 @@
   gap: .3rem;
   box-sizing: border-box;
 }
-.lux-card-title {
+ .lux-card-title {
   font-family: 'Playfair Display', Georgia, serif !important;
   font-size: 2rem !important;
   font-weight: 600 !important;
@@ -73,19 +73,19 @@
 .priority-skeleton {
   height: 50px;
   background: linear-gradient(90deg,rgba(159,129,90,.06) 0%,rgba(159,129,90,.11) 50%,rgba(159,129,90,.06) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+ background-size: 200% 100%;
+ animation: shimmer 1.5s infinite;
   border-radius: 10px;
   margin-bottom: .5rem;
 }
-.priority-item {
-  display: flex;
+ .priority-item {
+ display: flex;
   align-items: center;
   gap: .75rem;
   padding: .75rem .9rem;
   background: linear-gradient(135deg,rgba(159,129,90,.03),rgba(200,180,151,.055));
   border: 1px solid rgba(200,180,151,.16);
-  border-radius: 12px;
+ border-radius: 12px;
   margin-bottom: .5rem;
   transition: all .2s;
 }
@@ -98,15 +98,15 @@
   opacity: .52;
   background: rgba(200,180,151,.06);
 }
-.priority-num {
+ .priority-num {
   width: 26px; height: 26px;
-  border-radius: 50%;
+ border-radius: 50%;
   background: linear-gradient(135deg, #9f815a, #8a6e4a);
   color: #fff;
   font-size: .7rem;
-  font-weight: 700;
+ font-weight: 700;
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+ flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(159,129,90,.22);
   cursor: pointer;
   transition: background .2s, transform .15s;
@@ -120,8 +120,8 @@
   flex: 1;
   font-size: .875rem;
   color: #443c36;
-  line-height: 1.45;
-  font-weight: 500;
+ line-height: 1.45;
+ font-weight: 500;
   text-decoration: none;
   transition: color .15s;
 }
@@ -143,79 +143,79 @@
 }
 
 /* ── TRANSACTIONS LIST ── */
-.tx-item {
-  display: flex;
-  align-items: center;
+ .tx-item {
+ display: flex;
+ align-items: center;
   gap: .875rem;
   padding: .75rem 0;
   border-bottom: 1px solid rgba(200,180,151,.13);
-  text-decoration: none;
+ text-decoration: none;
   transition: all .2s;
-}
-.tx-item:last-child { border-bottom: none; }
-.tx-item:hover { transform: translateX(4px); }
+ }
+ .tx-item:last-child { border-bottom: none; }
+ .tx-item:hover { transform: translateX(4px); }
 .tx-item:hover .tx-addr { color: #9f815a; }
-.tx-dot {
+ .tx-dot {
   width: 9px; height: 9px;
-  border-radius: 50%;
+ border-radius: 50%;
   background: #c69270;
-  flex-shrink: 0;
+ flex-shrink: 0;
   box-shadow: 0 0 0 3px rgba(143,168,138,.18);
-}
-.tx-info { flex: 1; min-width: 0; }
+ }
+ .tx-info { flex: 1; min-width: 0; }
 .tx-addr {
-  font-weight: 600;
+ font-weight: 600;
   font-size: .9rem;
   color: #443c36;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
   transition: color .2s;
 }
 .tx-meta { font-size: .775rem; color: #7a6855; margin-top: .1rem; }
-.tx-badge {
+ .tx-badge {
   font-size: .62rem;
-  font-weight: 700;
-  text-transform: uppercase;
+ font-weight: 700;
+ text-transform: uppercase;
   letter-spacing: .04em;
   padding: .22rem .6rem;
-  border-radius: 999px;
+ border-radius: 999px;
   background: rgba(159,129,90,.12);
   color: #5c4e42;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
+ white-space: nowrap;
+ flex-shrink: 0;
+ }
 .tx-arrow { color: #C8B497; font-size: .95rem; flex-shrink: 0; transition: color .2s; }
 .tx-item:hover .tx-arrow { color: #c69270; }
 
-/* ── QUICK ACTIONS ── */
-.qa-item {
-  display: flex;
-  align-items: center;
+ /* ── QUICK ACTIONS ── */
+ .qa-item {
+ display: flex;
+ align-items: center;
   gap: .8rem;
   padding: .8rem .9rem;
   background: linear-gradient(135deg,rgba(159,129,90,.025),rgba(200,180,151,.045));
   border: 1px solid rgba(200,180,151,.16);
-  border-radius: 12px;
-  text-decoration: none;
+ border-radius: 12px;
+ text-decoration: none;
   color: #443c36;
   margin-bottom: .45rem;
   transition: all .2s cubic-bezier(.4,0,.2,1);
-}
+ }
 .qa-item:last-child { margin-bottom: 0; }
-.qa-item:hover {
+ .qa-item:hover {
   border-color: rgba(159,129,90,.35);
   background: linear-gradient(135deg,rgba(159,129,90,.07),rgba(200,180,151,.09));
-  transform: translateX(3px);
+ transform: translateX(3px);
   box-shadow: 0 4px 14px rgba(159,129,90,.09);
-}
-.qa-icon {
+ }
+ .qa-icon {
   width: 36px; height: 36px;
-  border-radius: 10px;
+ border-radius: 10px;
   background: linear-gradient(135deg,#c69270,#8a6e4a);
   display: flex; align-items: center; justify-content: center;
   color: #fff;
-  flex-shrink: 0;
+ flex-shrink: 0;
   box-shadow: 0 2px 7px rgba(159,129,90,.22);
 }
 .qa-label { font-size: .875rem; font-weight: 600; color: #443c36; }
@@ -239,16 +239,16 @@
   border-radius: 999px;
   text-decoration: none;
   font-size: .8rem;
-  font-weight: 600;
+ font-weight: 600;
   transition: opacity .2s;
 }
 .empty-state a:hover { opacity: .85; }
 
-/* ── SECTION LABEL ── */
+ /* ── SECTION LABEL ── */
 .eyebrow {
   font-size: .62rem;
-  font-weight: 700;
-  text-transform: uppercase;
+ font-weight: 700;
+ text-transform: uppercase;
   letter-spacing: .1em;
   color: #7a6855;
   margin-bottom: .55rem;
@@ -266,15 +266,15 @@
 
 /* ── DATE BADGE ── */
 .date-badge {
-  display: inline-flex;
-  align-items: center;
+ display: inline-flex;
+ align-items: center;
   gap: .4rem;
   background: rgba(159,129,90,.08);
   border: 1px solid rgba(159,129,90,.22);
   border-radius: 999px;
   padding: .38rem 1rem;
   font-size: .78rem;
-  font-weight: 600;
+ font-weight: 600;
   color: #5c4e42;
   white-space: nowrap;
 }
@@ -314,7 +314,7 @@
 }
 
 /* ── FADE ANIMATIONS ── */
-@keyframes fadeUp {
+ @keyframes fadeUp {
   from { opacity:0; transform:translateY(12px); }
   to   { opacity:1; transform:translateY(0); }
 }
@@ -325,7 +325,7 @@
 .fu4 { animation-delay: .18s; }
 .fu5 { animation-delay: .23s; }
 
-/* ── RESPONSIVE ── */
+ /* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
   .dash-grid { grid-template-columns: 1fr 1fr; }
   .dash-grid > *:last-child { grid-column: 1 / -1; }
@@ -342,7 +342,7 @@
   .kpi-value { font-size: 1.6rem; }
   .dash { padding: 0 .875rem 1.5rem; }
   .briefing-body { flex-wrap: wrap; gap: .5rem; }
-}
+ }
 </style>
 
 <div class="dash">
@@ -354,10 +354,10 @@
     <div class="ylh-page-hd__actions">
       <span class="date-badge">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span id="today-date">{{ today_date if today_date else "" }}</span>
+ <span id="today-date">{{ today_date if today_date else "" }}</span>
       </span>
-    </div>
-  </div>
+ </div>
+ </div>
 
   <!-- ── DAILY BRIEF CARD ── -->
   <div class="fu fu1" style="
@@ -372,7 +372,7 @@
     <div style="text-align:center;margin-bottom:1rem;">
       <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:2.2rem;font-style:italic;font-weight:600;color:#3a332d;line-height:1.35;">Loading your daily inspiration...</div>
       <div id="kindness-text" style="font-size:.88rem;color:rgba(58,51,45,.82);margin-top:.6rem;line-height:1.45;font-weight:500;letter-spacing:.01em;"></div>
-    </div>
+ </div>
 
     <!-- Divider -->
     <div style="height:1px;background:rgba(68,60,54,.15);margin-bottom:.85rem;"></div>
@@ -392,8 +392,8 @@
         <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
         New Quote
       </span>
-    </div>
-  </div>
+ </div>
+ </div>
 
   <!-- ── KPI STRIP ── -->
   <div class="kpi-strip fu fu2">
@@ -452,14 +452,14 @@
     <div class="lux-card fu fu3">
       <div class="priorities-hd">
         <h2 class="lux-card-title">Today's Priorities</h2>
-      </div>
-      <div class="lux-card-body">
+ </div>
+ <div class="lux-card-body">
         <div id="priorities-list">
+ <div class="priority-skeleton"></div>
           <div class="priority-skeleton"></div>
           <div class="priority-skeleton"></div>
-          <div class="priority-skeleton"></div>
-        </div>
-      </div>
+ </div>
+ </div>
       <div class="priority-refresh-footer">
         <button onclick="loadPriorities(true)" id="priorities-refresh-btn"
           style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#7a6855;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
@@ -468,82 +468,82 @@
           Refresh Priorities
         </button>
       </div>
-    </div>
+ </div>
 
     <!-- COL 2 — Active Transactions -->
     <div class="lux-card fu fu4">
       <div class="lux-card-hd">
         <h2 class="lux-card-title">Active Transactions</h2>
         {% if transactions %}<a href="{{ url_for('agent_transactions') }}" class="view-all">View all</a>{% endif %}
-      </div>
+ </div>
       <div class="lux-card-body" style="padding-top:.5rem;">
-        {% if transactions %}
+ {% if transactions %}
           {% for tx in transactions[:7] %}
-          <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-item">
-            <div class="tx-dot"></div>
-            <div class="tx-info">
+ <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-item">
+ <div class="tx-dot"></div>
+ <div class="tx-info">
               <div class="tx-addr">{{ tx.property_address or 'Property' }}</div>
-              <div class="tx-meta">{{ tx.client_name }}</div>
-            </div>
-            <div class="tx-badge">{{ (tx.current_stage or 'new')|replace('_',' ')|title }}</div>
+ <div class="tx-meta">{{ tx.client_name }}</div>
+ </div>
+ <div class="tx-badge">{{ (tx.current_stage or 'new')|replace('_',' ')|title }}</div>
             <div class="tx-arrow">›</div>
-          </a>
-          {% endfor %}
-        {% else %}
-        <div class="empty-state">
+ </a>
+ {% endfor %}
+ {% else %}
+ <div class="empty-state">
           No active transactions yet.
-          <br>
-          <a href="{{ url_for('agent_transactions') }}">Start Your First Deal</a>
-        </div>
-        {% endif %}
-      </div>
-    </div>
+ <br>
+ <a href="{{ url_for('agent_transactions') }}">Start Your First Deal</a>
+ </div>
+ {% endif %}
+ </div>
+ </div>
 
     <!-- COL 3 — Quick Actions -->
     <div class="lux-card fu fu5">
       <div class="lux-card-hd">
         <h2 class="lux-card-title">Quick Actions</h2>
-      </div>
-      <div class="lux-card-body">
+ </div>
+ <div class="lux-card-body">
 
         <a href="{{ url_for('agent_crm') }}?add=1" class="qa-item">
           <div class="qa-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
           <div><div class="qa-label">Add a Contact</div><div class="qa-sub">Drop a new lead in your CRM</div></div>
-          <div class="qa-arrow">›</div>
-        </a>
+ <div class="qa-arrow">›</div>
+ </a>
 
-        <a href="{{ url_for('agent_transactions') }}" class="qa-item">
+ <a href="{{ url_for('agent_transactions') }}" class="qa-item">
           <div class="qa-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
           <div><div class="qa-label">New Transaction</div><div class="qa-sub">Track a deal from day one</div></div>
-          <div class="qa-arrow">›</div>
-        </a>
+ <div class="qa-arrow">›</div>
+ </a>
 
-        <a href="{{ url_for('agent_communications') }}" class="qa-item">
+ <a href="{{ url_for('agent_communications') }}" class="qa-item">
           <div class="qa-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
           <div><div class="qa-label">Send a Message</div><div class="qa-sub">Email and text templates</div></div>
-          <div class="qa-arrow">›</div>
-        </a>
+ <div class="qa-arrow">›</div>
+ </a>
 
-        <a href="{{ url_for('agent_marketing') }}" class="qa-item">
+ <a href="{{ url_for('agent_marketing') }}" class="qa-item">
           <div class="qa-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
           <div><div class="qa-label">Create Content</div><div class="qa-sub">Marketing in seconds</div></div>
-          <div class="qa-arrow">›</div>
-        </a>
+ <div class="qa-arrow">›</div>
+ </a>
 
-        <a href="{{ url_for('agent_financials') }}" class="qa-item">
+ <a href="{{ url_for('agent_financials') }}" class="qa-item">
           <div class="qa-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           <div><div class="qa-label">Financials</div><div class="qa-sub">Income, goals & insights</div></div>
-          <div class="qa-arrow">›</div>
-        </a>
+ <div class="qa-arrow">›</div>
+ </a>
 
         <a href="{{ url_for('agent_booking') }}" class="qa-item">
           <div class="qa-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
           <div><div class="qa-label">Booking & Calendar</div><div class="qa-sub">Schedule & appointments</div></div>
-          <div class="qa-arrow">›</div>
-        </a>
+ <div class="qa-arrow">›</div>
+ </a>
 
-      </div>
-    </div>
+ </div>
+ </div>
 
   </div><!-- /dash-grid -->
 </div><!-- /dash -->
@@ -551,8 +551,8 @@
 <script>
 /* ── Time-of-day greeting ── */
 (function(){
-  var h = new Date().getHours();
-  var part = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+ var h = new Date().getHours();
+ var part = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
   var el = document.getElementById('dash-greeting');
   if(el) el.textContent = el.textContent.replace(/Good \w+,/, 'Good ' + part + ',');
   var d = document.getElementById('today-date');
@@ -561,28 +561,28 @@
 })();
 
 function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 /* ── Spin animation ── */
 (function(){
-  var s = document.createElement('style');
-  s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
-  document.head.appendChild(s);
+ var s = document.createElement('style');
+ s.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+ document.head.appendChild(s);
 })();
 
 function setRefreshing(btn, state){
-  if(!btn) return;
-  var svg = btn.querySelector('svg');
-  btn.disabled = state;
-  if(svg) svg.style.animation = state ? 'spin 0.7s linear infinite' : '';
+ if(!btn) return;
+ var svg = btn.querySelector('svg');
+ btn.disabled = state;
+ if(svg) svg.style.animation = state ? 'spin 0.7s linear infinite' : '';
 }
 
 /* ── Live KPI refresh ── */
 function refreshMetrics(){
   fetch('/api/agent/dashboard-metrics',{cache:'no-store'})
-  .then(function(r){ return r.json(); })
-  .then(function(d){
+ .then(function(r){ return r.json(); })
+ .then(function(d){
     var map = {
       'kpi-new-leads': d.new_leads,
       'kpi-active-deals': d.active_deals,
@@ -593,8 +593,8 @@ function refreshMetrics(){
       var el = document.getElementById(id);
       if(el && map[id] !== undefined) el.textContent = map[id];
     });
-  })
-  .catch(function(){});
+ })
+ .catch(function(){});
 }
 
 /* ── Daily Inspiration (local — instant, no API call) ── */
@@ -883,38 +883,38 @@ function renderStripPriorities(items){
 }
 
 function loadPriorities(force){
-  var list = document.getElementById('priorities-list');
-  var btn  = document.getElementById('priorities-refresh-btn');
-  if(!list) return;
+ var list = document.getElementById('priorities-list');
+ var btn  = document.getElementById('priorities-refresh-btn');
+ if(!list) return;
   list.innerHTML = '<div class="priority-skeleton"></div><div class="priority-skeleton"></div><div class="priority-skeleton"></div>';
   if(btn) setRefreshing(btn, true);
-  var ctrl = new AbortController();
-  var tid  = setTimeout(function(){ ctrl.abort(); }, 18000);
+ var ctrl = new AbortController();
+ var tid  = setTimeout(function(){ ctrl.abort(); }, 18000);
   if(force){ try{ localStorage.removeItem(PRIORITY_KEY); }catch(e){} }
   fetch('/api/ai/dashboard-priorities',{
     method:'POST',
     headers:{'Content-Type':'application/json','Cache-Control':'no-cache'},
     body:JSON.stringify({t:Date.now()}),
     signal:ctrl.signal
-  })
-  .then(function(r){ clearTimeout(tid); if(!r.ok) throw new Error(r.status); return r.json(); })
-  .then(function(d){
-    list.innerHTML = '';
+ })
+ .then(function(r){ clearTimeout(tid); if(!r.ok) throw new Error(r.status); return r.json(); })
+ .then(function(d){
+ list.innerHTML = '';
     var done  = loadDone();
-    var items = (d.priorities && d.priorities.length) ? d.priorities : [
-      'Review your active deals for next steps',
-      'Follow up with your top leads today',
-      'Add 2 new contacts to your CRM pipeline'
-    ];
-    items.slice(0,3).forEach(function(p, i){
+ var items = (d.priorities && d.priorities.length) ? d.priorities : [
+ 'Review your active deals for next steps',
+ 'Follow up with your top leads today',
+ 'Add 2 new contacts to your CRM pipeline'
+ ];
+ items.slice(0,3).forEach(function(p, i){
       list.appendChild(buildPriorityItem(p, i, done));
     });
     renderStripPriorities(items);
     if(btn) setRefreshing(btn, false);
-  })
-  .catch(function(err){
-    clearTimeout(tid);
-    list.innerHTML = '';
+ })
+ .catch(function(err){
+ clearTimeout(tid);
+ list.innerHTML = '';
     var done = loadDone();
     var fallback = ['Review your active deals for next steps','Follow up with your top leads today','Add 2 new contacts to your pipeline'];
     fallback.forEach(function(p,i){ list.appendChild(buildPriorityItem(p, i, done)); });
@@ -926,14 +926,14 @@ function loadPriorities(force){
 /* ── Boot ── */
 function initDashboard(){
   shuffleBriefing();   /* instant — no API call, runs before anything else */
-  loadPriorities();
-  refreshMetrics();
-  setInterval(refreshMetrics, 120000);
+ loadPriorities();
+ refreshMetrics();
+ setInterval(refreshMetrics, 120000);
 }
 if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initDashboard);
+ document.addEventListener('DOMContentLoaded', initDashboard);
 } else {
-  initDashboard();
+ initDashboard();
 }
 </script>
 {% endblock %}
