@@ -195,18 +195,19 @@
 </style>
 
 <!-- Page Header -->
-<div class="fin-header">
- <div>
- <h1 class="fin-header-title">Financials Hub</h1>
- <p class="fin-header-sub">Track loan revenue, pipeline, expenses, and income goals for {{ year }}.</p>
- </div>
- <div class="year-select">
- <span>Year</span>
- <select onchange="window.location.href='?year='+this.value">
- {% for y in available_years %}
+<div class="ylh-page-hd">
+ <div class="ylh-page-hd__label">Finance</div>
+ <h1 class="ylh-page-hd__title">Financials Hub</h1>
+ <p class="ylh-page-hd__sub">Track loan revenue, pipeline, expenses, and income goals for {{ year }}.</p>
+ <div class="ylh-page-hd__actions">
+   <div style="display:flex;align-items:center;gap:.5rem">
+   <span style="font-size:.75rem;font-weight:600;color:#6B5B4D">Year</span>
+   <select onchange="window.location.href='?year='+this.value" style="font-size:.8rem;border:1px solid rgba(107,91,77,.2);border-radius:6px;padding:.3rem .5rem;background:#fff;">
+   {% for y in available_years %}
  <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
  {% endfor %}
- </select>
+   </select>
+   </div>
  </div>
 </div>
 

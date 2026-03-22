@@ -1064,46 +1064,78 @@ textarea {
   max-width: 100% !important;
 }
 
-/* ── 2. PAGE HERO HEADERS — slim & refined ── */
+/* ── 2. PAGE HEADER — unified, centered across all pages ── */
+.ylh-page-hd,
 .ylh-hero,
 .crm-hero,
+.ref-hero,
 .page-hero,
 .dashboard-hero,
 .section-hero {
-  padding: 0.75rem 0 0.5rem !important;
-  margin-bottom: 0.75rem !important;
+  text-align: center !important;
+  padding: 1.75rem 0 1.25rem !important;
+  margin-bottom: 1.5rem !important;
+  border-bottom: 1px solid rgba(143,168,138,.15) !important;
+  display: block !important;
 }
 
+/* Remove flex split — hero__text is now just a block wrapper */
+.ylh-hero__text {
+  display: block !important;
+  text-align: center !important;
+}
+
+.ylh-page-hd__label,
+.ylh-hero__eyebrow,
+.ref-hero__eyebrow,
+.page-eyebrow,
+.section-eyebrow {
+  font-size: .6rem !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .13em !important;
+  color: #8FA88A !important;
+  display: block !important;
+  margin-bottom: .3rem !important;
+}
+
+.ylh-page-hd__title,
 .ylh-hero__title,
+.ref-hero__title,
 .crm-hero h1,
 .page-hero h1,
 .dashboard-header h1,
 .dashboard-main__header h1 {
-  font-size: 1.35rem !important;
-  margin: 0 0 0.15rem !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 1.875rem !important;
+  font-weight: 600 !important;
+  color: #1E2A1A !important;
+  margin: 0 0 .35rem !important;
   line-height: 1.2 !important;
+  letter-spacing: -.01em !important;
 }
 
+.ylh-page-hd__sub,
 .ylh-hero__subtitle,
 .crm-hero p,
 .page-hero p,
 .dashboard-header p,
 .dashboard-main__header p {
-  font-size: 0.78rem !important;
-  margin: 0 !important;
+  font-size: .875rem !important;
+  color: #6A7D64 !important;
+  margin: 0 auto !important;
+  max-width: 560px !important;
 }
 
-.ylh-hero__eyebrow,
-.page-eyebrow,
-.section-eyebrow {
-  font-size: 0.65rem !important;
-  margin-bottom: 0.2rem !important;
-}
-
+.ylh-page-hd__actions,
 .ylh-hero__actions,
 .page-hero__actions {
-  margin-top: 0.6rem !important;
-  gap: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: .625rem !important;
+  margin-top: .875rem !important;
 }
 
 /* ── 3. STATS / METRICS STRIPS — 3-4 col, tight ── */
@@ -1379,9 +1411,12 @@ a.action-card {
     grid-template-columns: 1fr !important;
   }
 
+  .ylh-page-hd__title,
   .ylh-hero__title,
+  .ref-hero__title,
+  .crm-hero h1,
   .dashboard-header h1 {
-    font-size: 1.15rem !important;
+    font-size: 1.5rem !important;
   }
 
   #briefing-text {

@@ -440,13 +440,11 @@
 <div id="crm">
 
 <!-- ── PAGE HERO ─────────────────────────────── -->
-<div class="crm-hero">
- <div class="crm-hero__inner">
-  <div>
-   <h1 class="crm-hero__title">Contacts <span style="font-size:1rem;font-weight:400;color:#8FA88A;vertical-align:middle;">{{ stats.total }}</span></h1>
-   <p class="crm-hero__sub">CRM &middot; Pipeline &middot; Relationship Management</p>
-  </div>
-  <div class="crm-hero__btns">
+<div class="ylh-page-hd">
+  <div class="ylh-page-hd__label">CRM</div>
+  <h1 class="ylh-page-hd__title">Contacts <span style="font-size:1rem;font-weight:400;color:#8FA88A;vertical-align:middle;">{{ stats.total }}</span></h1>
+  <p class="ylh-page-hd__sub">Pipeline &middot; Relationship Management</p>
+  <div class="ylh-page-hd__actions">
    <button class="t-btn t-btn--solid" onclick="openAddModal()">+ Add</button>
    <a href="{{ url_for('agent_crm_import') }}" class="t-btn t-btn--ghost">&#8593; Import</a>
    <button class="t-btn t-btn--ghost" onclick="doExport()">&#8595; Export</button>

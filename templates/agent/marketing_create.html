@@ -414,13 +414,12 @@
 
 <div class="creator-container">
  <!-- Header -->
- <div class="creator-header">
- <div class="header-left">
- <h1>Create Marketing Asset</h1>
- <div class="header-breadcrumb">
- {{ category|replace('-', ' ')|title }} → {{ asset_type|replace('-', ' ')|title }}
+ <div class="ylh-page-hd">
+ <div class="ylh-page-hd__label">Marketing</div>
+ <h1 class="ylh-page-hd__title">Create Marketing Asset</h1>
+ <p class="ylh-page-hd__sub">{{ category|replace('-', ' ')|title }} &rsaquo; {{ asset_type|replace('-', ' ')|title }}</p>
  </div>
- </div>
+ <div class="creator-header" style="display:none"><div class="header-left">
  <a href="{{ url_for('agent_marketing_hub', tx_id=tx_id) }}" class="back-to-hub">
  ← Back to Hub
  </a>

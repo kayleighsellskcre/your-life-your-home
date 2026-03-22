@@ -122,19 +122,20 @@
 <div id="fin">
 
 <!-- TOP BAR -->
-<div class="fin-topbar">
-  <div>
-    <h1>Financials Hub</h1>
-    <p>Commissions &middot; Expenses &middot; Mileage &middot; Goals &middot; Insights</p>
+<div class="ylh-page-hd">
+  <div class="ylh-page-hd__label">Finance</div>
+  <h1 class="ylh-page-hd__title">Financials Hub</h1>
+  <p class="ylh-page-hd__sub">Commissions &middot; Expenses &middot; Mileage &middot; Goals &middot; Insights</p>
+  <div class="ylh-page-hd__actions">
+    <form method="get" action="{{ url_for('agent_financials') }}" style="display:flex;align-items:center;gap:.5rem">
+      <label style="font-size:.75rem;font-weight:600;color:#6B5B4D">Year:</label>
+      <select name="year" class="year-select" onchange="this.form.submit()">
+        {% for y in available_years %}
+        <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </form>
   </div>
-  <form method="get" action="{{ url_for('agent_financials') }}" style="display:flex;align-items:center;gap:.5rem">
-    <label style="font-size:.75rem;font-weight:600;color:#6B5B4D">Year:</label>
-    <select name="year" class="year-select" onchange="this.form.submit()">
-      {% for y in available_years %}
-      <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
-      {% endfor %}
-    </select>
-  </form>
 </div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
