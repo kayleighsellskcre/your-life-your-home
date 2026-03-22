@@ -1064,6 +1064,58 @@ textarea {
   max-width: 100% !important;
 }
 
+/* ── PAGE HEADER ACTION PILLS — override all global button resets ── */
+.ylh-page-hd__actions button,
+.ylh-page-hd__actions a {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .25rem !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  padding: 0 .9rem !important;
+  border-radius: 15px !important;
+  border: 1.5px solid rgba(143,168,138,.3) !important;
+  font-size: .67rem !important;
+  font-weight: 700 !important;
+  letter-spacing: .06em !important;
+  text-transform: uppercase !important;
+  color: #5C7050 !important;
+  text-decoration: none !important;
+  background: #fff !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 3px rgba(44,58,40,.05) !important;
+  width: auto !important;
+  margin: 0 !important;
+  word-wrap: normal !important;
+  line-height: 1 !important;
+  transition: all .18s !important;
+}
+.ylh-page-hd__actions button:hover,
+.ylh-page-hd__actions a:hover {
+  background: rgba(143,168,138,.1) !important;
+  border-color: #8FA88A !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 3px 8px rgba(44,58,40,.09) !important;
+  color: #3D2E24 !important;
+}
+.ylh-page-hd__actions .stg-pill--on,
+.ylh-page-hd__actions button.stg-pill--on,
+.ylh-page-hd__actions .ylh-btn-primary {
+  background: linear-gradient(135deg, #8FA88A 0%, #6b8a5e 100%) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 2px 8px rgba(107,168,138,.3) !important;
+}
+.ylh-page-hd__actions .stg-pill--on:hover,
+.ylh-page-hd__actions button.stg-pill--on:hover {
+  background: linear-gradient(135deg, #6b8a5e 0%, #8FA88A 100%) !important;
+  color: #fff !important;
+}
+
 /* ── 2. PAGE HEADER — unified, centered across all pages ── */
 .ylh-page-hd,
 .ylh-hero,
