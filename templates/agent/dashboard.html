@@ -134,7 +134,7 @@
 .priority-link:hover { color: #8a6e4a; text-decoration: underline; }
 .priority-item.p-done .priority-link {
   text-decoration: line-through;
-  color: #9a8878;
+  color: #7a6855;
 }
 .p-num-digit { display: block; }
 .p-num-check { display: none; }
@@ -178,7 +178,7 @@
   text-overflow: ellipsis;
   transition: color .2s;
 }
-.tx-meta { font-size: .775rem; color: #9a8878; margin-top: .1rem; }
+.tx-meta { font-size: .775rem; color: #7a6855; margin-top: .1rem; }
 .tx-badge {
   font-size: .62rem;
   font-weight: 700;
@@ -186,8 +186,8 @@
   letter-spacing: .04em;
   padding: .22rem .6rem;
   border-radius: 999px;
-  background: rgba(159,129,90,.09);
-  color: #9f815a;
+  background: rgba(159,129,90,.12);
+  color: #5c4e42;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -225,7 +225,7 @@
   box-shadow: 0 2px 7px rgba(159,129,90,.22);
 }
 .qa-label { font-size: .875rem; font-weight: 600; color: #443c36; }
-.qa-sub { font-size: .72rem; color: #9a8878; margin-top: .06rem; }
+.qa-sub { font-size: .72rem; color: #7a6855; margin-top: .06rem; }
 .qa-arrow { margin-left: auto; color: #C8B497; font-size: .9rem; flex-shrink: 0; transition: color .2s; }
 .qa-item:hover .qa-arrow { color: #c69270; }
 
@@ -233,7 +233,7 @@
 .empty-state {
   text-align: center;
   padding: 2rem 1rem;
-  color: #9a8878;
+  color: #7a6855;
   font-size: .9rem;
 }
 .empty-state a {
@@ -256,33 +256,46 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .1em;
-  color: #9a8878;
+  color: #7a6855;
   margin-bottom: .55rem;
 }
 .view-all {
   font-size: .7rem;
   font-weight: 600;
-  color: #9f815a;
+  color: #5c4e42;
   text-decoration: none;
-  opacity: .8;
+  opacity: .85;
   letter-spacing: .04em;
-  transition: opacity .2s;
+  transition: opacity .2s, color .2s;
 }
-.view-all:hover { opacity: 1; }
+.view-all:hover { opacity: 1; color: #9f815a; }
 
 /* ── DATE BADGE ── */
 .date-badge {
   display: inline-flex;
   align-items: center;
   gap: .4rem;
-  background: rgba(159,129,90,.07);
-  border: 1px solid rgba(200,180,151,.3);
+  background: rgba(159,129,90,.08);
+  border: 1px solid rgba(159,129,90,.22);
   border-radius: 999px;
   padding: .38rem 1rem;
   font-size: .78rem;
   font-weight: 600;
-  color: #9f815a;
+  color: #5c4e42;
   white-space: nowrap;
+}
+
+/* ── BRIEFING CARD LINKS — dark on rose bg for contrast ── */
+#strip-priorities a,
+#briefing-text,
+#kindness-text {
+  color: #3a332d !important;
+}
+#strip-priorities a:hover { text-decoration: underline !important; }
+
+/* ── RESPONSIVE STRIP PRIORITIES ── */
+@media (max-width: 640px) {
+  #strip-priorities { grid-template-columns: 1fr !important; }
 }
 
 /* ── FADE ANIMATIONS ── */
@@ -349,8 +362,8 @@
     <!-- Divider -->
     <div style="height:1px;background:rgba(68,60,54,.15);margin-bottom:.85rem;"></div>
 
-    <!-- Today's 3 Priorities -->
-    <div id="strip-priorities" style="display:flex;flex-direction:column;gap:.45rem;"></div>
+    <!-- Today's 3 Priorities — side by side -->
+    <div id="strip-priorities" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;"></div>
 
     <!-- Footer: shuffle + refresh priorities -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;">
@@ -416,11 +429,11 @@
       <!-- label -->
       <div style="
         font-size:.68rem;font-weight:700;text-transform:uppercase;
-        letter-spacing:.07em;color:#9f815a;margin-bottom:.1rem;
+        letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;
       ">{{ k.label }}</div>
 
       <!-- sub -->
-      <div style="font-size:.75rem;color:#9a8878;">{{ k.sub }}</div>
+      <div style="font-size:.75rem;color:#7a6855;">{{ k.sub }}</div>
 
     </a>
     {% endfor %}
@@ -444,8 +457,8 @@
       </div>
       <div class="priority-refresh-footer">
         <button onclick="loadPriorities(true)" id="priorities-refresh-btn"
-          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#9a8878;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
-          onmouseover="this.style.color='#9f815a'" onmouseout="this.style.color='#9a8878'">
+          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#7a6855;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
+          onmouseover="this.style.color='#9f815a'" onmouseout="this.style.color='#7a6855'">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
           Refresh Priorities
         </button>
@@ -846,20 +859,22 @@ function renderStripPriorities(items){
   if(!strip) return;
   strip.innerHTML = '';
   items.slice(0,3).forEach(function(text, i){
-    var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:.6rem;';
+    /* Each priority is a small vertical card in its column */
+    var card = document.createElement('div');
+    card.style.cssText = 'background:rgba(68,60,54,.08);border-radius:10px;padding:.55rem .65rem;display:flex;flex-direction:column;align-items:center;gap:.35rem;text-align:center;';
     var num = document.createElement('div');
-    num.style.cssText = 'width:20px;height:20px;border-radius:50%;background:rgba(159,129,90,.18);color:#443c36;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+    num.style.cssText = 'width:22px;height:22px;border-radius:50%;background:#443c36;color:#f5f0e6;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
     num.textContent = i+1;
     var lnk = document.createElement('a');
     lnk.href = priorityLink(text);
-    lnk.style.cssText = 'font-size:.78rem;color:#443c36;font-weight:500;text-decoration:none;line-height:1.35;';
+    /* Use !important-safe approach: override via style attribute with highest specificity text */
+    lnk.setAttribute('style','font-size:.72rem;color:#443c36!important;font-weight:500;text-decoration:none;line-height:1.3;display:block;');
     lnk.textContent = text;
     lnk.onmouseover = function(){ this.style.textDecoration='underline'; };
     lnk.onmouseout  = function(){ this.style.textDecoration='none'; };
-    row.appendChild(num);
-    row.appendChild(lnk);
-    strip.appendChild(row);
+    card.appendChild(num);
+    card.appendChild(lnk);
+    strip.appendChild(card);
   });
 }
 

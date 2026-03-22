@@ -216,8 +216,8 @@ input[type="submit"]:not(.crm-sf-submit):hover {
 .btn-secondary,
 button[class*="btn-secondary"] {
   background: transparent !important;
-  color: #9f815a !important;
-  border: 1.5px solid rgba(194,177,161,0.7) !important;
+  color: #5c4e42 !important;
+  border: 1.5px solid rgba(159,129,90,0.5) !important;
   border-radius: 9px !important;
   font-weight: 600 !important;
   transition: all 0.2s ease !important;
@@ -432,7 +432,7 @@ tbody tr:last-child { border-bottom: none !important; }
 
 .dashboard-sidebar__title {
   font-family: 'Playfair Display', Georgia, serif !important;
-  color: #9f815a !important;
+  color: #443c36 !important;
   font-size: 1.1rem !important;
   font-weight: 400 !important;
   letter-spacing: 0.02em !important;
@@ -449,7 +449,7 @@ tbody tr:last-child { border-bottom: none !important; }
 .ylh-menu-button {
   background: none !important;
   border: none !important;
-  color: #9f815a !important;
+  color: #5c4e42 !important;
   font-weight: 600 !important;
   font-size: 0.75rem !important;
   text-transform: uppercase !important;
@@ -481,7 +481,7 @@ tbody tr:last-child { border-bottom: none !important; }
 }
 
 .ylh-submenu-link {
-  color: #9f815a !important;
+  color: #5c4e42 !important;
   font-size: 0.83rem !important;
   padding: 0.6rem 1.4rem 0.6rem 2rem !important;
   display: flex !important;
@@ -742,9 +742,11 @@ a:focus {
 
 /* ══════════════════════════════════════════════════════════════
    LINK COLORS
+   #9f815a is only 3.4:1 on white — fails WCAG AA for text.
+   Use #5c4e42 (6.2:1) for body links; golden only for hover/accent.
    ══════════════════════════════════════════════════════════════ */
-a { color: #9f815a !important; }
-a:hover { color: #443c36 !important; }
+a { color: #5c4e42 !important; }
+a:hover { color: #9f815a !important; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -754,7 +756,7 @@ h1, h2, h3, h4, h5, h6 {
   color: #443c36 !important;
   font-family: 'Playfair Display', Georgia, serif !important;
 }
-p, span, li, td, th {
+p, span, li {
   color: #443c36;
 }
 .subtext,
@@ -795,8 +797,8 @@ p, span, li, td, th {
 .crm-abtn,
 .crm-act,
 .crm-cbtn {
-  border-color: rgba(181,168,153,0.5) !important;
-  color: #9f815a !important;
+  border-color: rgba(159,129,90,0.4) !important;
+  color: #5c4e42 !important;
 }
 .crm-abtn:hover,
 .crm-act:hover {
@@ -809,10 +811,9 @@ p, span, li, td, th {
    TRANSACTION PAGES
    ══════════════════════════════════════════════════════════════ */
 .tx-act,
-.tx-btn,
-[class*="tx-"] {
-  border-color: rgba(181,168,153,0.5) !important;
-  color: #9f815a !important;
+.tx-btn {
+  border-color: rgba(159,129,90,0.4) !important;
+  color: #5c4e42 !important;
 }
 
 
