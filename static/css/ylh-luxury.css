@@ -1036,3 +1036,368 @@ textarea {
 .modal-footer {
   padding: 0.5rem 1rem !important;
 }
+
+/* =============================================================
+   UNIVERSAL PAGE LAYOUT OVERHAUL — March 2026
+   Consistent, compact, full-width, beautiful on every page
+   ============================================================= */
+
+/* ── 1. OUTER WRAPPERS — kill all excess padding ── */
+.agent-content-wrapper,
+.dashboard-container,
+.dashboard-main,
+.homeowner-content-wrapper,
+.homeowner-page-content,
+.vendors-container,
+.marketing-hub-container,
+.comms-container,
+.power-tools-container,
+.crm-container,
+.contests-wrap,
+.ref-page,
+[id="txpage"],
+[id="crm"],
+[id="inv-wrap"],
+[id="fin"],
+[id="clients-page"] {
+  padding: 0.75rem 1rem !important;
+  max-width: 100% !important;
+}
+
+/* ── 2. PAGE HERO HEADERS — slim & refined ── */
+.ylh-hero,
+.crm-hero,
+.page-hero,
+.dashboard-hero,
+.section-hero {
+  padding: 0.75rem 0 0.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.ylh-hero__title,
+.crm-hero h1,
+.page-hero h1,
+.dashboard-header h1,
+.dashboard-main__header h1 {
+  font-size: 1.35rem !important;
+  margin: 0 0 0.15rem !important;
+  line-height: 1.2 !important;
+}
+
+.ylh-hero__subtitle,
+.crm-hero p,
+.page-hero p,
+.dashboard-header p,
+.dashboard-main__header p {
+  font-size: 0.78rem !important;
+  margin: 0 !important;
+}
+
+.ylh-hero__eyebrow,
+.page-eyebrow,
+.section-eyebrow {
+  font-size: 0.65rem !important;
+  margin-bottom: 0.2rem !important;
+}
+
+.ylh-hero__actions,
+.page-hero__actions {
+  margin-top: 0.6rem !important;
+  gap: 0.5rem !important;
+}
+
+/* ── 3. STATS / METRICS STRIPS — 3-4 col, tight ── */
+.stats-strip,
+.metrics-strip,
+.kpi-strip,
+.crm-stats,
+.stats-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.metrics-grid {
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.metric-card,
+.stat-card,
+.kpi-strip__item {
+  padding: 0.65rem 0.85rem !important;
+  border-radius: 10px !important;
+  min-height: unset !important;
+}
+
+.metric-value,
+.stat-value {
+  font-size: 1.6rem !important;
+  line-height: 1 !important;
+  margin-bottom: 0.1rem !important;
+}
+
+.metric-label,
+.stat-label {
+  font-size: 0.68rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.05rem !important;
+}
+
+.metric-subtext,
+.stat-subtext {
+  font-size: 0.65rem !important;
+}
+
+/* ── 4. RESPONSIVE CONTENT GRID — 2 col on desktop ── */
+.responsive-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.6rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+@media (min-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .responsive-grid.three-col {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .responsive-grid.sidebar-layout {
+    grid-template-columns: 1fr 280px !important;
+  }
+}
+
+/* ── 5. ACTION CARDS — compact, not giant blocks ── */
+.action-card,
+a.action-card {
+  padding: 0.6rem 0.85rem !important;
+  min-height: unset !important;
+  gap: 0.65rem !important;
+  border-radius: 10px !important;
+}
+
+.action-icon {
+  width: 34px !important;
+  height: 34px !important;
+  font-size: 1rem !important;
+  border-radius: 8px !important;
+  flex-shrink: 0;
+}
+
+.action-title {
+  font-size: 0.82rem !important;
+  margin-bottom: 0.1rem !important;
+}
+
+.action-desc {
+  font-size: 0.72rem !important;
+  line-height: 1.35 !important;
+}
+
+/* ── 6. LOAN / LIST ITEMS — slim rows ── */
+.loan-item,
+.loan-row,
+.pipeline-item {
+  padding: 0.5rem 0.75rem !important;
+  margin-bottom: 0.35rem !important;
+  border-radius: 8px !important;
+}
+
+.loan-name {
+  font-size: 0.85rem !important;
+  margin-bottom: 0.15rem !important;
+}
+
+.loan-details {
+  font-size: 0.72rem !important;
+}
+
+/* ── 7. EMPTY STATES — less dramatic white space ── */
+.empty-state {
+  padding: 2rem 1.5rem !important;
+  border-radius: 12px !important;
+}
+
+.empty-state h3 {
+  font-size: 1rem !important;
+}
+
+.empty-state p {
+  font-size: 0.8rem !important;
+}
+
+/* ── 8. CARD STRUCTURE — universal ── */
+.card,
+.lux-card,
+.info-card,
+.feature-card {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 8px rgba(61,46,36,.06) !important;
+}
+
+.card h2,
+.card-title,
+.lux-card-title {
+  font-size: 0.9rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+/* ── 9. MORNING BRIEFING — max height so it never dominates ── */
+.briefing-card {
+  margin-bottom: 0.6rem !important;
+}
+
+.briefing-card-inner {
+  padding: 0.75rem 1rem !important;
+}
+
+#briefing-text {
+  max-height: 120px !important;
+  overflow: hidden !important;
+  font-size: 0.82rem !important;
+  line-height: 1.5 !important;
+}
+
+.briefing-label {
+  font-size: 0.65rem !important;
+  letter-spacing: 0.08em !important;
+  margin-bottom: 0.3rem !important;
+}
+
+.briefing-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  font-size: 1rem !important;
+}
+
+.briefing-actions {
+  margin-top: 0.5rem !important;
+  gap: 0.4rem !important;
+}
+
+/* ── 10. CATEGORY SECTIONS (vendors, etc.) ── */
+.category-section {
+  margin-bottom: 1rem !important;
+}
+
+.category-header {
+  font-size: 0.78rem !important;
+  letter-spacing: 0.07em !important;
+  margin-bottom: 0.4rem !important;
+  padding-bottom: 0.3rem !important;
+}
+
+.vendors-grid,
+.tools-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+  gap: 0.5rem !important;
+}
+
+/* ── 11. SECTION HEADERS with action buttons ── */
+.section-heading,
+.section-top,
+.content-row-header,
+.txgrid-header,
+.fin-topbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.6rem !important;
+  flex-wrap: wrap !important;
+}
+
+.section-heading h2,
+.section-top h2,
+.card h2 {
+  font-size: 0.88rem !important;
+  margin: 0 !important;
+}
+
+/* ── 12. TABS ── */
+.tab-nav,
+.tabs,
+.fin-tabs {
+  gap: 0.25rem !important;
+  margin-bottom: 0.6rem !important;
+  padding: 0.2rem !important;
+}
+
+.tab-btn,
+.tab-link,
+.fin-tab {
+  padding: 0.3rem 0.75rem !important;
+  font-size: 0.75rem !important;
+  border-radius: 6px !important;
+}
+
+/* ── 13. SUMMARY CARDS TOP-OF-PAGE (financials, etc.) ── */
+.fin-cards,
+.summary-row {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  gap: 0.5rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.fin-card,
+.summary-item {
+  padding: 0.65rem 0.9rem !important;
+  border-radius: 10px !important;
+}
+
+/* ── 14. LENDER SIDEBAR REFINEMENT ── */
+.lender-sidebar,
+.dashboard-sidebar {
+  padding: 0.5rem 0 !important;
+  min-width: 200px !important;
+}
+
+/* ── MOBILE RESPONSIVE — everything stacks cleanly ── */
+@media (max-width: 768px) {
+  .agent-content-wrapper,
+  .dashboard-container,
+  .homeowner-content-wrapper {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .metrics-grid,
+  .fin-cards,
+  .stats-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .responsive-grid,
+  .vendors-grid,
+  .tools-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ylh-hero__title,
+  .dashboard-header h1 {
+    font-size: 1.15rem !important;
+  }
+
+  #briefing-text {
+    max-height: 80px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-grid,
+  .fin-cards,
+  .stats-strip {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .action-card,
+  a.action-card {
+    padding: 0.5rem 0.65rem !important;
+  }
+}

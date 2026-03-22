@@ -765,5 +765,293 @@
  
  {% block extra_js %}
  {% endblock %}
- </body>
+ 
+<!-- MASTER LAYOUT OVERRIDE: loads last in document order, beats all template <style> blocks -->
+<style id="ylh-master-override">
+
+/* === OUTER WRAPPERS === */
+.agent-content-wrapper { padding: 0.5rem 1.1rem !important; }
+.dashboard-container { padding: 0.5rem 1rem !important; }
+.dashboard-main { padding: 0.5rem 1.1rem !important; }
+.marketing-hub-container { padding: 0.5rem 1rem !important; }
+
+/* === UNIVERSAL PAGE HEADER === */
+.ylh-page-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem !important;
+  padding: 0.55rem 1rem !important;
+  margin: 0 0 0.75rem !important;
+  background: linear-gradient(135deg, #F0EBE4 0%, #EAE4DC 100%) !important;
+  border: 1px solid rgba(194,177,161,0.35) !important;
+  border-radius: 10px !important;
+}
+.ylh-page-header__left { flex: 1; min-width: 0; }
+.ylh-page-header__eyebrow {
+  font-size: 0.6rem !important; font-weight: 700 !important;
+  text-transform: uppercase !important; letter-spacing: 0.1em !important;
+  color: #6B5B4D !important; margin: 0 0 0.15rem !important;
+}
+.ylh-page-header__title {
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: 1.25rem !important; font-weight: 700 !important;
+  color: #3D2E24 !important; margin: 0 0 0.15rem !important; line-height: 1.2 !important;
+}
+.ylh-page-header__sub {
+  font-size: 0.75rem !important; color: #A9A29A !important;
+  margin: 0 !important; line-height: 1.4 !important;
+}
+.ylh-page-header__btn {
+  padding: 0.35rem 0.9rem !important; font-size: 0.74rem !important;
+  white-space: nowrap !important; flex-shrink: 0 !important;
+}
+
+/* Existing page heroes made compact */
+.ref-hero, .ylh-hero, .crm-hero, .contests-header, .hub-header, .page-hero {
+  padding: 0.5rem 0.9rem !important;
+  margin: 0 0 0.65rem !important;
+  background: linear-gradient(135deg, #F0EBE4 0%, #EAE4DC 100%) !important;
+  border: 1px solid rgba(194,177,161,0.35) !important;
+  border-radius: 10px !important;
+  display: flex !important; align-items: center !important;
+  justify-content: space-between !important; flex-wrap: wrap !important;
+  gap: 0.75rem !important;
+}
+.ref-hero__title, .ylh-hero__title, .crm-hero h1, .contests-header h1, .hub-header h1 {
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: 1.25rem !important; margin: 0 !important; line-height: 1.2 !important; color: #3D2E24 !important;
+}
+.ref-hero__eyebrow, .ylh-hero__eyebrow {
+  font-size: 0.6rem !important; font-weight: 700 !important;
+  text-transform: uppercase !important; letter-spacing: 0.1em !important;
+  color: #6B5B4D !important; margin-bottom: 0.15rem !important;
+}
+.ref-hero__sub, .ylh-hero__subtitle, .crm-hero p, .contests-header p {
+  font-size: 0.75rem !important; color: #A9A29A !important; margin: 0.1rem 0 0 !important;
+}
+.ref-hero__actions, .ylh-hero__actions { gap: 0.35rem !important; flex-shrink: 0 !important; }
+.ref-hero__actions .btn, .ref-hero__actions a,
+.ylh-hero__actions .btn, .ylh-hero__actions a,
+.contests-header a, .hub-header a {
+  padding: 0.32rem 0.85rem !important; font-size: 0.73rem !important;
+}
+
+/* === STATS ROWS === */
+.ref-stats {
+  display: grid !important; grid-template-columns: repeat(4, 1fr) !important;
+  gap: 0.5rem !important; margin-bottom: 0.65rem !important;
+}
+.ref-stat { padding: 0.55rem 0.75rem !important; border-radius: 10px !important; }
+.ref-stat__value { font-size: 1.45rem !important; line-height: 1 !important; margin-bottom: 0.05rem !important; }
+.ref-stat__label { font-size: 0.65rem !important; }
+
+/* === CONTENT GRIDS === */
+.contests-grid {
+  display: grid !important; grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)) !important;
+  gap: 0.5rem !important; margin-bottom: 0.7rem !important;
+}
+.cal-grid {
+  display: grid !important; grid-template-columns: 1fr 1fr !important;
+  gap: 0.5rem !important; margin-top: 0.45rem !important;
+}
+.categories-grid, .asset-types-grid {
+  display: grid !important; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important; gap: 0.5rem !important;
+}
+.client-grid { grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)) !important; gap: 0.5rem !important; }
+.vendors-grid { grid-template-columns: repeat(auto-fill, minmax(225px, 1fr)) !important; gap: 0.5rem !important; }
+.tools-grid { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)) !important; gap: 0.5rem !important; }
+.metrics-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 0.5rem !important; margin-bottom: 0.6rem !important; }
+.responsive-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 0.6rem !important; margin-bottom: 0.6rem !important; }
+.actions-grid { display: grid !important; grid-template-columns: 1fr !important; gap: 0.4rem !important; }
+
+/* === UNIFORM CARDS === */
+.ref-card, .contest-card, .category-card, .cal-card, .asset-type-card,
+.card, .lux-card, .info-card, .action-card, a.action-card,
+.metric-card, .kpi-card, .vendor-card, .fin-card {
+  border-radius: 10px !important;
+  border: 1px solid rgba(194,177,161,0.28) !important;
+  background: #F5F0EB !important;
+  box-shadow: 0 1px 6px rgba(61,46,36,.05) !important;
+  margin-bottom: 0 !important;
+}
+.ref-card, .cal-card, .category-card, .asset-type-card {
+  padding: 0.65rem 0.85rem !important;
+}
+.ref-card__title { font-size: 0.8rem !important; margin-bottom: 0.25rem !important; }
+.contest-card { padding: 0.7rem 0.95rem 0.7rem 1.15rem !important; }
+.contest-card h3 { font-size: 0.86rem !important; margin: 0 0 0.2rem !important; }
+.contest-meta { font-size: 0.68rem !important; }
+.invite-status { font-size: 0.67rem !important; margin-top: 0.3rem !important; }
+
+/* Lender metric */
+.metric-card { padding: 0.6rem 0.75rem !important; text-align: center !important; }
+.metric-value { font-size: 1.5rem !important; line-height: 1 !important; margin-bottom: 0.06rem !important; }
+.metric-label { font-size: 0.67rem !important; margin-bottom: 0.03rem !important; }
+.metric-subtext { font-size: 0.62rem !important; }
+
+/* Action cards */
+.action-card, a.action-card { padding: 0.5rem 0.75rem !important; min-height: unset !important; gap: 0.55rem !important; }
+.action-icon { width: 30px !important; height: 30px !important; font-size: 0.9rem !important; border-radius: 7px !important; flex-shrink: 0 !important; }
+.action-title { font-size: 0.78rem !important; margin-bottom: 0.05rem !important; }
+.action-desc { font-size: 0.68rem !important; line-height: 1.3 !important; }
+.loan-item { padding: 0.38rem 0.6rem !important; margin-bottom: 0.28rem !important; }
+.loan-name { font-size: 0.8rem !important; margin-bottom: 0.06rem !important; }
+.loan-details { font-size: 0.68rem !important; }
+
+/* Agent dashboard */
+.dash { padding: 0.55rem 0 !important; }
+.dash-header { margin-bottom: 0.5rem !important; }
+.dash-header-left h1 { font-size: 1.25rem !important; font-family: "Playfair Display", Georgia, serif !important; }
+.dash-header-left p { font-size: 0.75rem !important; }
+.metrics-row { gap: 0.42rem !important; margin-bottom: 0.55rem !important; }
+.kpi-card { padding: 0.55rem 0.75rem 0.5rem !important; border-radius: 10px !important; }
+.kpi-value { font-size: 1.4rem !important; }
+.kpi-label { font-size: 0.62rem !important; }
+.kpi-sub { font-size: 0.62rem !important; }
+.kpi-icon { width: 25px !important; height: 25px !important; margin-bottom: 0.28rem !important; }
+.dash-main { gap: 0.55rem !important; }
+.dash-left, .dash-right { gap: 0.5rem !important; }
+.lux-card { background: #F5F0EB !important; }
+.lux-card-header { padding: 0.5rem 0.8rem 0 !important; }
+.lux-card-body { padding: 0.4rem 0.8rem 0.6rem !important; }
+.lux-card-title { font-size: 0.78rem !important; font-family: "Playfair Display", Georgia, serif !important; }
+.priority-item { padding: 0.42rem 0.65rem !important; }
+.priority-text { font-size: 0.77rem !important; }
+.tx-item { padding: 0.38rem 0 !important; }
+.qa-item { padding: 0.42rem 0.65rem !important; }
+.qa-label { font-size: 0.77rem !important; }
+.qa-sub { font-size: 0.66rem !important; }
+
+/* Morning briefing */
+.briefing-card { margin-bottom: 0.5rem !important; }
+.briefing-card-inner { padding: 0.65rem 0.9rem !important; }
+.briefing-label { font-size: 0.58rem !important; margin-bottom: 0.22rem !important; }
+#briefing-text { font-size: 0.78rem !important; max-height: 90px !important; overflow: hidden !important; }
+.briefing-icon { width: 26px !important; height: 26px !important; border-radius: 6px !important; }
+.briefing-actions { margin-top: 0.35rem !important; gap: 0.3rem !important; }
+
+/* Empty states */
+.empty-state { padding: 1.4rem 1rem !important; border-radius: 10px !important; background: #F5F0EB !important; }
+.empty-state h3 { font-size: 0.92rem !important; margin-bottom: 0.28rem !important; font-family: "Playfair Display", Georgia, serif !important; }
+.empty-state p { font-size: 0.76rem !important; }
+.empty-icon { font-size: 1.6rem !important; margin-bottom: 0.35rem !important; }
+.info-panel { padding: 0.65rem 0.85rem !important; border-radius: 10px !important; margin-bottom: 0.5rem !important; background: #F5F0EB !important; }
+.info-panel h4 { font-size: 0.78rem !important; margin-bottom: 0.28rem !important; font-family: "Playfair Display", Georgia, serif !important; }
+.info-panel li { font-size: 0.73rem !important; margin-bottom: 0.16rem !important; }
+
+/* Referral specific */
+.ref-link-box { padding: 0.55rem 0.8rem !important; border-radius: 10px !important; margin-bottom: 0.45rem !important; background: #F5F0EB !important; }
+.ref-link-label { font-size: 0.63rem !important; margin-bottom: 0.22rem !important; }
+.ref-steps { gap: 0.38rem !important; }
+.ref-step { padding: 0.48rem 0.65rem !important; background: #F5F0EB !important; border-radius: 8px !important; }
+
+/* Vendors */
+.category-section { margin-bottom: 0.65rem !important; }
+.category-header { font-size: 0.68rem !important; font-weight: 700 !important; text-transform: uppercase !important; letter-spacing: 0.08em !important; margin-bottom: 0.28rem !important; padding-bottom: 0.2rem !important; color: #A9A29A !important; }
+.vendor-card { padding: 0.58rem 0.78rem !important; }
+.vendor-name { font-size: 0.8rem !important; }
+.vendor-specialty { font-size: 0.66rem !important; }
+
+/* Financials */
+.kpi-row { gap: 0.42rem !important; margin-bottom: 0.58rem !important; flex-wrap: wrap !important; }
+.kpi { padding: 0.52rem 0.75rem !important; border-radius: 10px !important; flex: 1 1 115px !important; background: #F5F0EB !important; border: 1px solid rgba(194,177,161,0.28) !important; }
+.fin-topbar { padding: 0.32rem 0 0.5rem !important; margin-bottom: 0.52rem !important; }
+.fin-grid { gap: 0.58rem !important; }
+.panel-hd { padding: 0.42rem 0.75rem !important; font-size: 0.75rem !important; font-family: "Playfair Display", Georgia, serif !important; }
+.panel-body { padding: 0.52rem 0.75rem !important; }
+.fin-tabs { gap: 0.18rem !important; margin-bottom: 0.48rem !important; }
+.fin-tab { padding: 0.23rem 0.62rem !important; font-size: 0.68rem !important; }
+.fin-cards { gap: 0.42rem !important; margin-bottom: 0.58rem !important; }
+.fin-card { padding: 0.52rem 0.75rem !important; border-radius: 10px !important; }
+
+/* Property context (marketing) */
+.property-context { padding: 0.48rem 0.72rem !important; border-radius: 10px !important; margin-bottom: 0.48rem !important; background: #F5F0EB !important; }
+
+/* Tables */
+table th { padding: 0.3rem 0.58rem !important; font-size: 0.67rem !important; }
+table td { padding: 0.26rem 0.58rem !important; font-size: 0.76rem !important; }
+
+/* Buttons global */
+.btn-primary, .btn, .ylh-btn-primary, button.btn-primary { padding: 0.35rem 0.9rem !important; font-size: 0.76rem !important; }
+.btn-secondary, .btn-outline, .ylh-btn-outline { padding: 0.35rem 0.9rem !important; font-size: 0.76rem !important; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .agent-content-wrapper { padding: 0.45rem 0.55rem !important; }
+  .ref-stats { grid-template-columns: repeat(2, 1fr) !important; }
+  .contests-grid { grid-template-columns: 1fr !important; }
+  .responsive-grid { grid-template-columns: 1fr !important; }
+  .cal-grid { grid-template-columns: 1fr !important; }
+  .categories-grid, .asset-types-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .vendors-grid { grid-template-columns: 1fr 1fr !important; }
+  .kpi { flex: 1 1 42% !important; }
+  .ref-hero, .ylh-hero, .crm-hero, .contests-header { flex-direction: column !important; align-items: flex-start !important; }
+}
+@media (max-width: 480px) {
+  .ref-stats, .metrics-grid { grid-template-columns: repeat(2, 1fr) !important; }
+  .vendors-grid, .tools-grid { grid-template-columns: 1fr !important; }
+  .kpi { flex: 1 1 100% !important; }
+}
+
+/* === MISSING PAGE HEADERS - same look as ylh-hero === */
+.inv-topbar, .power-tools-header, .fin-topbar,
+.dashboard-header, .lender-header, .comms-topbar,
+.booking-hero, .referrals-header, .settings-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 0.75rem !important;
+  flex-wrap: wrap !important;
+  padding: 0.5rem 0.9rem !important;
+  margin: 0 0 0.65rem !important;
+  background: linear-gradient(135deg, #F0EBE4 0%, #EAE4DC 100%) !important;
+  border: 1px solid rgba(194,177,161,0.35) !important;
+  border-radius: 10px !important;
+}
+.inv-topbar__title, .power-tools-header__title,
+.fin-topbar h1, .dashboard-header h1, .lender-header h1 {
+  font-family: "Playfair Display", Georgia, serif !important;
+  font-size: 1.25rem !important; font-weight: 700 !important;
+  color: #3D2E24 !important; margin: 0 !important; line-height: 1.2 !important;
+}
+.inv-topbar__sub, .power-tools-header__description,
+.fin-topbar p, .dashboard-header p {
+  font-size: 0.74rem !important; color: #A9A29A !important; margin: 0.1rem 0 0 !important;
+}
+.inv-topbar__actions, .power-tools-header__actions { gap: 0.35rem !important; flex-shrink: 0 !important; }
+.i-btn, .i-btn--primary, .i-btn--ghost {
+  padding: 0.32rem 0.82rem !important; font-size: 0.72rem !important;
+  border-radius: 7px !important;
+}
+.inv-stats {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  gap: 0.45rem !important; margin-bottom: 0.6rem !important;
+}
+.inv-stat { padding: 0.55rem 0.75rem !important; border-radius: 10px !important; background: #F5F0EB !important; border: 1px solid rgba(194,177,161,0.28) !important; }
+.tool-card {
+  padding: 0.65rem 0.8rem !important; border-radius: 10px !important;
+  background: #F5F0EB !important; border: 1px solid rgba(194,177,161,0.28) !important;
+}
+.tool-card__title { font-size: 0.82rem !important; font-family: "Playfair Display", Georgia, serif !important; margin: 0.25rem 0 0.15rem !important; }
+.tool-card__description { font-size: 0.72rem !important; line-height: 1.4 !important; }
+.tool-card__status { font-size: 0.58rem !important; padding: 0.18rem 0.45rem !important; border-radius: 20px !important; }
+
+/* CRM stats strip */
+.crm-stats, .stats-strip { margin-bottom: 0.6rem !important; }
+.s-stat a, .s-stat { padding: 0.45rem 0.75rem !important; font-size: 0.7rem !important; }
+
+/* Lender dashboard header layout */
+.lender-dash-wrap { padding: 0.5rem 0 !important; }
+
+/* All page h1 headings consistent font */
+.agent-content-wrapper h1,
+.dashboard-main h1,
+.dashboard-container h1 {
+  font-family: "Playfair Display", Georgia, serif !important;
+  color: #3D2E24 !important;
+}
+</style>
+</body>
 </html>

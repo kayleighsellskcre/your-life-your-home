@@ -114,47 +114,6 @@
  padding: 0 .75rem !important;
  }
 
- /* ── DROPDOWN ────────────────────────────────────────────────── */
- .ylh-dropdown { position: relative; display: inline-flex; align-items: stretch; }
- .ylh-dropdown-menu {
- position: absolute;
- top: calc(100% + 2px);
- right: 0;
- background: #fff;
- min-width: 190px;
- border: 1px solid rgba(143,168,138,.25);
- border-radius: 0 0 8px 8px;
- box-shadow: 0 8px 24px rgba(44,58,40,.12);
- opacity: 0;
- visibility: hidden;
- transform: translateY(-6px);
- transition: all .2s ease;
- z-index: 1001;
- }
- .ylh-dropdown.active-drop .ylh-dropdown-menu {
- opacity: 1; visibility: visible; transform: translateY(0);
- }
- .ylh-dropdown-item {
- display: block;
- padding: .75rem 1.25rem;
- color: #2C3A28;
- text-decoration: none;
- font-size: .8rem;
- font-weight: 400;
- letter-spacing: .02em;
- transition: all .15s;
- border-left: 3px solid transparent;
- }
- .ylh-dropdown-item:hover {
- background: #F0F7EA;
- border-left-color: #8FA88A;
- padding-left: 1.5rem;
- }
- .ylh-dropdown-item.active {
- background: rgba(143,168,138,.12);
- border-left-color: #5C7050;
- font-weight: 600;
- }
 
  /* ── MOBILE HAMBURGER ────────────────────────────────────────── */
  .ylh-hamburger {
@@ -307,14 +266,11 @@
  <a href="{{ url_for('agent_financials') }}"
  class="ylh-nav-link {% if request.path.startswith('/agent/financials') %}active{% endif %}">Financials</a>
 
- <div class="ylh-dropdown">
- <a href="#" class="ylh-nav-link {% if request.path == url_for('agent_power_tools') or request.path.startswith('/agent/concierge') %}active{% endif %}"
- onclick="event.preventDefault();this.closest('.ylh-dropdown').classList.toggle('active-drop');">Tools &#9662;</a>
- <div class="ylh-dropdown-menu">
- <a href="{{ url_for('agent_power_tools') }}" class="ylh-dropdown-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
- <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-dropdown-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">Concierge</a>
- </div>
- </div>
+ <a href="{{ url_for('agent_power_tools') }}"
+ class="ylh-nav-link {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
+
+ <a href="{{ url_for('agent_concierge_dashboard') }}"
+ class="ylh-nav-link {% if request.path.startswith('/agent/concierge') %}active{% endif %}">Concierge</a>
 
  <a href="{{ url_for('agent_settings_profile') }}"
  class="ylh-nav-link {% if request.path.startswith('/agent/settings') %}active{% endif %}">Settings</a>
@@ -323,7 +279,9 @@
  <a href="{{ url_for('admin_settings') }}" class="ylh-nav-link ylh-nav-admin {% if 'admin' in request.path %}active{% endif %}">Admin</a>
  {% endif %}
 
+ {% if not current_user or (current_user.get('subscription_tier', 'free') or 'free') == 'free' %}
  <a href="{{ url_for('agent_subscription') }}" class="ylh-nav-link ylh-nav-upgrade {% if request.path.startswith('/agent/subscription') %}active{% endif %}">Upgrade</a>
+ {% endif %}
  </div>
 
  <!-- Mobile hamburger -->
@@ -348,14 +306,14 @@
  <a href="{{ url_for('agent_booking') }}" class="ylh-mob-item {% if request.path.startswith('/agent/booking') %}active{% endif %}">Booking</a>
  <a href="{{ url_for('agent_contests') }}" class="ylh-mob-item {% if request.path.startswith('/agent/contests') %}active{% endif %}">Contests</a>
  <a href="{{ url_for('agent_financials') }}" class="ylh-mob-item {% if request.path.startswith('/agent/financials') %}active{% endif %}">Financials</a>
- <div class="ylh-mob-section">Tools</div>
  <a href="{{ url_for('agent_power_tools') }}" class="ylh-mob-item {% if request.path == url_for('agent_power_tools') %}active{% endif %}">Power Tools</a>
  <a href="{{ url_for('agent_concierge_dashboard') }}" class="ylh-mob-item {% if request.path.startswith('/agent/concierge') %}active{% endif %}">Concierge</a>
- <div class="ylh-mob-section">Account</div>
  <a href="{{ url_for('agent_settings_profile') }}" class="ylh-mob-item {% if request.path.startswith('/agent/settings') %}active{% endif %}">Settings</a>
- <a href="{{ url_for('agent_subscription') }}" class="ylh-mob-item" style="color:#8B6914;font-weight:600;">Upgrade Plan</a>
  {% if current_user and current_user.get('role') == 'admin' %}
  <a href="{{ url_for('admin_settings') }}" class="ylh-mob-item">Admin</a>
+ {% endif %}
+ {% if not current_user or (current_user.get('subscription_tier', 'free') or 'free') == 'free' %}
+ <a href="{{ url_for('agent_subscription') }}" class="ylh-mob-item" style="color:#8B6914;font-weight:600;">Upgrade Plan</a>
  {% endif %}
 </div>
 
@@ -369,16 +327,10 @@
  if(btn){ btn.addEventListener('click', function(){ drawer.classList.contains('open') ? closeDrawer() : openDrawer(); }); }
  if(overlay){ overlay.addEventListener('click', closeDrawer); }
 
- /* Close desktop dropdowns on outside click */
- document.addEventListener('click', function(e){
- document.querySelectorAll('.ylh-dropdown.active-drop').forEach(function(d){
- if(!d.contains(e.target)) d.classList.remove('active-drop');
- });
- });
 })();
 </script>
 
-<div style="max-width: 1600px; margin: 0 auto; padding: 3rem 2rem;" class="agent-content-wrapper">
+<div style="max-width: 1600px; margin: 0 auto; padding: 0.75rem 1.25rem;" class="agent-content-wrapper">
  {% block agent_content %}
  {% endblock %}
 </div>

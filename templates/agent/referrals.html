@@ -21,17 +21,16 @@
 
 /* ── Hero ── */
 .ref-hero {
-  background: linear-gradient(135deg, rgba(140,158,120,.12) 0%, rgba(248,244,236,.7) 60%, rgba(255,255,255,.45) 100%);
-  border: 1px solid rgba(140,158,120,.22);
-  border-radius: 18px;
-  padding: 1.75rem 2rem;
-  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #F0EBE4 0%, #EAE4DC 100%);
+  border: 1px solid rgba(194,177,161,0.35);
+  border-radius: 10px;
+  padding: 0.5rem 0.9rem;
+  margin-bottom: 0.65rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  box-shadow: 0 2px 12px rgba(44,58,40,.06);
 }
 .ref-hero__eyebrow {
   font-size: .68rem;
@@ -43,7 +42,7 @@
 }
 .ref-hero__title {
   font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: 1.25rem;
   font-weight: 700;
   color: #2E3D25;
   margin: 0 0 .35rem;
@@ -64,18 +63,15 @@
 /* ── Stats strip ── */
 .ref-stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
 }
 .ref-stat {
-  background: #fff;
-  border: 1px solid rgba(140,158,120,.2);
-  border-radius: 14px;
-  padding: 1.25rem 1.5rem;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(44,58,40,.05);
-  transition: transform .2s, box-shadow .2s;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: #F5F0EB;
+  border: 1px solid rgba(194,177,161,0.28);
 }
 .ref-stat:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(44,58,40,.09); }
 .ref-stat__num {
@@ -313,7 +309,12 @@
   .ref-hero { padding: 1.25rem; flex-direction: column; }
   .ref-hero__actions { width: 100%; }
   .ref-btn-copy { width: 100% !important; justify-content: center !important; }
-  .ref-stats { grid-template-columns: 1fr 1fr; }
+  .ref-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
 }
 </style>
 
