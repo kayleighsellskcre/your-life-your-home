@@ -1091,13 +1091,56 @@ def init_db() -> None:
                 stage TEXT,
                 document_type TEXT,
                 display_name TEXT,
+                description TEXT,
                 is_required INTEGER DEFAULT 0,
                 triggers_stage_change INTEGER DEFAULT 0,
                 display_order INTEGER DEFAULT 0
             )
         """)
+        # Add description column if missing (migration)
+        try:
+            cur.execute("ALTER TABLE document_checklists ADD COLUMN description TEXT")
+        except Exception:
+            pass
+        # Seed default checklist items if table is empty
+        count = cur.execute("SELECT COUNT(*) FROM document_checklists").fetchone()[0]
+        if count == 0:
+            checklist_seed = [
+                # pre_contract
+                ("pre_contract", "buyer_agency_agreement", "Buyer Agency Agreement", "Signed buyer representation agreement", 1, 0, 1),
+                ("pre_contract", "pre_approval_letter", "Pre-Approval Letter", "Lender pre-approval from last 90 days", 1, 0, 2),
+                ("pre_contract", "proof_of_funds", "Proof of Funds", "Bank statement or fund verification for down payment", 0, 0, 3),
+                ("pre_contract", "listing_agreement", "Listing Agreement", "Signed listing contract with agent", 1, 0, 1),
+                ("pre_contract", "seller_disclosures_preliminary", "Preliminary Disclosures", "Seller property condition disclosure", 1, 0, 2),
+                # under_contract
+                ("under_contract", "purchase_agreement", "Purchase Agreement", "Fully executed purchase contract", 1, 1, 1),
+                ("under_contract", "earnest_money_receipt", "Earnest Money Receipt", "Confirmation of earnest money deposit", 1, 0, 2),
+                ("under_contract", "seller_disclosures", "Seller Disclosures", "Complete seller disclosure package", 1, 0, 3),
+                ("under_contract", "hoa_documents", "HOA Documents", "HOA rules, CC&Rs, and financials if applicable", 0, 0, 4),
+                # in_escrow
+                ("in_escrow", "inspection_report", "Inspection Report", "Completed home inspection report", 1, 0, 1),
+                ("in_escrow", "inspection_response", "Inspection Response", "Buyer's request for repairs or credits", 1, 0, 2),
+                ("in_escrow", "appraisal_report", "Appraisal Report", "Certified appraisal from lender", 1, 1, 3),
+                ("in_escrow", "title_report", "Title Report / Preliminary Title", "Title search and preliminary commitment", 1, 0, 4),
+                ("in_escrow", "loan_application", "Loan Application", "Complete mortgage application filed with lender", 1, 0, 5),
+                ("in_escrow", "homeowners_insurance", "Homeowners Insurance Binder", "Proof of insurance effective by close of escrow", 1, 0, 6),
+                # clear_to_close
+                ("clear_to_close", "clear_to_close_letter", "Clear to Close Letter", "Lender CTC confirmation", 1, 1, 1),
+                ("clear_to_close", "closing_disclosure", "Closing Disclosure", "Final CD from lender (3-day review)", 1, 0, 2),
+                ("clear_to_close", "wire_instructions", "Wire Instructions", "Verified wire transfer instructions from title", 1, 0, 3),
+                ("clear_to_close", "final_walkthrough", "Final Walkthrough Confirmation", "Buyer final walkthrough sign-off", 0, 0, 4),
+                ("clear_to_close", "utilities_transfer", "Utilities Transfer", "Seller utility transfer confirmation", 0, 0, 5),
+                # closed
+                ("closed", "settlement_statement", "Settlement Statement (HUD-1/ALTA)", "Final settlement statement", 1, 0, 1),
+                ("closed", "recorded_deed", "Recorded Deed", "County-recorded deed of transfer", 1, 0, 2),
+                ("closed", "keys", "Keys / Access", "Keys and garage openers delivered to buyer", 0, 0, 3),
+            ]
+            cur.executemany(
+                "INSERT INTO document_checklists (stage, document_type, display_name, description, is_required, triggers_stage_change, display_order) VALUES (?,?,?,?,?,?,?)",
+                checklist_seed
+            )
     except Exception as e:
-        print(f"Note: Could not create document_checklists table: {e}")
+        print(f"Note: Could not create/seed document_checklists table: {e}")
 
     # ------------- LENDER LOANS -------------
     cur.execute(

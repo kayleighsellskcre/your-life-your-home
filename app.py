@@ -6446,10 +6446,29 @@ def agent_transaction_detail(tx_id):
         flash("Transaction not found.", "error")
         return redirect(url_for("agent_transactions"))
 
-    documents = get_transaction_documents(tx_id)
-    participants = get_transaction_participants(tx_id)
-    timeline = get_transaction_timeline(tx_id)
-    doc_status = get_transaction_document_status(tx_id)
+    try:
+        documents = get_transaction_documents(tx_id)
+    except Exception as _e:
+        app.logger.warning(f"get_transaction_documents({tx_id}) failed: {_e}")
+        documents = []
+
+    try:
+        participants = get_transaction_participants(tx_id)
+    except Exception as _e:
+        app.logger.warning(f"get_transaction_participants({tx_id}) failed: {_e}")
+        participants = []
+
+    try:
+        timeline = get_transaction_timeline(tx_id)
+    except Exception as _e:
+        app.logger.warning(f"get_transaction_timeline({tx_id}) failed: {_e}")
+        timeline = []
+
+    try:
+        doc_status = get_transaction_document_status(tx_id)
+    except Exception as _e:
+        app.logger.warning(f"get_transaction_document_status({tx_id}) failed: {_e}")
+        doc_status = {"checklist": [], "completed": 0, "total": 0, "progress_percentage": 0}
 
     # Agent-only: load any existing commission record for this transaction
     tx_commission = None

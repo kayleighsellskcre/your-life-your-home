@@ -868,7 +868,7 @@
  Marketing Hub
  </a>
  <button class="action-btn action-btn--primary" onclick="aiSuggestTasks()" style="background:linear-gradient(135deg,#6B5B4D 0%,#5A4A3C 100%);">
- AI: Suggest Tasks
+  Suggest Tasks
  </button>
  </div>
 
@@ -972,10 +972,10 @@
  {% for item in doc_status.checklist %}
  <div class="checklist-item{% if item.completed %} completed{% elif item.status == 'pending' %} pending{% endif %}">
  <div class="checklist-item__info">
- <div class="checklist-item__title">{{ item.document_name }}</div>
- <div class="checklist-item__desc">
- {{ item.description }}
- {% if item.required %} • <strong>Required</strong>{% endif %}
+                <div class="checklist-item__title">{{ item.display_name or item.document_name or item.document_type }}</div>
+                <div class="checklist-item__desc">
+                {{ item.description or '' }}
+                {% if item.is_required or item.required %} • <strong>Required</strong>{% endif %}
  {% if item.triggers_stage_change %} • <strong>Auto-advances stage</strong>{% endif %}
  </div>
  </div>
@@ -1050,15 +1050,15 @@
  {% for p in participants %}
  <div class="participant-card">
  <div class="participant-info">
- <div class="participant-avatar">
- {{ p.name[:2]|upper }}
+            <div class="participant-avatar">
+              {{ ((p.name or p.email or '?')[:2])|upper }}
+            </div>
+            <div class="participant-details">
+              <h4>{{ p.name or p.email or 'Participant' }}</h4>
+              <p>{{ p.email or p.user_email or '' }}{% if p.phone %} &bull; {{ p.phone }}{% endif %}</p>
+            </div>
  </div>
- <div class="participant-details">
- <h4>{{ p.name }}</h4>
- <p>{{ p.email or p.user_email }}{% if p.phone %} • {{ p.phone }}{% endif %}</p>
- </div>
- </div>
- <span class="participant-badge">{{ p.participant_type|replace('_', ' ')|title }}</span>
+ <span class="participant-badge">{{ (p.participant_type or p.get('participant_type', 'participant') or 'participant')|replace('_', ' ')|title }}</span>
  </div>
  {% endfor %}
  </div>

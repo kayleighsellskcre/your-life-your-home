@@ -57,9 +57,8 @@ def create_transaction(agent_id: int, property_address: str, client_name: str,
 
 def get_agent_transactions(agent_id: int, status: str = 'active') -> List[Dict]:
     """Get all transactions for an agent"""
-    with get_db() as conn:
-        cursor = conn.cursor()
-    
+    conn = get_db()
+    cursor = conn.cursor()
     cursor.execute("""
         SELECT t.*,
                COUNT(DISTINCT td.id) as document_count,
@@ -71,8 +70,8 @@ def get_agent_transactions(agent_id: int, status: str = 'active') -> List[Dict]:
         GROUP BY t.id
         ORDER BY t.created_at DESC
     """, (agent_id, status))
-    
     transactions = [dict(row) for row in cursor.fetchall()]
+    conn.close()
     print(f"[DEBUG] get_agent_transactions(agent_id={agent_id}, status={status}) found {len(transactions)} transactions")
     return transactions
 
@@ -443,14 +442,24 @@ def get_transaction_participants(transaction_id: int) -> List[Dict]:
     """Get all participants for a transaction"""
     conn = get_db()
     cursor = conn.cursor()
-    
+
+    # Detect which timestamp column exists (schema may use added_at or created_at)
+    cursor.execute("PRAGMA table_info(transaction_participants)")
+    tp_cols = {col[1] for col in cursor.fetchall()}
+    if 'added_at' in tp_cols:
+        order_col = 'tp.added_at'
+    elif 'created_at' in tp_cols:
+        order_col = 'tp.created_at'
+    else:
+        order_col = 'tp.id'
+
     # Handle both INTEGER and TEXT transaction_id types
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT tp.*, u.email as user_email
         FROM transaction_participants tp
         LEFT JOIN users u ON tp.user_id = u.id
         WHERE CAST(tp.transaction_id AS TEXT) = CAST(? AS TEXT) AND tp.status != 'removed'
-        ORDER BY COALESCE(tp.added_at, tp.created_at) DESC
+        ORDER BY {order_col} DESC
     """, (str(transaction_id),))
     
     participants = []
@@ -506,20 +515,18 @@ def log_timeline_event(transaction_id: int, event_type: str,
 
 def get_transaction_timeline(transaction_id: int, limit: int = 50) -> List[Dict]:
     """Get timeline events for a transaction"""
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT tt.*, u.name as created_by_name
-            FROM transaction_timeline tt
-            LEFT JOIN users u ON tt.created_by = u.id
-            WHERE tt.transaction_id = ?
-            ORDER BY tt.created_at DESC
-            LIMIT ?
-        """, (transaction_id, limit))
-    
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT tt.*, u.name as created_by_name
+        FROM transaction_timeline tt
+        LEFT JOIN users u ON tt.created_by = u.id
+        WHERE tt.transaction_id = ?
+        ORDER BY tt.created_at DESC
+        LIMIT ?
+    """, (transaction_id, limit))
     timeline = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    
     return timeline
 
 # ============================================================================
