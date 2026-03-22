@@ -168,19 +168,22 @@
   background: rgba(200,180,151,.06);
 }
 .priority-num {
-  width: 24px; height: 24px;
+  width: 26px; height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6B8A5E, #5A4A3C);
+  background: linear-gradient(135deg, #6B8A5E, #4A6B40);
   color: #fff;
   font-size: .7rem;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(107,91,77,.28);
-  transition: background .2s;
+  box-shadow: 0 2px 6px rgba(107,91,77,.22);
+  cursor: pointer;
+  transition: background .2s, transform .15s;
+  user-select: none;
 }
+.priority-num:hover { transform: scale(1.1); }
 .priority-item.p-done .priority-num {
-  background: #9A8A7E;
+  background: #B0A8A0;
 }
 .priority-link {
   flex: 1;
@@ -196,29 +199,10 @@
   text-decoration: line-through;
   color: #9A8A7E;
 }
-.priority-check {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  border: 2px solid rgba(107,138,94,.4);
-  background: transparent;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  transition: all .2s;
-  padding: 0;
-  min-height: unset !important;
-  width: 22px !important;
-  margin: 0 !important;
-}
-.priority-check:hover { border-color: #6B8A5E; background: rgba(107,138,94,.08); }
-.priority-item.p-done .priority-check {
-  background: #6B8A5E;
-  border-color: #6B8A5E;
-}
-.priority-check-icon { display: none; }
-.priority-item.p-done .priority-check-icon { display: block; }
-.priority-check-ring { display: block; }
-.priority-item.p-done .priority-check-ring { display: none; }
+.p-num-digit { display: block; }
+.p-num-check { display: none; }
+.priority-item.p-done .p-num-digit { display: none; }
+.priority-item.p-done .p-num-check { display: block; }
 .priority-refresh-footer {
   display: flex;
   justify-content: center;
@@ -702,8 +686,8 @@ function loadDone(){
   try { return new Set(JSON.parse(localStorage.getItem(PRIORITY_KEY) || '[]')); } catch(e){ return new Set(); }
 }
 
-function togglePriority(btn){
-  var item = btn.closest('.priority-item');
+function togglePriority(numEl){
+  var item = numEl.closest('.priority-item');
   if(!item) return;
   var idx  = item.dataset.idx;
   var done = loadDone();
@@ -721,17 +705,14 @@ function buildPriorityItem(text, i, done){
   var isDone = done.has(String(i));
   var href   = priorityLink(text);
   var div    = document.createElement('div');
-  div.className  = 'priority-item' + (isDone ? ' p-done' : '');
+  div.className   = 'priority-item' + (isDone ? ' p-done' : '');
   div.dataset.idx = String(i);
-  div.innerHTML  =
-    '<div class="priority-num">' +
-      '<svg class="priority-check-icon" width="12" height="12" viewBox="0 0 16 16" fill="white"><polyline points="2,8 6,12 14,4" stroke="white" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      '<span class="priority-check-ring">' + (i+1) + '</span>' +
+  div.innerHTML   =
+    '<div class="priority-num" onclick="togglePriority(this)" title="Tap to mark done">' +
+      '<span class="p-num-digit">' + (i+1) + '</span>' +
+      '<svg class="p-num-check" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>' +
     '</div>' +
-    '<a href="' + href + '" class="priority-link">' + escapeHtml(text) + '</a>' +
-    '<button class="priority-check" onclick="togglePriority(this)" title="Mark done">' +
-      '<svg class="priority-check-icon" width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,8 6,12 14,4"/></svg>' +
-    '</button>';
+    '<a href="' + href + '" class="priority-link">' + escapeHtml(text) + '</a>';
   return div;
 }
 
