@@ -57,7 +57,7 @@
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.22rem;
   font-weight: 600;
-  color: #3D2E24;
+  color: #443c36;
   margin: 0;
   display: flex;
   align-items: center;
@@ -79,7 +79,7 @@
 }
 .priority-skeleton {
   height: 50px;
-  background: linear-gradient(90deg,rgba(107,91,77,.06) 0%,rgba(107,91,77,.11) 50%,rgba(107,91,77,.06) 100%);
+  background: linear-gradient(90deg,rgba(159,129,90,.06) 0%,rgba(159,129,90,.11) 50%,rgba(159,129,90,.06) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 10px;
@@ -90,7 +90,7 @@
   align-items: center;
   gap: .75rem;
   padding: .75rem .9rem;
-  background: linear-gradient(135deg,rgba(107,91,77,.03),rgba(200,180,151,.055));
+  background: linear-gradient(135deg,rgba(159,129,90,.03),rgba(200,180,151,.055));
   border: 1px solid rgba(200,180,151,.16);
   border-radius: 12px;
   margin-bottom: .5rem;
@@ -98,8 +98,8 @@
 }
 .priority-item:last-child { margin-bottom: 0; }
 .priority-item:not(.p-done):hover {
-  border-color: rgba(107,138,94,.35);
-  background: linear-gradient(135deg,rgba(107,91,77,.07),rgba(200,180,151,.1));
+  border-color: rgba(159,129,90,.35);
+  background: linear-gradient(135deg,rgba(159,129,90,.07),rgba(200,180,151,.1));
 }
 .priority-item.p-done {
   opacity: .52;
@@ -108,13 +108,13 @@
 .priority-num {
   width: 26px; height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #6B8A5E, #4A6B40);
+  background: linear-gradient(135deg, #9f815a, #4A6B40);
   color: #fff;
   font-size: .7rem;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(107,91,77,.22);
+  box-shadow: 0 2px 6px rgba(159,129,90,.22);
   cursor: pointer;
   transition: background .2s, transform .15s;
   user-select: none;
@@ -126,16 +126,16 @@
 .priority-link {
   flex: 1;
   font-size: .875rem;
-  color: #3D2E24;
+  color: #443c36;
   line-height: 1.45;
   font-weight: 500;
   text-decoration: none;
   transition: color .15s;
 }
-.priority-link:hover { color: #5A7A4A; text-decoration: underline; }
+.priority-link:hover { color: #8a6e4a; text-decoration: underline; }
 .priority-item.p-done .priority-link {
   text-decoration: line-through;
-  color: #9A8A7E;
+  color: #9a8878;
 }
 .p-num-digit { display: block; }
 .p-num-check { display: none; }
@@ -161,11 +161,11 @@
 }
 .tx-item:last-child { border-bottom: none; }
 .tx-item:hover { transform: translateX(4px); }
-.tx-item:hover .tx-addr { color: #6B8A5E; }
+.tx-item:hover .tx-addr { color: #9f815a; }
 .tx-dot {
   width: 9px; height: 9px;
   border-radius: 50%;
-  background: #8FA88A;
+  background: #c69270;
   flex-shrink: 0;
   box-shadow: 0 0 0 3px rgba(143,168,138,.18);
 }
@@ -173,13 +173,13 @@
 .tx-addr {
   font-weight: 600;
   font-size: .9rem;
-  color: #3D2E24;
+  color: #443c36;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color .2s;
 }
-.tx-meta { font-size: .775rem; color: #9A8A7E; margin-top: .1rem; }
+.tx-meta { font-size: .775rem; color: #9a8878; margin-top: .1rem; }
 .tx-badge {
   font-size: .62rem;
   font-weight: 700;
@@ -187,13 +187,13 @@
   letter-spacing: .04em;
   padding: .22rem .6rem;
   border-radius: 999px;
-  background: rgba(107,91,77,.09);
-  color: #6B5B4D;
+  background: rgba(159,129,90,.09);
+  color: #9f815a;
   white-space: nowrap;
   flex-shrink: 0;
 }
 .tx-arrow { color: #C8B497; font-size: .95rem; flex-shrink: 0; transition: color .2s; }
-.tx-item:hover .tx-arrow { color: #8FA88A; }
+.tx-item:hover .tx-arrow { color: #c69270; }
 
 /* ── QUICK ACTIONS ── */
 .qa-item {
@@ -201,47 +201,47 @@
   align-items: center;
   gap: .8rem;
   padding: .8rem .9rem;
-  background: linear-gradient(135deg,rgba(107,91,77,.025),rgba(200,180,151,.045));
+  background: linear-gradient(135deg,rgba(159,129,90,.025),rgba(200,180,151,.045));
   border: 1px solid rgba(200,180,151,.16);
   border-radius: 12px;
   text-decoration: none;
-  color: #3D2E24;
+  color: #443c36;
   margin-bottom: .45rem;
   transition: all .2s cubic-bezier(.4,0,.2,1);
 }
 .qa-item:last-child { margin-bottom: 0; }
 .qa-item:hover {
-  border-color: rgba(107,138,94,.35);
-  background: linear-gradient(135deg,rgba(107,91,77,.07),rgba(200,180,151,.09));
+  border-color: rgba(159,129,90,.35);
+  background: linear-gradient(135deg,rgba(159,129,90,.07),rgba(200,180,151,.09));
   transform: translateX(3px);
-  box-shadow: 0 4px 14px rgba(107,91,77,.09);
+  box-shadow: 0 4px 14px rgba(159,129,90,.09);
 }
 .qa-icon {
   width: 36px; height: 36px;
   border-radius: 10px;
-  background: linear-gradient(135deg,#8FA88A,#5A7A4A);
+  background: linear-gradient(135deg,#c69270,#8a6e4a);
   display: flex; align-items: center; justify-content: center;
   color: #fff;
   flex-shrink: 0;
-  box-shadow: 0 2px 7px rgba(107,91,77,.22);
+  box-shadow: 0 2px 7px rgba(159,129,90,.22);
 }
-.qa-label { font-size: .875rem; font-weight: 600; color: #3D2E24; }
-.qa-sub { font-size: .72rem; color: #9A8A7E; margin-top: .06rem; }
+.qa-label { font-size: .875rem; font-weight: 600; color: #443c36; }
+.qa-sub { font-size: .72rem; color: #9a8878; margin-top: .06rem; }
 .qa-arrow { margin-left: auto; color: #C8B497; font-size: .9rem; flex-shrink: 0; transition: color .2s; }
-.qa-item:hover .qa-arrow { color: #8FA88A; }
+.qa-item:hover .qa-arrow { color: #c69270; }
 
 /* ── EMPTY STATE ── */
 .empty-state {
   text-align: center;
   padding: 2rem 1rem;
-  color: #9A8A7E;
+  color: #9a8878;
   font-size: .9rem;
 }
 .empty-state a {
   display: inline-block;
   margin-top: .75rem;
   padding: .55rem 1.4rem;
-  background: #6B8A5E;
+  background: #9f815a;
   color: #fff;
   border-radius: 999px;
   text-decoration: none;
@@ -257,13 +257,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .1em;
-  color: #9A8A7E;
+  color: #9a8878;
   margin-bottom: .55rem;
 }
 .view-all {
   font-size: .7rem;
   font-weight: 600;
-  color: #6B8A5E;
+  color: #9f815a;
   text-decoration: none;
   opacity: .8;
   letter-spacing: .04em;
@@ -276,13 +276,13 @@
   display: inline-flex;
   align-items: center;
   gap: .4rem;
-  background: rgba(107,91,77,.07);
+  background: rgba(159,129,90,.07);
   border: 1px solid rgba(200,180,151,.3);
   border-radius: 999px;
   padding: .38rem 1rem;
   font-size: .78rem;
   font-weight: 600;
-  color: #6B5B4D;
+  color: #9f815a;
   white-space: nowrap;
 }
 
@@ -334,34 +334,34 @@
 
   <!-- ── DAILY BRIEF CARD ── -->
   <div class="fu fu1" style="
-    background:linear-gradient(130deg,#D4B0C4 0%,#DFC0D2 45%,#EAD0DC 100%);
+    background:linear-gradient(130deg,#c69270 0%,#d4a882 45%,#e0bc9a 100%);
     border-radius:16px;
     padding:1.25rem 1.5rem 1rem;
     margin-bottom:1.2rem;
-    box-shadow:0 4px 20px rgba(150,90,120,.14);
+    box-shadow:0 4px 20px rgba(159,129,90,.18);
     position:relative;
   ">
     <!-- Quote + kindness — centered -->
     <div style="text-align:center;margin-bottom:.9rem;">
-      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;font-style:italic;font-weight:600;color:#3D2028;line-height:1.4;">Loading your daily inspiration...</div>
-      <div id="kindness-text" style="font-size:.72rem;color:rgba(80,40,55,.72);margin-top:.35rem;line-height:1.3;"></div>
+      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:1.05rem;font-style:italic;font-weight:600;color:#443c36;line-height:1.4;">Loading your daily inspiration...</div>
+      <div id="kindness-text" style="font-size:.72rem;color:rgba(68,60,54,.72);margin-top:.35rem;line-height:1.3;"></div>
     </div>
 
     <!-- Divider -->
-    <div style="height:1px;background:rgba(120,60,90,.15);margin-bottom:.85rem;"></div>
+    <div style="height:1px;background:rgba(68,60,54,.15);margin-bottom:.85rem;"></div>
 
     <!-- Today's 3 Priorities -->
     <div id="strip-priorities" style="display:flex;flex-direction:column;gap:.45rem;"></div>
 
     <!-- Footer: shuffle + refresh priorities -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;">
-      <span onclick="loadPriorities(true)" role="button" title="Refresh priorities" style="font-size:.68rem;font-weight:600;color:rgba(80,40,55,.6);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
-        onmouseover="this.style.color='rgba(80,40,55,.9)'" onmouseout="this.style.color='rgba(80,40,55,.6)'">
+      <span onclick="loadPriorities(true)" role="button" title="Refresh priorities" style="font-size:.68rem;font-weight:600;color:rgba(68,60,54,.65);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
+        onmouseover="this.style.color='rgba(68,60,54,.95)'" onmouseout="this.style.color='rgba(68,60,54,.65)'">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
         Refresh Priorities
       </span>
-      <span onclick="shuffleBriefing()" role="button" title="New quote" style="font-size:.68rem;font-weight:600;color:rgba(80,40,55,.6);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
-        onmouseover="this.style.color='rgba(80,40,55,.9)'" onmouseout="this.style.color='rgba(80,40,55,.6)'">
+      <span onclick="shuffleBriefing()" role="button" title="New quote" style="font-size:.68rem;font-weight:600;color:rgba(68,60,54,.65);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
+        onmouseover="this.style.color='rgba(68,60,54,.95)'" onmouseout="this.style.color='rgba(68,60,54,.65)'">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
         New Quote
       </span>
@@ -372,10 +372,10 @@
   <div class="kpi-strip fu fu2">
 
     {% set kpis = [
-      { 'id':'kpi-new-leads',      'href':'/agent/crm',          'value': metrics.new_leads|default(0),              'accent':'#6B8A5E', 'icon_bg':'rgba(107,138,94,.13)',  'icon_color':'#5A7A4A', 'label':'New Leads',      'sub':'Ready for your call',  'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
-      { 'id':'kpi-active-deals',   'href':'/agent/transactions', 'value': transactions|length if transactions else 0, 'accent':'#C49A1A', 'icon_bg':'rgba(196,154,26,.13)',  'icon_color':'#9A7A10', 'label':'Active Deals',   'sub':'In your pipeline',     'svg':'<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
-      { 'id':'kpi-followups',      'href':'/agent/crm',          'value': metrics.followups_today|default(0),         'accent':'#A0522D', 'icon_bg':'rgba(160,82,45,.13)',   'icon_color':'#904020', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
-      { 'id':'kpi-total-contacts', 'href':'/agent/crm',          'value': metrics.total_contacts|default(0),          'accent':'#4A6580', 'icon_bg':'rgba(74,101,128,.13)',  'icon_color':'#3A5570', 'label':'Total Contacts', 'sub':'In your CRM',          'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
+      { 'id':'kpi-new-leads',      'href':'/agent/crm',          'value': metrics.new_leads|default(0),              'accent':'#9f815a', 'icon_bg':'rgba(159,129,90,.13)',  'icon_color':'#8a6e4a', 'label':'New Leads',      'sub':'Ready for your call',  'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+      { 'id':'kpi-active-deals',   'href':'/agent/transactions', 'value': transactions|length if transactions else 0, 'accent':'#c69270', 'icon_bg':'rgba(198,146,112,.13)', 'icon_color':'#a87550', 'label':'Active Deals',   'sub':'In your pipeline',     'svg':'<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
+      { 'id':'kpi-followups',      'href':'/agent/crm',          'value': metrics.followups_today|default(0),         'accent':'#8b6773', 'icon_bg':'rgba(139,103,115,.13)', 'icon_color':'#7a5562', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
+      { 'id':'kpi-total-contacts', 'href':'/agent/crm',          'value': metrics.total_contacts|default(0),          'accent':'#443c36', 'icon_bg':'rgba(68,60,54,.12)',    'icon_color':'#3a332d', 'label':'Total Contacts', 'sub':'In your CRM',          'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
     ] %}
 
     {% for k in kpis %}
@@ -411,17 +411,17 @@
       <div id="{{ k.id }}" style="
         font-family:'Playfair Display',Georgia,serif;
         font-size:2.1rem;font-weight:700;line-height:1;
-        color:#3D2E24;margin-bottom:.22rem;
+        color:#443c36;margin-bottom:.22rem;
       ">{{ k.value }}</div>
 
       <!-- label -->
       <div style="
         font-size:.68rem;font-weight:700;text-transform:uppercase;
-        letter-spacing:.07em;color:#6B5B4D;margin-bottom:.1rem;
+        letter-spacing:.07em;color:#9f815a;margin-bottom:.1rem;
       ">{{ k.label }}</div>
 
       <!-- sub -->
-      <div style="font-size:.75rem;color:#9A8A7E;">{{ k.sub }}</div>
+      <div style="font-size:.75rem;color:#9a8878;">{{ k.sub }}</div>
 
     </a>
     {% endfor %}
@@ -445,8 +445,8 @@
       </div>
       <div class="priority-refresh-footer">
         <button onclick="loadPriorities(true)" id="priorities-refresh-btn"
-          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#9A8A7E;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
-          onmouseover="this.style.color='#6B8A5E'" onmouseout="this.style.color='#9A8A7E'">
+          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#9a8878;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
+          onmouseover="this.style.color='#9f815a'" onmouseout="this.style.color='#9a8878'">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
           Refresh Priorities
         </button>
@@ -474,7 +474,7 @@
           {% endfor %}
         {% else %}
         <div class="empty-state">
-          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="rgba(107,91,77,.28)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto .65rem;display:block"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="rgba(159,129,90,.28)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto .65rem;display:block"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
           No active transactions yet.
           <br>
           <a href="{{ url_for('agent_transactions') }}">Start Your First Deal</a>
@@ -850,11 +850,11 @@ function renderStripPriorities(items){
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:.6rem;';
     var num = document.createElement('div');
-    num.style.cssText = 'width:20px;height:20px;border-radius:50%;background:rgba(80,40,55,.18);color:#3D2028;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
+    num.style.cssText = 'width:20px;height:20px;border-radius:50%;background:rgba(159,129,90,.18);color:#443c36;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;';
     num.textContent = i+1;
     var lnk = document.createElement('a');
     lnk.href = priorityLink(text);
-    lnk.style.cssText = 'font-size:.78rem;color:#3D2028;font-weight:500;text-decoration:none;line-height:1.35;';
+    lnk.style.cssText = 'font-size:.78rem;color:#443c36;font-weight:500;text-decoration:none;line-height:1.35;';
     lnk.textContent = text;
     lnk.onmouseover = function(){ this.style.textDecoration='underline'; };
     lnk.onmouseout  = function(){ this.style.textDecoration='none'; };
