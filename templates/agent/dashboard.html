@@ -93,93 +93,81 @@
   margin-top: .08rem;
 }
 
-/* ── AI BRIEFING ── */
+/* ── AI BRIEFING — compact single-line strip ── */
 .briefing-card {
-  background: linear-gradient(135deg, #2C2018 0%, #3D2E24 45%, #4A3C30 100%);
-  border-radius: 20px;
-  padding: 1.5rem 1.75rem;
+  background: linear-gradient(135deg, #2C2018 0%, #3D2E24 55%, #4A3C30 100%);
+  border-radius: 14px;
+  padding: .6rem 1.25rem;
   margin-bottom: 1.25rem;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(44,32,24,.22);
-}
-.briefing-card::before {
-  content: '';
-  position: absolute;
-  top: -60%; right: -5%;
-  width: 420px; height: 420px;
-  background: radial-gradient(circle, rgba(200,180,151,.1) 0%, transparent 65%);
-  pointer-events: none;
-}
-.briefing-card::after {
-  content: '';
-  position: absolute;
-  bottom: -40%; left: -5%;
-  width: 280px; height: 280px;
-  background: radial-gradient(circle, rgba(143,168,138,.08) 0%, transparent 65%);
-  pointer-events: none;
+  box-shadow: 0 4px 18px rgba(44,32,24,.18);
 }
 .briefing-inner {
   display: flex;
-  gap: 1.25rem;
-  align-items: flex-start;
+  gap: .9rem;
+  align-items: center;
   position: relative;
   z-index: 1;
 }
 .briefing-icon {
-  width: 52px; height: 52px;
+  width: 32px; height: 32px;
   background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.16);
-  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 1.5rem;
   flex-shrink: 0;
-  backdrop-filter: blur(6px);
 }
-.briefing-body { flex: 1; min-width: 0; }
-.briefing-label {
-  font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: rgba(200,180,151,.75);
-  margin-bottom: .45rem;
-}
-#briefing-text {
-  font-size: .975rem;
-  line-height: 1.65;
-  color: rgba(255,255,255,.9);
-  min-height: 2.5rem;
-}
-.briefing-foot {
+.briefing-body {
+  flex: 1; min-width: 0;
   display: flex;
   align-items: center;
   gap: .75rem;
-  margin-top: .85rem;
+  flex-wrap: wrap;
 }
+.briefing-label {
+  font-size: .6rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(200,180,151,.65);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#briefing-text {
+  font-size: .875rem;
+  line-height: 1.4;
+  color: rgba(255,255,255,.88);
+  flex: 1;
+  min-width: 0;
+}
+.briefing-foot { flex-shrink: 0; }
 .briefing-refresh-btn {
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.2);
-  color: rgba(255,255,255,.78);
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.16);
+  color: rgba(255,255,255,.7);
   border-radius: 999px;
-  padding: .38rem 1rem;
-  font-size: .78rem;
+  padding: .25rem .75rem;
+  font-size: .7rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: .35rem;
+  gap: .28rem;
   transition: all .2s;
-  backdrop-filter: blur(4px);
+  white-space: nowrap;
+  min-height: unset !important;
+  width: auto !important;
+  margin: 0 !important;
 }
-.briefing-refresh-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+.briefing-refresh-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
 .briefing-skeleton {
-  height: .9rem;
+  height: .75rem;
+  width: 60%;
   background: linear-gradient(90deg,rgba(255,255,255,.06) 0%,rgba(255,255,255,.13) 50%,rgba(255,255,255,.06) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
-  margin-bottom: .45rem;
 }
 @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
@@ -450,21 +438,18 @@
     </div>
   </div>
 
-  <!-- ── AI MORNING BRIEFING ── -->
+  <!-- ── AI MORNING BRIEFING — compact strip ── -->
   <div class="briefing-card fu fu1">
     <div class="briefing-inner">
       <div class="briefing-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.8)" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
       </div>
       <div class="briefing-body">
-        <div class="briefing-label">Morning Briefing</div>
-        <div id="briefing-text">
-          <div class="briefing-skeleton" style="width:92%"></div>
-          <div class="briefing-skeleton" style="width:68%;margin-top:.4rem"></div>
-        </div>
+        <span class="briefing-label">Today</span>
+        <div id="briefing-text"><div class="briefing-skeleton"></div></div>
         <div class="briefing-foot">
           <button class="briefing-refresh-btn" onclick="loadBriefing()" id="briefing-refresh-btn">
-            <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
             Refresh
           </button>
         </div>
@@ -688,7 +673,7 @@ function loadBriefing(){
   var el  = document.getElementById('briefing-text');
   var btn = document.getElementById('briefing-refresh-btn');
   if(!el) return;
-  el.innerHTML = '<div class="briefing-skeleton" style="width:92%"></div><div class="briefing-skeleton" style="width:68%;margin-top:.4rem"></div>';
+  el.innerHTML = '<div class="briefing-skeleton"></div>';
   setRefreshing(btn, true);
   var ctrl = new AbortController();
   var tid  = setTimeout(function(){ ctrl.abort(); }, 18000);

@@ -69,15 +69,14 @@ def ai_dashboard_briefing(agent_name: str, metrics: dict, followups: list, tasks
     followup_str = ", ".join(followups[:5]) if followups else "none"
     task_str = " / ".join(tasks[:5]) if tasks else "none"
     prompt = (
-        f"You are writing a short, warm, professional morning briefing for {agent_name}, a real estate agent. "
-        f"Keep it to 2-3 sentences. Be encouraging and specific. Do not use bullet points. "
-        f"Current pipeline: {metrics.get('new_leads',0)} new leads, {metrics.get('active',0)} active clients, "
-        f"{metrics.get('needs_followup',0)} contacts needing follow-up, {metrics.get('pending_tasks',0)} open tasks. "
-        f"Contacts to follow up with: {followup_str}. "
-        f"Upcoming tasks: {task_str}. "
-        f"Write the briefing now — no greeting, just the content."
+        f"Write a single upbeat sentence (max 20 words) for {agent_name}, a real estate agent. "
+        f"Sound like a warm, energetic friend, not a corporate coach. "
+        f"Mention what to focus on today using these facts: "
+        f"{metrics.get('new_leads',0)} new leads, {metrics.get('needs_followup',0)} follow-ups needed"
+        + (f", top contacts to reach: {followup_str}" if followup_str != 'none' else "") + ". "
+        f"Rules: no em dashes, no bullet points, no greeting, no exclamation marks at start, end with one exclamation mark."
     )
-    return ai_complete(prompt, system="You are a warm, professional real estate business coach.", max_tokens=150, temperature=0.6)
+    return ai_complete(prompt, system="You are a positive, human, friendly real estate colleague. Never use em dashes or mdashes.", max_tokens=60, temperature=0.75)
 
 
 def ai_draft_email(contact_name: str, contact_stage: str, contact_notes: str,
