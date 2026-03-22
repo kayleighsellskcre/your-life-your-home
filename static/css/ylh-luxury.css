@@ -742,11 +742,38 @@ a:focus {
 
 /* ══════════════════════════════════════════════════════════════
    LINK COLORS
-   #9f815a is only 3.4:1 on white — fails WCAG AA for text.
-   Use #5c4e42 (6.2:1) for body links; golden only for hover/accent.
+   Body text links: #5c4e42 (6.2:1 on white — WCAG AA ✓)
+   Button-style <a> tags keep white/light text via overrides below.
    ══════════════════════════════════════════════════════════════ */
 a { color: #5c4e42 !important; }
 a:hover { color: #9f815a !important; }
+
+/* ── Button-style anchors must keep light text ── */
+a.btn,
+a.btn-primary,
+a.btn-premium,
+a[class*="btn-primary"],
+a[class*="btn-premium"],
+.empty-state a,
+a.stg-pill,
+a.stg-pill--on,
+a.ylh-btn-primary,
+a.btn-ai,
+a[class*="cta-btn"],
+a[class*="-cta"] {
+  color: #f0ebe0 !important;
+}
+a.btn:hover,
+a.btn-primary:hover,
+.empty-state a:hover {
+  color: #fff !important;
+}
+
+/* ── Secondary button anchors keep on-brand text ── */
+a.btn-secondary,
+a[class*="btn-secondary"] {
+  color: #5c4e42 !important;
+}
 
 
 /* ══════════════════════════════════════════════════════════════
