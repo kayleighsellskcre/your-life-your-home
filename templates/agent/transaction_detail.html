@@ -200,34 +200,49 @@
 .tx-client-name { font-size: .82rem; font-weight: 700; color: #3D2E24; margin-bottom: .15rem; }
 .tx-client-sub  { font-size: .7rem; color: #9A8A7A; line-height: 1.5; }
 
-.tx-action-list { display: flex; flex-direction: column; gap: .35rem; }
+.tx-action-list { display: flex; flex-direction: column; gap: .3rem; }
 .tx-action-item {
   display: flex;
   align-items: center;
-  gap: .5rem;
-  padding: .45rem .75rem;
+  gap: .55rem;
+  padding: 0 .875rem;
+  height: 36px;
   border-radius: 7px;
   font-size: .75rem;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  border: none;
-  transition: all .18s;
+  border: 1px solid rgba(107,91,77,.16);
+  transition: background .15s, border-color .15s, color .15s;
   width: 100%;
-  background: rgba(107,91,77,.06);
-  border: 1px solid rgba(107,91,77,.13);
-  color: #6B5B4D;
+  background: #fff;
+  color: #5A4A3C;
   text-align: left;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.tx-action-item:hover { background: rgba(107,91,77,.13); color: #3D2E24; transform: translateX(2px); }
-.tx-action-item.primary {
-  background: linear-gradient(135deg, #6B5B4D, #5A4A3C);
-  color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(107,91,77,.2);
+.tx-action-item:hover {
+  background: rgba(107,91,77,.06);
+  border-color: rgba(107,91,77,.32);
+  color: #3D2E24;
 }
-.tx-action-item.primary:hover { opacity: .9; transform: translateX(2px); }
-.tx-action-icon { width: 16px; text-align: center; flex-shrink: 0; opacity: .75; }
+.tx-action-icon {
+  width: 15px;
+  text-align: center;
+  flex-shrink: 0;
+  font-size: .8rem;
+  opacity: .65;
+}
+/* Panel-header micro buttons */
+.tx-panel-hd .tx-btn {
+  font-size: .62rem !important;
+  padding: .18rem .5rem !important;
+  border-radius: 5px;
+  line-height: 1;
+  font-weight: 600;
+}
 
 /* Commission */
 .tx-comm-row {
@@ -316,18 +331,17 @@
 .tx-uploaded-name { font-size: .75rem; font-weight: 600; color: #3D2E24; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tx-uploaded-sub  { font-size: .62rem; color: #9A8A7A; }
 
-/* Drop zone */
+/* Drop zone (modal only) */
 .tx-dropzone {
   border: 2px dashed rgba(107,91,77,.25);
   border-radius: 8px;
-  padding: .875rem;
+  padding: 1.25rem .875rem;
   text-align: center;
   cursor: pointer;
-  transition: all .2s;
+  transition: border-color .2s, background .2s;
   background: #FDFBF8;
   color: #9A8A7A;
   font-size: .76rem;
-  margin-bottom: .75rem;
 }
 .tx-dropzone:hover { border-color: #6B5B4D; background: #F6F2E8; color: #6B5B4D; }
 
@@ -592,10 +606,10 @@
       <div class="tx-panel-hd">Quick Actions</div>
       <div class="tx-panel-body">
         <div class="tx-action-list">
-          <button class="tx-action-item primary" onclick="document.getElementById('upload-modal').style.display='flex'">
+          <button class="tx-action-item" onclick="document.getElementById('upload-modal').style.display='flex'">
             <span class="tx-action-icon">↑</span> Upload Document
           </button>
-          <button class="tx-action-item primary" onclick="document.getElementById('share-modal').style.display='flex'">
+          <button class="tx-action-item" onclick="document.getElementById('share-modal').style.display='flex'">
             <span class="tx-action-icon">✉</span> Share with Client
           </button>
           <button class="tx-action-item" onclick="document.getElementById('add-participant-modal').style.display='flex'">
@@ -717,8 +731,7 @@
     <div class="tx-panel">
       <div class="tx-panel-hd">
         <span>Document Checklist</span>
-        <button class="tx-btn tx-btn-primary" onclick="document.getElementById('upload-modal').style.display='flex'"
-                style="font-size:.65rem;padding:.22rem .6rem">+ Upload</button>
+        <button class="tx-btn tx-btn-ghost" onclick="document.getElementById('upload-modal').style.display='flex'">+ Upload</button>
       </div>
       <div class="tx-panel-body">
         {% if doc_status.checklist %}
@@ -759,13 +772,12 @@
     {% else %}
     <div class="tx-panel">
       <div class="tx-panel-hd">Uploaded Documents</div>
-      <div class="tx-panel-body">
-        <div class="tx-dropzone" onclick="document.getElementById('upload-modal').style.display='flex'">
-          <div style="font-size:1.3rem;margin-bottom:.25rem">↑</div>
-          <div style="font-weight:600;margin-bottom:.15rem">Drag &amp; drop or click to upload</div>
-          <div style="font-size:.7rem">PDF, DOC, DOCX, JPG, PNG</div>
-        </div>
-        <p style="font-size:.75rem;color:#B0A090;text-align:center;margin:0">No documents uploaded yet.</p>
+      <div class="tx-panel-body" style="text-align:center;padding:1.25rem 1rem">
+        <div style="font-size:.8rem;color:#B0A090;margin-bottom:.6rem">No documents uploaded yet.</div>
+        <button onclick="document.getElementById('upload-modal').style.display='flex'"
+                class="tx-btn tx-btn-ghost" style="font-size:.72rem;padding:.35rem .875rem">
+          ↑ Upload First Document
+        </button>
       </div>
     </div>
     {% endif %}
