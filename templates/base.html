@@ -673,58 +673,184 @@
 
  <body>
  <!-- Eco-Inspired Header -->
+ <style>
+ /* ── TOP NAV HAMBURGER ──────────────────────────── */
+ .ylh-hdr-title {
+   position: absolute; left: 50%; transform: translateX(-50%);
+   font-family: 'Playfair Display', Georgia, serif;
+   font-size: .95rem; font-weight: 600; color: #fff;
+   letter-spacing: .04em; white-space: nowrap; pointer-events: none;
+ }
+ .ylh-ham-wrap { position: relative; flex-shrink: 0; }
+ .ylh-ham-btn {
+   background: transparent; border: none; cursor: pointer;
+   display: flex; flex-direction: column; justify-content: center;
+   gap: 5px; padding: 6px 8px; border-radius: 6px;
+   transition: background .15s;
+ }
+ .ylh-ham-btn:hover { background: rgba(255,255,255,.12); }
+ .ylh-ham-btn span {
+   display: block; width: 22px; height: 2px;
+   background: rgba(255,255,255,.9); border-radius: 2px;
+   transition: all .2s;
+ }
+ .ylh-ham-menu {
+   display: none; position: absolute; top: calc(100% + 8px); right: 0;
+   background: #fff; min-width: 220px; border-radius: 10px;
+   box-shadow: 0 8px 32px rgba(30,42,26,.18);
+   border: 1px solid rgba(143,168,138,.2);
+   overflow: hidden; z-index: 999999;
+ }
+ .ylh-ham-menu.open { display: block; }
+ .ylh-ham-section {
+   font-size: .58rem; font-weight: 700; letter-spacing: .12em;
+   text-transform: uppercase; color: #8FA88A;
+   padding: .6rem 1rem .25rem; border-top: 1px solid rgba(143,168,138,.12);
+ }
+ .ylh-ham-section:first-child { border-top: none; }
+ .ylh-ham-item {
+   display: block; padding: .6rem 1rem; color: #2C3A28;
+   text-decoration: none; font-size: .82rem; font-weight: 500;
+   transition: background .12s, padding-left .12s;
+   border-left: 3px solid transparent;
+ }
+ .ylh-ham-item:hover { background: #F0F7EA; border-left-color: #8FA88A; padding-left: 1.25rem; color: #1E2A1A; }
+ .ylh-ham-signout {
+   display: block; padding: .7rem 1rem; color: #9A4A3A;
+   text-decoration: none; font-size: .82rem; font-weight: 600;
+   border-top: 1px solid rgba(143,168,138,.15);
+   transition: background .12s;
+ }
+ .ylh-ham-signout:hover { background: #FFF5F3; }
+ </style>
+
  <header class="site-header">
- <div class="header-content" style="display: flex; align-items: center; justify-content: space-between; position: relative;">
- <a href="{{ url_for('index') }}" class="brand-logo" style="flex-shrink: 0;">
- Your Life • Your Home
- </a>
- 
- <!-- Agent/Lender Info in Center (for homeowners only) -->
- {% if session.get('role') == 'homeowner' and professionals and professionals|length > 0 %}
- {% set primary_prof = professionals[0] %}
- <div class="header-agent-info">
- <!-- Professional Photo -->
- {% set header_photo_url = get_professional_photo_url(primary_prof.get('professional_photo')) if primary_prof else None %}
- {% if header_photo_url %}
- <img src="{{ header_photo_url }}" alt="{{ primary_prof.name or 'Professional' }}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.3); flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
- <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: none; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] if primary_prof else '?' }}</div>
- {% else %}
- <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 600; flex-shrink: 0; border: 2px solid rgba(255, 255, 255, 0.3);">{{ (primary_prof.name or '?')[0] }}</div>
- {% endif %}
- 
- <!-- Professional Info -->
- <div style="display: flex; flex-direction: column; gap: 0.1rem; min-width: 0;">
- <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 0.9rem; color: white; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.name or 'Professional' }}</div>
- <div style="font-size: 0.7rem; color: rgba(255, 255, 255, 0.9); text-transform: capitalize;">{{ (primary_prof.professional_role or primary_prof.professional_type or 'agent')|replace('_', ' ') }}</div>
- {% if primary_prof.get('brokerage_name') %}
- <div style="font-size: 0.65rem; color: rgba(255, 255, 255, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ primary_prof.brokerage_name }}</div>
- {% endif %}
- </div>
- 
- <!-- Brokerage Logo (if available) -->
- {% if primary_prof.get('brokerage_logo') %}
- <img src="{{ url_for('static', filename=primary_prof.brokerage_logo) }}" alt="{{ primary_prof.get('brokerage_name', 'Company') }}" style="max-height: 28px; max-width: 80px; object-fit: contain; flex-shrink: 0; margin-left: 0.5rem; filter: brightness(0) invert(1); opacity: 0.9;">
- {% endif %}
- </div>
- {% endif %}
- 
- <nav class="main-nav" style="flex-shrink: 0;">
- <ul>
- <li><a href="{{ url_for('index') }}">Home</a></li>
- {% if session.get('user_id') %}
- <li>
- <a href="{% if session.get('role') == 'agent' %}{{ url_for('agent_dashboard') }}{% elif session.get('role') == 'lender' %}{{ url_for('lender_dashboard') }}{% else %}{{ url_for('homeowner_overview') }}{% endif %}">
- Dashboard
- </a>
- </li>
- <li><a href="{{ url_for('logout') }}">Sign Out</a></li>
- {% else %}
- <li><a href="{{ url_for('login') }}">Sign In</a></li>
- {% endif %}
- </ul>
- </nav>
+ <div class="header-content" style="display:flex;align-items:center;justify-content:space-between;position:relative;">
+
+   <!-- Left: Brand -->
+   <a href="{{ url_for('index') }}" class="brand-logo" style="flex-shrink:0;">Your Life • Your Home</a>
+
+   <!-- Center: Dashboard title when logged in -->
+   {% if session.get('user_id') %}
+   <span class="ylh-hdr-title">
+     {% if session.get('role') == 'agent' %}Agent Dashboard
+     {% elif session.get('role') == 'lender' %}Lender Dashboard
+     {% else %}Homeowner Dashboard{% endif %}
+   </span>
+   {% endif %}
+
+   <!-- Right: Hamburger (logged in) or Sign In (guest) -->
+   {% if session.get('user_id') %}
+   <div class="ylh-ham-wrap">
+     <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Menu">
+       <span></span><span></span><span></span>
+     </button>
+     <div class="ylh-ham-menu" id="ylhHamMenu">
+
+       {% if session.get('role') == 'agent' %}
+       <div class="ylh-ham-section">Overview</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">&#9632; Dashboard</a>
+
+       <div class="ylh-ham-section">My Business</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">Contacts &amp; CRM</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_clients') }}">My Clients</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_referrals') }}">Referrals &amp; Growth</a>
+
+       <div class="ylh-ham-section">Marketing &amp; Outreach</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_communications') }}">Communications</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_vendors') }}">Vendor Network</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_booking') }}">Booking &amp; Calendar</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_contests') }}">Client Contests</a>
+
+       <div class="ylh-ham-section">Finance &amp; Tools</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_financials') }}">Financials</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_power_tools') }}">Power Tools</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_concierge_dashboard') }}">AI Concierge</a>
+
+       <div class="ylh-ham-section">Account</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_settings_profile') }}">Settings &amp; Profile</a>
+       <a class="ylh-ham-signout" href="{{ url_for('logout') }}">&#8592; Sign Out</a>
+
+       {% elif session.get('role') == 'lender' %}
+       <div class="ylh-ham-section">Overview</div>
+       <a class="ylh-ham-item" href="{{ url_for('lender_dashboard') }}">&#9632; Dashboard</a>
+
+       <div class="ylh-ham-section">My Clients</div>
+       <a class="ylh-ham-item" href="{{ url_for('lender_crm') }}">Borrower CRM</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_clients') }}">My Clients</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_loans') }}">Loan Tracker</a>
+
+       <div class="ylh-ham-section">Growth &amp; Marketing</div>
+       <a class="ylh-ham-item" href="{{ url_for('lender_marketing_hub_global') }}">Marketing Hub</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_referrals') }}">Referrals</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_booking') }}">Booking &amp; Calendar</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_messages') }}">Email &amp; Text Library</a>
+
+       <div class="ylh-ham-section">Finance &amp; Tools</div>
+       <a class="ylh-ham-item" href="{{ url_for('lender_financials') }}">Financials</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_power_suite') }}">Power Suite</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_roles') }}">Roles &amp; Partners</a>
+
+       <div class="ylh-ham-section">Account</div>
+       <a class="ylh-ham-item" href="{{ url_for('lender_settings_profile') }}">Settings &amp; Profile</a>
+       <a class="ylh-ham-signout" href="{{ url_for('logout') }}">&#8592; Sign Out</a>
+
+       {% else %}
+       <div class="ylh-ham-section">My Home</div>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_overview') }}">&#9632; Overview</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_value_equity_overview') }}">Value &amp; Equity</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_home_timeline') }}">Home Timeline</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_saved_notes') }}">Design Boards</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_planner') }}">Renovation Planner</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_upload_documents') }}">Documents</a>
+
+       <div class="ylh-ham-section">Care &amp; Maintenance</div>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_care_maintenance_guide') }}">Home Care Guide</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_care_home_protection') }}">Home Protection</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_care_warranty_log') }}">Warranty &amp; Appliances</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_care_seasonal_checklists') }}">Seasonal Checklists</a>
+
+       <div class="ylh-ham-section">Next Move</div>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_next_buy_sell_guidance') }}">Buy &amp; Sell Guidance</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_next_affordability') }}">Affordability Calculator</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_next_loan_paths') }}">Loan Paths</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_next_plan_move') }}">Plan My Move</a>
+
+       <div class="ylh-ham-section">Support</div>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_resources') }}">Resources</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_ask_question') }}">Ask a Question</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_schedule_chat') }}">Schedule a Chat</a>
+
+       <a class="ylh-ham-signout" href="{{ url_for('logout') }}">&#8592; Sign Out</a>
+       {% endif %}
+
+     </div>
+   </div>
+   {% else %}
+   <nav class="main-nav" style="flex-shrink:0;">
+     <ul><li><a href="{{ url_for('login') }}">Sign In</a></li></ul>
+   </nav>
+   {% endif %}
+
  </div>
  </header>
+
+ <script>
+ (function(){
+   var btn = document.getElementById('ylhHamBtn');
+   var menu = document.getElementById('ylhHamMenu');
+   if(!btn || !menu) return;
+   btn.addEventListener('click', function(e){
+     e.stopPropagation();
+     menu.classList.toggle('open');
+   });
+   document.addEventListener('click', function(e){
+     if(!menu.contains(e.target) && e.target !== btn) menu.classList.remove('open');
+   });
+ })();
+ </script>
 
  <div class="ylh-shell">
  <main class="ylh-main">
