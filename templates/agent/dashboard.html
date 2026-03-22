@@ -23,65 +23,67 @@
 
 /* ── AI BRIEFING — compact single-line strip ── */
 .briefing-card {
-  background: linear-gradient(100deg, #7A9E6E 0%, #8FAF82 45%, #A8C49A 100%);
-  border-radius: 12px;
-  padding: .38rem 1.1rem;
+  background: linear-gradient(105deg, #7B4F6A 0%, #9A6882 40%, #B58898 100%);
+  border-radius: 10px;
+  padding: .28rem 1.1rem;
   margin-bottom: 1.25rem;
-  box-shadow: 0 2px 12px rgba(90,122,74,.18);
+  box-shadow: 0 2px 14px rgba(100,60,90,.22);
 }
 .briefing-inner {
   display: flex;
-  gap: .75rem;
+  gap: .6rem;
   align-items: center;
+  min-height: 0;
 }
 .briefing-body {
   flex: 1; min-width: 0;
   display: flex;
   align-items: center;
-  gap: .65rem;
+  gap: .55rem;
   flex-wrap: nowrap;
 }
 .briefing-label {
-  font-size: .58rem;
+  font-size: .55rem;
   font-weight: 700;
-  letter-spacing: .13em;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.75);
+  color: rgba(255,255,255,.7);
   white-space: nowrap;
   flex-shrink: 0;
 }
 #briefing-text {
-  font-size: .82rem;
-  line-height: 1.3;
+  font-size: .78rem;
+  line-height: 1.25;
   color: #fff;
   flex: 1;
   min-width: 0;
   font-weight: 500;
+  font-style: italic;
 }
 .briefing-foot { flex-shrink: 0; }
 .briefing-refresh-btn {
-  background: rgba(255,255,255,.22);
-  border: 1px solid rgba(255,255,255,.38);
+  background: rgba(255,255,255,.18);
+  border: 1px solid rgba(255,255,255,.32);
   color: #fff;
   border-radius: 999px;
-  padding: .2rem .65rem;
-  font-size: .65rem;
+  padding: .18rem .6rem;
+  font-size: .62rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: .25rem;
+  gap: .22rem;
   transition: all .2s;
   white-space: nowrap;
   min-height: unset !important;
   width: auto !important;
   margin: 0 !important;
 }
-.briefing-refresh-btn:hover { background: rgba(255,255,255,.36); }
+.briefing-refresh-btn:hover { background: rgba(255,255,255,.3); }
 .briefing-skeleton {
-  height: .65rem;
-  width: 55%;
-  background: linear-gradient(90deg,rgba(255,255,255,.15) 0%,rgba(255,255,255,.3) 50%,rgba(255,255,255,.15) 100%);
+  height: .6rem;
+  width: 50%;
+  background: linear-gradient(90deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.25) 50%,rgba(255,255,255,.12) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;

@@ -67,16 +67,13 @@ def ai_dashboard_briefing(agent_name: str, metrics: dict, followups: list, tasks
     tasks: list of pending task titles
     """
     followup_str = ", ".join(followups[:5]) if followups else "none"
-    task_str = " / ".join(tasks[:5]) if tasks else "none"
     prompt = (
-        f"Write a single upbeat sentence (max 20 words) for {agent_name}, a real estate agent. "
-        f"Sound like a warm, energetic friend, not a corporate coach. "
-        f"Mention what to focus on today using these facts: "
-        f"{metrics.get('new_leads',0)} new leads, {metrics.get('needs_followup',0)} follow-ups needed"
-        + (f", top contacts to reach: {followup_str}" if followup_str != 'none' else "") + ". "
-        f"Rules: no em dashes, no bullet points, no greeting, no exclamation marks at start, end with one exclamation mark."
+        f"Write a short, electric motivational quote (max 18 words) to start {agent_name}'s real estate day. "
+        f"Make it feel like a best friend cheering them on, not a corporate slogan. "
+        f"It should feel personal, warm, and exciting. "
+        f"Rules: no em dashes, no bullet points, no greeting, no exclamation mark at the very start, end with exactly one exclamation mark, no quotes around the text."
     )
-    return ai_complete(prompt, system="You are a positive, human, friendly real estate colleague. Never use em dashes or mdashes.", max_tokens=60, temperature=0.75)
+    return ai_complete(prompt, system="You are an enthusiastic, warm, uplifting real estate coach. Never use em dashes, mdashes, or quotation marks around your response.", max_tokens=55, temperature=0.85)
 
 
 def ai_draft_email(contact_name: str, contact_stage: str, contact_notes: str,
