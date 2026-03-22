@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
+<style>
+  /* Sidebar hidden — all navigation via hamburger menu */
+  .dashboard-sidebar { display: none !important; }
+  .dashboard-container { display: block !important; }
+  .dashboard-main { width: 100% !important; max-width: 1600px; margin: 0 auto; padding: 1.25rem !important; }
+</style>
 <div class="dashboard-container">
  <aside class="dashboard-sidebar">
  <div class="dashboard-sidebar__header">

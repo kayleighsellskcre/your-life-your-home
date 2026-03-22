@@ -212,11 +212,11 @@
  display: block !important;
  }
  
- /* Ultra Skinny Main Header */
+ /* Main Header — centered 2-line layout */
  .site-header {
- padding: 0.5rem 0 !important;
- min-height: 48px !important;
- max-height: 48px !important;
+ padding: 0 !important;
+ min-height: 64px !important;
+ max-height: 64px !important;
  background: linear-gradient(160deg, #364A2B 0%, #2A3C20 100%) !important;
  position: sticky !important;
  top: 0 !important;
@@ -224,11 +224,11 @@
  }
  
  .header-content {
- padding: 0 0.875rem !important;
+ padding: 0 1rem !important;
  flex-wrap: nowrap !important;
- gap: 0.5rem !important;
- min-height: 48px !important;
- max-height: 48px !important;
+ gap: 0 !important;
+ min-height: 64px !important;
+ max-height: 64px !important;
  align-items: center !important;
  overflow: hidden !important;
  }
@@ -675,11 +675,10 @@
  <!-- Eco-Inspired Header -->
  <style>
  /* ── TOP NAV HAMBURGER ──────────────────────────── */
- .ylh-hdr-title {
-   position: absolute; left: 50%; transform: translateX(-50%);
-   font-family: 'Playfair Display', Georgia, serif;
-   font-size: .95rem; font-weight: 600; color: #fff;
-   letter-spacing: .04em; white-space: nowrap; pointer-events: none;
+.ylh-hdr-title {
+  font-family: 'Lato', sans-serif;
+  font-size: .72rem; font-weight: 500; color: rgba(255,255,255,.85);
+  letter-spacing: .1em; white-space: nowrap; text-transform: uppercase;
  }
  .ylh-ham-wrap { position: relative; flex-shrink: 0; }
  .ylh-ham-btn {
@@ -694,14 +693,15 @@
    background: rgba(255,255,255,.9); border-radius: 2px;
    transition: all .2s;
  }
- .ylh-ham-menu {
-   display: none; position: absolute; top: calc(100% + 8px); right: 0;
-   background: #fff; min-width: 220px; border-radius: 10px;
-   box-shadow: 0 8px 32px rgba(30,42,26,.18);
-   border: 1px solid rgba(143,168,138,.2);
-   overflow: hidden; z-index: 999999;
- }
- .ylh-ham-menu.open { display: block; }
+.ylh-ham-menu {
+  display: none; position: fixed; top: 64px; right: 0;
+  background: #fff; min-width: 240px; border-radius: 0 0 10px 10px;
+  box-shadow: 0 8px 32px rgba(30,42,26,.18);
+  border: 1px solid rgba(143,168,138,.2);
+  overflow-y: auto; max-height: calc(100vh - 64px);
+  z-index: 999999;
+}
+.ylh-ham-menu.open { display: block; }
  .ylh-ham-section {
    font-size: .58rem; font-weight: 700; letter-spacing: .12em;
    text-transform: uppercase; color: #8FA88A;
@@ -727,21 +727,28 @@
  <header class="site-header">
  <div class="header-content" style="display:flex;align-items:center;justify-content:space-between;position:relative;">
 
-   <!-- Left: Brand -->
-   <a href="{{ url_for('index') }}" class="brand-logo" style="flex-shrink:0;">Your Life • Your Home</a>
-
-   <!-- Center: Dashboard title when logged in -->
+   <!-- Left balancer (mirrors hamburger width) -->
    {% if session.get('user_id') %}
-   <span class="ylh-hdr-title">
-     {% if session.get('role') == 'agent' %}Agent Dashboard
-     {% elif session.get('role') == 'lender' %}Lender Dashboard
-     {% else %}Homeowner Dashboard{% endif %}
-   </span>
+   <div style="width:42px;flex-shrink:0;"></div>
+   {% else %}
+   <div style="width:42px;flex-shrink:0;"></div>
    {% endif %}
+
+   <!-- Center: Brand + Dashboard Title stacked -->
+   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
+     <a href="{{ url_for('index') }}" class="brand-logo" style="font-size:1.05rem;letter-spacing:.04em;">Your Life • Your Home</a>
+     {% if session.get('user_id') %}
+     <span class="ylh-hdr-title" style="position:static;transform:none;font-size:.72rem;opacity:.85;font-weight:500;letter-spacing:.1em;text-transform:uppercase;">
+       {% if session.get('role') == 'agent' %}Agent Dashboard
+       {% elif session.get('role') == 'lender' %}Lender Dashboard
+       {% else %}Homeowner Dashboard{% endif %}
+     </span>
+     {% endif %}
+   </div>
 
    <!-- Right: Hamburger (logged in) or Sign In (guest) -->
    {% if session.get('user_id') %}
-   <div class="ylh-ham-wrap">
+   <div class="ylh-ham-wrap" style="flex-shrink:0;">
      <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Menu">
        <span></span><span></span><span></span>
      </button>
