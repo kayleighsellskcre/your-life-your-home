@@ -328,6 +328,7 @@
 </div>
 
 <!-- ── ROLE CARDS ────────────────────────────────────────────────── -->
+{% if not session.get('user_id') %}
 <section class="featured-section">
   <div class="featured-container">
     <div class="section-header">
@@ -388,6 +389,7 @@
     </div>
   </div>
 </section>
+{% endif %}
 
 <!-- ── PHILOSOPHY SECTION ─────────────────────────────────────────── -->
 <section class="philosophy-section">
