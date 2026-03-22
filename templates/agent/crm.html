@@ -367,6 +367,9 @@
  transition:all .12s!important;
 }
 .cmod-x:hover{background:rgba(159,129,90,.18)!important;color:#443c36!important;}
+/* Add-contact modal: centered title, no × button */
+#addModal .cmod-head{display:block!important;text-align:center!important;}
+#addModal .cmod-x{display:none!important;}
 
 .mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem;}
 .mgrid-full{grid-column:1/-1;}
@@ -1015,9 +1018,8 @@
 <!-- ══ QUICK-ADD MODAL ══════════════════════════ -->
 <div id="addModal" class="cmod">
  <div class="cmod-box">
- <div class="cmod-head">
- Add New Contact
- <button class="cmod-x" onclick="closeAddModal()">×</button>
+ <div class="cmod-head" style="display:block!important;text-align:center!important;">
+  Add New Contact
  </div>
  <form method="post" id="qaForm">
  <input type="hidden" name="action" value="add">
@@ -1245,12 +1247,12 @@ function openAddModal(stage){
   var head = modal.querySelector('.cmod-head');
   if(head){
    var lbl = stageLabels[stage] || stage;
-   head.childNodes[0].textContent = 'Add Contact — ' + lbl + ' ';
+   head.childNodes[0].textContent = 'Add Contact — ' + lbl;
   }
  } else {
   /* Reset title and stage to default */
   var head = modal.querySelector('.cmod-head');
-  if(head) head.childNodes[0].textContent = 'Add New Contact ';
+  if(head) head.childNodes[0].textContent = 'Add New Contact';
   var sel = document.getElementById('qa-stage-sel');
   if(sel) sel.value = 'new';
  }
