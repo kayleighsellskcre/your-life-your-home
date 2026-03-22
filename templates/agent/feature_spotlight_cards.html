@@ -709,13 +709,13 @@
  
  // Build HTML using string concatenation to avoid template literal issues
  let previewHtml = '<!DOCTYPE html><html><head><title>Feature Spotlight Cards Preview - 4 per page (5.5x4.25 each)</title><style>';
- previewHtml += '@page { size: 11in 8.5in landscape; margin: 0; }';
+ previewHtml += '@page { size: 11in 8.5in landscape; margin: 0.2in; }';
  previewHtml += '* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }';
- previewHtml += 'body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: #888; padding: 0; margin: 0; }';
- previewHtml += '.page { width: 11in; height: 8.5in; display: grid; grid-template-columns: 5.375in 5.375in; grid-template-rows: 4.125in 4.125in; gap: 0.25in; padding: 0; page-break-after: always; break-after: page; margin: 0 auto 0.5rem auto; background: #F5F1E8; overflow: hidden; }';
- previewHtml += '@media print { body { background: #F5F1E8; } .page { margin: 0; } }';
+ previewHtml += 'html,body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: #888; margin: 0; padding: 0; }';
+ previewHtml += '.page { width: 10.6in; height: 8.1in; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 0.15in; page-break-after: always; break-after: page; margin: 0 auto 0.5rem auto; background: #F5F1E8; overflow: hidden; }';
  previewHtml += '.page:last-child { page-break-after: auto; break-after: auto; }';
- previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 2px solid rgba(200, 180, 151, 0.3); padding: 0.3in 0.45in 0.35in 0.45in; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden; min-width: 0; min-height: 0; }';
+ previewHtml += '@media print { html,body { background: #F5F1E8; } .page { width: 100%; height: calc(8.5in - 0.4in); margin: 0; } }';
+ previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 2px solid rgba(200, 180, 151, 0.3); padding: 0.3in 0.4in; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden; min-width: 0; min-height: 0; width: 100%; height: 100%; }';
  previewHtml += '.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(107, 91, 77, 0.5) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.5) 100%); }';
  previewHtml += '.card-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 0.15in; width: 100%; }';
  previewHtml += '.card-logo { height: 28px; margin-bottom: 0.1in; opacity: 0.9; }';
