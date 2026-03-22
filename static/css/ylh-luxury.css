@@ -4,59 +4,85 @@
    Applied: March 2026
    ============================================================= */
 
-/* ── NEW PALETTE TOKENS — Golden · Flax · Rose · Sage · Firewood ── */
-:root {
-  /* Brand palette */
-  --golden:      #9f815a;   /* Golden       — primary CTAs, accents       */
-  --golden-dark: #8a6e4a;   /* Golden dark  — hover states                */
-  --rose:        #c69270;   /* Rose         — secondary accent, warmth     */
-  --rose-light:  #dbb090;   /* Rose light   — hover, tints                 */
-  --sage:        #8b6773;   /* Sage/mauve   — subtle accents, tags          */
-  --flax:        #dbd4c2;   /* Flax cream   — backgrounds, light fills      */
-  --flax-light:  #f0ebe0;   /* Flax light   — page bg, card bg              */
-  --firewood:    #443c36;   /* Firewood     — primary text, dark bg         */
-  --firewood-dk: #3a332d;   /* Firewood dk  — deep shadows, header          */
+/*
+  ══════════════════════════════════════════════════════════
+  YOUR LIFE YOUR HOME — FINAL LUXURY PALETTE
+  Golden · Flax · Rose · Sage · Firewood
+  Redesigned for elegance + WCAG AA readability
+  ══════════════════════════════════════════════════════════
 
-  /* Semantic aliases (keep old names working) */
-  --esp:         #9f815a;
-  --esp-dark:    #8a6e4a;
-  --esp-deeper:  #443c36;
-  --taupe:       #c69270;
-  --cream:       #dbd4c2;
-  --cream-light: #f0ebe0;
-  --greige:      #e0d8cc;
-  --stone:       #c8b89a;
-  --wgray:       #9a8878;
+  USAGE RULES (read before editing):
+  • Firewood #443c36 — ALL body text, headings. 8.5:1 on white. ✓
+  • Text-mid  #5c4e42 — Secondary text / subtitles. 6.2:1 on white. ✓
+  • Text-muted #7a6855 — Captions, labels. 4.7:1 on white. ✓ (WCAG AA)
+  • Golden #9f815a — Borders, icons, accent bars, BUTTON BACKGROUNDS only.
+                     3.4:1 — NOT for body text.
+  • Rose #c69270   — Decorative fills, accent cards, hover tints. NOT text.
+  • Sage #8b6773   — Badge fills, subtle decorative accents. NOT text.
+  • Flax #dbd4c2   — Card fills, sidebar bg, section dividers.
+  • Page bg #faf8f4 — Near-white warm base. Firewood text = 8:1 ✓
+  ══════════════════════════════════════════════════════════
+*/
+
+:root {
+  /* ── Brand palette ── */
+  --golden:       #9f815a;  /* Golden    — accents, borders, button bg    */
+  --golden-dark:  #8a6e4a;  /* Golden dk — button hover                   */
+  --golden-deep:  #6d5438;  /* Golden deep — high-contrast accent text    */
+  --rose:         #c69270;  /* Rose      — warm fills, card accents        */
+  --rose-dark:    #a87558;  /* Rose dark — decorative shadows              */
+  --sage:         #8b6773;  /* Sage/mauve — badge fills, tag accents       */
+  --flax:         #dbd4c2;  /* Flax      — soft fills, dividers            */
+  --flax-light:   #f0ebe0;  /* Flax lt   — section fills                  */
+  --firewood:     #443c36;  /* Firewood  — primary text + dark bg          */
+  --firewood-dk:  #3a332d;  /* Firewood dk — header, deep shadows         */
+
+  /* ── Readable text scale ── */
+  --text-primary: #443c36;  /* 8.5:1 on white ✓ */
+  --text-mid:     #5c4e42;  /* 6.2:1 on white ✓ */
+  --text-muted:   #7a6855;  /* 4.7:1 on white ✓ */
+  --text-faint:   #9a8878;  /* 3.2:1 — labels/placeholders only */
+
+  /* ── Semantic aliases (keep templates working) ── */
+  --esp:               #9f815a;
+  --esp-dark:          #8a6e4a;
+  --esp-deeper:        #443c36;
+  --taupe:             #c69270;
+  --cream:             #dbd4c2;
+  --cream-light:       #f0ebe0;
+  --greige:            #e8e2d6;
+  --stone:             #c8b89a;
+  --wgray:             #7a6855;
   --olive-green:       #9f815a;
   --olive-green-dark:  #8a6e4a;
   --olive-green-light: #c8a87a;
   --taupe-beige:       #c69270;
   --warm-cream:        #dbd4c2;
-  --beige-light:       #e0d8cc;
+  --beige-light:       #e8e2d6;
   --charcoal-brown:    #443c36;
-  --warm-gray:         #9a8878;
+  --warm-gray:         #7a6855;
   --light-cream:       #f0ebe0;
 
-  /* Component tokens */
-  --nav-bg:      linear-gradient(135deg, #f5f0e4 0%, #ece5d5 100%);
-  --nav-border:  rgba(159,129,90,0.22);
-  --nav-active-bar: #9f815a;
-  --card-bg:     #FFFFFF;
-  --card-border: rgba(159,129,90,0.18);
-  --btn-primary: #9f815a;
-  --btn-primary-hover: #8a6e4a;
-  --input-border: rgba(159,129,90,0.35);
-  --input-focus:  #9f815a;
-  --badge-bg:    rgba(159,129,90,0.1);
-  --flash-success-bg:  rgba(159,129,90,0.1);
-  --flash-error-bg:    rgba(160,65,61,0.1);
-  --header-bg:   linear-gradient(160deg, #443c36 0%, #3a332d 100%);
+  /* ── Component tokens ── */
+  --nav-bg:             linear-gradient(135deg, #f5f0e6 0%, #ede7d8 100%);
+  --nav-border:         rgba(159,129,90,0.2);
+  --nav-active-bar:     #9f815a;
+  --card-bg:            #ffffff;
+  --card-border:        rgba(159,129,90,0.16);
+  --btn-primary:        #443c36;
+  --btn-primary-hover:  #3a332d;
+  --input-border:       rgba(159,129,90,0.32);
+  --input-focus:        #9f815a;
+  --badge-bg:           rgba(159,129,90,0.1);
+  --flash-success-bg:   rgba(159,129,90,0.1);
+  --flash-error-bg:     rgba(160,65,61,0.1);
+  --header-bg:          linear-gradient(160deg, #443c36 0%, #3a332d 100%);
 }
 
 
 /* ── GLOBAL BODY & BACKGROUND ── */
 body {
-  background-color: #f0ebe0 !important;
+  background-color: #faf8f4 !important;
   color: #443c36 !important;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
@@ -114,7 +140,7 @@ body {
 .ylh-flash.success {
   background: rgba(159,129,90,0.1) !important;
   border-color: rgba(194,177,161,0.5) !important;
-  color: #8a6e4a !important;
+  color: #5c4e42 !important;
 }
 .ylh-flash.error {
   background: rgba(160,65,61,0.08) !important;
@@ -129,7 +155,7 @@ body {
 .ylh-flash.info {
   background: rgba(159,129,90,0.07) !important;
   border-color: rgba(181,168,153,0.4) !important;
-  color: #8a6e4a !important;
+  color: #5c4e42 !important;
 }
 
 
@@ -199,7 +225,7 @@ button[class*="btn-secondary"] {
 .btn-secondary:hover {
   background: rgba(159,129,90,0.06) !important;
   border-color: #9f815a !important;
-  color: #8a6e4a !important;
+  color: #5c4e42 !important;
 }
 
 /* AI/Gradient buttons */
@@ -247,7 +273,7 @@ textarea:focus,
 }
 input::placeholder,
 textarea::placeholder {
-  color: #9a8878 !important;
+  color: #7a6855 !important;
   opacity: 0.8 !important;
 }
 
@@ -270,7 +296,7 @@ table {
 }
 thead th {
   background: rgba(233,228,216,0.6) !important;
-  color: #9a8878 !important;
+  color: #7a6855 !important;
   font-size: 0.68rem !important;
   font-weight: 700 !important;
   text-transform: uppercase !important;
@@ -317,15 +343,15 @@ tbody tr:last-child { border-bottom: none !important; }
 
 .ylh-nav-title {
   font-family: 'Playfair Display', Georgia, serif !important;
-  color: #9f815a !important;
+  color: #443c36 !important;
   font-weight: 400 !important;
   letter-spacing: 0.025em !important;
 }
-.ylh-nav-title:hover { color: #443c36 !important; }
+.ylh-nav-title:hover { color: #3a332d !important; }
 
 .ylh-nav-link,
 .ylh-nav-button {
-  color: #9f815a !important;
+  color: #5c4e42 !important;
   font-weight: 500 !important;
   letter-spacing: 0.055em !important;
   border-bottom: 3px solid transparent !important;
@@ -359,7 +385,7 @@ tbody tr:last-child { border-bottom: none !important; }
   transition: all 0.18s ease !important;
 }
 .ylh-dropdown-item:hover {
-  background: #f0ebe0 !important;
+  background: #faf8f4 !important;
   border-left-color: #c8a87a !important;
   padding-left: 1.75rem !important;
 }
@@ -382,7 +408,7 @@ tbody tr:last-child { border-bottom: none !important; }
   background: linear-gradient(135deg, rgba(194,177,161,0.2) 0%, rgba(194,177,161,0.1) 100%) !important;
   border-radius: 6px !important;
   border-bottom: 3px solid #c8a87a !important;
-  color: #8a6e4a !important;
+  color: #5c4e42 !important;
 }
 
 
@@ -390,7 +416,7 @@ tbody tr:last-child { border-bottom: none !important; }
    LENDER SIDEBAR
    ══════════════════════════════════════════════════════════════ */
 .dashboard-container {
-  background: #f0ebe0 !important;
+  background: #faf8f4 !important;
 }
 
 .dashboard-sidebar {
@@ -414,7 +440,7 @@ tbody tr:last-child { border-bottom: none !important; }
 }
 
 .dashboard-sidebar__subtitle {
-  color: #9a8878 !important;
+  color: #7a6855 !important;
   font-size: 0.78rem !important;
   line-height: 1.5 !important;
   margin: 0 !important;
@@ -490,7 +516,7 @@ tbody tr:last-child { border-bottom: none !important; }
    DASHBOARD MAIN CONTENT AREA
    ══════════════════════════════════════════════════════════════ */
 .dashboard-main {
-  background: #f0ebe0 !important;
+  background: #faf8f4 !important;
 }
 
 .dashboard-main__header {
@@ -523,7 +549,7 @@ tbody tr:last-child { border-bottom: none !important; }
 .card-label,
 .card-title,
 [class*="card-label"] {
-  color: #9a8878 !important;
+  color: #7a6855 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.08em !important;
   font-size: 0.7rem !important;
@@ -636,7 +662,7 @@ hr,
   transition: all 0.22s ease !important;
 }
 .action-card:hover {
-  background: #f0ebe0 !important;
+  background: #faf8f4 !important;
   border-color: rgba(194,177,161,0.6) !important;
   box-shadow: 0 4px 16px rgba(159,129,90,0.1) !important;
   transform: translateY(-2px) !important;
@@ -649,17 +675,17 @@ hr,
 /* These map the financials page's :root vars to the new palette */
 .fin-header h1                { color: #443c36 !important; }
 .fin-card                     { background: #fff !important; border-color: rgba(211,198,184,0.4) !important; }
-.fin-tab                      { color: #9a8878 !important; }
+.fin-tab                      { color: #7a6855 !important; }
 .fin-tab:hover                { color: #443c36 !important; }
-.fin-tab.active               { color: #8a6e4a !important; border-bottom-color: #c8a87a !important; }
+.fin-tab.active               { color: #5c4e42 !important; border-bottom-color: #c8a87a !important; }
 .fin-tabs                     { border-bottom-color: rgba(211,198,184,0.5) !important; }
 .btn-add                      { background: #9f815a !important; }
 .btn-add:hover                { background: #8a6e4a !important; }
-.fin-table th                 { color: #9a8878 !important; border-bottom-color: rgba(211,198,184,0.5) !important; }
+.fin-table th                 { color: #7a6855 !important; border-bottom-color: rgba(211,198,184,0.5) !important; }
 .fin-table tr:hover td        { background: rgba(233,228,216,0.35) !important; }
 .ai-coach-panel               { background: linear-gradient(135deg, #fff 0%, #f0ebe0 100%) !important; border-color: rgba(211,198,184,0.4) !important; }
 .btn-coach                    { background: linear-gradient(135deg, #9f815a, #8a6e4a) !important; }
-.goal-card                    { background: #f0ebe0 !important; border-color: rgba(211,198,184,0.35) !important; }
+.goal-card                    { background: #faf8f4 !important; border-color: rgba(211,198,184,0.35) !important; }
 .year-select select           { background: #FDFAF7 !important; border-color: rgba(181,168,153,0.5) !important; color: #443c36 !important; }
 .chart-card                   { background: #fff !important; border-color: rgba(211,198,184,0.4) !important; }
 .tbl-act-green                { color: #4A7C59 !important; border-color: rgba(74,124,89,0.35) !important; }
@@ -671,7 +697,7 @@ hr,
    ══════════════════════════════════════════════════════════════ */
 [class*="ai-panel"],
 [class*="marketing-panel"] {
-  background: #f0ebe0 !important;
+  background: #faf8f4 !important;
   border-color: rgba(211,198,184,0.4) !important;
 }
 
@@ -736,7 +762,7 @@ p, span, li, td, th {
 .muted,
 [class*="-sub"],
 [class*="muted"] {
-  color: #9a8878 !important;
+  color: #7a6855 !important;
 }
 
 
