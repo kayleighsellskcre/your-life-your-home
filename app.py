@@ -7247,115 +7247,51 @@ def agent_feature_spotlight_cards_generate(tx_id):
     if not features:
         flash("Please add at least one feature.", "error")
         return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
-    
-    # Always save the card set automatically
-    set_name = request.form.get('set_name', '').strip()
-    
-    # If no name provided, generate one with timestamp
-    if not set_name:
-        from datetime import datetime
-        set_name = f"Cards - {datetime.now().strftime('%b %d, %Y %I:%M %p')}"
-    
-    from database import save_spotlight_card_set
-    try:
-        save_spotlight_card_set(
-            user["id"],
-            tx_id,
-            set_name,
-            transaction.get('property_address', ''),
-            features
-        )
-        print(f"[OK] Card set '{set_name}' saved successfully for user {user['id']}, tx {tx_id}")
-    except Exception as e:
-        print(f" Error saving card set: {e}")
-        import traceback
-        traceback.print_exc()
 
-    # Refine features with AI
-    refined_features = []
-    for feature in features:
-        refined_feature = refine_feature_text(feature)
-        refined_features.append(refined_feature)
-    
-    # Get agent profile for branding
-    from database import get_user_profile
-    agent_name = user.get("name", "Your Agent")
+    from datetime import datetime
+
+    # Save the card set automatically
+    set_name = request.form.get('set_name', '').strip()
+    if not set_name:
+        set_name = f"Cards - {datetime.now().strftime('%b %d, %Y %I:%M %p')}"
+
     try:
-        agent_profile = get_user_profile(user["id"])
-        brokerage_logo = agent_profile.get("brokerage_logo") if agent_profile else None
+        from database import save_spotlight_card_set
+        save_spotlight_card_set(
+            user["id"], tx_id, set_name,
+            transaction.get('property_address', ''), features
+        )
     except Exception as e:
-        print(f"Error getting agent profile: {e}")
-        brokerage_logo = None
-    
-    # Use default logo if agent doesn't have one
-    if not brokerage_logo:
-        brokerage_logo = "https://i.postimg.cc/zB5B38Bq/KCRE-Logo.png"
-    
-    # Generate PDF
+        import traceback
+        print(f"Error saving card set: {traceback.format_exc()}")
+
+    # Get agent branding
+    agent_name = user.get("name", "Your Agent")
+    brokerage_logo = "https://i.postimg.cc/zB5B38Bq/KCRE-Logo.png"
     try:
-        from weasyprint import HTML
-        
-        html = render_template(
-            "agent/feature_spotlight_pdf.html",
-            features=refined_features,
-            property_address=transaction.get('property_address', 'Property'),
-            agent_name=agent_name,
-            brokerage_logo=brokerage_logo,
-        )
-        
-        pdf = HTML(string=html, base_url=str(BASE_DIR / "static")).write_pdf()
-        
-        safe_filename = f"feature-spotlight-cards-{tx_id}-{datetime.now().strftime('%Y%m%d')}.pdf"
-        
-        response = Response(
-            pdf,
-            mimetype='application/pdf',
-            headers={
-                'Content-Disposition': f'inline; filename="{safe_filename}"'
-            }
-        )
-        return response
-        
-    except ImportError:
-        # WeasyPrint not installed - show HTML preview with print button
+        from database import get_user_profile
+        agent_profile = get_user_profile(user["id"])
+        if agent_profile and agent_profile.get("brokerage_logo"):
+            brokerage_logo = agent_profile["brokerage_logo"]
+    except Exception:
+        pass
+
+    # Render HTML print page directly — no WeasyPrint, no AI refinement per card
+    try:
         html_preview = render_template(
             "agent/feature_spotlight_pdf.html",
-            features=refined_features,
+            features=features,
             property_address=transaction.get('property_address', 'Property'),
             agent_name=agent_name,
             brokerage_logo=brokerage_logo,
+            auto_print=True,
         )
         return html_preview
-    except (OSError, Exception) as e:
+    except Exception as e:
         import traceback
-        error_msg = str(e)
-        print(f"Error generating PDF: {traceback.format_exc()}")
-        
-        # Check if it's a Windows GTK+ dependency issue
-        if 'libgobject' in error_msg.lower() or 'gtk' in error_msg.lower() or '0x7e' in error_msg:
-            # Windows dependency issue - return HTML with print functionality
-            html_preview = render_template(
-                "agent/feature_spotlight_pdf.html",
-                features=refined_features,
-                property_address=transaction.get('property_address', 'Property'),
-                agent_name=agent_name,
-                brokerage_logo=brokerage_logo,
-            )
-            return html_preview
-        else:
-            # Other error - try HTML preview as fallback
-            try:
-                html_preview = render_template(
-                    "agent/feature_spotlight_pdf.html",
-                    features=refined_features,
-                    property_address=transaction.get('property_address', 'Property'),
-                    agent_name=agent_name,
-                    brokerage_logo=brokerage_logo,
-                )
-                return html_preview
-            except:
-                flash(f"Error generating PDF: {str(e)}", "error")
-                return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
+        print(f"Error rendering spotlight cards: {traceback.format_exc()}")
+        flash("Error generating cards. Please try Preview Cards instead.", "error")
+        return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
 
 
 @app.route("/agent/spotlight-cards/<int:set_id>/load")
