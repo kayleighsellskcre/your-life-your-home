@@ -358,7 +358,7 @@
   <div class="briefing-card fu fu1">
     <div class="briefing-inner">
       <div class="briefing-body">
-        <span class="briefing-label">✨ Today</span>
+        <span class="briefing-label">Today</span>
         <div id="briefing-text"><div class="briefing-skeleton"></div></div>
         <div class="briefing-foot">
           <button class="briefing-refresh-btn" onclick="loadBriefing()" id="briefing-refresh-btn">
@@ -374,14 +374,16 @@
   <div class="kpi-strip fu fu2">
 
     {% set kpis = [
-      { 'id':'kpi-new-leads',      'value': metrics.new_leads|default(0),              'accent':'#6B8A5E', 'icon_bg':'rgba(107,138,94,.13)',  'icon_color':'#5A7A4A', 'label':'New Leads',      'sub':'Ready for your call',  'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
-      { 'id':'kpi-active-deals',   'value': transactions|length if transactions else 0, 'accent':'#C49A1A', 'icon_bg':'rgba(196,154,26,.13)',  'icon_color':'#9A7A10', 'label':'Active Deals',   'sub':'In your pipeline',     'svg':'<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
-      { 'id':'kpi-followups',      'value': metrics.followups_today|default(0),         'accent':'#A0522D', 'icon_bg':'rgba(160,82,45,.13)',   'icon_color':'#904020', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
-      { 'id':'kpi-total-contacts', 'value': metrics.total_contacts|default(0),          'accent':'#4A6580', 'icon_bg':'rgba(74,101,128,.13)',  'icon_color':'#3A5570', 'label':'Total Contacts', 'sub':'In your CRM',          'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
+      { 'id':'kpi-new-leads',      'href':'/agent/crm',          'value': metrics.new_leads|default(0),              'accent':'#6B8A5E', 'icon_bg':'rgba(107,138,94,.13)',  'icon_color':'#5A7A4A', 'label':'New Leads',      'sub':'Ready for your call',  'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
+      { 'id':'kpi-active-deals',   'href':'/agent/transactions', 'value': transactions|length if transactions else 0, 'accent':'#C49A1A', 'icon_bg':'rgba(196,154,26,.13)',  'icon_color':'#9A7A10', 'label':'Active Deals',   'sub':'In your pipeline',     'svg':'<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
+      { 'id':'kpi-followups',      'href':'/agent/crm',          'value': metrics.followups_today|default(0),         'accent':'#A0522D', 'icon_bg':'rgba(160,82,45,.13)',   'icon_color':'#904020', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
+      { 'id':'kpi-total-contacts', 'href':'/agent/crm',          'value': metrics.total_contacts|default(0),          'accent':'#4A6580', 'icon_bg':'rgba(74,101,128,.13)',  'icon_color':'#3A5570', 'label':'Total Contacts', 'sub':'In your CRM',          'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
     ] %}
 
     {% for k in kpis %}
-    <div style="
+    <a href="{{ k.href }}" style="
+      display:block;
+      text-decoration:none;
       background:#fff;
       border:1px solid rgba(200,180,151,.22);
       border-radius:18px;
@@ -390,6 +392,7 @@
       position:relative;
       overflow:hidden;
       transition:box-shadow .25s,transform .25s;
+      cursor:pointer;
     " onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(61,46,36,.10)'"
        onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(61,46,36,.055)'">
 
@@ -422,7 +425,7 @@
       <!-- sub -->
       <div style="font-size:.75rem;color:#9A8A7E;">{{ k.sub }}</div>
 
-    </div>
+    </a>
     {% endfor %}
 
   </div><!-- /kpi-strip -->
