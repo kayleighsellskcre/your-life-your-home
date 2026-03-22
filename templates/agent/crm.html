@@ -390,21 +390,104 @@
  .mgrid{grid-template-columns:1fr;}
  .mgrid-full{grid-column:1;}
 }
+
+/* ══ DASHBOARD-MATCHING LAYOUT LAYER ══════════════ */
+
+/* Outer wrapper — same padding as .dash on dashboard */
+#crm {
+ padding: 0 1.75rem 2.5rem !important;
+}
+
+/* Fade-up animations — identical to dashboard */
+@keyframes crmFadeUp {
+ from { opacity:0; transform:translateY(12px); }
+ to   { opacity:1; transform:translateY(0); }
+}
+.crm-fu  { animation: crmFadeUp .42s ease-out both; }
+.crm-fu1 { animation-delay: .04s; }
+.crm-fu2 { animation-delay: .08s; }
+.crm-fu3 { animation-delay: .13s; }
+
+/* KPI strip — same 4-up grid as dashboard */
+.crm-kpi-strip {
+ display: grid;
+ grid-template-columns: repeat(4, 1fr);
+ gap: 1rem;
+ margin-bottom: 1.25rem;
+}
+@media(max-width:1100px){ .crm-kpi-strip { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:640px) { .crm-kpi-strip { grid-template-columns: repeat(2,1fr); gap:.625rem; } }
+
+/* Lux card — same white card language as dashboard */
+.crm-lux-card {
+ background: #fff;
+ border: 1px solid rgba(159,129,90,.18);
+ border-radius: 18px;
+ box-shadow: 0 2px 16px rgba(68,60,54,.06);
+ overflow: hidden;
+ transition: box-shadow .3s;
+}
+.crm-lux-card:hover { box-shadow: 0 6px 28px rgba(68,60,54,.1); }
+
+/* Card header — title + action row */
+.crm-card-hd {
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ flex-wrap: wrap;
+ gap: .75rem;
+ padding: 1rem 1.5rem .9rem;
+ border-bottom: 1px solid rgba(159,129,90,.12);
+}
+.crm-card-title {
+ font-family: 'Playfair Display', Georgia, serif;
+ font-size: 1.55rem;
+ font-weight: 600;
+ color: #443c36;
+ margin: 0;
+ letter-spacing: -.01em;
+}
+.crm-card-sub {
+ font-size: .67rem;
+ font-weight: 700;
+ letter-spacing: .12em;
+ text-transform: uppercase;
+ color: #7a6855;
+ margin: .15rem 0 0;
+}
+.crm-card-actions {
+ display: flex;
+ gap: .5rem;
+ flex-wrap: wrap;
+ align-items: center;
+}
+
+/* Toolbar inside card — remove its own background */
+.toolbar {
+ background: transparent !important;
+ border-bottom: 1px solid rgba(159,129,90,.1) !important;
+ box-shadow: none !important;
+ padding: .75rem 1.5rem !important;
+}
+
+/* Pills bar inside card — match inner border */
+.pills-bar {
+ background: #faf8f4 !important;
+ border-bottom: 1px solid rgba(159,129,90,.1) !important;
+ padding: .55rem 1.5rem !important;
+}
+
+/* Responsive */
+@media(max-width:900px){ #crm { padding: 0 1rem 2rem !important; } }
+@media(max-width:640px){ #crm { padding: 0 .875rem 1.5rem !important; } }
 </style>
 
 <div id="crm">
 
-<!-- ── PAGE HERO ─────────────────────────────── -->
-<div class="ylh-page-hd">
-  <h1 class="ylh-page-hd__title">CRM <span style="font-size:1rem;font-weight:400;color:#9f815a;vertical-align:middle;">{{ stats.total }}</span></h1>
+<!-- ── PAGE HEADER ───────────────────────────── -->
+<div class="ylh-page-hd crm-fu">
+  <h1 class="ylh-page-hd__title">Your CRM</h1>
   <p class="ylh-page-hd__sub">Contacts &middot; Pipeline &middot; Relationship Management</p>
-  <div class="ylh-page-hd__actions">
-   <button class="stg-pill stg-pill--on" onclick="openAddModal()">+ Add Contact</button>
-   <a href="{{ url_for('agent_crm_import') }}" class="stg-pill">&#8593; Import</a>
-   <button class="stg-pill" onclick="doExport()">&#8595; Export</button>
-   <a href="{{ url_for('agent_address_labels') }}" class="stg-pill">Labels</a>
-  </div>
- </div>
 </div>
 
 <!-- ── FLASH ─────────────────────────────────── -->
@@ -418,15 +501,55 @@
  {% endif %}
 {% endwith %}
 
-<!-- ── STATS ──────────────────────────────────── -->
-<div class="stats-strip">
- <a href="?" class="s-stat"><span class="s-num">{{ stats.total }}</span><span class="s-lbl">Total</span></a>
- <a href="?stage=active" class="s-stat"><span class="s-num">{{ stats.active }}</span><span class="s-lbl">Pipeline</span></a>
- <a href="?stage=new" class="s-stat"><span class="s-num">{{ stats.new }}</span><span class="s-lbl">New</span></a>
- <a href="?" class="s-stat"><span class="s-num {% if stats.needs_followup|default(0) > 0 %}s-num--r{% endif %}">{{ stats.needs_followup|default(0) }}</span><span class="s-lbl">Follow-up</span></a>
- {% if stats.pending_tasks|default(0) > 0 %}<a href="?" class="s-stat"><span class="s-num">{{ stats.pending_tasks }}</span><span class="s-lbl">Tasks</span></a>{% endif %}
- {% if stats.total_equity > 0 %}<span class="s-stat"><span class="s-num">${{ "{:,.0f}".format(stats.total_equity/1000) }}K</span><span class="s-lbl">Equity</span></span>{% endif %}
-</div>
+<!-- ── KPI STRIP (dashboard-style) ───────────── -->
+<div class="crm-kpi-strip crm-fu crm-fu1">
+
+ <a href="?" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#9f815a;border-radius:18px 18px 0 0;"></div>
+  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:#443c36;margin-bottom:.2rem;">{{ stats.total }}</div>
+  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">Total Contacts</div>
+  <div style="font-size:.75rem;color:#7a6855;">In your CRM</div>
+ </a>
+
+ <a href="?stage=active" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#c69270;border-radius:18px 18px 0 0;"></div>
+  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:#443c36;margin-bottom:.2rem;">{{ stats.active }}</div>
+  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">Active Pipeline</div>
+  <div style="font-size:.75rem;color:#7a6855;">Ready to move</div>
+ </a>
+
+ <a href="?stage=new" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#8b6773;border-radius:18px 18px 0 0;"></div>
+  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:#443c36;margin-bottom:.2rem;">{{ stats.new }}</div>
+  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">New Leads</div>
+  <div style="font-size:.75rem;color:#7a6855;">Ready for your call</div>
+ </a>
+
+ <a href="?" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
+  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#443c36;border-radius:18px 18px 0 0;"></div>
+  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:{% if stats.needs_followup|default(0) > 0 %}#a0413d{% else %}#443c36{% endif %};margin-bottom:.2rem;">{{ stats.needs_followup|default(0) }}</div>
+  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">Need Follow-up</div>
+  <div style="font-size:.75rem;color:#7a6855;">Don't let them slip away</div>
+ </a>
+
+</div><!-- /crm-kpi-strip -->
+
+<!-- ── CONTACT CARD ───────────────────────────── -->
+<div class="crm-lux-card crm-fu crm-fu2">
+
+ <!-- Card header: title + action buttons -->
+ <div class="crm-card-hd">
+  <div>
+   <h2 class="crm-card-title">Your Contacts</h2>
+   <p class="crm-card-sub">Contacts &middot; Pipeline &middot; Follow-ups</p>
+  </div>
+  <div class="crm-card-actions">
+   <button class="stg-pill stg-pill--on" onclick="openAddModal()">+ Add Contact</button>
+   <a href="{{ url_for('agent_crm_import') }}" class="stg-pill">&#8593; Import</a>
+   <button class="stg-pill" onclick="doExport()">&#8595; Export</button>
+   <a href="{{ url_for('agent_address_labels') }}" class="stg-pill">Labels</a>
+  </div>
+ </div>
 
 <!-- ── TOOLBAR ────────────────────────────────── -->
 <div class="toolbar">
@@ -484,7 +607,7 @@
 </div>
 
 <!-- ── MAIN ───────────────────────────────────── -->
-<div class="main-layout">
+<div class="main-layout crm-fu crm-fu3">
 
  <!-- Quick-Add Sidebar -->
  <aside class="qa-panel open" id="qaPanel">
@@ -574,7 +697,7 @@
  <div class="exp-grid">
  {% if contact.property_address %}<div class="exp-field"><span class="exp-key">Property</span>{{ contact.property_address }}</div>{% endif %}
  {% if contact.property_value %}<div class="exp-field"><span class="exp-key">Value</span>${{ "{:,.0f}".format(contact.property_value) }}</div>{% endif %}
- {% if contact.equity_estimate %}<div class="exp-field"><span class="exp-key">Equity</span><span style="color:#4A7C59;font-weight:700;">${{ "{:,.0f}".format(contact.equity_estimate) }}</span></div>{% endif %}
+ {% if contact.equity_estimate %}<div class="exp-field"><span class="exp-key">Equity</span><span style="color:#9f815a;font-weight:700;">${{ "{:,.0f}".format(contact.equity_estimate) }}</span></div>{% endif %}
  {% if contact.zip_code %}<div class="exp-field"><span class="exp-key">ZIP</span>{{ contact.zip_code }}</div>{% endif %}
  {% if contact.home_anniversary %}<div class="exp-field"><span class="exp-key">Anniversary</span>{{ contact.home_anniversary }}</div>{% endif %}
  {% if contact.interaction_count > 0 %}<div class="exp-field"><span class="exp-key">Interactions</span>{{ contact.interaction_count }}</div>{% endif %}
@@ -625,6 +748,7 @@
  </div>
 
 </div><!-- /main-layout -->
+</div><!-- /crm-lux-card -->
 </div><!-- /crm -->
 
 <!-- ══ AI DRAFT EMAIL MODAL ═════════════════════ -->
