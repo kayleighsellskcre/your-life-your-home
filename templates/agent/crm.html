@@ -480,6 +480,29 @@
  padding: .55rem 1.5rem !important;
 }
 
+/* Quick-add "+" icon inside each stage pill */
+.stg-pill-add {
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ width:15px!important;height:15px!important;border-radius:50%!important;
+ font-size:.75rem!important;line-height:1!important;font-weight:700!important;
+ cursor:pointer!important;flex-shrink:0!important;margin-left:.3rem!important;
+ background:rgba(159,129,90,.15)!important;color:#5c4e42!important;
+ border:1px solid rgba(159,129,90,.28)!important;
+ transition:all .15s!important;text-decoration:none!important;
+ vertical-align:middle!important;
+}
+.stg-pill-add:hover {
+ background:#9f815a!important;color:#f0ebe0!important;border-color:#9f815a!important;
+ transform:scale(1.12)!important;
+}
+.stg-pill--on .stg-pill-add {
+ background:rgba(255,255,255,.22)!important;color:#f0ebe0!important;
+ border-color:rgba(255,255,255,.35)!important;
+}
+.stg-pill--on .stg-pill-add:hover {
+ background:rgba(255,255,255,.5)!important;color:#443c36!important;
+}
+
 /* Responsive */
 @media(max-width:900px){ #crm { padding: 0 1rem 2rem !important; } }
 @media(max-width:640px){ #crm { padding: 0 .875rem 1.5rem !important; } }
@@ -602,9 +625,9 @@
  <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill {% if not stage_filter %}stg-pill--on{% endif %}">All</a>
  {% for slug,lbl in [('new','New Lead'),('attempted','Attempted'),('contacted','Contacted'),('appt_set','Appt Set'),('appt_done','Appt Done'),('active','Active'),('under_contract','Under Contract'),('closed','Closed'),('past','Past Client'),('nurture','Nurture'),('sphere','Sphere'),('hold','Hold')] %}
  {% if stage_filter==slug %}
- <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill stg-pill--on">{{ lbl }}&nbsp;<span class="stg-pill-x" title="Clear filter">×</span></a>
+ <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill stg-pill--on">{{ lbl }}&nbsp;<span class="stg-pill-x" title="Clear filter">×</span><span class="stg-pill-add" onclick="event.preventDefault();event.stopPropagation();openAddModal('{{ slug }}')" title="Add contact to {{ lbl }}">+</span></a>
  {% else %}
- <a href="?stage={{ slug }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}&sort={{ sort_by }}" class="stg-pill">{{ lbl }}</a>
+ <a href="?stage={{ slug }}{% if search_query %}&search={{ search_query }}{% endif %}{% if tag_filter %}&tag={{ tag_filter }}{% endif %}&sort={{ sort_by }}" class="stg-pill">{{ lbl }}<span class="stg-pill-add" onclick="event.preventDefault();event.stopPropagation();openAddModal('{{ slug }}')" title="Add contact to {{ lbl }}">+</span></a>
  {% endif %}
  {% endfor %}
 </div>
@@ -790,7 +813,7 @@
  </div>
  <div class="mf">
  <label>Stage</label>
- <select name="stage">
+ <select name="stage" id="qa-stage-sel">
  <option value="new">New Lead</option>
  <option value="attempted">Attempted Contact</option>
  <option value="contacted">Contacted</option>
@@ -990,8 +1013,32 @@
 var CD = {{ contacts|tojson|default('[]') }};
 var openId = null;
 
-function openAddModal(){
- document.getElementById('addModal').classList.add('open');
+function openAddModal(stage){
+ var modal = document.getElementById('addModal');
+ modal.classList.add('open');
+ /* Pre-select the stage if called from a stage pill */
+ if(stage){
+  var sel = document.getElementById('qa-stage-sel');
+  if(sel) sel.value = stage;
+  /* Update modal title to reflect the stage */
+  var stageLabels = {
+   'new':'New Lead','attempted':'Attempted Contact','contacted':'Contacted',
+   'appt_set':'Appt Set','appt_done':'Appt Done','active':'Active Buyer/Seller',
+   'under_contract':'Under Contract','closed':'Closed','past':'Past Client',
+   'nurture':'Nurture','sphere':'Sphere of Influence','hold':'On Hold'
+  };
+  var head = modal.querySelector('.cmod-head');
+  if(head){
+   var lbl = stageLabels[stage] || stage;
+   head.childNodes[0].textContent = 'Add Contact — ' + lbl + ' ';
+  }
+ } else {
+  /* Reset title and stage to default */
+  var head = modal.querySelector('.cmod-head');
+  if(head) head.childNodes[0].textContent = 'Add New Contact ';
+  var sel = document.getElementById('qa-stage-sel');
+  if(sel) sel.value = 'new';
+ }
  setTimeout(function(){ document.getElementById('qaName').focus(); }, 80);
 }
 function closeAddModal(){
