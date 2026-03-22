@@ -110,13 +110,11 @@
 <div id="clients-page" class="ylh-page">
 
  <!-- Hero -->
- <div class="ylh-hero">
- <div class="ylh-hero__text">
- <div class="ylh-hero__eyebrow">Client Portfolio</div>
- <h1 class="ylh-hero__title">My Clients</h1>
- <p class="ylh-hero__subtitle">All linked homeowner clients, live portal data at a glance</p>
- </div>
- <div class="ylh-hero__actions">
+ <div class="ylh-page-hd">
+ <div class="ylh-page-hd__label">Client Portfolio</div>
+ <h1 class="ylh-page-hd__title">My Clients</h1>
+ <p class="ylh-page-hd__sub">All linked homeowner clients, live portal data at a glance</p>
+ <div class="ylh-page-hd__actions">
  <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)" style="border:1px solid rgba(143,163,130,.3);border-radius:10px;padding:.55rem .9rem;font-size:.82rem;background:white;color:#3D2E24;outline:none;min-width:200px;">
  <a href="{{ url_for('agent_referrals') }}" class="ylh-btn ylh-btn-primary">+ Invite Client</a>
  </div>

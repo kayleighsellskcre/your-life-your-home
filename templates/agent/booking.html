@@ -192,14 +192,12 @@
 </style>
 
 <div class="booking-container ylh-page" style="padding-top:1.25rem;">
- <div class="ylh-hero">
- <div class="ylh-hero__text">
- <div class="ylh-hero__eyebrow">Scheduling</div>
- <h1 class="ylh-hero__title">Booking &amp; Calendar</h1>
- <p class="ylh-hero__subtitle">Let your clients self-schedule at a time that works for everyone.</p>
- </div>
+ <div class="ylh-page-hd">
+ <div class="ylh-page-hd__label">Scheduling</div>
+ <h1 class="ylh-page-hd__title">Booking &amp; Calendar</h1>
+ <p class="ylh-page-hd__sub">Let your clients self-schedule at a time that works for everyone.</p>
  {% if profile and profile.schedule_url %}
- <div class="ylh-hero__actions">
+ <div class="ylh-page-hd__actions">
  <a href="{{ url_for('agent_settings_profile') }}" class="ylh-btn ylh-btn-ghost">Edit Calendar Link</a>
  </div>
  {% endif %}

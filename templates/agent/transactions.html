@@ -386,14 +386,12 @@
 
 <!-- ── HERO ─────────────────────────────────── -->
 <div style="max-width:1400px;margin:0 auto;padding:1.25rem 1.25rem 0;">
- <div class="ylh-hero" style="margin-bottom:1rem;">
- <div class="ylh-hero__text">
- <div class="ylh-hero__eyebrow">Pipeline</div>
- <h1 class="ylh-hero__title">Transactions</h1>
- <p class="ylh-hero__subtitle">All active and recent deals, organized by stage</p>
- </div>
- <div class="ylh-hero__actions">
- <span class="tx-bar__count" style="font-size:.78rem;color:#9A9472;font-weight:600;background:rgba(107,91,77,.1);border-radius:10px;padding:.2rem .7rem;">{{ transactions|length if transactions else 0 }} deals</span>
+ <div class="ylh-page-hd">
+ <div class="ylh-page-hd__label">Pipeline</div>
+ <h1 class="ylh-page-hd__title">Transactions</h1>
+ <p class="ylh-page-hd__sub">All active and recent deals, organized by stage</p>
+ <div class="ylh-page-hd__actions">
+ <span style="font-size:.78rem;color:#9A9472;font-weight:600;background:rgba(107,91,77,.1);border-radius:10px;padding:.2rem .7rem;">{{ transactions|length if transactions else 0 }} deals</span>
  <button class="t-btn t-btn--solid" style="height:34px;padding:0 1rem;font-size:.8rem;" onclick="openAddTx()">+ New Transaction</button>
  </div>
  </div>
