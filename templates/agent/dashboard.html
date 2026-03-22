@@ -22,22 +22,6 @@
 }
 
 /* ── AI BRIEFING — compact single-line strip ── */
-/* briefing strip — all sizing via inline style on the element */
-.briefing-shuffle-btn {
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.32);
-  color: #fff;
-  border-radius: 50%;
-  width: 22px !important; height: 22px !important;
-  min-height: unset !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: background .2s, transform .3s;
-}
-.briefing-shuffle-btn:hover { background: rgba(255,255,255,.3); transform: rotate(180deg); }
 @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
 
 /* ── 3-COLUMN MAIN GRID ── */
@@ -344,25 +328,24 @@
   </div>
 
   <!-- ── DAILY INSPIRATION STRIP ── -->
-  <div class="fu fu1" style="
-    background:linear-gradient(105deg,#7B4F6A 0%,#9A6882 50%,#B28898 100%);
-    border-radius:10px;
-    padding:.32rem 1rem;
-    margin-bottom:1.1rem;
-    box-shadow:0 2px 12px rgba(100,60,90,.2);
-    display:flex;
-    align-items:center;
-    gap:.65rem;
-    min-height:0;
-  ">
-    <!-- quote column -->
-    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:.05rem;">
-      <div id="briefing-text" style="font-size:.78rem;font-style:italic;color:#fff;font-weight:500;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-      <div id="kindness-text" style="font-size:.62rem;color:rgba(255,255,255,.72);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+  <div class="fu fu1" style="background:linear-gradient(108deg,#8C6070 0%,#A8808E 48%,#C0A0AE 100%);border-radius:12px;padding:.42rem 1.1rem;margin-bottom:1.1rem;box-shadow:0 3px 16px rgba(110,60,80,.18);display:flex;align-items:center;gap:.8rem;">
+    <div style="flex:1;min-width:0;">
+      <div id="briefing-text" style="font-size:.8rem;font-style:italic;font-weight:500;color:#fff;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+      <div id="kindness-text" style="font-size:.65rem;color:rgba(255,255,255,.78);line-height:1.25;margin-top:.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
     </div>
-    <!-- shuffle button -->
-    <button class="briefing-shuffle-btn" onclick="shuffleBriefing()" title="New quote">
-      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
+    <button onclick="shuffleBriefing()" title="New quote" style="
+      all:unset;
+      width:24px;height:24px;
+      border-radius:50%;
+      background:rgba(255,255,255,.18);
+      border:1px solid rgba(255,255,255,.35);
+      color:#fff;
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;cursor:pointer;
+      transition:background .2s,transform .3s;
+    " onmouseover="this.style.background='rgba(255,255,255,.3)';this.style.transform='rotate(180deg)'"
+       onmouseout="this.style.background='rgba(255,255,255,.18)';this.style.transform='rotate(0deg)'">
+      <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
     </button>
   </div>
 
