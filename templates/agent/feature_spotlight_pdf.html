@@ -4,21 +4,23 @@
  <meta charset="UTF-8">
  <style>
  @page {
- size: 11in 8.5in;
- margin: 0.125in;
- background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+ size: 11in 8.5in landscape;
+ margin: 0;
  }
  
  * {
  margin: 0;
  padding: 0;
  box-sizing: border-box;
+ -webkit-print-color-adjust: exact;
+ print-color-adjust: exact;
  }
  
  body {
  font-family: 'Georgia', 'Times New Roman', serif;
  color: #2C2820;
- background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+ background: #F5F1E8;
+ width: 11in;
  }
  
  .page {
@@ -28,29 +30,33 @@
  grid-template-columns: 5.375in 5.375in;
  grid-template-rows: 4.125in 4.125in;
  gap: 0.25in;
- padding: 0;
+ padding: 0.125in;
  page-break-after: always;
- background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%);
+ break-after: page;
+ background: #F5F1E8;
+ overflow: hidden;
  }
  
  .page:last-child {
  page-break-after: auto;
+ break-after: auto;
  }
  
  .card {
  background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%);
  border: 2px solid rgba(200, 180, 151, 0.3);
- padding: 0.4in 0.5in 0.45in 0.5in;
+ padding: 0.3in 0.45in 0.35in 0.45in;
  display: flex;
  flex-direction: column;
  justify-content: space-between;
  align-items: center;
  page-break-inside: avoid;
+ break-inside: avoid;
  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
  position: relative;
  overflow: hidden;
- width: 5.375in;
- height: 4.125in;
+ min-width: 0;
+ min-height: 0;
  }
  
  .card::before {
@@ -129,15 +135,31 @@
  border-radius: 2px;
  }
  
+ .card-content {
+ display: flex;
+ flex-direction: column;
+ align-items: center;
+ text-align: center;
+ flex: 1;
+ justify-content: center;
+ width: 100%;
+ overflow: hidden;
+ min-height: 0;
+ }
+
  .card-description {
- font-size: 10pt;
+ font-size: 9.5pt;
  color: #3D2E24;
- line-height: 1.65;
+ line-height: 1.6;
  font-family: 'Georgia', serif;
  font-weight: 400;
  text-align: center;
  max-width: 92%;
  margin: 0 auto;
+ overflow: hidden;
+ display: -webkit-box;
+ -webkit-line-clamp: 5;
+ -webkit-box-orient: vertical;
  }
  
  .print-button-container {

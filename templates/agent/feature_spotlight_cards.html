@@ -332,10 +332,13 @@
  <!-- Feature cards will be added here dynamically -->
  </div>
 
- <div style="text-align: center; margin-top: 2rem;">
- <button type="button" id="add-feature-btn" class="btn-secondary" style="margin-right: 1rem;">
- + Add Feature
+ <div style="text-align: center; margin-top: 1.5rem;">
+ <button type="button" id="add-feature-btn" class="btn-secondary" style="margin-right: 1rem; padding: 0.75rem 1.75rem; font-size: 1rem;">
+ + Add Feature Card
  </button>
+ <div id="feature-page-counter" style="margin-top: 0.75rem; font-size: 0.85rem; color: rgba(61,46,36,0.65); font-style: italic;">
+ 0 features &mdash; 0 pages when printed
+ </div>
  </div>
 
  <div class="button-group">
@@ -395,13 +398,24 @@
  '</div>';
  
  container.appendChild(card);
+ updatePageCounter();
  }
 
  function removeFeatureCard(id) {
  const card = document.getElementById('feature-' + id);
  if (card) {
  card.remove();
+ updatePageCounter();
  }
+ }
+
+ function updatePageCounter() {
+ const container = document.getElementById('features-container');
+ const counter = document.getElementById('feature-page-counter');
+ if (!container || !counter) return;
+ const count = container.querySelectorAll('.feature-card').length;
+ const pages = Math.ceil(count / 4) || 0;
+ counter.textContent = count + ' feature' + (count !== 1 ? 's' : '') + ' \u2014 ' + pages + ' page' + (pages !== 1 ? 's' : '') + ' when printed (4 per page)';
  }
 
  // Refine feature with AI
@@ -509,6 +523,7 @@
  aiStatus.textContent = ' Created ' + data.features.length + ' spotlight cards! Review and edit them below.';
  aiStatus.style.color = 'var(--olive-green)';
  }
+ updatePageCounter();
  
  // Clear notes textarea
  notesTextarea.value = '';
@@ -694,20 +709,21 @@
  
  // Build HTML using string concatenation to avoid template literal issues
  let previewHtml = '<!DOCTYPE html><html><head><title>Feature Spotlight Cards Preview - 4 per page (5.5x4.25 each)</title><style>';
- previewHtml += '@page { size: 11in 8.5in; margin: 0.125in; }';
- previewHtml += '* { margin: 0; padding: 0; box-sizing: border-box; }';
- previewHtml += 'body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); padding: 1rem; min-height: 100vh; }';
- previewHtml += '.page { width: 11in; height: 8.5in; display: grid; grid-template-columns: 5.375in 5.375in; grid-template-rows: 4.125in 4.125in; gap: 0.25in; padding: 0; page-break-after: always; margin-bottom: 1rem; background: linear-gradient(135deg, #F8F6F0 0%, #F5F1E8 100%); }';
- previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 2px solid rgba(200, 180, 151, 0.3); padding: 0.4in 0.5in 0.45in 0.5in; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden; width: 5.375in; height: 4.125in; }';
+ previewHtml += '@page { size: 11in 8.5in landscape; margin: 0; }';
+ previewHtml += '* { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }';
+ previewHtml += 'body { font-family: Georgia, Times New Roman, serif; color: #2C2820; background: #F5F1E8; padding: 1rem; min-height: 100vh; }';
+ previewHtml += '.page { width: 11in; height: 8.5in; display: grid; grid-template-columns: 5.375in 5.375in; grid-template-rows: 4.125in 4.125in; gap: 0.25in; padding: 0.125in; page-break-after: always; break-after: page; margin-bottom: 1.5rem; background: #F5F1E8; overflow: hidden; }';
+ previewHtml += '.page:last-child { page-break-after: auto; break-after: auto; }';
+ previewHtml += '.card { background: linear-gradient(135deg, #FFFFFF 0%, #FDFCF9 100%); border: 2px solid rgba(200, 180, 151, 0.3); padding: 0.3in 0.45in 0.35in 0.45in; display: flex; flex-direction: column; justify-content: space-between; align-items: center; box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08); position: relative; overflow: hidden; min-width: 0; min-height: 0; }';
  previewHtml += '.card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, rgba(107, 91, 77, 0.5) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.5) 100%); }';
  previewHtml += '.card-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 0.15in; width: 100%; }';
  previewHtml += '.card-logo { height: 28px; margin-bottom: 0.1in; opacity: 0.9; }';
  previewHtml += '.card-agent { font-size: 7.5pt; color: rgba(107, 91, 77, 0.85); font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; font-family: Arial, sans-serif; }';
- previewHtml += '.card-content { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; justify-content: center; width: 100%; }';
+ previewHtml += '.card-content { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; justify-content: center; width: 100%; overflow: hidden; min-height: 0; }';
  previewHtml += '.card-room { font-size: 7.5pt; color: rgba(107, 91, 77, 0.75); text-transform: uppercase; letter-spacing: 0.18em; margin-bottom: 0.15in; font-weight: 600; font-family: Arial, sans-serif; text-align: center; }';
  previewHtml += '.card-title { font-size: 18pt; font-weight: 600; color: #2C2820; margin-bottom: 0.18in; letter-spacing: -0.01em; line-height: 1.25; font-family: Georgia, serif; text-align: center; max-width: 90%; }';
  previewHtml += '.card-divider { width: 60px; height: 2.5px; background: linear-gradient(90deg, rgba(107, 91, 77, 0.3) 0%, rgba(107, 91, 77, 0.8) 50%, rgba(107, 91, 77, 0.3) 100%); margin: 0 auto 0.18in auto; border-radius: 2px; }';
- previewHtml += '.card-description { font-size: 10pt; color: #3D2E24; line-height: 1.65; font-family: Georgia, serif; font-weight: 400; text-align: center; max-width: 92%; margin: 0 auto; }';
+ previewHtml += '.card-description { font-size: 9.5pt; color: #3D2E24; line-height: 1.6; font-family: Georgia, serif; font-weight: 400; text-align: center; max-width: 92%; margin: 0 auto; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }';
  previewHtml += '.print-button { position: fixed; top: 1rem; right: 1rem; background: linear-gradient(135deg, #6B5B4D 0%, rgba(107, 91, 77, 0.95) 100%); color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(107, 91, 77, 0.3); z-index: 1000; font-size: 0.95rem; }';
  previewHtml += '.print-button:hover { background: linear-gradient(135deg, rgba(107, 91, 77, 0.95) 0%, #6B5B4D 100%); transform: translateY(-1px); }';
  previewHtml += '@media print { .print-button { display: none; } body { padding: 0; } }';
@@ -763,6 +779,7 @@
  document.querySelector('textarea[name="features[' + currentIdx + '][description]"]').value = feature.description;
  }
  
+ updatePageCounter();
  // Show success message
  alert('Card set "' + cardSet.set_name + '" loaded successfully!');
  } else {
