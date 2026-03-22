@@ -3176,6 +3176,32 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
     # Use the professionals_list we loaded earlier, or fallback to empty list
     professionals = professionals_list if professionals_list else []
 
+    # Attach referral URLs so the homeowner can share their agent/lender's link
+    try:
+        from database import get_referral_links_for_agent, get_referral_links_for_lender, create_referral_link as _create_ref_ho
+        for prof in professionals:
+            prof_role = prof.get("professional_role") or prof.get("professional_type", "agent")
+            prof_id = prof.get("professional_id") or prof.get("user_id")
+            if not prof_id:
+                continue
+            try:
+                if prof_role == "agent":
+                    links = get_referral_links_for_agent(prof_id)
+                    if not links:
+                        _create_ref_ho(agent_id=prof_id)
+                        links = get_referral_links_for_agent(prof_id)
+                else:
+                    links = get_referral_links_for_lender(prof_id)
+                    if not links:
+                        _create_ref_ho(lender_id=prof_id)
+                        links = get_referral_links_for_lender(prof_id)
+                if links:
+                    prof["referral_url"] = url_for("referral_landing", referral_code=links[0]["token"], _external=True)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
     # Final verification before rendering
     if homeowner_id and not professionals:
         print(f"HOMEOWNER DASHBOARD FINAL WARNING: No professionals found for homeowner {homeowner_id} - dashboard will show empty team section")
@@ -9205,12 +9231,24 @@ def agent_settings_profile():
     # GET - load profile
     profile = get_user_profile(user["id"])
     profile_dict = dict(profile) if profile and hasattr(profile, 'keys') else (profile if profile else {})
-    
+
+    # Referral link
+    from database import get_referral_links_for_agent, create_referral_link as _create_ref
+    try:
+        ref_links = get_referral_links_for_agent(user["id"])
+        if not ref_links:
+            _create_ref(agent_id=user["id"])
+            ref_links = get_referral_links_for_agent(user["id"])
+        referral_url = url_for("referral_landing", referral_code=ref_links[0]["token"], _external=True) if ref_links else None
+    except Exception:
+        referral_url = None
+
     return render_template(
         "agent/settings_profile.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         profile=profile_dict,
+        referral_url=referral_url,
     )
 
 
@@ -10380,12 +10418,24 @@ def lender_settings_profile():
     # GET - load profile
     profile = get_user_profile(user["id"])
     profile_dict = dict(profile) if profile and hasattr(profile, 'keys') else (profile if profile else {})
-    
+
+    # Referral link
+    from database import get_referral_links_for_lender, create_referral_link as _create_ref_l
+    try:
+        ref_links = get_referral_links_for_lender(user["id"])
+        if not ref_links:
+            _create_ref_l(lender_id=user["id"])
+            ref_links = get_referral_links_for_lender(user["id"])
+        referral_url = url_for("referral_landing", referral_code=ref_links[0]["token"], _external=True) if ref_links else None
+    except Exception:
+        referral_url = None
+
     return render_template(
         "lender/settings_profile.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
         profile=profile_dict,
+        referral_url=referral_url,
     )
 
 

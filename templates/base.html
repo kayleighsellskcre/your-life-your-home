@@ -736,7 +736,7 @@
 
    <!-- Center: Brand + Dashboard Title stacked -->
    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-     <a href="{{ url_for('index') }}" class="brand-logo" style="font-size:1.05rem;letter-spacing:.04em;">Your Life • Your Home</a>
+     <a href="{{ url_for('index') }}" class="brand-logo" style="font-size:1.65rem;letter-spacing:.05em;">Your Life • Your Home</a>
      {% if session.get('user_id') %}
      <span class="ylh-hdr-title" style="position:static;transform:none;font-size:.72rem;opacity:.85;font-weight:500;letter-spacing:.1em;text-transform:uppercase;">
        {% if session.get('role') == 'agent' %}Agent Dashboard
@@ -758,11 +758,9 @@
        <div class="ylh-ham-section">Overview</div>
        <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">&#9632; Dashboard</a>
 
-       <div class="ylh-ham-section">My Business</div>
-       <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">Contacts &amp; CRM</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_clients') }}">My Clients</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_referrals') }}">Referrals &amp; Growth</a>
+      <div class="ylh-ham-section">My Business</div>
+      <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">Contacts &amp; CRM</a>
+      <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Clients &amp; Transactions</a>
 
        <div class="ylh-ham-section">Marketing &amp; Outreach</div>
        <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
@@ -784,14 +782,12 @@
        <div class="ylh-ham-section">Overview</div>
        <a class="ylh-ham-item" href="{{ url_for('lender_dashboard') }}">&#9632; Dashboard</a>
 
-       <div class="ylh-ham-section">My Clients</div>
-       <a class="ylh-ham-item" href="{{ url_for('lender_crm') }}">Borrower CRM</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_clients') }}">My Clients</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_loans') }}">Loan Tracker</a>
+      <div class="ylh-ham-section">My Business</div>
+      <a class="ylh-ham-item" href="{{ url_for('lender_crm') }}">Borrower CRM</a>
+      <a class="ylh-ham-item" href="{{ url_for('lender_loans') }}">Clients &amp; Loans</a>
 
-       <div class="ylh-ham-section">Growth &amp; Marketing</div>
-       <a class="ylh-ham-item" href="{{ url_for('lender_marketing_hub_global') }}">Marketing Hub</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_referrals') }}">Referrals</a>
+      <div class="ylh-ham-section">Marketing &amp; Outreach</div>
+      <a class="ylh-ham-item" href="{{ url_for('lender_marketing_hub_global') }}">Marketing Hub</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_booking') }}">Booking &amp; Calendar</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_messages') }}">Email &amp; Text Library</a>
 

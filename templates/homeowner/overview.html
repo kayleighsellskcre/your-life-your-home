@@ -52,6 +52,19 @@
  {% if prof.get('phone') %}<a href="tel:{{ prof.phone }}" style="font-size:.72rem;color:#6B5B4D;text-decoration:none;padding:.18rem .45rem;background:rgba(107,91,77,.1);border-radius:4px;"> Call</a>{% endif %}
  {% if prof.get('website_url') %}<a href="{{ prof.website_url }}" target="_blank" style="font-size:.72rem;color:#6B5B4D;text-decoration:none;padding:.18rem .45rem;background:rgba(107,91,77,.1);border-radius:4px;"> Web</a>{% endif %}
  </div>
+ {% if prof.get('referral_url') %}
+ <div style="margin-top:.6rem;padding:.55rem .7rem;background:rgba(107,91,77,.06);border-radius:6px;border:1px dashed rgba(107,91,77,.2);">
+   <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6B5B4D;margin-bottom:.3rem;">Share with friends &amp; family</div>
+   <div style="display:flex;align-items:center;gap:.4rem;">
+     <input type="text" id="hwRef{{ loop.index }}" value="{{ prof.referral_url }}" readonly
+       style="flex:1;min-width:0;padding:.28rem .5rem;border:1px solid rgba(107,91,77,.25);border-radius:5px;font-family:monospace;font-size:.65rem;background:#fff;color:#3D2E24;">
+     <button type="button" onclick="copyHwRef('hwRef{{ loop.index }}',this)"
+       style="padding:.28rem .65rem;background:#6B5B4D;color:#fff;border:none;border-radius:5px;font-size:.65rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+       Copy
+     </button>
+   </div>
+ </div>
+ {% endif %}
  </div>
  </div>
  {% endfor %}
@@ -182,4 +195,15 @@
 </div>
 {% endif %}
 
+<script>
+function copyHwRef(inputId, btn) {
+  var el = document.getElementById(inputId);
+  el.select(); el.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(el.value).then(function() {
+    var orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = orig; }, 2000);
+  });
+}
+</script>
 {% endblock %}

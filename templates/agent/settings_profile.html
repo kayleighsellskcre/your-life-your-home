@@ -528,11 +528,40 @@
  </div>
  </div>
 
- <!-- Save Button -->
- <div style="text-align: center; margin-top: 2rem; margin-bottom: 0.75rem;">
- <button type="submit" class="btn-save"> Save Profile</button>
- </div>
- </form>
+<!-- Save Button -->
+<div style="text-align: center; margin-top: 2rem; margin-bottom: 0.75rem;">
+<button type="submit" class="btn-save"> Save Profile</button>
+</div>
+</form>
+
+<!-- Referral Link Card -->
+{% if referral_url %}
+<div class="settings-section" style="margin-top:1.5rem;">
+  <h2> Your Referral Link</h2>
+  <p style="color:var(--warm-gray);margin-bottom:1rem;">Share this link with homeowners, friends, and family. Anyone who signs up through your link is automatically connected to you.</p>
+  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+    <input type="text" id="agentRefUrl" value="{{ referral_url }}" readonly
+      style="flex:1;min-width:220px;padding:.55rem .85rem;border:1px solid rgba(143,168,138,.35);border-radius:8px;font-family:monospace;font-size:.82rem;background:#fafaf8;color:#3D2E24;">
+    <button type="button" onclick="copyRef('agentRefUrl',this)"
+      style="padding:.55rem 1.2rem;background:var(--olive-green);color:#fff;border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;">
+      Copy Link
+    </button>
+  </div>
+  <p style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);">
+    Direct link: <a href="{{ referral_url }}" target="_blank" style="color:var(--olive-green);word-break:break-all;">{{ referral_url }}</a>
+  </p>
+</div>
+<script>
+function copyRef(inputId, btn) {
+  var el = document.getElementById(inputId);
+  el.select(); el.setSelectionRange(0, 99999);
+  navigator.clipboard.writeText(el.value).then(function() {
+    btn.textContent = 'Copied!';
+    setTimeout(function(){ btn.textContent = 'Copy Link'; }, 2000);
+  });
+}
+</script>
+{% endif %}
 </div>
 
 <script>
