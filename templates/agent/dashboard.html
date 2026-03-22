@@ -333,25 +333,23 @@
   </div>
 
   <!-- ── DAILY INSPIRATION STRIP ── -->
-  <div class="fu fu1" style="background:linear-gradient(108deg,#8C6070 0%,#A8808E 48%,#C0A0AE 100%);border-radius:12px;padding:.42rem 1.1rem;margin-bottom:1.1rem;box-shadow:0 3px 16px rgba(110,60,80,.18);display:flex;align-items:center;gap:.8rem;">
+  <div class="fu fu1" style="background:linear-gradient(108deg,#8C6070 0%,#A8808E 48%,#C0A0AE 100%);border-radius:12px;padding:.45rem 1.1rem;margin-bottom:1.1rem;box-shadow:0 3px 16px rgba(110,60,80,.18);display:flex;align-items:center;gap:.8rem;">
     <div style="flex:1;min-width:0;">
-      <div id="briefing-text" style="font-size:.8rem;font-style:italic;font-weight:500;color:#fff;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+      <div id="briefing-text" style="font-size:.8rem;font-style:italic;font-weight:500;color:#fff;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Loading your daily inspiration...</div>
       <div id="kindness-text" style="font-size:.65rem;color:rgba(255,255,255,.78);line-height:1.25;margin-top:.1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
     </div>
-    <button onclick="shuffleBriefing()" title="New quote" style="
-      all:unset;
-      width:24px;height:24px;
+    <span onclick="shuffleBriefing()" title="New quote" role="button" style="
+      display:inline-flex;align-items:center;justify-content:center;
+      width:24px;height:24px;flex-shrink:0;
       border-radius:50%;
       background:rgba(255,255,255,.18);
       border:1px solid rgba(255,255,255,.35);
-      color:#fff;
-      display:flex;align-items:center;justify-content:center;
-      flex-shrink:0;cursor:pointer;
+      color:#fff;cursor:pointer;
       transition:background .2s,transform .3s;
     " onmouseover="this.style.background='rgba(255,255,255,.3)';this.style.transform='rotate(180deg)'"
        onmouseout="this.style.background='rgba(255,255,255,.18)';this.style.transform='rotate(0deg)'">
       <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
-    </button>
+    </span>
   </div>
 
   <!-- ── KPI STRIP ── -->
@@ -878,7 +876,7 @@ function loadPriorities(force){
 
 /* ── Boot ── */
 function initDashboard(){
-  loadBriefing();
+  shuffleBriefing();   /* instant — no API call, runs before anything else */
   loadPriorities();
   refreshMetrics();
   setInterval(refreshMetrics, 120000);
