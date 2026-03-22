@@ -180,13 +180,14 @@
 .pills-bar::-webkit-scrollbar{display:none;}
 .stg-pill{
  display:inline-flex!important;align-items:center!important;gap:.25rem!important;
- height:28px!important;padding:0 .85rem!important;border-radius:14px!important;
- border:1.5px solid rgba(143,168,138,.3)!important;
- font-size:.67rem!important;font-weight:700!important;letter-spacing:.05em!important;
+ height:34px!important;padding:0 1.1rem!important;border-radius:17px!important;
+ border:1.5px solid rgba(143,168,138,.35)!important;
+ font-size:.7rem!important;font-weight:600!important;letter-spacing:.04em!important;
  text-transform:uppercase!important;color:#5C7050!important;
  text-decoration:none!important;transition:all .18s!important;
  background:#fff!important;white-space:nowrap!important;flex-shrink:0!important;cursor:pointer!important;
- box-shadow:0 1px 3px rgba(44,58,40,.05)!important;
+ box-shadow:0 1px 4px rgba(44,58,40,.07)!important;
+ width:auto!important;min-height:unset!important;min-width:unset!important;margin:0!important;
 }
 .stg-pill:hover{
  background:rgba(143,168,138,.1)!important;border-color:#8FA88A!important;
@@ -441,9 +442,8 @@
 
 <!-- ── PAGE HERO ─────────────────────────────── -->
 <div class="ylh-page-hd">
-  <div class="ylh-page-hd__label">CRM</div>
-  <h1 class="ylh-page-hd__title">Contacts <span style="font-size:1rem;font-weight:400;color:#8FA88A;vertical-align:middle;">{{ stats.total }}</span></h1>
-  <p class="ylh-page-hd__sub">Pipeline &middot; Relationship Management</p>
+  <h1 class="ylh-page-hd__title">CRM <span style="font-size:1rem;font-weight:400;color:#8FA88A;vertical-align:middle;">{{ stats.total }}</span></h1>
+  <p class="ylh-page-hd__sub">Contacts &middot; Pipeline &middot; Relationship Management</p>
   <div class="ylh-page-hd__actions">
    <button class="stg-pill stg-pill--on" onclick="openAddModal()">+ Add Contact</button>
    <a href="{{ url_for('agent_crm_import') }}" class="stg-pill">&#8593; Import</a>
