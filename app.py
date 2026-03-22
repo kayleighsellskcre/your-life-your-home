@@ -11600,46 +11600,85 @@ def ai_dashboard_briefing_endpoint():
 
 @app.route("/api/ai/dashboard-priorities", methods=["POST"])
 def ai_dashboard_priorities_endpoint():
-    """Return 3 AI-prioritized action items for the agent's day."""
+    """Return 3 AI-prioritized action items, rotating each call, based on real contact data."""
     user = get_current_user()
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
+    import random as _random, re as _re, json as _json
     from ai_platform import ai_complete
     from database import get_user_profile, get_contacts_needing_followup
     profile = get_user_profile(user["id"]) or {}
     profile_d = dict(profile) if profile else {}
     agent_name = (profile_d.get("full_name") or user.get("name") or "there").split()[0]
     metrics = get_agent_dashboard_metrics(user["id"]) if user.get("role") == "agent" else {}
-    followup_contacts = get_contacts_needing_followup(user["id"], days_threshold=14)
-    followup_names = [c.get("name", "") for c in followup_contacts[:5] if c.get("name")]
-    followup_str = ", ".join(followup_names) if followup_names else "none"
+
+    # Pull contacts not touched in 30 days and separately 60 days for richer context
+    overdue_30  = get_contacts_needing_followup(user["id"], days_threshold=30)
+    overdue_60  = get_contacts_needing_followup(user["id"], days_threshold=60)
+
+    # Build named lists (shuffle so each refresh surfaces different names)
+    names_30 = [c.get("name", "") for c in overdue_30 if c.get("name")]
+    names_60 = [c.get("name", "") for c in overdue_60 if c.get("name")]
+    _random.shuffle(names_30)
+    _random.shuffle(names_60)
+
+    # Pick a rotating window of contacts to highlight (up to 4 from each bucket)
+    highlight_30 = names_30[:4]
+    highlight_60 = names_60[:4]
+
+    followup_str = ", ".join(highlight_30) if highlight_30 else "none"
+    lapsed_str   = ", ".join(highlight_60) if highlight_60 else "none"
+
+    # Randomize the angle / focus so each refresh feels fresh
+    focus_options = [
+        "Focus on re-engaging lapsed contacts and booking calls.",
+        "Focus on moving active deals forward and closing pipeline gaps.",
+        "Focus on lead nurturing and adding value to warm contacts.",
+        "Focus on relationship-building touches that generate referrals.",
+        "Focus on proactive outreach to contacts who haven't heard from you recently.",
+    ]
+    focus = _random.choice(focus_options)
+
     prompt = (
-        f"You are a real estate business coach for {agent_name}. "
-        f"Pipeline: {metrics.get('new_leads', 0)} new leads, "
+        f"You are a real estate business coach generating a fresh daily priority list for {agent_name}. "
+        f"Pipeline snapshot: {metrics.get('new_leads', 0)} new leads, "
         f"{metrics.get('active_transactions', 0)} active deals, "
-        f"{metrics.get('followups_today', 0)} follow-ups due. "
-        f"Contacts needing follow-up: {followup_str}. "
-        f"Give exactly 3 specific, high-impact action items for today. "
-        f"Each item must start with a strong action verb. Keep each under 12 words. "
-        f"Format as JSON array: [\"action 1\", \"action 2\", \"action 3\"]. "
-        f"Output only the JSON array, nothing else."
+        f"{metrics.get('followups_today', 0)} follow-ups overdue. "
+        + (f"Contacts with NO touch in 30+ days (prioritize these): {followup_str}. " if followup_str != "none" else "")
+        + (f"Contacts with NO touch in 60+ days (urgent re-engagement needed): {lapsed_str}. " if lapsed_str != "none" else "")
+        + f"{focus} "
+        f"Generate exactly 3 specific, actionable priorities for today. "
+        f"If real contact names are provided above, use them directly in the actions (e.g. 'Call Carr to reconnect'). "
+        f"Each priority must start with a strong action verb and be under 14 words. "
+        f"Vary the priorities from common patterns — surprise with fresh angles. "
+        f"Output ONLY a JSON array: [\"priority 1\", \"priority 2\", \"priority 3\"]. No extra text."
     )
-    result = ai_complete(prompt, system="You are a real estate productivity coach. Be specific and direct.", max_tokens=120, temperature=0.5)
-    import re as _re
+    result = ai_complete(
+        prompt,
+        system="You are a sharp, encouraging real estate productivity coach. Be specific, use real names when given, and vary your suggestions each time.",
+        max_tokens=150,
+        temperature=0.82
+    )
     result = _re.sub(r"^```[a-z]*\n?", "", result.strip())
     result = _re.sub(r"\n?```$", "", result.strip())
     try:
-        import json as _json
         priorities = _json.loads(result)
         if not isinstance(priorities, list):
             raise ValueError
         priorities = [str(p) for p in priorities[:3]]
     except Exception:
-        priorities = [
-            f"Follow up with {followup_names[0]}" if followup_names else "Call your top lead today",
-            "Review your active transactions for next steps",
-            "Add 2 new contacts to your CRM pipeline",
-        ]
+        # Meaningful fallback using real names when available
+        fallback = []
+        if highlight_30:
+            fallback.append(f"Reach out to {highlight_30[0]} — no contact in over a month")
+        elif highlight_60:
+            fallback.append(f"Re-engage {highlight_60[0]} — they haven't heard from you in 60+ days")
+        else:
+            fallback.append("Call your top lead and schedule a showing")
+        fallback.append("Review active transactions and confirm next steps with each client")
+        fallback.append("Add 2 new contacts to your CRM before end of day")
+        priorities = fallback
+
     resp = jsonify({"priorities": priorities})
     resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
     resp.headers["Pragma"] = "no-cache"
