@@ -1,19 +1,15 @@
 {% extends "agent/layout.html" %}
 {% block agent_content %}
 <style>
-/* ══ IMPORT PAGE — Dashboard Luxury Style ════════ */
-.imp-wrap { padding: 0 1.75rem 2.5rem; }
+/* ══ CRM IMPORT — Dashboard Luxury Style ═════════ */
+.imp-wrap { padding:0 1.75rem 2.5rem; }
 
-@keyframes impFadeUp {
-  from { opacity:0; transform:translateY(12px); }
-  to   { opacity:1; transform:translateY(0); }
-}
-.ifu  { animation: impFadeUp .42s ease-out both; }
+@keyframes impFU { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.ifu  { animation:impFU .42s ease-out both; }
 .ifu1 { animation-delay:.06s; }
 .ifu2 { animation-delay:.12s; }
 .ifu3 { animation-delay:.18s; }
 
-/* Lux card */
 .imp-card {
   background:#fff;
   border:1px solid rgba(159,129,90,.18);
@@ -21,100 +17,147 @@
   box-shadow:0 2px 16px rgba(68,60,54,.06);
   overflow:hidden;
   margin-bottom:1.25rem;
+  transition:box-shadow .3s;
 }
+.imp-card:hover { box-shadow:0 6px 28px rgba(68,60,54,.09); }
+
 .imp-card-hd {
   padding:1rem 1.5rem .85rem;
   border-bottom:1px solid rgba(159,129,90,.1);
-  display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;
 }
 .imp-card-title {
   font-family:'Playfair Display',Georgia,serif;
-  font-size:1.25rem;font-weight:600;color:#443c36;margin:0;
+  font-size:1.25rem;font-weight:600;color:#443c36;margin:0 0 .1rem;
 }
 .imp-card-sub {
-  font-size:.7rem;font-weight:700;text-transform:uppercase;
-  letter-spacing:.1em;color:#7a6855;margin:.1rem 0 0;
+  font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#7a6855;
 }
-.imp-card-body { padding:1.5rem; }
+.imp-card-body { padding:1.25rem 1.5rem; }
 
-/* Upload zone */
+/* ── UPLOAD AREA ── */
 .upload-zone {
   border:2.5px dashed rgba(159,129,90,.35);
-  border-radius:14px;padding:2.5rem 1.5rem;
-  text-align:center;background:#faf8f4;
-  transition:all .2s;cursor:pointer;
+  border-radius:14px;
+  padding:2.5rem 1.5rem;
+  text-align:center;
+  background:rgba(159,129,90,.03);
+  transition:all .2s;
+  cursor:pointer;
+  position:relative;
 }
 .upload-zone:hover, .upload-zone.dragover {
-  border-color:#9f815a;background:rgba(159,129,90,.05);
+  border-color:#9f815a;
+  background:rgba(159,129,90,.07);
 }
-.upload-zone h3 {
-  font-family:'Playfair Display',Georgia,serif;
-  font-size:1.15rem;font-weight:600;color:#443c36;margin:.75rem 0 .35rem;
-}
-.upload-zone p { font-size:.82rem;color:#7a6855;margin:0; }
-#fileChosen {
-  margin-top:.75rem;font-size:.8rem;font-weight:600;
-  color:#9f815a;display:none;
-}
+.upload-zone input[type=file] { display:none; }
 .upload-icon {
-  width:52px;height:52px;border-radius:14px;
+  width:56px;height:56px;border-radius:50%;
   background:linear-gradient(135deg,rgba(159,129,90,.12),rgba(159,129,90,.06));
   border:1.5px solid rgba(159,129,90,.22);
-  display:inline-flex;align-items:center;justify-content:center;
-  margin-bottom:.5rem;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 1rem;
+}
+.upload-title {
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:1.15rem;font-weight:600;color:#443c36;margin:0 0 .4rem;
+}
+.upload-sub { font-size:.82rem;color:#7a6855;margin:0 0 1.2rem; }
+.upload-file-name {
+  display:none;margin-top:.9rem;
+  font-size:.82rem;font-weight:700;color:#9f815a;
+  background:rgba(159,129,90,.08);border-radius:999px;
+  padding:.3rem .9rem;display:none;
+  align-items:center;justify-content:center;gap:.4rem;
 }
 
-/* Template download button */
-.tpl-btn {
-  display:inline-flex;align-items:center;gap:.5rem;
-  padding:.6rem 1.2rem;border-radius:999px;
-  background:#fff;border:1.5px solid rgba(159,129,90,.35);
-  color:#5c4e42;font-size:.78rem;font-weight:700;cursor:pointer;
-  text-decoration:none;transition:all .18s;
-  box-shadow:0 1px 5px rgba(68,60,54,.06);
+/* ── DOWNLOAD TEMPLATE BUTTON ── */
+.btn-dl-template {
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.6rem 1.3rem;border-radius:999px;
+  background:#fff;border:1.5px solid rgba(159,129,90,.4);
+  color:#5c4e42;font-size:.8rem;font-weight:700;
+  cursor:pointer;transition:all .18s;text-decoration:none;
+  letter-spacing:.02em;
 }
-.tpl-btn:hover { background:#f5f0e6;border-color:#9f815a;color:#443c36; }
+.btn-dl-template:hover { background:#f5f0e6;border-color:#9f815a;color:#443c36; }
 
-/* Submit button */
-.imp-submit {
+.btn-continue {
   display:inline-flex;align-items:center;gap:.4rem;
   padding:.7rem 2rem;border-radius:999px;
   background:#9f815a;color:#f0ebe0;
   border:none;font-size:.88rem;font-weight:700;
-  cursor:pointer;transition:all .2s;letter-spacing:.03em;
+  cursor:pointer;transition:all .2s;
   box-shadow:0 3px 12px rgba(159,129,90,.28);
+  letter-spacing:.02em;
 }
-.imp-submit:hover { background:#8a6e4a;transform:translateY(-1px); }
-.imp-submit:disabled { opacity:.6;cursor:not-allowed;transform:none; }
+.btn-continue:hover { background:#8a6e4a;transform:translateY(-1px); }
+.btn-continue:disabled { opacity:.5;cursor:not-allowed;transform:none; }
 
-/* Stage reference grid */
+/* ── STAGE REFERENCE GRID ── */
 .stage-grid {
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
   gap:.55rem;
 }
-.stage-item {
-  display:flex;align-items:flex-start;gap:.6rem;
-  background:#faf8f4;border:1px solid rgba(159,129,90,.12);
-  border-radius:10px;padding:.6rem .75rem;
+.stage-card {
+  display:flex;align-items:center;gap:.7rem;
+  padding:.6rem .85rem;
+  background:#faf8f4;
+  border:1px solid rgba(159,129,90,.14);
+  border-radius:10px;
+  transition:border-color .15s;
 }
+.stage-card:hover { border-color:rgba(159,129,90,.3); }
 .stage-dot {
-  width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:.28rem;
+  width:10px;height:10px;border-radius:50%;flex-shrink:0;
 }
-.stage-name { font-size:.78rem;font-weight:700;color:#443c36;display:block; }
-.stage-code { font-size:.65rem;color:#9f815a;font-family:monospace;letter-spacing:.03em; }
-.stage-desc { font-size:.7rem;color:#7a6855;line-height:1.35;margin-top:.15rem; }
+.stage-info { min-width:0; }
+.stage-name { font-size:.82rem;font-weight:700;color:#443c36;display:block; }
+.stage-code { font-size:.7rem;color:#7a6855;font-family:monospace; }
 
-/* Field chips */
-.field-chips { display:flex;flex-wrap:wrap;gap:.35rem; }
-.field-chip {
-  background:rgba(159,129,90,.1);border:1px solid rgba(159,129,90,.22);
-  border-radius:999px;padding:.2rem .65rem;
-  font-size:.72rem;font-weight:600;color:#5c4e42;
+/* ── FIELD COLUMNS LIST ── */
+.field-columns {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:.4rem .75rem;
+  list-style:none;padding:0;margin:0;
 }
-.field-chip--req { background:rgba(68,60,54,.1);border-color:rgba(68,60,54,.2);color:#3a332d; }
+.field-columns li {
+  display:flex;align-items:center;gap:.45rem;
+  font-size:.8rem;color:#5c4e42;padding:.3rem 0;
+}
+.field-check {
+  width:16px;height:16px;border-radius:50%;flex-shrink:0;
+  background:rgba(159,129,90,.12);border:1.5px solid rgba(159,129,90,.28);
+  display:flex;align-items:center;justify-content:center;
+}
+.field-check svg { color:#9f815a; }
 
-@media(max-width:768px){ .imp-wrap { padding:0 1rem 2rem; } }
+/* ── HOW IT WORKS STEPS ── */
+.steps { display:flex;gap:1rem;flex-wrap:wrap; }
+.step {
+  flex:1;min-width:160px;
+  display:flex;gap:.7rem;align-items:flex-start;
+  padding:.75rem 1rem;
+  background:#faf8f4;border-radius:12px;
+  border:1px solid rgba(159,129,90,.12);
+}
+.step-num {
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#9f815a,#8a6e4a);
+  color:#f0ebe0;font-size:.78rem;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 6px rgba(159,129,90,.22);
+}
+.step-text { font-size:.8rem;color:#5c4e42;line-height:1.45; }
+.step-text strong { color:#443c36;display:block;margin-bottom:.1rem; }
+
+@media(max-width:768px){
+  .imp-wrap { padding:0 1rem 2rem; }
+  .stage-grid { grid-template-columns:repeat(2,1fr); }
+  .field-columns { grid-template-columns:1fr 1fr; }
+}
 </style>
 
 <div class="imp-wrap">
@@ -122,151 +165,163 @@
   <!-- Page Header -->
   <div class="ylh-page-hd ifu">
     <h1 class="ylh-page-hd__title">Import Contacts</h1>
-    <p class="ylh-page-hd__sub">Upload your spreadsheet — we'll map your columns and sync everything without duplicates.</p>
+    <p class="ylh-page-hd__sub">Upload your Excel or CSV &middot; We auto-map columns &middot; No duplicates</p>
     <div class="ylh-page-hd__actions">
-      <a href="{{ url_for('agent_crm') }}" style="display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:600;color:#5c4e42;text-decoration:none;padding:.45rem 1rem;border-radius:999px;border:1.5px solid rgba(159,129,90,.3);background:#fff;transition:all .18s;" onmouseover="this.style.background='#f5f0e6'" onmouseout="this.style.background='#fff'">
-        ← Back to CRM
-      </a>
+      <a href="{{ url_for('agent_crm') }}" style="font-size:.8rem;font-weight:600;color:#5c4e42;text-decoration:none;opacity:.8;">← Back to CRM</a>
     </div>
   </div>
 
-  <!-- Upload Card -->
+  <!-- ── HOW IT WORKS ── -->
   <div class="imp-card ifu ifu1">
     <div class="imp-card-hd">
       <div>
-        <h2 class="imp-card-title">Upload Your File</h2>
-        <p class="imp-card-sub">Excel or CSV &middot; Any column structure</p>
+        <h2 class="imp-card-title">How it Works</h2>
+        <p class="imp-card-sub">Three easy steps — done in under a minute</p>
       </div>
-      <button onclick="downloadTemplate()" class="tpl-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Download Blank Template
+      <button onclick="downloadTemplate()" class="btn-dl-template">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Starter Template
       </button>
+    </div>
+    <div class="imp-card-body">
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Download the template</strong> Use the starter CSV above — it has all the right column headers already set up. Fill in your contacts and save.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Upload your file</strong> Drag and drop your Excel or CSV below. We accept any column names — our smart mapper finds them automatically.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Review &amp; sync</strong> Confirm the column mapping, pick a default stage for anyone without one, and hit Sync. Done.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── UPLOAD ── -->
+  <div class="imp-card ifu ifu2">
+    <div class="imp-card-hd">
+      <div>
+        <h2 class="imp-card-title">Upload Your File</h2>
+        <p class="imp-card-sub">Excel (.xlsx, .xls) or CSV &middot; First row = column headers</p>
+      </div>
     </div>
     <div class="imp-card-body">
       <form method="post" enctype="multipart/form-data" id="uploadForm">
         <input type="hidden" name="action" value="upload">
+
         <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
           <div class="upload-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9f815a" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9f815a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </div>
-          <h3>Click to Upload or Drag &amp; Drop</h3>
-          <p>Excel (.xlsx, .xls) or CSV &middot; First row must be headers</p>
-          <div id="fileChosen"></div>
-          <input type="file" name="file" id="fileInput" style="display:none;" accept=".xlsx,.xls,.csv" required>
+          <p class="upload-title">Click to Upload or Drag & Drop</p>
+          <p class="upload-sub">Supports Excel (.xlsx, .xls) and CSV files</p>
+          <input type="file" name="file" id="fileInput" accept=".xlsx,.xls,.csv" required onchange="onFileSelect(this)">
+          <div id="fileNameBadge" class="upload-file-name"></div>
         </div>
-        <div style="margin-top:1.25rem;text-align:center;">
-          <button type="submit" class="imp-submit" id="submitBtn" disabled>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9,11 12,14 22,4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            Continue to Map Columns →
+
+        <div style="display:flex;justify-content:center;margin-top:1.25rem;">
+          <button type="submit" class="btn-continue" id="continueBtn" disabled>
+            Continue to Column Mapping →
           </button>
-          <p style="font-size:.72rem;color:#9a8878;margin-top:.5rem;">Select a file above to continue</p>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Stage Reference Card -->
+  <!-- ── STAGE REFERENCE ── -->
   <div class="imp-card ifu ifu2">
     <div class="imp-card-hd">
       <div>
-        <h2 class="imp-card-title">Stage Values for Your Spreadsheet</h2>
-        <p class="imp-card-sub">Use these exact values in your "Stage" column</p>
+        <h2 class="imp-card-title">Pipeline Stages</h2>
+        <p class="imp-card-sub">Use any of these values in your "Stage" column — we recognize them automatically</p>
       </div>
     </div>
     <div class="imp-card-body">
-      <p style="font-size:.82rem;color:#5c4e42;margin-bottom:1rem;line-height:1.55;">
-        Add a column called <strong>Stage</strong> to your spreadsheet and use any of these values. If a contact has no stage, you can set a default during import.
-      </p>
       <div class="stage-grid">
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#9f815a;"></div>
-          <div><span class="stage-name">New Lead</span><span class="stage-code">new</span><p class="stage-desc">Just entered your pipeline, not yet contacted</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#c69270;"></div>
-          <div><span class="stage-name">Attempted</span><span class="stage-code">attempted</span><p class="stage-desc">Reached out but haven't connected yet</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#8b6773;"></div>
-          <div><span class="stage-name">Contacted</span><span class="stage-code">contacted</span><p class="stage-desc">Made first contact, conversation started</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#7a8b6e;"></div>
-          <div><span class="stage-name">Appt Set</span><span class="stage-code">appt_set</span><p class="stage-desc">Appointment scheduled and confirmed</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#6e8b7a;"></div>
-          <div><span class="stage-name">Appt Done</span><span class="stage-code">appt_done</span><p class="stage-desc">Met with client, appointment completed</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#443c36;"></div>
-          <div><span class="stage-name">Active</span><span class="stage-code">active</span><p class="stage-desc">Actively working together on a deal</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#3a5568;"></div>
-          <div><span class="stage-name">Under Contract</span><span class="stage-code">under_contract</span><p class="stage-desc">Deal is in contract, heading to close</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#3d5a3e;"></div>
-          <div><span class="stage-name">Closed</span><span class="stage-code">closed</span><p class="stage-desc">Transaction successfully closed</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#9f815a;opacity:.7"></div>
-          <div><span class="stage-name">Past Client</span><span class="stage-code">past</span><p class="stage-desc">Closed before — nurture for referrals</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#a08870;"></div>
-          <div><span class="stage-name">Nurture</span><span class="stage-code">nurture</span><p class="stage-desc">Long-term lead, not ready yet</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#7b8fa0;"></div>
-          <div><span class="stage-name">Sphere</span><span class="stage-code">sphere</span><p class="stage-desc">Personal network, referral sources</p></div>
-        </div>
-        <div class="stage-item">
-          <div class="stage-dot" style="background:#b0a898;"></div>
-          <div><span class="stage-name">Hold</span><span class="stage-code">hold</span><p class="stage-desc">Paused — will revisit later</p></div>
-        </div>
+        <div class="stage-card"><div class="stage-dot" style="background:#9f815a;"></div><div class="stage-info"><span class="stage-name">New Lead</span><span class="stage-code">new · "New Lead" · "new lead"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#c69270;"></div><div class="stage-info"><span class="stage-name">Attempted</span><span class="stage-code">attempted · "Attempted Contact"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#8b6773;"></div><div class="stage-info"><span class="stage-name">Contacted</span><span class="stage-code">contacted · "Contacted"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#7a8b6f;"></div><div class="stage-info"><span class="stage-name">Appt Set</span><span class="stage-code">appt_set · "Appt Set" · "Appointment Set"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#5a7a6f;"></div><div class="stage-info"><span class="stage-name">Appt Done</span><span class="stage-code">appt_done · "Appt Done" · "Appointment Done"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#6b8a5e;"></div><div class="stage-info"><span class="stage-name">Active</span><span class="stage-code">active · "Active" · "Active Buyer"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#4a7a6b;"></div><div class="stage-info"><span class="stage-name">Under Contract</span><span class="stage-code">under_contract · "Under Contract"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#443c36;"></div><div class="stage-info"><span class="stage-name">Closed</span><span class="stage-code">closed · "Closed"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#6b5a48;"></div><div class="stage-info"><span class="stage-name">Past Client</span><span class="stage-code">past · "Past Client" · "Past"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#8b7040;"></div><div class="stage-info"><span class="stage-name">Nurture</span><span class="stage-code">nurture · "Nurture"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#7a6080;"></div><div class="stage-info"><span class="stage-name">Sphere</span><span class="stage-code">sphere · "Sphere" · "Sphere of Influence"</span></div></div>
+        <div class="stage-card"><div class="stage-dot" style="background:#a09080;"></div><div class="stage-info"><span class="stage-name">Hold</span><span class="stage-code">hold · "Hold" · "On Hold"</span></div></div>
       </div>
+      <p style="font-size:.75rem;color:#7a6855;margin-top:.85rem;">
+        <strong style="color:#443c36;">Tip:</strong> If a contact has no stage value in your file, you'll be able to choose a default stage on the next screen.
+      </p>
     </div>
   </div>
 
-  <!-- Fields Reference Card -->
+  <!-- ── ALL SUPPORTED FIELDS ── -->
   <div class="imp-card ifu ifu3">
     <div class="imp-card-hd">
       <div>
         <h2 class="imp-card-title">All Supported Fields</h2>
-        <p class="imp-card-sub">Every column your spreadsheet can include</p>
+        <p class="imp-card-sub">Every column we can import — use any of these header names in your file</p>
       </div>
     </div>
     <div class="imp-card-body">
-      <p style="font-size:.82rem;color:#5c4e42;margin-bottom:1rem;line-height:1.55;">
-        Your column names don't have to match exactly — we auto-detect common variations. <span style="background:rgba(68,60,54,.08);border-radius:4px;padding:.05rem .35rem;font-weight:700;">Bold</span> = required.
-      </p>
-      <div class="field-chips">
-        <span class="field-chip field-chip--req">Name *</span>
-        <span class="field-chip">Last Name</span>
-        <span class="field-chip">Email</span>
-        <span class="field-chip">Phone</span>
-        <span class="field-chip">Stage</span>
-        <span class="field-chip" style="background:rgba(139,103,115,.1);border-color:rgba(139,103,115,.22);color:#5a3545;">Birthday (MM/DD)</span>
-        <span class="field-chip">Home Anniversary</span>
-        <span class="field-chip">Address</span>
-        <span class="field-chip">City</span>
-        <span class="field-chip">State</span>
-        <span class="field-chip">ZIP</span>
-        <span class="field-chip">Property Address</span>
-        <span class="field-chip">Property Value</span>
-        <span class="field-chip">Equity Estimate</span>
-        <span class="field-chip">Lead Source</span>
-        <span class="field-chip">Notes</span>
-        <span class="field-chip">Tags</span>
-      </div>
-      <div style="margin-top:1.1rem;background:#faf8f4;border:1px solid rgba(159,129,90,.12);border-radius:10px;padding:.75rem 1rem;">
-        <p style="font-size:.78rem;color:#5c4e42;margin:0;line-height:1.6;">
-          <strong>Smart sync:</strong> Matches existing contacts by email, phone, or name — updates them instead of creating duplicates.
-          &nbsp;&middot;&nbsp; <strong>Birthday format:</strong> Use MM/DD (e.g. 03/15 for March 15).
-          &nbsp;&middot;&nbsp; <strong>First row:</strong> Must be column headers.
-        </p>
+
+      <p style="font-size:.8rem;color:#5c4e42;margin:0 0 1rem;line-height:1.5;">Your column headers don't need to match exactly — our smart mapper recognizes common variations. But using the names below will auto-map instantly.</p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem 1.5rem;">
+
+        <div>
+          <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9f815a;margin:0 0 .5rem;border-bottom:2px solid rgba(159,129,90,.15);padding-bottom:.3rem;">Contact Identity</p>
+          <ul class="field-columns">
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Name</strong> / First Name / Full Name</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Last Name</strong></span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Email</strong> / Email Address</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Phone</strong> / Cell / Mobile</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9f815a;margin:0 0 .5rem;border-bottom:2px solid rgba(159,129,90,.15);padding-bottom:.3rem;">Pipeline & CRM</p>
+          <ul class="field-columns">
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Stage</strong> / Status / Pipeline</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Lead Source</strong> / Source</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Notes</strong> / Comments</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Tags</strong> / Category / Group</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9f815a;margin:0 0 .5rem;border-bottom:2px solid rgba(159,129,90,.15);padding-bottom:.3rem;">Important Dates</p>
+          <ul class="field-columns">
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Birthday</strong> / DOB / Bday <em style="color:#7a6855;font-size:.72rem;">(MM/DD)</em></span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Home Anniversary</strong> / Anniversary</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9f815a;margin:0 0 .5rem;border-bottom:2px solid rgba(159,129,90,.15);padding-bottom:.3rem;">Mailing Address</p>
+          <ul class="field-columns">
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Address</strong> / Street / Mailing Address</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>City</strong></span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>State</strong> / Province</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>ZIP</strong> / Postal Code</span></li>
+          </ul>
+        </div>
+
+        <div>
+          <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#9f815a;margin:0 0 .5rem;border-bottom:2px solid rgba(159,129,90,.15);padding-bottom:.3rem;">Property Details</p>
+          <ul class="field-columns">
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Property Address</strong></span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Property Value</strong> / Home Value / Price</span></li>
+            <li><div class="field-check"><svg width="9" height="9" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1,6 4,9 11,2"/></svg></div><span><strong>Equity Estimate</strong> / Equity</span></li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </div>
@@ -274,56 +329,56 @@
 </div><!-- /imp-wrap -->
 
 <script>
-const uploadZone = document.getElementById('uploadZone');
-const fileInput  = document.getElementById('fileInput');
-const fileChosen = document.getElementById('fileChosen');
-const submitBtn  = document.getElementById('submitBtn');
-const submitNote = submitBtn.nextElementSibling;
-
-fileInput.addEventListener('change', function(){
-  if(this.files.length > 0){
-    fileChosen.textContent = '✓ ' + this.files[0].name;
-    fileChosen.style.display = 'block';
-    uploadZone.style.borderColor = '#9f815a';
-    submitBtn.disabled = false;
-    if(submitNote) submitNote.style.display = 'none';
+/* ── File picker ── */
+function onFileSelect(input){
+  var badge = document.getElementById('fileNameBadge');
+  var btn   = document.getElementById('continueBtn');
+  var zone  = document.getElementById('uploadZone');
+  if(input.files.length > 0){
+    badge.textContent = '✓ ' + input.files[0].name;
+    badge.style.display = 'inline-flex';
+    zone.style.borderColor = '#9f815a';
+    btn.disabled = false;
   }
-});
+}
 
-uploadZone.addEventListener('dragover', function(e){ e.preventDefault(); this.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', function(){ this.classList.remove('dragover'); });
-uploadZone.addEventListener('drop', function(e){
-  e.preventDefault(); this.classList.remove('dragover');
+/* ── Drag and drop ── */
+var zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', function(e){ e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', function(){ zone.classList.remove('dragover'); });
+zone.addEventListener('drop', function(e){
+  e.preventDefault();
+  zone.classList.remove('dragover');
   if(e.dataTransfer.files.length > 0){
-    fileInput.files = e.dataTransfer.files;
-    fileChosen.textContent = '✓ ' + e.dataTransfer.files[0].name;
-    fileChosen.style.display = 'block';
-    this.style.borderColor = '#9f815a';
-    submitBtn.disabled = false;
-    if(submitNote) submitNote.style.display = 'none';
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    onFileSelect(document.getElementById('fileInput'));
   }
 });
 
+/* ── Download starter template ── */
 function downloadTemplate(){
   var headers = [
-    'First Name','Last Name','Email','Phone','Stage',
-    'Birthday (MM/DD)','Home Anniversary','Address','City','State','ZIP',
-    'Property Address','Property Value','Equity Estimate','Lead Source','Notes','Tags'
+    'First Name','Last Name','Email','Phone',
+    'Stage','Lead Source','Notes','Tags',
+    'Birthday (MM/DD)','Home Anniversary',
+    'Address','City','State','ZIP',
+    'Property Address','Property Value','Equity Estimate'
   ];
-  var stageNote = [
-    '(e.g. John)','(e.g. Smith)','(e.g. john@email.com)','(e.g. 555-867-5309)',
-    '(new / attempted / contacted / appt_set / appt_done / active / under_contract / closed / past / nurture / sphere / hold)',
-    '(MM/DD e.g. 03/15)','(MM/DD/YYYY e.g. 06/01/2020)',
-    '(Street address)','(City)','(2-letter e.g. WA)','(e.g. 98101)',
-    '(Investment/property addr)','(e.g. 450000)','(e.g. 120000)',
-    '(referral_client / open_house / zillow / sphere / website / other)',
-    '(Any notes)','(comma-separated e.g. VIP, Investor)'
+  /* One sample row showing exactly what to type */
+  var sample = [
+    'Jane','Smith','jane@email.com','555-555-1234',
+    'New Lead','Referral','Met at open house — wants 3BR in Kirkland','VIP,Buyer',
+    '06/15','01/20/2020',
+    '123 Oak Ave','Kirkland','WA','98033',
+    '','','560000'
   ];
-  var csvRows = [headers.join(','), stageNote.map(function(v){ return '"'+v+'"'; }).join(',')];
-  var blob = new Blob([csvRows.join('\n')], {type:'text/csv'});
+  var csv = headers.join(',') + '\n' + sample.map(function(v){ return '"'+v+'"'; }).join(',') + '\n';
+  /* Add 4 blank rows so they can start filling in immediately */
+  for(var i=0;i<4;i++) csv += headers.map(function(){ return ''; }).join(',') + '\n';
+
   var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'ylh_crm_import_template.csv';
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'YLH_CRM_Import_Template.csv';
   a.click();
 }
 </script>
