@@ -285,16 +285,20 @@
   white-space: nowrap;
 }
 
-/* ── BRIEFING CARD LINKS — dark on rose bg for contrast ── */
-#strip-priorities a,
-#briefing-text,
-#kindness-text {
+/* ── BRIEFING CARD — force 3-col grid, readable colors ── */
+#strip-priorities {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: .65rem !important;
+}
+#strip-priorities a {
   color: #3a332d !important;
+  text-decoration: none !important;
 }
 #strip-priorities a:hover { text-decoration: underline !important; }
+#briefing-text, #kindness-text { color: #3a332d !important; }
 
-/* ── RESPONSIVE STRIP PRIORITIES ── */
-@media (max-width: 640px) {
+@media (max-width: 700px) {
   #strip-priorities { grid-template-columns: 1fr !important; }
 }
 
@@ -355,7 +359,7 @@
   ">
     <!-- Quote + kindness — centered -->
     <div style="text-align:center;margin-bottom:1rem;">
-      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:1.45rem;font-style:italic;font-weight:600;color:#3a332d;line-height:1.45;">Loading your daily inspiration...</div>
+      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:1.85rem;font-style:italic;font-weight:600;color:#3a332d;line-height:1.4;">Loading your daily inspiration...</div>
       <div id="kindness-text" style="font-size:1rem;color:rgba(58,51,45,.85);margin-top:.55rem;line-height:1.45;font-weight:500;"></div>
     </div>
 
