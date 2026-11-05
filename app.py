@@ -1919,6 +1919,68 @@ def send_review_requests():
             print(f"[REVIEW] Error sending to {row.get('client_email')}: {e}")
 
 
+# ── ONBOARDING CHECKLIST ───────────────────────────────────────────────────
+def _count(conn, sql, args):
+    try:
+        return conn.execute(sql, args).fetchone()[0]
+    except Exception:
+        return 0
+
+
+@app.context_processor
+def _inject_onboarding():
+    def onboarding_checklist():
+        """Return {'steps': [...], 'done': n} for the signed-in user, or None when hidden/finished."""
+        uid, role = session.get("user_id"), session.get("role")
+        if not uid or role not in ("agent", "lender", "homeowner"):
+            return None
+        conn = get_connection()
+        try:
+            if _count(conn, "SELECT onboarding_dismissed FROM users WHERE id=?", (uid,)):
+                return None
+            if role == "agent":
+                spec = [
+                    ("Add your photo and contact info", "agent_settings_profile",
+                     "SELECT COUNT(*) FROM user_profiles WHERE user_id=? AND professional_photo IS NOT NULL AND professional_photo<>''"),
+                    ("Add your first client to the CRM", "agent_crm", "SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id=?"),
+                    ("Start a transaction", "agent_transactions", "SELECT COUNT(*) FROM agent_transactions WHERE agent_user_id=?"),
+                    ("Add a trusted vendor", "agent_vendors", "SELECT COUNT(*) FROM trusted_vendors WHERE agent_id=?"),
+                ]
+            elif role == "lender":
+                spec = [
+                    ("Add your photo and contact info", "lender_settings_profile",
+                     "SELECT COUNT(*) FROM user_profiles WHERE user_id=? AND professional_photo IS NOT NULL AND professional_photo<>''"),
+                    ("Add your first borrower", "lender_crm", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=?"),
+                    ("Add a loan", "lender_loans", "SELECT COUNT(*) FROM lender_loans WHERE lender_user_id=?"),
+                ]
+            else:
+                spec = [
+                    ("Add your home", "homeowner_overview", "SELECT COUNT(*) FROM properties WHERE user_id=?"),
+                    ("Upload an important document", "homeowner_upload_documents", "SELECT COUNT(*) FROM homeowner_documents WHERE user_id=?"),
+                    ("Log a home project or repair", "homeowner_home_timeline", "SELECT COUNT(*) FROM homeowner_timeline_events WHERE user_id=?"),
+                    ("Track a warranty or appliance", "homeowner_care_warranty_log", "SELECT COUNT(*) FROM homeowner_warranty_log WHERE user_id=?"),
+                ]
+            steps = [{"label": l, "url": url_for(ep), "done": bool(_count(conn, q, (uid,)))} for l, ep, q in spec]
+        finally:
+            conn.close()
+        done = sum(1 for s in steps if s["done"])
+        if done == len(steps):
+            return None
+        return {"steps": steps, "done": done}
+    return {"onboarding_checklist": onboarding_checklist}
+
+
+@app.route("/onboarding/dismiss", methods=["POST"])
+def onboarding_dismiss():
+    uid = session.get("user_id")
+    if uid:
+        conn = get_connection()
+        conn.execute("UPDATE users SET onboarding_dismissed=1 WHERE id=?", (uid,))
+        conn.commit()
+        conn.close()
+    return redirect(request.referrer or url_for("index"))
+
+
 def backup_database(keep=7):
     """Write a consistent snapshot of the SQLite DB next to it (backups/), keeping the newest `keep`."""
     import sqlite3
