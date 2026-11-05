@@ -1018,10 +1018,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from apscheduler.schedulers.background import BackgroundScheduler
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-EMAIL_USER = os.environ.get("EMAIL_USER")
-EMAIL_PASS = os.environ.get("EMAIL_PASS")
+# Accept either EMAIL_* or MAIL_* variable names (Railway uses MAIL_*)
+EMAIL_HOST = os.environ.get("EMAIL_HOST") or os.environ.get("MAIL_SERVER") or "smtp.gmail.com"
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT") or os.environ.get("MAIL_PORT") or 587)
+EMAIL_USER = os.environ.get("EMAIL_USER") or os.environ.get("MAIL_USERNAME")
+EMAIL_PASS = os.environ.get("EMAIL_PASS") or os.environ.get("MAIL_PASSWORD")
 
 
 def send_reminder_email(to_email, subject, body):
