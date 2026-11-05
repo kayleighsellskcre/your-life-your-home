@@ -24,6 +24,7 @@ except ImportError:
     pass
 
 from flask import (
+    send_file,
     Flask,
     render_template,
     redirect,
@@ -1918,6 +1919,30 @@ def send_review_requests():
             print(f"[REVIEW] Error sending to {row.get('client_email')}: {e}")
 
 
+def backup_database(keep=7):
+    """Write a consistent snapshot of the SQLite DB next to it (backups/), keeping the newest `keep`."""
+    import sqlite3
+    from datetime import datetime as _dt
+    from database import DB_PATH
+    bdir = Path(DB_PATH).parent / "backups"
+    bdir.mkdir(parents=True, exist_ok=True)
+    dest = bdir / f"ylh-{_dt.now().strftime('%Y%m%d-%H%M%S')}.db"
+    src = sqlite3.connect(DB_PATH, timeout=30)
+    dst = sqlite3.connect(dest)
+    try:
+        src.backup(dst)
+    finally:
+        dst.close()
+        src.close()
+    for old in sorted(bdir.glob("ylh-*.db"))[:-keep]:
+        try:
+            old.unlink()
+        except OSError:
+            pass
+    print(f"[BACKUP] Saved {dest.name}")
+    return dest
+
+
 def start_scheduler():
     """Start background scheduler safely without blocking app startup."""
     try:
@@ -1935,6 +1960,7 @@ def start_scheduler():
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily — bracket contest invites
+        scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
         scheduler.start()
         print("[OK] Reminder scheduler started with CRM automation and daily value updates.")
     except Exception as e:
@@ -10833,6 +10859,17 @@ def admin_users_list():
     conn.close()
     
     return render_template('admin/users.html', users=users)
+
+@app.route("/admin/backup/download")
+def admin_backup_download():
+    """Admins can download a fresh snapshot of the database."""
+    user = _admin_session_user()
+    if not user:
+        flash("Access denied", "error")
+        return redirect(url_for("index"))
+    path = backup_database()
+    return send_file(path, as_attachment=True, download_name=path.name)
+
 
 @app.route("/admin/audit-logs")
 def admin_audit_logs():
