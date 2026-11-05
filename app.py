@@ -365,6 +365,7 @@ _RATE_RULES = {
     "reset_password": (10, 3600),
     "concierge_chat": (20, 600),   # public AI chat costs real money per message
     "lead_intake_webhook": (30, 600),
+    "resend_verification": (3, 3600),
 }
 
 
@@ -1919,6 +1920,83 @@ def send_review_requests():
             print(f"[REVIEW] Error sending to {row.get('client_email')}: {e}")
 
 
+# ---------------- EMAIL VERIFICATION ----------------
+def _verify_serializer():
+    from itsdangerous import URLSafeTimedSerializer
+    return URLSafeTimedSerializer(app.secret_key, salt="ylh-verify-email")
+
+
+def _mark_email_verified(user_id):
+    try:
+        conn = get_connection()
+        conn.execute("UPDATE users SET email_verified=1 WHERE id=?", (int(user_id),))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"[VERIFY] could not mark verified: {e}")
+
+
+def _send_verification_email(user_id, email):
+    """Email a 3-day confirmation link. Never raises; signup must not fail on email trouble."""
+    try:
+        token = _verify_serializer().dumps({"uid": int(user_id), "email": email.lower()})
+        link = url_for("verify_email", token=token, _external=True)
+        return send_reminder_email(
+            email,
+            "Confirm your email for Your Life, Your Home",
+            "Welcome! Please confirm your email address by opening this link:\n\n"
+            f"{link}\n\nThe link works for 3 days. If you didn't create an account, ignore this email.",
+        )
+    except Exception as e:
+        print(f"[VERIFY] send failed: {e}")
+        return False
+
+
+@app.route("/verify-email/<token>")
+def verify_email(token):
+    from itsdangerous import BadSignature, SignatureExpired
+    from database import get_user_by_id
+    try:
+        data = _verify_serializer().loads(token, max_age=3 * 24 * 3600)
+        row = get_user_by_id(data["uid"])
+        if not row or str(row["email"]).lower() != data.get("email"):
+            raise BadSignature("mismatch")
+    except (SignatureExpired, BadSignature, KeyError, TypeError):
+        flash("That confirmation link is invalid or has expired. Sign in and request a new one.", "error")
+        return redirect(url_for("login"))
+    _mark_email_verified(data["uid"])
+    flash("Thanks! Your email is confirmed.", "success")
+    return redirect(url_for("index") if session.get("user_id") else url_for("login"))
+
+
+@app.route("/resend-verification", methods=["POST"])
+def resend_verification():
+    uid = session.get("user_id")
+    if not uid:
+        return redirect(url_for("login"))
+    row = get_connection().execute("SELECT email, email_verified FROM users WHERE id=?", (uid,)).fetchone()
+    if row and not row["email_verified"]:
+        if _send_verification_email(uid, row["email"]):
+            flash("Confirmation email sent. Check your inbox.", "success")
+        else:
+            flash("We couldn't send the email right now. Please try again later.", "error")
+    return redirect(request.referrer or url_for("index"))
+
+
+@app.context_processor
+def _inject_unverified():
+    uid = session.get("user_id")
+    if not uid:
+        return {"email_unverified": False}
+    try:
+        conn = get_connection()
+        row = conn.execute("SELECT email_verified FROM users WHERE id=?", (uid,)).fetchone()
+        conn.close()
+        return {"email_unverified": bool(row) and not row["email_verified"]}
+    except Exception:
+        return {"email_unverified": False}
+
+
 # ── ONBOARDING CHECKLIST ───────────────────────────────────────────────────
 def _count(conn, sql, args):
     try:
@@ -2853,6 +2931,7 @@ def signup():
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
+        _send_verification_email(user_id, email)
         
         # Success message for agents/lenders
         if role == "agent":
@@ -3046,6 +3125,7 @@ def reset_password(token):
             flash("Password must be at least 8 characters.", "error")
             return redirect(url_for("reset_password", token=token))
         update_user_password(user["id"], generate_password_hash(new_password))
+        _mark_email_verified(user["id"])
         flash("Password updated. Please sign in with your new password.", "success")
         return redirect(url_for("login", role=user.get("role", "homeowner")))
     return render_template("auth/reset_password.html", token=token)
