@@ -1,3 +1,4 @@
+import time
 print('>>> THIS IS THE REAL app.py BEING RUN <<<')
 
 import os
@@ -366,6 +367,7 @@ _RATE_RULES = {
     "concierge_chat": (20, 600),   # public AI chat costs real money per message
     "lead_intake_webhook": (30, 600),
     "resend_verification": (3, 3600),
+    "login_verify": (10, 900),
 }
 
 
@@ -3015,6 +3017,20 @@ def login():
             flash(f"This account is registered as a {user.get('role', 'user').title()}. Please select the correct role.", "error")
             return redirect(url_for("login", role=user.get("role", "homeowner")))
         
+        # Two-step login: park the user until they enter their authenticator code
+        try:
+            from mfa import is_mfa_enabled
+            if is_mfa_enabled(int(user_id)):
+                session.clear()
+                session["mfa_pending"] = {
+                    "uid": int(user_id), "name": str(user.get("name") or "User"),
+                    "role": str(user.get("role")), "remember": request.form.get("remember") == "on",
+                    "ts": time.time(),
+                }
+                return redirect(url_for("login_verify"))
+        except Exception as _e:
+            print(f"[MFA] check skipped: {_e}")
+
         # Set session
         session.clear()
         session.permanent = request.form.get("remember") == "on"
@@ -3056,6 +3072,79 @@ def agent_admin_redirect():
     """Redirect /agent/admin to the actual admin settings page."""
     return redirect(url_for("admin_settings"), 301)
 # ── End URL Alias Redirects ──────────────────────────────────────────────────
+
+
+# ---------------- TWO-STEP LOGIN (optional, authenticator app) ----------------
+def _finish_login(uid, name, role, remember=False):
+    session.clear()
+    session.permanent = bool(remember)
+    session["user_id"] = int(uid)
+    session["name"] = name
+    session["role"] = role
+    session.modified = True
+    try:
+        c = get_connection()
+        c.execute("UPDATE users SET last_login = datetime('now') WHERE id = ?", (int(uid),))
+        c.commit()
+        c.close()
+    except Exception as e:
+        print(f"[LOGIN] last_login update skipped: {e}")
+    target = {"homeowner": "homeowner_overview", "agent": "agent_dashboard", "lender": "lender_dashboard"}.get(role, "index")
+    return redirect(url_for(target))
+
+
+@app.route("/login/verify", methods=["GET", "POST"])
+def login_verify():
+    pend = session.get("mfa_pending")
+    if not pend or time.time() - pend.get("ts", 0) > 300:
+        session.pop("mfa_pending", None)
+        flash("Please sign in again.", "error")
+        return redirect(url_for("login"))
+    if request.method == "POST":
+        from mfa import verify_mfa_code
+        ok, _used_backup = verify_mfa_code(pend["uid"], request.form.get("code", "").strip().replace(" ", ""))
+        if ok:
+            return _finish_login(pend["uid"], pend["name"], pend["role"], pend.get("remember"))
+        flash("That code didn't work. Try the current 6-digit code, or a backup code.", "error")
+        return redirect(url_for("login_verify"))
+    return render_template("auth/login_verify.html")
+
+
+@app.route("/account/security", methods=["GET", "POST"])
+def account_security():
+    uid = session.get("user_id")
+    if not uid:
+        return redirect(url_for("login"))
+    from mfa import generate_mfa_secret, verify_mfa_code, enable_mfa, disable_mfa, is_mfa_enabled
+    enabled = bool(is_mfa_enabled(uid))
+    action = request.form.get("action") if request.method == "POST" else None
+    if action == "start" and not enabled:
+        c = get_connection()
+        row = c.execute("SELECT email FROM users WHERE id=?", (uid,)).fetchone()
+        c.close()
+        secret, qr, codes = generate_mfa_secret(uid, row["email"])
+        return render_template("account/security.html", enabled=False, setup=True, secret=secret, qr=qr, codes=codes)
+    if action == "confirm" and not enabled:
+        code = request.form.get("code", "").strip().replace(" ", "")
+        import pyotp
+        c = get_connection()
+        row = c.execute("SELECT secret FROM mfa_settings WHERE user_id=?", (uid,)).fetchone()
+        c.close()
+        if row and pyotp.TOTP(row["secret"]).verify(code, valid_window=1):
+            enable_mfa(uid)
+            flash("Two-step sign-in is on.", "success")
+        else:
+            flash("That code didn't match. Start again and scan the new QR code.", "error")
+        return redirect(url_for("account_security"))
+    if action == "disable" and enabled:
+        ok, _ = verify_mfa_code(uid, request.form.get("code", "").strip().replace(" ", ""))
+        if ok:
+            disable_mfa(uid)
+            flash("Two-step sign-in is off.", "success")
+        else:
+            flash("That code didn't match, so it was left on.", "error")
+        return redirect(url_for("account_security"))
+    return render_template("account/security.html", enabled=enabled, setup=False)
 
 
 # ---------------- PASSWORD RESET (emailed, single-use, expiring link) ----------------

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block page_title %}Account security &bull; Your Life Your Home{% endblock %}
+{% block content %}
+{% include "auth/_auth_styles.html" %}
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Two-step sign-in</h1>
+    {% if setup %}
+      <p class="lead">1. Scan this QR code with Google Authenticator, Authy or 1Password.<br>2. Enter the 6-digit code it shows.</p>
+      <p style="text-align:center"><img alt="QR code" src="data:image/png;base64,{{ qr }}" width="200" height="200"></p>
+      <p style="font-size:.8rem;text-align:center;word-break:break-all">Can't scan? Enter this key: <strong>{{ secret }}</strong></p>
+      <p style="font-size:.85rem"><strong>Save these backup codes</strong> somewhere safe. Each works once if you lose your phone:</p>
+      <p style="font-family:monospace;font-size:.9rem;line-height:1.7">{% for c in codes %}{{ c }}{% if not loop.last %} &nbsp; {% endif %}{% endfor %}</p>
+      <form method="post">
+        <input type="hidden" name="action" value="confirm">
+        <label for="code">6-digit code</label>
+        <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" required>
+        <button class="btn-primary" type="submit">Turn on</button>
+      </form>
+    {% elif enabled %}
+      <p class="lead">Two-step sign-in is <strong>on</strong>. To turn it off, enter a current code.</p>
+      <form method="post">
+        <input type="hidden" name="action" value="disable">
+        <label for="code">Code</label>
+        <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" required>
+        <button class="btn-primary" type="submit">Turn off</button>
+      </form>
+    {% else %}
+      <p class="lead">Add a second step when you sign in: a code from an authenticator app on your phone. Recommended for agents and lenders.</p>
+      <form method="post"><input type="hidden" name="action" value="start"><button class="btn-primary" type="submit">Set up</button></form>
+    {% endif %}
+    <a class="back" href="{{ url_for('index') }}">&larr; Back</a>
+  </div>
+</div>
+{% endblock %}

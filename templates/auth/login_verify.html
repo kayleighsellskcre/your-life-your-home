@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block page_title %}Verify &bull; Your Life Your Home{% endblock %}
+{% block content %}
+{% include "auth/_auth_styles.html" %}
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Two-step sign-in</h1>
+    <p class="lead">Enter the 6-digit code from your authenticator app, or one of your backup codes.</p>
+    <form method="post">
+      <label for="code">Code</label>
+      <input id="code" name="code" inputmode="numeric" autocomplete="one-time-code" required autofocus />
+      <button class="btn-primary" type="submit">Verify</button>
+    </form>
+    <a class="back" href="{{ url_for('login') }}">&larr; Back to sign in</a>
+  </div>
+</div>
+{% endblock %}
