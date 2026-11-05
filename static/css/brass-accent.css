@@ -1,0 +1,30 @@
+/* Antique-brass accent for the highest-value calls to action.
+   Loaded last. Scoped to the landing hero and auth cards so dashboards keep
+   their sage buttons; add class "btn-brass" anywhere else you want it. */
+:root { --brass: #8A6D2F; --brass-light: #A68A4E; --brass-line: rgba(166,138,78,.55); }
+
+.btn-brass,
+.hero-buttons .btn-primary,
+.auth-card .btn-primary,
+.auth-form .btn-primary {
+  background: linear-gradient(135deg, var(--brass-light) 0%, var(--brass) 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(138,109,47,.28) !important;
+}
+.btn-brass:hover,
+.hero-buttons .btn-primary:hover,
+.auth-card .btn-primary:hover,
+.auth-form .btn-primary:hover {
+  background: linear-gradient(135deg, var(--brass) 0%, #6F5622 100%) !important;
+  box-shadow: 0 6px 18px rgba(138,109,47,.38) !important;
+}
+/* Thin brass rule under section labels */
+.section-header-label::after {
+  content: ""; display: block; width: 36px; height: 2px; margin: .6rem auto 0; background: var(--brass-line);
+}
+.hero-buttons .btn-pulse { animation-name: ylhPulseBrass; }
+@keyframes ylhPulseBrass {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(138,109,47,.2); }
+  50% { transform: scale(1.06); box-shadow: 0 8px 26px rgba(138,109,47,.4); }
+}

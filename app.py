@@ -2079,6 +2079,8 @@ def index():
         "main/index.html",
         brand_name=FRONT_BRAND_NAME,
         cloud_cma_url=CLOUD_CMA_URL,
+        hero_photo=next((f"img/hero-home.{e}" for e in ("jpg", "jpeg", "webp", "png")
+                         if (BASE_DIR / "static" / "img" / f"hero-home.{e}").exists()), None),
     )
 
 
