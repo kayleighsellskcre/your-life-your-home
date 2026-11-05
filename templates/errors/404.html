@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block page_title %}Page not found &bull; Your Life Your Home{% endblock %}
+{% block content %}
+{% include "auth/_auth_styles.html" %}
+<div class="auth-page">
+  <div class="auth-card" style="text-align:center;">
+    <h1>Page not found</h1>
+    <p class="lead">We couldn't find the page you were looking for.</p>
+    <a class="btn-primary" href="{{ url_for('index') }}" style="display:inline-block;width:auto;padding:.8rem 1.75rem;">Back to home</a>
+  </div>
+</div>
+{% endblock %}

@@ -16,7 +16,17 @@
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
  
  <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
- <meta name="description" content="Luxury homeowner platform connecting you with trusted real estate professionals" />
+ {% block meta %}
+ <meta name="description" content="Track your home's value and equity, plan renovations, and stay on top of home care, free for homeowners, with CRM and marketing tools for agents and loan officers." />
+ <link rel="canonical" href="{{ request.base_url }}" />
+ <meta property="og:type" content="website" />
+ <meta property="og:site_name" content="Your Life, Your Home" />
+ <meta property="og:title" content="Your Life, Your Home: your home's story, beautifully organized" />
+ <meta property="og:description" content="Understand your equity, plan your next move, and keep every detail of your home in one calm space." />
+ <meta property="og:url" content="{{ request.base_url }}" />
+ <meta name="twitter:card" content="summary" />
+ {% endblock %}
+ <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}" />
 
  <!-- Main CSS -->
  <!-- Design System Foundation -->
@@ -71,6 +81,15 @@
  rel="stylesheet"
  />
  
+ <style>
+ .skip-link { position:absolute; left:-9999px; top:0; background:#364A2B; color:#fff; padding:.6rem 1rem; z-index:10000; border-radius:0 0 6px 0; }
+ .skip-link:focus { left:0; }
+ :focus-visible { outline:3px solid #5C7050; outline-offset:2px; }
+ .site-footer { text-align:center; padding:2rem 1rem; font-size:.85rem; color:#5C7050; border-top:1px solid rgba(143,168,138,.3); background:#F4F8F0; }
+ .site-footer p { margin:.25rem 0; }
+ .site-footer a { color:#364A2B; }
+ @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+ </style>
  <style>
  /* Base overrides for full-width layouts */
  body {
@@ -673,6 +692,7 @@
  </head>
 
  <body>
+ <a class="skip-link" href="#main-content">Skip to content</a>
  <!-- Eco-Inspired Header -->
  <style>
  /* ── TOP NAV HAMBURGER ──────────────────────────── */
@@ -750,7 +770,7 @@
    <!-- Right: Hamburger (logged in) or Sign In (guest) -->
    {% if session.get('user_id') %}
    <div class="ylh-ham-wrap" style="flex-shrink:0;">
-     <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Menu">
+     <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Open menu" aria-haspopup="true" aria-controls="ylhHamMenu" aria-expanded="false">
        <span></span><span></span><span></span>
      </button>
      <div class="ylh-ham-menu" id="ylhHamMenu">
@@ -849,6 +869,7 @@
    btn.addEventListener('click', function(e){
      e.stopPropagation();
      menu.classList.toggle('open');
+     btn.setAttribute('aria-expanded', menu.classList.contains('open') ? 'true' : 'false');
    });
    document.addEventListener('click', function(e){
      if(!menu.contains(e.target) && e.target !== btn) menu.classList.remove('open');
@@ -857,7 +878,7 @@
  </script>
 
  <div class="ylh-shell">
- <main class="ylh-main">
+ <main class="ylh-main" id="main-content">
  {# Optional flash messages section #}
  {% with messages = get_flashed_messages(with_categories=True) %}
  {% if messages %}
@@ -874,6 +895,12 @@
  {% block content %}{% endblock %}
  </main>
  </div>
+ <footer class="site-footer">
+ <p>&copy; {{ now_year }} Your Life, Your Home. All rights reserved.</p>
+ {% if not session.get('user_id') %}
+ <p><a href="{{ url_for('login') }}">Sign in</a> &middot; <a href="{{ url_for('signup') }}">Create an account</a></p>
+ {% endif %}
+ </footer>
 
  <!-- Sidebar menu toggle logic -->
  <script>

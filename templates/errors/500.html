@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block page_title %}Something went wrong &bull; Your Life Your Home{% endblock %}
+{% block content %}
+{% include "auth/_auth_styles.html" %}
+<div class="auth-page">
+  <div class="auth-card" style="text-align:center;">
+    <h1>Something went wrong</h1>
+    <p class="lead">We hit an unexpected snag. Please try again in a moment.</p>
+    <a class="btn-primary" href="{{ url_for('index') }}" style="display:inline-block;width:auto;padding:.8rem 1.75rem;">Back to home</a>
+  </div>
+</div>
+{% endblock %}

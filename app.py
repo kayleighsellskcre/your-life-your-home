@@ -302,9 +302,62 @@ except Exception as e:
     print(f"[Startup] Promo code init warning: {e}")
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("YLH_SECRET_KEY", "change-this-secret-key")
-app.config["TEMPLATES_AUTO_RELOAD"] = True
+_IS_PRODUCTION = bool(os.environ.get("RAILWAY_ENVIRONMENT") or os.environ.get("YLH_ENV") == "production")
+_secret = os.environ.get("YLH_SECRET_KEY")
+if not _secret:
+    # The old fallback string is public in git history; anyone who knows it can forge
+    # a session. Keep a fallback so the app still boots, but be loud about it.
+    print("[SECURITY WARNING] YLH_SECRET_KEY is not set. Set it to a long random value "
+          "(python -c \"import secrets; print(secrets.token_hex(32))\") in your environment.")
+    _secret = "change-this-secret-key"
+app.secret_key = _secret
+app.config["TEMPLATES_AUTO_RELOAD"] = not _IS_PRODUCTION
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = _IS_PRODUCTION  # HTTPS only in production
+app.config["MAX_CONTENT_LENGTH"] = 250 * 1024 * 1024  # 250 MB upload cap
+
+
+# ── Security hardening: headers + cross-site POST guard ─────────────────────
+_CSRF_EXEMPT_PATHS = ("/stripe/webhook", "/api/homebot/webhook", "/api/lead-intake/")
+
+
+@app.before_request
+def _block_cross_site_posts():
+    """Reject state-changing requests whose Origin header points at another site.
+
+    Browsers always send Origin on cross-origin POSTs, so this stops classic CSRF
+    without needing a token in every form. Server-to-server webhooks (no Origin)
+    and the explicitly exempt public endpoints are unaffected.
+    """
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return None
+    if request.path.startswith(_CSRF_EXEMPT_PATHS):
+        return None
+    origin = request.headers.get("Origin")
+    if origin and origin != "null":
+        from urllib.parse import urlparse
+        if urlparse(origin).netloc != request.host:
+            return ("Cross-site request blocked.", 403)
+    return None
+
+
+@app.context_processor
+def _inject_now_year():
+    from datetime import datetime
+    return {"now_year": datetime.now().year}
+
+
+@app.after_request
+def _security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    if _IS_PRODUCTION:
+        response.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return response
 
 # ── Custom Jinja2 filters ────────────────────────────────────────────────────
 @app.template_filter("min")
@@ -800,8 +853,11 @@ UPLOAD_TIMELINE.mkdir(parents=True, exist_ok=True)
 
 # Helper to get current user id
 def get_current_user_id() -> int:
-    """Fallback to demo user for now."""
-    return session.get("user_id") or 1
+    """Return the logged-in user's id; unauthenticated visitors get a 401 (never another user's data)."""
+    uid = session.get("user_id")
+    if not uid:
+        abort(401)
+    return uid
 
 
 def get_current_user() -> Optional[dict]:
@@ -1791,7 +1847,7 @@ def start_scheduler():
         scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
-        scheduler.add_job(send_contest_invites_scheduled, "cron", hour=9, minute=30)  # 9:30 AM daily — bracket contest invites
+        scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily — bracket contest invites
         scheduler.start()
         print("[OK] Reminder scheduler started with CRM automation and daily value updates.")
     except Exception as e:
@@ -2023,6 +2079,53 @@ def index():
         brand_name=FRONT_BRAND_NAME,
         cloud_cma_url=CLOUD_CMA_URL,
     )
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    body = chr(10).join([
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin",
+        "Disallow: /agent/",
+        "Disallow: /lender/",
+        "Disallow: /homeowner",
+        "Disallow: /api/",
+        "Disallow: /debug/",
+        f"Sitemap: {request.url_root}sitemap.xml",
+        "",
+    ])
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    urls = [url_for("index", _external=True), url_for("login", _external=True), url_for("signup", _external=True)]
+    xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+    xml += "".join(f"<url><loc>{u}</loc></url>" for u in urls) + "</urlset>"
+    return Response(xml, mimetype="application/xml")
+
+
+@app.errorhandler(404)
+def _not_found(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Not found"}), 404
+    return render_template("errors/404.html"), 404
+
+
+@app.errorhandler(401)
+def _unauthorized(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Please sign in"}), 401
+    flash("Please sign in to continue.", "warning")
+    return redirect(url_for("login"))
+
+
+@app.errorhandler(500)
+def _server_error(e):
+    if request.path.startswith("/api/"):
+        return jsonify({"error": "Server error"}), 500
+    return render_template("errors/500.html"), 500
 
 
 @app.route("/health/ffmpeg")
@@ -2277,25 +2380,9 @@ def signup():
                                 flash("An error occurred while completing your account. Please try again.", "error")
                                 return redirect(url_for("signup", role=role, ref=referral_token_from_form))
                         else:
-                            # Account exists - ALWAYS UPDATE PASSWORD (password reset feature)
-                            print(f"SIGNUP: Account exists - updating password for {email}")
-                            try:
-                                from database import update_user_password
-                                update_user_password(
-                                    existing_user["id"],
-                                    password_hash,
-                                    name if name else existing_user.get("name"),
-                                    role if role else existing_user.get("role")
-                                )
-                                print(f"SIGNUP: Password updated successfully for user {existing_user['id']}")
-                                flash("Your password has been updated! Please log in with your new password.", "success")
-                                return redirect(url_for("login", role=role))
-                            except Exception as update_error:
-                                print(f"SIGNUP ERROR: Failed to update password - {str(update_error)}")
-                                import traceback
-                                print(traceback.format_exc())
-                                flash("Error updating password. Please try again or contact support.", "error")
-                                return redirect(url_for("signup", role=role))
+                            # Account already has a password: never overwrite it from signup.
+                            flash("An account with that email already exists. Please sign in, or use \"Forgot password?\".", "error")
+                            return redirect(url_for("login", role=existing_user.get("role") or role))
                     else:
                         # Email constraint failed but user not found - this shouldn't happen
                         print(f"DEBUG Signup: IntegrityError but user not found - {str(e)}")
@@ -2636,27 +2723,17 @@ def login():
             flash("Account incomplete. Please sign up again with the same email to set your password.", "error")
             return redirect(url_for("signup", role=selected_role))
         
-        # Verify password - SIMPLE DIRECT CHECK
-        password_correct = False
+        # Verify password
         try:
             password_correct = check_password_hash(stored_hash, password)
         except Exception as e:
             print(f"LOGIN PASSWORD CHECK ERROR: {str(e)}")
-            # If check fails, try to regenerate hash and update
-            try:
-                new_hash = generate_password_hash(password)
-                from database import update_user_password
-                update_user_password(user_id, new_hash)
-                password_correct = True  # Allow login after reset
-                flash("Your password has been reset. Please log in again.", "success")
-            except:
-                pass
-        
+            password_correct = False
+
         if not password_correct:
-            # Offer immediate password reset
-            flash("Password incorrect. You can reset it by signing up again with the same email.", "error")
-            return redirect(url_for("signup", role=selected_role))
-        
+            flash("Email or password did not match. Use \"Forgot password?\" if you need to reset it.", "error")
+            return redirect(url_for("login", role=selected_role))
+
         # Check role
         if user_role != str(selected_role).strip().lower():
             flash(f"This account is registered as a {user.get('role', 'user').title()}. Please select the correct role.", "error")
@@ -2953,85 +3030,76 @@ def debug_sync_all_homeowners_to_crm():
         return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
-@app.route("/reset-password", methods=["GET", "POST"])
-def reset_password():
-    """Password reset - allows users to reset their password by email"""
+# ---------------- PASSWORD RESET (emailed, single-use, expiring link) ----------------
+def _reset_serializer():
+    from itsdangerous import URLSafeTimedSerializer
+    return URLSafeTimedSerializer(app.secret_key, salt="ylh-password-reset")
+
+
+def _reset_fingerprint(password_hash):
+    """Tie a token to the current password so it dies the moment the password changes."""
+    import hashlib
+    return hashlib.sha256((password_hash or "").encode()).hexdigest()[:16]
+
+
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    """Step 1: ask for an email; send a reset link if the account exists."""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
-        new_password = request.form.get("password", "")
-        confirm_password = request.form.get("confirm_password", "")
-        
-        if not email or not new_password:
-            flash("Please fill in email and new password.", "error")
-            return redirect(url_for("reset_password"))
-        
-        if new_password != confirm_password:
-            flash("Passwords do not match.", "error")
-            return redirect(url_for("reset_password"))
-        
-        if len(new_password) < 6:
-            flash("Password must be at least 6 characters.", "error")
-            return redirect(url_for("reset_password"))
-        
-        try:
-            user_row = get_user_by_email(email)
-            if not user_row:
-                flash("Account not found. Please check your email.", "error")
-                return redirect(url_for("reset_password"))
-            
-            user = dict(user_row) if hasattr(user_row, 'keys') and not isinstance(user_row, dict) else (user_row if isinstance(user_row, dict) else {})
-            user_id = user.get("id")
-            new_hash = generate_password_hash(new_password)
-            
-            from database import update_user_password
-            update_user_password(user_id, new_hash)
-            
-            flash("Password reset successful! Please log in with your new password.", "success")
-            return redirect(url_for("login", role=user.get("role", "homeowner")))
-        except Exception as e:
-            print(f"RESET PASSWORD ERROR: {str(e)}")
-            import traceback
-            print(traceback.format_exc())
-            flash("Error resetting password. Please try again.", "error")
-            return redirect(url_for("reset_password"))
-    
-    return render_template("auth/reset_password.html")
+        if email:
+            try:
+                user_row = get_user_by_email(email)
+                if user_row:
+                    user = dict(user_row) if hasattr(user_row, "keys") and not isinstance(user_row, dict) else user_row
+                    token = _reset_serializer().dumps(
+                        {"uid": user["id"], "fp": _reset_fingerprint(user.get("password_hash"))}
+                    )
+                    link = url_for("reset_password", token=token, _external=True)
+                    sent = send_reminder_email(
+                        email,
+                        "Reset your Your Life, Your Home password",
+                        "We received a request to reset your password.\n\n"
+                        f"Use this link within 1 hour:\n{link}\n\n"
+                        "If you didn't ask for this, you can safely ignore this email.",
+                    )
+                    if not sent:
+                        print(f"[RESET] Email not sent for {email}. Link: {link}")
+            except Exception as e:
+                print(f"FORGOT PASSWORD ERROR: {e}")
+        # Same message whether or not the account exists (prevents account enumeration)
+        flash("If an account exists for that email, a reset link is on its way.", "success")
+        return redirect(url_for("login"))
+    return render_template("auth/forgot_password.html")
 
 
-@app.route("/debug/reset-password", methods=["POST"])
-def debug_reset_password():
-    """TEMPORARY: Reset password for debugging - REMOVE IN PRODUCTION"""
+@app.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """Step 2: set a new password using the emailed link."""
+    from itsdangerous import BadSignature, SignatureExpired
+    from database import update_user_password, get_user_by_id
     try:
-        data = request.get_json() or request.form
-        email = (data.get("email") or "").strip().lower()
-        new_password = data.get("password") or data.get("new_password")
-        
-        if not email or not new_password:
-            return jsonify({"error": "Email and password required"}), 400
-        
-        user_row = get_user_by_email(email)
-        if not user_row:
-            return jsonify({"error": "User not found"}), 404
-        
-        if hasattr(user_row, 'keys') and not isinstance(user_row, dict):
-            user = dict(user_row)
-        else:
-            user = user_row if isinstance(user_row, dict) else {}
-        
-        user_id = user.get("id")
-        new_hash = generate_password_hash(new_password)
-        
-        from database import update_user_password
-        update_user_password(user_id, new_hash)
-        
-        return jsonify({
-            "success": True,
-            "message": f"Password reset for user {user_id}",
-            "email": email
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
+        data = _reset_serializer().loads(token, max_age=3600)
+        user_row = get_user_by_id(data["uid"])
+        user = dict(user_row) if user_row and hasattr(user_row, "keys") and not isinstance(user_row, dict) else user_row
+        if not user or _reset_fingerprint(user.get("password_hash")) != data.get("fp"):
+            raise BadSignature("stale")
+    except (SignatureExpired, BadSignature, KeyError, TypeError):
+        flash("That reset link is invalid or has expired. Please request a new one.", "error")
+        return redirect(url_for("forgot_password"))
+
+    if request.method == "POST":
+        new_password = request.form.get("password", "")
+        if new_password != request.form.get("confirm_password", ""):
+            flash("Passwords do not match.", "error")
+            return redirect(url_for("reset_password", token=token))
+        if len(new_password) < 8:
+            flash("Password must be at least 8 characters.", "error")
+            return redirect(url_for("reset_password", token=token))
+        update_user_password(user["id"], generate_password_hash(new_password))
+        flash("Password updated. Please sign in with your new password.", "success")
+        return redirect(url_for("login", role=user.get("role", "homeowner")))
+    return render_template("auth/reset_password.html", token=token)
 
 
 @app.route("/logout")
@@ -12054,18 +12122,6 @@ def lead_intake_webhook(agent_token):
         return {"success": False, "error": "Could not create contact"}, 500
 
 
-# ---------------- DEVELOPMENT SERVER ----------------
-if __name__ == "__main__":
-    # Only runs when executing directly with Python (not with gunicorn)
-    # Gunicorn will import the app and won't execute this block
-    app.run(
-        host="127.0.0.1",
-        port=5000,
-        debug=True,  # Enable debug mode for development
-        use_reloader=False,  # Disable reloader on Windows to avoid import issues
-    )
-
-
 # =============================================================
 # CLIENT CONTESTS (Bracket Contests — NFL Playoffs & NCAA)
 # =============================================================
@@ -13052,3 +13108,14 @@ Lender Data:
         return jsonify(parsed)
     except Exception as e:
         return jsonify({"pipeline_score": 0, "summary": "Add loans to your pipeline to get an AI health assessment.", "recommendations": []})
+
+
+# ---------------- DEVELOPMENT SERVER ----------------
+if __name__ == "__main__":
+    # Only runs when executing directly with Python (not with gunicorn)
+    app.run(
+        host="127.0.0.1",
+        port=5000,
+        debug=not _IS_PRODUCTION,
+        use_reloader=False,  # Disable reloader on Windows to avoid import issues
+    )

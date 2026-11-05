@@ -1,6 +1,16 @@
 {% extends "base.html" %}
 
-{% block page_title %}Home &bull; Your Life Your Home{% endblock %}
+{% block page_title %}Your Life, Your Home | Home value, equity & care in one calm space{% endblock %}
+{% block meta %}
+<meta name="description" content="Free for homeowners: track your home's value and equity, plan renovations, and keep every document and checklist in one place. CRM and marketing tools for agents and loan officers." />
+<link rel="canonical" href="{{ request.base_url }}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Your Life, Your Home" />
+<meta property="og:title" content="Your Life, Your Home: your home's story, beautifully organized" />
+<meta property="og:description" content="Understand your equity, plan your next move, and keep every detail of your home in one calm space." />
+<meta property="og:url" content="{{ request.base_url }}" />
+<meta name="twitter:card" content="summary" />
+{% endblock %}
 
 {% block content %}
 <style>
@@ -48,7 +58,7 @@
 .hero-tagline {
   font-family: 'Playfair Display', Georgia, serif;
   font-size: 1.15rem;
-  color: #8FA88A;
+  color: #5C7050;
   margin: 0 0 .875rem;
   font-weight: 500;
   letter-spacing: 0.04em;
@@ -81,9 +91,16 @@
   justify-content: center;
 }
 
+.btn-pulse { animation: ylhPulse 2.2s ease-in-out infinite; }
+@keyframes ylhPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(92,112,80,.18); }
+  50% { transform: scale(1.06); box-shadow: 0 8px 26px rgba(92,112,80,.35); }
+}
+@media (prefers-reduced-motion: reduce) { .btn-pulse { animation: none; } }
+
 .hero-note {
-  font-size: 0.82rem;
-  color: #7A9068;
+  font-size: 0.85rem;
+  color: #4A5E3E;
   line-height: 1.7;
   letter-spacing: 0.01em;
 }
@@ -110,7 +127,7 @@
   font-weight: 700;
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: #8FA88A;
+  color: #5C7050;
   display: block;
   margin-bottom: .625rem;
 }
@@ -268,7 +285,6 @@
 
 @media (max-width: 768px) {
   html, body { overflow-x: hidden !important; max-width: 100vw !important; }
-  * { max-width: 100%; box-sizing: border-box; }
 
   .hero-wrapper { grid-template-columns: 1fr !important; min-height: auto !important; padding: 0 !important; }
   .hero-content-side { padding: 2rem 1rem !important; max-width: 100% !important; margin: 0 !important; }
@@ -308,12 +324,14 @@
     </p>
 
     <div class="hero-buttons">
-      <a class="btn-primary" id="homepage-primary-btn" href="{{ cloud_cma_url }}" target="_blank" rel="noopener">
+      <a id="homepage-primary-btn" class="btn-primary btn-pulse" href="{{ cloud_cma_url }}" target="_blank" rel="noopener">
         Discover Your Home's Worth
       </a>
-      <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('homeowner_overview') }}">
-        Explore Homeowners Dashboard
-      </a>
+      {% if session.get('user_id') %}
+      <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('homeowner_overview') }}">Go to My Dashboard</a>
+      {% else %}
+      <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('signup', role='homeowner') }}">Create a Free Account</a>
+      {% endif %}
     </div>
 
     <p class="hero-note">
@@ -323,17 +341,17 @@
   </div>
 
   <div class="hero-image-side">
-    <div class="hero-decorative-text">Your<br>Home</div>
+    <div class="hero-decorative-text" aria-hidden="true">Your<br>Home</div>
   </div>
 </div>
 
 <!-- ── ROLE CARDS ────────────────────────────────────────────────── -->
 {% if not session.get('user_id') %}
-<section class="featured-section">
+<section class="featured-section" aria-labelledby="journeys-heading">
   <div class="featured-container">
     <div class="section-header">
       <span class="section-header-label">Built For You</span>
-      <h2 class="section-title">Designed for Every Journey</h2>
+      <h2 class="section-title" id="journeys-heading">Designed for Every Journey</h2>
       <p class="section-subtitle" style="text-align:center !important;margin:0 auto !important;">
         Thoughtfully crafted spaces for homeowners, real estate agents, and lending professionals
       </p>
@@ -343,7 +361,7 @@
 
       <!-- Homeowner Card -->
       <article class="role-card featured">
-        <div class="role-card-icon">&#9884;</div>
+        <div class="role-card-icon" aria-hidden="true">&#127968;</div>
         <h3 class="role-card-title">Homeowners</h3>
         <p class="role-card-description">
           Your free sanctuary: value snapshots, equity tracking, renovation planning,
@@ -358,7 +376,7 @@
 
       <!-- Agent Card -->
       <article class="role-card">
-        <div class="role-card-icon">&#9884;</div>
+        <div class="role-card-icon" aria-hidden="true">&#128188;</div>
         <h3 class="role-card-title">Real Estate Agents</h3>
         <p class="role-card-description">
           Elegant CRM, client dashboards, smart coordinator, document center,
@@ -373,7 +391,7 @@
 
       <!-- Lender Card -->
       <article class="role-card">
-        <div class="role-card-icon">&#9884;</div>
+        <div class="role-card-icon" aria-hidden="true">&#127974;</div>
         <h3 class="role-card-title">Loan Officers</h3>
         <p class="role-card-description">
           Professional profile, borrower CRM, live loan tracking, marketing suite,
@@ -403,39 +421,9 @@
       </p>
     </div>
     <div class="philosophy-visual">
-      <div class="philosophy-visual-text">Calm<br>Curated<br>Yours</div>
+      <div class="philosophy-visual-text" aria-hidden="true">Calm<br>Curated<br>Yours</div>
     </div>
   </div>
 </section>
 
-<script>
-/* Elegant pulse on primary hero button only */
-(function() {
-  function elegantPulse(btn, duration) {
-    if (!btn) return;
-    btn.style.transformOrigin = 'center center';
-    btn.style.willChange = 'transform';
-    var startTime = null;
-    function animate(ts) {
-      if (!startTime) startTime = ts;
-      var p = ((ts - startTime) % duration) / duration;
-      var s = 1 + 0.10 * (0.5 - 0.5 * Math.cos(p * Math.PI * 2));
-      btn.style.transform = 'scale(' + s.toFixed(4) + ')';
-      var si = (s - 1) * 0.4;
-      btn.style.boxShadow = '0 ' + (4 + si*12) + 'px ' + (12 + si*25) + 'px rgba(92,112,80,' + (0.18 + si*0.25) + ')';
-      requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
-  }
-
-  function init() {
-    var btn = document.getElementById('homepage-primary-btn');
-    if (btn) elegantPulse(btn, 2200);
-  }
-
-  if (document.readyState === 'complete' || document.readyState === 'interactive') { init(); }
-  else { document.addEventListener('DOMContentLoaded', init); }
-  setTimeout(init, 150);
-})();
-</script>
 {% endblock %}
