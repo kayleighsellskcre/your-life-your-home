@@ -343,6 +343,92 @@ def _block_cross_site_posts():
     return None
 
 
+if _IS_PRODUCTION:
+    # Railway terminates HTTPS in front of the app: trust one proxy hop so request.remote_addr
+    # is the real client IP and url_for(_external=True) builds https:// links.
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+
+# ── Simple in-memory rate limiting (per worker) ──────────────────────────────
+import time as _time
+import threading as _threading
+
+_RATE_HITS = {}
+_RATE_LOCK = _threading.Lock()
+# endpoint -> (max requests, window seconds)
+_RATE_RULES = {
+    "login": (8, 900),             # 8 sign-in attempts / 15 min per IP
+    "signup": (10, 3600),
+    "forgot_password": (5, 3600),
+    "reset_password": (10, 3600),
+    "concierge_chat": (20, 600),   # public AI chat costs real money per message
+    "lead_intake_webhook": (30, 600),
+}
+
+
+def _rate_limited(key, limit, window):
+    now = _time.time()
+    with _RATE_LOCK:
+        hits = [t for t in _RATE_HITS.get(key, []) if now - t < window]
+        if len(hits) >= limit:
+            _RATE_HITS[key] = hits
+            return True
+        hits.append(now)
+        _RATE_HITS[key] = hits
+        if len(_RATE_HITS) > 5000:  # keep memory bounded
+            for k in [k for k, v in _RATE_HITS.items() if not v or now - v[-1] > 3600]:
+                _RATE_HITS.pop(k, None)
+    return False
+
+
+@app.before_request
+def _apply_rate_limits():
+    rule = _RATE_RULES.get(request.endpoint or "")
+    if not rule or request.method != "POST":
+        return None
+    limit, window = rule
+    ip = request.remote_addr or "unknown"
+    keys = [f"{request.endpoint}:ip:{ip}"]
+    if request.endpoint == "login":
+        email = (request.form.get("email") or "").strip().lower()
+        if email:
+            keys.append(f"login:email:{email}")  # also blunts distributed guessing
+    if any(_rate_limited(k, limit, window) for k in keys):
+        if request.is_json or request.path.startswith("/api/") or request.endpoint == "concierge_chat":
+            return jsonify({"error": "Too many requests. Please slow down and try again shortly."}), 429
+        flash("Too many attempts. Please wait a few minutes and try again.", "error")
+        return redirect(url_for("login")), 303
+    return None
+
+
+_ALLOWED_UPLOAD_EXT = {
+    "png", "jpg", "jpeg", "gif", "webp", "heic", "heif", "bmp", "tif", "tiff",   # images
+    "pdf", "doc", "docx", "xls", "xlsx", "csv", "txt", "rtf", "ppt", "pptx",     # documents
+    "mp4", "mov", "webm", "m4v",                                                 # video
+}
+
+
+@app.before_request
+def _validate_uploads():
+    """One allow-list for every upload form. Blocks .html/.svg/.js/.exe etc. that could
+    run scripts or malware when opened from our domain."""
+    if request.method != "POST" or not request.files:
+        return None
+    for f in [fl for key in request.files for fl in request.files.getlist(key)]:
+        name = (f.filename or "").strip()
+        if not name:
+            continue  # empty file input
+        ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
+        if ext not in _ALLOWED_UPLOAD_EXT:
+            msg = "That file type isn't supported. Please upload an image, PDF, Word, Excel or CSV file."
+            if request.is_json or request.path.startswith("/api/") or request.headers.get("X-Requested-With"):
+                return jsonify({"error": msg}), 400
+            flash(msg, "error")
+            return redirect(request.referrer or url_for("index")), 303
+    return None
+
+
 @app.context_processor
 def _inject_now_year():
     from datetime import datetime
@@ -1855,9 +1941,29 @@ def start_scheduler():
         print(f"[WARNING] Scheduler could not start (non-critical): {e}")
 
 
+_scheduler_lock_fh = None
+
+
+def _acquire_scheduler_lock():
+    """With several gunicorn workers, let exactly one run the daily jobs (no double emails)."""
+    global _scheduler_lock_fh
+    try:
+        import fcntl, tempfile
+        _scheduler_lock_fh = open(os.path.join(tempfile.gettempdir(), "ylh_scheduler.lock"), "w")
+        fcntl.flock(_scheduler_lock_fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return True
+    except ImportError:
+        return True  # Windows/dev: single process
+    except OSError:
+        return False  # another worker already owns the scheduler
+
+
 # Start scheduler when app starts (non-blocking)
 try:
-    start_scheduler()
+    if _acquire_scheduler_lock():
+        start_scheduler()
+    else:
+        print("[Scheduler] Another worker is running scheduled jobs; skipping here.")
 except Exception as e:
     print(f"[WARNING] Scheduler initialization failed (non-critical): {e}")
 
@@ -2273,7 +2379,7 @@ def signup():
                         print(f"SIGNUP: No agent/lender in referral link, using default agent {agent_id}")
 
         # Debug: Print signup attempt
-        print(f"DEBUG Signup: role={role}, email={email}, name={name}, agent_id={agent_id}, lender_id={lender_id}")
+        print(f"Signup attempt: role={role}, agent_id={agent_id}, lender_id={lender_id}")
         
         # Use retry logic for database operations to handle locking
         max_retries = 5
@@ -2343,7 +2449,7 @@ def signup():
                         
                         # Check if account is incomplete (missing password_hash)
                         if not existing_user.get("password_hash"):
-                            print(f"DEBUG Signup: Found incomplete account for {email}, completing it...")
+                            print("Signup: completing an incomplete account")
                             try:
                                 # Check if role matches - if not, we can't complete it
                                 existing_role = existing_user.get("role")
@@ -2488,7 +2594,7 @@ def signup():
                                 if existing_dict.get("email") and existing_dict.get("email").lower() == email.lower():
                                     contact_exists = True
                                     existing_contact_id = existing_dict.get("id")
-                                    print(f"SIGNUP: CRM contact already exists for {email} (ID: {existing_contact_id})")
+                                    print(f"SIGNUP: CRM contact already exists (ID: {existing_contact_id})")
                                     break
                             
                             if not contact_exists:
@@ -2749,7 +2855,15 @@ def login():
         session["name"] = str(user.get("name") or "User")
         session["role"] = str(user.get("role"))
         session.modified = True
-        
+        try:
+            from database import get_connection as _gc_login
+            _c = _gc_login()
+            _c.execute("UPDATE users SET last_login = datetime('now') WHERE id = ?", (int(user_id),))
+            _c.commit()
+            _c.close()
+        except Exception as _e:
+            print(f"[LOGIN] last_login update skipped: {_e}")
+
         # Redirect
         redirect_map = {
             "homeowner": url_for("homeowner_overview"),
@@ -2765,57 +2879,6 @@ def login():
     return render_template("auth/login.html", role=role)
 
 
-@app.route("/debug/check-account/<email>")
-def debug_check_account(email):
-    """Debug route to check account details - REMOVE IN PRODUCTION"""
-    if not session.get("user_id") or session.get("role") != "admin":
-        return jsonify({"error": "Admin access required"}), 403
-    try:
-        user_row = get_user_by_email(email.lower().strip())
-        if not user_row:
-            return jsonify({"error": "User not found", "email": email})
-        
-        if hasattr(user_row, 'keys') and not isinstance(user_row, dict):
-            user = dict(user_row)
-        else:
-            user = user_row if isinstance(user_row, dict) else {}
-        
-        # Check relationships
-        from database import get_homeowner_professionals
-        professionals = []
-        if user.get("role") == "homeowner":
-            try:
-                profs = get_homeowner_professionals(user.get("id"))
-                for prof in profs:
-                    prof_dict = dict(prof) if hasattr(prof, 'keys') and not isinstance(prof, dict) else prof
-                    professionals.append({
-                        "id": prof_dict.get("professional_id"),
-                        "name": prof_dict.get("name"),
-                        "role": prof_dict.get("professional_role"),
-                        "email": prof_dict.get("email")
-                    })
-            except Exception as e:
-                professionals = [{"error": str(e)}]
-        
-        return jsonify({
-            "found": True,
-            "id": user.get("id"),
-            "email": user.get("email"),
-            "name": user.get("name"),
-            "role": user.get("role"),
-            "agent_id": user.get("agent_id"),
-            "lender_id": user.get("lender_id"),
-            "has_password_hash": bool(user.get("password_hash")),
-            "password_hash_length": len(user.get("password_hash", "")),
-            "password_hash_preview": user.get("password_hash", "")[:50] + "..." if user.get("password_hash") else None,
-            "password_hash_starts_with": user.get("password_hash", "")[:10] if user.get("password_hash") else None,
-            "professionals": professionals
-        })
-    except Exception as e:
-        return jsonify({"error": str(e), "email": email})
-
-
-# ── URL Alias Redirects ─────────────────────────────────────────────────────
 @app.route("/agent/trusted-vendors")
 def agent_trusted_vendors_redirect():
     """Redirect legacy/wrong URL to correct vendors page."""
@@ -2826,211 +2889,6 @@ def agent_admin_redirect():
     """Redirect /agent/admin to the actual admin settings page."""
     return redirect(url_for("admin_settings"), 301)
 # ── End URL Alias Redirects ──────────────────────────────────────────────────
-
-
-@app.route("/debug/sync-homeowner-to-crm/<int:homeowner_id>")
-def debug_sync_homeowner_to_crm(homeowner_id):
-    """Sync an existing homeowner to their agent's CRM - REMOVE IN PRODUCTION"""
-    if not session.get("user_id") or session.get("role") != "admin":
-        return jsonify({"error": "Admin access required"}), 403
-    try:
-        from database import get_user_by_id, list_agent_contacts, add_agent_contact, get_homeowner_professionals
-        
-        homeowner = get_user_by_id(homeowner_id)
-        if not homeowner:
-            return jsonify({"error": "Homeowner not found"}), 404
-        
-        homeowner_dict = dict(homeowner) if hasattr(homeowner, 'keys') and not isinstance(homeowner, dict) else homeowner
-        if homeowner_dict.get("role") != "homeowner":
-            return jsonify({"error": "User is not a homeowner"}), 400
-        
-        # Get agent from relationships (more reliable than agent_id column)
-        professionals = get_homeowner_professionals(homeowner_id)
-        agent_id = None
-        for prof in professionals:
-            prof_dict = dict(prof) if hasattr(prof, 'keys') and not isinstance(prof, dict) else prof
-            if prof_dict.get("professional_role") == "agent":
-                agent_id = prof_dict.get("professional_id") or prof_dict.get("user_id")
-                break
-        
-        # Fallback to agent_id column if no relationship found
-        if not agent_id:
-            agent_id = homeowner_dict.get("agent_id")
-        
-        if not agent_id:
-            return jsonify({"error": "Homeowner has no linked agent"}), 400
-        
-        # Check if contact already exists
-        existing_contacts = list_agent_contacts(agent_id)
-        contact_exists = False
-        for existing in existing_contacts:
-            existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
-            if existing_dict.get("email") and existing_dict.get("email").lower() == homeowner_dict.get("email", "").lower():
-                contact_exists = True
-                break
-        
-        if contact_exists:
-            return jsonify({"message": "Contact already exists in CRM", "homeowner_id": homeowner_id, "agent_id": agent_id})
-        
-        # Create CRM contact
-        contact_id = add_agent_contact(
-            agent_user_id=agent_id,
-            name=homeowner_dict.get("name", ""),
-            email=homeowner_dict.get("email", ""),
-            phone="",
-            stage="new",
-            best_contact=homeowner_dict.get("email", "") if homeowner_dict.get("email") else "",
-            last_touch="",
-            birthday="",
-            home_anniversary="",
-            address="",
-            notes=f"Synced from homeowner account on {datetime.now().strftime('%Y-%m-%d')}",
-            tags="referral",
-            property_address="",
-            property_value=None,
-            equity_estimate=None
-        )
-        
-        return jsonify({
-            "success": True,
-            "message": f"Homeowner {homeowner_id} synced to agent {agent_id}'s CRM",
-            "contact_id": contact_id
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
-
-
-@app.route("/debug/check-crm-contacts/<int:agent_id>")
-def debug_check_crm_contacts(agent_id):
-    """Debug route to check all contacts for an agent - REMOVE IN PRODUCTION"""
-    if not session.get("user_id") or session.get("role") != "admin":
-        return jsonify({"error": "Admin access required"}), 403
-    try:
-        from database import list_agent_contacts, get_user_by_id, get_connection
-        
-        # Get agent info
-        agent = get_user_by_id(agent_id)
-        if not agent:
-            return jsonify({"error": "Agent not found"}), 404
-        
-        agent_dict = dict(agent) if hasattr(agent, 'keys') and not isinstance(agent, dict) else agent
-        
-        # Get all contacts (no filter)
-        all_contacts = list_agent_contacts(agent_id, stage_filter=None)
-        
-        # Get contacts by stage
-        new_contacts = list_agent_contacts(agent_id, stage_filter="new")
-        active_contacts = list_agent_contacts(agent_id, stage_filter="active")
-        
-        # Convert to dicts
-        contacts_data = []
-        for contact in all_contacts:
-            contact_dict = dict(contact) if hasattr(contact, 'keys') and not isinstance(contact, dict) else contact
-            contacts_data.append({
-                'id': contact_dict.get('id'),
-                'name': contact_dict.get('name'),
-                'email': contact_dict.get('email'),
-                'stage': contact_dict.get('stage'),
-                'created_at': contact_dict.get('created_at'),
-                'tags': contact_dict.get('tags'),
-            })
-        
-        return jsonify({
-            "agent": {
-                "id": agent_id,
-                "name": agent_dict.get('name'),
-                "email": agent_dict.get('email'),
-            },
-            "total_contacts": len(all_contacts),
-            "new_contacts": len(new_contacts),
-            "active_contacts": len(active_contacts),
-            "all_contacts": contacts_data,
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
-
-
-@app.route("/debug/sync-all-homeowners-to-crm")
-def debug_sync_all_homeowners_to_crm():
-    """Sync ALL existing homeowners to their agents' CRMs - REMOVE IN PRODUCTION"""
-    if not session.get("user_id") or session.get("role") != "admin":
-        return jsonify({"error": "Admin access required"}), 403
-    try:
-        from database import get_connection, list_agent_contacts, add_agent_contact, get_homeowner_professionals
-        
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, name, email, agent_id FROM users WHERE role = 'homeowner'")
-        homeowners = cur.fetchall()
-        conn.close()
-        
-        results = []
-        for homeowner_row in homeowners:
-            homeowner = dict(homeowner_row) if hasattr(homeowner_row, 'keys') and not isinstance(homeowner_row, dict) else homeowner_row
-            homeowner_id = homeowner.get("id")
-            
-            # Get agent from relationships
-            professionals = get_homeowner_professionals(homeowner_id)
-            agent_id = None
-            for prof in professionals:
-                prof_dict = dict(prof) if hasattr(prof, 'keys') and not isinstance(prof, dict) else prof
-                if prof_dict.get("professional_role") == "agent":
-                    agent_id = prof_dict.get("professional_id") or prof_dict.get("user_id")
-                    break
-            
-            if not agent_id:
-                agent_id = homeowner.get("agent_id")
-            
-            if not agent_id:
-                results.append({"homeowner_id": homeowner_id, "status": "skipped", "reason": "no agent"})
-                continue
-            
-            # Check if contact exists
-            existing_contacts = list_agent_contacts(agent_id)
-            contact_exists = False
-            for existing in existing_contacts:
-                existing_dict = dict(existing) if hasattr(existing, 'keys') and not isinstance(existing, dict) else existing
-                if existing_dict.get("email") and existing_dict.get("email").lower() == homeowner.get("email", "").lower():
-                    contact_exists = True
-                    break
-            
-            if contact_exists:
-                results.append({"homeowner_id": homeowner_id, "status": "exists", "agent_id": agent_id})
-                continue
-            
-            # Create contact
-            try:
-                contact_id = add_agent_contact(
-                    agent_user_id=agent_id,
-                    name=homeowner.get("name", ""),
-                    email=homeowner.get("email", ""),
-                    phone="",
-                    stage="new",
-                    best_contact=homeowner.get("email", "") if homeowner.get("email") else "",
-                    last_touch="",
-                    birthday="",
-                    home_anniversary="",
-                    address="",
-                    notes=f"Synced from homeowner account on {datetime.now().strftime('%Y-%m-%d')}",
-                    tags="referral",
-                    property_address="",
-                    property_value=None,
-                    equity_estimate=None
-                )
-                results.append({"homeowner_id": homeowner_id, "status": "created", "contact_id": contact_id, "agent_id": agent_id})
-            except Exception as e:
-                results.append({"homeowner_id": homeowner_id, "status": "error", "error": str(e)})
-        
-        return jsonify({
-            "success": True,
-            "total_homeowners": len(homeowners),
-            "results": results
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({"error": str(e), "traceback": traceback.format_exc()}), 500
 
 
 # ---------------- PASSWORD RESET (emailed, single-use, expiring link) ----------------
@@ -3067,7 +2925,7 @@ def forgot_password():
                         "If you didn't ask for this, you can safely ignore this email.",
                     )
                     if not sent:
-                        print(f"[RESET] Email not sent for {email}. Link: {link}")
+                        print("[RESET] Reset email could not be sent (check MAIL_* settings).")
             except Exception as e:
                 print(f"FORGOT PASSWORD ERROR: {e}")
         # Same message whether or not the account exists (prevents account enumeration)
@@ -3346,7 +3204,7 @@ def homeowner_saved_notes():
         flash("User ID not found. Please log in again.", "error")
         return redirect(url_for("login"))
     
-    print(f"[DEBUG][SAVED NOTES] user_id: {user_id}, user: {user.get('email', 'unknown')}")
+    print(f"[SAVED NOTES] user_id: {user_id}")
     raw_boards = get_design_boards_for_user(user_id)
     print(
         f"[DEBUG][SAVED NOTES] get_design_boards_for_user({user_id}) returned: {raw_boards}"
@@ -3356,17 +3214,6 @@ def homeowner_saved_notes():
     design_dir.mkdir(parents=True, exist_ok=True)
 
     if request.method == "POST":
-        print(f"\n{'='*80}")
-        print(f"[BOARD POST] POST request received!")
-        print(f"[BOARD POST] Form keys: {list(request.form.keys())}")
-        print(f"[BOARD POST] Files keys: {list(request.files.keys())}")
-        for key, value in request.form.items():
-            if len(str(value)) < 100:
-                print(f"[BOARD POST]   {key}: {value}")
-            else:
-                print(f"[BOARD POST]   {key}: {str(value)[:100]}...")
-        print(f"{'='*80}\n")
-        
         action = request.form.get("action") or "create_board"
         print(f"[BOARD POST] Action: {action}")
 
@@ -4430,8 +4277,6 @@ def homeowner_value_equity_overview():
         # Update snapshot - function will preserve existing data for None values
         try:
             print(f"[LOAN UPDATE] Updating snapshot for user {homeowner_id}, property {property_id}")
-            print(f"[LOAN UPDATE] Values: value={value_estimate}, balance={loan_balance}, rate={loan_rate}, payment={loan_payment}, term={loan_term_years}, start_date={loan_start_date}")
-            print(f"[LOAN UPDATE] Additional: tax={property_tax_monthly}, insurance={homeowners_insurance_monthly}, PMI={pmi_monthly}")
             
             upsert_homeowner_snapshot_for_property(
                 user_id=homeowner_id,
@@ -4759,142 +4604,6 @@ def homeowner_value_equity_overview():
             "frame-ancestors 'self'; "
             "worker-src 'self' blob: https://*.homebotapp.com; "
             "manifest-src 'self' https://*.homebotapp.com;"
-        )
-    
-    return response
-
-
-@app.route("/test-board-save")
-def test_board_save():
-    """Test route to verify board saving works."""
-    user = get_current_user()
-    if not user:
-        return jsonify({"error": "Not logged in"}), 401
-    
-    user_id = user.get("id")
-    from database import add_design_board_note, get_design_boards_for_user
-    
-    try:
-        # Try to create a test board
-        test_board_name = f"TEST_BOARD_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-        board_id = add_design_board_note(
-            user_id=user_id,
-            project_name=test_board_name,
-            title="Test Board",
-            details="This is a test board",
-            photos=[],
-            files=[],
-            vision_statement=None,
-            color_palette=[],
-            board_template="collage",
-            label_style="sans-serif",
-            is_private=0,
-            fixtures=[],
-        )
-        
-        # Verify it was created
-        boards = get_design_boards_for_user(user_id)
-        
-        return jsonify({
-            "success": True,
-            "board_id": board_id,
-            "board_name": test_board_name,
-            "boards_found": list(boards.keys()),
-            "test_board_in_list": test_board_name in boards
-        })
-    except Exception as e:
-        import traceback
-        return jsonify({
-            "success": False,
-            "error": str(e),
-            "traceback": traceback.format_exc()
-        }), 500
-
-
-@app.route("/test-homebot")
-def test_homebot():
-    """Minimal test page for Homebot widget - use this to verify widget works in isolation."""
-    from database import get_homeowner_professionals, get_user_profile, get_user_by_id
-    
-    user = get_current_user()
-    if not user:
-        flash("Please log in to access this page.", "warning")
-        return redirect(url_for("login"))
-    
-    if user.get("role") != "homeowner":
-        flash("This page is for homeowners only.", "error")
-        return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
-    
-    homeowner_id = user["id"]
-    
-    # Get homeowner's professionals (agents and lenders)
-    professionals = get_homeowner_professionals(homeowner_id)
-    
-    # Find the first professional (agent preferred, then lender) with a Homebot widget ID
-    homebot_widget_id = None
-    
-    # Prefer agent over lender
-    for prof in professionals:
-        prof_dict = dict(prof) if hasattr(prof, 'keys') else prof
-        prof_id = prof_dict.get('professional_id') or prof_dict.get('user_id')
-        if prof_id:
-            profile = get_user_profile(prof_id)
-            if profile:
-                profile_dict = dict(profile) if hasattr(profile, 'keys') else profile
-                widget_id = profile_dict.get('homebot_widget_id')
-                if widget_id:
-                    widget_id = str(widget_id).strip()
-                    if widget_id:
-                        homebot_widget_id = widget_id
-                        # Prefer agent, so if we found an agent, break
-                        if prof_dict.get('professional_role') == 'agent' or prof_dict.get('professional_type') == 'agent':
-                            break
-    
-    # Fallback: check agent_id/lender_id columns if no professionals found
-    if not homebot_widget_id:
-        homeowner_user = get_user_by_id(homeowner_id)
-        if homeowner_user:
-            homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') else homeowner_user
-            # Try agent first
-            agent_id = homeowner_dict.get("agent_id")
-            if agent_id:
-                agent_profile = get_user_profile(agent_id)
-                if agent_profile:
-                    profile_dict = dict(agent_profile) if hasattr(agent_profile, 'keys') else agent_profile
-                    widget_id = profile_dict.get('homebot_widget_id')
-                    if widget_id:
-                        widget_id = str(widget_id).strip()
-                        if widget_id:
-                            homebot_widget_id = widget_id
-            # Try lender if no agent
-            if not homebot_widget_id:
-                lender_id = homeowner_dict.get("lender_id")
-                if lender_id:
-                    lender_profile = get_user_profile(lender_id)
-                    if lender_profile:
-                        profile_dict = dict(lender_profile) if hasattr(lender_profile, 'keys') else lender_profile
-                        widget_id = profile_dict.get('homebot_widget_id')
-                        if widget_id:
-                            widget_id = str(widget_id).strip()
-                            if widget_id:
-                                homebot_widget_id = widget_id
-    
-    # Render test page with minimal CSP
-    response = make_response(render_template(
-        "test_homebot.html",
-        homebot_widget_id=homebot_widget_id or '',
-    ))
-    
-    # Very permissive CSP for testing
-    response.headers['Content-Security-Policy'] = (
-        "default-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com; "
-        "frame-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com data:; "
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.homebotapp.com; "
-        "font-src 'self' https://fonts.gstatic.com data:; "
-        "img-src 'self' data: https: blob:; "
-        "connect-src 'self' https://embed.homebotapp.com https://*.homebotapp.com https://*.cloudflare.com https://*.amazonaws.com wss: ws:; "
-        "form-action 'self' https://embed.homebotapp.com https://*.homebotapp.com;"
         )
     
     return response
@@ -10944,6 +10653,20 @@ def homebot_webhook():
 # ADMIN RBAC ROUTES
 # ============================================================================
 
+def _admin_session_user():
+    """The real, logged-in site admin (even while viewing as another user), else None."""
+    from rbac import is_site_admin
+    imp = session.get("impersonation") or {}
+    real_id = imp.get("admin_id") or session.get("user_id")
+    if not real_id or not is_site_admin(real_id):
+        return None
+    row = get_user_by_id(int(real_id))
+    if not row:
+        return None
+    u = dict(row)
+    return {"id": u["id"], "name": u.get("name"), "role": u.get("role"), "email": u.get("email")}
+
+
 @app.route("/admin")
 @app.route("/admin/dashboard")
 def admin_dashboard():
@@ -10951,14 +10674,11 @@ def admin_dashboard():
     from rbac import has_role
     from audit import get_audit_logs
     
-    user = session.get('user')
+    user = _admin_session_user()
     if not user:
-        return redirect(url_for('login', role='admin'))
+        flash("Administrator access required", "error")
+        return redirect(url_for('login', role='agent'))
     
-    # Check if user has owner or admin role
-    if not has_role(user['id'], 'owner') and not has_role(user['id'], 'admin'):
-        flash("You must be an administrator to access this page", "error")
-        return redirect(url_for('dashboard'))
     
     conn = get_connection()
     cur = conn.cursor()
@@ -10970,8 +10690,11 @@ def admin_dashboard():
     cur.execute("SELECT COUNT(*) as count FROM properties")
     total_properties = cur.fetchone()['count']
     
-    cur.execute("SELECT COUNT(*) as count FROM video_projects")
-    total_videos = cur.fetchone()['count']
+    try:
+        cur.execute("SELECT COUNT(*) as count FROM video_projects")
+        total_videos = cur.fetchone()['count']
+    except Exception:
+        total_videos = 0  # video studio was removed; table may not exist
     
     cur.execute("""
         SELECT COUNT(*) as count FROM users 
@@ -11029,7 +10752,7 @@ def admin_impersonate_user(user_id):
     from rbac import has_permission
     from impersonation import start_impersonation
     
-    admin = session.get('user')
+    admin = _admin_session_user()
     if not admin:
         return redirect(url_for('login'))
     
@@ -11070,13 +10793,13 @@ def admin_impersonate_user(user_id):
     
     # Redirect to appropriate dashboard based on target user's role
     if target_user['role'] == 'homeowner':
-        return redirect(url_for('homeowner_dashboard'))
+        return redirect(url_for('homeowner_overview'))
     elif target_user['role'] == 'agent':
         return redirect(url_for('agent_dashboard'))
     elif target_user['role'] == 'lender':
         return redirect(url_for('lender_dashboard'))
     else:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
 
 @app.route("/admin/end-impersonation", methods=["POST"])
 def admin_end_impersonation():
@@ -11084,7 +10807,9 @@ def admin_end_impersonation():
     from impersonation import end_impersonation
     
     if 'impersonation' not in session:
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
+    if not _admin_session_user():
+        abort(403)
     
     imp = session['impersonation']
     
@@ -11092,7 +10817,10 @@ def admin_end_impersonation():
     end_impersonation(imp['session_id'], imp['admin_id'])
     
     # Restore admin session
-    session['user'] = imp['original_user']
+    orig = imp.get('original_user') or {}
+    session['user_id'] = int(orig.get('user_id') or imp['admin_id'])
+    session['name'] = orig.get('name') or 'Admin'
+    session['role'] = orig.get('role') or 'agent'
     del session['impersonation']
     
     flash("Exited Support Mode - Back to Admin View", "success")
@@ -11103,10 +10831,10 @@ def admin_users_list():
     """List all users with management options"""
     from rbac import has_permission
     
-    user = session.get('user')
+    user = _admin_session_user()
     if not user or not has_permission(user['id'], 'users.view'):
         flash("Access denied", "error")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
     
     conn = get_connection()
     cur = conn.cursor()
@@ -11130,10 +10858,10 @@ def admin_audit_logs():
     from rbac import has_permission
     from audit import get_audit_logs
     
-    user = session.get('user')
+    user = _admin_session_user()
     if not user or not has_permission(user['id'], 'security.view_audit'):
         flash("Access denied", "error")
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('index'))
     
     # Get filters from query params
     action_filter = request.args.get('action')
@@ -11229,12 +10957,17 @@ def concierge_chat(agent_token):
         return jsonify({"error": "Invalid agent"}), 404
     
     # Get message and session
-    data = request.get_json()
-    user_message = data.get('message', '').strip()
-    session_id = data.get('session_id')
-    
+    data = request.get_json(silent=True) or {}
+    user_message = str(data.get('message', '')).strip()[:1000]  # cap length: every message costs money
+    session_id = str(data.get('session_id') or '')[:64] or None
+
     if not user_message:
         return jsonify({"error": "Message required"}), 400
+
+    # Per-agent daily ceiling so a guessed/abused link can't run up the OpenAI bill
+    if _rate_limited(f"concierge:agent:{agent_id}", 300, 86400):
+        return jsonify({"response": "This assistant is very busy right now. Please contact your agent directly.",
+                        "session_id": session_id or "", "metadata": {}}), 200
     
     if not session_id:
         # Generate new session ID
@@ -11242,7 +10975,7 @@ def concierge_chat(agent_token):
         session_id = str(uuid.uuid4())
     
     # Get visitor IP
-    visitor_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    visitor_ip = request.remote_addr
     
     # Process with AI
     ai = ConciergeAI(agent_id)

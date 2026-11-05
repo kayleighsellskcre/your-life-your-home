@@ -27,8 +27,31 @@ def get_user_permissions(user_id):
     
     return permissions
 
+def is_site_admin(user_id):
+    """True for the site owner: listed in YLH_ADMIN_EMAILS, or holding the owner/admin role."""
+    import os
+    try:
+        allow = {e.strip().lower() for e in os.environ.get("YLH_ADMIN_EMAILS", "").split(",") if e.strip()}
+        if allow:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT email FROM users WHERE id = ?", (user_id,))
+            row = cur.fetchone()
+            conn.close()
+            if row and (row["email"] or "").strip().lower() in allow:
+                return True
+    except Exception:
+        pass
+    try:
+        return has_role(user_id, "owner") or has_role(user_id, "admin")
+    except Exception:
+        return False
+
+
 def has_permission(user_id, permission):
     """Check if user has a specific permission"""
+    if is_site_admin(user_id):
+        return True
     # Owner has ALL permissions
     conn = get_connection()
     cur = conn.cursor()
@@ -91,7 +114,7 @@ def require_permission(permission):
         def decorated_function(*args, **kwargs):
             from audit import audit_log
             
-            user = session.get('user')
+            user = ({'id': session.get('user_id')} if session.get('user_id') else None)
             if not user:
                 flash("Please log in to access this page", "error")
                 return redirect(url_for('login'))
@@ -118,7 +141,7 @@ def require_role(role_name):
         def decorated_function(*args, **kwargs):
             from audit import audit_log
             
-            user = session.get('user')
+            user = ({'id': session.get('user_id')} if session.get('user_id') else None)
             if not user:
                 flash("Please log in to access this page", "error")
                 return redirect(url_for('login'))
@@ -143,7 +166,7 @@ def require_any_permission(*permissions):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            user = session.get('user')
+            user = ({'id': session.get('user_id')} if session.get('user_id') else None)
             if not user:
                 flash("Please log in to access this page", "error")
                 return redirect(url_for('login'))
@@ -164,7 +187,7 @@ def require_all_permissions(*permissions):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            user = session.get('user')
+            user = ({'id': session.get('user_id')} if session.get('user_id') else None)
             if not user:
                 flash("Please log in to access this page", "error")
                 return redirect(url_for('login'))

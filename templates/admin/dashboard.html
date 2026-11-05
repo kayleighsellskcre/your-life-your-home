@@ -9,7 +9,7 @@
  <div class="impersonation-banner">
  <div class="impersonation-content">
  <span class="impersonation-icon"></span>
- <strong>Support Mode Active:</strong> Viewing as {{ session.user.name }}
+ <strong>Support Mode Active:</strong> Viewing as {{ session.get("name") }}
  <form method="POST" action="/admin/end-impersonation" style="display: inline; margin-left: auto;">
  <button type="submit" class="btn-exit-impersonation">Exit Support Mode</button>
  </form>

@@ -106,7 +106,7 @@
  <td class="date-cell">{{ user.last_login[:10] if user.last_login else 'Never' }}</td>
  <td>
  <div class="action-buttons">
- {% if user.id != session.user.id %}
+ {% if user.id != session.get("user_id") %}
  <form method="POST" action="/admin/impersonate/{{ user.id }}" style="display: inline;">
  <button type="submit" class="btn-action btn-impersonate" title="View As User">
  View As

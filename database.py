@@ -182,6 +182,17 @@ def init_db() -> None:
     except:
         pass
 
+    # Admin/user-management columns on users (older databases lack them)
+    for _col, _type in [
+        ("phone", "TEXT"),
+        ("last_login", "TEXT"),
+        ("email_verified", "INTEGER DEFAULT 0"),
+    ]:
+        try:
+            cur.execute(f"ALTER TABLE users ADD COLUMN {_col} {_type}")
+        except Exception:
+            pass
+
     # New profile fields: Calendly URL, Google review link, webhook token
     for _col, _type in [
         ("calendly_url", "TEXT"),
