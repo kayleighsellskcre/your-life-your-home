@@ -10454,24 +10454,6 @@ def homeowner_support_get_help():
     )
 
 
-# Redirect old individual support URLs -> unified page
-@app.route("/homeowner/support/ask-question-old")
-def homeowner_support_ask_question_legacy():
-    return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
-
-@app.route("/homeowner/support/resources-old")
-def homeowner_support_resources_legacy():
-    return redirect(url_for("homeowner_support_get_help") + "?tab=resources")
-
-@app.route("/homeowner/support/chat-human-old")
-def homeowner_support_chat_human_legacy():
-    return redirect(url_for("homeowner_support_get_help") + "?tab=contact")
-
-@app.route("/homeowner/support/schedule-chat-old")
-def homeowner_support_schedule_chat_legacy():
-    return redirect(url_for("homeowner_support_get_help") + "?tab=schedule")
-
-
 # ── NEXT HOME HUB ──────────────────────────────────────────────────────────
 @app.route("/homeowner/next", methods=["GET"])
 @app.route("/homeowner/next/", methods=["GET"])
