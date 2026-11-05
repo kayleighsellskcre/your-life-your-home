@@ -28,54 +28,8 @@
  {% endblock %}
  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}" />
 
- <!-- Main CSS -->
- <!-- Design System Foundation -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/design-system.css') }}"
- />
- <!-- Variable Bridge for CSS Alignment -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/variable-bridge.css') }}"
- />
- <!-- Responsive Grid System (NEW - Mobile-First) -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/responsive-grid.css') }}"
- />
- <!-- Custom Styles -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/styles.css') }}"
- />
- <!-- Platform Enhancements -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/platform-enhancements.css') }}"
- />
- <!-- Compact / Dainty Styling -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/compact-dainty.css') }}"
- />
- <!-- Form Enhancements -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/form-enhancements.css') }}"
- />
- <!-- Luxury Palette, Warm Taupe / Espresso / Soft Cream -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/ylh-luxury.css') }}"
- />
- <!-- Sage & Olive Green Revival, Quiet Luxury Serenity (loads last = highest priority) -->
- <link
- rel="stylesheet"
- href="{{ url_for('static', filename='css/sage-revival.css') }}"
- />
-
- <link rel="stylesheet" href="{{ url_for('static', filename='css/brass-accent.css') }}" />
+ <!-- Site styles (built by scripts/build_css.py; edit the source files in static/css/, then rebuild) -->
+ <link rel="stylesheet" href="{{ url_for('static', filename='css/ylh.bundle.css') }}?v={{ css_version }}" />
 
  <!-- Google Fonts - Optimized Loading -->
  <link

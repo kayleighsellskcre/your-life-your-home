@@ -436,7 +436,11 @@ def _validate_uploads():
 @app.context_processor
 def _inject_now_year():
     from datetime import datetime
-    return {"now_year": datetime.now().year}
+    try:
+        css_v = int((Path(app.static_folder) / "css" / "ylh.bundle.css").stat().st_mtime)
+    except OSError:
+        css_v = 0
+    return {"now_year": datetime.now().year, "css_version": css_v}
 
 
 @app.after_request
