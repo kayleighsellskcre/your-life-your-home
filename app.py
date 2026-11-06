@@ -9339,7 +9339,14 @@ def lender_crm():
                             updates[field] = val if val else None
                 
                 try:
+                    _before = get_lender_borrower(int(borrower_id), user["id"]) or {}
                     update_lender_borrower(int(borrower_id), user["id"], **updates)
+                    if updates.get("status") and updates.get("status") != _before.get("status"):
+                        import automation
+                        _bg(automation.notify_borrower_status, user["id"],
+                            updates.get("name") or _before.get("name"),
+                            updates.get("email") or _before.get("email"),
+                            updates["status"], send_reminder_email, _site_url())
                     flash("Borrower updated successfully!", "success")
                 except Exception as e:
                     flash(f"Error updating borrower: {e}", "error")
@@ -9833,20 +9840,27 @@ def lender_loans():
 
     if request.method == "POST":
         borrower_name = request.form.get("borrower_name", "").strip()
-        loan_amount = request.form.get("loan_amount", "").strip()
-        loan_type = request.form.get("loan_type", "conventional").strip()
+        borrower_email = request.form.get("borrower_email", "").strip()
+        loan_type = request.form.get("loan_type", "").strip() or "Conventional"
         status = request.form.get("status", "preapproval").strip()
 
-        if borrower_name and loan_amount:
+        if borrower_name:
             try:
                 add_lender_loan(
-                    user["id"], borrower_name, status, loan_type, loan_amount,
-                    request.form.get("stage", "Application").strip() or "Application",
+                    user["id"], borrower_name, status, loan_type,
+                    request.form.get("target_payment", "").strip(),
+                    request.form.get("stage", "preapproval_started").strip(),
                     request.form.get("close_date", "").strip(),
+                    borrower_email,
                 )
-                flash("Loan added successfully!", "success")
+                import automation
+                _bg(automation.on_loan_created, user["id"], borrower_name, borrower_email, send_reminder_email, _site_url())
+                flash("Loan saved." + (" Your borrower has been invited to their portal." if borrower_email else ""), "success")
             except Exception as e:
-                flash(f"Error adding loan: {e}", "error")
+                print(f"[LOANS] save failed: {e}")
+                flash("Sorry, that loan could not be saved.", "error")
+        else:
+            flash("Please enter the borrower's name.", "error")
 
     loans = list_lender_loans(user["id"])
     return render_template(

@@ -277,3 +277,97 @@ def lender_shared_deals(lender_id, limit=8):
     except Exception:
         _log("lender_shared_deals failed:\n" + traceback.format_exc())
         return []
+
+
+STATUS_LABELS = {
+    "prospect": "Getting started",
+    "preapproval": "Pre-approval",
+    "processing": "Processing",
+    "underwriting": "Underwriting",
+    "in_process": "In process",
+    "clear_to_close": "Clear to close",
+    "closed": "Closed",
+}
+
+
+def _lender_signup_link(base_url, lender_id):
+    try:
+        from database import get_or_create_referral_code
+        code = get_or_create_referral_code(lender_id, "lender")
+        return f"{base_url}/r/{code}" if code else f"{base_url}/signup?role=homeowner"
+    except Exception:
+        return f"{base_url}/signup?role=homeowner"
+
+
+def on_loan_created(lender_id, borrower_name, borrower_email, send_email, base_url):
+    """New loan with a borrower email: add them to the lender CRM, connect their account, or invite them."""
+    try:
+        email = (borrower_email or "").strip()
+        if not email:
+            return "no-email"
+        conn = get_connection()
+        try:
+            lender = _user(conn, lender_id) or {}
+            if not _row(conn, "SELECT id FROM lender_borrowers WHERE lender_user_id = ? AND lower(email) = lower(?)", (lender_id, email)):
+                conn.execute(
+                    "INSERT INTO lender_borrowers (lender_user_id, name, status, email) VALUES (?, ?, 'preapproval', ?)",
+                    (lender_id, borrower_name, email),
+                )
+            acct = _user_by_email(conn, email)
+            if acct and acct.get("role") == "homeowner":
+                conn.execute("UPDATE users SET lender_id = ? WHERE id = ? AND lender_id IS NULL", (lender_id, acct["id"]))
+                conn.commit()
+                return "linked"
+            conn.commit()
+        finally:
+            conn.close()
+        link = _lender_signup_link(base_url, lender_id)
+        body = (
+            f"Hi {borrower_name or 'there'},\n\n"
+            f"{lender.get('name') or 'Your lender'} set up a free homeowner portal for you on Your Life, Your Home. "
+            f"Follow your loan, keep your documents in one place, and watch your home's value and equity.\n\n"
+            f"Create your account here: {link}\n\n"
+            f"Use this email address ({email}) so everything connects automatically."
+        )
+        send_email(email, f"{lender.get('name') or 'Your lender'} invited you to your home portal", body)
+        return "invited"
+    except Exception:
+        _log("on_loan_created failed:\n" + traceback.format_exc())
+        return "error"
+
+
+def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status, send_email, base_url):
+    """Loan status moved: tell the borrower, and the borrower's agent when we know who that is."""
+    try:
+        label = STATUS_LABELS.get(new_status, (new_status or "").replace("_", " ").title())
+        email = (borrower_email or "").strip()
+        if not email or not label:
+            return []
+        conn = get_connection()
+        try:
+            lender = _user(conn, lender_id) or {}
+            acct = _user_by_email(conn, email)
+            agent = _user(conn, acct.get("agent_id")) if acct else None
+        finally:
+            conn.close()
+        sent = []
+        lender_line = f"Your lender: {lender.get('name', '')}" + (f" ({lender.get('email')})" if lender.get("email") else "")
+        body = (
+            f"Hi {borrower_name or 'there'},\n\n"
+            f"Good news on your loan: it is now \"{label}\".\n\n{lender_line}\n"
+            f"Track everything in your portal: {base_url}/homeowner\n"
+        )
+        if send_email(email, f"Loan update: {label}", body):
+            sent.append(email)
+        if agent and agent.get("email"):
+            body = (
+                f"Hi {agent.get('name') or 'there'},\n\n"
+                f"{borrower_name or 'Your client'}'s loan with {lender.get('name') or 'their lender'} moved to \"{label}\".\n"
+                f"Open your dashboard: {base_url}/agent\n"
+            )
+            if send_email(agent["email"], f"Client loan update: {borrower_name} is now {label}", body):
+                sent.append(agent["email"])
+        return sent
+    except Exception:
+        _log("notify_borrower_status failed:\n" + traceback.format_exc())
+        return []

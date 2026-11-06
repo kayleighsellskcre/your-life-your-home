@@ -1176,6 +1176,11 @@ def init_db() -> None:
         """
     )
 
+    try:
+        cur.execute("ALTER TABLE lender_loans ADD COLUMN borrower_email TEXT")
+    except Exception:
+        pass
+
     # ------------- MESSAGE TEMPLATES -------------
     cur.execute(
         """
@@ -2957,20 +2962,23 @@ def add_lender_loan(
     target_payment: str,
     stage: str,
     close_date: str,
-) -> None:
+    borrower_email: str = "",
+) -> int:
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
         INSERT INTO lender_loans (
-            lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date
+            lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date, borrower_email
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
-        (lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date),
+        (lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date, borrower_email or ""),
     )
+    loan_id = cur.lastrowid
     conn.commit()
     conn.close()
+    return loan_id
 
 
 def list_lender_loans(lender_user_id: int) -> List[Dict]:
