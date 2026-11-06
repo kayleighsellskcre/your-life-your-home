@@ -526,7 +526,15 @@
  </div>
  <div class="txf">
  <label>Client Name *</label>
- <input type="text" name="client_name" required placeholder="Jane Doe">
+ <input type="text" name="client_name" required placeholder="Jane Doe" value="{{ contact_info.name if contact_info else '' }}">
+ </div>
+ <div class="txf">
+ <label>Client Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(connects their portal)</span></label>
+ <input type="email" name="client_email" placeholder="jane@email.com" value="{{ contact_info.email if contact_info else '' }}">
+ </div>
+ <div class="txf">
+ <label>Lender Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(optional, shares the deal)</span></label>
+ <input type="email" name="lender_email" placeholder="lender@email.com">
  </div>
  <div class="txf">
  <label>Side</label>

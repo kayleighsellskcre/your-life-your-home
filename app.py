@@ -5284,6 +5284,7 @@ def lender_dashboard():
             print(f"Error getting lender borrowers: {traceback.format_exc()}")
             borrowers = []
 
+        import automation
         return render_template(
             "lender/dashboard.html",
             brand_name=FRONT_BRAND_NAME,
@@ -5291,6 +5292,7 @@ def lender_dashboard():
             metrics=metrics,
             loans=loans,
             borrowers=borrowers,
+            shared_deals=automation.lender_shared_deals(user["id"]),
         )
     except Exception as e:
         import traceback
@@ -6477,7 +6479,8 @@ def agent_transactions():
                     notes=request.form.get("notes", "").strip(),
                 )
                 import automation
-                automation.link_transaction_parties(new_tx_id)
+                automation.link_transaction_parties(new_tx_id, request.form.get("lender_email", "").strip())
+                _bg(automation.invite_client_if_needed, new_tx_id, send_reminder_email, _site_url())
                 flash("Transaction created successfully!", "success")
             except Exception as e:
                 flash(f"Error creating transaction: {e}", "error")

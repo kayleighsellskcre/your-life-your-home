@@ -57,24 +57,28 @@ def _transaction(conn, tx_id):
     return _row(conn, "SELECT * FROM transactions WHERE id = ?", (tx_id,))
 
 
-def link_transaction_parties(tx_id):
-    """Attach the client's homeowner account (and their lender) to a transaction by matching email."""
+def link_transaction_parties(tx_id, lender_email=None):
+    """Attach the client's homeowner account and a lender (given email, else the client's own lender) to a transaction."""
     try:
         conn = get_connection()
         try:
             tx = _transaction(conn, tx_id)
             if not tx:
                 return False
+            named_lender = _user_by_email(conn, lender_email)
+            named_lender_id = named_lender["id"] if named_lender and named_lender.get("role") == "lender" else None
             home = _user_by_email(conn, tx.get("client_email"))
-            if not home or home.get("role") != "homeowner":
+            if home and home.get("role") != "homeowner":
+                home = None
+            if not home and not named_lender_id:
                 return False
-            lender_id = tx.get("lender_user_id") or home.get("lender_id")
+            lender_id = named_lender_id or tx.get("lender_user_id") or (home or {}).get("lender_id")
             conn.execute(
-                "UPDATE transactions SET homeowner_user_id = ?, lender_user_id = COALESCE(lender_user_id, ?) WHERE id = ?",
-                (home["id"], lender_id, tx_id),
+                "UPDATE transactions SET homeowner_user_id = COALESCE(?, homeowner_user_id), lender_user_id = COALESCE(?, lender_user_id) WHERE id = ?",
+                ((home or {}).get("id"), lender_id, tx_id),
             )
             conn.commit()
-            _log(f"linked transaction {tx_id} to homeowner {home['id']} (lender {lender_id})")
+            _log(f"linked transaction {tx_id} to homeowner {(home or {}).get('id')} (lender {lender_id})")
             return True
         finally:
             conn.close()
@@ -215,4 +219,61 @@ def route_homeowner_question(user_id, topic, question, send_email, base_url):
         return sent
     except Exception:
         _log("route_homeowner_question failed:\n" + traceback.format_exc())
+        return []
+
+
+def invite_client_if_needed(tx_id, send_email, base_url):
+    """If the client has no account yet, email them an invitation to the agent's portal."""
+    try:
+        conn = get_connection()
+        try:
+            tx = _transaction(conn, tx_id)
+            if not tx:
+                return False
+            email = (tx.get("client_email") or "").strip()
+            if not email or _user_by_email(conn, email):
+                return False
+            agent = _user(conn, tx.get("agent_id")) or {}
+        finally:
+            conn.close()
+        link = _signup_link(base_url, tx.get("agent_id"))
+        body = (
+            f"Hi {tx.get('client_name') or 'there'},\n\n"
+            f"{agent.get('name') or 'Your agent'} set up a free homeowner portal for you on Your Life, Your Home. "
+            f"Track {tx.get('property_address') or 'your transaction'} step by step, keep your documents in one place, "
+            f"and watch your home's value and equity after closing.\n\n"
+            f"Create your account here: {link}\n\n"
+            f"Use this email address ({email}) so everything connects automatically."
+        )
+        ok = send_email(email, f"{agent.get('name') or 'Your agent'} invited you to your home portal", body)
+        _log(f"invited {email} for transaction {tx_id}: {ok}")
+        return bool(ok)
+    except Exception:
+        _log("invite_client_if_needed failed:\n" + traceback.format_exc())
+        return False
+
+
+def lender_shared_deals(lender_id, limit=8):
+    """Active transactions an agent has shared with this lender."""
+    try:
+        conn = get_connection()
+        try:
+            rows = conn.execute(
+                """SELECT t.id, t.property_address, t.client_name, t.current_stage, t.target_close_date,
+                          t.purchase_price, u.name AS agent_name
+                   FROM transactions t LEFT JOIN users u ON u.id = t.agent_id
+                   WHERE t.lender_user_id = ? AND t.status = 'active' AND t.current_stage NOT IN ('closed', 'cancelled')
+                   ORDER BY t.target_close_date IS NULL, t.target_close_date, t.created_at DESC LIMIT ?""",
+                (lender_id, limit),
+            ).fetchall()
+            out = []
+            for r in rows:
+                d = dict(r)
+                d["stage_label"] = STAGE_LABELS.get(d.get("current_stage"), d.get("current_stage"))
+                out.append(d)
+            return out
+        finally:
+            conn.close()
+    except Exception:
+        _log("lender_shared_deals failed:\n" + traceback.format_exc())
         return []

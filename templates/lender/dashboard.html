@@ -475,6 +475,18 @@
  <button class="ylh-btn-ghost" onclick="loadBriefing()" title="Refresh" style="background:none;border:none;color:#6B5B4D;font-size:.8rem;cursor:pointer;font-weight:600;">↺</button>
  </div>
 
+ {% if shared_deals %}
+ <div style="background:#fff;border:1px solid rgba(94,110,74,.22);border-left:4px solid #8A6D2F;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;">
+ <div style="font-weight:700;color:#364A2B;margin-bottom:.6rem;">Deals shared with you <span style="font-weight:400;font-size:.8rem;color:#6b7560;">&middot; {{ shared_deals|length }} active</span></div>
+ {% for d in shared_deals %}
+ <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.5rem 0;border-top:1px solid rgba(94,110,74,.12);font-size:.88rem;">
+ <span><strong>{{ d.property_address }}</strong> &middot; {{ d.client_name }}<br><span style="color:#6b7560;font-size:.78rem;">Agent: {{ d.agent_name }}</span></span>
+ <span style="text-align:right;"><span style="font-weight:600;color:#5E6E4A;">{{ d.stage_label }}</span>{% if d.target_close_date %}<br><span style="color:#6b7560;font-size:.78rem;">Closing {{ d.target_close_date }}</span>{% endif %}</span>
+ </div>
+ {% endfor %}
+ </div>
+ {% endif %}
+
  <!-- Metrics Cards -->
  <div class="metrics-grid">
  <div class="metric-card">
