@@ -1727,7 +1727,14 @@ Your Life, Your Home Team
 
 
 def update_home_values_daily():
-    """Automatically update home values daily using Homebot-style appreciation formulas."""
+    """Nightly home value refresh. Uses real market data (RentCast) when configured; never invents growth."""
+    import valuation
+    if valuation.provider_configured():
+        valuation.refresh_stale_values()
+        return
+    if os.environ.get("ALLOW_SIMULATED_VALUES") != "1":
+        print("[VALUES] No value provider configured (set RENTCAST_API_KEY); not simulating growth.")
+        return
     from database import get_connection, get_user_properties, get_homeowner_snapshot_for_property, upsert_homeowner_snapshot_for_property
     from datetime import datetime, timedelta
     
@@ -4881,6 +4888,9 @@ def homeowner_value_equity_overview():
             homeowner_data=homeowner_data or {},
             market_rates=market_rates,
             snapshot=snapshot_data,
+            value_source_note=__import__("valuation").describe_source(snapshot_data),
+            value_change=_value_change_last_year(snapshot_history, snapshot_data),
+            value_refresh_available=__import__("valuation").provider_configured(),
             snapshot_history=snapshot_history or [],
             properties=properties_list,
             current_property=current_property or {},
@@ -4939,11 +4949,55 @@ def homeowner_add_property():
 
     property_id = add_property(user["id"], address, estimated_value, property_type)
     set_primary_property(user["id"], property_id)
+    try:
+        import valuation
+        if valuation.provider_configured():
+            _bg(valuation.refresh_property_value, user["id"], property_id)
+    except Exception as _e:
+        print(f"[VALUES] add-property lookup skipped: {_e}")
 
     flash(f"Property '{address}' added successfully!", "success")
     return redirect(
         url_for("homeowner_value_equity_overview", property_id=property_id)
     )
+
+
+def _value_change_last_year(history, snapshot):
+    """Dollar change in estimated value over the available history (up to a year). None if unknown."""
+    try:
+        now = (snapshot or {}).get("value_estimate")
+        pts = [h for h in (history or []) if h.get("value_estimate")]
+        if not now or len(pts) < 2:
+            return None
+        oldest = sorted(pts, key=lambda h: h["snapshot_date"])[0]
+        return float(now) - float(oldest["value_estimate"])
+    except Exception:
+        return None
+
+
+@app.route("/homeowner/value/refresh", methods=["POST"])
+def homeowner_value_refresh():
+    import valuation
+    uid = session.get("user_id")
+    pid = request.form.get("property_id", type=int)
+    if not pid:
+        from database import get_user_properties
+        props = [dict(p) for p in (get_user_properties(uid) or [])]
+        pid = next((p["id"] for p in props if p.get("is_primary")), props[0]["id"] if props else None)
+    msgs = {
+        "ok": ("Your home value was updated from live market data.", "success"),
+        "cooldown": ("Your value was refreshed recently. Estimates update about once a week at most.", "info"),
+        "cap": ("Live updates are paused for now. Please try again later.", "info"),
+        "homebot": ("Your value is already kept current by Homebot.", "info"),
+        "no-address": ("Add your full street address first so we can look up your home.", "error"),
+        "no-key": ("Live home values are not switched on yet.", "info"),
+        "not-found": ("We couldn't find that address. Use the full format: street, city, state, ZIP.", "error"),
+        "error": ("We couldn't reach the value service. Please try again soon.", "error"),
+    }
+    status = valuation.refresh_property_value(uid, pid, min_days=7) if pid else "no-address"
+    text, cat = msgs.get(status, msgs["error"])
+    flash(text, cat)
+    return redirect(url_for("homeowner_value_equity_overview"))
 
 
 @app.route("/homeowner/switch-property", methods=["POST"])

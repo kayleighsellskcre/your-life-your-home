@@ -785,10 +785,18 @@
   - 
  {% endif %}
  </div>
- <div class="snapshot-card-sublabel">Your home's current market value</div>
+ <div class="snapshot-card-sublabel">{{ value_source_note or "Your home's current market value" }}</div>
+ {% if value_change is not none %}
  <div class="snapshot-card-change">
- ↑ +$12,500 this year
+ {{ '↑' if value_change >= 0 else '↓' }} {{ '+' if value_change >= 0 else '-' }}${{ "{:,}".format(value_change|abs|int) }} since {{ (snapshot_history|map(attribute='snapshot_date')|list|sort|first)[:10] }}
  </div>
+ {% endif %}
+ {% if value_refresh_available and current_property_id %}
+ <form method="post" action="{{ url_for('homeowner_value_refresh') }}" onclick="event.stopPropagation();" style="margin-top:.5rem;">
+ <input type="hidden" name="property_id" value="{{ current_property_id }}">
+ <a href="#" onclick="this.closest('form').submit();return false;" style="font-size:.78rem;text-decoration:underline;color:inherit;">Refresh from live market data</a>
+ </form>
+ {% endif %}
  </div>
  
  <!-- Equity -->

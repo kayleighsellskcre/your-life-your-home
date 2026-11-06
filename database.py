@@ -1182,6 +1182,22 @@ def init_db() -> None:
     except Exception:
         pass
 
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS avm_calls (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            property_id INTEGER,
+            status TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    for _c in ("value_low REAL", "value_high REAL"):
+        try:
+            cur.execute(f"ALTER TABLE homeowner_snapshots ADD COLUMN {_c}")
+        except Exception:
+            pass
+
     # Events that happen to a client's account (e.g. loan status changes) so their activity feed can show them
     cur.execute(
         """
@@ -3731,7 +3747,7 @@ def get_homeowner_snapshot_for_property(user_id: int, property_id: int) -> dict:
     cur.execute(
         """SELECT value_estimate, equity_estimate, loan_rate, loan_payment, 
                   loan_balance, loan_term_years, loan_start_date,
-                  last_value_refresh, value_refresh_source, updated_at,
+                  last_value_refresh, value_refresh_source, value_low, value_high, updated_at,
                   property_tax_monthly, homeowners_insurance_monthly, pmi_monthly
            FROM homeowner_snapshots
            WHERE user_id = ? AND property_id = ?
@@ -3772,6 +3788,7 @@ def upsert_homeowner_snapshot_for_property(
         (user_id, property_id),
     )
     existing = cur.fetchone()
+    existing = dict(existing) if existing else None  # sqlite3.Row has no .get()
 
     # Merge with existing data - only update fields that are explicitly provided (not None)
     # This ensures empty form fields don't overwrite existing data
