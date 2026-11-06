@@ -325,6 +325,23 @@ app.config["MAX_CONTENT_LENGTH"] = 250 * 1024 * 1024  # 250 MB upload cap
 _CSRF_EXEMPT_PATHS = ("/stripe/webhook", "/api/homebot/webhook", "/api/lead-intake/")
 
 
+_AREA_HOME = {"agent": "agent_dashboard", "lender": "lender_dashboard", "homeowner": "homeowner_overview"}
+
+
+@app.before_request
+def _enforce_area_access():
+    """Each area (/agent, /lender, /homeowner) is for signed-in members of that role only."""
+    area = request.path.split("/")[1] if request.path.count("/") >= 1 else ""
+    if area not in _AREA_HOME:
+        return None
+    uid, role = session.get("user_id"), session.get("role")
+    if not uid:
+        return redirect(url_for("login", role=area))
+    if role == "admin" or role == area:
+        return None
+    return redirect(url_for(_AREA_HOME.get(role, "index")))
+
+
 @app.before_request
 def _block_cross_site_posts():
     """Reject state-changing requests whose Origin header points at another site.
@@ -2417,51 +2434,6 @@ def _server_error(e):
     if request.path.startswith("/api/"):
         return jsonify({"error": "Server error"}), 500
     return render_template("errors/500.html"), 500
-
-
-@app.route("/health/ffmpeg")
-def health_ffmpeg():
-    """Health check endpoint to verify FFmpeg installation status"""
-    import subprocess
-    import json
-    
-    try:
-        result = subprocess.run(
-            ['ffmpeg', '-version'],
-            capture_output=True,
-            timeout=5,
-            text=True
-        )
-        
-        if result.returncode == 0:
-            # Extract version from output
-            version_line = result.stdout.split('\n')[0] if result.stdout else "Unknown"
-            return jsonify({
-                "status": "available",
-                "version": version_line,
-                "message": "FFmpeg is installed and ready"
-            })
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "FFmpeg command returned non-zero exit code",
-                "stderr": result.stderr
-            }), 500
-    except FileNotFoundError:
-        return jsonify({
-            "status": "not_found",
-            "message": "FFmpeg is not installed or not in PATH. Railway may still be installing it."
-        }), 503
-    except subprocess.TimeoutExpired:
-        return jsonify({
-            "status": "timeout",
-            "message": "FFmpeg check timed out"
-        }), 503
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
 
 
 @app.route("/signup", methods=["GET", "POST"])
