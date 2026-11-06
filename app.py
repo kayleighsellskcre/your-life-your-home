@@ -433,6 +433,16 @@ def _validate_uploads():
     return None
 
 
+@app.template_filter("load_json")
+def _load_json_filter(value):
+    """Parse a JSON string (e.g. a stored list of file names); empty list if blank or invalid."""
+    import json as _json
+    try:
+        return _json.loads(value) if value else []
+    except (TypeError, ValueError):
+        return []
+
+
 @app.context_processor
 def _inject_now_year():
     from datetime import datetime
@@ -9862,8 +9872,8 @@ def lender_marketing_hub_global():
         return redirect(url_for("login", role="lender"))
     
     # Get all borrowers for selection
-    from database import get_lender_borrowers
-    borrowers = get_lender_borrowers(user["id"])
+    from database import list_lender_borrowers
+    borrowers = list_lender_borrowers(user["id"])
     
     # Get lender profile for branding
     from database import get_user_profile
@@ -10569,7 +10579,7 @@ def homeowner_care_home_protection():
 @app.route("/homeowner/care/warranty-log", methods=["GET", "POST"])
 def homeowner_care_warranty_log():
     """Warranty log - add, view, and delete warranty items."""
-    from database import get_current_user, add_warranty_log_item, list_warranty_log_items, delete_warranty_log_item
+    from database import add_warranty_log_item, list_warranty_log_items, delete_warranty_log_item
     from datetime import datetime
     
     user = get_current_user()
