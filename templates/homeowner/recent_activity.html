@@ -27,11 +27,9 @@
  <label for="type" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Type</label>
  <select id="type" name="type">
  <option value="">All types</option>
- <option value="note" {% if request.args.get('type') == 'note' %}selected{% endif %}>Notes</option>
- <option value="document" {% if request.args.get('type') == 'document' %}selected{% endif %}>Documents</option>
- <option value="renovation" {% if request.args.get('type') == 'renovation' %}selected{% endif %}>Renovation updates</option>
- <option value="equity" {% if request.args.get('type') == 'equity' %}selected{% endif %}>Value &amp; equity</option>
- <option value="conversation" {% if request.args.get('type') == 'conversation' %}selected{% endif %}>Conversations</option>
+ {% for key, label in activity_types %}
+ <option value="{{ key }}" {% if request.args.get('type') == key %}selected{% endif %}>{{ label }}</option>
+ {% endfor %}
  </select>
  </div>
 
@@ -112,45 +110,7 @@
  {% else %}
  <div class="activity-list">
  <div class="activity-item">
- <div class="activity-header">
- <h3 class="activity-title">Updated Renovation Plan</h3>
- <span class="activity-date">Today</span>
- </div>
- <p class="activity-description">You added budget notes for your kitchen project.</p>
- <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
- Renovation
- </p>
- <a class="card-link" href="{{ url_for('homeowner_reno_planner') }}">
- Open Renovation Planner →
- </a>
- </div>
-
- <div class="activity-item">
- <div class="activity-header">
- <h3 class="activity-title">Uploaded a New Document</h3>
- <span class="activity-date">This Week</span>
- </div>
- <p class="activity-description">Home inspection report now stored in your document center.</p>
- <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
- Document
- </p>
- <a class="card-link" href="{{ url_for('homeowner_upload_documents') }}">
- View Documents →
- </a>
- </div>
-
- <div class="activity-item">
- <div class="activity-header">
- <h3 class="activity-title">Equity Check-In Idea</h3>
- <span class="activity-date">Example</span>
- </div>
- <p class="activity-description">Make a note to review your value and equity once a quarter so you can spot opportunities early.</p>
- <p style="font-size: 0.85rem; color: var(--olive-green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; margin-top: 0.5rem;">
- Value &amp; Equity
- </p>
- <a class="card-link" href="{{ url_for('homeowner_value_equity_overview') }}">
- Open Value Dashboard →
- </a>
+ <p class="activity-description">Nothing here yet. As you add documents, projects, warranties and notes, and as your agent and lender update your transaction, it all shows up in this feed.</p>
  </div>
  </div>
  {% endif %}

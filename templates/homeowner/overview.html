@@ -132,6 +132,21 @@
 </div>
 {% endif %}
 
+{% if recent_items %}
+<div style="max-width:900px;margin:0 auto 1.5rem;background:#fff;border:1px solid rgba(94,110,74,.22);border-radius:12px;padding:1rem 1.25rem;">
+ <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem;">
+ <strong style="color:#364A2B;">Recent activity</strong>
+ <a href="{{ url_for('homeowner_recent_activity') }}" style="font-size:.8rem;color:#5E6E4A;">See all</a>
+ </div>
+ {% for it in recent_items %}
+ <a href="{{ it.link_url }}" style="display:flex;justify-content:space-between;gap:1rem;padding:.45rem 0;border-top:1px solid rgba(94,110,74,.12);text-decoration:none;color:inherit;font-size:.88rem;">
+ <span>{{ it.title }}{% if it.summary %}<span style="color:#6b7560;"> &middot; {{ it.summary[:60] }}</span>{% endif %}</span>
+ <span style="color:#6b7560;font-size:.78rem;white-space:nowrap;">{{ it.date_display }}</span>
+ </a>
+ {% endfor %}
+</div>
+{% endif %}
+
 <!-- Financial Snapshot -->
 <div class="section">
  <div class="container">

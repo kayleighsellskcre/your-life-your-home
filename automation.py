@@ -371,3 +371,86 @@ def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status,
     except Exception:
         _log("notify_borrower_status failed:\n" + traceback.format_exc())
         return []
+
+
+ACTIVITY_TYPES = [
+    ("transaction", "Your transaction"),
+    ("document", "Documents"),
+    ("renovation", "Renovation"),
+    ("care", "Home care"),
+    ("home", "Home timeline"),
+    ("design", "Design boards"),
+    ("question", "Questions"),
+    ("value", "Value & equity"),
+]
+_TYPE_LABEL = dict(ACTIVITY_TYPES)
+
+
+def _when(ts):
+    from datetime import datetime, date
+    try:
+        d = datetime.strptime(str(ts)[:19], "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        try:
+            d = datetime.strptime(str(ts)[:10], "%Y-%m-%d")
+        except ValueError:
+            return str(ts or "")
+    delta = (date.today() - d.date()).days
+    if delta == 0:
+        return "Today"
+    if delta == 1:
+        return "Yesterday"
+    if 1 < delta < 7:
+        return f"{delta} days ago"
+    return d.strftime("%b %d, %Y").replace(" 0", " ")
+
+
+def homeowner_activity(user_id, q=None, type_=None, range_=None, from_date=None, to_date=None, limit=60):
+    """One feed of everything happening on a homeowner's account, newest first."""
+    from datetime import datetime, timedelta
+    sources = [
+        ("transaction", "SELECT tt.description AS title, t.property_address AS summary, tt.created_at AS ts FROM transaction_timeline tt JOIN transactions t ON t.id = tt.transaction_id WHERE t.homeowner_user_id = ? AND tt.event_type IN ('stage_changed', 'created')", "homeowner_overview"),
+        ("document", "SELECT 'Document added: ' || COALESCE(name, 'Untitled') AS title, COALESCE(category, '') AS summary, created_at AS ts FROM homeowner_documents WHERE user_id = ?", "homeowner_upload_documents"),
+        ("renovation", "SELECT 'Renovation project: ' || COALESCE(name, 'Untitled') AS title, COALESCE(status, '') AS summary, created_at AS ts FROM homeowner_projects WHERE user_id = ?", "homeowner_reno_planner"),
+        ("care", "SELECT 'Warranty tracked: ' || COALESCE(item_name, 'Item') AS title, COALESCE(warranty_provider, '') AS summary, created_at AS ts FROM homeowner_warranty_log WHERE user_id = ?", "homeowner_care_warranty_log"),
+        ("home", "SELECT COALESCE(title, 'Home update') AS title, COALESCE(category, '') AS summary, created_at AS ts FROM homeowner_timeline_events WHERE user_id = ?", "homeowner_home_timeline"),
+        ("design", "SELECT 'Design board: ' || COALESCE(title, 'Untitled') AS title, COALESCE(project_name, '') AS summary, created_at AS ts FROM homeowner_notes WHERE user_id = ?", "homeowner_saved_notes"),
+        ("question", "SELECT 'You asked: ' || COALESCE(topic, 'General') AS title, COALESCE(question, '') AS summary, created_at AS ts FROM homeowner_questions WHERE user_id = ?", "homeowner_support_get_help"),
+        ("value", "SELECT 'Home value updated' AS title, 'Estimated value $' || CAST(CAST(value_estimate AS INTEGER) AS TEXT) AS summary, created_at AS ts FROM homeowner_snapshot_history WHERE user_id = ? AND value_estimate IS NOT NULL", "homeowner_value_equity_overview"),
+    ]
+    want = type_ if type_ in _TYPE_LABEL else None
+    items = []
+    conn = get_connection()
+    try:
+        for kind, sql, endpoint in sources:
+            if want and kind != want:
+                continue
+            try:
+                for r in conn.execute(sql, (user_id,)).fetchall():
+                    items.append({"type": kind, "type_label": _TYPE_LABEL[kind], "title": r["title"], "summary": r["summary"], "ts": r["ts"] or "", "endpoint": endpoint})
+            except Exception:
+                continue
+    finally:
+        conn.close()
+    cutoff = None
+    if range_ == "today":
+        cutoff = datetime.now().strftime("%Y-%m-%d")
+    elif range_ and str(range_).isdigit():
+        cutoff = (datetime.now() - timedelta(days=int(range_))).strftime("%Y-%m-%d")
+    needle = (q or "").strip().lower()
+    out = []
+    for it in sorted(items, key=lambda x: x["ts"], reverse=True):
+        day = it["ts"][:10]
+        if cutoff and day < cutoff:
+            continue
+        if from_date and day < from_date:
+            continue
+        if to_date and day > to_date:
+            continue
+        if needle and needle not in f"{it['title']} {it['summary']}".lower():
+            continue
+        it["date_display"] = _when(it["ts"])
+        out.append(it)
+        if len(out) >= limit:
+            break
+    return out

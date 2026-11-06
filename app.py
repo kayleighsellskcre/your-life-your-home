@@ -3432,9 +3432,19 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
         except Exception as tx_err:
             print(f"[Overview] Could not load homeowner transaction: {tx_err}")
 
+    recent_items = []
+    try:
+        import automation
+        recent_items = automation.homeowner_activity(homeowner_id or session.get("user_id"), limit=5)
+        for _a in recent_items:
+            _a["link_url"] = url_for(_a["endpoint"])
+    except Exception as _e:
+        print(f"[Overview] activity feed skipped: {_e}")
+
     return render_template(
         "homeowner/overview.html",
         brand_name=FRONT_BRAND_NAME,
+        recent_items=recent_items,
         snapshot=snapshot,
         cloud_cma_url=CLOUD_CMA_URL,
         professionals=professionals,
@@ -3448,9 +3458,19 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
 
 @app.route("/homeowner/recent-activity")
 def homeowner_recent_activity():
+    import automation
+    activities = automation.homeowner_activity(
+        session.get("user_id"),
+        q=request.args.get("q"), type_=request.args.get("type"), range_=request.args.get("range"),
+        from_date=request.args.get("from_date"), to_date=request.args.get("to_date"),
+    )
+    for a in activities:
+        a["link_url"] = url_for(a["endpoint"])
     return render_template(
         "homeowner/recent_activity.html",
         brand_name=FRONT_BRAND_NAME,
+        activities=activities,
+        activity_types=automation.ACTIVITY_TYPES,
     )
 
 
