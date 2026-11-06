@@ -3,7 +3,7 @@
 <section class="ylh-onboard" aria-label="Getting started">
   <div class="ylh-onboard__top">
     <div><strong>Get started</strong> <span>{{ _ob.done }} of {{ _ob.steps|length }} done</span></div>
-    <form method="post" action="{{ url_for('onboarding_dismiss') }}"><button type="submit" class="ylh-onboard__x">Hide</button></form>
+    <form method="post" action="{{ url_for('onboarding_dismiss') }}"><a href="#" class="ylh-onboard__x" onclick="this.closest('form').submit();return false;">Hide</a></form>
   </div>
   <div class="ylh-onboard__bar"><i style="width:{{ (_ob.done / _ob.steps|length * 100)|round|int }}%"></i></div>
   <ul>
@@ -16,7 +16,9 @@
 .ylh-onboard{background:#fff;border:1px solid rgba(94,110,74,.25);border-left:4px solid #8A6D2F;border-radius:12px;padding:1rem 1.25rem;margin:0 0 1.25rem;box-shadow:0 2px 10px rgba(54,74,43,.06)}
 .ylh-onboard__top{display:flex;justify-content:space-between;align-items:center;color:#364A2B;font-size:.95rem}
 .ylh-onboard__top span{color:#6b7560;font-size:.82rem;margin-left:.5rem}
-.ylh-onboard__x{background:none;border:none;color:#6b7560;font-size:.8rem;cursor:pointer;text-decoration:underline}
+.ylh-onboard__top form{flex:0 0 auto;margin:0;width:auto}
+.ylh-onboard a.ylh-onboard__x{color:#6b7560;font-size:.8rem;text-decoration:underline;padding:.2rem .4rem;display:inline}
+.ylh-onboard__top>div{display:flex;align-items:baseline;gap:.5rem;flex-wrap:nowrap;white-space:nowrap}
 .ylh-onboard__bar{height:6px;background:#e7eddf;border-radius:3px;margin:.6rem 0 .8rem;overflow:hidden}
 .ylh-onboard__bar i{display:block;height:100%;background:#5E6E4A}
 .ylh-onboard ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.4rem .9rem}
