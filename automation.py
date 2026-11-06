@@ -351,6 +351,8 @@ def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status,
         finally:
             conn.close()
         sent = []
+        if acct:
+            record_account_event(acct["id"], "loan", f"Loan update: {label}", f"Your lender {lender.get('name') or ''} moved your loan to {label}.".replace("  ", " "))
         lender_line = f"Your lender: {lender.get('name', '')}" + (f" ({lender.get('email')})" if lender.get("email") else "")
         body = (
             f"Hi {borrower_name or 'there'},\n\n"
@@ -375,6 +377,7 @@ def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status,
 
 ACTIVITY_TYPES = [
     ("transaction", "Your transaction"),
+    ("loan", "Your loan"),
     ("document", "Documents"),
     ("renovation", "Renovation"),
     ("care", "Home care"),
@@ -409,6 +412,7 @@ def homeowner_activity(user_id, q=None, type_=None, range_=None, from_date=None,
     """One feed of everything happening on a homeowner's account, newest first."""
     from datetime import datetime, timedelta
     sources = [
+        ("loan", "SELECT title AS title, COALESCE(summary, '') AS summary, created_at AS ts FROM account_events WHERE user_id = ? AND kind = 'loan'", "homeowner_next_loan_paths"),
         ("transaction", "SELECT tt.description AS title, t.property_address AS summary, tt.created_at AS ts FROM transaction_timeline tt JOIN transactions t ON t.id = tt.transaction_id WHERE t.homeowner_user_id = ? AND tt.event_type IN ('stage_changed', 'created')", "homeowner_overview"),
         ("document", "SELECT 'Document added: ' || COALESCE(name, 'Untitled') AS title, COALESCE(category, '') AS summary, created_at AS ts FROM homeowner_documents WHERE user_id = ?", "homeowner_upload_documents"),
         ("renovation", "SELECT 'Renovation project: ' || COALESCE(name, 'Untitled') AS title, COALESCE(status, '') AS summary, created_at AS ts FROM homeowner_projects WHERE user_id = ?", "homeowner_reno_planner"),
@@ -462,7 +466,7 @@ def _md(date_str):
     return s[5:10] if len(s) >= 10 and s[4] == "-" else (s[:5] if len(s) == 5 and s[2] == "-" else "")
 
 
-def build_digest(user_id, role):
+def build_digest(user_id, role, force_weekly=False):
     """What a professional needs to know today. Returns {'sections': [(title, [lines])], 'count': n}."""
     from datetime import date, timedelta
     today = date.today()
@@ -520,6 +524,22 @@ def build_digest(user_id, role):
                 sections.append(("Closings in the next 14 days", lines))
             people = rows("SELECT name, birthday, home_anniversary FROM lender_borrowers WHERE lender_user_id = ?", (user_id,))
 
+        if force_weekly or today.weekday() == 0:   # Mondays: opportunities, so they don't repeat daily
+            if role == "agent":
+                rich = rows(
+                    """SELECT u.name AS name, s.value_estimate AS v, COALESCE(s.equity_estimate, s.value_estimate - s.loan_balance) AS eq
+                       FROM homeowner_snapshots s JOIN users u ON u.id = s.user_id
+                       WHERE u.agent_id = ? AND COALESCE(s.equity_estimate, s.value_estimate - s.loan_balance) >= 150000
+                       ORDER BY eq DESC LIMIT 5""", (user_id,))
+                if rich:
+                    sections.append(("Clients with strong equity (possible conversations)", [f"{r['name']}: about ${int(r['eq']):,} in equity" for r in rich]))
+            else:
+                high = rows(
+                    """SELECT u.name AS name, s.loan_rate AS rate FROM homeowner_snapshots s JOIN users u ON u.id = s.user_id
+                       WHERE u.lender_id = ? AND s.loan_rate >= 6.5 ORDER BY s.loan_rate DESC LIMIT 5""", (user_id,))
+                if high:
+                    sections.append(("Clients who may want a refinance conversation", [f"{r['name']}: current rate {r['rate']}%" for r in high]))
+
         celebrate = [f"{p['name']}: birthday today" for p in people if _md(p.get("birthday")) == mmdd] + \
                     [f"{p['name']}: home anniversary today" for p in people if _md(p.get("home_anniversary")) == mmdd]
         if celebrate:
@@ -573,3 +593,15 @@ def send_daily_digests(send_email, base_url):
         _log("send_daily_digests failed:\n" + traceback.format_exc())
     _log(f"daily digests sent: {sent}")
     return sent
+
+
+def record_account_event(user_id, kind, title, summary=""):
+    try:
+        conn = get_connection()
+        try:
+            conn.execute("INSERT INTO account_events (user_id, kind, title, summary) VALUES (?, ?, ?, ?)", (user_id, kind, title, summary))
+            conn.commit()
+        finally:
+            conn.close()
+    except Exception:
+        _log("record_account_event failed:\n" + traceback.format_exc())

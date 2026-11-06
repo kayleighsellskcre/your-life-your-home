@@ -1182,6 +1182,20 @@ def init_db() -> None:
     except Exception:
         pass
 
+    # Events that happen to a client's account (e.g. loan status changes) so their activity feed can show them
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS account_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            kind TEXT,
+            title TEXT,
+            summary TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
     # ------------- MESSAGE TEMPLATES -------------
     cur.execute(
         """
