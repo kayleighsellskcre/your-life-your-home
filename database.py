@@ -669,6 +669,10 @@ def init_db() -> None:
         cur.execute("ALTER TABLE homeowner_documents ADD COLUMN r2_url TEXT")
     except:
         pass
+    try:
+        cur.execute("ALTER TABLE homeowner_documents ADD COLUMN file_path TEXT")
+    except:
+        pass
 
     # ------------- HOMEOWNER WARRANTY LOG -------------
     cur.execute(
@@ -2229,6 +2233,13 @@ def delete_warranty_log_item(item_id: int, user_id: int) -> bool:
     return success
 
 
+def _with_doc_filename(docs):
+    """Give every document a 'filename' (stored file name) whatever the table's schema era."""
+    for d in docs:
+        d["filename"] = d.get("file_path") or d.get("filename") or d.get("name") or ""
+    return docs
+
+
 def list_homeowner_documents(user_id: int) -> List[Dict]:
     """List all documents for a homeowner. Handles schema migration if needed."""
     conn = get_connection()
@@ -2255,6 +2266,8 @@ def list_homeowner_documents(user_id: int) -> List[Dict]:
             select_cols.append('category')
         if 'file_path' in columns:
             select_cols.append('file_path')
+        if 'filename' in columns:
+            select_cols.append('filename')
         if 'r2_key' in columns:
             select_cols.append('r2_key')
         if 'r2_url' in columns:
@@ -2282,7 +2295,7 @@ def list_homeowner_documents(user_id: int) -> List[Dict]:
         
         rows = cur.fetchall()
         conn.close()
-        return rows_to_dicts(rows)
+        return _with_doc_filename(rows_to_dicts(rows))
     except Exception as e:
         print(f"[DB ERROR] Error listing homeowner documents: {str(e)}")
         import traceback
@@ -2300,7 +2313,7 @@ def list_homeowner_documents(user_id: int) -> List[Dict]:
             )
             rows = cur.fetchall()
             conn.close()
-            return rows_to_dicts(rows)
+            return _with_doc_filename(rows_to_dicts(rows))
         except:
             conn.close()
             return []

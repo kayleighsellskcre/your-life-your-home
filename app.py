@@ -4455,9 +4455,9 @@ def homeowner_upload_documents():
 
         add_homeowner_document(
             user_id=user_id,
-            title=title,
+            name=title,
             category=category,
-            file_name=stored_name,
+            file_path=stored_name,
             r2_key=r2_key,
         )
         flash("Document uploaded.", "success")
@@ -7669,18 +7669,25 @@ def agent_communications():
         return redirect(url_for("login", role="agent"))
 
     if request.method == "POST":
-        template_name = request.form.get("template_name", "").strip()
-        template_content = request.form.get("template_content", "").strip()
-        template_type = request.form.get("template_type", "email").strip()
-
-        if template_name and template_content:
+        label = request.form.get("label", "").strip()
+        body = request.form.get("body", "").strip()
+        if label and body:
             try:
-                add_message_template(user["id"], template_name, template_content, template_type)
+                add_message_template(
+                    user["id"], "agent", label,
+                    request.form.get("category", "General").strip(),
+                    request.form.get("channel", "email").strip(),
+                    request.form.get("subject", "").strip(), body,
+                )
                 flash("Template saved!", "success")
             except Exception as e:
-                flash(f"Error saving template: {e}", "error")
+                print(f"[TEMPLATES] save failed: {e}")
+                flash("Sorry, that template could not be saved.", "error")
+        else:
+            flash("Please give the template a name and a message.", "error")
+        return redirect(url_for("agent_communications"))
 
-    templates = list_message_templates(user["id"])
+    templates = list_message_templates("agent", user["id"])
     return render_template(
         "agent/communications.html",
         brand_name=FRONT_BRAND_NAME,
@@ -9822,7 +9829,11 @@ def lender_loans():
 
         if borrower_name and loan_amount:
             try:
-                add_lender_loan(user["id"], borrower_name, loan_amount, loan_type, status)
+                add_lender_loan(
+                    user["id"], borrower_name, status, loan_type, loan_amount,
+                    request.form.get("stage", "Application").strip() or "Application",
+                    request.form.get("close_date", "").strip(),
+                )
                 flash("Loan added successfully!", "success")
             except Exception as e:
                 flash(f"Error adding loan: {e}", "error")
