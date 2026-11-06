@@ -1146,26 +1146,55 @@ EMAIL_USER = os.environ.get("EMAIL_USER") or os.environ.get("MAIL_USERNAME")
 EMAIL_PASS = os.environ.get("EMAIL_PASS") or os.environ.get("MAIL_PASSWORD")
 
 
+def _send_via_resend(to_email, subject, body):
+    """Send over HTTPS (port 443) with Resend. Works on hosts that block SMTP, like Railway's Hobby plan."""
+    import json as _json
+    import urllib.request as _req
+    sender = os.environ.get("MAIL_FROM") or EMAIL_USER or ""
+    if not sender:
+        print("[WARNING] RESEND_API_KEY is set but MAIL_FROM is not; cannot send.")
+        return False
+    payload = _json.dumps({"from": sender, "to": [to_email], "subject": subject, "text": body}).encode("utf-8")
+    request_ = _req.Request(
+        "https://api.resend.com/emails", data=payload, method="POST",
+        headers={"Authorization": f"Bearer {os.environ['RESEND_API_KEY']}", "Content-Type": "application/json"})
+    try:
+        with _req.urlopen(request_, timeout=15) as resp:
+            ok = 200 <= resp.status < 300
+        print(f"[OK] Email sent to {to_email} via Resend" if ok else f"[WARNING] Resend returned {resp.status}")
+        return ok
+    except Exception as e:
+        detail = ""
+        try:
+            detail = e.read().decode("utf-8")[:200]
+        except Exception:
+            pass
+        print(f" Failed to send email to {to_email} via Resend: {e} {detail}")
+        return False
+
+
 def send_reminder_email(to_email, subject, body):
-    """Send a reminder email using SMTP."""
+    """Send an email. Uses Resend over HTTPS when RESEND_API_KEY is set, otherwise SMTP (with a timeout)."""
+    if os.environ.get("RESEND_API_KEY"):
+        return _send_via_resend(to_email, subject, body)
     if not EMAIL_USER or not EMAIL_PASS:
         print(f"[WARNING] Email not configured - cannot send to {to_email}")
         return False
-    
+
     msg = MIMEMultipart()
     msg["From"] = os.environ.get("MAIL_FROM") or EMAIL_USER
     msg["To"] = to_email
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain"))
     try:
-        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT) as server:
+        with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10) as server:
             server.starttls()
             server.login(EMAIL_USER, EMAIL_PASS)
             server.sendmail(EMAIL_USER, to_email, msg.as_string())
         print(f"[OK] Email sent to {to_email}")
         return True
     except Exception as e:
-        print(f" Failed to send email to {to_email}: {e}")
+        print(f" Failed to send email to {to_email}: {e} (if this says timed out or unreachable, your host may block SMTP; set RESEND_API_KEY to send over HTTPS)")
         return False
 
 
@@ -1976,12 +2005,14 @@ def _mark_email_verified(user_id):
         print(f"[VERIFY] could not mark verified: {e}")
 
 
-def _send_verification_email(user_id, email):
-    """Email a 3-day confirmation link. Never raises; signup must not fail on email trouble."""
+def _send_verification_email(user_id, email, background=False):
+    """Email a 3-day confirmation link. Never raises; signup must not fail on email trouble.
+    The link is built here (needs the request); with background=True only the slow sending is deferred."""
     try:
         token = _verify_serializer().dumps({"uid": int(user_id), "email": email.lower()})
         link = url_for("verify_email", token=token, _external=True)
-        return send_reminder_email(
+        sender = (lambda *a: _bg(send_reminder_email, *a)) if background else send_reminder_email
+        return sender(
             email,
             "Confirm your email for Your Life, Your Home",
             "Welcome! Please confirm your email address by opening this link:\n\n"
@@ -2197,6 +2228,31 @@ def _acquire_scheduler_lock():
     except OSError:
         return False  # another worker already owns the scheduler
 
+
+def _apply_emergency_password():
+    """Locked out and email isn't working? Set YLH_RESET_EMAIL and YLH_RESET_PASSWORD in the host's
+    variables, redeploy, sign in, then DELETE both variables. Only an existing account is changed."""
+    email = (os.environ.get("YLH_RESET_EMAIL") or "").strip().lower()
+    new_pw = os.environ.get("YLH_RESET_PASSWORD") or ""
+    if not email or not new_pw:
+        return
+    try:
+        if len(new_pw) < 8:
+            print("[ADMIN] YLH_RESET_PASSWORD is shorter than 8 characters; ignored.")
+            return
+        from database import get_user_by_email, update_user_password
+        row = get_user_by_email(email)
+        if not row:
+            print(f"[ADMIN] YLH_RESET_EMAIL: no account found for {email}; nothing changed.")
+            return
+        user = dict(row)
+        update_user_password(user["id"], generate_password_hash(new_pw))
+        print(f"[ADMIN] Password set for {email}. Sign in, then DELETE YLH_RESET_EMAIL and YLH_RESET_PASSWORD.")
+    except Exception as e:
+        print(f"[ADMIN] Emergency password reset failed: {e}")
+
+
+_apply_emergency_password()
 
 # Start scheduler when app starts (non-blocking)
 try:
@@ -2960,7 +3016,7 @@ def signup():
         session["user_id"] = user_id
         session["role"] = role
         session["name"] = name or "Friend"
-        _send_verification_email(user_id, email)
+        _send_verification_email(user_id, email, background=True)
         
         # Success message for agents/lenders
         if role == "agent":
@@ -3200,15 +3256,14 @@ def forgot_password():
                         {"uid": user["id"], "fp": _reset_fingerprint(user.get("password_hash"))}
                     )
                     link = url_for("reset_password", token=token, _external=True)
-                    sent = send_reminder_email(
+                    _bg(
+                        send_reminder_email,
                         email,
                         "Reset your Your Life, Your Home password",
                         "We received a request to reset your password.\n\n"
                         f"Use this link within 1 hour:\n{link}\n\n"
                         "If you didn't ask for this, you can safely ignore this email.",
                     )
-                    if not sent:
-                        print("[RESET] Reset email could not be sent (check MAIL_* settings).")
             except Exception as e:
                 print(f"FORGOT PASSWORD ERROR: {e}")
         # Same message whether or not the account exists (prevents account enumeration)
