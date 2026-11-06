@@ -1146,15 +1146,38 @@ EMAIL_USER = os.environ.get("EMAIL_USER") or os.environ.get("MAIL_USERNAME")
 EMAIL_PASS = os.environ.get("EMAIL_PASS") or os.environ.get("MAIL_PASSWORD")
 
 
-def _send_via_resend(to_email, subject, body):
+def _clean_header(value):
+    """Keep names and addresses on one line so they can't inject extra email headers."""
+    return " ".join(str(value or "").split())
+
+
+def _from_address(from_name=None):
+    """MAIL_FROM, with its display name swapped for from_name when one is given."""
+    from email.utils import parseaddr, formataddr
+    name, addr = parseaddr(os.environ.get("MAIL_FROM") or EMAIL_USER or "")
+    if from_name:
+        name = _clean_header(from_name)
+    return name, addr, (formataddr((name, addr)) if addr else "")
+
+
+def _reply_to_address(reply_to=None):
+    """Who replies go to: the agent or lender when given, otherwise MAIL_REPLY_TO (if set)."""
+    return _clean_header(reply_to or os.environ.get("MAIL_REPLY_TO") or "")
+
+
+def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
     """Send over HTTPS (port 443) with Resend. Works on hosts that block SMTP, like Railway's Hobby plan."""
     import json as _json
     import urllib.request as _req
-    sender = os.environ.get("MAIL_FROM") or EMAIL_USER or ""
+    _, _, sender = _from_address(from_name)
     if not sender:
         print("[WARNING] RESEND_API_KEY is set but MAIL_FROM is not; cannot send.")
         return False
-    payload = _json.dumps({"from": sender, "to": [to_email], "subject": subject, "text": body}).encode("utf-8")
+    data = {"from": sender, "to": [to_email], "subject": subject, "text": body}
+    reply = _reply_to_address(reply_to)
+    if reply:
+        data["reply_to"] = [reply]
+    payload = _json.dumps(data).encode("utf-8")
     request_ = _req.Request(
         "https://api.resend.com/emails", data=payload, method="POST",
         headers={"Authorization": f"Bearer {os.environ['RESEND_API_KEY']}", "Content-Type": "application/json"})
@@ -1173,13 +1196,12 @@ def _send_via_resend(to_email, subject, body):
         return False
 
 
-def _send_via_brevo(to_email, subject, body):
+def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
     """Send over HTTPS (port 443) with Brevo's API. Works on hosts that block SMTP, like Railway's Hobby plan."""
     import json as _json
     import html as _html
     import urllib.request as _req
-    from email.utils import parseaddr
-    name, addr = parseaddr(os.environ.get("MAIL_FROM") or EMAIL_USER or "")
+    name, addr, _ = _from_address(from_name)
     if not addr:
         print("[WARNING] BREVO_API_KEY is set but MAIL_FROM is not; cannot send.")
         return False
@@ -1187,10 +1209,14 @@ def _send_via_brevo(to_email, subject, body):
     if name:
         sender["name"] = name
     html_body = "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.5\">" + _html.escape(body).replace("\n", "<br>") + "</div>"
-    payload = _json.dumps({
+    data = {
         "sender": sender, "to": [{"email": to_email}], "subject": subject,
         "htmlContent": html_body, "textContent": body,
-    }).encode("utf-8")
+    }
+    reply = _reply_to_address(reply_to)
+    if reply:
+        data["replyTo"] = {"email": reply}
+    payload = _json.dumps(data).encode("utf-8")
     request_ = _req.Request(
         "https://api.brevo.com/v3/smtp/email", data=payload, method="POST",
         headers={"api-key": os.environ["BREVO_API_KEY"], "Content-Type": "application/json", "Accept": "application/json"})
@@ -1209,20 +1235,27 @@ def _send_via_brevo(to_email, subject, body):
         return False
 
 
-def send_reminder_email(to_email, subject, body):
-    """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout)."""
+def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None):
+    """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout).
+
+    from_name replaces the display name (e.g. "Jane Smith via Your Life Your Home") and reply_to sends
+    replies to that address. The From address itself always stays MAIL_FROM, so emails stay authenticated.
+    """
     if os.environ.get("RESEND_API_KEY"):
-        return _send_via_resend(to_email, subject, body)
+        return _send_via_resend(to_email, subject, body, from_name, reply_to)
     if os.environ.get("BREVO_API_KEY"):
-        return _send_via_brevo(to_email, subject, body)
+        return _send_via_brevo(to_email, subject, body, from_name, reply_to)
     if not EMAIL_USER or not EMAIL_PASS:
         print(f"[WARNING] Email not configured - cannot send to {to_email}")
         return False
 
     msg = MIMEMultipart()
-    msg["From"] = os.environ.get("MAIL_FROM") or EMAIL_USER
+    msg["From"] = _from_address(from_name)[2] or EMAIL_USER
     msg["To"] = to_email
     msg["Subject"] = subject
+    reply = _reply_to_address(reply_to)
+    if reply:
+        msg["Reply-To"] = reply
     msg.attach(MIMEText(body, "plain"))
     try:
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10) as server:
@@ -1234,6 +1267,37 @@ def send_reminder_email(to_email, subject, body):
     except Exception as e:
         print(f" Failed to send email to {to_email}: {e} (if this says timed out or unreachable, your host may block SMTP; set BREVO_API_KEY or RESEND_API_KEY to send over HTTPS)")
         return False
+
+
+def pro_sender(user_id):
+    """Sender details for an email sent on an agent's or lender's behalf.
+
+    Returns kwargs for send_reminder_email: the display name reads "<their name> via Your Life Your Home"
+    and replies go to their own email. Returns {} if they can't be found, so the email still sends normally.
+    """
+    if not user_id:
+        return {}
+    try:
+        conn = get_connection()
+        try:
+            row = conn.execute(
+                "SELECT u.name, u.email, up.full_name FROM users u "
+                "LEFT JOIN user_profiles up ON up.user_id = u.id WHERE u.id = ?", (user_id,)).fetchone()
+        finally:
+            conn.close()
+    except Exception as e:
+        print(f"[WARNING] pro_sender lookup failed for user {user_id}: {e}")
+        return {}
+    if not row:
+        return {}
+    row = dict(row)
+    name = _clean_header(row.get("full_name") or row.get("name"))
+    out = {}
+    if name:
+        out["from_name"] = f"{name} via Your Life Your Home"
+    if row.get("email"):
+        out["reply_to"] = row["email"]
+    return out
 
 
 def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referral_token=None, signup_timestamp=None):
@@ -1463,7 +1527,7 @@ Thank you for being part of our community.
 Best regards,
 Your Life, Your Home Team
 """
-        if send_reminder_email(contact['email'], subject, body):
+        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'birthday', contact['email'], subject, 'sent'
@@ -1488,7 +1552,7 @@ We hope you're enjoying your home and creating wonderful memories.
 Best regards,
 Your Life, Your Home Team
 """
-        if send_reminder_email(contact['email'], subject, body):
+        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'anniversary', contact['email'], subject, 'sent'
@@ -1603,7 +1667,7 @@ Stay safe and enjoy the season!
 Best regards,
 Your Life, Your Home Team
 """
-        if send_reminder_email(contact['email'], subject, body):
+        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'seasonal', contact['email'], subject, 'sent'
@@ -1709,7 +1773,7 @@ Your home equity continues to grow! This represents significant wealth you've bu
 Best regards,
 Your Life, Your Home Team
 """
-        if send_reminder_email(contact['email'], subject, body):
+        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'equity', contact['email'], subject, 'sent'
@@ -1786,7 +1850,7 @@ Thank you for being part of our community.
 Best regards,
 Your Life, Your Home Team
 """
-        if send_reminder_email(contact['email'], subject, body):
+        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'holiday', contact['email'], subject, 'sent'
@@ -1945,7 +2009,7 @@ def send_drip_emails():
         subject = subjects.get(step, f"Following up — {agent_name}")
         body = bodies.get(step, f"Hi {contact_name},\n\nJust wanted to check in.\n\n{agent_name}")
         try:
-            send_reminder_email(row["contact_email"], subject, body)
+            send_reminder_email(row["contact_email"], subject, body, **pro_sender(row.get("agent_user_id")))
             # Mark as sent
             conn2 = get_connection()
             cur2 = conn2.cursor()
@@ -2013,7 +2077,7 @@ def send_review_requests():
                 f"who is thinking about buying or selling. I love referrals!\n\n"
                 f"Warmly,\n{agent_name}")
         try:
-            send_reminder_email(row["client_email"], subject, body)
+            send_reminder_email(row["client_email"], subject, body, **pro_sender(row.get("agent_user_id")))
             conn2 = get_connection()
             cur2 = conn2.cursor()
             cur2.execute("""
@@ -6340,7 +6404,7 @@ Looking forward to supporting you,
 
 {agent_name}
 """
-    if send_reminder_email(email, subject, body):
+    if send_reminder_email(email, subject, body, **pro_sender(user["id"])):
         flash(f" Portal invite sent to {email}!", "success")
     else:
         flash(f" Could not send email — please check your email settings.", "error")
@@ -12555,7 +12619,7 @@ Good luck!
 
 {agent_name}
 """
-        if send_reminder_email(email, subject, body):
+        if send_reminder_email(email, subject, body, **pro_sender(agent_user["id"])):
             count += 1
     # Mark as sent
     conn = get_db_connection()

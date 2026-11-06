@@ -47,6 +47,19 @@ def _user_by_email(conn, email):
     return _row(conn, "SELECT id, name, email, role, agent_id, lender_id FROM users WHERE lower(email) = lower(?)", (email.strip(),))
 
 
+def _via(person):
+    """send_email kwargs so an email shows "<name> via Your Life Your Home" and replies go to that person."""
+    person = person or {}
+    out = {}
+    name = " ".join(str(person.get("name") or "").split())
+    if name:
+        out["from_name"] = f"{name} via Your Life Your Home"
+    email = " ".join(str(person.get("email") or "").split())
+    if email:
+        out["reply_to"] = email
+    return out
+
+
 def _user(conn, uid):
     if not uid:
         return None
@@ -123,7 +136,7 @@ def notify_stage_change(tx_id, new_stage, send_email, base_url):
             )
             if new_stage == "closed" and not tx.get("homeowner_user_id"):
                 body += f"\nCreate your free homeowner account to track your home's value and care: {_signup_link(base_url, tx.get('agent_id'))}\n"
-            if send_email(client_email, f"Update on {addr}: {label}", body):
+            if send_email(client_email, f"Update on {addr}: {label}", body, **_via(agent)):
                 sent.append(client_email)
         if lender and lender.get("email"):
             body = (
@@ -132,7 +145,7 @@ def notify_stage_change(tx_id, new_stage, send_email, base_url):
                 f"{agent_line}\n"
                 f"Open your dashboard: {base_url}/lender\n"
             )
-            if send_email(lender["email"], f"Client update: {addr} is now {label}", body):
+            if send_email(lender["email"], f"Client update: {addr} is now {label}", body, **_via(agent)):
                 sent.append(lender["email"])
         return sent
     except Exception:
@@ -206,7 +219,7 @@ def route_homeowner_question(user_id, topic, question, send_email, base_url):
                 + (f" or {home.get('phone')}" if home.get("phone") else "")
                 + f"\nOpen your dashboard: {base_url}/{kind}\n"
             )
-            if send_email(pro["email"], f"Question from {home.get('name') or 'a homeowner'}: {topic or 'General'}", body):
+            if send_email(pro["email"], f"Question from {home.get('name') or 'a homeowner'}: {topic or 'General'}", body, **_via(home)):
                 sent.append(pro["email"])
         if agent and contact:
             from database import add_crm_task, add_crm_interaction
@@ -245,7 +258,7 @@ def invite_client_if_needed(tx_id, send_email, base_url):
             f"Create your account here: {link}\n\n"
             f"Use this email address ({email}) so everything connects automatically."
         )
-        ok = send_email(email, f"{agent.get('name') or 'Your agent'} invited you to your home portal", body)
+        ok = send_email(email, f"{agent.get('name') or 'Your agent'} invited you to your home portal", body, **_via(agent))
         _log(f"invited {email} for transaction {tx_id}: {ok}")
         return bool(ok)
     except Exception:
@@ -329,7 +342,7 @@ def on_loan_created(lender_id, borrower_name, borrower_email, send_email, base_u
             f"Create your account here: {link}\n\n"
             f"Use this email address ({email}) so everything connects automatically."
         )
-        send_email(email, f"{lender.get('name') or 'Your lender'} invited you to your home portal", body)
+        send_email(email, f"{lender.get('name') or 'Your lender'} invited you to your home portal", body, **_via(lender))
         return "invited"
     except Exception:
         _log("on_loan_created failed:\n" + traceback.format_exc())
@@ -359,7 +372,7 @@ def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status,
             f"Good news on your loan: it is now \"{label}\".\n\n{lender_line}\n"
             f"Track everything in your portal: {base_url}/homeowner\n"
         )
-        if send_email(email, f"Loan update: {label}", body):
+        if send_email(email, f"Loan update: {label}", body, **_via(lender)):
             sent.append(email)
         if agent and agent.get("email"):
             body = (
@@ -367,7 +380,7 @@ def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status,
                 f"{borrower_name or 'Your client'}'s loan with {lender.get('name') or 'their lender'} moved to \"{label}\".\n"
                 f"Open your dashboard: {base_url}/agent\n"
             )
-            if send_email(agent["email"], f"Client loan update: {borrower_name} is now {label}", body):
+            if send_email(agent["email"], f"Client loan update: {borrower_name} is now {label}", body, **_via(lender)):
                 sent.append(agent["email"])
         return sent
     except Exception:
