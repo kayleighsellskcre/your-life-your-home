@@ -1173,10 +1173,48 @@ def _send_via_resend(to_email, subject, body):
         return False
 
 
+def _send_via_brevo(to_email, subject, body):
+    """Send over HTTPS (port 443) with Brevo's API. Works on hosts that block SMTP, like Railway's Hobby plan."""
+    import json as _json
+    import html as _html
+    import urllib.request as _req
+    from email.utils import parseaddr
+    name, addr = parseaddr(os.environ.get("MAIL_FROM") or EMAIL_USER or "")
+    if not addr:
+        print("[WARNING] BREVO_API_KEY is set but MAIL_FROM is not; cannot send.")
+        return False
+    sender = {"email": addr}
+    if name:
+        sender["name"] = name
+    html_body = "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.5\">" + _html.escape(body).replace("\n", "<br>") + "</div>"
+    payload = _json.dumps({
+        "sender": sender, "to": [{"email": to_email}], "subject": subject,
+        "htmlContent": html_body, "textContent": body,
+    }).encode("utf-8")
+    request_ = _req.Request(
+        "https://api.brevo.com/v3/smtp/email", data=payload, method="POST",
+        headers={"api-key": os.environ["BREVO_API_KEY"], "Content-Type": "application/json", "Accept": "application/json"})
+    try:
+        with _req.urlopen(request_, timeout=15) as resp:
+            ok = 200 <= resp.status < 300
+        print(f"[OK] Email sent to {to_email} via Brevo" if ok else f"[WARNING] Brevo returned {resp.status}")
+        return ok
+    except Exception as e:
+        detail = ""
+        try:
+            detail = e.read().decode("utf-8")[:200]
+        except Exception:
+            pass
+        print(f" Failed to send email to {to_email} via Brevo: {e} {detail}")
+        return False
+
+
 def send_reminder_email(to_email, subject, body):
-    """Send an email. Uses Resend over HTTPS when RESEND_API_KEY is set, otherwise SMTP (with a timeout)."""
+    """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout)."""
     if os.environ.get("RESEND_API_KEY"):
         return _send_via_resend(to_email, subject, body)
+    if os.environ.get("BREVO_API_KEY"):
+        return _send_via_brevo(to_email, subject, body)
     if not EMAIL_USER or not EMAIL_PASS:
         print(f"[WARNING] Email not configured - cannot send to {to_email}")
         return False
@@ -1194,7 +1232,7 @@ def send_reminder_email(to_email, subject, body):
         print(f"[OK] Email sent to {to_email}")
         return True
     except Exception as e:
-        print(f" Failed to send email to {to_email}: {e} (if this says timed out or unreachable, your host may block SMTP; set RESEND_API_KEY to send over HTTPS)")
+        print(f" Failed to send email to {to_email}: {e} (if this says timed out or unreachable, your host may block SMTP; set BREVO_API_KEY or RESEND_API_KEY to send over HTTPS)")
         return False
 
 
