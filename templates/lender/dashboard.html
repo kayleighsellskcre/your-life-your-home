@@ -460,6 +460,25 @@
 
 <div class="dashboard-container">
 {% include "_onboarding.html" %}
+{% if today_digest and today_digest.sections %}
+<section class="ylh-today" aria-label="Today">
+  <div class="ylh-today__hd"><strong>Today</strong> <span>{{ today_digest.count }} thing{{ '' if today_digest.count == 1 else 's' }} to know</span></div>
+  <div class="ylh-today__grid">
+  {% for title, items in today_digest.sections %}
+    <div><div class="ylh-today__t">{{ title }}</div>
+    {% for i in items[:4] %}<div class="ylh-today__i">{{ i }}</div>{% endfor %}
+    {% if items|length > 4 %}<div class="ylh-today__i" style="color:#6b7560;">+ {{ items|length - 4 }} more</div>{% endif %}</div>
+  {% endfor %}
+  </div>
+</section>
+<style>
+.ylh-today{background:#fff;border:1px solid rgba(94,110,74,.25);border-left:4px solid #5E6E4A;border-radius:12px;padding:1rem 1.25rem;margin:0 0 1.25rem;box-shadow:0 2px 10px rgba(54,74,43,.06)}
+.ylh-today__hd{color:#364A2B;font-size:.95rem;margin-bottom:.6rem}.ylh-today__hd span{color:#6b7560;font-size:.82rem;margin-left:.5rem}
+.ylh-today__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.9rem 1.5rem}
+.ylh-today__t{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:#8A6D2F;font-weight:700;margin-bottom:.25rem}
+.ylh-today__i{font-size:.86rem;color:#364A2B;padding:.12rem 0}
+</style>
+{% endif %}
 
  <!-- Header -->
  <div class="ylh-page-hd animate-in">

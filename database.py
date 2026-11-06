@@ -188,6 +188,7 @@ def init_db() -> None:
         ("last_login", "TEXT"),
         ("email_verified", "INTEGER DEFAULT 0"),
         ("onboarding_dismissed", "INTEGER DEFAULT 0"),
+        ("digest_enabled", "INTEGER DEFAULT 1"),
     ]:
         try:
             cur.execute(f"ALTER TABLE users ADD COLUMN {_col} {_type}")

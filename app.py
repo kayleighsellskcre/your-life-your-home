@@ -2097,6 +2097,21 @@ def _inject_onboarding():
     return {"onboarding_checklist": onboarding_checklist}
 
 
+@app.route("/digest/unsubscribe/<token>")
+def digest_unsubscribe(token):
+    import automation
+    uid = automation.digest_unsubscribe_uid(token)
+    if uid:
+        conn = get_connection()
+        conn.execute("UPDATE users SET digest_enabled = 0 WHERE id = ?", (uid,))
+        conn.commit()
+        conn.close()
+        flash("You're unsubscribed from the daily summary email.", "success")
+    else:
+        flash("That link isn't valid.", "error")
+    return redirect(url_for("index"))
+
+
 @app.route("/onboarding/dismiss", methods=["POST"])
 def onboarding_dismiss():
     uid = session.get("user_id")
@@ -2150,6 +2165,9 @@ def start_scheduler():
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily — bracket contest invites
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
+        scheduler.add_job(
+            lambda: __import__("automation").send_daily_digests(send_reminder_email, os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")),
+            "cron", hour=7, minute=30)  # 7:30 AM daily pro digest
         scheduler.start()
         print("[OK] Reminder scheduler started with CRM automation and daily value updates.")
     except Exception as e:
@@ -5245,10 +5263,16 @@ def agent_dashboard():
     try:
         today_label = _now.strftime("%A, %B %-d")   # Linux/Mac
     except ValueError:
-        today_label = _now.strftime("%A, %B %#d")   # Windows (%#d strips leading zero)
+        today_label = f"{_now.strftime('%A, %B')} {_now.day}"
     except Exception:
         today_label = _now.strftime("%A, %B %d").lstrip("0").replace(" 0", " ")
 
+    try:
+        import automation
+        today_digest = automation.build_digest(user["id"], "agent")
+    except Exception as _e:
+        print(f"[DIGEST] dashboard digest skipped: {_e}")
+        today_digest = None
     return render_template(
         "agent/dashboard.html",
         brand_name=FRONT_BRAND_NAME,
@@ -5256,6 +5280,7 @@ def agent_dashboard():
         metrics=metrics,
         transactions=transactions,
         today_date=today_label,
+        today_digest=today_digest,
     )
 
 @app.route("/lender", methods=["GET"])
@@ -5313,6 +5338,7 @@ def lender_dashboard():
             loans=loans,
             borrowers=borrowers,
             shared_deals=automation.lender_shared_deals(user["id"]),
+            today_digest=automation.build_digest(user["id"], "lender"),
         )
     except Exception as e:
         import traceback

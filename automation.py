@@ -454,3 +454,122 @@ def homeowner_activity(user_id, q=None, type_=None, range_=None, from_date=None,
         if len(out) >= limit:
             break
     return out
+
+
+def _md(date_str):
+    """'1985-04-12' -> '04-12' (month-day) for birthday/anniversary matching."""
+    s = str(date_str or "")
+    return s[5:10] if len(s) >= 10 and s[4] == "-" else (s[:5] if len(s) == 5 and s[2] == "-" else "")
+
+
+def build_digest(user_id, role):
+    """What a professional needs to know today. Returns {'sections': [(title, [lines])], 'count': n}."""
+    from datetime import date, timedelta
+    today = date.today()
+    today_s = today.isoformat()
+    soon_s = (today + timedelta(days=14)).isoformat()
+    mmdd = today.strftime("%m-%d")
+    sections = []
+    conn = get_connection()
+    try:
+        def rows(sql, args=()):
+            try:
+                return [dict(r) for r in conn.execute(sql, args).fetchall()]
+            except Exception:
+                return []
+
+        tasks = rows(
+            """SELECT title, due_date FROM crm_tasks
+               WHERE professional_user_id = ? AND status IN ('pending', 'in_progress')
+                 AND due_date IS NOT NULL AND due_date <= ?
+               ORDER BY due_date LIMIT 10""", (user_id, today_s))
+        if tasks:
+            sections.append(("Tasks due today or overdue", [
+                f"{t['title']}" + (f" (overdue since {t['due_date']})" if t["due_date"] < today_s else " (today)") for t in tasks]))
+
+        if role == "agent":
+            closings = rows(
+                """SELECT property_address, client_name, target_close_date FROM transactions
+                   WHERE agent_id = ? AND status = 'active' AND current_stage NOT IN ('closed', 'cancelled')
+                     AND target_close_date BETWEEN ? AND ? ORDER BY target_close_date LIMIT 10""", (user_id, today_s, soon_s))
+            if closings:
+                sections.append(("Closings in the next 14 days", [f"{c['property_address']} - {c['client_name']} (closing {c['target_close_date']})" for c in closings]))
+            questions = rows(
+                """SELECT u.name AS name, q.topic AS topic FROM homeowner_questions q JOIN users u ON u.id = q.user_id
+                   WHERE u.agent_id = ? AND COALESCE(q.status, 'new') NOT IN ('answered', 'closed')
+                     AND q.created_at >= datetime('now', '-7 days') ORDER BY q.created_at DESC LIMIT 10""", (user_id,))
+            if questions:
+                sections.append(("Client questions waiting for a reply", [f"{q['name']}: {q['topic'] or 'General'}" for q in questions]))
+            leads = rows(
+                """SELECT name, email FROM users WHERE agent_id = ? AND role = 'homeowner'
+                   AND created_at >= datetime('now', '-1 day') ORDER BY created_at DESC LIMIT 10""", (user_id,))
+            if leads:
+                sections.append(("New clients who signed up in the last day", [f"{l['name']} ({l['email']})" for l in leads]))
+            people = rows("SELECT name, birthday, home_anniversary FROM agent_contacts WHERE agent_user_id = ?", (user_id,))
+        else:
+            closings = rows(
+                """SELECT borrower_name, close_date FROM lender_loans
+                   WHERE lender_user_id = ? AND close_date BETWEEN ? AND ? ORDER BY close_date LIMIT 10""", (user_id, today_s, soon_s))
+            shared = rows(
+                """SELECT property_address, client_name, target_close_date FROM transactions
+                   WHERE lender_user_id = ? AND status = 'active' AND current_stage NOT IN ('closed', 'cancelled')
+                     AND target_close_date BETWEEN ? AND ? ORDER BY target_close_date LIMIT 10""", (user_id, today_s, soon_s))
+            lines = [f"{c['borrower_name']} (closing {c['close_date']})" for c in closings] + \
+                    [f"{s['client_name']} at {s['property_address']} (closing {s['target_close_date']})" for s in shared]
+            if lines:
+                sections.append(("Closings in the next 14 days", lines))
+            people = rows("SELECT name, birthday, home_anniversary FROM lender_borrowers WHERE lender_user_id = ?", (user_id,))
+
+        celebrate = [f"{p['name']}: birthday today" for p in people if _md(p.get("birthday")) == mmdd] + \
+                    [f"{p['name']}: home anniversary today" for p in people if _md(p.get("home_anniversary")) == mmdd]
+        if celebrate:
+            sections.append(("Birthdays and anniversaries today", celebrate[:10]))
+    finally:
+        conn.close()
+    return {"sections": sections, "count": sum(len(s[1]) for s in sections)}
+
+
+def _digest_serializer():
+    from itsdangerous import URLSafeSerializer
+    import os
+    return URLSafeSerializer(os.environ.get("YLH_SECRET_KEY") or "dev-insecure-key", salt="ylh-digest-optout")
+
+
+def digest_unsubscribe_token(user_id):
+    return _digest_serializer().dumps({"uid": int(user_id)})
+
+
+def digest_unsubscribe_uid(token):
+    try:
+        return int(_digest_serializer().loads(token)["uid"])
+    except Exception:
+        return None
+
+
+def send_daily_digests(send_email, base_url):
+    """Morning email to every agent and lender who has something on their plate. Skips empty days."""
+    sent = 0
+    try:
+        conn = get_connection()
+        try:
+            pros = [dict(r) for r in conn.execute(
+                "SELECT id, name, email, role FROM users WHERE role IN ('agent', 'lender') AND COALESCE(digest_enabled, 1) = 1 AND email IS NOT NULL AND email <> ''").fetchall()]
+        finally:
+            conn.close()
+        for p in pros:
+            d = build_digest(p["id"], p["role"])
+            if not d["count"]:
+                continue
+            lines = [f"Good morning {(p.get('name') or '').split(' ')[0] or 'there'}, here is your day:", ""]
+            for title, items in d["sections"]:
+                lines.append(title.upper())
+                lines += [f"  - {i}" for i in items]
+                lines.append("")
+            lines.append(f"Open your dashboard: {base_url}/{p['role']}")
+            lines.append(f"Stop these daily emails: {base_url}/digest/unsubscribe/{digest_unsubscribe_token(p['id'])}")
+            if send_email(p["email"], f"Your day: {d['count']} things to know", "\n".join(lines)):
+                sent += 1
+    except Exception:
+        _log("send_daily_digests failed:\n" + traceback.format_exc())
+    _log(f"daily digests sent: {sent}")
+    return sent
