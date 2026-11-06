@@ -15,7 +15,7 @@
  <link rel="preconnect" href="https://fonts.googleapis.com" />
  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
  
- <title>{% block page_title %}Your Life • Your Home{% endblock %}</title>
+ <title>{% block page_title %}{% set _pt %}{% block title %}{% endblock %}{% endset %}{% set _pt = _pt|striptags|trim|replace(' • Your Life • Your Home', '')|replace(' • Your Life Your Home', '')|replace(' | Your Life Your Home', '') %}{{ _pt ~ ' • ' if _pt else '' }}Your Life Your Home{% endblock %}</title>
  {% block meta %}
  <meta name="description" content="Track your home's value and equity, plan renovations, and stay on top of home care, free for homeowners, with CRM and marketing tools for agents and loan officers." />
  <link rel="canonical" href="{{ request.base_url }}" />
@@ -708,6 +708,13 @@
    transition: background .12s;
  }
  .ylh-ham-signout:hover { background: rgba(198,146,112,.1); }
+
+ /* Readability on phones: small labels and badges never go below 12px */
+ @media (max-width: 768px) {
+   label, th, .template-badge, .s-badge, .x-btn, .exp-key, .msec, .metric-label, .metric-subtext,
+   .action-desc, .gh-resource-category, .auto-badge, .borrower-badge, .status-badge, .stage-badge,
+   .card-badge, .current-badge, .badge-premium { font-size: max(.75rem, 12px) !important; }
+ }
  </style>
 
  <header class="site-header">
