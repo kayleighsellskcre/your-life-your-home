@@ -603,6 +603,24 @@
  </select>
  </div>
  <div>
+ <label>Loan Stage</label>
+ <select name="loan_stage" id="edit_loan_stage">
+ <option value="">Not in the loan pipeline</option>
+ <option value="preapproval_started">Pre-Approval Started</option>
+ <option value="preapproval_verified">Pre-Approval Verified</option>
+ <option value="loan_processing">Loan Processing</option>
+ <option value="appraisal_ordered">Appraisal Ordered</option>
+ <option value="appraisal_received">Appraisal Received</option>
+ <option value="uw_approval">Underwriting Approval</option>
+ <option value="clear_to_close">Clear to Close</option>
+ <option value="funding_closing">Funding and Closing</option>
+ </select>
+ </div>
+ <div>
+ <label>Target Close Date</label>
+ <input type="date" name="close_date" id="edit_close_date">
+ </div>
+ <div>
  <label>Loan Type</label>
  <input type="text" name="loan_type" id="edit_loan_type">
  </div>
@@ -941,6 +959,8 @@ function openEditModal(borrowerId) {
  document.getElementById('edit_phone').value = borrower.phone || '';
  document.getElementById('edit_status').value = borrower.status || 'prospect';
  document.getElementById('edit_loan_type').value = borrower.loan_type || '';
+ document.getElementById('edit_loan_stage').value = borrower.loan_stage || '';
+ document.getElementById('edit_close_date').value = borrower.close_date || '';
  document.getElementById('edit_target_payment').value = borrower.target_payment || '';
  document.getElementById('edit_loan_amount').value = borrower.loan_amount || '';
  document.getElementById('edit_loan_rate').value = borrower.loan_rate || '';

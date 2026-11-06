@@ -1182,6 +1182,42 @@ def init_db() -> None:
     except Exception:
         pass
 
+    # One record per lender client: the loan pipeline fields live on lender_borrowers.
+    # The first time these columns appear, fold any rows from the old lender_loans list into the CRM.
+    _added_loan_cols = False
+    for _c in ("loan_stage TEXT", "close_date TEXT"):
+        try:
+            cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {_c}")
+            _added_loan_cols = True
+        except Exception:
+            pass
+    if _added_loan_cols:
+        try:
+            for _l in cur.execute("SELECT * FROM lender_loans").fetchall():
+                _l = dict(_l)
+                _email = (_l.get("borrower_email") or "").strip()
+                _name = (_l.get("borrower_name") or "").strip()
+                _hit = None
+                if _email:
+                    _hit = cur.execute("SELECT id FROM lender_borrowers WHERE lender_user_id = ? AND lower(email) = lower(?)", (_l["lender_user_id"], _email)).fetchone()
+                if not _hit and _name:
+                    _hit = cur.execute("SELECT id FROM lender_borrowers WHERE lender_user_id = ? AND lower(name) = lower(?)", (_l["lender_user_id"], _name)).fetchone()
+                _stage = _l.get("stage") or "preapproval_started"
+                if _hit:
+                    cur.execute(
+                        """UPDATE lender_borrowers SET loan_stage = ?, close_date = COALESCE(NULLIF(close_date, ''), ?),
+                           loan_type = COALESCE(NULLIF(loan_type, ''), ?), target_payment = COALESCE(NULLIF(target_payment, ''), ?)
+                           WHERE id = ?""",
+                        (_stage, _l.get("close_date"), _l.get("loan_type"), _l.get("target_payment"), _hit["id"]))
+                else:
+                    cur.execute(
+                        """INSERT INTO lender_borrowers (lender_user_id, name, status, loan_type, target_payment, email, loan_stage, close_date)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (_l["lender_user_id"], _name or "Borrower", _l.get("status") or "preapproval", _l.get("loan_type"),
+                         _l.get("target_payment"), _email, _stage, _l.get("close_date")))
+        except Exception as _e:
+            print(f"[DB] loans -> borrowers migration skipped: {_e}")
+
     cur.execute(
         """
         CREATE TABLE IF NOT EXISTS avm_calls (
@@ -2846,7 +2882,7 @@ def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> Lis
                email, phone, birthday, home_anniversary, address, notes, tags,
                property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
                auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-               user_id
+               user_id, loan_stage, close_date
         FROM lender_borrowers
         WHERE lender_user_id = ?
     """
@@ -2870,7 +2906,7 @@ def get_lender_borrower(borrower_id: int, lender_user_id: int) -> Optional[dict]
         SELECT id, created_at, name, status, loan_type, target_payment, last_touch,
                email, phone, birthday, home_anniversary, address, notes, tags,
                property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
-               auto_seasonal, auto_equity, auto_holidays, equity_frequency
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency, loan_stage, close_date
         FROM lender_borrowers
         WHERE id = ? AND lender_user_id = ?
         """,
@@ -2920,31 +2956,45 @@ def add_lender_loan(
     close_date: str,
     borrower_email: str = "",
 ) -> int:
+    """Put a client in the loan pipeline. Reuses the borrower if they already exist (by email, then name)."""
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO lender_loans (
-            lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date, borrower_email
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        (lender_user_id, borrower_name, status, loan_type, target_payment, stage, close_date, borrower_email or ""),
-    )
-    loan_id = cur.lastrowid
+    email = (borrower_email or "").strip()
+    name = (borrower_name or "").strip()
+    stage = stage or "preapproval_started"
+    hit = None
+    if email:
+        hit = cur.execute("SELECT id FROM lender_borrowers WHERE lender_user_id = ? AND lower(email) = lower(?)", (lender_user_id, email)).fetchone()
+    if not hit and name:
+        hit = cur.execute("SELECT id FROM lender_borrowers WHERE lender_user_id = ? AND lower(name) = lower(?)", (lender_user_id, name)).fetchone()
+    if hit:
+        borrower_id = hit["id"]
+        cur.execute(
+            """UPDATE lender_borrowers SET status = ?, loan_stage = ?, close_date = COALESCE(NULLIF(?, ''), close_date),
+               loan_type = COALESCE(NULLIF(?, ''), loan_type), target_payment = COALESCE(NULLIF(?, ''), target_payment),
+               email = COALESCE(NULLIF(email, ''), NULLIF(?, '')), last_touch = CURRENT_TIMESTAMP WHERE id = ?""",
+            (status, stage, close_date or "", loan_type or "", target_payment or "", email, borrower_id))
+    else:
+        cur.execute(
+            """INSERT INTO lender_borrowers (lender_user_id, name, status, loan_type, target_payment, email, loan_stage, close_date)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (lender_user_id, name, status, loan_type, target_payment, email, stage, close_date or ""))
+        borrower_id = cur.lastrowid
     conn.commit()
     conn.close()
-    return loan_id
+    return borrower_id
 
 
 def list_lender_loans(lender_user_id: int) -> List[Dict]:
+    """The loan pipeline: borrowers who have a loan stage. Same shape the loan pages have always used."""
     conn = get_connection()
     cur = conn.cursor()
     cur.execute(
         """
-        SELECT id, created_at, borrower_name, status, loan_type, target_payment, stage, close_date
-        FROM lender_loans
-        WHERE lender_user_id = ?
+        SELECT id, created_at, name AS borrower_name, status, loan_type, target_payment,
+               loan_stage AS stage, close_date, email AS borrower_email, loan_amount
+        FROM lender_borrowers
+        WHERE lender_user_id = ? AND COALESCE(loan_stage, '') <> ''
         ORDER BY created_at DESC
         """,
         (lender_user_id,),

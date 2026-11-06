@@ -525,8 +525,9 @@ def build_digest(user_id, role, force_weekly=False):
             people = rows("SELECT name, birthday, home_anniversary FROM agent_contacts WHERE agent_user_id = ?", (user_id,))
         else:
             closings = rows(
-                """SELECT borrower_name, close_date FROM lender_loans
-                   WHERE lender_user_id = ? AND close_date BETWEEN ? AND ? ORDER BY close_date LIMIT 10""", (user_id, today_s, soon_s))
+                """SELECT name AS borrower_name, close_date FROM lender_borrowers
+                   WHERE lender_user_id = ? AND COALESCE(loan_stage, '') <> '' AND close_date BETWEEN ? AND ?
+                   ORDER BY close_date LIMIT 10""", (user_id, today_s, soon_s))
             shared = rows(
                 """SELECT property_address, client_name, target_close_date FROM transactions
                    WHERE lender_user_id = ? AND status = 'active' AND current_stage NOT IN ('closed', 'cancelled')

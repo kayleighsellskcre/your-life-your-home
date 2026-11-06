@@ -2229,7 +2229,7 @@ def _inject_onboarding():
                     ("Add your photo and contact info", "lender_settings_profile",
                      "SELECT COUNT(*) FROM user_profiles WHERE user_id=? AND professional_photo IS NOT NULL AND professional_photo<>''"),
                     ("Add your first borrower", "lender_crm", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=?"),
-                    ("Add a loan", "lender_loans", "SELECT COUNT(*) FROM lender_loans WHERE lender_user_id=?"),
+                    ("Add a loan", "lender_loans", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=? AND COALESCE(loan_stage, '') <> ''"),
                 ]
             else:
                 spec = [
@@ -9553,7 +9553,7 @@ def lender_crm():
                             'address', 'notes', 'tags', 'property_address',
                             'loan_amount', 'loan_rate', 'auto_birthday', 
                             'auto_anniversary', 'auto_seasonal', 'auto_equity',
-                            'auto_holidays', 'equity_frequency']:
+                            'auto_holidays', 'equity_frequency', 'loan_stage', 'close_date']:
                     val = request.form.get(field, "").strip()
                     if val or field in ['auto_birthday', 'auto_anniversary', 
                                        'auto_seasonal', 'auto_equity', 'auto_holidays']:
