@@ -9902,8 +9902,8 @@ def lender_marketing_hub(borrower_id):
         return redirect(url_for("login", role="lender"))
 
     from database import get_lender_borrower
-    borrower = get_lender_borrower(borrower_id)
-    if not borrower or borrower.get("lender_id") != user["id"]:
+    borrower = get_lender_borrower(borrower_id, user["id"])
+    if not borrower:
         flash("Borrower not found.", "error")
         return redirect(url_for("lender_crm"))
     
@@ -9935,8 +9935,8 @@ def lender_marketing_create(borrower_id):
         return redirect(url_for("login", role="lender"))
 
     from database import get_lender_borrower
-    borrower = get_lender_borrower(borrower_id)
-    if not borrower or borrower.get("lender_id") != user["id"]:
+    borrower = get_lender_borrower(borrower_id, user["id"])
+    if not borrower:
         flash("Borrower not found.", "error")
         return redirect(url_for("lender_crm"))
     
@@ -9974,8 +9974,8 @@ def lender_marketing_generate(borrower_id):
         return redirect(url_for("login", role="lender"))
 
     from database import get_lender_borrower
-    borrower = get_lender_borrower(borrower_id)
-    if not borrower or borrower.get("lender_id") != user["id"]:
+    borrower = get_lender_borrower(borrower_id, user["id"])
+    if not borrower:
         flash("Borrower not found.", "error")
         return redirect(url_for("lender_crm"))
     
