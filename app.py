@@ -2157,6 +2157,19 @@ def resend_verification():
 
 
 @app.context_processor
+def _inject_is_site_admin():
+    """Lets the menu show a 'Site Admin' link to the owner/admins only."""
+    uid = session.get("user_id")
+    if not uid or session.get("role") not in ("agent", "admin"):
+        return {"is_site_admin": False}
+    try:
+        from rbac import is_site_admin
+        return {"is_site_admin": bool(is_site_admin(uid))}
+    except Exception:
+        return {"is_site_admin": False}
+
+
+@app.context_processor
 def _inject_unverified():
     uid = session.get("user_id")
     if not uid:
@@ -3247,19 +3260,6 @@ def login():
     return render_template("auth/login.html", role=role)
 
 
-@app.route("/agent/trusted-vendors")
-def agent_trusted_vendors_redirect():
-    """Redirect legacy/wrong URL to correct vendors page."""
-    return redirect(url_for("agent_vendors"), 301)
-
-@app.route("/agent/admin")
-def agent_admin_redirect():
-    """Redirect /agent/admin to the actual admin settings page."""
-    return redirect(url_for("admin_settings"), 301)
-# ── End URL Alias Redirects ──────────────────────────────────────────────────
-
-
-# ---------------- TWO-STEP LOGIN (optional, authenticator app) ----------------
 def _finish_login(uid, name, role, remember=False):
     session.clear()
     session.permanent = bool(remember)
@@ -6324,12 +6324,6 @@ def _names_match(excel_name, db_name):
     if len(overlap) >= 2:  # at least 2 words match (e.g. first + last name)
         return True
     return False
-
-
-@app.route("/agent/crm/update-addresses", methods=["GET"], endpoint="agent_update_addresses")
-def agent_crm_update_addresses():
-    """Redirect to unified import - no longer a separate flow."""
-    return redirect(url_for("agent_crm_import"))
 
 
 @app.route("/agent/crm/quick-update", methods=["POST"])
@@ -10443,20 +10437,6 @@ def lender_roles():
     )
 
 
-@app.route("/lender/documents", methods=["GET"])
-def lender_documents():
-    """Lender documents."""
-    user = get_current_user()
-    if not user or user.get("role") != "lender":
-        return redirect(url_for("login", role="lender"))
-
-    return render_template(
-        "lender/documents.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-    )
-
-
 @app.route("/lender/power-suite", methods=["GET"])
 def lender_power_suite():
     """Lender power suite."""
@@ -10994,13 +10974,6 @@ def homeowner_support_resources():
     return redirect(url_for("homeowner_support_get_help") + "?tab=resources")
 
 
-@app.route("/homeowner/support/meet-team", methods=["GET"])
-def homeowner_support_meet_team():
-    """Meet the team — redirects to unified Get Help page."""
-    return redirect(url_for("homeowner_support_get_help") + "?tab=team")
-
-
-# ── UNIFIED SUPPORT: GET HELP ──────────────────────────────────────────────
 @app.route("/homeowner/support/get-help", methods=["GET"])
 @app.route("/homeowner/support", methods=["GET"])
 def homeowner_support_get_help():

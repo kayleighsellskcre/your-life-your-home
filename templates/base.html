@@ -743,6 +743,7 @@
        <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">Dashboard</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">CRM</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_referrals') }}">Invite Clients</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_communications') }}">Communications</a>
        <details class="ylh-ham-more"><summary>More tools</summary>
@@ -752,12 +753,15 @@
        <a class="ylh-ham-item" href="{{ url_for('agent_financials') }}">Financials</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_power_tools') }}">Power Tools</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_concierge_dashboard') }}">AI Concierge</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_subscription') }}">Plan &amp; Billing</a>
        </details>
        <a class="ylh-ham-item" href="{{ url_for('agent_settings_profile') }}">Settings &amp; Profile</a>
+       {% if is_site_admin %}<a class="ylh-ham-item" href="{{ url_for('admin_dashboard') }}">Site Admin</a>{% endif %}
        {% elif session.get('role') == 'lender' %}
        <a class="ylh-ham-item" href="{{ url_for('lender_dashboard') }}">Dashboard</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_crm') }}">Borrower CRM</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_loans') }}">Clients &amp; Loans</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_referrals') }}">Invite Clients</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_marketing_hub_global') }}">Marketing Hub</a>
        <details class="ylh-ham-more"><summary>More tools</summary>
        <a class="ylh-ham-item" href="{{ url_for('lender_booking') }}">Booking &amp; Calendar</a>
@@ -765,33 +769,33 @@
        <a class="ylh-ham-item" href="{{ url_for('lender_financials') }}">Financials</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_power_suite') }}">Power Suite</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_roles') }}">Roles &amp; Partners</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_subscription') }}">Plan &amp; Billing</a>
        </details>
        <a class="ylh-ham-item" href="{{ url_for('lender_settings_profile') }}">Settings &amp; Profile</a>
        {% else %}
        <a class="ylh-ham-item" href="{{ url_for('homeowner_overview') }}">Home Overview</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_value_equity_overview') }}">Value &amp; Equity</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_upload_documents') }}">Documents</a>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_ask_question') }}">Ask a Question</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_get_help') }}">Get Help</a>
        <details class="ylh-ham-more"><summary>Plan &amp; Design</summary>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_home_timeline') }}">Home Timeline</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_saved_notes') }}">Design Boards</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_planner') }}">Renovation Planner</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_material_cost') }}">Cost Estimator</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_roi_guide') }}">Renovation ROI Guide</a>
        </details>
        <details class="ylh-ham-more"><summary>Home Care</summary>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_maintenance_guide') }}">Home Care Guide</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_home_protection') }}">Home Protection</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_warranty_log') }}">Warranty &amp; Appliances</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_seasonal_checklists') }}">Seasonal Checklists</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_care_energy_savings') }}">Energy Savings</a>
        </details>
        <details class="ylh-ham-more"><summary>Your Next Move</summary>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_buy_sell_guidance') }}">Buy &amp; Sell Guidance</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_affordability') }}">Affordability Calculator</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_loan_paths') }}">Loan Paths</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_plan_move') }}">Plan My Move</a>
-       </details>
-       <details class="ylh-ham-more"><summary>Help</summary>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_resources') }}">Resources</a>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_schedule_chat') }}">Schedule a Chat</a>
        </details>
        {% endif %}
        <a class="ylh-ham-item" href="{{ url_for('account_security') }}">Account security</a>
