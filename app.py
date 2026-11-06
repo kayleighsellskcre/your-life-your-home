@@ -203,8 +203,6 @@ from database import (
     add_homeowner_question,
     add_agent_contact,
     list_agent_contacts,
-    add_agent_transaction,
-    get_agent_transaction,
     add_lender_loan,
     list_lender_loans,
     add_message_template,
@@ -3576,7 +3574,7 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
     if homeowner_id and not professionals:
         print(f"HOMEOWNER DASHBOARD FINAL WARNING: No professionals found for homeowner {homeowner_id} - dashboard will show empty team section")
 
-    # Load active transaction for this homeowner (from agent_transactions linked by homeowner_user_id or email)
+    # Load the homeowner's active transaction (linked by homeowner account or client email)
     active_transaction = None
     if homeowner_id and homeowner_user:
         try:
@@ -3589,25 +3587,6 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
                    ORDER BY created_at DESC LIMIT 1""",
                 (homeowner_id, hw_email, hw_email)
             ).fetchone()
-            if not tx_row:
-              tx_row = conn_tx.execute(
-                """SELECT * FROM agent_transactions
-                   WHERE homeowner_user_id = ?
-                     AND (stage IS NULL OR stage NOT IN ('closed','cancelled'))
-                   ORDER BY created_at DESC LIMIT 1""",
-                (homeowner_id,)
-            ).fetchone()
-            if not tx_row and hw_email:
-                # Fallback: match by client_name field containing email, or by participants table
-                tx_row = conn_tx.execute(
-                    """SELECT t.* FROM agent_transactions t
-                       LEFT JOIN transaction_participants tp
-                         ON tp.transaction_id = t.id AND LOWER(tp.email) = ?
-                       WHERE (LOWER(t.client_name) LIKE ? OR tp.id IS NOT NULL)
-                         AND (t.stage IS NULL OR t.stage NOT IN ('closed','cancelled'))
-                       ORDER BY t.created_at DESC LIMIT 1""",
-                    (hw_email, f"%{hw_email}%")
-                ).fetchone()
             conn_tx.close()
             if tx_row:
                 active_transaction = dict(tx_row)
@@ -11994,20 +11973,21 @@ def ai_transactions_coordinator_endpoint():
     user = get_current_user()
     if not user:
         return jsonify({"error": "Unauthorized"}), 401
-    from database import list_agent_transactions, get_user_profile
+    from database import get_user_profile
+    from transaction_helpers import get_agent_transactions as _real_transactions
     from ai_platform import ai_transaction_coordinator_summary
     profile = get_user_profile(user["id"]) or {}
     profile_d = dict(profile) if profile else {}
     agent_name = (profile_d.get("full_name") or user.get("name") or "there").split()[0]
-    raw_txns = list_agent_transactions(user["id"]) or []
+    raw_txns = _real_transactions(user["id"]) or []
     txns = []
     for t in raw_txns[:8]:
         td = dict(t) if not isinstance(t, dict) else t
         txns.append({
             "address": td.get("property_address") or "Unknown",
-            "stage": td.get("stage") or "",
+            "stage": (td.get("current_stage") or "").replace("_", " "),
             "client_name": td.get("client_name") or "",
-            "close_date": td.get("close_date") or "",
+            "close_date": td.get("target_close_date") or "",
             "side": td.get("side") or "buyer",
         })
     summary = ai_transaction_coordinator_summary(agent_name, txns)
