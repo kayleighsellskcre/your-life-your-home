@@ -836,9 +836,11 @@
  {% endif %}
  </div>
  <div class="snapshot-card-sublabel">Current mortgage balance</div>
- <div class="snapshot-card-change negative">
- ↓ -$850/month
+ {% if snapshot and snapshot.get('loan_payment') %}
+ <div class="snapshot-card-change">
+ ${{ "{:,}".format(snapshot.get('loan_payment')|int) }}/month payment
  </div>
+ {% endif %}
  </div>
  </div>
  
