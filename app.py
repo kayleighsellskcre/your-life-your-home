@@ -2223,7 +2223,7 @@ def _inject_onboarding():
                     ("Add your photo and contact info", "agent_settings_profile",
                      "SELECT COUNT(*) FROM user_profiles WHERE user_id=? AND professional_photo IS NOT NULL AND professional_photo<>''"),
                     ("Add your first client to the CRM", "agent_crm", "SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id=?"),
-                    ("Start a transaction", "agent_transactions", "SELECT COUNT(*) FROM agent_transactions WHERE agent_user_id=?"),
+                    ("Start a transaction", "agent_transactions", "SELECT COUNT(*) FROM transactions WHERE agent_id=?"),
                     ("Add a trusted vendor", "agent_vendors", "SELECT COUNT(*) FROM trusted_vendors WHERE agent_id=?"),
                 ]
             elif role == "lender":
