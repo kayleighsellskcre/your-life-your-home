@@ -8693,7 +8693,8 @@ def agent_vendors():
                         email=email,
                         website=website,
                         address=address,
-                        notes=notes
+                        notes=notes,
+                        agent_id=user["id"],
                     ):
                         flash("Vendor updated successfully!", "success")
                     else:
@@ -8706,7 +8707,7 @@ def agent_vendors():
             if vendor_id:
                 try:
                     vendor_id = int(vendor_id)
-                    if delete_trusted_vendor(vendor_id):
+                    if delete_trusted_vendor(vendor_id, user["id"]):
                         flash("Vendor removed successfully.", "success")
                     else:
                         flash("Error removing vendor.", "error")

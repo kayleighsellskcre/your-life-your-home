@@ -5415,9 +5415,10 @@ def update_trusted_vendor(
     email: Optional[str] = None,
     website: Optional[str] = None,
     address: Optional[str] = None,
-    notes: Optional[str] = None
+    notes: Optional[str] = None,
+    agent_id: Optional[int] = None,
 ) -> bool:
-    """Update a trusted vendor. Returns True if successful."""
+    """Update a trusted vendor (only the owning agent's, when agent_id is given). Returns True if successful."""
     conn = get_connection()
     cur = conn.cursor()
     
@@ -5456,8 +5457,12 @@ def update_trusted_vendor(
     updates.append("updated_at = CURRENT_TIMESTAMP")
     params.append(vendor_id)
     
+    where = "id = ?"
+    if agent_id is not None:
+        where += " AND agent_id = ?"
+        params.append(agent_id)
     cur.execute(
-        f"UPDATE trusted_vendors SET {', '.join(updates)} WHERE id = ?",
+        f"UPDATE trusted_vendors SET {', '.join(updates)} WHERE {where}",
         params
     )
     success = cur.rowcount > 0
@@ -5466,14 +5471,20 @@ def update_trusted_vendor(
     return success
 
 
-def delete_trusted_vendor(vendor_id: int) -> bool:
-    """Soft delete a trusted vendor (set is_active = 0). Returns True if successful."""
+def delete_trusted_vendor(vendor_id: int, agent_id: Optional[int] = None) -> bool:
+    """Soft delete a trusted vendor (only the owning agent's, when agent_id is given). Returns True if successful."""
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        "UPDATE trusted_vendors SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-        (vendor_id,)
-    )
+    if agent_id is not None:
+        cur.execute(
+            "UPDATE trusted_vendors SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND agent_id = ?",
+            (vendor_id, agent_id)
+        )
+    else:
+        cur.execute(
+            "UPDATE trusted_vendors SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+            (vendor_id,)
+        )
     success = cur.rowcount > 0
     conn.commit()
     conn.close()
