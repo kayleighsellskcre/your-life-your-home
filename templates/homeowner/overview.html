@@ -78,6 +78,7 @@
  {% set tx = active_transaction %}
  {% set stage_labels = {
  'pre_contract':'Pre-Contract',
+ 'in_escrow':'In Escrow',
  'under_contract':'Under Contract',
  'inspection':'Inspection',
  'appraisal':'Appraisal',
@@ -89,6 +90,7 @@
  {% set stage_colors = {
  'pre_contract':'#6B5B4D',
  'under_contract':'#1D4ED8',
+ 'in_escrow':'#D97706',
  'inspection':'#D97706',
  'appraisal':'#7C3AED',
  'clear_to_close':'#059669',
@@ -96,7 +98,7 @@
  'closed':'#15803d',
  'cancelled':'#9CA3AF'
  } %}
- {% set stages_list = ['pre_contract','under_contract','inspection','appraisal','clear_to_close','closing','closed'] %}
+ {% set stages_list = ['pre_contract','under_contract','in_escrow','clear_to_close','closed'] %}
  {% set tx_stage = tx.get('stage') or 'pre_contract' %}
  {% set stage_idx = stages_list.index(tx_stage) if tx_stage in stages_list else 0 %}
  <div style="background:linear-gradient(135deg,#FFFFFF 0%,#F9F7F4 100%);border:1px solid rgba(200,180,151,.3);border-radius:14px;padding:1.25rem 1.4rem;">
@@ -115,7 +117,7 @@
  <span>Closed</span>
  </div>
  <div style="height:7px;background:rgba(107,91,77,.12);border-radius:4px;overflow:hidden;">
- <div style="height:100%;width:{{ ((stage_idx + 1) / 7 * 100) | int }}%;background:linear-gradient(90deg,#6B5B4D,#C2B1A1);border-radius:4px;"></div>
+ <div style="height:100%;width:{{ ((stage_idx + 1) / stages_list|length * 100) | int }}%;background:linear-gradient(90deg,#6B5B4D,#C2B1A1);border-radius:4px;"></div>
  </div>
  </div>
  <span style="display:inline-flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:700;color:{{ stage_colors.get(tx_stage,'#6B5B4D') }};background:rgba(107,91,77,.08);padding:.28rem .6rem;border-radius:12px;">

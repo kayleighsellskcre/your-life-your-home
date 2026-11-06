@@ -1153,7 +1153,7 @@ def send_reminder_email(to_email, subject, body):
         return False
     
     msg = MIMEMultipart()
-    msg["From"] = EMAIL_USER
+    msg["From"] = os.environ.get("MAIL_FROM") or EMAIL_USER
     msg["To"] = to_email
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain"))
@@ -2028,6 +2028,22 @@ def _inject_unverified():
         return {"email_unverified": bool(row) and not row["email_verified"]}
     except Exception:
         return {"email_unverified": False}
+
+
+# ── CONNECTIVE AUTOMATION HELPERS ──────────────────────────────────────────
+def _bg(fn, *args):
+    """Run slow work (email) off the request thread; run inline under tests."""
+    if app.config.get("TESTING"):
+        return fn(*args)
+    import threading
+    threading.Thread(target=fn, args=args, daemon=True).start()
+
+
+def _site_url():
+    try:
+        return request.url_root.rstrip("/")
+    except RuntimeError:
+        return os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")
 
 
 # ── ONBOARDING CHECKLIST ───────────────────────────────────────────────────
@@ -3385,6 +3401,14 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
             hw_email = (homeowner_user.get("email") or "").lower().strip()
             conn_tx = get_db_connection()
             tx_row = conn_tx.execute(
+                """SELECT *, current_stage AS stage, target_close_date AS close_date FROM transactions
+                   WHERE (homeowner_user_id = ? OR (? <> '' AND lower(client_email) = ?))
+                     AND status = 'active' AND current_stage NOT IN ('closed','cancelled')
+                   ORDER BY created_at DESC LIMIT 1""",
+                (homeowner_id, hw_email, hw_email)
+            ).fetchone()
+            if not tx_row:
+              tx_row = conn_tx.execute(
                 """SELECT * FROM agent_transactions
                    WHERE homeowner_user_id = ?
                      AND (stage IS NULL OR stage NOT IN ('closed','cancelled'))
@@ -6440,7 +6464,7 @@ def agent_transactions():
 
         if property_address and client_name:
             try:
-                create_transaction(
+                new_tx_id = create_transaction(
                     agent_id=user["id"],
                     property_address=property_address,
                     client_name=client_name,
@@ -6452,6 +6476,8 @@ def agent_transactions():
                     purchase_price=request.form.get("purchase_price", "").strip() or None,
                     notes=request.form.get("notes", "").strip(),
                 )
+                import automation
+                automation.link_transaction_parties(new_tx_id)
                 flash("Transaction created successfully!", "success")
             except Exception as e:
                 flash(f"Error creating transaction: {e}", "error")
@@ -6788,6 +6814,14 @@ def agent_transaction_change_stage(tx_id):
             if sub_stage and new_stage == 'pre_contract':
                 pass
             flash("Transaction stage updated successfully.", "success")
+            try:
+                import automation
+                automation.link_transaction_parties(tx_id)
+                if new_stage == "closed":
+                    automation.on_transaction_closed(tx_id)
+                _bg(automation.notify_stage_change, tx_id, new_stage, send_reminder_email, _site_url())
+            except Exception as _auto_err:
+                print(f"[AUTOMATION] stage hook failed: {_auto_err}")
             # AI: Auto-generate recommended tasks for the new stage (background thread)
             try:
                 import threading as _thr
@@ -10654,7 +10688,12 @@ def homeowner_support_ask_question():
         redirect_to = request.form.get("_redirect_to") or url_for("homeowner_support_get_help") + "?tab=ask&sent=1"
         if question and user:
             add_homeowner_question(user["id"], topic or "General", question)
-            flash("Question submitted! We'll get back to you soon.", "success")
+            try:
+                import automation
+                _bg(automation.route_homeowner_question, user["id"], topic or "General", question, send_reminder_email, _site_url())
+            except Exception as _auto_err:
+                print(f"[AUTOMATION] question hook failed: {_auto_err}")
+            flash("Question submitted! Your agent has been notified and will reply to you directly.", "success")
             return redirect(redirect_to)
         elif not question:
             flash("Please enter your question.", "error")
