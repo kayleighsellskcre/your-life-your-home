@@ -138,7 +138,7 @@ def handle_profile_file_upload(file_field_name: str, folder: str = "profiles", r
         import traceback
         print(f"{role_prefix}PROFILE: Error uploading file: {e}")
         print(traceback.format_exc())
-        flash(f"Error uploading {file_field_name}: {str(e)}", "error")
+        flash("We could not upload that file. Please try a different image.", "error")
         return None
 
 
@@ -416,7 +416,7 @@ def _apply_rate_limits():
     if any(_rate_limited(k, limit, window) for k in keys):
         if request.is_json or request.path.startswith("/api/") or request.endpoint == "concierge_chat":
             return jsonify({"error": "Too many requests. Please slow down and try again shortly."}), 429
-        flash("Too many attempts. Please wait a few minutes and try again.", "error")
+        flash("That was a lot of tries in a row. Please wait a few minutes and try again.", "error")
         return redirect(url_for("login")), 303
     return None
 
@@ -1986,25 +1986,25 @@ def send_drip_emails():
             1:  f"Great to connect with you, {contact_name}",
             3:  f"Checking in, {contact_name}",
             7:  f"Still here to help, {contact_name}",
-            14: f"Touching base — {agent_name}",
+            14: f"Thinking of you, {contact_name}",
         }
         bodies = {
             1: (f"Hi {contact_name},\n\nJust wanted to reach out and say it was great to connect with you. "
                 f"I am here whenever you are ready to talk about buying or selling. "
                 f"Feel free to reach me at {agent_phone or agent_email} anytime.\n\nWarm regards,\n{agent_name}"),
             3: (f"Hi {contact_name},\n\nJust checking in to see if you have any questions or if there is "
-                f"anything I can help you with. No pressure at all — I just want to make sure you have "
+                f"anything I can help you with. No pressure at all, I just want to make sure you have "
                 f"everything you need.\n\nWarm regards,\n{agent_name}"),
             7: (f"Hi {contact_name},\n\nI know life gets busy, so I just wanted to pop back in and let you "
                 f"know I am still here for you whenever the timing is right. Whether it is a question about "
-                f"the market or you are ready to take the next step — I am just a call or text away.\n\n"
+                f"the market or you are ready to take the next step, I am just a call or text away.\n\n"
                 f"Warm regards,\n{agent_name}\n{agent_phone}"),
             14: (f"Hi {contact_name},\n\nI wanted to touch base one more time. Real estate decisions are "
                  f"big ones, and I never want to rush you. If you are still exploring your options or have "
-                 f"questions, I am happy to chat — zero pressure.\n\n"
+                 f"questions, I am happy to chat, with zero pressure.\n\n"
                  f"Warm regards,\n{agent_name}\n{agent_phone or agent_email}"),
         }
-        subject = subjects.get(step, f"Following up — {agent_name}")
+        subject = subjects.get(step, f"Thinking of you, {contact_name}")
         body = bodies.get(step, f"Hi {contact_name},\n\nJust wanted to check in.\n\n{agent_name}")
         try:
             send_reminder_email(row["contact_email"], subject, body, **pro_sender(row.get("agent_user_id")))
@@ -2071,7 +2071,7 @@ def send_review_requests():
                 f"Congratulations again on your closing! It was truly a pleasure working with you, "
                 f"and I hope you are settling in and loving your new home.\n"
                 f"{review_cta}"
-                f"And please remember — I am always here for you, your family, and anyone you know "
+                f"And please remember that I am always here for you, your family, and anyone you know "
                 f"who is thinking about buying or selling. I love referrals!\n\n"
                 f"Warmly,\n{agent_name}")
         try:
@@ -2133,7 +2133,7 @@ def verify_email(token):
         if not row or str(row["email"]).lower() != data.get("email"):
             raise BadSignature("mismatch")
     except (SignatureExpired, BadSignature, KeyError, TypeError):
-        flash("That confirmation link is invalid or has expired. Sign in and request a new one.", "error")
+        flash("That confirmation link has expired or is not quite right. Sign in and we will send you a new one.", "error")
         return redirect(url_for("login"))
     _mark_email_verified(data["uid"])
     flash("Thanks! Your email is confirmed.", "success")
@@ -2150,7 +2150,7 @@ def resend_verification():
         if _send_verification_email(uid, row["email"]):
             flash("Confirmation email sent. Check your inbox.", "success")
         else:
-            flash("We couldn't send the email right now. Please try again later.", "error")
+            flash("We could not send that email just now. Please try again in a little while.", "error")
     return redirect(request.referrer or url_for("index"))
 
 
@@ -2314,7 +2314,7 @@ def start_scheduler():
         scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
-        scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily — bracket contest invites
+        scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
         scheduler.add_job(
             lambda: __import__("automation").send_daily_digests(send_reminder_email, os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")),
@@ -2738,19 +2738,19 @@ def signup():
 
         # Validate required fields
         if not name:
-            flash("Please enter your full name.", "error")
+            flash("What should we call you? Please add your full name.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
         
         if not email:
-            flash("Please enter your email address.", "error")
+            flash("We will need your email address to set up your account.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
         
         if not password:
-            flash("Please enter a password.", "error")
+            flash("Please choose a password to keep your account safe.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
         
         if len(password) < 6:
-            flash("Password must be at least 6 characters long.", "error")
+            flash("Your password needs at least 6 characters. A little longer is even better.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         password_hash = generate_password_hash(password)
@@ -2840,9 +2840,9 @@ def signup():
                     # Re-raise if not a lock issue or max retries reached
                     print(f"DEBUG Signup: OperationalError - {str(e)}")
                     if "locked" in error_str:
-                        flash("The database is temporarily busy. Please wait a moment and try again.", "error")
+                        flash("Things are a little busy right now. Please give it a moment and try again.", "error")
                     else:
-                        flash(f"Database error: {str(e)}. Please try again.", "error")
+                        flash("Something went wrong on our end. Please try again in a moment.", "error")
                     import traceback
                     print(f"Database operational error during signup: {traceback.format_exc()}")
                     return redirect(url_for("signup", role=role, ref=referral_token_from_form))
@@ -2902,7 +2902,7 @@ def signup():
                                     raise ValueError("Account update failed - user not found after update")
                             except Exception as update_error:
                                 print(f"DEBUG Signup: Error completing incomplete account - {str(update_error)}")
-                                flash("An error occurred while completing your account. Please try again.", "error")
+                                flash("Something went wrong while finishing your account. Please try again.", "error")
                                 return redirect(url_for("signup", role=role, ref=referral_token_from_form))
                         else:
                             # Account already has a password: never overwrite it from signup.
@@ -2914,7 +2914,7 @@ def signup():
                         flash("That email is already in use. Please sign in instead.", "error")
                         return redirect(url_for("login", role=role))
                 else:
-                    flash(f"An error occurred while creating your account. Please try again.", "error")
+                    flash("Something went wrong while creating your account. Please try again.", "error")
                     import traceback
                     print(f"Database error during signup: {traceback.format_exc()}")
                     return redirect(url_for("signup", role=role, ref=referral_token_from_form))
@@ -2923,7 +2923,7 @@ def signup():
                 print(f"DEBUG Signup: Exception - {type(e).__name__}: {str(e)}")
                 # For non-lock errors, don't retry
                 if "locked" not in str(e).lower():
-                    flash(f"An error occurred: {str(e)}. Please try again.", "error")
+                    flash("Something went wrong on our end. Please try again in a moment.", "error")
                     import traceback
                     print(f"Unexpected error during signup: {traceback.format_exc()}")
                     return redirect(url_for("signup", role=role, ref=referral_token_from_form))
@@ -2936,7 +2936,7 @@ def signup():
                     time.sleep(wait_time)
                     continue
                 else:
-                    flash(f"An error occurred: {str(e)}. Please try again.", "error")
+                    flash("Something went wrong on our end. Please try again in a moment.", "error")
                     import traceback
                     print(f"Unexpected error during signup: {traceback.format_exc()}")
                     return redirect(url_for("signup", role=role, ref=referral_token_from_form))
@@ -2945,7 +2945,7 @@ def signup():
             # If we get here, all retries failed
             error_msg = f"Unable to create account. {str(last_error) if last_error else 'Please try again in a moment.'}"
             if last_error and "locked" in str(last_error).lower():
-                flash("The database is temporarily busy. Please wait a moment and try again.", "error")
+                flash("Things are a little busy right now. Please give it a moment and try again.", "error")
             else:
                 flash(error_msg, "error")
             print(f"DEBUG Signup: All retries failed. Last error: {last_error}")
@@ -2978,7 +2978,7 @@ def signup():
                     agent_user = get_user_by_id(agent_id)
                     if not agent_user:
                         print(f"SIGNUP ERROR: Agent {agent_id} not found!")
-                        flash(f"Error: Agent not found. Please contact support.", "error")
+                        flash("We could not find that agent. Please reach out and we will sort it out for you.", "error")
                     else:
                         agent_dict = dict(agent_user) if hasattr(agent_user, 'keys') and not isinstance(agent_user, dict) else agent_user
                         print(f"SIGNUP: Agent verified - {agent_dict.get('name')} (ID: {agent_id})")
@@ -2997,7 +2997,7 @@ def signup():
                             print(f"SIGNUP ERROR: Failed to create client relationship - {str(rel_error)}")
                             import traceback
                             print(traceback.format_exc())
-                            flash(f"Warning: Could not link to agent. Please contact support.", "error")
+                            flash("Your account is ready, but we could not connect you to your agent yet. Please reach out and we will fix it right away.", "error")
                         
                         # Create CRM contact - CRITICAL
                         try:
@@ -3047,7 +3047,7 @@ def signup():
                                 
                                 if not found_contact:
                                     print(f"SIGNUP VERIFICATION ERROR: CRM contact {contact_id} NOT found in agent's CRM after creation!")
-                                    flash(f"Warning: Contact created but verification failed. Please contact support.", "error")
+                                    flash("Your account is ready, but we could not finish connecting you to your agent. Please reach out and we will take care of it.", "error")
                                 
                                 # SEND EMAIL NOTIFICATION TO AGENT
                                 signup_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -3083,12 +3083,12 @@ def signup():
                             print(f"SIGNUP ERROR: Failed to create CRM contact - {str(crm_error)}")
                             import traceback
                             print(traceback.format_exc())
-                            flash(f"Warning: Could not add you to agent's CRM. Please contact support.", "error")
+                            flash("Your account is ready, but we could not finish connecting you to your agent. Please reach out and we will take care of it.", "error")
                 except Exception as agent_error:
                     print(f"SIGNUP ERROR: Agent setup failed - {str(agent_error)}")
                     import traceback
                     print(traceback.format_exc())
-                    flash(f"Error linking to agent. Please contact support.", "error")
+                    flash("Your account is ready, but we could not connect you to your agent yet. Please reach out and we will fix it right away.", "error")
             
             # Handle lender relationship
             if lender_id:
@@ -3174,7 +3174,7 @@ def signup():
                 elif relationships_created:
                     flash("Welcome! You've been connected to your professional team.", "success")
                 else:
-                    flash("Account created, but there was an issue linking to your agent. Please contact support.", "error")
+                    flash("Your account is ready, but we could not connect you to your agent yet. Please reach out and we will fix it right away.", "error")
 
         # Auto-login after signup (permanent session for convenience)
         session.permanent = True
@@ -3220,11 +3220,11 @@ def login():
         selected_role = request.form.get("role", "").strip()
         
         if not email or not password:
-            flash("Please fill in email and password.", "error")
+            flash("Please enter your email and password so we can sign you in.", "error")
             return redirect(url_for("login", role=selected_role))
         
         if not selected_role:
-            flash("Please select your role.", "error")
+            flash("Please choose how you use the site: homeowner, agent or lender.", "error")
             return redirect(url_for("login"))
         
         # Get user
@@ -3232,11 +3232,11 @@ def login():
             user_row = get_user_by_email(email)
         except Exception as e:
             print(f"LOGIN ERROR: {str(e)}")
-            flash("Database error. Please try again.", "error")
+            flash("Something went wrong on our end. Please try again in a moment.", "error")
             return redirect(url_for("login", role=selected_role))
         
         if not user_row:
-            flash("Email or password did not match.", "error")
+            flash("We could not find a match for that email and password. Please try again, or use \"Forgot password?\" and we will help you get back in.", "error")
             return redirect(url_for("login", role=selected_role))
         
         # Convert to dict
@@ -3259,7 +3259,7 @@ def login():
             password_correct = False
 
         if not password_correct:
-            flash("Email or password did not match. Use \"Forgot password?\" if you need to reset it.", "error")
+            flash("We could not find a match for that email and password. Please try again, or use \"Forgot password?\" and we will help you get back in.", "error")
             return redirect(url_for("login", role=selected_role))
 
         # Check role
@@ -3438,16 +3438,16 @@ def reset_password(token):
         if not user or _reset_fingerprint(user.get("password_hash")) != data.get("fp"):
             raise BadSignature("stale")
     except (SignatureExpired, BadSignature, KeyError, TypeError):
-        flash("That reset link is invalid or has expired. Please request a new one.", "error")
+        flash("That reset link has expired or is not quite right. No worries, you can request a new one.", "error")
         return redirect(url_for("forgot_password"))
 
     if request.method == "POST":
         new_password = request.form.get("password", "")
         if new_password != request.form.get("confirm_password", ""):
-            flash("Passwords do not match.", "error")
+            flash("Those two passwords do not match yet. Please try again.", "error")
             return redirect(url_for("reset_password", token=token))
         if len(new_password) < 8:
-            flash("Password must be at least 8 characters.", "error")
+            flash("Please choose a password with at least 8 characters.", "error")
             return redirect(url_for("reset_password", token=token))
         update_user_password(user["id"], generate_password_hash(new_password))
         _mark_email_verified(user["id"])
@@ -3504,7 +3504,7 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
             homeowner_id = None
             viewing_as_professional = False
         elif user.get("role") != "homeowner":
-            flash("This page is for homeowners only.", "error")
+            flash("That page is made for homeowners.", "error")
             return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
         else:
             # Authenticated homeowner
@@ -4716,7 +4716,7 @@ def homeowner_value_equity_overview():
         return redirect(url_for("login"))
     
     if user.get("role") != "homeowner":
-        flash("This page is for homeowners only.", "error")
+        flash("That page is made for homeowners.", "error")
         return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
     
     homeowner_id = user["id"]
@@ -6412,16 +6412,16 @@ def agent_crm_invite_to_portal(contact_id):
     subject = f" {agent_name} invited you to your free homeowner portal"
     body = f"""Hi {client_first},
 
-{agent_name} has set up a personal homeowner portal for you through Your Life, Your Home — and it's completely free.
+{agent_name} has set up a personal homeowner portal for you through Your Life, Your Home, and it's completely free.
 
 Your portal gives you:
--  Real-time home value & equity tracking
+-  Home value and equity tracking
 -  Home care reminders & seasonal checklists
 -  Secure document storage
--  AI-powered insights about your home's finances
+-  Helpful insights about your home's finances
 -  Direct connection with {agent_name}
 
-Click the link below to create your account — it only takes 2 minutes:
+Click the link below to create your account. It only takes 2 minutes:
 
 {referral_url}
 
@@ -6434,7 +6434,7 @@ Looking forward to supporting you,
     if send_reminder_email(email, subject, body, **pro_sender(user["id"])):
         flash(f" Portal invite sent to {email}!", "success")
     else:
-        flash(f" Could not send email — please check your email settings.", "error")
+        flash(f" We could not send that email. Please check your email settings and try again.", "error")
     return redirect(url_for("agent_crm"))
 
 
@@ -7195,7 +7195,7 @@ def extract_features_from_notes(notes):
 Walkthrough Notes:
 {notes}
 
-Your job is to create ONE spotlight card for EVERY distinct item, update, or feature mentioned. Do not skip any item — every line or bullet in the notes should become its own card.
+Your job is to create ONE spotlight card for EVERY distinct item, update, or feature mentioned. Do not skip any item, every line or bullet in the notes should become its own card.
 
 For each feature:
 1. room/area: Use the most relevant label (e.g., HOME, KITCHEN, PRIMARY BATH, BACKYARD, BASEMENT, HOA, etc.)
@@ -7224,7 +7224,7 @@ Example:
             )
             
             import json
-            raw = response.choices[0].message.content.strip()
+            raw = __import__("ai_platform").humanize(response.choices[0].message.content.strip())
             parsed = json.loads(raw)
             # Handle both {"features": [...]} wrapper and bare array
             if isinstance(parsed, dict):
@@ -7277,7 +7277,7 @@ IMPORTANT: Return ONLY a valid JSON array. Do not truncate. Include every single
             )
             
             import json
-            result = json.loads(response.choices[0].message.content.strip())
+            result = json.loads(__import__("ai_platform").humanize(response.choices[0].message.content.strip()))
             
             # Validate result is a list
             if isinstance(result, list) and len(result) > 0:
@@ -7369,7 +7369,7 @@ Example format:
                     )
                     
                     import json
-                    result = json.loads(response.choices[0].message.content.strip())
+                    result = json.loads(__import__("ai_platform").humanize(response.choices[0].message.content.strip()))
                     refined_title = result.get('title', refined_title)
                     refined_description = result.get('description', refined_description)
                 except (ImportError, AttributeError):
@@ -7413,7 +7413,7 @@ Example format:
                     )
                     
                     import json
-                    result = json.loads(response.choices[0].message.content.strip())
+                    result = json.loads(__import__("ai_platform").humanize(response.choices[0].message.content.strip()))
                     refined_title = result.get('title', refined_title)
                     refined_description = result.get('description', refined_description)
             except ImportError:
@@ -7939,7 +7939,8 @@ Return ONLY the refined text, nothing else. Keep it roughly the same length."""
             temperature=0.7
         )
         
-        refined_text = response.choices[0].message.content.strip()
+        from ai_platform import humanize as _humanize
+        refined_text = _humanize(response.choices[0].message.content.strip())
         # Remove quotes if AI added them
         refined_text = refined_text.strip('"').strip("'")
         
@@ -8036,7 +8037,7 @@ def agent_power_tools():
 # ─────────────────────────────────────────────
 @app.route("/agent/invoices", methods=["GET"])
 def agent_invoices():
-    """Invoice dashboard — list all invoices."""
+    """Invoice dashboard, list all invoices."""
     from database import list_invoices, list_agent_contacts
     user = get_current_user()
     if not user or user.get("role") != "agent":
@@ -8331,15 +8332,15 @@ def _get_checklist_data(season: str, role: str) -> dict:
                 {
                     "heading": "Exterior & Curb Appeal",
                     "items": [
-                        "Inspect roof for winter damage — missing shingles, lifted flashing, damaged gutters",
-                        "Clean gutters and downspouts of winter debris — check for sagging or separation",
+                        "Inspect roof for winter damage, missing shingles, lifted flashing, damaged gutters",
+                        "Clean gutters and downspouts of winter debris, check for sagging or separation",
                         "Power wash siding, driveway, walkways and patio surfaces",
                         "Inspect foundation and basement walls for new cracks or moisture intrusion",
                         "Repair any caulking around windows, doors and exterior trim damaged by freeze-thaw",
                         "Fill and repair driveway and walkway cracks opened by winter frost heaving",
-                        "Freshen landscaping — edge beds, add fresh mulch and plant seasonal color",
+                        "Freshen landscaping, edge beds, add fresh mulch and plant seasonal color",
                         "Inspect fences, gates and retaining walls for winter heaving or damage",
-                        "Start up the irrigation system — test each zone, check heads and connections",
+                        "Start up the irrigation system, test each zone, check heads and connections",
                         "Trim tree branches back from the roofline and any overhead power lines",
                         "Touch up exterior paint and wood stain on trim, siding and decks",
                     ],
@@ -8348,14 +8349,14 @@ def _get_checklist_data(season: str, role: str) -> dict:
                     "heading": "Interior & Home Systems",
                     "items": [
                         "Schedule a professional AC tune-up before the first heat wave hits",
-                        "Replace HVAC filters — set a monthly reminder through the summer",
-                        "Test every smoke detector and CO alarm — replace all batteries annually",
-                        "Test the sump pump before spring rains — pour water in the pit to confirm it activates",
+                        "Replace HVAC filters, set a monthly reminder through the summer",
+                        "Test every smoke detector and CO alarm, replace all batteries annually",
+                        "Test the sump pump before spring rains, pour water in the pit to confirm it activates",
                         "Flush sediment from the water heater and test the pressure relief valve",
-                        "Deep clean behind the refrigerator (coils), stove and dryer — clear the dryer vent fully",
+                        "Deep clean behind the refrigerator (coils), stove and dryer, clear the dryer vent fully",
                         "Inspect plumbing under all sinks and around toilets for slow leaks or corrosion",
                         "Inspect crawl space and attic for moisture, pest activity or winter damage",
-                        "Wash windows inside and out — check seals for fogging or failure",
+                        "Wash windows inside and out, check seals for fogging or failure",
                         "Test GFCI outlets in kitchen, bathrooms, garage and all outdoor locations",
                         "Schedule a professional pest inspection before warm weather opens the door for them",
                     ],
@@ -8370,29 +8371,29 @@ def _get_checklist_data(season: str, role: str) -> dict:
                 {
                     "heading": "Cooling & Indoor Comfort",
                     "items": [
-                        "Check and replace HVAC filters monthly — heavy use means faster buildup",
+                        "Check and replace HVAC filters monthly, heavy use means faster buildup",
                         "Keep the AC condenser unit clear of grass clippings, weeds and debris",
                         "Program your thermostat with away schedules to save energy all season",
-                        "Check attic ventilation — proper airflow reduces cooling costs noticeably",
+                        "Check attic ventilation, proper airflow reduces cooling costs noticeably",
                         "Set ceiling fans to spin counterclockwise for a cooling downward breeze",
                         "Add window film or thermal curtains to west and south-facing windows",
                         "Check window AC units for proper drainage and clean their filters",
-                        "Clean bathroom and kitchen exhaust fans — they help pull heat from the home",
+                        "Clean bathroom and kitchen exhaust fans, they help pull heat from the home",
                     ],
                 },
                 {
                     "heading": "Exterior & Outdoor Living",
                     "items": [
-                        "Inspect and re-seal deck, patio and wood fence — UV and moisture cause real damage",
-                        "Check deck boards and railings for rot, looseness or splinters — repair promptly",
-                        "Clean and inspect the outdoor grill — replace worn parts before peak grilling",
-                        "Adjust irrigation schedules for peak summer — water deeply 2–3x per week, not daily",
+                        "Inspect and re-seal deck, patio and wood fence, UV and moisture cause real damage",
+                        "Check deck boards and railings for rot, looseness or splinters, repair promptly",
+                        "Clean and inspect the outdoor grill, replace worn parts before peak grilling",
+                        "Adjust irrigation schedules for peak summer, water deeply 2–3x per week, not daily",
                         "Inspect outdoor hoses, faucets and sprinkler heads for leaks or low-pressure clogs",
                         "Treat the lawn for grubs and summer weeds before they take hold",
                         "Check pool filter, balance chemicals and inspect all equipment on a weekly schedule",
-                        "Confirm ground around your foundation slopes away from the home — never toward it",
+                        "Confirm ground around your foundation slopes away from the home, never toward it",
                         "Repair or replace damaged window and door screens to keep pests out",
-                        "Check outdoor light fixtures — clean lenses and replace any burned-out bulbs",
+                        "Check outdoor light fixtures, clean lenses and replace any burned-out bulbs",
                     ],
                 },
             ],
@@ -8406,31 +8407,31 @@ def _get_checklist_data(season: str, role: str) -> dict:
                     "heading": "Heating & Weatherproofing",
                     "items": [
                         "Schedule a furnace or boiler inspection and cleaning before first use of the season",
-                        "Replace HVAC filters and stock up on extras — heating season means heavy monthly use",
-                        "Have chimney and fireplace professionally cleaned and inspected — fire safety first",
-                        "Replace worn weatherstripping on all exterior doors — test the seal with a dollar bill",
+                        "Replace HVAC filters and stock up on extras, heating season means heavy monthly use",
+                        "Have chimney and fireplace professionally cleaned and inspected, fire safety first",
+                        "Replace worn weatherstripping on all exterior doors, test the seal with a dollar bill",
                         "Re-caulk around windows, pipes and exterior penetrations to prevent winter heat loss",
-                        "Insulate any exposed pipes in unheated areas — garage, crawlspace, basement, attic",
-                        "Drain all outdoor faucets, hose bibs and irrigation lines completely — prevent pipe bursts",
-                        "Check attic insulation depth — if you can see the floor joists, add more before winter",
-                        "Upgrade to a smart thermostat if you haven't — the energy savings pay for it quickly",
+                        "Insulate any exposed pipes in unheated areas, garage, crawlspace, basement, attic",
+                        "Drain all outdoor faucets, hose bibs and irrigation lines completely, prevent pipe bursts",
+                        "Check attic insulation depth, if you can see the floor joists, add more before winter",
+                        "Upgrade to a smart thermostat if you haven't, the energy savings pay for it quickly",
                         "Stock up on ice melt, sand and snow removal tools before the first freeze",
                     ],
                 },
                 {
                     "heading": "Exterior & Lawn",
                     "items": [
-                        "Clean gutters and downspouts once all leaves have fallen — prevents dangerous ice dams",
+                        "Clean gutters and downspouts once all leaves have fallen, prevents dangerous ice dams",
                         "Inspect roof flashing, valleys and penetrations one final time before winter arrives",
                         "Remove dead or weak tree branches that could fall on your home in a winter storm",
                         "Rake leaves from the lawn before they mat down and suffocate the grass",
-                        "Aerate and overseed the lawn — fall is the best time for recovery and thickening",
+                        "Aerate and overseed the lawn, fall is the best time for recovery and thickening",
                         "Apply a slow-release winterizing fertilizer to your lawn and all garden beds",
-                        "Plant spring bulbs now — tulips, daffodils and hyacinths need time to root before spring",
-                        "Drain garden hoses, outdoor fountains and potted irrigation lines — store them indoors",
+                        "Plant spring bulbs now, tulips, daffodils and hyacinths need time to root before spring",
+                        "Drain garden hoses, outdoor fountains and potted irrigation lines, store them indoors",
                         "Store patio furniture indoors or cover with weatherproof covers before hard frost",
                         "Seal driveway and walkway cracks before freeze-thaw cycles turn small cracks into big ones",
-                        "Test outdoor lighting and improve coverage — days shorten fast and safety matters",
+                        "Test outdoor lighting and improve coverage, days shorten fast and safety matters",
                     ],
                 },
             ],
@@ -8438,36 +8439,36 @@ def _get_checklist_data(season: str, role: str) -> dict:
         "winter": {
             "title": "Winter Home Watch",
             "subtitle": "Protect, monitor and plan through the cold",
-            "tagline": "Winter asks a lot of your home. Stay ahead with these protection and planning tasks — and use the quiet season to set yourself up for a strong spring.",
+            "tagline": "Winter asks a lot of your home. Stay ahead with these protection and planning tasks, and use the quiet season to set yourself up for a strong spring.",
             "sections": [
                 {
                     "heading": "Safety & Warmth",
                     "items": [
-                        "Know exactly where your main water shut-off valve is — burst pipes demand immediate action",
+                        "Know exactly where your main water shut-off valve is, burst pipes demand immediate action",
                         "Open cabinet doors under sinks when outdoor temps drop below 20°F",
                         "Let exposed faucets drip slightly during extreme cold snaps to prevent freezing",
-                        "Keep a fire extinguisher accessible — holiday candles, fireplaces and cooking raise the risk",
-                        "Restock your emergency kit — flashlights, batteries, blankets, bottled water, first aid",
+                        "Keep a fire extinguisher accessible, holiday candles, fireplaces and cooking raise the risk",
+                        "Restock your emergency kit, flashlights, batteries, blankets, bottled water, first aid",
                         "Run a whole-home humidifier to protect wood floors, furniture and your comfort",
-                        "Monitor your water heater — cold inlet water puts extra stress on older units",
-                        "Replace HVAC filters monthly throughout the heating season — don't skip",
+                        "Monitor your water heater, cold inlet water puts extra stress on older units",
+                        "Replace HVAC filters monthly throughout the heating season, don't skip",
                         "Keep the thermostat no lower than 55°F even while away for holidays or travel",
-                        "Keep the garage door closed as much as possible — cold garages put pipes at risk",
+                        "Keep the garage door closed as much as possible, cold garages put pipes at risk",
                     ],
                 },
                 {
                     "heading": "Cold-Weather Exterior & Planning",
                     "items": [
-                        "Clear snow and ice from all walkways and steps promptly — prevent dangerous falls",
-                        "Use calcium chloride or sand near landscaping and concrete — rock salt causes damage",
+                        "Clear snow and ice from all walkways and steps promptly, prevent dangerous falls",
+                        "Use calcium chloride or sand near landscaping and concrete, rock salt causes damage",
                         "After heavy snowfall, safely remove buildup from the roof with a roof rake",
-                        "Watch for ice dams forming at roof eaves — they signal an attic heat loss issue",
+                        "Watch for ice dams forming at roof eaves, they signal an attic heat loss issue",
                         "Check the attic after major snow events for frost or moisture buildup",
-                        "Test smoke and CO alarms mid-season — winter heating and cooking raise the stakes",
+                        "Test smoke and CO alarms mid-season, winter heating and cooking raise the stakes",
                         "Document all home improvements and repairs from this year for taxes and insurance",
-                        "Review your homeowner's insurance policy — confirm coverage reflects your home's current value",
+                        "Review your homeowner's insurance policy, confirm coverage reflects your home's current value",
                         "Book spring contractors now (HVAC, landscaping, roofing, painters) before their schedules fill",
-                        "Plan and budget your spring home improvement projects — the quiet season is perfect for it",
+                        "Plan and budget your spring home improvement projects, the quiet season is perfect for it",
                     ],
                 },
             ],
@@ -8654,7 +8655,7 @@ def generate_script_response():
         # Pre-defined responses based on style (in production would use OpenAI)
         style_templates = {
             "direct": "I appreciate you being straightforward about that. Here's what you need to know: {response}. I'm confident the results will speak for themselves.",
-            "warm": "I completely understand where you're coming from—it's a significant consideration! What I've found is that {response}. Let me walk you through exactly what that looks like...",
+            "warm": "I completely understand where you're coming from, it's a significant consideration! What I've found is that {response}. Let me walk you through exactly what that looks like...",
             "data_driven": "Great question. Let me share some data with you. {response}. When you factor in those numbers, the value becomes clear.",
             "storyteller": "You know, I had another client who {response}. It made all the difference in their experience.",
             "professional": "I appreciate your inquiry. {response}. The value proposition is designed to maximize your outcomes."
@@ -8681,7 +8682,7 @@ def generate_script_response():
                 "Show examples of your recent success stories",
                 "Provide references from satisfied clients",
                 "Walk them through your unique approach",
-                "Give them time to think—don't pressure"
+                "Give them time to think, don't pressure"
             ],
             "body_language": [
                 "Maintain confident posture",
@@ -8766,7 +8767,7 @@ def save_script():
 
 @app.route("/agent/clients")
 def agent_clients():
-    """Agent client portal — list of all linked homeowner clients with live data."""
+    """Agent client portal, list of all linked homeowner clients with live data."""
     user = get_current_user()
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
@@ -10472,7 +10473,8 @@ Return ONLY the refined text, nothing else. Keep it roughly the same length."""
             temperature=0.7
         )
         
-        refined_text = response.choices[0].message.content.strip()
+        from ai_platform import humanize as _humanize
+        refined_text = _humanize(response.choices[0].message.content.strip())
         refined_text = refined_text.strip('"').strip("'")
         
         return jsonify({
@@ -10530,7 +10532,7 @@ def lender_power_suite():
 
 @app.route("/lender/clients")
 def lender_clients():
-    """Lender client portal — list of all linked homeowner clients with live data."""
+    """Lender client portal, list of all linked homeowner clients with live data."""
     user = get_current_user()
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
@@ -10937,7 +10939,7 @@ def homeowner_care_warranty_log():
         return redirect(url_for("login"))
     
     if user.get("role") != "homeowner":
-        flash("This page is for homeowners only.", "error")
+        flash("That page is made for homeowners.", "error")
         return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
     
     homeowner_id = user["id"]
@@ -11035,26 +11037,26 @@ def homeowner_support_ask_question():
 
 @app.route("/homeowner/support/chat-human", methods=["GET"])
 def homeowner_support_chat_human():
-    """Redirects to unified Get Help page — Contact tab."""
+    """Redirects to unified Get Help page, Contact tab."""
     return redirect(url_for("homeowner_support_get_help") + "?tab=contact")
 
 
 @app.route("/homeowner/support/schedule-chat", methods=["GET"])
 def homeowner_support_schedule_chat():
-    """Redirects to unified Get Help page — Schedule tab."""
+    """Redirects to unified Get Help page, Schedule tab."""
     return redirect(url_for("homeowner_support_get_help") + "?tab=schedule")
 
 
 @app.route("/homeowner/support/resources", methods=["GET"])
 def homeowner_support_resources():
-    """Redirects to unified Get Help page — Resources tab."""
+    """Redirects to unified Get Help page, Resources tab."""
     return redirect(url_for("homeowner_support_get_help") + "?tab=resources")
 
 
 @app.route("/homeowner/support/get-help", methods=["GET"])
 @app.route("/homeowner/support", methods=["GET"])
 def homeowner_support_get_help():
-    """Unified Get Help page — replaces the 5 separate support sub-pages."""
+    """Unified Get Help page, replaces the 5 separate support sub-pages."""
     user = get_current_user()
     if not user:
         return redirect(url_for("login"))
@@ -12000,7 +12002,7 @@ def ai_dashboard_priorities_endpoint():
         f"Generate exactly 3 specific, actionable priorities for today. "
         f"If real contact names are provided above, use them directly in the actions (e.g. 'Call Carr to reconnect'). "
         f"Each priority must start with a strong action verb and be under 14 words. "
-        f"Vary the priorities from common patterns — surprise with fresh angles. "
+        f"Vary the priorities from common patterns, surprise with fresh angles. "
         f"Output ONLY a JSON array: [\"priority 1\", \"priority 2\", \"priority 3\"]. No extra text."
     )
     result = ai_complete(
@@ -12020,9 +12022,9 @@ def ai_dashboard_priorities_endpoint():
         # Meaningful fallback using real names when available
         fallback = []
         if highlight_30:
-            fallback.append(f"Reach out to {highlight_30[0]} — no contact in over a month")
+            fallback.append(f"Reach out to {highlight_30[0]}, no contact in over a month")
         elif highlight_60:
-            fallback.append(f"Re-engage {highlight_60[0]} — they haven't heard from you in 60+ days")
+            fallback.append(f"Re-engage {highlight_60[0]}, they haven't heard from you in 60+ days")
         else:
             fallback.append("Call your top lead and schedule a showing")
         fallback.append("Review active transactions and confirm next steps with each client")
@@ -12620,7 +12622,7 @@ def agent_contest_reset_invites(cid):
     )
     conn.commit()
     conn.close()
-    flash("Invite status reset — you can now resend invites.", "success")
+    flash("Invite status reset. You can now resend invites.", "success")
     return redirect(url_for("agent_contests"))
 
 
@@ -12648,10 +12650,10 @@ def _send_contest_invites_for(contest, agent_user):
         deadline_line = ""
         if contest.get("deadline_date"):
             deadline_line = f"\n⏰ Bracket deadline: {contest['deadline_date']}"
-        subject = f"{type_emoji} {contest['contest_name']} — You're Invited!"
+        subject = f"{type_emoji} {contest['contest_name']}: You're Invited!"
         body = f"""Hi {client_name}!
 
-It's that time of year again — and I'm doing something fun for my clients!
+It's that time of year again, and I'm doing something fun for my clients!
 
 {type_emoji} {contest['contest_name']}
 
@@ -12662,9 +12664,9 @@ I'm hosting a FREE bracket contest for my clients this year, and I'd love for yo
 How to join:
 1. Download the CBS Sports app (free on iPhone or Android)
 2. Go to "Bracket Games" and search for my group
-3. Fill out your bracket — no sports knowledge required, just have fun!
+3. Fill out your bracket. No sports knowledge required, just have fun!
 
-{contest.get('notes', '').strip() + chr(10) if contest.get('notes') else ''}This is just my small way of having some fun with the people I care about. Thanks for being such a great client — I'm grateful for you!
+{contest.get('notes', '').strip() + chr(10) if contest.get('notes') else ''}This is just my small way of having some fun with the people I care about. Thanks for being such a great client. I'm grateful for you!
 
 Good luck! 
 
@@ -12684,7 +12686,7 @@ Good luck!
 
 
 def send_contest_invites_scheduled():
-    """Scheduler job: daily check — send invites for any contest whose invite_date is today."""
+    """Scheduler job: daily check, send invites for any contest whose invite_date is today."""
     import datetime
     today = datetime.date.today().isoformat()
     conn = get_db_connection()
@@ -13030,7 +13032,7 @@ Agent Data:
         return jsonify(parsed)
     except Exception as e:
         return jsonify({"insights": [
-            {"icon": "trend", "title": "Keep Going", "body": "Your AI coach is ready — add some transactions to unlock personalized insights.", "type": "info"}
+            {"icon": "trend", "title": "Keep Going", "body": "Your coach is ready when you are. Add a few transactions and you will see helpful insights here.", "type": "info"}
         ]})
 
 
@@ -13070,7 +13072,7 @@ Agent Data:
         parsed = _json.loads(clean.strip())
         return jsonify(parsed)
     except Exception as e:
-        return jsonify({"headline": "Add more data to unlock your forecast.", "action": "Log your first commission to get started.", "confidence": "low"})
+        return jsonify({"headline": "Add a little more data and your forecast will appear here.", "action": "Log your first commission to get started.", "confidence": "low"})
 
 
 @app.route("/api/ai/financials/agent-tax-optimizer", methods=["POST"])
@@ -13373,7 +13375,7 @@ Lender Data:
         return jsonify(parsed)
     except Exception as e:
         return jsonify({"insights": [
-            {"icon": "trend", "title": "Ready to Analyze", "body": "Add loans and expenses to unlock personalized AI insights for your business.", "type": "info"}
+            {"icon": "trend", "title": "Ready to Analyze", "body": "Add a few loans and expenses and you will see helpful insights for your business here.", "type": "info"}
         ]})
 
 
@@ -13413,7 +13415,7 @@ Lender Data:
         parsed = _json.loads(clean.strip())
         return jsonify(parsed)
     except Exception as e:
-        return jsonify({"headline": "Log your pipeline to unlock your forecast.", "action": "Add your first loan to get started.", "confidence": "low"})
+        return jsonify({"headline": "Add your pipeline and your forecast will appear here.", "action": "Add your first loan to get started.", "confidence": "low"})
 
 
 @app.route("/api/ai/financials/lender-pipeline", methods=["POST"])

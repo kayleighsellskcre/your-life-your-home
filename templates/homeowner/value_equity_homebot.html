@@ -937,7 +937,7 @@
  {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') and snapshot.get('value_estimate') > 0 %}
  {% set ltv = (snapshot.get('loan_balance') / snapshot.get('value_estimate') * 100) %}
  <strong style="font-size: 1.5rem; color: var(--olive-green);">{{ "%.1f"|format(ltv) }}%</strong><br>
- Lower is better. Below 80% unlocks better rates.
+ Lower is better. Getting below 80% can help you qualify for better rates.
  {% else %}
   - 
  {% endif %}
@@ -983,7 +983,7 @@
  
  <div class="info-card" onclick="location.href='{{ url_for('homeowner_next_loan_paths') }}'" style="cursor:pointer;">
  <h4>Cash-Out Refinance</h4>
- <p>Unlock your equity for renovations, investments, or other financial goals. Click to explore.</p>
+ <p>Your equity can help with renovations, investments, or other goals. Click to explore.</p>
  </div>
  
  <div class="info-card">

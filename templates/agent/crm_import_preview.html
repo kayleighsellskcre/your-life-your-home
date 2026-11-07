@@ -170,7 +170,7 @@
           <div class="map-field map-field--req">
             <label class="map-label">Name <span>*</span> (required)</label>
             <select name="map_name" id="map_name" class="map-select" required>
-              <option value="">— Select Column —</option>
+              <option value="">Select a column</option>
               {% for col in columns %}{% set c=col.lower() %}
               <option value="{{ col }}" {% if ('full' in c and 'name' in c) or c in ['name','contact name','client name','customer name','full name'] or (('first' in c and 'name' in c) and 'last' not in c) or (c.startswith('name') and 'last' not in c) %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -180,7 +180,7 @@
           <div class="map-field">
             <label class="map-label">Last Name (merges with Name)</label>
             <select name="map_last_name" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if ('last' in col.lower() and 'name' in col.lower()) or col.lower()=='last' %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -190,7 +190,7 @@
           <div class="map-field">
             <label class="map-label">Email</label>
             <select name="map_email" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'email' in col.lower() or 'e-mail' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -200,7 +200,7 @@
           <div class="map-field">
             <label class="map-label">Phone</label>
             <select name="map_phone" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'phone' in col.lower() or 'tel' in col.lower() or 'cell' in col.lower() or 'mobile' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -213,7 +213,7 @@
           <div class="map-field">
             <label class="map-label">Stage</label>
             <select name="map_stage" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'stage' in col.lower() or 'status' in col.lower() or 'pipeline' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -223,7 +223,7 @@
           <div class="map-field">
             <label class="map-label">Lead Source</label>
             <select name="map_lead_source" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'source' in col.lower() or 'lead source' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -233,7 +233,7 @@
           <div class="map-field">
             <label class="map-label">Notes</label>
             <select name="map_notes" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'note' in col.lower() or 'comment' in col.lower() or 'remark' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -243,7 +243,7 @@
           <div class="map-field">
             <label class="map-label">Tags</label>
             <select name="map_tags" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'tag' in col.lower() or 'category' in col.lower() or 'group' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -256,7 +256,7 @@
           <div class="map-field">
             <label class="map-label">Birthday (MM/DD)</label>
             <select name="map_birthday" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'birthday' in col.lower() or 'birth' in col.lower() or 'dob' in col.lower() or 'bday' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -266,7 +266,7 @@
           <div class="map-field">
             <label class="map-label">Home Anniversary</label>
             <select name="map_anniversary" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'anniversary' in col.lower() or ('home' in col.lower() and 'date' in col.lower()) %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -279,7 +279,7 @@
           <div class="map-field">
             <label class="map-label">Street Address</label>
             <select name="map_address" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}{% set c=col.lower() %}
               <option value="{{ col }}" {% if ('address' in c or 'street' in c or 'addr' in c or 'mailing' in c) and 'property' not in c and 'city' not in c and 'state' not in c %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -289,7 +289,7 @@
           <div class="map-field">
             <label class="map-label">City</label>
             <select name="map_city" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'city' in col.lower() or 'municipality' in col.lower() or 'town' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -299,7 +299,7 @@
           <div class="map-field">
             <label class="map-label">State</label>
             <select name="map_state" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}{% set c=col.lower() %}
               <option value="{{ col }}" {% if ('state' in c or 'province' in c) and 'address' not in c %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -309,7 +309,7 @@
           <div class="map-field">
             <label class="map-label">ZIP / Postal</label>
             <select name="map_zip" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'zip' in col.lower() or 'postal' in col.lower() or 'postcode' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -322,7 +322,7 @@
           <div class="map-field">
             <label class="map-label">Property Address</label>
             <select name="map_property_address" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'property' in col.lower() or ('home' in col.lower() and 'address' in col.lower()) %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -332,7 +332,7 @@
           <div class="map-field">
             <label class="map-label">Property Value ($)</label>
             <select name="map_property_value" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'value' in col.lower() or 'price' in col.lower() or 'home value' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
@@ -342,7 +342,7 @@
           <div class="map-field">
             <label class="map-label">Equity Estimate ($)</label>
             <select name="map_equity" class="map-select">
-              <option value="">— Skip —</option>
+              <option value="">Skip this column</option>
               {% for col in columns %}
               <option value="{{ col }}" {% if 'equity' in col.lower() %}selected{% endif %}>{{ col }}</option>
               {% endfor %}

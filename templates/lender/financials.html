@@ -746,7 +746,7 @@ async function loadInsights() {
  </div>`).join('');
  grid.style.display = 'grid';
  } else {
- grid.innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Add pipeline data to unlock personalized insights.</div>';
+ grid.innerHTML = '<div style="color:var(--warm-gray);font-size:.85rem;">Add your pipeline and we will share helpful insights with you.</div>';
  grid.style.display = 'block';
  }
  } catch(e) {
@@ -774,7 +774,7 @@ async function loadForecast() {
  <div class="ai-confidence ${confClass}">${confClass} confidence</div>
  </div>
  <div class="ai-forecast-card">
- <div class="val">${d.projected_loan_count || '&mdash;'}</div>
+ <div class="val">${d.projected_loan_count || '0'}</div>
  <div class="lbl">Projected Loans</div>
  </div>
  <div class="ai-forecast-card">

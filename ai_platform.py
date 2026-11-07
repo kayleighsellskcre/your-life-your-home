@@ -1,5 +1,5 @@
 """
-ai_platform.py — Central AI utility for Your Life Your Home
+ai_platform.py, Central AI utility for Your Life Your Home
 
 All AI features across the platform call ai_complete() from here.
 This keeps model selection, error handling, and key management in one place.
@@ -10,6 +10,22 @@ from typing import Optional
 
 _DEFAULT_MODEL = "gpt-4o-mini"
 _FAST_MODEL    = "gpt-4o-mini"
+
+
+VOICE = (
+    " Always write like a warm, caring real person who genuinely wants the best for the reader. "
+    "Be kind, encouraging and plain-spoken, never stiff, salesy or robotic. "
+    "Never use em dashes or en dashes; use commas, periods or the word 'and' instead."
+)
+
+
+def humanize(text: str) -> str:
+    """Safety net for any AI text: no em or en dashes, tidy spacing."""
+    if not text:
+        return text
+    for d in ("—", "–"):
+        text = text.replace(" " + d + " ", ", ").replace(d, ", ")
+    return text.replace(",,", ",").replace(" ,", ",")
 
 
 def _get_key() -> Optional[str]:
@@ -26,7 +42,7 @@ def ai_complete(
 ) -> str:
     """
     Call OpenAI and return the text response.
-    Returns an empty string on failure — callers handle graceful fallback.
+    Returns an empty string on failure, callers handle graceful fallback.
     """
     key = _get_key()
     if not key:
@@ -38,13 +54,13 @@ def ai_complete(
         response = client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": system},
+                {"role": "system", "content": system + VOICE},
                 {"role": "user",   "content": prompt},
             ],
             max_tokens=max_tokens,
             temperature=temperature,
         )
-        return (response.choices[0].message.content or "").strip()
+        return humanize((response.choices[0].message.content or "").strip())
     except Exception as e:
         print(f"[AI] Error: {e}")
         return ""
@@ -95,7 +111,7 @@ def ai_draft_email(contact_name: str, contact_stage: str, contact_notes: str,
         f"Recent contact notes: {contact_notes[:200] if contact_notes else 'none'}. "
         f"Recent interactions: {interactions_str or 'none'}. "
         f"Additional context: {context or 'general check-in'}. "
-        f"Write only the email body — no subject line, no 'Subject:' prefix. "
+        f"Write only the email body, no subject line, no 'Subject:' prefix. "
         f"Keep it to 3-4 sentences. Sound like a real person. End with a warm sign-off and include {agent_name}'s name. "
         f"Phone: {agent_phone}. Do not use em dashes."
     )
@@ -123,7 +139,7 @@ def ai_next_action(contact_name: str, contact_stage: str, contact_notes: str,
         f"Notes: {contact_notes[:150] if contact_notes else 'none'}. "
         f"Recent interactions: {interactions_str}. "
         f"Respond in this exact format:\n"
-        f"ACTION: (one clear, specific action to take — call, text, email, or meet)\n"
+        f"ACTION: (one clear, specific action to take, call, text, email, or meet)\n"
         f"REASON: (one sentence explaining why this action makes sense right now)\n"
         f"URGENCY: (exactly one word: low, medium, or high)"
     )

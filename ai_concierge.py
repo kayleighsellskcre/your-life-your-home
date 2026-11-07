@@ -163,7 +163,8 @@ When a homeowner expresses interest in connecting with a professional, ask for t
         history = self.get_conversation_history(conversation_id)
         
         # Build messages for OpenAI
-        messages = [{"role": "system", "content": self.SYSTEM_PROMPT}]
+        from ai_platform import VOICE
+        messages = [{"role": "system", "content": self.SYSTEM_PROMPT + VOICE}]
         
         for msg in history:
             if msg['role'] in ['user', 'assistant']:
@@ -183,7 +184,8 @@ When a homeowner expresses interest in connecting with a professional, ask for t
                 max_tokens=300
             )
             
-            assistant_message = response.choices[0].message.content
+            from ai_platform import humanize
+            assistant_message = humanize(response.choices[0].message.content)
             print(f"[AI CONCIERGE] Got response from OpenAI: {assistant_message[:100]}...")
             
             # Save assistant response

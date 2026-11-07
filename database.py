@@ -4850,8 +4850,8 @@ def get_homeowner_professionals(homeowner_id: int) -> List[Dict]:
 
 def get_agent_clients(agent_user_id: int) -> List[Dict]:
     """
-    Return all homeowner clients linked to an agent — combining users.agent_id
-    and client_relationships — enriched with their latest homeowner snapshot data.
+    Return all homeowner clients linked to an agent, combining users.agent_id
+    and client_relationships, enriched with their latest homeowner snapshot data.
     """
     conn = get_connection()
     cur = conn.cursor()
@@ -4892,8 +4892,8 @@ def get_agent_clients(agent_user_id: int) -> List[Dict]:
 
 def get_lender_clients(lender_user_id: int) -> List[Dict]:
     """
-    Return all homeowner clients linked to a lender — combining users.lender_id
-    and client_relationships — enriched with their latest homeowner snapshot data.
+    Return all homeowner clients linked to a lender, combining users.lender_id
+    and client_relationships, enriched with their latest homeowner snapshot data.
     """
     conn = get_connection()
     cur = conn.cursor()

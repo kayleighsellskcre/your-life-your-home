@@ -849,7 +849,7 @@
  <main class="ylh-main" id="main-content">
  {% if email_unverified %}
  <div style="margin-bottom:.8rem;padding:.65rem 1rem;background:#fbf6e9;border:1px solid #d9c79a;border-left:4px solid #8A6D2F;border-radius:8px;font-size:.88rem;color:#4a4130;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-   <span>Please confirm your email address &mdash; check your inbox for our message.</span>
+   <span>Please confirm your email address. We sent a message to your inbox.</span>
    <form method="post" action="{{ url_for('resend_verification') }}" style="margin:0;"><button type="submit" style="background:none;border:none;color:#8A6D2F;font-weight:600;text-decoration:underline;cursor:pointer;padding:0;">Resend email</button></form>
  </div>
  {% endif %}

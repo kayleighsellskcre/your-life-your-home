@@ -3,7 +3,7 @@
 {% block agent_content %}
 <style>
 /* ================================================================
-   TRANSACTION DETAIL — matches platform design system exactly
+   TRANSACTION DETAIL, matches platform design system exactly
    Colors/fonts/cards/spacing from dashboard.html + financials.html
    ================================================================ */
 
@@ -542,7 +542,7 @@
 <div class="tx-kpi-row">
   <div class="tx-kpi">
     <div class="tx-kpi__lbl">Primary Client</div>
-    <div class="tx-kpi__val accent" style="font-size:.88rem">{{ transaction.client_name or '—' }}</div>
+    <div class="tx-kpi__val accent" style="font-size:.88rem">{{ transaction.client_name or 'Not added' }}</div>
   </div>
   <div class="tx-kpi">
     <div class="tx-kpi__lbl">Side</div>
@@ -589,7 +589,7 @@
         {% for p in participants %}
         {% if (p.participant_type or '') == 'client' %}
         <div class="tx-client-block">
-          <div class="tx-client-name">{{ p.name or p.email or '—' }}</div>
+          <div class="tx-client-name">{{ p.name or p.email or 'Not added' }}</div>
           {% if p.email %}<div class="tx-client-sub">{{ p.email }}</div>{% endif %}
           {% if p.phone  %}<div class="tx-client-sub">{{ p.phone }}</div>{% endif %}
         </div>
@@ -634,7 +634,7 @@
     <!-- Commission — Agent Only -->
     <div class="tx-panel">
       <div class="tx-panel-hd">
-        <span>Commission <span style="font-weight:400;opacity:.7;font-size:.62rem;text-transform:none;letter-spacing:0">&mdash; Agent Only</span></span>
+        <span>Commission <span style="font-weight:400;opacity:.7;font-size:.62rem;text-transform:none;letter-spacing:0">(Agent only)</span></span>
         <button onclick="toggleCommPanel()" id="comm-toggle-btn" class="tx-btn tx-btn-ghost" style="font-size:.65rem;padding:.2rem .55rem">
           {% if tx_commission %}Edit{% else %}+ Add{% endif %}
         </button>

@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional, List, Dict, Any
 
 def get_db():
-    """Get database connection — uses same Railway persistent volume path as database.py"""
+    """Get database connection, uses same Railway persistent volume path as database.py"""
     import os
     from pathlib import Path
     volume_path = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
