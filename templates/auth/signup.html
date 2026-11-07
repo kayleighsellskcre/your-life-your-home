@@ -4,6 +4,7 @@
 
 {% block content %}
 <style>
+ .inviter-hero { width:100%; aspect-ratio:16/9; max-height:190px; object-fit:cover; border-radius:14px; display:block; margin-bottom:.7rem; }
  .inviter-card { display:flex; align-items:center; gap:.9rem; padding:.9rem 1rem; margin-bottom:.4rem; background:#F4F8F0; border:1px solid rgba(94,110,74,.22); border-radius:14px; }
  .inviter-photo { width:56px; height:56px; border-radius:50%; object-fit:cover; flex:0 0 56px; border:2px solid #fff; box-shadow:0 1px 6px rgba(54,74,43,.2); }
  .inviter-initial { display:flex; align-items:center; justify-content:center; background:#364A2B; color:#fff; font-weight:700; font-size:1.3rem; }
@@ -199,6 +200,8 @@
 <div class="auth-page">
  <div class="auth-card">
  {% if inviter %}
+ {% set hero_src = inviter.hero or (url_for('static', filename=default_hero) if default_hero else None) %}
+ {% if hero_src %}<img class="inviter-hero" src="{{ hero_src }}" alt="" />{% endif %}
  <div class="inviter-card">
  {% set ph = get_professional_photo_url(inviter.photo) if inviter.photo else None %}
  {% if ph %}<img class="inviter-photo" src="{{ ph }}" alt="{{ inviter.name }}" />

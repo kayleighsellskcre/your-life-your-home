@@ -200,6 +200,7 @@ def init_db() -> None:
         ("calendly_url", "TEXT"),
         ("google_review_link", "TEXT"),
         ("webhook_token", "TEXT"),
+        ("hero_image", "TEXT"),
     ]:
         try:
             cur.execute(f"ALTER TABLE user_profiles ADD COLUMN {_col} {_type}")

@@ -535,6 +535,25 @@
 </div>
 </form>
 
+<!-- Invite page photo -->
+<div class="settings-section" style="margin-top:1.5rem;">
+ <h3 style="margin:0 0 .35rem;">Invite page photo</h3>
+ <p style="margin:0 0 .9rem;color:#55684F;font-size:.9rem;">The banner your clients see when they open your invite link. Use a warm, bright landscape photo at least 1600 pixels wide, with the main subject near the center.</p>
+ {% if profile and profile.get('hero_image') %}
+ <img src="{{ profile.hero_image }}" alt="Your invite page photo" style="width:100%;max-width:520px;aspect-ratio:16/9;object-fit:cover;border-radius:12px;display:block;margin-bottom:.8rem;">
+ {% endif %}
+ <form method="post" action="{{ url_for('settings_invite_hero') }}" enctype="multipart/form-data" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+ <input type="file" name="hero_image" accept="image/*" required>
+ <button type="submit" class="btn-save" style="margin:0;">{% if profile and profile.get('hero_image') %}Replace photo{% else %}Upload photo{% endif %}</button>
+ </form>
+ {% if profile and profile.get('hero_image') %}
+ <form method="post" action="{{ url_for('settings_invite_hero') }}" style="margin-top:.5rem;">
+ <input type="hidden" name="action" value="remove">
+ <button type="submit" style="background:none;border:none;color:#5E6E4A;text-decoration:underline;cursor:pointer;padding:0;font-size:.85rem;">Remove photo</button>
+ </form>
+ {% endif %}
+</div>
+
 <!-- Referral Link Card -->
 {% if referral_url %}
 <div class="settings-section" style="margin-top:1.5rem;">

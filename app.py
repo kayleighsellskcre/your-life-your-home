@@ -2691,6 +2691,7 @@ def _inviter_for_token(token):
             "brokerage": prof.get("brokerage_name") or prof.get("team_name") or "",
             "photo": prof.get("professional_photo") or "",
             "bio": bio,
+            "hero": prof.get("hero_image") or "",
         }
     except Exception as exc:  # never break signup over a greeting
         print(f"inviter lookup failed: {exc}")
@@ -3204,6 +3205,7 @@ def signup():
         brand_name=FRONT_BRAND_NAME,
         referral_code=referral_token,  # Keep for backward compatibility in template
         inviter=_inviter_for_token(referral_token) if role == "homeowner" else None,
+        default_hero=(_hero_photos() or [None])[0],
     )
 
 
@@ -9399,6 +9401,50 @@ def admin_promo_codes():
 # -------------------------------------------------
 # AGENT SETTINGS ROUTES
 # -------------------------------------------------
+@app.route("/settings/invite-hero", methods=["POST"])
+def settings_invite_hero():
+    """Agents/lenders choose the banner photo their clients see on their invite page."""
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "lender"):
+        return redirect(url_for("login"))
+    role = user["role"]
+    back = url_for("agent_settings_profile" if role == "agent" else "lender_settings_profile")
+    if request.form.get("action") == "remove":
+        new_value = ""
+    else:
+        f = request.files.get("hero_image")
+        if not f or not f.filename:
+            flash("Choose a photo first.", "error")
+            return redirect(back)
+        try:
+            import base64, io
+            from PIL import Image, ImageOps
+            img = ImageOps.exif_transpose(Image.open(f.stream)).convert("RGB")
+            if img.width < 600:
+                flash("That photo is too small. Please use one at least 1200 pixels wide.", "error")
+                return redirect(back)
+            if img.width > 1600:
+                img = img.resize((1600, round(img.height * 1600 / img.width)), Image.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, "JPEG", quality=80, optimize=True)
+            new_value = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+        except Exception:
+            flash("We couldn't read that file. Please upload a JPG or PNG photo.", "error")
+            return redirect(back)
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT 1 FROM user_profiles WHERE user_id = ?", (user["id"],))
+    if cur.fetchone():
+        cur.execute("UPDATE user_profiles SET hero_image = ? WHERE user_id = ?", (new_value, user["id"]))
+    else:
+        cur.execute("INSERT INTO user_profiles (user_id, role, hero_image) VALUES (?, ?, ?)",
+                    (user["id"], role, new_value))
+    conn.commit()
+    conn.close()
+    flash("Invite photo removed." if new_value == "" else "Invite photo saved. New clients will see it on your invite link.", "success")
+    return redirect(back)
+
+
 @app.route("/agent/settings/profile", methods=["GET", "POST"])
 def agent_settings_profile():
     """Agent settings and profile."""
