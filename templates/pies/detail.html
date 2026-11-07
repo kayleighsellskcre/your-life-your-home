@@ -18,7 +18,7 @@
     <div class="pie-actions">
       <a class="pie-btn secondary small" href="{{ url_for('pies.flyer', event_id=ev.id) }}" target="_blank" rel="noopener">Print or save flyer</a>
       <a class="pie-btn secondary small" href="{{ url_for('pies.edit_event', event_id=ev.id) }}">Edit event</a>
-      <a class="pie-btn secondary small" href="{{ url_for('pies.export_csv', event_id=ev.id) }}">Download list (CSV)</a>
+      <a class="pie-btn secondary small" href="{{ url_for('pies.export_xlsx', event_id=ev.id) }}">Download Excel</a>
       <a class="pie-btn secondary small" href="{{ url_for('pies.public_event', token=ev.token) }}" target="_blank" rel="noopener">See what clients see</a>
     </div>
   </div>

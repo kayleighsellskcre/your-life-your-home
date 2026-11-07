@@ -55,13 +55,12 @@
 
     <div class="pie-card" id="sec-pie" style="display:none;">
       <h2>Your pie</h2>
+      <p class="pie-hint" style="margin:-.3rem 0 .6rem;">One pie per person, so choose your favorite.</p>
       <div class="pie-row">
         {% if pies %}
         <div><label class="pie-label" for="pie_type" style="margin-top:0;">Type of pie</label>
           <select id="pie_type" name="pie_type"><option value="">Choose one</option>{% for p in pies %}<option {{ 'selected' if form.get('pie_type') == p }}>{{ p }}</option>{% endfor %}</select></div>
         {% endif %}
-        <div><label class="pie-label" for="quantity" style="margin-top:0;">How many</label>
-          <select id="quantity" name="quantity">{% for n in range(1, 6) %}<option value="{{ n }}" {{ 'selected' if form.get('quantity') == n|string }}>{{ n }}</option>{% endfor %}</select></div>
       </div>
       <label class="pie-label" for="notes" id="notes-label">Anything we should know? <span class="pie-hint">(allergies, a note for the baker)</span></label>
       <textarea id="notes" name="notes" rows="3" maxlength="800">{{ form.get('notes', '') }}</textarea>

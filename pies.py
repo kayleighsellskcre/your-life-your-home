@@ -426,6 +426,74 @@ def export_csv(event_id):
                     headers={"Content-Disposition": f"attachment; filename=pie-responses-{ev['id']}.csv"})
 
 
+@bp.route("/pies/<int:event_id>/export.xlsx")
+def export_xlsx(event_id):
+    """Excel workbook: every response on one sheet, plus a bake list and pickup totals."""
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font, PatternFill
+    from openpyxl.utils import get_column_letter
+    conn = _db()
+    rows = conn.execute("SELECT * FROM pie_responses WHERE event_id=? ORDER BY slot_label, name", (ev["id"],)).fetchall()
+    conn.close()
+    names = {"pickup": "Yes, pickup", "cant_make": "Yes, needs another time", "no": "No thank you"}
+    head_fill = PatternFill("solid", fgColor="364A2B")
+    head_font = Font(bold=True, color="FFFFFF")
+
+    def style_header(ws, widths):
+        for i, w in enumerate(widths, 1):
+            c = ws.cell(row=1, column=i)
+            c.fill, c.font = head_fill, head_font
+            c.alignment = Alignment(vertical="center")
+            ws.column_dimensions[get_column_letter(i)].width = w
+        ws.freeze_panes = "A2"
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Responses"
+    ws.append(["Name", "Phone", "Email", "Answer", "Pickup", "Pie", "Notes", "Picked up", "Submitted"])
+    for r in rows:
+        ws.append([_csv_safe(r["name"]), _csv_safe(r["phone"]), _csv_safe(r["email"]), names.get(r["choice"], r["choice"]),
+                   _csv_safe(r["slot_label"]), _csv_safe(r["pie_type"]), _csv_safe(r["notes"]),
+                   "Yes" if r["picked_up"] else "", r["created_at"]])
+    style_header(ws, [24, 16, 30, 24, 46, 16, 40, 12, 20])
+    ws.auto_filter.ref = ws.dimensions
+    for row in ws.iter_rows(min_row=2):
+        for c in row:
+            c.alignment = Alignment(wrap_text=True, vertical="top")
+
+    bl = wb.create_sheet("Bake list")
+    bl.append(["Pie", "How many"])
+    totals = {}
+    for r in rows:
+        if r["choice"] in ("pickup", "cant_make"):
+            k = r["pie_type"] or "No preference"
+            totals[k] = totals.get(k, 0) + 1
+    for k, v in sorted(totals.items()):
+        bl.append([_csv_safe(k), v])
+    bl.append(["Total", sum(totals.values())])
+    bl.cell(row=bl.max_row, column=1).font = Font(bold=True)
+    bl.cell(row=bl.max_row, column=2).font = Font(bold=True)
+    style_header(bl, [28, 12])
+
+    pk = wb.create_sheet("By pickup")
+    pk.append(["Pickup", "Pies"])
+    by = {}
+    for r in rows:
+        if r["choice"] == "pickup":
+            by[r["slot_label"]] = by.get(r["slot_label"], 0) + 1
+    for k, v in sorted(by.items()):
+        pk.append([_csv_safe(k), v])
+    style_header(pk, [60, 10])
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return Response(buf.getvalue(), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    headers={"Content-Disposition": f"attachment; filename=pie-responses-{ev['id']}.xlsx"})
+
+
 @bp.route("/pies/<int:event_id>/flyer")
 def flyer(event_id):
     user, ev = _owned_event(event_id)
@@ -544,10 +612,7 @@ def public_event(token):
                 pie_type = (f.get("pie_type") or "").strip()[:60]
                 if pies and pie_type not in pies:
                     err = "Please choose a type of pie."
-                try:
-                    qty = max(1, min(int(f.get("quantity") or 1), 10))
-                except ValueError:
-                    qty = 1
+                qty = 1  # one pie per person
                 if choice == "pickup" and not err:
                     sid = f.get("slot_id", "")
                     match = next((s for s in slots if str(s["id"]) == sid), None)
@@ -632,6 +697,11 @@ def init_app(app, get_current_user, bg, send_email):
     @app.template_filter("pie_time")
     def _pt(v):
         return fmt_time(v)
+
+    @app.template_filter("no_emoji")
+    def _ne(v):
+        import re
+        return re.sub(r"[🀀-🫿☀-➿️‍]+", "", v or "").strip()
 
     @app.template_filter("pie_date")
     def _pd(v):
