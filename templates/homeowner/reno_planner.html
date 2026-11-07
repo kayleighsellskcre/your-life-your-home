@@ -91,7 +91,7 @@
  if (data.success) {
  location.reload();
  } else {
- alert('Could not delete project: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  })
  .catch(() => alert('Could not delete project.'));
@@ -99,7 +99,7 @@
  </script>
  {% else %}
  <div class="empty-state">
- <h3> No Projects Yet</h3>
+ <h3>What would you love to change first?</h3>
  <p>Start with the one that's on your mind the most, even if it's just in the dreaming phase.</p>
  </div>
  {% endif %}

@@ -1040,7 +1040,7 @@
  </div>
  {% else %}
  <div class="empty-gallery">
- <h3> No Photos Yet</h3>
+ <h3>Your board is ready for its first photo</h3>
  <p>Add inspiration photos to bring this board to life</p>
  </div>
  {% endif %}
@@ -1255,7 +1255,7 @@
  // Reload the page to show updated notes
  location.reload();
  } else {
- alert('Could not delete note: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  })
  .catch(() => {
@@ -1874,7 +1874,7 @@
  };
  
  image.onerror = function() {
- alert('Error loading image. Please check the image path.');
+ alert('We could not load that image. Please try again.');
  };
  }
 
@@ -1901,11 +1901,11 @@
  alert(' Photo cropped successfully!');
  window.location.reload();
  } else {
- alert('Error: ' + (data.error || 'Could not crop photo'));
+ alert('We could not crop that photo. Please try again.');
  }
  })
  .catch(err => {
- alert('Error cropping photo');
+ alert('We could not crop that photo. Please try again.');
  console.error(err);
  });
  });

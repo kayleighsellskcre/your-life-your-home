@@ -612,7 +612,7 @@ function deleteNoteFromBoard() {
  location.reload();
  }
  } else {
- alert('Could not delete note: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  })
  .catch(() => alert('Could not delete note.'));
@@ -703,12 +703,12 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
  }
  }
  } else {
- alert('Could not save: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  })
  .catch(error => {
  console.error('Save error:', error);
- alert('Could not save project: ' + (error.error || error.message || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  })
  .finally(() => {
  saveButton.disabled = false;
@@ -802,7 +802,7 @@ function deleteProject(projectId, projectName) {
  location.reload();
  }
  } else {
- alert('Could not delete project: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  })
  .catch(() => alert('Could not delete project.'));

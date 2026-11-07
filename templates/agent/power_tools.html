@@ -1143,7 +1143,7 @@ This CMA has been saved to your CRM. You can now:
  document.getElementById('cma-results-content').textContent = resultsHTML;
  document.getElementById('cma-results').style.display = 'block';
  } else {
- alert('Error generating CMA: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error:', error);
@@ -1216,11 +1216,11 @@ The campaign has been added to your Marketing Hub. You'll receive notifications 
  document.getElementById('farming-results-content').textContent = resultsHTML;
  document.getElementById('farming-results').style.display = 'block';
  } else {
- alert('Error creating campaign: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error:', error);
- alert('Failed to create campaign. Please try again.');
+ alert('We could not create campaign just now. Please try again in a moment.');
  } finally {
  button.disabled = false;
  button.textContent = 'Create Campaign';
@@ -1282,11 +1282,11 @@ Remember: Objections are opportunities to demonstrate your expertise!
  document.getElementById('scripts-results-content').textContent = resultsHTML;
  document.getElementById('scripts-results').style.display = 'block';
  } else {
- alert('Error generating script: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error:', error);
- alert('Failed to generate script. Please try again.');
+ alert('We could not generate script just now. Please try again in a moment.');
  } finally {
  button.disabled = false;
  button.textContent = 'Get Response Script';
@@ -1317,11 +1317,11 @@ Remember: Objections are opportunities to demonstrate your expertise!
  if (data.success) {
  alert('Script saved to your library! You can access it anytime from the Scripts section in Communications.');
  } else {
- alert('Error saving script: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error:', error);
- alert('Failed to save script. Please try again.');
+ alert('We could not save script just now. Please try again in a moment.');
  }
  }
  
@@ -1390,11 +1390,11 @@ It includes:
  document.getElementById('market-results-content').innerHTML = resultsHTML;
  document.getElementById('market-results').style.display = 'block';
  } else {
- alert('Error generating report: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error:', error);
- alert('Failed to generate report. Please try again.');
+ alert('We could not generate report just now. Please try again in a moment.');
  } finally {
  button.disabled = false;
  button.textContent = 'Generate Report';

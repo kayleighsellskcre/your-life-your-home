@@ -731,7 +731,7 @@ function addClientToCRM() {
  if (data.success) {
  alert(data.message || 'Client added to CRM successfully!');
  } else {
- alert('Error: ' + (data.error || 'Failed to add client to CRM'));
+ alert('We could not add that client to your CRM. Please try again in a moment.');
  }
  })
  .catch(error => {
@@ -829,7 +829,7 @@ function addAdditionalClient(event) {
  })
  .catch(error => {
  console.error('Error adding client:', error);
- alert('Error adding client: ' + (error.message || 'Unknown error occurred'));
+ alert('We could not finish that just now. Please try again in a moment.');
  });
 }
 
@@ -857,7 +857,7 @@ function removeAdditionalClient(participantId) {
  })
  .catch(error => {
  console.error('Error:', error);
- alert('Error removing client: ' + error.message);
+ alert('We could not finish that just now. Please try again in a moment.');
  });
 }
 </script>

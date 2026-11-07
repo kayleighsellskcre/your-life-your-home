@@ -461,11 +461,11 @@
  roomInput.value = data.refined.room;
  }
  } else {
- alert('Refinement failed: ' + (data.error || 'Unknown error'));
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error refining feature:', error);
- alert('Error refining feature. Please try again.');
+ alert('We could not finish refining feature just now. Please try again in a moment.');
  } finally {
  refineBtn.textContent = originalText;
  refineBtn.disabled = false;
@@ -787,11 +787,11 @@
  // Show success message
  alert('Card set "' + cardSet.set_name + '" loaded successfully!');
  } else {
- alert('Error loading card set: ' + data.error);
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error loading card set:', error);
- alert('Error loading card set. Please try again.');
+ alert('We could not finish loading card set just now. Please try again in a moment.');
  }
  }
  
@@ -808,14 +808,14 @@
  const data = await response.json();
  
  if (data.success) {
- alert('Card set deleted successfully!');
+ alert('Card set deleted.');
  location.reload();
  } else {
- alert('Error deleting card set: ' + data.error);
+ alert('We could not finish that just now. Please try again in a moment.');
  }
  } catch (error) {
  console.error('Error deleting card set:', error);
- alert('Error deleting card set. Please try again.');
+ alert('We could not finish deleting card set just now. Please try again in a moment.');
  }
  }
 

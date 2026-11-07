@@ -1056,7 +1056,7 @@ def agent_add_participant(tx_id):
     if not transaction or transaction.get("agent_id") != user["id"]:
         if request.is_json or request.content_type == 'application/json':
             return jsonify({"success": False, "error": "Transaction not found"}), 404
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
     
     name = request.form.get("participant_name", "").strip()
@@ -1067,7 +1067,7 @@ def agent_add_participant(tx_id):
     if not name:
         if request.is_json or request.content_type == 'application/json':
             return jsonify({"success": False, "error": "Name is required"}), 400
-        flash("Participant name is required.", "error")
+        flash("Please add the participant's name.", "error")
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
     try:
@@ -1087,13 +1087,13 @@ def agent_add_participant(tx_id):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json or request.content_type == 'application/json':
             return jsonify({"success": True, "message": "Client added successfully", "participant_id": participant_id}), 200
         
-        flash("Participant added successfully!", "success")
+        flash("Participant added!", "success")
     except Exception as e:
         import traceback
         print(f"Error adding participant: {traceback.format_exc()}")
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json or request.content_type == 'application/json':
             return jsonify({"success": False, "error": str(e)}), 500
-        flash(f"Error adding participant: {e}", "error")
+        flash("We could not add that participant. Please try again in a moment.", "error")
 
     return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
@@ -2749,8 +2749,8 @@ def signup():
             flash("Please choose a password to keep your account safe.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
         
-        if len(password) < 6:
-            flash("Your password needs at least 6 characters. A little longer is even better.", "error")
+        if len(password) < 8:
+            flash("Your password needs at least 8 characters. A little longer is even better.", "error")
             return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         password_hash = generate_password_hash(password)
@@ -3185,9 +3185,9 @@ def signup():
         
         # Success message for agents/lenders
         if role == "agent":
-            flash("Account created successfully! Welcome to Your Life Your Home.", "success")
+            flash("Account created! Welcome to Your Life Your Home.", "success")
         elif role == "lender":
-            flash("Account created successfully! Welcome to Your Life Your Home.", "success")
+            flash("Account created! Welcome to Your Life Your Home.", "success")
         
         # Save email to localStorage (will be handled by JavaScript)
         response = redirect(url_for("agent_dashboard") if role == "agent"
@@ -3489,7 +3489,7 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
             return redirect(url_for("agent_dashboard" if user and user.get("role") == "agent" else "lender_dashboard"))
         homeowner_user = get_user_by_id(homeowner_id)
         if not homeowner_user or homeowner_user["role"] != "homeowner":
-            flash("Homeowner not found.", "error")
+            flash("We could not find that homeowner.", "error")
             return redirect(url_for("agent_dashboard" if user.get("role") == "agent" else "lender_dashboard"))
         homeowner_user = dict(homeowner_user)
         viewing_as_professional = True
@@ -3698,12 +3698,12 @@ def homeowner_saved_notes():
     """
     user = get_current_user()
     if not user:
-        flash("Please log in to create boards.", "warning")
+        flash("Please sign in to create boards.", "warning")
         return redirect(url_for("login"))
     
     user_id = user.get("id")
     if not user_id:
-        flash("User ID not found. Please log in again.", "error")
+        flash("Please sign in again to continue.", "error")
         return redirect(url_for("login"))
     
     print(f"[SAVED NOTES] user_id: {user_id}")
@@ -3728,7 +3728,7 @@ def homeowner_saved_notes():
             board_links = (request.form.get("board_links") or "").strip()
 
             if not board_name:
-                flash("Please provide a board name.", "error")
+                flash("Please give your board a name.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
 
             # Photos
@@ -3747,7 +3747,7 @@ def homeowner_saved_notes():
                     ).replace("\\", "/")
                     saved_photos.append(rel_path)
                 except Exception:
-                    flash(f"Could not save file: {safe_name}", "error")
+                    flash("We could not save file. Please try again in a moment.", "error")
 
             # Fixtures
             saved_fixtures = []
@@ -3767,7 +3767,7 @@ def homeowner_saved_notes():
                     ).replace("\\", "/")
                     saved_fixtures.append(rel_path)
                 except Exception:
-                    flash(f"Could not save fixture: {safe_name}", "error")
+                    flash("We could not save fixture. Please try again in a moment.", "error")
 
             colors = request.form.getlist("colors[]")
             color_palette = [c for c in colors if c]
@@ -3791,7 +3791,7 @@ def homeowner_saved_notes():
 
             # Validate required fields before attempting to save
             if not board_name or not board_name.strip():
-                flash("Board name is required.", "error")
+                flash("Please give your board a name.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
             
             print(f"[BOARD CREATE] Attempting to create board:")
@@ -3866,7 +3866,7 @@ def homeowner_saved_notes():
                 return redirect(url_for("homeowner_saved_notes", view=board_name))
             except ValueError as ve:
                 print(f"[BOARD CREATE VALIDATION ERROR] {str(ve)}")
-                flash(f"Validation error: {str(ve)}", "error")
+                flash("Something in that form needs another look. Please check it and try again.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
             except Exception as e:
                 import traceback
@@ -3874,14 +3874,14 @@ def homeowner_saved_notes():
                 print(f"[BOARD CREATE ERROR] Failed to create board '{board_name}': {str(e)}")
                 print(f"[BOARD CREATE ERROR] Error type: {type(e).__name__}")
                 print(error_trace)
-                flash(f"Could not create the board: {str(e)}", "error")
+                flash("We could not create the board. Please try again in a moment.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
 
         # ---------- EDIT BOARD ----------
         if action == "edit_board":
             board_name = (request.form.get("board_name") or "").strip()
             if not board_name:
-                flash("Missing board name.", "error")
+                flash("Please give your board a name.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
 
             # Remove photos
@@ -3897,7 +3897,7 @@ def homeowner_saved_notes():
                         except Exception:
                             pass
                 except Exception:
-                    flash("Could not remove some photos.", "error")
+                    flash("We could not remove some of those photos. Please try again.", "error")
 
             # Remove fixtures
             remove_fixtures_list = request.form.getlist("remove_fixtures")
@@ -3913,12 +3913,12 @@ def homeowner_saved_notes():
                                 fpath.unlink()
                         except Exception as file_error:
                             print(f"[FIXTURE REMOVAL] Could not delete file {f}: {file_error}")
-                    flash("Fixtures removed successfully!", "success")
+                    flash("Fixtures removed!", "success")
                 except Exception as e:
                     import traceback
                     print(f"[FIXTURE REMOVAL ERROR] Failed to remove fixtures: {str(e)}")
                     print(traceback.format_exc())
-                    flash(f"Could not remove some fixtures: {str(e)}", "error")
+                    flash("We could not remove some fixtures. Please try again in a moment.", "error")
 
             # New photos
             new_photos = []
@@ -3939,7 +3939,7 @@ def homeowner_saved_notes():
                     ).replace("\\", "/")
                     new_photos.append(rel_path)
                 except Exception:
-                    flash(f"Could not save file: {safe_name}", "error")
+                    flash("We could not save file. Please try again in a moment.", "error")
 
             # New fixtures
             new_fixtures = []
@@ -3962,7 +3962,7 @@ def homeowner_saved_notes():
                     ).replace("\\", "/")
                     new_fixtures.append(rel_path)
                 except Exception:
-                    flash(f"Could not save fixture: {safe_name}", "error")
+                    flash("We could not save fixture. Please try again in a moment.", "error")
 
             edit_title = (request.form.get("edit_title") or "").strip()
             edit_notes = (request.form.get("edit_notes") or "").strip()
@@ -4022,7 +4022,7 @@ def homeowner_saved_notes():
                         files=[],
                         fixtures=all_fixtures,
                     )
-                    flash("Board updated successfully!", "success")
+                    flash("Board updated!", "success")
                     # Redirect to board detail page if we're coming from there
                     if request.referrer and '/design-boards/' in request.referrer:
                         return redirect(url_for('homeowner_design_board_view', board_name=board_name))
@@ -4031,7 +4031,7 @@ def homeowner_saved_notes():
                     import traceback
                     print(f"[BOARD EDIT ERROR] Failed to update board: {str(e)}")
                     print(traceback.format_exc())
-                    flash(f"Could not update board: {str(e)}", "error")
+                    flash("We could not update board. Please try again in a moment.", "error")
                     # Redirect to board detail page if we're coming from there
                     if request.referrer and '/design-boards/' in request.referrer:
                         return redirect(url_for('homeowner_design_board_view', board_name=board_name))
@@ -4043,7 +4043,7 @@ def homeowner_saved_notes():
             board_name = (request.form.get("board_name") or "").strip()
             print(f"[BOARD DELETE] Attempting to delete board: '{board_name}' for user {user_id}")
             if not board_name:
-                flash("Board name is required for deletion.", "error")
+                flash("Please tell us which board to delete.", "error")
                 return redirect(url_for("homeowner_saved_notes"))
             
             try:
@@ -4092,12 +4092,12 @@ def homeowner_saved_notes():
                 # Delete from database
                     delete_design_board(user_id, board_name)
                 print(f"[BOARD DELETE] Successfully deleted board '{board_name}' from database")
-                flash("Board deleted successfully.", "success")
+                flash("Board deleted.", "success")
             except Exception as e:
                 import traceback
                 print(f"[BOARD DELETE ERROR] Failed to delete board '{board_name}': {str(e)}")
                 print(traceback.format_exc())
-                flash(f"Could not delete that board: {str(e)}", "error")
+                flash("We could not delete that board. Please try again in a moment.", "error")
 
             return redirect(url_for("homeowner_saved_notes"))
 
@@ -4419,7 +4419,7 @@ def homeowner_design_board_duplicate(board_name):
     new_name = request.form.get("new_name", f"{board_name} (Copy)").strip()
 
     if not new_name:
-        flash("New board name is required.", "error")
+        flash("Please give the new board a name.", "error")
         return redirect(url_for("homeowner_design_board_view", board_name=board_name))
 
     try:
@@ -4427,7 +4427,7 @@ def homeowner_design_board_duplicate(board_name):
         flash(f" Board duplicated as '{new_name}'!", "success")
         return redirect(url_for("homeowner_design_board_view", board_name=new_name))
     except Exception:
-        flash("Could not duplicate board.", "error")
+        flash("We could not duplicate that board. Please try again.", "error")
         return redirect(url_for("homeowner_design_board_view", board_name=board_name))
 
 
@@ -4446,7 +4446,7 @@ def homeowner_design_board_privacy(board_name):
         status = "private" if is_private else "shareable"
         flash(f"Board is now {status}.", "success")
     except Exception:
-        flash("Could not update privacy settings.", "error")
+        flash("We could not update the privacy setting. Please try again.", "error")
 
     return redirect(url_for("homeowner_design_board_view", board_name=board_name))
 
@@ -4464,7 +4464,7 @@ def homeowner_design_board_template(board_name):
         update_board_template(user_id, board_name, template)
         flash(f"Board template changed to {template}.", "success")
     except Exception:
-        flash("Could not update template.", "error")
+        flash("We could not update the template. Please try again.", "error")
 
     return redirect(url_for("homeowner_design_board_view", board_name=board_name))
 
@@ -4577,7 +4577,7 @@ def homeowner_document_view(doc_id):
             file_url = get_file_url_from_r2(row["r2_key"])
             return redirect(file_url)
         except Exception as e:
-            flash(f"Could not retrieve file: {str(e)}", "error")
+            flash("We could not retrieve file. Please try again in a moment.", "error")
             return redirect(url_for("homeowner_upload_documents"))
 
     # Fallback to local file
@@ -4712,7 +4712,7 @@ def homeowner_value_equity_overview():
     
     user = get_current_user()
     if not user:
-        flash("Please log in to access this page.", "warning")
+        flash("Please sign in to access this page.", "warning")
         return redirect(url_for("login"))
     
     if user.get("role") != "homeowner":
@@ -4734,7 +4734,7 @@ def homeowner_value_equity_overview():
         # Get property ID
         primary_property = get_primary_property(homeowner_id)
         if not primary_property:
-            flash("Please add a property first before updating loan details.", "error")
+            flash("Please add your home first, then we can add your loan details.", "error")
             return redirect(url_for("homeowner_value_equity_overview"))
         
         property_id = primary_property.get('id')
@@ -4795,14 +4795,14 @@ def homeowner_value_equity_overview():
             )
             
             print(f"[LOAN UPDATE] Successfully updated snapshot")
-            flash("Loan details updated successfully! Your equity numbers have been recalculated.", "success")
+            flash("Loan details updated! Your equity numbers have been recalculated.", "success")
             return redirect(url_for("homeowner_value_equity_overview"))
         except Exception as e:
             import traceback
             error_trace = traceback.format_exc()
             print(f"[LOAN UPDATE] ERROR: {str(e)}")
             print(error_trace)
-            flash(f"Error updating loan details: {str(e)}", "error")
+            flash("We could not update your loan details. Please try again in a moment.", "error")
             # Continue to render the form so user can see the error
     
     # Get homeowner's professionals (agents and lenders)
@@ -5091,7 +5091,7 @@ def homeowner_value_equity_overview():
         error_trace = traceback.format_exc()
         print(f"[HOMEBOT] ERROR rendering template: {str(e)}")
         print(error_trace)
-        flash(f"Error loading equity page: {str(e)}", "error")
+        flash("We could not load your equity page. Please try again in a moment.", "error")
         return redirect(url_for("homeowner_overview"))
     
     # Set CSP headers to allow Homebot iframe (only if widget is present)
@@ -5119,12 +5119,12 @@ def homeowner_add_property():
     """Add a new property for the homeowner."""
     user = get_current_user()
     if not user:
-        flash("Please log in to add a property.", "warning")
+        flash("Please sign in to add a property.", "warning")
         return redirect(url_for("login"))
 
     address = request.form.get("property_address", "").strip()
     if not address:
-        flash("Property address is required.", "error")
+        flash("Please add the home's address.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
 
     estimated_value = None
@@ -5146,7 +5146,7 @@ def homeowner_add_property():
     except Exception as _e:
         print(f"[VALUES] add-property lookup skipped: {_e}")
 
-    flash(f"Property '{address}' added successfully!", "success")
+    flash(f"Property '{address}' added!", "success")
     return redirect(
         url_for("homeowner_value_equity_overview", property_id=property_id)
     )
@@ -5199,18 +5199,18 @@ def homeowner_switch_property():
 
     property_id = request.form.get("property_id")
     if not property_id:
-        flash("No property selected.", "error")
+        flash("Please choose a home first.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
 
     try:
         property_id = int(property_id)
     except Exception:
-        flash("Invalid property ID.", "error")
+        flash("We could not find that home.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
 
     prop = get_property_by_id(property_id)
     if not prop or prop["user_id"] != user["id"]:
-        flash("Property not found.", "error")
+        flash("We could not find that home.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
 
     set_primary_property(user["id"], property_id)
@@ -5226,7 +5226,7 @@ def homeowner_update_property_address():
     """Update the address of a property."""
     user = get_current_user()
     if not user:
-        flash("Please log in.", "warning")
+        flash("Please sign in to continue.", "warning")
         return redirect(url_for("login"))
     
     property_id = request.form.get("property_id")
@@ -5239,13 +5239,13 @@ def homeowner_update_property_address():
     try:
         property_id = int(property_id)
     except Exception:
-        flash("Invalid property ID.", "error")
+        flash("We could not find that home.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
     
     # Verify property belongs to user
     prop = get_property_by_id(property_id)
     if not prop or prop["user_id"] != user["id"]:
-        flash("Property not found.", "error")
+        flash("We could not find that home.", "error")
         return redirect(url_for("homeowner_value_equity_overview"))
     
     # Update address
@@ -5327,12 +5327,12 @@ def homeowner_reno_planner_edit_project(project_id):
     user = get_current_user()
     user_id = user["id"] if user else None
     if not user_id:
-        flash("Please log in to edit projects.", "error")
+        flash("Please sign in to edit projects.", "error")
         return redirect(url_for("login", role="homeowner"))
     
     project = get_homeowner_project(project_id, user_id)
     if not project:
-        flash("Project not found.", "error")
+        flash("We could not find that project.", "error")
         return redirect(url_for("homeowner_reno_planner"))
     
     if request.method == "POST":
@@ -5354,10 +5354,10 @@ def homeowner_reno_planner_edit_project(project_id):
                 budget=budget_str,
                 notes=notes,
             )
-            flash("Project updated successfully.", "success")
+            flash("Project updated.", "success")
             return redirect(url_for("homeowner_reno_planner"))
         else:
-            flash("Project name is required.", "error")
+            flash("Please give your project a name.", "error")
     
     project_dict = dict(project) if hasattr(project, 'keys') else project
     return render_template(
@@ -5392,12 +5392,12 @@ def homeowner_edit_note(note_id):
     user = get_current_user()
     user_id = user["id"] if user else None
     if not user_id:
-        flash("Please log in to edit notes.", "error")
+        flash("Please sign in to edit notes.", "error")
         return redirect(url_for("login", role="homeowner"))
     
     note = get_homeowner_note_by_id(note_id, user_id)
     if not note:
-        flash("Note not found.", "error")
+        flash("We could not find that note.", "error")
         return redirect(url_for("homeowner_saved_notes"))
     
     note_dict = dict(note) if hasattr(note, 'keys') else note
@@ -5415,7 +5415,7 @@ def homeowner_edit_note(note_id):
             details=details if details else None,
             tags=tags if tags else None,
         )
-        flash("Note updated successfully.", "success")
+        flash("Note updated.", "success")
         return redirect(url_for("homeowner_design_board_view", board_name=board_name))
     
     return render_template(
@@ -5473,7 +5473,7 @@ def agent_dashboard():
     user = get_current_user()
     
     if not user:
-        flash("Please log in to access your dashboard.", "error")
+        flash("Please sign in to see your dashboard.", "error")
         return redirect(url_for("login", role="agent"))
     
     # Check role - normalize for comparison
@@ -5498,7 +5498,7 @@ def agent_dashboard():
     except Exception as e:
         import traceback
         print(f"Error in agent_dashboard: {traceback.format_exc()}")
-        flash(f"Error loading dashboard: {str(e)}", "error")
+        flash("We could not load your dashboard. Please try again in a moment.", "error")
         metrics = {"new_leads": 0, "active_transactions": 0, "followups_today": 0}
         transactions = []
 
@@ -5588,7 +5588,7 @@ def lender_dashboard():
         import traceback
         error_trace = traceback.format_exc()
         print(f"ERROR in lender_dashboard: {error_trace}")
-        flash(f"Error loading dashboard: {str(e)}", "error")
+        flash("We could not load your dashboard. Please try again in a moment.", "error")
         return redirect(url_for("login", role="lender"))
 
 
@@ -5635,7 +5635,7 @@ def agent_crm():
             
             if not name:
                 print("ERROR: Name is required but empty")
-                flash("Name is required!", "error")
+                flash("Please add a name.", "error")
                 return redirect(url_for("agent_crm"))
             else:
                 try:
@@ -5643,13 +5643,13 @@ def agent_crm():
                     existing = list_agent_contacts(user["id"])
                     for ex in existing:
                         if email and ex.get("email") and str(ex["email"]).strip().lower() == email.lower():
-                            flash(f"Contact with email {email} already exists. Use Edit to update.", "error")
+                            flash("You already have a contact with that email. Open them to make changes.", "error")
                             return redirect(url_for("agent_crm"))
                         if phone and ex.get("phone") and _normalize_phone(str(ex.get("phone") or "")) == _normalize_phone(phone):
-                            flash(f"Contact with phone {phone} already exists. Use Edit to update.", "error")
+                            flash("You already have a contact with that phone. Open them to make changes.", "error")
                             return redirect(url_for("agent_crm"))
                         if _names_match(name, ex.get("name") or ""):
-                            flash(f"Contact '{name}' already exists. Use Edit to update.", "error")
+                            flash(f"You already have a contact named {name}. Open them to make changes.", "error")
                             return redirect(url_for("agent_crm"))
                     prop_val = float(property_value) if property_value else None
                     equity_val = float(equity_estimate) if equity_estimate else None
@@ -5690,15 +5690,15 @@ def agent_crm():
                             )
                             flash(f"Contact added and linked to homeowner account ({email})!", "success")
                         else:
-                            flash("Contact added successfully!", "success")
+                            flash("Contact added!", "success")
                     else:
-                        flash("Contact added successfully!", "success")
+                        flash("Contact added!", "success")
                     return redirect(url_for("agent_crm"))
                 except Exception as e:
                     import traceback
                     error_trace = traceback.format_exc()
                     print(f"ERROR adding contact: {error_trace}")
-                    flash(f"Error adding contact: {str(e)}", "error")
+                    flash("We could not add that contact. Please try again in a moment.", "error")
                     return redirect(url_for("agent_crm"))
         
         elif action == "update":
@@ -5731,9 +5731,9 @@ def agent_crm():
                 
                 try:
                     update_agent_contact(int(contact_id), user["id"], **updates)
-                    flash("Contact updated successfully!", "success")
+                    flash("Contact updated!", "success")
                 except Exception as e:
-                    flash(f"Error updating contact: {e}", "error")
+                    flash("We could not update that contact. Please try again in a moment.", "error")
                     import traceback
                     print(f"Error updating contact: {traceback.format_exc()}")
         
@@ -5750,9 +5750,9 @@ def agent_crm():
                         int(contact_id), "agent_contact", user["id"],
                         interaction_type, subject, notes, channel
                     )
-                    flash("Interaction logged successfully!", "success")
+                    flash("Interaction logged!", "success")
                 except Exception as e:
-                    flash(f"Error logging interaction: {e}", "error")
+                    flash("We could not log that note. Please try again in a moment.", "error")
         
         elif action == "add_task":
             contact_id = request.form.get("contact_id")
@@ -5768,9 +5768,9 @@ def agent_crm():
                         int(contact_id), "agent_contact", user["id"],
                         title, description, due_date or None, priority, reminder_date
                     )
-                    flash("Task added successfully!", "success")
+                    flash("Task added!", "success")
                 except Exception as e:
-                    flash(f"Error adding task: {e}", "error")
+                    flash("We could not add that task. Please try again in a moment.", "error")
         
         elif action == "update_task":
             task_id = request.form.get("task_id")
@@ -5781,18 +5781,18 @@ def agent_crm():
                     if status == "completed":
                         updates["completed_at"] = datetime.now().isoformat()
                     update_crm_task(int(task_id), user["id"], **updates)
-                    flash("Task updated successfully!", "success")
+                    flash("Task updated!", "success")
                 except Exception as e:
-                    flash(f"Error updating task: {e}", "error")
+                    flash("We could not update that task. Please try again in a moment.", "error")
         
         elif action == "delete_task":
             task_id = request.form.get("task_id")
             if task_id:
                 try:
                     delete_crm_task(int(task_id), user["id"])
-                    flash("Task deleted successfully!", "success")
+                    flash("Task deleted!", "success")
                 except Exception as e:
-                    flash(f"Error deleting task: {e}", "error")
+                    flash("We could not delete that task. Please try again in a moment.", "error")
         
         elif action == "add_deal":
             contact_id = request.form.get("contact_id")
@@ -5816,9 +5816,9 @@ def agent_crm():
                         deal_name, deal_type, property_address, deal_val, comm_rate,
                         stage, prob, expected_close_date or None, notes
                     )
-                    flash("Deal added successfully!", "success")
+                    flash("Deal added!", "success")
                 except Exception as e:
-                    flash(f"Error adding deal: {e}", "error")
+                    flash("We could not add that deal. Please try again in a moment.", "error")
         
         elif action == "update_deal":
             deal_id = request.form.get("deal_id")
@@ -5841,18 +5841,18 @@ def agent_crm():
                     
                     if updates:
                         update_crm_deal(int(deal_id), user["id"], **updates)
-                        flash("Deal updated successfully!", "success")
+                        flash("Deal updated!", "success")
                 except Exception as e:
-                    flash(f"Error updating deal: {e}", "error")
+                    flash("We could not update that deal. Please try again in a moment.", "error")
         
         elif action == "delete_deal":
             deal_id = request.form.get("deal_id")
             if deal_id:
                 try:
                     delete_crm_deal(int(deal_id), user["id"])
-                    flash("Deal deleted successfully!", "success")
+                    flash("Deal deleted!", "success")
                 except Exception as e:
-                    flash(f"Error deleting deal: {e}", "error")
+                    flash("We could not delete that deal. Please try again in a moment.", "error")
         
         elif action == "remove_duplicates":
             try:
@@ -5860,7 +5860,7 @@ def agent_crm():
                 removed = remove_duplicate_agent_contacts(user["id"])
                 flash(f"Removed {removed} duplicate contact(s).", "success")
             except Exception as e:
-                flash(f"Error removing duplicates: {str(e)}", "error")
+                flash("We could not remove the duplicates. Please try again in a moment.", "error")
             return redirect(url_for("agent_crm"))
         
         elif action == "delete":
@@ -5869,11 +5869,11 @@ def agent_crm():
                 try:
                     from database import delete_agent_contact
                     if delete_agent_contact(int(contact_id), user["id"]):
-                        flash("Contact deleted successfully!", "success")
+                        flash("Contact deleted!", "success")
                     else:
-                        flash("Contact not found or could not be deleted.", "error")
+                        flash("We could not delete that contact. Please try again.", "error")
                 except Exception as e:
-                    flash(f"Error deleting contact: {e}", "error")
+                    flash("We could not delete that contact. Please try again in a moment.", "error")
             return redirect(url_for("agent_crm"))
         
         elif action == "add_relationship":
@@ -5889,11 +5889,11 @@ def agent_crm():
                         user["id"], relationship_type, notes
                     )
                     if result:
-                        flash("Relationship added successfully!", "success")
+                        flash("Relationship added!", "success")
                     else:
-                        flash("Relationship already exists!", "error")
+                        flash("Those two are already connected.", "error")
                 except Exception as e:
-                    flash(f"Error adding relationship: {e}", "error")
+                    flash("We could not add that connection. Please try again in a moment.", "error")
         
         elif action == "bulk_action":
             contact_ids = request.form.getlist("contact_ids")
@@ -5918,7 +5918,7 @@ def agent_crm():
                                 update_agent_contact(int(contact_id), user["id"], stage=stage)
                     flash(f"Bulk action completed for {len(contact_ids)} contact(s)!", "success")
                 except Exception as e:
-                    flash(f"Error performing bulk action: {e}", "error")
+                    flash("We could not complete that bulk action. Please try again in a moment.", "error")
 
     stage_filter = request.args.get("stage")
     search_query = request.args.get("search", "").strip()
@@ -6186,7 +6186,7 @@ def agent_crm():
         import traceback
         error_trace = traceback.format_exc()
         print(f"Error loading contacts: {error_trace}")
-        flash(f"Error loading contacts: {e}", "error")
+        flash("We could not load your contacts. Please try again in a moment.", "error")
         contacts_list = []
         contacts_list_dicts = []  # Ensure this is defined even on error
         stats = {'total': 0, 'new': 0, 'active': 0, 'past': 0, 'with_automation': 0, 'total_equity': 0, 'pending_tasks': 0, 'total_deals': 0, 'pipeline_value': 0, 'expected_commission': 0, 'needs_followup': 0, 'follow_up_days': 30}
@@ -6394,11 +6394,11 @@ def agent_crm_invite_to_portal(contact_id):
         return redirect(url_for("login", role="agent"))
     contact = get_agent_contact(contact_id, user["id"])
     if not contact:
-        flash("Contact not found.", "error")
+        flash("We could not find that contact.", "error")
         return redirect(url_for("agent_crm"))
     email = contact.get("email", "").strip()
     if not email:
-        flash("This contact has no email address on file.", "error")
+        flash("This contact does not have an email address yet. Add one and try again.", "error")
         return redirect(url_for("agent_crm"))
     # Get or create referral link for this agent
     links = get_referral_links_for_agent(user["id"])
@@ -6454,18 +6454,18 @@ def agent_crm_import():
         if action == "upload":
             # Handle file upload
             if 'file' not in request.files:
-                flash("Please select a file to upload.", "error")
+                flash("Please choose a file to upload.", "error")
                 return redirect(url_for("agent_crm_import"))
             
             file = request.files['file']
             if file.filename == '':
-                flash("Please select a file to upload.", "error")
+                flash("Please choose a file to upload.", "error")
                 return redirect(url_for("agent_crm_import"))
             
             # Check file extension
             filename = file.filename.lower()
             if not (filename.endswith('.xlsx') or filename.endswith('.xls') or filename.endswith('.csv')):
-                flash("Please upload an Excel (.xlsx, .xls) or CSV file.", "error")
+                flash("Please upload an Excel (.xlsx, .xls) or CSV file and we will take it from there.", "error")
                 return redirect(url_for("agent_crm_import"))
             
             try:
@@ -6496,7 +6496,7 @@ def agent_crm_import():
                 )
             except Exception as e:
                 import traceback
-                flash(f"Error reading file: {str(e)}", "error")
+                flash("We could not read that file. Please try again in a moment.", "error")
                 print(f"Import error: {traceback.format_exc()}")
                 return redirect(url_for("agent_crm_import"))
         
@@ -6508,7 +6508,7 @@ def agent_crm_import():
             
             import_data_json = session.get('crm_import_data')
             if not import_data_json:
-                flash("No import data found. Please upload a file again.", "error")
+                flash("We lost track of that import. Please upload your file again.", "error")
                 return redirect(url_for("agent_crm_import"))
             
             try:
@@ -6700,7 +6700,7 @@ def agent_crm_import():
                 return redirect(url_for("agent_crm"))
             except Exception as e:
                 import traceback
-                flash(f"Error during import: {str(e)}", "error")
+                flash("We ran into trouble with that import. Please check your file and try again.", "error")
                 print(f"Import error: {traceback.format_exc()}")
                 return redirect(url_for("agent_crm_import"))
     
@@ -6765,9 +6765,9 @@ def agent_transactions():
                 import automation
                 automation.link_transaction_parties(new_tx_id, request.form.get("lender_email", "").strip())
                 _bg(automation.invite_client_if_needed, new_tx_id, send_reminder_email, _site_url())
-                flash("Transaction created successfully!", "success")
+                flash("Transaction created!", "success")
             except Exception as e:
-                flash(f"Error creating transaction: {e}", "error")
+                flash("We could not create that transaction. Please try again in a moment.", "error")
 
     # Get contact info if coming from CRM
     contact_id = request.args.get("contact_id")
@@ -6805,7 +6805,7 @@ def agent_transaction_detail(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
 
     try:
@@ -6869,7 +6869,7 @@ def agent_transaction_commission_save(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
 
     f = request.form
@@ -6996,7 +6996,7 @@ def agent_transaction_edit(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
 
     if request.method == "POST":
@@ -7037,7 +7037,7 @@ def agent_transaction_edit(tx_id):
         }
         
         if update_transaction(tx_id, user["id"], **update_data):
-            flash("Transaction updated successfully!", "success")
+            flash("Transaction updated!", "success")
             # Schedule review request if stage was just set to closed
             if db_stage == 'closed':
                 try:
@@ -7049,7 +7049,7 @@ def agent_transaction_edit(tx_id):
                     pass
             return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
         else:
-            flash("Error updating transaction.", "error")
+            flash("We could not update that transaction. Please try again in a moment.", "error")
 
     # Get participants for displaying additional clients
     participants = get_transaction_participants(tx_id)
@@ -7072,7 +7072,7 @@ def agent_transaction_change_stage(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
 
     new_stage = request.form.get("new_stage", "").strip()
@@ -7085,13 +7085,13 @@ def agent_transaction_change_stage(tx_id):
         sub_stage = parts[1] if len(parts) > 1 else sub_stage
     
     if not new_stage:
-        flash("Please select a stage.", "error")
+        flash("Please choose a stage.", "error")
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
     # Validate stage
     valid_stages = ['pre_contract', 'under_contract', 'in_escrow', 'clear_to_close', 'closed', 'cancelled']
     if new_stage not in valid_stages:
-        flash("Invalid stage selected.", "error")
+        flash("That stage is not one we recognize. Please pick one from the list.", "error")
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
     try:
@@ -7100,7 +7100,7 @@ def agent_transaction_change_stage(tx_id):
             # Store sub-stage in notes if needed (for Summary vs Showings distinction)
             if sub_stage and new_stage == 'pre_contract':
                 pass
-            flash("Transaction stage updated successfully.", "success")
+            flash("Transaction stage updated.", "success")
             try:
                 import automation
                 automation.link_transaction_parties(tx_id)
@@ -7148,11 +7148,11 @@ def agent_transaction_change_stage(tx_id):
                 except Exception as rev_err:
                     print(f"[REVIEW] Could not schedule review request: {rev_err}")
         else:
-            flash("Could not update transaction stage.", "error")
+            flash("We could not update that stage. Please try again.", "error")
     except Exception as e:
         import traceback
         print(f"Error changing stage: {traceback.format_exc()}")
-        flash(f"Error updating stage: {str(e)}", "error")
+        flash("We could not update that stage. Please try again in a moment.", "error")
 
     return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
 
@@ -7167,7 +7167,7 @@ def agent_transaction_delete(tx_id):
     if delete_transaction(tx_id, user["id"]):
         flash("Transaction deleted.", "success")
     else:
-        flash("Could not delete transaction.", "error")
+        flash("We could not delete that transaction. Please try again.", "error")
 
     return redirect(url_for("agent_transactions"))
 
@@ -7446,7 +7446,7 @@ def agent_feature_spotlight_cards(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
     
     # Get saved card sets for this transaction
@@ -7554,7 +7554,7 @@ def agent_feature_spotlight_cards_generate(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
 
     # Parse features from form data
@@ -7589,7 +7589,7 @@ def agent_feature_spotlight_cards_generate(tx_id):
             })
     
     if not features:
-        flash("Please add at least one feature.", "error")
+        flash("Please add at least one feature to get started.", "error")
         return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
 
     from datetime import datetime
@@ -7634,7 +7634,7 @@ def agent_feature_spotlight_cards_generate(tx_id):
     except Exception as e:
         import traceback
         print(f"Error rendering spotlight cards: {traceback.format_exc()}")
-        flash("Error generating cards. Please try Preview Cards instead.", "error")
+        flash("We could not create those cards just now. Please try Preview Cards instead.", "error")
         return redirect(url_for("agent_feature_spotlight_cards", tx_id=tx_id))
 
 
@@ -7711,7 +7711,7 @@ def agent_marketing_hub(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
     
     # Get agent profile for branding
@@ -7772,7 +7772,7 @@ def agent_marketing_create(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
     
     # Get category and asset type from query params
@@ -7810,7 +7810,7 @@ def agent_marketing_generate(tx_id):
 
     transaction = get_transaction_detail(tx_id)
     if not transaction or transaction.get("agent_id") != user["id"]:
-        flash("Transaction not found.", "error")
+        flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
     
     try:
@@ -7891,7 +7891,7 @@ def agent_marketing_generate(tx_id):
     except Exception as e:
         import traceback
         print(f"Error generating marketing asset: {traceback.format_exc()}")
-        flash(f"Error generating asset: {str(e)}", "error")
+        flash("We could not create that. Please try again in a moment.", "error")
         return redirect(url_for('agent_marketing_hub', tx_id=tx_id))
 
 
@@ -7976,7 +7976,7 @@ def agent_communications():
                 flash("Template saved!", "success")
             except Exception as e:
                 print(f"[TEMPLATES] save failed: {e}")
-                flash("Sorry, that template could not be saved.", "error")
+                flash("We could not save that template. Please try again.", "error")
         else:
             flash("Please give the template a name and a message.", "error")
         return redirect(url_for("agent_communications"))
@@ -8007,7 +8007,7 @@ def agent_marketing():
                 add_marketing_template(user["id"], template_name, template_content, template_type)
                 flash("Marketing template saved!", "success")
             except Exception as e:
-                flash(f"Error saving template: {e}", "error")
+                flash("We could not save that template. Please try again in a moment.", "error")
 
     templates = list_marketing_templates(user["id"])
     return render_template(
@@ -8165,7 +8165,7 @@ def agent_invoice_edit(inv_id):
         return redirect(url_for("login", role="agent"))
     invoice = get_invoice(inv_id, user["id"])
     if not invoice:
-        flash("Invoice not found.", "error")
+        flash("We could not find that invoice.", "error")
         return redirect(url_for("agent_invoices"))
 
     contacts = list_agent_contacts(user["id"])
@@ -8289,7 +8289,7 @@ def agent_invoice_print(inv_id):
         return redirect(url_for("login", role="agent"))
     invoice = get_invoice(inv_id, user["id"])
     if not invoice:
-        flash("Invoice not found.", "error")
+        flash("We could not find that invoice.", "error")
         return redirect(url_for("agent_invoices"))
     items = get_invoice_items(inv_id)
     return render_template(
@@ -8791,12 +8791,12 @@ def agent_client_detail(homeowner_id):
     )
     
     if not can_access_homeowner(user["id"], "agent", homeowner_id):
-        flash("You don't have access to this client's data.", "error")
+        flash("That client is not connected to your account.", "error")
         return redirect(url_for("agent_clients"))
     
     homeowner = get_user_by_id(homeowner_id)
     if not homeowner or homeowner.get("role") != "homeowner":
-        flash("Client not found.", "error")
+        flash("We could not find that client.", "error")
         return redirect(url_for("agent_clients"))
     
     profile = get_homeowner_full_profile(homeowner_id)
@@ -8868,7 +8868,7 @@ def agent_referrals():
                 flash("New referral link created!", "success")
                 return redirect(url_for("agent_referrals"))
             except Exception as e:
-                flash(f"Error creating referral link: {str(e)}", "error")
+                flash("We could not create that referral link. Please try again in a moment.", "error")
         
         # Get all referral links for this agent
         referral_links = get_referral_links_for_agent(user["id"])
@@ -8914,7 +8914,7 @@ def agent_referrals():
         import traceback
         error_trace = traceback.format_exc()
         print(f"Error in agent_referrals: {error_trace}")
-        flash(f"Error loading referral page: {str(e)}", "error")
+        flash("We could not load your referral page. Please try again in a moment.", "error")
         return redirect(url_for("agent_dashboard"))
 
 
@@ -8946,7 +8946,7 @@ def agent_vendors():
             notes = request.form.get("notes", "").strip() or None
             
             if not name or not category:
-                flash("Name and category are required.", "error")
+                flash("Please add a name and a category.", "error")
             else:
                 try:
                     vendor_id = create_trusted_vendor(
@@ -8960,9 +8960,9 @@ def agent_vendors():
                         address=address,
                         notes=notes
                     )
-                    flash(f"Vendor '{name}' added successfully!", "success")
+                    flash(f"Vendor '{name}' added!", "success")
                 except Exception as e:
-                    flash(f"Error adding vendor: {str(e)}", "error")
+                    flash("We could not add that vendor. Please try again in a moment.", "error")
         
         elif action == "update":
             vendor_id = request.form.get("vendor_id")
@@ -8990,11 +8990,11 @@ def agent_vendors():
                         notes=notes,
                         agent_id=user["id"],
                     ):
-                        flash("Vendor updated successfully!", "success")
+                        flash("Vendor updated!", "success")
                     else:
-                        flash("Error updating vendor.", "error")
+                        flash("We could not update that vendor. Please try again in a moment.", "error")
                 except (ValueError, Exception) as e:
-                    flash(f"Error updating vendor: {str(e)}", "error")
+                    flash("We could not update that vendor. Please try again in a moment.", "error")
         
         elif action == "delete":
             vendor_id = request.form.get("vendor_id")
@@ -9002,11 +9002,11 @@ def agent_vendors():
                 try:
                     vendor_id = int(vendor_id)
                     if delete_trusted_vendor(vendor_id, user["id"]):
-                        flash("Vendor removed successfully.", "success")
+                        flash("Vendor removed.", "success")
                     else:
-                        flash("Error removing vendor.", "error")
+                        flash("We could not remove that vendor. Please try again in a moment.", "error")
                 except (ValueError, Exception) as e:
-                    flash(f"Error removing vendor: {str(e)}", "error")
+                    flash("We could not remove that vendor. Please try again in a moment.", "error")
         
         return redirect(url_for("agent_vendors"))
     
@@ -9075,7 +9075,7 @@ def admin_toggle_premium():
             )
             conn.commit()
             conn.close()
-            flash(" Premium features enabled!", "success")
+            flash("Your premium features are ready. Enjoy!", "success")
         elif action == "downgrade":
             cur.execute(
                 "UPDATE users SET subscription_tier = ? WHERE id = ?",
@@ -9083,7 +9083,7 @@ def admin_toggle_premium():
             )
             conn.commit()
             conn.close()
-            flash("Free tier activated", "success")
+            flash("You are all set on the free plan", "success")
         
         return redirect(url_for("admin_toggle_premium"))
     
@@ -9195,7 +9195,7 @@ def agent_subscription_checkout(tier):
     if "user_id" not in session or session.get("role") != "agent":
         return redirect(url_for("login"))
     if tier not in ("professional", "elite"):
-        flash("Invalid subscription tier.", "error")
+        flash("We could not find that plan. Please choose one from the list.", "error")
         return redirect(url_for("agent_subscription"))
 
     user = get_user_by_id(session["user_id"])
@@ -9215,7 +9215,7 @@ def agent_subscription_checkout(tier):
     )
 
     if error:
-        flash(f"Could not start checkout: {error}", "error")
+        flash("We could not start checkout. Please try again in a moment.", "error")
         return redirect(url_for("agent_subscription"))
 
     return redirect(checkout_url)
@@ -9252,7 +9252,7 @@ def agent_subscription_portal():
     )
 
     if error:
-        flash(f"Could not open billing portal: {error}", "error")
+        flash("We could not open billing portal. Please try again in a moment.", "error")
         return redirect(url_for("agent_subscription"))
 
     return redirect(portal_url)
@@ -9287,7 +9287,7 @@ def lender_subscription_checkout(tier):
     if "user_id" not in session or session.get("role") != "lender":
         return redirect(url_for("login"))
     if tier not in ("professional", "elite"):
-        flash("Invalid subscription tier.", "error")
+        flash("We could not find that plan. Please choose one from the list.", "error")
         return redirect(url_for("lender_subscription"))
 
     user = get_user_by_id(session["user_id"])
@@ -9307,7 +9307,7 @@ def lender_subscription_checkout(tier):
     )
 
     if error:
-        flash(f"Could not start checkout: {error}", "error")
+        flash("We could not start checkout. Please try again in a moment.", "error")
         return redirect(url_for("lender_subscription"))
 
     return redirect(checkout_url)
@@ -9344,7 +9344,7 @@ def lender_subscription_portal():
     )
 
     if error:
-        flash(f"Could not open billing portal: {error}", "error")
+        flash("We could not open billing portal. Please try again in a moment.", "error")
         return redirect(url_for("lender_subscription"))
 
     return redirect(portal_url)
@@ -9557,7 +9557,7 @@ def agent_settings_profile():
             print(f"{'='*60}")
             print(error_trace)
             print(f"{'='*60}\n")
-            flash(f"Error updating profile: {str(e)}. Please check the console for details and try again.", "error")
+            flash("We could not update your profile. Please try again in a moment.", "error")
             # Continue to render the form so user can see the error and try again
     
     # GET - load profile
@@ -9637,11 +9637,11 @@ def lender_crm():
                         )
                         flash(f"Borrower added and linked to homeowner account ({email})!", "success")
                     else:
-                        flash("Borrower added successfully!", "success")
+                        flash("Borrower added!", "success")
                 else:
-                    flash("Borrower added successfully!", "success")
+                    flash("Borrower added!", "success")
             except Exception as e:
-                flash(f"Error adding borrower: {e}", "error")
+                flash("We could not add that borrower. Please try again in a moment.", "error")
         
         elif action == "update":
             borrower_id = request.form.get("borrower_id")
@@ -9676,9 +9676,9 @@ def lender_crm():
                             updates.get("name") or _before.get("name"),
                             updates.get("email") or _before.get("email"),
                             updates["status"], send_reminder_email, _site_url())
-                    flash("Borrower updated successfully!", "success")
+                    flash("Borrower updated!", "success")
                 except Exception as e:
-                    flash(f"Error updating borrower: {e}", "error")
+                    flash("We could not update that borrower. Please try again in a moment.", "error")
         
         elif action == "add_interaction":
             borrower_id = request.form.get("borrower_id")
@@ -9693,9 +9693,9 @@ def lender_crm():
                         int(borrower_id), "lender_borrower", user["id"],
                         interaction_type, subject, notes, channel
                     )
-                    flash("Interaction logged successfully!", "success")
+                    flash("Interaction logged!", "success")
                 except Exception as e:
-                    flash(f"Error logging interaction: {e}", "error")
+                    flash("We could not log that note. Please try again in a moment.", "error")
         
         elif action == "add_task":
             borrower_id = request.form.get("borrower_id")
@@ -9711,9 +9711,9 @@ def lender_crm():
                         int(borrower_id), "lender_borrower", user["id"],
                         title, description, due_date or None, priority, reminder_date
                     )
-                    flash("Task added successfully!", "success")
+                    flash("Task added!", "success")
                 except Exception as e:
-                    flash(f"Error adding task: {e}", "error")
+                    flash("We could not add that task. Please try again in a moment.", "error")
         
         elif action == "update_task":
             task_id = request.form.get("task_id")
@@ -9724,9 +9724,9 @@ def lender_crm():
                     if status == "completed":
                         updates["completed_at"] = datetime.now().isoformat()
                     update_crm_task(int(task_id), user["id"], **updates)
-                    flash("Task updated successfully!", "success")
+                    flash("Task updated!", "success")
                 except Exception as e:
-                    flash(f"Error updating task: {e}", "error")
+                    flash("We could not update that task. Please try again in a moment.", "error")
         
         elif action == "add_deal":
             borrower_id = request.form.get("borrower_id")
@@ -9750,9 +9750,9 @@ def lender_crm():
                         deal_name, deal_type, property_address, deal_val, comm_rate,
                         stage, prob, expected_close_date or None, notes
                     )
-                    flash("Deal added successfully!", "success")
+                    flash("Deal added!", "success")
                 except Exception as e:
-                    flash(f"Error adding deal: {e}", "error")
+                    flash("We could not add that deal. Please try again in a moment.", "error")
         
         elif action == "bulk_action":
             borrower_ids = request.form.getlist("borrower_ids")
@@ -9776,7 +9776,7 @@ def lender_crm():
                                 update_lender_borrower(int(borrower_id), user["id"], status=status)
                     flash(f"Bulk action completed for {len(borrower_ids)} borrower(s)!", "success")
                 except Exception as e:
-                    flash(f"Error performing bulk action: {e}", "error")
+                    flash("We could not complete that bulk action. Please try again in a moment.", "error")
         
         elif action == "update_followup_days":
             follow_up_days = request.form.get("follow_up_days", "30").strip()
@@ -9978,18 +9978,18 @@ def lender_crm_import():
         if action == "upload":
             # Handle file upload
             if 'file' not in request.files:
-                flash("Please select a file to upload.", "error")
+                flash("Please choose a file to upload.", "error")
                 return redirect(url_for("lender_crm_import"))
             
             file = request.files['file']
             if file.filename == '':
-                flash("Please select a file to upload.", "error")
+                flash("Please choose a file to upload.", "error")
                 return redirect(url_for("lender_crm_import"))
             
             # Check file extension
             filename = file.filename.lower()
             if not (filename.endswith('.xlsx') or filename.endswith('.xls') or filename.endswith('.csv')):
-                flash("Please upload an Excel (.xlsx, .xls) or CSV file.", "error")
+                flash("Please upload an Excel (.xlsx, .xls) or CSV file and we will take it from there.", "error")
                 return redirect(url_for("lender_crm_import"))
             
             try:
@@ -10020,7 +10020,7 @@ def lender_crm_import():
                 )
             except Exception as e:
                 import traceback
-                flash(f"Error reading file: {str(e)}", "error")
+                flash("We could not read that file. Please try again in a moment.", "error")
                 print(f"Import error: {traceback.format_exc()}")
                 return redirect(url_for("lender_crm_import"))
         
@@ -10028,7 +10028,7 @@ def lender_crm_import():
             # Actually import the data
             import_data_json = session.get('crm_import_data')
             if not import_data_json:
-                flash("No import data found. Please upload a file again.", "error")
+                flash("We lost track of that import. Please upload your file again.", "error")
                 return redirect(url_for("lender_crm_import"))
             
             try:
@@ -10141,14 +10141,14 @@ def lender_crm_import():
                 session.pop('crm_import_data', None)
                 session.pop('crm_import_columns', None)
                 
-                flash(f"Import complete! {imported} borrowers imported, {skipped} skipped, {len(errors)} errors.", "success")
+                flash(f"All done! We imported {imported} borrowers. {skipped} were skipped and {len(errors)} had trouble.", "success")
                 if errors:
                     flash(f"Errors: {', '.join(errors[:5])}{'...' if len(errors) > 5 else ''}", "error")
                 
                 return redirect(url_for("lender_crm"))
             except Exception as e:
                 import traceback
-                flash(f"Error during import: {str(e)}", "error")
+                flash("We ran into trouble with that import. Please check your file and try again.", "error")
                 print(f"Import error: {traceback.format_exc()}")
                 return redirect(url_for("lender_crm_import"))
     
@@ -10187,7 +10187,7 @@ def lender_loans():
                 flash("Loan saved." + (" Your borrower has been invited to their portal." if borrower_email else ""), "success")
             except Exception as e:
                 print(f"[LOANS] save failed: {e}")
-                flash("Sorry, that loan could not be saved.", "error")
+                flash("We could not save that loan. Please try again.", "error")
         else:
             flash("Please enter the borrower's name.", "error")
 
@@ -10268,7 +10268,7 @@ def lender_marketing_hub(borrower_id):
     from database import get_lender_borrower
     borrower = get_lender_borrower(borrower_id, user["id"])
     if not borrower:
-        flash("Borrower not found.", "error")
+        flash("We could not find that borrower.", "error")
         return redirect(url_for("lender_crm"))
     
     # Get lender profile for branding
@@ -10301,7 +10301,7 @@ def lender_marketing_create(borrower_id):
     from database import get_lender_borrower
     borrower = get_lender_borrower(borrower_id, user["id"])
     if not borrower:
-        flash("Borrower not found.", "error")
+        flash("We could not find that borrower.", "error")
         return redirect(url_for("lender_crm"))
     
     # Get category and asset type from query params
@@ -10340,7 +10340,7 @@ def lender_marketing_generate(borrower_id):
     from database import get_lender_borrower
     borrower = get_lender_borrower(borrower_id, user["id"])
     if not borrower:
-        flash("Borrower not found.", "error")
+        flash("We could not find that borrower.", "error")
         return redirect(url_for("lender_crm"))
     
     try:
@@ -10425,7 +10425,7 @@ def lender_marketing_generate(borrower_id):
     except Exception as e:
         import traceback
         print(f"Error generating marketing asset: {traceback.format_exc()}")
-        flash(f"Error generating asset: {str(e)}", "error")
+        flash("We could not create that. Please try again in a moment.", "error")
         return redirect(url_for('lender_marketing_hub', borrower_id=borrower_id))
 
 
@@ -10556,12 +10556,12 @@ def lender_client_detail(homeowner_id):
     )
     
     if not can_access_homeowner(user["id"], "lender", homeowner_id):
-        flash("You don't have access to this client's data.", "error")
+        flash("That client is not connected to your account.", "error")
         return redirect(url_for("lender_clients"))
     
     homeowner = get_user_by_id(homeowner_id)
     if not homeowner or homeowner.get("role") != "homeowner":
-        flash("Client not found.", "error")
+        flash("We could not find that client.", "error")
         return redirect(url_for("lender_clients"))
     
     profile = get_homeowner_full_profile(homeowner_id)
@@ -10638,7 +10638,7 @@ def lender_referrals():
                 flash("New referral link created!", "success")
                 return redirect(url_for("lender_referrals"))
             except Exception as e:
-                flash(f"Error creating referral link: {str(e)}", "error")
+                flash("We could not create that referral link. Please try again in a moment.", "error")
         
         # Get all referral links for this lender
         referral_links = get_referral_links_for_lender(user["id"])
@@ -10684,7 +10684,7 @@ def lender_referrals():
         import traceback
         error_trace = traceback.format_exc()
         print(f"Error in lender_referrals: {error_trace}")
-        flash(f"Error loading referral page: {str(e)}", "error")
+        flash("We could not load your referral page. Please try again in a moment.", "error")
         return redirect(url_for("lender_dashboard"))
 
 
@@ -10745,12 +10745,12 @@ def lender_settings_profile():
                 fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
                 conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
             )
-            flash("Profile updated successfully!", "success")
+            flash("Profile updated!", "success")
             return redirect(url_for("lender_settings_profile"))
         except Exception as e:
             import traceback
             print(f"Error updating profile: {traceback.format_exc()}")
-            flash(f"Error updating profile: {str(e)}", "error")
+            flash("We could not update your profile. Please try again in a moment.", "error")
     
     # GET - load profile
     profile = get_user_profile(user["id"])
@@ -10935,7 +10935,7 @@ def homeowner_care_warranty_log():
     
     user = get_current_user()
     if not user:
-        flash("Please log in to access this page.", "warning")
+        flash("Please sign in to access this page.", "warning")
         return redirect(url_for("login"))
     
     if user.get("role") != "homeowner":
@@ -10950,9 +10950,9 @@ def homeowner_care_warranty_log():
         if request.form.get("delete_id"):
             item_id = int(request.form.get("delete_id"))
             if delete_warranty_log_item(item_id, homeowner_id):
-                flash("Warranty item deleted successfully.", "success")
+                flash("Warranty item deleted.", "success")
             else:
-                flash("Error deleting warranty item.", "error")
+                flash("We could not delete that warranty item. Please try again in a moment.", "error")
             return redirect(url_for("homeowner_care_warranty_log"))
         
         # Handle add new item
@@ -10960,7 +10960,7 @@ def homeowner_care_warranty_log():
         category = request.form.get("category", "").strip()
         
         if not item_name or not category:
-            flash("Item name and category are required.", "error")
+            flash("Please add an item name and a category.", "error")
             return redirect(url_for("homeowner_care_warranty_log"))
         
         purchase_date = request.form.get("purchase_date") or None
@@ -10982,12 +10982,12 @@ def homeowner_care_warranty_log():
                 warranty_number=warranty_number,
                 notes=notes
             )
-            flash("Warranty item added successfully!", "success")
+            flash("Warranty item added!", "success")
         except Exception as e:
             print(f"[WARRANTY LOG] Error adding item: {e}")
             import traceback
             traceback.print_exc()
-            flash(f"Error adding warranty item: {str(e)}", "error")
+            flash("We could not add that warranty item. Please try again in a moment.", "error")
         
         return redirect(url_for("homeowner_care_warranty_log"))
     
@@ -11029,7 +11029,7 @@ def homeowner_support_ask_question():
             flash("Question submitted! Your agent has been notified and will reply to you directly.", "success")
             return redirect(redirect_to)
         elif not question:
-            flash("Please enter your question.", "error")
+            flash("What would you like to ask? Type your question and we will pass it along.", "error")
         return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
     # GET: redirect to unified page
     return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
@@ -11278,7 +11278,7 @@ def admin_dashboard():
     
     user = _admin_session_user()
     if not user:
-        flash("Administrator access required", "error")
+        flash("That area is just for site administrators.", "error")
         return redirect(url_for('login', role='agent'))
     
     
@@ -11360,7 +11360,7 @@ def admin_impersonate_user(user_id):
     
     # Check permission
     if not has_permission(admin['id'], 'users.impersonate'):
-        flash("You don't have permission to impersonate users", "error")
+        flash("That option is just for site administrators.", "error")
         return redirect(url_for('admin_dashboard'))
     
     # Get target user
@@ -11371,7 +11371,7 @@ def admin_impersonate_user(user_id):
     conn.close()
     
     if not target_user:
-        flash("User not found", "error")
+        flash("We could not find that person.", "error")
         return redirect(url_for('admin_dashboard'))
     
     target_user = dict(target_user)
@@ -11435,7 +11435,7 @@ def admin_users_list():
     
     user = _admin_session_user()
     if not user or not has_permission(user['id'], 'users.view'):
-        flash("Access denied", "error")
+        flash("That page is not available to your account.", "error")
         return redirect(url_for('index'))
     
     conn = get_connection()
@@ -11459,7 +11459,7 @@ def admin_backup_download():
     """Admins can download a fresh snapshot of the database."""
     user = _admin_session_user()
     if not user:
-        flash("Access denied", "error")
+        flash("That page is not available to your account.", "error")
         return redirect(url_for("index"))
     path = backup_database()
     return send_file(path, as_attachment=True, download_name=path.name)
@@ -11473,7 +11473,7 @@ def admin_audit_logs():
     
     user = _admin_session_user()
     if not user or not has_permission(user['id'], 'security.view_audit'):
-        flash("Access denied", "error")
+        flash("That page is not available to your account.", "error")
         return redirect(url_for('index'))
     
     # Get filters from query params
@@ -11668,7 +11668,7 @@ def agent_concierge_settings():
              datetime.now().isoformat())
         )
         conn.commit()
-        flash("Concierge settings saved successfully!", "success")
+        flash("Concierge settings saved!", "success")
         return redirect(url_for('agent_concierge_settings'))
     
     # GET - load current settings
@@ -11718,9 +11718,9 @@ def agent_concierge_vendors():
                  address, service_area_zips, monthly_fee, is_exclusive, notes)
             )
             conn.commit()
-            flash(f"Vendor {name} added successfully!", "success")
+            flash(f"Vendor {name} added!", "success")
         else:
-            flash("Please fill in all required fields", "error")
+            flash("Please fill in the required fields so we can save this.", "error")
         
         return redirect(url_for('agent_concierge_vendors'))
     
@@ -12551,7 +12551,7 @@ def agent_contest_edit(cid):
         return redirect(url_for("login", role="agent"))
     contest = _get_db_contest(cid, user["id"])
     if not contest:
-        flash("Contest not found.", "error")
+        flash("We could not find that contest.", "error")
         return redirect(url_for("agent_contests"))
     if request.method == "POST":
         conn = get_db_connection()
@@ -12602,7 +12602,7 @@ def agent_contest_send_invites(cid):
         return redirect(url_for("login", role="agent"))
     contest = _get_db_contest(cid, user["id"])
     if not contest:
-        flash("Contest not found.", "error")
+        flash("We could not find that contest.", "error")
         return redirect(url_for("agent_contests"))
     count = _send_contest_invites_for(contest, user)
     flash(f" Invites sent to {count} clients!", "success")

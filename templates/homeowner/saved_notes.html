@@ -868,7 +868,7 @@
  
  if (!boardNameStr) {
  console.error('[DELETE] No board name provided');
- alert('Error: Board name is missing.');
+ alert('Please give your board a name first.');
  return false;
  }
  
@@ -925,7 +925,7 @@
  return false;
  } catch (error) {
  console.error('[DELETE] Error creating form:', error);
- alert('Error deleting board. Please try refreshing the page and try again.');
+ alert('We could not delete that board. Please refresh the page and try again.');
  return false;
  }
  }
@@ -1343,7 +1343,7 @@
  if (boardName) {
  deleteBoard(boardName);
  } else {
- alert('Error: Could not find board name.');
+ alert('Please give your board a name first.');
  }
  return false;
  });
