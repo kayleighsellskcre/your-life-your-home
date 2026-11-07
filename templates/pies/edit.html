@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ 'New pie event' if is_new else 'Edit pie event' }}{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+<div class="pie-wrap">
+  <p class="pie-kicker"><a href="{{ url_for('pies.manage_list') }}" style="color:inherit;">Holiday pie pickup</a></p>
+  <h1 class="pie-h1">{{ 'Create a pie event' if is_new else 'Edit your pie event' }}</h1>
+  <p class="pie-sub">Fill in what you know. You can change anything later, and your link stays the same.</p>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
+
+  <form method="post" enctype="multipart/form-data">
+    <div class="pie-card">
+      <h2>The basics</h2>
+      <label class="pie-label" for="title">Event name</label>
+      <input class="pie-input" id="title" name="title" required maxlength="120" value="{{ ev.title or '' }}">
+      <label class="pie-label" for="message">Message to your clients <span class="pie-hint">(optional)</span></label>
+      <textarea id="message" name="message" rows="3" maxlength="1500" placeholder="Thank you for being part of my year. I'd love to bring you a homemade pie.">{{ ev.message or '' }}</textarea>
+      <div class="pie-row">
+        <div>
+          <label class="pie-label" for="order_by">Reply by <span class="pie-hint">(optional)</span></label>
+          <input class="pie-input" type="date" id="order_by" name="order_by" value="{{ ev.order_by or '' }}">
+        </div>
+        <div>
+          <label class="pie-label" for="price_note">Cost note <span class="pie-hint">(optional)</span></label>
+          <input class="pie-input" id="price_note" name="price_note" maxlength="200" placeholder="My gift to you" value="{{ ev.price_note or '' }}">
+        </div>
+      </div>
+    </div>
+
+    <div class="pie-card">
+      <h2>Pickup days, times and places</h2>
+      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Add each pickup separately. Set a limit if you can only hand out so many pies at that time.</p>
+      <div id="slots">
+        {% for s in (slots or [None]) %}
+        <div class="pie-slot-row">
+          <input type="hidden" name="slot_id" value="{{ s.id if s else '' }}">
+          <div><label>Day</label><input class="pie-input" type="date" name="slot_date" value="{{ s.slot_date if s else '' }}"></div>
+          <div><label>From</label><input class="pie-input" type="time" name="slot_start" value="{{ s.start_time if s else '' }}"></div>
+          <div><label>Until</label><input class="pie-input" type="time" name="slot_end" value="{{ s.end_time if s else '' }}"></div>
+          <div class="wide"><label>Location</label><input class="pie-input" name="slot_location" maxlength="200" placeholder="My office, 123 Main St" value="{{ s.location if s else '' }}"></div>
+          <div><label>Limit</label><input class="pie-input" type="number" min="1" name="slot_capacity" placeholder="None" value="{{ s.capacity if s and s.capacity else '' }}"></div>
+          <button type="button" class="pie-link danger" onclick="removeSlot(this)" aria-label="Remove this pickup">Remove</button>
+        </div>
+        {% endfor %}
+      </div>
+      <button type="button" class="pie-btn secondary small" onclick="addSlot()">Add another pickup</button>
+    </div>
+
+    <div class="pie-card">
+      <h2>Pies</h2>
+      <label class="pie-label" for="pie_types">Types of pie <span class="pie-hint">(one per line)</span></label>
+      <textarea id="pie_types" name="pie_types" rows="5" maxlength="1200">{{ ev.pie_types or '' }}</textarea>
+      <label class="pie-label" for="cant_make_prompt">What to say to someone who can't make the times</label>
+      <textarea id="cant_make_prompt" name="cant_make_prompt" rows="3" maxlength="500">{{ ev.cant_make_prompt or '' }}</textarea>
+    </div>
+
+    <div class="pie-card">
+      <h2>Your flyer <span class="pie-hint">(optional)</span></h2>
+      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Upload a flyer you already made (JPG or PNG) and clients will see it at the top of the sign-up page. You can also print a branded flyer from the event page after saving.</p>
+      {% if ev.flyer_image %}
+      <img src="{{ ev.flyer_image }}" alt="Your flyer" style="max-width:260px;border-radius:10px;display:block;margin-bottom:.6rem;">
+      <label style="font-size:.88rem;"><input type="checkbox" name="remove_flyer" value="1"> Remove this flyer</label>
+      {% endif %}
+      <input type="file" name="flyer" accept="image/*" style="margin-top:.5rem;">
+    </div>
+
+    <div class="pie-actions">
+      <button class="pie-btn" type="submit">Save event</button>
+      <a class="pie-link" href="{{ url_for('pies.manage_list') }}">Cancel</a>
+    </div>
+  </form>
+</div>
+<script>
+function addSlot() {
+  var wrap = document.getElementById('slots');
+  var row = wrap.querySelector('.pie-slot-row').cloneNode(true);
+  row.querySelectorAll('input').forEach(function (i) { i.value = ''; });
+  wrap.appendChild(row);
+}
+function removeSlot(btn) {
+  var wrap = document.getElementById('slots');
+  var row = btn.closest('.pie-slot-row');
+  if (wrap.querySelectorAll('.pie-slot-row').length > 1) { row.remove(); }
+  else { row.querySelectorAll('input').forEach(function (i) { i.value = ''; }); }
+}
+</script>
+{% endblock %}

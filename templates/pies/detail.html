@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ ev.title }}{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+<div class="pie-wrap">
+  <p class="pie-kicker"><a href="{{ url_for('pies.manage_list') }}" style="color:inherit;">Holiday pie pickup</a></p>
+  <h1 class="pie-h1">{{ ev.title }} <span class="pie-pill {{ 'grey' if closed else '' }}" style="vertical-align:middle;">{{ 'Closed' if closed else 'Open' }}</span></h1>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
+
+  <div class="pie-card">
+    <h2>Share your sign-up link</h2>
+    <div class="pie-copy">
+      <input class="pie-input" id="plink" readonly value="{{ public_url }}" onclick="this.select()">
+      <button type="button" class="pie-btn small" onclick="copyLink()" id="copybtn">Copy link</button>
+    </div>
+    <p class="pie-hint" style="margin:.6rem 0 0;">Paste it into a text, email or social post. Clients don't need an account.</p>
+    <div class="pie-actions">
+      <a class="pie-btn secondary small" href="{{ url_for('pies.flyer', event_id=ev.id) }}" target="_blank" rel="noopener">Print or save flyer</a>
+      <a class="pie-btn secondary small" href="{{ url_for('pies.edit_event', event_id=ev.id) }}">Edit event</a>
+      <a class="pie-btn secondary small" href="{{ url_for('pies.export_csv', event_id=ev.id) }}">Download list (CSV)</a>
+      <a class="pie-btn secondary small" href="{{ url_for('pies.public_event', token=ev.token) }}" target="_blank" rel="noopener">See what clients see</a>
+    </div>
+  </div>
+
+  <div class="pie-stats">
+    <div class="pie-stat"><b>{{ stats.pies }}</b><span>pies requested</span></div>
+    <div class="pie-stat"><b>{{ stats.pickup }}</b><span>picking up</span></div>
+    <div class="pie-stat"><b>{{ stats.cant_make }}</b><span>need another time</span></div>
+    <div class="pie-stat"><b>{{ stats.no }}</b><span>no thank you</span></div>
+    <div class="pie-stat"><b>{{ stats.picked_up }}</b><span>picked up</span></div>
+  </div>
+
+  {% if pie_totals or slots %}
+  <div class="pie-row" style="align-items:start;">
+    {% if pie_totals %}
+    <div class="pie-card" style="margin:0;">
+      <h2>Bake list</h2>
+      {% for k, v in pie_totals.items() %}<div style="display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid #EEF1E8;"><span>{{ k }}</span><b>{{ v }}</b></div>{% endfor %}
+    </div>
+    {% endif %}
+    {% if slots %}
+    <div class="pie-card" style="margin:0;">
+      <h2>Pickups</h2>
+      {% for s in slots %}<div style="padding:.3rem 0;border-bottom:1px solid #EEF1E8;font-size:.9rem;">{{ s.label }}<br><span class="pie-hint">{{ s.taken }} pie{{ '' if s.taken == 1 else 's' }}{% if s.capacity %} of {{ s.capacity }}{% endif %}</span></div>{% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="pie-card" id="responses" style="margin-top:1.1rem;">
+    <h2>Responses</h2>
+    {% if responses %}
+    <div class="pie-table-wrap">
+    <table class="pie-table">
+      <thead><tr><th>Name</th><th>Contact</th><th>Answer</th><th>Pie</th><th>Notes</th><th>Picked up</th></tr></thead>
+      <tbody>
+      {% for r in responses %}
+        <tr>
+          <td><strong>{{ r.name }}</strong></td>
+          <td>{% if r.phone %}{{ r.phone }}<br>{% endif %}{% if r.email %}<a href="mailto:{{ r.email }}">{{ r.email }}</a>{% endif %}</td>
+          <td>
+            {% if r.choice == 'pickup' %}<span class="pie-pill">Pickup</span><br>{{ r.slot_label }}
+            {% elif r.choice == 'cant_make' %}<span class="pie-pill warn">Needs another time</span>
+            {% else %}<span class="pie-pill grey">No thank you</span>{% endif %}
+          </td>
+          <td>{% if r.choice != 'no' %}{{ r.quantity }} &times; {{ r.pie_type or 'Any' }}{% endif %}</td>
+          <td style="max-width:260px;">{{ r.notes or '' }}</td>
+          <td>
+            {% if r.choice != 'no' %}
+            <form method="post" action="{{ url_for('pies.mark_picked_up', event_id=ev.id, response_id=r.id) }}">
+              <button class="pie-link" type="submit">{{ 'Yes. Undo' if r.picked_up else 'Mark picked up' }}</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p style="color:#55684F;margin:0;">No responses yet. Share your link to get started.</p>
+    {% endif %}
+  </div>
+
+  <div class="pie-card">
+    <h2>Flyer artwork</h2>
+    <p class="pie-hint" style="margin:-.3rem 0 .7rem;">Want a picture on your printed flyer? We can create warm holiday pie artwork for you with AI. Your name, logo and details are added automatically.</p>
+    {% if has_ai %}
+    <form method="post" action="{{ url_for('pies.ai_art', event_id=ev.id) }}" style="display:flex;gap:.6rem;flex-wrap:wrap;">
+      <input class="pie-input" name="style" maxlength="200" placeholder="Optional: e.g. pumpkin and apple pie, cozy autumn kitchen" style="flex:1;min-width:240px;">
+      <button class="pie-btn small" type="submit">{{ 'Create new artwork' if ev.art_image else 'Create artwork' }}</button>
+    </form>
+    {% if ev.art_image %}
+    <img src="{{ ev.art_image }}" alt="Flyer artwork" style="max-width:300px;border-radius:10px;display:block;margin-top:.8rem;">
+    <form method="post" action="{{ url_for('pies.ai_art', event_id=ev.id) }}"><input type="hidden" name="action" value="remove"><button class="pie-link" type="submit" style="margin-top:.4rem;">Remove artwork</button></form>
+    {% endif %}
+    {% else %}
+    <p class="pie-hint" style="margin:0;">AI artwork isn't switched on yet. You can still upload your own flyer or print the built-in one.</p>
+    {% endif %}
+  </div>
+
+  <div class="pie-actions" style="justify-content:space-between;">
+    <form method="post" action="{{ url_for('pies.toggle_event', event_id=ev.id) }}"><button class="pie-link" type="submit">{{ 'Reopen sign-ups' if not ev.is_active else 'Close sign-ups' }}</button></form>
+    <form method="post" action="{{ url_for('pies.delete_event', event_id=ev.id) }}" onsubmit="return confirm('Delete this event and all of its responses? This cannot be undone.');"><button class="pie-link danger" type="submit">Delete event</button></form>
+  </div>
+</div>
+<script>
+function copyLink() {
+  var i = document.getElementById('plink'); i.select();
+  try { navigator.clipboard.writeText(i.value); } catch (e) { document.execCommand('copy'); }
+  var b = document.getElementById('copybtn'); b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy link'; }, 1800);
+}
+</script>
+{% endblock %}

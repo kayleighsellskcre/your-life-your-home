@@ -13459,6 +13459,10 @@ Lender Data:
 
 
 # ---------------- DEVELOPMENT SERVER ----------------
+import pies as _pies
+_pies.init_app(app, get_current_user, _bg, send_reminder_email)
+
+
 if __name__ == "__main__":
     # Only runs when executing directly with Python (not with gunicorn)
     app.run(

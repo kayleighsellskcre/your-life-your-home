@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Thank you{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+<div class="pie-wrap narrow" style="text-align:center;">
+  <p class="pie-kicker">{{ ev.title }}</p>
+  <h1 class="pie-h1">
+    {% if answer.choice == 'no' %}Thank you for letting us know{% else %}Thank you{% if answer.name %}, {{ answer.name.split(' ')[0] }}{% endif %}!{% endif %}
+  </h1>
+  <div class="pie-card" style="text-align:left;">
+    {% if answer.choice == 'pickup' %}
+      <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
+      <p style="margin:0;color:#55684F;">Pickup: {{ answer.slot }}</p>
+      <p class="pie-hint" style="margin:.8rem 0 0;">We've emailed you a confirmation. Need to change something? Fill the form out again with the same email.</p>
+    {% elif answer.choice == 'cant_make' %}
+      <p style="margin:0;">We got your note and {{ brand.name.split(' ')[0] if brand.name else 'your host' }} will be in touch to arrange a time that works.</p>
+    {% elif answer.choice == 'no' %}
+      <p style="margin:0;">No pie this year, no problem. Happy holidays from all of us.</p>
+    {% else %}
+      <p style="margin:0;">Your answer has been received.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

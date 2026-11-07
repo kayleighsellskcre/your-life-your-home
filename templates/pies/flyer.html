@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ ev.title }} flyer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #E9E5DC; font-family: 'Lato', Arial, sans-serif; color: #364A2B; }
+  .bar { max-width: 8.5in; margin: 1rem auto 0; padding: 0 .5rem; display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
+  .bar button, .bar a { padding: .6rem 1.1rem; border-radius: 10px; border: 1px solid #5E6E4A; background: #364A2B; color: #fff; font: 700 .9rem 'Lato', Arial, sans-serif; cursor: pointer; text-decoration: none; }
+  .bar a { background: #fff; color: #364A2B; }
+  .bar span { font-size: .85rem; color: #55684F; }
+  .sheet { width: 8.5in; min-height: 11in; margin: 1rem auto 2rem; background: #F4F8F0; position: relative; overflow: hidden; box-shadow: 0 6px 30px rgba(0,0,0,.15); display: flex; flex-direction: column; }
+  .art { height: 3.6in; background: #E4EBD8 center/cover no-repeat; position: relative; }
+  .art.empty { background: linear-gradient(135deg, #E4EBD8, #D2DEC0); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-size: 8rem; color: rgba(54,74,43,.4); }
+  .body { padding: .45in .6in .3in; flex: 1; }
+  .kicker { text-transform: uppercase; letter-spacing: .22em; font-size: .8rem; font-weight: 700; color: #55684F; margin: 0 0 .15in; text-align: center; }
+  h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 3rem; line-height: 1.1; margin: 0 0 .15in; text-align: center; color: #364A2B; }
+  .msg { text-align: center; font-size: 1.08rem; line-height: 1.55; color: #3d4f35; margin: 0 auto .28in; max-width: 6in; white-space: pre-line; }
+  .cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: .35in; margin-bottom: .25in; }
+  h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; margin: 0 0 .1in; border-bottom: 2px solid #C8B497; padding-bottom: .05in; }
+  .slot { margin: 0 0 .09in; font-size: 1rem; line-height: 1.35; }
+  .slot b { display: block; }
+  ul { margin: 0; padding-left: 1.1rem; font-size: 1rem; line-height: 1.7; }
+  .cta { display: flex; align-items: center; gap: .3in; background: #fff; border: 1px solid rgba(94,110,74,.25); border-radius: 14px; padding: .2in .3in; }
+  .cta img.qr { width: 1.35in; height: 1.35in; }
+  .cta b { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; display: block; margin-bottom: .05in; }
+  .cta .url { font-size: .82rem; word-break: break-all; color: #55684F; margin-top: .06in; }
+  .cta .by { font-size: .95rem; color: #3d4f35; }
+  .foot { background: #364A2B; color: #fff; padding: .22in .6in; display: flex; align-items: center; gap: .22in; }
+  .foot img.avatar { width: .8in; height: .8in; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
+  .foot .who b { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; display: block; }
+  .foot .who span { font-size: .95rem; opacity: .92; display: block; }
+  .foot img.logo { margin-left: auto; max-height: .75in; max-width: 1.8in; object-fit: contain; background: #fff; border-radius: 8px; padding: .06in .1in; }
+  @media print {
+    body { background: #fff; }
+    .bar { display: none; }
+    .sheet { margin: 0; box-shadow: none; width: 100%; height: 11in; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+  @media (max-width: 8.6in) { .sheet { width: 100%; } .cols { grid-template-columns: 1fr; } h1 { font-size: 2.2rem; } .body { padding: .3in .25in; } .foot { padding: .2in .25in; flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <button type="button" onclick="window.print()">Print or save as PDF</button>
+  <a href="{{ url_for('pies.event_detail', event_id=ev.id) }}">Back to event</a>
+  <span>In the print window, choose "Save as PDF" to get a file you can text or post.</span>
+</div>
+<div class="sheet">
+  {% if ev.art_image or ev.flyer_image %}<div class="art" style="background-image:url('{{ ev.art_image or ev.flyer_image }}')"></div>
+  {% else %}<div class="art empty" aria-hidden="true">&#129383;</div>{% endif %}
+  <div class="body">
+    <p class="kicker">{{ brand.brokerage or 'With gratitude' }}</p>
+    <h1>{{ ev.title }}</h1>
+    {% if ev.message %}<p class="msg">{{ ev.message }}</p>{% endif %}
+    <div class="cols">
+      <div>
+        <h2>Pickup</h2>
+        {% for s in slots %}
+        <p class="slot"><b>{{ s.slot_date|pie_date }}{% if s.start_time %}, {{ s.start_time|pie_time }}{% if s.end_time %} to {{ s.end_time|pie_time }}{% endif %}{% endif %}</b>{{ s.location }}</p>
+        {% else %}<p class="slot">Details coming soon.</p>{% endfor %}
+      </div>
+      {% if pies %}
+      <div>
+        <h2>Pies</h2>
+        <ul>{% for p in pies %}<li>{{ p }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+    </div>
+    <div class="cta">
+      {% if qr %}<img class="qr" src="{{ qr }}" alt="QR code to sign up">{% endif %}
+      <div>
+        <b>Reserve your pie</b>
+        <div class="by">Scan with your phone camera, or visit the link below.{% if ev.order_by %} Please reply by {{ ev.order_by|pie_date }}.{% endif %}{% if ev.price_note %} {{ ev.price_note }}.{% endif %}</div>
+        <div class="url">{{ public_url }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="foot">
+    {% set photo = get_professional_photo_url(brand.photo) if brand.photo else None %}
+    {% if photo %}<img class="avatar" src="{{ photo }}" alt="">{% endif %}
+    <div class="who"><b>{{ brand.name }}</b>{% if brand.brokerage %}<span>{{ brand.brokerage }}</span>{% endif %}{% if brand.phone %}<span>{{ brand.phone }}</span>{% endif %}</div>
+    {% if brand.logo %}<img class="logo" src="{{ brand.logo }}" alt="">{% endif %}
+  </div>
+</div>
+</body>
+</html>
