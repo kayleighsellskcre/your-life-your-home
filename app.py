@@ -2572,6 +2572,24 @@ def referral_landing(referral_code):
     )
 
 
+def _hero_photos():
+    """Landing-page hero images: static/img/hero-1.jpg, hero-2.jpg, ... (any of jpg/jpeg/webp/png).
+    A single legacy hero-home.* file still works. Drop in or remove files to change the slideshow."""
+    img_dir = BASE_DIR / "static" / "img"
+    found = []
+    for n in range(1, 11):
+        for e in ("jpg", "jpeg", "webp", "png"):
+            if (img_dir / f"hero-{n}.{e}").exists():
+                found.append(f"img/hero-{n}.{e}")
+                break
+    if not found:
+        for e in ("jpg", "jpeg", "webp", "png"):
+            if (img_dir / f"hero-home.{e}").exists():
+                found.append(f"img/hero-home.{e}")
+                break
+    return found
+
+
 @app.route("/")
 def index():
     """
@@ -2594,8 +2612,7 @@ def index():
         "main/index.html",
         brand_name=FRONT_BRAND_NAME,
         cloud_cma_url=CLOUD_CMA_URL,
-        hero_photo=next((f"img/hero-home.{e}" for e in ("jpg", "jpeg", "webp", "png")
-                         if (BASE_DIR / "static" / "img" / f"hero-home.{e}").exists()), None),
+        hero_photos=_hero_photos(),
     )
 
 
