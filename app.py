@@ -1332,32 +1332,22 @@ def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referr
         from flask import request
         base_url = request.url_root.rstrip('/') if hasattr(request, 'url_root') else 'https://itsyourlifeyourhome.com'
         
-        subject = f" New Lead: {homeowner_name} signed up!"
+        subject = f"Good news: {homeowner_name} just signed up!"
         
-        body = f"""New Lead Notification
+        body = f"""Hi {agent_name.split(' ')[0]},
 
-A new homeowner has signed up and been added to your CRM!
+Good news! {homeowner_name} just signed up through your link and is now in your CRM as a new contact.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Name: {homeowner_name}
+Email: {homeowner_email}
+Signed up: {signup_timestamp or 'Just now'}
+How they found you: {referral_token if referral_token and referral_token != 'default' else 'Your main sign-up link'}
 
-LEAD INFORMATION:
-- Name: {homeowner_name}
-- Email: {homeowner_email}
-- Signup Date: {signup_timestamp or 'Just now'}
-
-REFERRAL SOURCE:
-- Referral Token: {referral_token if referral_token and referral_token != 'default' else 'Default Assignment'}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-This lead has been automatically added to your CRM with stage "new".
-
-You can view and manage this contact in your CRM dashboard:
+A quick, friendly hello while you are fresh in their mind goes a long way. You can see them here:
 {base_url}/agent/crm
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-This is an automated notification from Your Life - Your Home.
+Cheering you on,
+Your Life, Your Home
 """
         
         # Send the email
@@ -1508,6 +1498,22 @@ def get_anniversary_contacts():
     return contacts
 
 
+def _pro_names(professional_id):
+    """(full name, first name) of the agent or lender an automated email is sent on behalf of."""
+    name = ""
+    try:
+        from database import get_user_by_id
+        row = get_user_by_id(professional_id) if professional_id else None
+        name = (dict(row).get("name") or "") if row else ""
+    except Exception:
+        pass
+    return (name or "Your Life, Your Home"), ((name or "").split(" ")[0] or "your friends at Your Life, Your Home")
+
+
+def _first(name):
+    return (name or "").strip().split(" ")[0] or "there"
+
+
 def send_birthday_emails():
     """Send birthday emails to contacts."""
     if not EMAIL_USER or not EMAIL_PASS:
@@ -1515,15 +1521,14 @@ def send_birthday_emails():
     
     contacts = get_birthday_contacts()
     for contact in contacts:
-        subject = f" Happy Birthday, {contact['name']}!"
-        body = f"""Hi {contact['name']},
+        pro_full, pro_first = _pro_names(contact.get('professional_id'))
+        subject = f"Happy birthday, {_first(contact['name'])}!"
+        body = f"""Hi {_first(contact['name'])},
 
-Wishing you a wonderful birthday filled with joy and happiness!
+Happy birthday! I hope your day is full of people you love and something delicious. I feel lucky to know you.
 
-Thank you for being part of our community.
-
-Best regards,
-Your Life, Your Home Team
+With warmth,
+{pro_full}
 """
         if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
@@ -1540,15 +1545,16 @@ def send_anniversary_emails():
     contacts = get_anniversary_contacts()
     for contact in contacts:
         property_info = f" at {contact.get('property_address', 'your home')}" if contact.get('property_address') else ""
-        subject = f" Happy Home Anniversary, {contact['name']}!"
-        body = f"""Hi {contact['name']},
+        pro_full, pro_first = _pro_names(contact.get('professional_id'))
+        subject = f"Happy home anniversary, {_first(contact['name'])}!"
+        body = f"""Hi {_first(contact['name'])},
 
-Congratulations on your home anniversary{property_info}!
+Happy home anniversary{property_info}! I hope your home has been filling your days with good memories. I am so glad I got to be part of your story.
 
-We hope you're enjoying your home and creating wonderful memories.
+If you ever have a question about your home or what it is worth, I would love to help.
 
-Best regards,
-Your Life, Your Home Team
+Warmly,
+{pro_full}
 """
         if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
@@ -1653,17 +1659,18 @@ def send_seasonal_checklists():
     
     # Send to all contacts (only once per season - you may want to track this)
     for contact in contacts:
-        subject = f" {season} Home Maintenance Checklist"
-        body = f"""Hi {contact['name']},
+        pro_full, pro_first = _pro_names(contact.get('professional_id'))
+        subject = f"Your {season.lower()} home care list"
+        body = f"""Hi {_first(contact['name'])},
 
-Here's your {season.lower()} home maintenance checklist to keep your home in great shape:
+I put together a few things to help you care for your home this {season.lower()}. There is no need to do it all, just pick what feels helpful:
 
 {checklist}
 
-Stay safe and enjoy the season!
+I am thinking of you and your home. Reach out anytime if I can help with anything.
 
-Best regards,
-Your Life, Your Home Team
+Warmly,
+{pro_full}
 """
         if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
@@ -1757,19 +1764,20 @@ def send_equity_updates():
     for contact in contacts:
         equity = contact.get('equity_estimate', 0)
         property_val = contact.get('property_value', 0)
-        subject = f" Your Home Equity Update - {today.strftime('%B %Y')}"
-        body = f"""Hi {contact['name']},
+        pro_full, pro_first = _pro_names(contact.get('professional_id'))
+        subject = f"Your home equity update for {today.strftime('%B %Y')}"
+        body = f"""Hi {_first(contact['name'])},
 
-Here's your monthly equity update:
+Here is a quick look at where your home stands this month:
 
-Property: {contact.get('property_address', 'Your Home')}
-Estimated Value: ${property_val:,.0f}
-Estimated Equity: ${equity:,.0f}
+Home: {contact.get('property_address', 'Your home')}
+Estimated value: ${property_val:,.0f}
+Estimated equity: ${equity:,.0f}
 
-Your home equity continues to grow! This represents significant wealth you've built.
+These are estimates, but they are a nice reminder of how much you have built. I am proud of you. If you would like to talk it through, I am just a call or message away.
 
-Best regards,
-Your Life, Your Home Team
+Warmly,
+{pro_full}
 """
         if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
@@ -1838,15 +1846,14 @@ def send_holiday_greetings():
     conn.close()
     
     for contact in contacts:
-        subject = f" {holiday}, {contact['name']}!"
-        body = f"""Hi {contact['name']},
+        pro_full, pro_first = _pro_names(contact.get('professional_id'))
+        subject = f"{holiday}, {_first(contact['name'])}!"
+        body = f"""Hi {_first(contact['name'])},
 
-{holiday}! We hope you have a wonderful celebration with family and friends.
+{holiday}! I am wishing you and your family a warm and wonderful celebration. Thank you for letting me be part of your journey.
 
-Thank you for being part of our community.
-
-Best regards,
-Your Life, Your Home Team
+Warmly,
+{pro_full}
 """
         if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
             log_automated_email(
@@ -2114,9 +2121,11 @@ def _send_verification_email(user_id, email, background=False):
         sender = (lambda *a: _bg(send_reminder_email, *a)) if background else send_reminder_email
         return sender(
             email,
-            "Confirm your email for Your Life, Your Home",
-            "Welcome! Please confirm your email address by opening this link:\n\n"
-            f"{link}\n\nThe link works for 3 days. If you didn't create an account, ignore this email.",
+            "Welcome! Please confirm your email",
+            "Welcome to Your Life, Your Home. We are so glad you are here!\n\n"
+            "Please confirm your email address by opening this link:\n\n"
+            f"{link}\n\nThe link works for 3 days. If you did not sign up, you can safely ignore this message and nothing will change.\n\n"
+            "Warmly,\nYour Life, Your Home",
         )
     except Exception as e:
         print(f"[VERIFY] send failed: {e}")
@@ -3413,10 +3422,10 @@ def forgot_password():
                     _bg(
                         send_reminder_email,
                         email,
-                        "Reset your Your Life, Your Home password",
-                        "We received a request to reset your password.\n\n"
-                        f"Use this link within 1 hour:\n{link}\n\n"
-                        "If you didn't ask for this, you can safely ignore this email.",
+                        "Reset your password",
+                        "Hi there,\n\nNo worries, it happens to all of us. Here is your link to choose a new password:\n\n"
+                        f"{link}\n\nIt works for 1 hour. If you did not ask for this, you can ignore this email and your password will stay just as it is.\n\n"
+                        "Take care,\nYour Life, Your Home",
                     )
             except Exception as e:
                 print(f"FORGOT PASSWORD ERROR: {e}")
@@ -12461,8 +12470,8 @@ def lead_intake_webhook(agent_token):
             if _agent:
                 send_reminder_email(
                     _agent["email"],
-                    f"New lead: {name or email}",
-                    f"A new lead just came in from your website.\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nSource: {source}\nMessage: {message}\n\nLog in to your CRM to follow up."
+                    f"Good news: {name or email} wants to connect",
+                    f"Good news, a new lead just came in from your website.\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nSource: {source}\nTheir message: {message}\n\nA quick, friendly reply goes a long way. You can follow up from your CRM."
                 )
         except Exception:
             pass

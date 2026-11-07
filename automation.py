@@ -128,11 +128,12 @@ def notify_stage_change(tx_id, new_stage, send_email, base_url):
         client_email = (tx.get("client_email") or "").strip()
         if client_email:
             body = (
-                f"Hi {tx.get('client_name') or 'there'},\n\n"
-                f"Quick update on {addr}: it is now \"{label}\".\n"
+                f"Hi {(tx.get('client_name') or 'there').split(' ')[0]},\n\n"
+                f"I wanted you to hear this from me: {addr} is now \"{label}\".\n"
                 f"{STAGE_BLURBS.get(new_stage, '')}\n\n"
                 f"{agent_line}\n"
-                f"Track everything in your dashboard: {base_url}/homeowner\n"
+                f"You can follow along anytime here: {base_url}/homeowner\n\n"
+                f"Warmly,\n{agent.get('name') or 'Your Life, Your Home'}\n"
             )
             if new_stage == "closed" and not tx.get("homeowner_user_id"):
                 body += f"\nCreate your free homeowner account to track your home's value and care: {_signup_link(base_url, tx.get('agent_id'))}\n"
@@ -140,10 +141,11 @@ def notify_stage_change(tx_id, new_stage, send_email, base_url):
                 sent.append(client_email)
         if lender and lender.get("email"):
             body = (
-                f"Hi {lender.get('name') or 'there'},\n\n"
-                f"{tx.get('client_name') or 'Your client'}'s transaction at {addr} moved to \"{label}\".\n"
+                f"Hi {(lender.get('name') or 'there').split(' ')[0]},\n\n"
+                f"A quick heads up: {tx.get('client_name') or 'your client'}'s transaction at {addr} just moved to \"{label}\".\n"
                 f"{agent_line}\n"
-                f"Open your dashboard: {base_url}/lender\n"
+                f"You can see the details here: {base_url}/lender\n\n"
+                f"Thank you for taking such good care of them.\n"
             )
             if send_email(lender["email"], f"Client update: {addr} is now {label}", body, **_via(agent)):
                 sent.append(lender["email"])
@@ -213,11 +215,11 @@ def route_homeowner_question(user_id, topic, question, send_email, base_url):
             if not pro.get("email"):
                 continue
             body = (
-                f"{home.get('name') or 'A homeowner'} sent you a question through Your Life, Your Home.\n\n"
-                f"Topic: {topic or 'General'}\n\n{question}\n\n"
-                f"Reply to them directly: {home.get('email')}"
+                f"{home.get('name') or 'A homeowner'} just reached out to you through Your Life, Your Home and would love to hear back.\n\n"
+                f"Topic: {topic or 'General'}\n\n\"{question}\"\n\n"
+                f"You can reply to them directly at {home.get('email')}"
                 + (f" or {home.get('phone')}" if home.get("phone") else "")
-                + f"\nOpen your dashboard: {base_url}/{kind}\n"
+                + f".\nYour dashboard is here too: {base_url}/{kind}\n"
             )
             if send_email(pro["email"], f"Question from {home.get('name') or 'a homeowner'}: {topic or 'General'}", body, **_via(home)):
                 sent.append(pro["email"])
@@ -251,12 +253,13 @@ def invite_client_if_needed(tx_id, send_email, base_url):
             conn.close()
         link = _signup_link(base_url, tx.get("agent_id"))
         body = (
-            f"Hi {tx.get('client_name') or 'there'},\n\n"
-            f"{agent.get('name') or 'Your agent'} set up a free homeowner portal for you on Your Life, Your Home. "
-            f"Track {tx.get('property_address') or 'your transaction'} step by step, keep your documents in one place, "
+            f"Hi {(tx.get('client_name') or 'there').split(' ')[0]},\n\n"
+            f"{agent.get('name') or 'Your agent'} has set up a free home portal just for you. It is a calm place to follow "
+            f"{tx.get('property_address') or 'your transaction'} step by step, keep your documents together, "
             f"and watch your home's value and equity after closing.\n\n"
             f"Create your account here: {link}\n\n"
-            f"Use this email address ({email}) so everything connects automatically."
+            f"Please use this email address ({email}) so everything connects for you automatically.\n\n"
+            f"We are so glad you are here.\n\nWarmly,\n{agent.get('name') or 'Your Life, Your Home'}"
         )
         ok = send_email(email, f"{agent.get('name') or 'Your agent'} invited you to your home portal", body, **_via(agent))
         _log(f"invited {email} for transaction {tx_id}: {ok}")
@@ -336,11 +339,12 @@ def on_loan_created(lender_id, borrower_name, borrower_email, send_email, base_u
             conn.close()
         link = _lender_signup_link(base_url, lender_id)
         body = (
-            f"Hi {borrower_name or 'there'},\n\n"
-            f"{lender.get('name') or 'Your lender'} set up a free homeowner portal for you on Your Life, Your Home. "
-            f"Follow your loan, keep your documents in one place, and watch your home's value and equity.\n\n"
+            f"Hi {(borrower_name or 'there').split(' ')[0]},\n\n"
+            f"{lender.get('name') or 'Your lender'} has set up a free home portal just for you. It is a calm place to follow "
+            f"your loan, keep your documents together, and watch your home's value and equity.\n\n"
             f"Create your account here: {link}\n\n"
-            f"Use this email address ({email}) so everything connects automatically."
+            f"Please use this email address ({email}) so everything connects for you automatically.\n\n"
+            f"We are so glad you are here.\n\nWarmly,\n{lender.get('name') or 'Your Life, Your Home'}"
         )
         send_email(email, f"{lender.get('name') or 'Your lender'} invited you to your home portal", body, **_via(lender))
         return "invited"
@@ -368,17 +372,19 @@ def notify_borrower_status(lender_id, borrower_name, borrower_email, new_status,
             record_account_event(acct["id"], "loan", f"Loan update: {label}", f"Your lender {lender.get('name') or ''} moved your loan to {label}.".replace("  ", " "))
         lender_line = f"Your lender: {lender.get('name', '')}" + (f" ({lender.get('email')})" if lender.get("email") else "")
         body = (
-            f"Hi {borrower_name or 'there'},\n\n"
-            f"Good news on your loan: it is now \"{label}\".\n\n{lender_line}\n"
-            f"Track everything in your portal: {base_url}/homeowner\n"
+            f"Hi {(borrower_name or 'there').split(' ')[0]},\n\n"
+            f"I have good news about your loan: it is now \"{label}\".\n\n{lender_line}\n"
+            f"You can follow along anytime in your portal: {base_url}/homeowner\n\n"
+            f"Warmly,\n{lender.get('name') or 'Your Life, Your Home'}\n"
         )
         if send_email(email, f"Loan update: {label}", body, **_via(lender)):
             sent.append(email)
         if agent and agent.get("email"):
             body = (
-                f"Hi {agent.get('name') or 'there'},\n\n"
-                f"{borrower_name or 'Your client'}'s loan with {lender.get('name') or 'their lender'} moved to \"{label}\".\n"
-                f"Open your dashboard: {base_url}/agent\n"
+                f"Hi {(agent.get('name') or 'there').split(' ')[0]},\n\n"
+                f"A quick heads up: {borrower_name or 'your client'}'s loan with {lender.get('name') or 'their lender'} just moved to \"{label}\".\n"
+                f"You can see the details here: {base_url}/agent\n\n"
+                f"Thank you for taking such good care of them.\n"
             )
             if send_email(agent["email"], f"Client loan update: {borrower_name} is now {label}", body, **_via(lender)):
                 sent.append(agent["email"])
@@ -594,11 +600,13 @@ def send_daily_digests(send_email, base_url):
             d = build_digest(p["id"], p["role"])
             if not d["count"]:
                 continue
-            lines = [f"Good morning {(p.get('name') or '').split(' ')[0] or 'there'}, here is your day:", ""]
+            lines = [f"Good morning, {(p.get('name') or '').split(' ')[0] or 'friend'}. Here is what is waiting for you today:", ""]
             for title, items in d["sections"]:
                 lines.append(title.upper())
                 lines += [f"  - {i}" for i in items]
                 lines.append("")
+            lines.append("You are doing wonderful work. Wishing you a great day!")
+            lines.append("")
             lines.append(f"Open your dashboard: {base_url}/{p['role']}")
             lines.append(f"Stop these daily emails: {base_url}/digest/unsubscribe/{digest_unsubscribe_token(p['id'])}")
             if send_email(p["email"], f"Your day: {d['count']} things to know", "\n".join(lines)):
