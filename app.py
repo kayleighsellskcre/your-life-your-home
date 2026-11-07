@@ -2663,6 +2663,40 @@ def _server_error(e):
     return render_template("errors/500.html"), 500
 
 
+def _inviter_for_token(token):
+    """Who sent this invite link? Used to greet new homeowners with their agent/lender's name,
+    photo and brokerage. Returns None for missing/invalid/default tokens."""
+    if not token or token == "default":
+        return None
+    try:
+        from database import get_referral_link_by_token, get_user_by_id, get_user_profile
+        link = get_referral_link_by_token(token)
+        if not link:
+            return None
+        pro_id = link.get("agent_id") or link.get("lender_id")
+        role = "agent" if link.get("agent_id") else "lender"
+        user = get_user_by_id(pro_id) if pro_id else None
+        if not user:
+            return None
+        user = dict(user)
+        prof = get_user_profile(pro_id) or {}
+        prof = dict(prof) if not isinstance(prof, dict) else prof
+        bio = (prof.get("bio") or "").strip()
+        if len(bio) > 160:
+            bio = bio[:157].rsplit(" ", 1)[0] + "…"
+        return {
+            "name": user.get("name") or "",
+            "first_name": (user.get("name") or "").split(" ")[0],
+            "role": role,
+            "brokerage": prof.get("brokerage_name") or prof.get("team_name") or "",
+            "photo": prof.get("professional_photo") or "",
+            "bio": bio,
+        }
+    except Exception as exc:  # never break signup over a greeting
+        print(f"inviter lookup failed: {exc}")
+        return None
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     """
@@ -3168,7 +3202,8 @@ def signup():
         "auth/signup.html", 
         role=role, 
         brand_name=FRONT_BRAND_NAME,
-        referral_code=referral_token  # Keep for backward compatibility in template
+        referral_code=referral_token,  # Keep for backward compatibility in template
+        inviter=_inviter_for_token(referral_token) if role == "homeowner" else None,
     )
 
 
