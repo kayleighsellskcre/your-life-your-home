@@ -1095,7 +1095,7 @@
  <div style="color: var(--charcoal-brown); line-height: 1.6; white-space: pre-wrap; font-size: 0.95rem;">{{ note.details }}</div>
  {% endif %}
  {% if note.created_at %}
- <p style="font-size: 0.75rem; color: #999; margin-top: 1rem; margin-bottom: 0;">Added: {{ note.created_at }}</p>
+ <p style="font-size: 0.75rem; color: #6B6B66; margin-top: 1rem; margin-bottom: 0;">Added: {{ note.created_at }}</p>
  {% endif %}
  </div>
  {% endfor %}
@@ -1110,7 +1110,7 @@
  <div style="width: 90%; max-width: 600px; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: auto; max-height: 90vh; overflow-y: auto;">
  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
  <h2 style="margin: 0; font-size: 1.8rem; color: #3D2E24;">Edit Board</h2>
- <button onclick="closeEditModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+ <button onclick="closeEditModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #6B6B66; line-height: 1;">×</button>
  </div>
 
  <form method="post" action="{{ url_for('homeowner_saved_notes') }}" enctype="multipart/form-data" style="display: grid; gap: 1.5rem;">
@@ -1119,7 +1119,7 @@
 
  <div>
  <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B5B4D; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
- Board Title <span style="font-weight: 400; color: #999;">(optional)</span>
+ Board Title <span style="font-weight: 400; color: #6B6B66;">(optional)</span>
  </label>
  <input type="text" name="edit_title" value="{{ selected_board }}" placeholder="Board title..." style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px; font-size: 1rem;">
  </div>
@@ -1174,7 +1174,7 @@
 
  <div>
  <label style="display: block; font-size: 0.85rem; font-weight: 700; color: #6B5B4D; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.6rem;">
- Add More Fixtures/Furniture <span style="font-weight: 400; color: #999;">(backgrounds removed)</span>
+ Add More Fixtures/Furniture <span style="font-weight: 400; color: #6B6B66;">(backgrounds removed)</span>
  </label>
  <input type="file" name="new_fixtures" multiple accept="image/*" style="width: 100%; padding: 0.9rem; border: 2px solid #E5DDD0; border-radius: 8px;">
  </div>
@@ -1196,7 +1196,7 @@
  <div style="width: 90%; max-width: 500px; background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
  <h2 style="margin: 0; font-size: 1.8rem; color: #3D2E24;">Board Options</h2>
- <button onclick="closeOptionsMenu()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+ <button onclick="closeOptionsMenu()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #6B6B66; line-height: 1;">×</button>
  </div>
 
  <div style="display: grid; gap: 1rem;">
@@ -1772,7 +1772,7 @@
  <div style="width: 90%; max-width: 900px; background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.5); margin: auto; max-height: 95vh; display: flex; flex-direction: column;">
  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-shrink: 0;">
  <h2 style="margin: 0; font-size: 1.8rem; color: #3D2E24;"> Crop Photo</h2>
- <button onclick="closeCropModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #999; line-height: 1;">×</button>
+ <button onclick="closeCropModal()" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #6B6B66; line-height: 1;">×</button>
  </div>
 
  <div style="margin-bottom: 1.5rem; flex-shrink: 0;">

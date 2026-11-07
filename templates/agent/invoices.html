@@ -19,7 +19,7 @@
   gap: 0.75rem;
 }
 .inv-topbar__title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:400;color:#3D2E24;margin:0;}
-.inv-topbar__sub{font-size:.72rem;color:#9A9472;letter-spacing:.06em;text-transform:uppercase;margin-top:.15rem;}
+.inv-topbar__sub{font-size:.72rem;color:#6F6B4D;letter-spacing:.06em;text-transform:uppercase;margin-top:.15rem;}
 .inv-topbar__actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;}
 
 /* ── BUTTONS ── */
@@ -45,11 +45,11 @@
 .inv-stat{
  background:#fff;padding:.85rem 1.25rem;
 }
-.inv-stat__label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9A9472;margin-bottom:.3rem;}
+.inv-stat__label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6F6B4D;margin-bottom:.3rem;}
 .inv-stat__val{font-family:'Playfair Display',serif;font-size:1.35rem;color:#3D2E24;font-weight:400;}
 .inv-stat__val--green{color:#4A7C59;}
 .inv-stat__val--gold{color:#8B6914;}
-.inv-stat__val--muted{color:#9A9472;}
+.inv-stat__val--muted{color:#6F6B4D;}
 
 /* ── FILTER PILLS ── */
 .inv-pills{
@@ -76,7 +76,7 @@
 .inv-table{width:100%;border-collapse:collapse;background:#fff;min-width:720px;}
 .inv-table thead th{
  padding:.5rem .75rem;font-size:.6rem;font-weight:700;text-transform:uppercase;
- letter-spacing:.08em;color:#9A9472;background:#F5F0EB;
+ letter-spacing:.08em;color:#6F6B4D;background:#F5F0EB;
  border-bottom:1px solid rgba(200,180,151,.22);text-align:left;
 }
 .inv-table thead th:last-child{text-align:right;}
@@ -84,7 +84,7 @@
 .inv-table tbody tr:last-child{border-bottom:none;}
 .inv-table tbody tr:hover{background:#F5F0EB;}
 .inv-td{padding:.55rem .75rem;font-size:.78rem;color:#3D2E24;vertical-align:middle;}
-.inv-td--muted{color:#9A9472;}
+.inv-td--muted{color:#6F6B4D;}
 .inv-td--right{text-align:right;}
 .inv-td--bold{font-weight:700;}
 
@@ -99,7 +99,7 @@
 .s-badge--overdue {background:rgba(185,64,64,.12);color:#b94040;}
 
 /* ── EMPTY STATE ── */
-.inv-empty{text-align:center;padding:3.5rem 1.5rem;color:#9A9472;}
+.inv-empty{text-align:center;padding:3.5rem 1.5rem;color:#6F6B4D;}
 .inv-empty svg{opacity:.25;margin-bottom:1rem;}
 .inv-empty h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:400;color:#3D2E24;margin-bottom:.5rem;}
 .inv-empty p{font-size:.82rem;margin-bottom:1.25rem;}
@@ -189,7 +189,7 @@
  <td class="inv-td inv-td--bold"><a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" style="color:#6B5B4D;">{{ inv.invoice_number }}</a></td>
  <td class="inv-td">
  <div style="font-weight:600;">{{ inv.client_name or '-' }}</div>
- {% if inv.client_email %}<div style="font-size:.68rem;color:#9A9472;">{{ inv.client_email }}</div>{% endif %}
+ {% if inv.client_email %}<div style="font-size:.68rem;color:#6F6B4D;">{{ inv.client_email }}</div>{% endif %}
  </td>
  <td class="inv-td inv-td--muted">{{ inv.issue_date or '-' }}</td>
  <td class="inv-td inv-td--muted {% if inv.status == 'overdue' %}inv-td--bold{% endif %}" style="{% if inv.status == 'overdue' %}color:#b94040{% endif %}">{{ inv.due_date or '-' }}</td>

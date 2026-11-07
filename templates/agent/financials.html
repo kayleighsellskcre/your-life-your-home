@@ -84,12 +84,12 @@
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: rgba(107,91,77,.025); }
 .badge-paid      { background: #e8f5e9; color: #2e7d32; border-radius: 10px; padding: .15rem .5rem; font-size: .65rem; font-weight: 700; }
-.badge-projected { background: #fff8e1; color: #f57f17; border-radius: 10px; padding: .15rem .5rem; font-size: .65rem; font-weight: 700; }
+.badge-projected { background: #fff8e1; color: #9A5300; border-radius: 10px; padding: .15rem .5rem; font-size: .65rem; font-weight: 700; }
 .btn-del { background: none; border: none; color: #c0392b; font-size: .75rem; cursor: pointer; padding: .15rem .35rem; border-radius: 4px; }
 .btn-del:hover { background: rgba(192,57,43,.08); }
 .btn-paid { background: rgba(46,125,50,.1); border: none; color: #2e7d32; font-size: .7rem; font-weight: 600; cursor: pointer; padding: .15rem .5rem; border-radius: 5px; white-space: nowrap; }
 .btn-paid:hover { background: rgba(46,125,50,.2); }
-.empty-row td { text-align: center; color: #9e9e9e; padding: 1.25rem; font-style: italic; font-size: .78rem; }
+.empty-row td { text-align: center; color: #6B6B66; padding: 1.25rem; font-style: italic; font-size: .78rem; }
 .tx-link { font-size: .7rem; color: #6B5B4D; text-decoration: none; border-bottom: 1px solid rgba(107,91,77,.3); white-space: nowrap; }
 .tx-link:hover { color: #3D2E24; }
 
@@ -107,7 +107,7 @@
 .ai-insight .ai-ins-title { font-size: .8rem; font-weight: 700; color: #3D2E24; margin-bottom: .2rem; }
 .ai-insight .ai-ins-body  { font-size: .78rem; color: #6B5B4D; line-height: 1.45; }
 .ai-insight.positive { border-left: 3px solid #2e7d32; }
-.ai-insight.warning  { border-left: 3px solid #f57f17; }
+.ai-insight.warning  { border-left: 3px solid #9A5300; }
 .ai-insight.info     { border-left: 3px solid #1565c0; }
 .btn-ai { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.85); border-radius: 6px; padding: .35rem .75rem; font-size: .72rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: .35rem; transition: all .2s; }
 .btn-ai:hover { background: rgba(255,255,255,.18); color: white; }
@@ -257,7 +257,7 @@
             <td style="white-space:nowrap">{{ c.close_date or '-' }}</td>
             <td style="text-transform:capitalize">{{ c.transaction_side or '-' }}</td>
             <td>${{ "{:,.0f}".format(c.sale_price or 0) }}</td>
-            <td style="font-weight:600;color:{% if c.status == 'paid' %}#2e7d32{% else %}#f57f17{% endif %}">${{ "{:,.0f}".format(c.net_commission or 0) }}</td>
+            <td style="font-weight:600;color:{% if c.status == 'paid' %}#2e7d32{% else %}#9A5300{% endif %}">${{ "{:,.0f}".format(c.net_commission or 0) }}</td>
             <td>
               {% if c.status == 'paid' %}
               <span class="badge-paid">Paid</span>
@@ -512,7 +512,7 @@
         <div class="progress-bar-fill" style="width:{{ tx_pct }}%"></div>
       </div>
       {% else %}
-      <div style="text-align:center;color:#9e9e9e;font-size:.78rem;padding:1.25rem 0">
+      <div style="text-align:center;color:#6B6B66;font-size:.78rem;padding:1.25rem 0">
         No goals set for {{ year }} yet.<br>
         <button class="add-form-toggle" onclick="toggle('edit-goals')" style="margin-top:.5rem">Set Goals</button>
       </div>
@@ -544,7 +544,7 @@
     </div>
     <div class="panel-body">
       <div id="coach-container" style="font-size:.82rem;color:#6B5B4D;line-height:1.55;min-height:2rem">
-        <span style="color:#9e9e9e;font-style:italic">Click "Get Coaching" for personalized financial tips based on your data.</span>
+        <span style="color:#6B6B66;font-style:italic">Click "Get Coaching" for personalized financial tips based on your data.</span>
       </div>
     </div>
   </div>
@@ -556,7 +556,7 @@
       {% if expense_by_cat %}
       <div class="chart-wrap" style="height:160px"><canvas id="expChart"></canvas></div>
       {% else %}
-      <div style="text-align:center;color:#9e9e9e;font-size:.78rem;padding:1rem 0">No expenses logged yet.</div>
+      <div style="text-align:center;color:#6B6B66;font-size:.78rem;padding:1rem 0">No expenses logged yet.</div>
       {% endif %}
     </div>
   </div>
@@ -692,7 +692,7 @@ function loadInsights() {
 function loadCoach() {
   var el = document.getElementById('coach-container');
   var btn = document.getElementById('coach-btn');
-  el.innerHTML = '<span style="color:#9e9e9e;font-size:.78rem">Generating coaching tips...</span>';
+  el.innerHTML = '<span style="color:#6B6B66;font-size:.78rem">Generating coaching tips...</span>';
   if (btn) btn.disabled = true;
   fetch('/api/ai/financials/agent-coach', {
     method: 'POST', headers: {'Content-Type':'application/json'},
@@ -701,7 +701,7 @@ function loadCoach() {
     el.innerHTML = (d.coach_response || 'No coaching available.').replace(/\n/g,'<br>');
     if (btn) btn.disabled = false;
   }).catch(function(){
-    el.innerHTML = '<span style="color:#9e9e9e;font-style:italic">Could not load coaching tips.</span>';
+    el.innerHTML = '<span style="color:#6B6B66;font-style:italic">Could not load coaching tips.</span>';
     if (btn) btn.disabled = false;
   });
 }

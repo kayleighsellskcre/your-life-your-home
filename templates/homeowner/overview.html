@@ -106,12 +106,12 @@
  My Active Transaction
  </div>
  <div style="font-size:1rem;font-weight:700;color:#3D2E24;margin-bottom:.25rem;">{{ tx.get('property_address',' - ') }}</div>
- <div style="font-size:.78rem;color:rgba(61,46,36,.6);margin-bottom:.8rem;">
+ <div style="font-size:.78rem;color:rgba(61, 46, 36, 0.78);margin-bottom:.8rem;">
  {% if tx.get('side') %}{{ tx.side | capitalize }}{% endif %}{% if tx.get('close_date') %} · Closing {{ tx.close_date }}{% endif %}
  </div>
  <!-- Progress bar -->
  <div style="margin-bottom:.7rem;">
- <div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(61,46,36,.45);margin-bottom:.3rem;">
+ <div style="display:flex;justify-content:space-between;font-size:.65rem;color:rgba(61, 46, 36, 0.78);margin-bottom:.3rem;">
  <span>Start</span>
  <span style="font-weight:700;color:{{ stage_colors.get(tx_stage,'#6B5B4D') }};">{{ stage_labels.get(tx_stage, tx_stage) }}</span>
  <span>Closed</span>

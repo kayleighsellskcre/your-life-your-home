@@ -34,7 +34,7 @@
 }
 .tx-bar__count {
  font-size: .7rem;
- color: #9A9472;
+ color: #6F6B4D;
  font-weight: 600;
  background: rgba(107,91,77,.1);
  border-radius: 10px;
@@ -83,7 +83,7 @@
 }
 .flash-item--success { background: #e8f5e9; color: #2e7d32; }
 .flash-item--error { background: #fdecea; color: #c62828; }
-.flash-item--warning { background: #fff8e1; color: #f57f17; }
+.flash-item--warning { background: #fff8e1; color: #9A5300; }
 .flash-item--info { background: #e3f2fd; color: #1565c0; }
 
 /* ─── Stage summary strip ─── */
@@ -160,7 +160,7 @@
  font-weight: 700;
  text-transform: uppercase;
  letter-spacing: .09em;
- color: #9A9472;
+ color: #6F6B4D;
  background: #F0EDE5;
  border-bottom: 1.5px solid rgba(107,91,77,.15);
  white-space: nowrap;
@@ -195,7 +195,7 @@
  color: #2c3320;
  max-width: 220px;
 }
-.tx-td--muted { color: #9A9472; }
+.tx-td--muted { color: #6F6B4D; }
 .tx-td--actions {
  text-align: right;
  padding-right: .75rem;
@@ -214,7 +214,7 @@
 }
 .stg--summary { background: rgba(200,180,151,.22); color: #5A4A3C; }
 .stg--showings { background: rgba(33,150,243,.12); color: #1565C0; }
-.stg--under_contract { background: rgba(255,152,0,.14); color: #E65100; }
+.stg--under_contract { background: rgba(255,152,0,.14); color: #B23C00; }
 .stg--earnest_money { background: rgba(156,39,176,.12); color: #6A1B9A; }
 .stg--inspection { background: rgba(244,67,54,.12); color: #B71C1C; }
 .stg--appraisal { background: rgba(0,150,136,.12); color: #00695C; }
@@ -233,7 +233,7 @@
  text-transform: uppercase;
 }
 .side-b--buyer { background: rgba(33,150,243,.12); color: #1565C0; }
-.side-b--seller { background: rgba(255,152,0,.14); color: #E65100; }
+.side-b--seller { background: rgba(255,152,0,.14); color: #B23C00; }
 .side-b--both { background: rgba(156,39,176,.12); color: #6A1B9A; }
 
 /* ─── Action buttons ─── */
@@ -270,7 +270,7 @@
 .tx-empty {
  text-align: center;
  padding: 3rem 1rem;
- color: #9A9472;
+ color: #6F6B4D;
 }
 .tx-empty p { font-size: .875rem; margin: .5rem 0 1.25rem; }
 
@@ -392,7 +392,7 @@
  <h1 class="ylh-page-hd__title">Transactions</h1>
  <p class="ylh-page-hd__sub">All active and recent deals, organized by stage</p>
  <div class="ylh-page-hd__actions">
- <span style="font-size:.78rem;color:#9A9472;font-weight:600;background:rgba(107,91,77,.1);border-radius:10px;padding:.2rem .7rem;">{{ transactions|length if transactions else 0 }} deals</span>
+ <span style="font-size:.78rem;color:#6F6B4D;font-weight:600;background:rgba(107,91,77,.1);border-radius:10px;padding:.2rem .7rem;">{{ transactions|length if transactions else 0 }} deals</span>
  <a href="{{ url_for('agent_crm') }}?add=1" class="t-btn" style="height:36px;padding:0 1.35rem;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;background:#fff;color:#5C7050;border:1.5px solid rgba(143,168,138,.4);border-radius:999px;box-shadow:0 1px 4px rgba(44,58,40,.06);white-space:nowrap;min-height:unset;width:auto;margin:0;">+ Add Client to CRM</a>
  <button class="t-btn t-btn--solid" style="height:36px;padding:0 1.35rem;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;min-height:unset;width:auto;margin:0;white-space:nowrap;" onclick="openAddTx()">+ New Transaction</button>
  </div>
@@ -530,11 +530,11 @@
  <input type="text" name="client_name" required placeholder="Jane Doe" value="{{ contact_info.name if contact_info else '' }}">
  </div>
  <div class="txf">
- <label>Client Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(connects their portal)</span></label>
+ <label>Client Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(connects their portal)</span></label>
  <input type="email" name="client_email" placeholder="jane@email.com" value="{{ contact_info.email if contact_info else '' }}">
  </div>
  <div class="txf">
- <label>Lender Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(optional, shares the deal)</span></label>
+ <label>Lender Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(optional, shares the deal)</span></label>
  <input type="email" name="lender_email" placeholder="lender@email.com">
  </div>
  <div class="txf">
@@ -560,7 +560,7 @@
  </select>
  </div>
  <div class="txf">
- <label>Target Close Date <span style="font-weight:400;text-transform:none;font-size:.65em;color:#9A9472;">(optional)</span></label>
+ <label>Target Close Date <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(optional)</span></label>
  <input type="date" name="close_date">
  </div>
  </div>

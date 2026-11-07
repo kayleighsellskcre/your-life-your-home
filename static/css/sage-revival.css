@@ -34,8 +34,8 @@
   --header-bg:        linear-gradient(160deg, #364A2B 0%, #2A3C20 100%);
 
   /* Olive aliases (old templates reference these) */
-  --olive-green:        #8C9E78;
-  --olive-green-dark:   #5E6E4A;
+  --olive-green:        #5E6E4A;
+  --olive-green-dark:   #3F5130;
   --olive-green-light:  #B8C9A2;
 }
 
@@ -228,8 +228,10 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 /* ══════════════════════════════════════════════════════════════
    LINKS — warm sage
    ══════════════════════════════════════════════════════════════ */
-a { color: #8C9E78 !important; }
-a:hover { color: #5E6E4A !important; }
+/* Plain links: sage-dark (5.6:1 on white). :where() keeps specificity at zero and no !important,
+   so buttons that are links keep the colours they set themselves. */
+:where(a) { color: #5E6E4A; }
+:where(a):hover { color: #364A2B; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -322,7 +324,7 @@ a:hover { color: #5E6E4A !important; }
 /* ══════════════════════════════════════════════════════════════
    MISC OLIVE ALIASES
    ══════════════════════════════════════════════════════════════ */
-.text-olive   { color: #8C9E78 !important; }
+.text-olive   { color: #5E6E4A !important; }
 .bg-olive     { background: #8C9E78 !important; }
 .border-olive { border-color: rgba(140,158,120,0.4) !important; }
 
@@ -350,11 +352,11 @@ a:hover { color: #5E6E4A !important; }
 }
 [style*="color: #6B5B4D"],
 [style*="color:#6B5B4D"] {
-  color: #8C9E78 !important;
+  color: #5E6E4A !important;
 }
 [style*="background: #6B5B4D"],
 [style*="background:#6B5B4D"] {
-  background: #8C9E78 !important;
+  background: #5E6E4A !important;
 }
 
 .agent-sub-nav .active,
@@ -380,7 +382,7 @@ a:hover { color: #5E6E4A !important; }
     rgba(255,255,255,0.4) 100%) !important;
   border-color: rgba(140,158,120,0.22) !important;
 }
-.ylh-hero__eyebrow { color: #8C9E78 !important; }
+.ylh-hero__eyebrow { color: #5E6E4A !important; }
 
 /* ylh-btn colors */
 .ylh-btn-primary {
@@ -408,7 +410,7 @@ a:hover { color: #5E6E4A !important; }
   border-color: rgba(140,158,120,0.28) !important;
   border-left-color: #8C9E78 !important;
 }
-.ylh-ai-panel__label { color: #8C9E78 !important; }
+.ylh-ai-panel__label { color: #5E6E4A !important; }
 
 /* ylh-stat cards */
 .ylh-stat { border-color: rgba(140,158,120,0.18) !important; }
