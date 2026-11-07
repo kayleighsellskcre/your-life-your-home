@@ -3214,7 +3214,6 @@ def signup():
         brand_name=FRONT_BRAND_NAME,
         referral_code=referral_token,  # Keep for backward compatibility in template
         inviter=_inviter_for_token(referral_token) if role == "homeowner" else None,
-        default_hero=(_hero_photos() or [None])[0],
     )
 
 

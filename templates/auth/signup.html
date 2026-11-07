@@ -200,7 +200,7 @@
 <div class="auth-page">
  <div class="auth-card">
  {% if inviter %}
- {% set hero_src = inviter.hero or (url_for('static', filename=default_hero) if default_hero else None) %}
+ {% set hero_src = inviter.hero %}
  {% if hero_src %}<img class="inviter-hero" src="{{ hero_src }}" alt="" />{% endif %}
  <div class="inviter-card">
  {% set ph = get_professional_photo_url(inviter.photo) if inviter.photo else None %}
