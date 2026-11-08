@@ -30,7 +30,7 @@
 
     <div class="pie-card">
       <h2>Pickup days, times and places</h2>
-      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Add each pickup separately. Set a limit if you can only hand out so many pies at that time.</p>
+      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Add each pickup separately. Use a full street address so people get one-tap directions. Set a limit if you can only hand out so many pies at that time.</p>
       <div id="slots">
         {% for s in (slots or [None]) %}
         <div class="pie-slot-row">
@@ -38,7 +38,7 @@
           <div><label>Day</label><input class="pie-input" type="date" name="slot_date" value="{{ s.slot_date if s else '' }}"></div>
           <div><label>From</label><input class="pie-input" type="time" name="slot_start" value="{{ s.start_time if s else '' }}"></div>
           <div><label>Until</label><input class="pie-input" type="time" name="slot_end" value="{{ s.end_time if s else '' }}"></div>
-          <div class="wide"><label>Location</label><input class="pie-input" name="slot_location" maxlength="200" placeholder="My office, 123 Main St" value="{{ s.location if s else '' }}"></div>
+          <div class="wide"><label>Location</label><input class="pie-input" name="slot_location" maxlength="200" placeholder="Full address, e.g. 123 Main St, Shawnee, KS" value="{{ s.location if s else '' }}"></div>
           <div><label>Limit</label><input class="pie-input" type="number" min="1" name="slot_capacity" placeholder="None" value="{{ s.capacity if s and s.capacity else '' }}"></div>
           <button type="button" class="pie-link danger" onclick="removeSlot(this)" aria-label="Remove this pickup">Remove</button>
         </div>
@@ -53,6 +53,15 @@
       <textarea id="pie_types" name="pie_types" rows="5" maxlength="1200">{{ ev.pie_types or '' }}</textarea>
       <label class="pie-label" for="cant_make_prompt">What to say to someone who can't make the times</label>
       <textarea id="cant_make_prompt" name="cant_make_prompt" rows="3" maxlength="500">{{ ev.cant_make_prompt or '' }}</textarea>
+    </div>
+
+    <div class="pie-card">
+      <h2>For people who can't make the pickup times</h2>
+      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">When someone says yes but can't come, they can choose delivery, or pick a day and time to come to your home. Turn on whichever you like.</p>
+      <label style="display:flex;gap:.5rem;align-items:center;font-size:.95rem;"><input type="checkbox" name="offer_delivery" value="1" style="width:auto;" {{ 'checked' if ev.offer_delivery is none or ev.offer_delivery }}> I can deliver pies</label>
+      <label class="pie-label" for="home_address">Your home pickup address <span class="pie-hint">(leave blank to turn off home pickup)</span></label>
+      <input class="pie-input" id="home_address" name="home_address" maxlength="250" placeholder="123 Main St, Shawnee, KS 66218" value="{{ ev.home_address or '' }}">
+      <p class="pie-hint" style="margin:.4rem 0 0;">This address is not shown on the sign-up page. People only see it, with a directions button, after they choose home pickup and confirm.</p>
     </div>
 
     <div class="pie-card">

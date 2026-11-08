@@ -22,8 +22,8 @@ from flask import (Blueprint, Response, abort, current_app, flash, redirect,
 bp = Blueprint("pies", __name__)
 
 CHOICES = ("pickup", "cant_make", "no")
-DEFAULT_CANT_MAKE = ("No problem. Tell us what would work, for example a different day or time, "
-                     "or picking one up at my home, and we'll arrange it.")
+DEFAULT_CANT_MAKE = ("No problem at all! I would still love to get you a pie. "
+                     "Choose below whether you would like it delivered or would rather pick it up at my home.")
 DEFAULT_PIES = "Pumpkin\nApple\nPecan\nCherry"
 
 
@@ -78,8 +78,88 @@ def ensure_tables():
         created_at TEXT DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (event_id) REFERENCES pie_events(id) ON DELETE CASCADE
     )""")
+    # later additions (safe to run every start)
+    def _add(table, col, ddl):
+        have = {r[1] for r in cur.execute(f"PRAGMA table_info({table})").fetchall()}
+        if col not in have:
+            cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}")
+    _add("pie_events", "home_address", "TEXT")
+    _add("pie_events", "offer_delivery", "INTEGER DEFAULT 1")
+    _add("pie_responses", "fulfillment", "TEXT")
+    _add("pie_responses", "address", "TEXT")
+    _add("pie_responses", "want_date", "TEXT")
+    _add("pie_responses", "want_time", "TEXT")
     conn.commit()
     conn.close()
+
+
+def maps_url(place):
+    """Google Maps directions link (opens the Maps app on phones)."""
+    from urllib.parse import quote
+    return "https://www.google.com/maps/dir/?api=1&destination=" + quote(place or "")
+
+
+def apple_maps_url(place):
+    from urllib.parse import quote
+    return "https://maps.apple.com/?daddr=" + quote(place or "")
+
+
+def _cal_times(d, start, end, default_minutes=60):
+    """Return (start_dt, end_dt) or (date, None) for an all-day entry."""
+    from datetime import timedelta
+    try:
+        day = datetime.strptime(d, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        return None, None
+    try:
+        s = datetime.strptime(f"{d} {start}", "%Y-%m-%d %H:%M")
+    except (TypeError, ValueError):
+        return day.date(), None
+    try:
+        e = datetime.strptime(f"{d} {end}", "%Y-%m-%d %H:%M")
+        if e <= s:
+            e = s + timedelta(minutes=default_minutes)
+    except (TypeError, ValueError):
+        e = s + timedelta(minutes=default_minutes)
+    return s, e
+
+
+def google_cal_url(cal):
+    from datetime import timedelta
+    from urllib.parse import urlencode
+    s, e = _cal_times(cal.get("date"), cal.get("start"), cal.get("end"), cal.get("minutes", 60))
+    if s is None:
+        return ""
+    if e is None:
+        dates = f"{s.strftime('%Y%m%d')}/{(s + timedelta(days=1)).strftime('%Y%m%d')}"
+    else:
+        dates = f"{s.strftime('%Y%m%dT%H%M%S')}/{e.strftime('%Y%m%dT%H%M%S')}"
+    q = {"action": "TEMPLATE", "text": cal.get("title", ""), "dates": dates,
+         "details": cal.get("details", ""), "location": cal.get("location", "")}
+    return "https://calendar.google.com/calendar/render?" + urlencode(q)
+
+
+def build_ics(cal):
+    from datetime import timedelta
+    s, e = _cal_times(cal.get("date"), cal.get("start"), cal.get("end"), cal.get("minutes", 60))
+    if s is None:
+        return None
+
+    def esc(v):
+        return (str(v or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,")
+                .replace("\r", "").replace("\n", "\\n"))
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Your Life Your Home//Pie pickup//EN", "CALSCALE:GREGORIAN",
+             "METHOD:PUBLISH", "BEGIN:VEVENT", f"UID:{secrets.token_hex(8)}@yourlifeyourhome",
+             "DTSTAMP:" + datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")]
+    if e is None:
+        lines += [f"DTSTART;VALUE=DATE:{s.strftime('%Y%m%d')}", f"DTEND;VALUE=DATE:{(s + timedelta(days=1)).strftime('%Y%m%d')}"]
+    else:
+        lines += [f"DTSTART:{s.strftime('%Y%m%dT%H%M%S')}", f"DTEND:{e.strftime('%Y%m%dT%H%M%S')}"]
+    lines += [f"SUMMARY:{esc(cal.get('title'))}", f"LOCATION:{esc(cal.get('location'))}",
+              f"DESCRIPTION:{esc(cal.get('details'))}",
+              "BEGIN:VALARM", "TRIGGER:-PT1H", "ACTION:DISPLAY", "DESCRIPTION:Pie pickup in one hour", "END:VALARM",
+              "END:VEVENT", "END:VCALENDAR"]
+    return "\r\n".join(lines) + "\r\n"
 
 
 def fmt_time(t):
@@ -273,6 +353,8 @@ def edit_event(event_id=None):
         pie_types = "\n".join(p.strip()[:60] for p in (f.get("pie_types") or "").splitlines() if p.strip())[:1200]
         price_note = (f.get("price_note") or "").strip()[:200]
         cant_make_prompt = (f.get("cant_make_prompt") or "").strip()[:500] or DEFAULT_CANT_MAKE
+        home_address = (f.get("home_address") or "").strip()[:250]
+        offer_delivery = 1 if f.get("offer_delivery") else 0
         flyer_image = ev["flyer_image"] if ev else None
         if f.get("remove_flyer"):
             flyer_image = None
@@ -288,15 +370,17 @@ def edit_event(event_id=None):
         cur = conn.cursor()
         if ev:
             cur.execute("""UPDATE pie_events SET title=?, message=?, order_by=?, pie_types=?, price_note=?,
-                           cant_make_prompt=?, flyer_image=? WHERE id=?""",
-                        (title, message, order_by, pie_types, price_note, cant_make_prompt, flyer_image, ev["id"]))
+                           cant_make_prompt=?, flyer_image=?, home_address=?, offer_delivery=? WHERE id=?""",
+                        (title, message, order_by, pie_types, price_note, cant_make_prompt, flyer_image,
+                         home_address, offer_delivery, ev["id"]))
             eid = ev["id"]
         else:
             token = secrets.token_urlsafe(9)
             cur.execute("""INSERT INTO pie_events (owner_id, owner_role, token, title, message, order_by, pie_types,
-                           price_note, cant_make_prompt, flyer_image) VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                           price_note, cant_make_prompt, flyer_image, home_address, offer_delivery)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
                         (user["id"], user["role"], token, title, message, order_by, pie_types, price_note,
-                         cant_make_prompt, flyer_image))
+                         cant_make_prompt, flyer_image, home_address, offer_delivery))
             eid = cur.lastrowid
 
         # pickup slots: update existing, add new, remove the ones taken off the form
@@ -331,7 +415,8 @@ def edit_event(event_id=None):
         flash("Saved. Your sign-up link is ready to share.", "success")
         return redirect(url_for("pies.event_detail", event_id=eid))
 
-    defaults = {"pie_types": DEFAULT_PIES, "cant_make_prompt": DEFAULT_CANT_MAKE, "title": "Holiday Pie Pickup"}
+    defaults = {"pie_types": DEFAULT_PIES, "cant_make_prompt": DEFAULT_CANT_MAKE, "title": "Holiday Pie Pickup",
+                "offer_delivery": 1, "home_address": ""}
     return render_template("pies/edit.html", ev=dict(ev) if ev else defaults, slots=slots, is_new=ev is None,
                            role=user["role"])
 
@@ -581,7 +666,7 @@ def public_event(token):
     brand = _branding(ev["owner_id"])
     closed = _is_closed(ev)
     ctx = dict(ev=dict(ev), slots=slots, pies=_pie_list(ev), brand=brand, closed=closed,
-               fmt_order_by=fmt_date(ev["order_by"]), form={})
+               fmt_order_by=fmt_date(ev["order_by"]), form={}, today=date.today().isoformat())
 
     if request.method == "POST":
         f = request.form
@@ -598,6 +683,8 @@ def public_event(token):
         notes = (f.get("notes") or "").strip()[:800]
         err = None
         slot_id, slot_lbl, pie_type, qty = None, "", "", 1
+        fulfil, address, want_date, want_time, cal, where = "", "", "", "", None, ""
+        can_deliver, has_home = bool(ev["offer_delivery"]), bool((ev["home_address"] or "").strip())
         if choice not in CHOICES:
             err = "Please choose one of the three answers."
         elif not name:
@@ -622,8 +709,39 @@ def public_event(token):
                         err = "That time is full. Please choose another."
                     else:
                         slot_id, slot_lbl = match["id"], match["label"]
-                if choice == "cant_make" and not err and not notes:
-                    err = "Please tell us what would work for you."
+                        where = match.get("location") or ""
+                        cal = {"date": match["slot_date"], "start": match["start_time"], "end": match["end_time"],
+                               "location": where}
+                if choice == "cant_make" and not err:
+                    if can_deliver or has_home:
+                        fulfil = f.get("fulfillment", "")
+                        if fulfil == "delivery" and can_deliver:
+                            address = (f.get("delivery_address") or "").strip()[:250]
+                            if len(address) < 6:
+                                err = "Please enter the address where we should deliver your pie."
+                            else:
+                                slot_lbl = f"Delivery to {address}"
+                                where = address
+                        elif fulfil == "home" and has_home:
+                            want_date = (f.get("want_date") or "").strip()
+                            want_time = (f.get("want_time") or "").strip()
+                            try:
+                                d_ok = datetime.strptime(want_date, "%Y-%m-%d").date() >= date.today()
+                                datetime.strptime(want_time, "%H:%M")
+                            except ValueError:
+                                d_ok = None
+                            if d_ok is None:
+                                err = "Please choose the day and time you would like to pick up."
+                            elif not d_ok:
+                                err = "Please choose a day that has not passed yet."
+                            else:
+                                where = ev["home_address"].strip()
+                                slot_lbl = f"Home pickup, {fmt_date(want_date)} at {fmt_time(want_time)}"
+                                cal = {"date": want_date, "start": want_time, "end": "", "location": where, "minutes": 30}
+                        else:
+                            err = "Please choose delivery or pickup at the host's home."
+                    elif not notes:
+                        err = "Please tell us what would work for you."
         elif email and "@" not in email:
             err = "That email address doesn't look right."
         if err:
@@ -636,17 +754,27 @@ def public_event(token):
         if email:
             existing = cur.execute("SELECT id FROM pie_responses WHERE event_id=? AND lower(email)=?",
                                    (ev["id"], email)).fetchone()
-        vals = (name, phone, email, choice, slot_id, slot_lbl, pie_type, qty if choice != "no" else 0, notes)
+        vals = (name, phone, email, choice, slot_id, slot_lbl, pie_type, qty if choice != "no" else 0, notes,
+                fulfil, address, want_date, want_time)
         if existing:
             cur.execute("""UPDATE pie_responses SET name=?, phone=?, email=?, choice=?, slot_id=?, slot_label=?,
-                           pie_type=?, quantity=?, notes=?, created_at=CURRENT_TIMESTAMP WHERE id=?""", (*vals, existing["id"]))
+                           pie_type=?, quantity=?, notes=?, fulfillment=?, address=?, want_date=?, want_time=?,
+                           created_at=CURRENT_TIMESTAMP WHERE id=?""", (*vals, existing["id"]))
         else:
             cur.execute("""INSERT INTO pie_responses (event_id, name, phone, email, choice, slot_id, slot_label,
-                           pie_type, quantity, notes) VALUES (?,?,?,?,?,?,?,?,?,?)""", (ev["id"], *vals))
+                           pie_type, quantity, notes, fulfillment, address, want_date, want_time)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (ev["id"], *vals))
         conn.commit()
         conn.close()
-        _notify(dict(ev), brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, bool(existing))
-        session[f"pie_{token}"] = {"choice": choice, "slot": slot_lbl, "pie": pie_type, "qty": qty, "name": name}
+        if cal:
+            cal["title"] = f"{ev['title']}: pie pickup"
+            cal["details"] = (f"{pie_type or 'Pie'} from {brand['name']}." if brand["name"] else f"{pie_type or 'Pie'} pickup.")
+            if brand["phone"]:
+                cal["details"] += f" Questions? {brand['phone']}"
+        _notify(dict(ev), brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, bool(existing),
+                fulfil=fulfil, where=where, cal=cal)
+        session[f"pie_{token}"] = {"choice": choice, "slot": slot_lbl, "pie": pie_type, "qty": qty, "name": name,
+                                   "fulfil": fulfil, "where": where, "cal": cal}
         return redirect(url_for("pies.public_thanks", token=token))
 
     return render_template("pies/public.html", **ctx)
@@ -657,19 +785,51 @@ def public_thanks(token):
     ev = _event_by_token(token)
     if not ev:
         abort(404)
-    return render_template("pies/thanks.html", ev=dict(ev), brand=_branding(ev["owner_id"]),
-                           answer=session.get(f"pie_{token}") or {})
+    answer = session.get(f"pie_{token}") or {}
+    cal = answer.get("cal")
+    return render_template("pies/thanks.html", ev=dict(ev), brand=_branding(ev["owner_id"]), answer=answer,
+                           gcal=google_cal_url(cal) if cal else "",
+                           ics_url=url_for("pies.public_calendar", token=token) if cal and _cal_times(cal.get("date"), cal.get("start"), cal.get("end"))[0] else "")
 
 
-def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, updated):
+@bp.route("/pies/r/<token>/calendar.ics")
+def public_calendar(token):
+    """The visitor's own confirmed pickup as a calendar file (works with Apple, Outlook and Google)."""
+    ev = _event_by_token(token)
+    if not ev:
+        abort(404)
+    cal = (session.get(f"pie_{token}") or {}).get("cal")
+    data = build_ics(cal) if cal else None
+    if not data:
+        abort(404)
+    return Response(data, mimetype="text/calendar",
+                    headers={"Content-Disposition": "attachment; filename=pie-pickup.ics"})
+
+
+def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, updated, fulfil="", where="", cal=None):
     """Confirmation to the client and a heads-up to the agent/lender. Never blocks the response."""
     _bg, send_reminder_email = _H["bg"], _H["send_email"]
     owner_first = (brand["name"] or "your host").split(" ")[0]
+    extras = ""
+    if where:
+        extras += f"Directions: {maps_url(where)}\n"
+    if cal and google_cal_url(cal):
+        extras += f"Add to your calendar: {google_cal_url(cal)}\n"
+    if extras:
+        extras = "\n" + extras
     if choice == "pickup":
         line = f"{qty} x {pie_type or 'pie'} for pickup: {slot_lbl}"
-        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! You're all set.\n\n{line}\n\n"
+        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! You're all set.\n\n{line}\n{extras}\n"
                        f"If anything changes, just fill out the form again with the same email or reply to this message.\n\n"
                        f"Warmly,\n{brand['name']}")
+    elif choice == "cant_make" and fulfil == "delivery":
+        line = f"{qty} x {pie_type or 'pie'}, delivered to {where}"
+        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll bring your pie to you and will text or email "
+                       f"to let you know when I'm on my way.\n\n{line}\n\nWarmly,\n{brand['name']}")
+    elif choice == "cant_make" and fulfil == "home":
+        line = f"{qty} x {pie_type or 'pie'}, pickup at my home: {slot_lbl}\nAddress: {where}"
+        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll have your pie ready for you.\n\n{line}\n{extras}\n"
+                       f"If your plans change, just reply to this message.\n\nWarmly,\n{brand['name']}")
     elif choice == "cant_make":
         line = f"{qty} x {pie_type or 'pie'}. Needs a different time: {notes}"
         client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I got your note and will reach out to arrange a time that works.\n\n"
@@ -702,6 +862,9 @@ def init_app(app, get_current_user, bg, send_email):
     def _ne(v):
         import re
         return re.sub(r"[🀀-🫿☀-➿️‍]+", "", v or "").strip()
+
+    app.add_template_global(maps_url, "maps_url")
+    app.add_template_global(apple_maps_url, "apple_maps_url")
 
     @app.template_filter("pie_date")
     def _pd(v):

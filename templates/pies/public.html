@@ -44,13 +44,37 @@
         <input type="radio" name="slot_id" value="{{ s.id }}" {{ 'disabled' if s.full }} {{ 'checked' if form.get('slot_id') == s.id|string }}>
         <span>{{ s.label }}{% if s.full %} <span class="pie-pill grey">Full</span>{% endif %}</span>
       </label>
+      {% if s.location %}<div class="pie-dir"><a href="{{ maps_url(s.location) }}" target="_blank" rel="noopener">Get directions</a> <span>&middot;</span> <a href="{{ apple_maps_url(s.location) }}" target="_blank" rel="noopener">Apple Maps</a></div>{% endif %}
       {% endfor %}
       {% else %}<p class="pie-hint">No pickup times have been added yet.</p>{% endif %}
     </div>
 
     <div class="pie-card" id="sec-cant" style="display:none;">
       <h2>What would work for you?</h2>
-      <p class="pie-hint" style="margin:-.3rem 0 .5rem;">{{ ev.cant_make_prompt }}</p>
+      <p class="pie-hint" style="margin:-.3rem 0 .5rem;white-space:pre-line;">{{ ev.cant_make_prompt }}</p>
+      {% if ev.offer_delivery or ev.home_address %}
+      <div id="fulfil-opts">
+        {% if ev.offer_delivery %}
+        <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if form.get('fulfillment') == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it.</small></span></label>
+        {% endif %}
+        {% if ev.home_address %}
+        <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you.</small></span></label>
+        {% endif %}
+      </div>
+      <div id="fulfil-delivery" style="display:none;margin-top:.6rem;">
+        <label class="pie-label" for="delivery_address" style="margin-top:0;">Delivery address</label>
+        <textarea id="delivery_address" name="delivery_address" rows="2" maxlength="250" placeholder="Street, city and zip">{{ form.get('delivery_address', '') }}</textarea>
+      </div>
+      <div id="fulfil-home" style="display:none;margin-top:.6rem;">
+        <div class="pie-row">
+          <div><label class="pie-label" for="want_date" style="margin-top:0;">Day</label>
+            <input class="pie-input" type="date" id="want_date" name="want_date" min="{{ today }}" value="{{ form.get('want_date', '') }}"></div>
+          <div><label class="pie-label" for="want_time" style="margin-top:0;">Time</label>
+            <input class="pie-input" type="time" id="want_time" name="want_time" value="{{ form.get('want_time', '') }}"></div>
+        </div>
+        <p class="pie-hint" style="margin:.5rem 0 0;">I'll have your pie ready. You'll get the address and a directions button once you send your answer.</p>
+      </div>
+      {% endif %}
     </div>
 
     <div class="pie-card" id="sec-pie" style="display:none;">
@@ -93,13 +117,18 @@
     show('sec-cant', v === 'cant_make');
     show('sec-pie', v === 'pickup' || v === 'cant_make');
     show('sec-you', !!v);
+    var fu = (document.querySelector('input[name=fulfillment]:checked') || {}).value;
+    show('fulfil-delivery', v === 'cant_make' && fu === 'delivery');
+    show('fulfil-home', v === 'cant_make' && fu === 'home');
     var yes = v !== 'no';
     document.getElementById('req-phone') && (document.getElementById('req-phone').textContent = yes ? '(required)' : '(optional)');
     document.getElementById('req-email') && (document.getElementById('req-email').textContent = yes ? '(required)' : '(optional)');
     var nl = document.getElementById('notes-label');
-    if (nl) nl.firstChild.textContent = v === 'cant_make' ? 'What day, time or place would work? ' : 'Anything we should know? ';
+    var hasOpts = !!document.getElementById('fulfil-opts');
+    if (nl) nl.firstChild.textContent = (v === 'cant_make' && !hasOpts) ? 'What day, time or place would work? ' : 'Anything we should know? ';
   }
   radios.forEach(function (r) { r.addEventListener('change', sync); });
+  document.querySelectorAll('input[name=fulfillment]').forEach(function (r) { r.addEventListener('change', sync); });
   sync();
 })();
 </script>

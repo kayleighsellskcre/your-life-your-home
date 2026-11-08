@@ -11,13 +11,37 @@
     {% if answer.choice == 'pickup' %}
       <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
       <p style="margin:0;color:#55684F;">Pickup: {{ answer.slot }}</p>
-      <p class="pie-hint" style="margin:.8rem 0 0;">We've emailed you a confirmation. Need to change something? Fill the form out again with the same email.</p>
+    {% elif answer.choice == 'cant_make' and answer.fulfil == 'delivery' %}
+      <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
+      <p style="margin:0;color:#55684F;">{{ answer.slot }}</p>
+      <p style="margin:.6rem 0 0;">{{ brand.name.split(' ')[0] if brand.name else 'Your host' }} will bring it to you and reach out when it is on the way.</p>
+    {% elif answer.choice == 'cant_make' and answer.fulfil == 'home' %}
+      <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
+      <p style="margin:0;color:#55684F;">{{ answer.slot }}</p>
+      <p style="margin:.6rem 0 0;">I will have it ready for you at {{ answer.where }}.</p>
     {% elif answer.choice == 'cant_make' %}
       <p style="margin:0;">We got your note and {{ brand.name.split(' ')[0] if brand.name else 'your host' }} will be in touch to arrange a time that works.</p>
     {% elif answer.choice == 'no' %}
       <p style="margin:0;">No pie this year, no problem. Happy holidays from all of us.</p>
     {% else %}
       <p style="margin:0;">Your answer has been received.</p>
+    {% endif %}
+
+    {% if answer.where and answer.fulfil != 'delivery' %}
+    <div class="pie-actions" style="margin-top:1rem;">
+      <a class="pie-btn small" href="{{ maps_url(answer.where) }}" target="_blank" rel="noopener">Get directions</a>
+      <a class="pie-btn secondary small" href="{{ apple_maps_url(answer.where) }}" target="_blank" rel="noopener">Apple Maps</a>
+    </div>
+    {% endif %}
+    {% if gcal or ics_url %}
+    <div class="pie-actions" style="margin-top:.6rem;">
+      {% if gcal %}<a class="pie-btn small" href="{{ gcal }}" target="_blank" rel="noopener">Add to Google Calendar</a>{% endif %}
+      {% if ics_url %}<a class="pie-btn secondary small" href="{{ ics_url }}">Apple or Outlook calendar</a>{% endif %}
+    </div>
+    <p class="pie-hint" style="margin:.6rem 0 0;">The address is added to your calendar event.</p>
+    {% endif %}
+    {% if answer.choice in ('pickup', 'cant_make') %}
+    <p class="pie-hint" style="margin:.8rem 0 0;">We've emailed you a confirmation. Need to change something? Fill the form out again with the same email.</p>
     {% endif %}
   </div>
 </div>

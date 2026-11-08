@@ -42,7 +42,7 @@
     {% if slots %}
     <div class="pie-card" style="margin:0;">
       <h2>Pickups</h2>
-      {% for s in slots %}<div style="padding:.3rem 0;border-bottom:1px solid #EEF1E8;font-size:.9rem;">{{ s.label }}<br><span class="pie-hint">{{ s.taken }} pie{{ '' if s.taken == 1 else 's' }}{% if s.capacity %} of {{ s.capacity }}{% endif %}</span></div>{% endfor %}
+      {% for s in slots %}<div style="padding:.3rem 0;border-bottom:1px solid #EEF1E8;font-size:.9rem;">{{ s.label }}{% if s.location %} <a class="pie-maplink" href="{{ maps_url(s.location) }}" target="_blank" rel="noopener">Directions</a>{% endif %}<br><span class="pie-hint">{{ s.taken }} pie{{ '' if s.taken == 1 else 's' }}{% if s.capacity %} of {{ s.capacity }}{% endif %}</span></div>{% endfor %}
     </div>
     {% endif %}
   </div>
@@ -61,7 +61,10 @@
           <td>{% if r.phone %}{{ r.phone }}<br>{% endif %}{% if r.email %}<a href="mailto:{{ r.email }}">{{ r.email }}</a>{% endif %}</td>
           <td>
             {% if r.choice == 'pickup' %}<span class="pie-pill">Pickup</span><br>{{ r.slot_label }}
-            {% elif r.choice == 'cant_make' %}<span class="pie-pill warn">Needs another time</span>
+            {% elif r.choice == 'cant_make' %}
+              {% if r.fulfillment == 'delivery' %}<span class="pie-pill warn">Deliver</span><br>{{ r.address }}<br><a class="pie-maplink" href="{{ maps_url(r.address) }}" target="_blank" rel="noopener">Directions</a>
+              {% elif r.fulfillment == 'home' %}<span class="pie-pill">Home pickup</span><br>{{ r.slot_label }}
+              {% else %}<span class="pie-pill warn">Needs another time</span>{% endif %}
             {% else %}<span class="pie-pill grey">No thank you</span>{% endif %}
           </td>
           <td>{% if r.choice != 'no' %}{{ r.quantity }} &times; {{ r.pie_type or 'Any' }}{% endif %}</td>
