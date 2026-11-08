@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Contract details{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+<style>
+  .tc-sec summary { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 600; color: #1F2A24; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+  .tc-sec summary::-webkit-details-marker { display: none; }
+  .tc-sec summary::after { content: "+"; font-size: 1.4rem; color: #8A6A3B; }
+  .tc-sec[open] summary::after { content: "\2212"; }
+  .tc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .2rem 1rem; margin-top: .7rem; }
+  .tc-grid .full { grid-column: 1 / -1; }
+  @media (max-width: 640px) { .tc-grid { grid-template-columns: 1fr; } }
+</style>
+<div class="pie-wrap">
+  <p class="pie-kicker"><a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="color:inherit;">&larr; {{ tx.property_address }}</a></p>
+  <h1 class="pie-h1">Contract details</h1>
+  <p class="pie-sub">Fill this in once. Your deadlines, your private sheet and the shareable sheet are all made from it, so they always match.</p>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
+
+  <div class="pie-card">
+    <h2>Have the contract as a PDF?</h2>
+    <p class="pie-hint" style="margin:-.3rem 0 .7rem;">Upload it and we will fill in what we can find. You check it before anything is shared. It works with typed PDFs, not scans.</p>
+    <form method="post" action="{{ url_for('tc.upload', tx_id=tx.id) }}" enctype="multipart/form-data" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
+      <input type="file" name="contract" accept="application/pdf" required>
+      <button class="pie-btn secondary small" type="submit">Fill it in for me</button>
+    </form>
+  </div>
+
+  <form method="post">
+    {% for title, opened, fields in sections %}
+    <details class="pie-card tc-sec" {{ 'open' if opened }}>
+      <summary>{{ title }}</summary>
+      <div class="tc-grid">
+        {% for key, label, kind, ph in fields %}
+        <div class="{{ 'full' if kind == 'area' }}">
+          <label class="pie-label" for="f_{{ key }}">{{ label }}</label>
+          {% if kind == 'area' %}
+          <textarea id="f_{{ key }}" name="f_{{ key }}" rows="3" maxlength="600" placeholder="{{ ph }}">{{ d.get(key, '') }}</textarea>
+          {% else %}
+          <input class="pie-input" id="f_{{ key }}" name="f_{{ key }}" type="{{ kind }}" maxlength="300" placeholder="{{ ph }}" value="{{ d.get(key, '') }}">
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </details>
+    {% endfor %}
+    <div class="pie-actions">
+      <button class="pie-btn" type="submit">Save and set my deadlines</button>
+      <a class="pie-link" href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

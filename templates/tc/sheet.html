@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{ address }}{% if kind == 'private' %} (internal){% endif %}</title>
+<style>
+  @page { size: letter; margin: 0.55in 0.6in; background: #FAF8F3; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #FAF8F3; color: #26302A; font-family: "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.4; }
+  .sheet { max-width: 8.3in; margin: 0 auto; padding: 1.2rem 1.4rem 2rem; }
+  .tools { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: flex-end; margin-bottom: 1rem; }
+  .tools a, .tools button { font: inherit; font-size: .85rem; font-weight: 600; padding: .45rem .9rem; border-radius: 999px; border: 1px solid #5E6E4A; background: #fff; color: #364A2B; text-decoration: none; cursor: pointer; }
+  .tools a.primary { background: #364A2B; color: #fff; }
+  .kicker { font-size: 8.5pt; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: #8A6A3B; margin: 0; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: 27pt; line-height: 1.1; margin: .2rem 0 .3rem; color: #1F2A24; }
+  .sub { color: #6B746C; font-size: 10pt; margin: 0 0 .8rem; }
+  .internal { background: #F6E6E0; border: 1px solid #E2B8AA; color: #7A2E1D; font-weight: 700; font-size: 9pt; padding: .5rem .8rem; border-radius: 6px; margin: 0 0 .9rem; }
+  .block { border-top: 1px solid #D9CFB8; padding: .75rem 0 .35rem; page-break-inside: avoid; }
+  .block h2 { font-size: 8.5pt; letter-spacing: .1em; text-transform: uppercase; color: #8A6A3B; margin: 0 0 .5rem; font-weight: 700; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem 2rem; }
+  .row .l { font-size: 8pt; text-transform: uppercase; letter-spacing: .05em; color: #6B746C; font-weight: 700; }
+  .row .v { font-size: 10.5pt; white-space: pre-line; overflow-wrap: anywhere; }
+  .row.wide { grid-column: 1 / -1; }
+  .row .v.strong { font-weight: 700; }
+  .foot { margin-top: 1rem; font-size: 8.5pt; color: #8B938C; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } h1 { font-size: 21pt; } }
+  @media print { .tools { display: none; } .sheet { padding: 0; max-width: none; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+  {% if not pdf %}
+  <div class="tools">
+    {% if can_back and tx %}<a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}">Back to transaction</a>{% endif %}
+    {% if kind == 'private' %}<a class="primary" href="?pdf=1">Download PDF</a>
+    {% else %}<a class="primary" href="?pdf=1">Download PDF</a>{% endif %}
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+  {% endif %}
+
+  <p class="kicker">{{ 'Internal transaction information' if kind == 'private' else 'Transaction summary' }}</p>
+  <h1>{{ address }}</h1>
+  <p class="sub">{% if county %}{{ county }}{% endif %}{% if county and mls %} &nbsp;|&nbsp; {% endif %}{% if mls %}MLS {{ mls }}{% endif %}</p>
+  {% if kind == 'private' %}<p class="internal">INTERNAL COPY. This page has your clients' phone numbers and emails. Please do not forward it. Use the shareable sheet for other agents, title and lenders.</p>{% endif %}
+
+  {% for b in blocks %}
+  <div class="block">
+    <h2>{{ b.title }}</h2>
+    <div class="grid">
+      {% for label, value in b.rows %}
+      <div class="row{{ ' wide' if not label or value|length > 70 or '\n' in value }}">
+        {% if label %}<div class="l">{{ label }}</div>{% endif %}
+        <div class="v{{ ' strong' if label in ('Buyers', 'Seller') }}">{{ value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+  <p class="foot">Prepared by your transaction coordinator. Please double check dates against the contract.</p>
+</div>
+</body>
+</html>

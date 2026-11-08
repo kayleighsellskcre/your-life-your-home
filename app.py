@@ -2324,7 +2324,8 @@ def start_scheduler():
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
-        scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)  # day-before pie pickup reminders
+        scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)
+        scheduler.add_job(lambda: __import__("tc").send_deadline_reminders(), "cron", hour=14, minute=0)  # 9 AM Central deadline heads-ups  # day-before pie pickup reminders
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
         scheduler.add_job(
             lambda: __import__("automation").send_daily_digests(send_reminder_email, os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")),
@@ -6866,6 +6867,7 @@ def agent_transaction_detail(tx_id):
         timeline=timeline,
         doc_status=doc_status,
         tx_commission=tx_commission,
+        tc=_tc.card_context(tx_id),
     )
 
 
@@ -13472,6 +13474,9 @@ Lender Data:
 # ---------------- DEVELOPMENT SERVER ----------------
 import pies as _pies
 _pies.init_app(app, get_current_user, _bg, send_reminder_email)
+import tc as _tc
+_tc.init_app(app, get_current_user, _bg, send_reminder_email, get_transaction_detail,
+             lambda tx_id, kind, text, uid: __import__("transaction_helpers").log_timeline_event(tx_id, kind, text, uid))
 
 
 if __name__ == "__main__":
