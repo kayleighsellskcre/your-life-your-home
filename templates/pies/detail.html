@@ -28,6 +28,19 @@
     </div>
   </div>
 
+  <div class="pie-card" style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;">
+    <div>
+      <b>Thank-you email</b>
+      <div class="pie-hint" style="margin:.15rem 0 0;">
+        {% if ev.thank_date %}Goes out {{ ev.thank_date|pie_date }}{% else %}No date set. Add one under Edit event, or send it now.{% endif %}
+        &middot; {{ stats.thanked }} sent{% if stats.to_thank %}, {{ stats.to_thank }} waiting{% endif %}
+      </div>
+    </div>
+    {% if stats.to_thank %}
+    <form method="post" action="{{ url_for('pies.thank_now', event_id=ev.id) }}" onsubmit="return confirm('Send the thank-you email now to everyone who ordered?');"><button class="pie-btn secondary small" type="submit">Send thank-yous now</button></form>
+    {% endif %}
+  </div>
+
   <div class="pie-stats">
     <div class="pie-stat"><b>{{ stats.pies }}</b><span>pies requested</span></div>
     <div class="pie-stat"><b>{{ stats.pickup }}</b><span>picking up</span></div>

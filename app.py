@@ -2338,6 +2338,7 @@ def start_scheduler():
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
         scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)
         scheduler.add_job(lambda: __import__("tc").send_deadline_reminders(), "cron", hour=14, minute=0)  # 9 AM Central deadline heads-ups  # day-before pie pickup reminders
+        scheduler.add_job(lambda: __import__("pies").send_thank_yous(), "cron", hour=10, minute=15)  # pie thank-you emails on their chosen date
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
         scheduler.add_job(
             lambda: __import__("automation").send_daily_digests(send_reminder_email, os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")),

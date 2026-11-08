@@ -93,6 +93,9 @@ def ensure_tables():
     _add("pie_responses", "want_time", "TEXT")
     _add("pie_responses", "reminded", "INTEGER DEFAULT 0")
     _add("pie_responses", "edit_token", "TEXT")
+    _add("pie_responses", "thanked", "INTEGER DEFAULT 0")
+    _add("pie_events", "thank_date", "TEXT")
+    _add("pie_events", "thank_message", "TEXT")
     conn.commit()
     conn.close()
 
@@ -363,6 +366,12 @@ def edit_event(event_id=None):
         pie_types = "\n".join(p.strip()[:60] for p in (f.get("pie_types") or "").splitlines() if p.strip())[:1200]
         price_note = (f.get("price_note") or "").strip()[:200]
         cant_make_prompt = (f.get("cant_make_prompt") or "").strip()[:500] or DEFAULT_CANT_MAKE
+        thank_date = (f.get("thank_date") or "").strip()
+        try:
+            datetime.strptime(thank_date, "%Y-%m-%d")
+        except ValueError:
+            thank_date = ""
+        thank_message = (f.get("thank_message") or "").strip()[:1200]
         home_address = (f.get("home_address") or "").strip()[:250]
         offer_delivery = 1 if f.get("offer_delivery") else 0
         home_from = (f.get("home_from") or "").strip()
@@ -393,17 +402,19 @@ def edit_event(event_id=None):
         if ev:
             cur.execute("""UPDATE pie_events SET title=?, message=?, order_by=?, pie_types=?, price_note=?,
                            cant_make_prompt=?, flyer_image=?, home_address=?, offer_delivery=?,
-                           home_from=?, home_to=? WHERE id=?""",
+                           home_from=?, home_to=?, thank_date=?, thank_message=? WHERE id=?""",
                         (title, message, order_by, pie_types, price_note, cant_make_prompt, flyer_image,
-                         home_address, offer_delivery, home_from, home_to, ev["id"]))
+                         home_address, offer_delivery, home_from, home_to, thank_date, thank_message, ev["id"]))
             eid = ev["id"]
         else:
             token = secrets.token_urlsafe(9)
             cur.execute("""INSERT INTO pie_events (owner_id, owner_role, token, title, message, order_by, pie_types,
-                           price_note, cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to)
-                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                           price_note, cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to,
+                           thank_date, thank_message)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                         (user["id"], user["role"], token, title, message, order_by, pie_types, price_note,
-                         cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to))
+                         cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to,
+                         thank_date, thank_message))
             eid = cur.lastrowid
 
         # pickup slots: update existing, add new, remove the ones taken off the form
@@ -439,7 +450,8 @@ def edit_event(event_id=None):
         return redirect(url_for("pies.event_detail", event_id=eid))
 
     defaults = {"pie_types": DEFAULT_PIES, "cant_make_prompt": DEFAULT_CANT_MAKE, "title": "Holiday Pie Pickup",
-                "offer_delivery": 1, "home_address": "", "home_from": "", "home_to": ""}
+                "offer_delivery": 1, "home_address": "", "home_from": "", "home_to": "",
+                "thank_date": "", "thank_message": ""}
     return render_template("pies/edit.html", ev=dict(ev) if ev else defaults, slots=slots, is_new=ev is None,
                            role=user["role"])
 
@@ -468,6 +480,8 @@ def event_detail(event_id):
         "pies": sum(pie_totals.values()),
         "picked_up": sum(1 for r in responses if r["picked_up"]),
     }
+    stats["to_thank"] = sum(1 for r in responses if r["choice"] in ("pickup", "cant_make") and r.get("email") and not r.get("thanked"))
+    stats["thanked"] = sum(1 for r in responses if r.get("thanked"))
     return render_template("pies/detail.html", ev=dict(ev), slots=slots, responses=responses, stats=stats,
                            pie_totals=pie_totals, public_url=_public_url(ev), closed=_is_closed(ev),
                            has_ai=bool(os.environ.get("OPENAI_API_KEY")), role=user["role"])
@@ -1075,6 +1089,59 @@ def send_reminders(today=None):
             __import__("logging").getLogger(__name__).warning("pie reminder failed: %s", exc)
     conn.close()
     return sent
+
+
+DEFAULT_THANK = ("Thank you so much for being part of {title}. It was a joy to share a pie with you, and I am grateful "
+                 "to have you in my life. Wishing you and your family a warm, happy holiday season.")
+
+
+def _thank_body(ev, r, brand):
+    first = (r["name"] or "there").split(" ")[0]
+    msg = (ev["thank_message"] or "").strip() or DEFAULT_THANK.format(title=ev["title"])
+    return f"Hi {first},\n\n{msg}\n\nWarmly,\n{brand['name']}"
+
+
+def send_thank_yous(today=None, event_id=None):
+    """Thank-you email to everyone who ordered a pie (not the 'no thank you' answers), once each.
+    Runs daily from the scheduler for events whose thank-you date has arrived; with event_id it sends
+    now for that event whatever its date. Returns how many were sent."""
+    send = _H.get("send_email")
+    if not send:
+        return 0
+    day = (today or date.today()).isoformat()
+    conn = _db()
+    if event_id:
+        events = conn.execute("SELECT * FROM pie_events WHERE id=?", (event_id,)).fetchall()
+    else:
+        events = conn.execute("SELECT * FROM pie_events WHERE thank_date IS NOT NULL AND thank_date != '' AND thank_date <= ?",
+                              (day,)).fetchall()
+    sent = 0
+    for ev in events:
+        brand = _branding(ev["owner_id"])
+        rows = conn.execute("""SELECT * FROM pie_responses WHERE event_id=? AND choice IN ('pickup','cant_make')
+                               AND COALESCE(thanked,0)=0 AND email IS NOT NULL AND email != ''""", (ev["id"],)).fetchall()
+        for r in rows:
+            try:
+                send(r["email"], f"Thank you from {brand['name'] or 'us'}", _thank_body(ev, r, brand),
+                     brand["name"] or None, brand["email"] or None)
+                conn.execute("UPDATE pie_responses SET thanked=1 WHERE id=?", (r["id"],))
+                conn.commit()
+                sent += 1
+            except Exception as exc:
+                __import__("logging").getLogger(__name__).warning("pie thank-you failed: %s", exc)
+    conn.close()
+    return sent
+
+
+@bp.route("/pies/<int:event_id>/thank-now", methods=["POST"])
+def thank_now(event_id):
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    n = send_thank_yous(event_id=ev["id"])
+    flash(f"Thank-you email sent to {n} {'person' if n == 1 else 'people'}." if n else
+          "Everyone who ordered has already been thanked, or there are no email addresses to send to.", "success")
+    return redirect(url_for("pies.event_detail", event_id=ev["id"]))
 
 
 _H = {}
