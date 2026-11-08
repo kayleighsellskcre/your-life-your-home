@@ -61,6 +61,12 @@
       <label style="display:flex;gap:.5rem;align-items:center;font-size:.95rem;"><input type="checkbox" name="offer_delivery" value="1" style="width:auto;" {{ 'checked' if ev.offer_delivery is none or ev.offer_delivery }}> I can deliver pies</label>
       <label class="pie-label" for="home_address">Your home pickup address <span class="pie-hint">(leave blank to turn off home pickup)</span></label>
       <input class="pie-input" id="home_address" name="home_address" maxlength="250" placeholder="123 Main St, Shawnee, KS 66218" value="{{ ev.home_address or '' }}">
+      <div class="pie-row">
+        <div><label class="pie-label" for="home_from">Home pickup days: from</label>
+          <input class="pie-input" type="date" id="home_from" name="home_from" value="{{ ev.home_from or '' }}"></div>
+        <div><label class="pie-label" for="home_to">Until</label>
+          <input class="pie-input" type="date" id="home_to" name="home_to" value="{{ ev.home_to or '' }}"></div>
+      </div>
       <p class="pie-hint" style="margin:.4rem 0 0;">This address is not shown on the sign-up page. People only see it, with a directions button, after they choose home pickup and confirm.</p>
     </div>
 

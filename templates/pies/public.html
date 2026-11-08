@@ -58,7 +58,7 @@
         <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if form.get('fulfillment') == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it.</small></span></label>
         {% endif %}
         {% if ev.home_address %}
-        <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you.</small></span></label>
+        <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you{% if home_range %}, {{ home_range }}{% endif %}.</small></span></label>
         {% endif %}
       </div>
       <div id="fulfil-delivery" style="display:none;margin-top:.6rem;">
@@ -68,7 +68,7 @@
       <div id="fulfil-home" style="display:none;margin-top:.6rem;">
         <div class="pie-row">
           <div><label class="pie-label" for="want_date" style="margin-top:0;">Day</label>
-            <input class="pie-input" type="date" id="want_date" name="want_date" min="{{ today }}" value="{{ form.get('want_date', '') }}"></div>
+            <input class="pie-input" type="date" id="want_date" name="want_date" min="{{ home_min }}"{% if home_max %} max="{{ home_max }}"{% endif %} value="{{ form.get('want_date', '') }}"></div>
           <div><label class="pie-label" for="want_time" style="margin-top:0;">Time</label>
             <input class="pie-input" type="time" id="want_time" name="want_time" value="{{ form.get('want_time', '') }}"></div>
         </div>

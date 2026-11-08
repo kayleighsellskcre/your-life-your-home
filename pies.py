@@ -85,6 +85,8 @@ def ensure_tables():
             cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}")
     _add("pie_events", "home_address", "TEXT")
     _add("pie_events", "offer_delivery", "INTEGER DEFAULT 1")
+    _add("pie_events", "home_from", "TEXT")
+    _add("pie_events", "home_to", "TEXT")
     _add("pie_responses", "fulfillment", "TEXT")
     _add("pie_responses", "address", "TEXT")
     _add("pie_responses", "want_date", "TEXT")
@@ -356,6 +358,18 @@ def edit_event(event_id=None):
         cant_make_prompt = (f.get("cant_make_prompt") or "").strip()[:500] or DEFAULT_CANT_MAKE
         home_address = (f.get("home_address") or "").strip()[:250]
         offer_delivery = 1 if f.get("offer_delivery") else 0
+        home_from = (f.get("home_from") or "").strip()
+        home_to = (f.get("home_to") or "").strip()
+        try:
+            datetime.strptime(home_from, "%Y-%m-%d")
+        except ValueError:
+            home_from = ""
+        try:
+            datetime.strptime(home_to, "%Y-%m-%d")
+        except ValueError:
+            home_to = ""
+        if home_from and home_to and home_to < home_from:
+            home_from, home_to = home_to, home_from
         flyer_image = ev["flyer_image"] if ev else None
         if f.get("remove_flyer"):
             flyer_image = None
@@ -371,17 +385,18 @@ def edit_event(event_id=None):
         cur = conn.cursor()
         if ev:
             cur.execute("""UPDATE pie_events SET title=?, message=?, order_by=?, pie_types=?, price_note=?,
-                           cant_make_prompt=?, flyer_image=?, home_address=?, offer_delivery=? WHERE id=?""",
+                           cant_make_prompt=?, flyer_image=?, home_address=?, offer_delivery=?,
+                           home_from=?, home_to=? WHERE id=?""",
                         (title, message, order_by, pie_types, price_note, cant_make_prompt, flyer_image,
-                         home_address, offer_delivery, ev["id"]))
+                         home_address, offer_delivery, home_from, home_to, ev["id"]))
             eid = ev["id"]
         else:
             token = secrets.token_urlsafe(9)
             cur.execute("""INSERT INTO pie_events (owner_id, owner_role, token, title, message, order_by, pie_types,
-                           price_note, cant_make_prompt, flyer_image, home_address, offer_delivery)
-                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)""",
+                           price_note, cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                         (user["id"], user["role"], token, title, message, order_by, pie_types, price_note,
-                         cant_make_prompt, flyer_image, home_address, offer_delivery))
+                         cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to))
             eid = cur.lastrowid
 
         # pickup slots: update existing, add new, remove the ones taken off the form
@@ -417,7 +432,7 @@ def edit_event(event_id=None):
         return redirect(url_for("pies.event_detail", event_id=eid))
 
     defaults = {"pie_types": DEFAULT_PIES, "cant_make_prompt": DEFAULT_CANT_MAKE, "title": "Holiday Pie Pickup",
-                "offer_delivery": 1, "home_address": ""}
+                "offer_delivery": 1, "home_address": "", "home_from": "", "home_to": ""}
     return render_template("pies/edit.html", ev=dict(ev) if ev else defaults, slots=slots, is_new=ev is None,
                            role=user["role"])
 
@@ -701,7 +716,9 @@ def public_event(token):
     brand = _branding(ev["owner_id"])
     closed = _is_closed(ev)
     ctx = dict(ev=dict(ev), slots=slots, pies=_pie_list(ev), brand=brand, closed=closed,
-               fmt_order_by=fmt_date(ev["order_by"]), form={}, today=date.today().isoformat())
+               fmt_order_by=fmt_date(ev["order_by"]), form={}, today=date.today().isoformat(),
+               home_min=max([x for x in (date.today().isoformat(), ev["home_from"] or "") if x]),
+               home_max=ev["home_to"] or "", home_range=" to ".join(x for x in (fmt_date(ev["home_from"]), fmt_date(ev["home_to"])) if x))
 
     if request.method == "POST":
         f = request.form
@@ -769,6 +786,9 @@ def public_event(token):
                                 err = "Please choose the day and time you would like to pick up."
                             elif not d_ok:
                                 err = "Please choose a day that has not passed yet."
+                            elif (ev["home_from"] and want_date < ev["home_from"]) or (ev["home_to"] and want_date > ev["home_to"]):
+                                rng = " to ".join(x for x in (fmt_date(ev["home_from"]), fmt_date(ev["home_to"])) if x)
+                                err = f"Please choose a day between {rng}."
                             else:
                                 where = ev["home_address"].strip()
                                 slot_lbl = f"Home pickup, {fmt_date(want_date)} at {fmt_time(want_time)}"
