@@ -289,6 +289,12 @@ def _is_closed(ev):
     return False
 
 
+def _is_event_owner(ev):
+    """True when the person signed in right now is the host of this event."""
+    u = _owner()
+    return bool(u and u["id"] == ev["owner_id"])
+
+
 def _public_url(ev):
     return url_for("pies.public_event", token=ev["token"], _external=True)
 
@@ -758,6 +764,9 @@ def public_delete(token, edit_token):
     r = _response_by_edit_token(ev, edit_token)
     if not r:
         abort(404)
+    if _is_closed(ev) and not _is_event_owner(ev):
+        flash("Orders are locked in, so this response can no longer be changed or cancelled.", "error")
+        return redirect(url_for("pies.public_event", token=token))
     conn = _db()
     conn.execute("DELETE FROM pie_responses WHERE id=?", (r["id"],))
     conn.commit()
@@ -820,7 +829,9 @@ def public_event(token, edit_token=None):
                 s["taken"] -= (editing_row["quantity"] or 0)
                 s["full"] = False
     brand = _branding(ev["owner_id"])
-    closed = _is_closed(ev) and not editing_row
+    # After the order-by date (or when sign-ups are closed) nothing can change for guests, because the
+    # orders are being placed. Only the host, signed in, can still adjust a response.
+    closed = _is_closed(ev) and not (editing_row and _is_event_owner(ev))
     ctx = dict(ev=dict(ev), slots=slots, pies=_pie_list(ev), brand=brand, closed=closed,
                editing=edit_token if editing_row else "",
                fmt_order_by=fmt_date(ev["order_by"]), form=_form_from_response(editing_row) if editing_row else {},
@@ -955,6 +966,7 @@ def public_thanks(token):
     answer = session.get(f"pie_{token}") or {}
     cal = answer.get("cal")
     return render_template("pies/thanks.html", ev=dict(ev), brand=_branding(ev["owner_id"]), answer=answer,
+                           locked=_is_closed(ev), order_by_label=fmt_date(ev["order_by"]),
                            gcal=google_cal_url(cal) if cal else "",
                            ics_url=url_for("pies.public_calendar", token=token) if cal and _cal_times(cal.get("date"), cal.get("start"), cal.get("end"))[0] else "")
 
@@ -984,7 +996,8 @@ def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, note
     if cal and google_cal_url(cal):
         extras += f"Add to your calendar: {google_cal_url(cal)}\n"
     if edit_link:
-        extras += f"Change or cancel your response: {edit_link}\n"
+        until = fmt_date(ev.get("order_by")) if ev.get("order_by") else ""
+        extras += f"Change or cancel your response{(' (until ' + until + ')') if until else ''}: {edit_link}\n"
     if extras:
         extras = "\n" + extras
     if choice == "pickup":
