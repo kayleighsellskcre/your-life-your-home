@@ -1,0 +1,22 @@
+{% if tc_up %}
+<style>
+  .tcup { background:#fff; border:1px solid #E4DCCB; border-radius:14px; padding:1rem 1.2rem; margin-bottom:1rem; }
+  .tcup h3 { font-family:'Playfair Display',serif; font-size:1.1rem; margin:0 0 .5rem; color:#1F2A24; }
+  .tcup a.row { display:flex; align-items:center; gap:.7rem; padding:.45rem 0; border-bottom:1px solid #F0EADB; text-decoration:none; color:#26302A; }
+  .tcup a.row:last-child { border-bottom:0; }
+  .tcup .nm { flex:1; font-weight:600; font-size:.92rem; }
+  .tcup .nm small { display:block; font-weight:400; color:#6B746C; }
+  .tcup .pill { font-size:.72rem; font-weight:700; padding:.15rem .6rem; border-radius:999px; background:#EEF4E8; color:#364A2B; }
+  .tcup .pill.soon { background:#F6EEDC; color:#6F5624; }
+  .tcup .pill.late { background:#F6E3DE; color:#8C3A28; }
+</style>
+<div class="tcup">
+  <h3>Coming up</h3>
+  {% for r in tc_up %}
+  <a class="row" href="{{ url_for('agent_transaction_detail', tx_id=r.transaction_id) }}#contract-card">
+    <div class="nm">{{ r.label }}<small>{{ r.property_address }} &middot; {{ r.pretty }}</small></div>
+    <span class="pill {{ 'late' if r.days < 0 else ('soon' if r.days <= 2 else '') }}">{{ r.when }}</span>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}

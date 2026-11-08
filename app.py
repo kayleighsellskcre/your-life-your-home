@@ -6803,6 +6803,7 @@ def agent_transactions():
         user=user,
         transactions=transactions,
         contact_info=contact_info,
+        tc_up=_tc.upcoming_for_agent(user["id"]),
     )
 
 

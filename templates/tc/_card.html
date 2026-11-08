@@ -30,7 +30,7 @@
     {% if tc.upcoming %}
       {% for r in tc.upcoming %}
       <div class="dl">
-        <div class="nm">{{ r.label }}<small>{{ r.pretty }}</small></div>
+        <div class="nm">{{ r.label }}<small>{{ r.pretty }}{% if r.tip %} &middot; {{ r.tip }}{% endif %}</small></div>
         <span class="pill {{ 'late' if r.days is not none and r.days < 0 else ('soon' if r.days is not none and r.days <= 2 else '') }}">{{ r.when }}</span>
         <form method="post" action="{{ url_for('tc.deadline_done', tx_id=transaction.id, key=r.key) }}"><button class="tick" type="submit">Mark done</button></form>
       </div>
@@ -42,8 +42,17 @@
       <a class="b main" href="{{ url_for('tc.sheet', tx_id=transaction.id, kind='shareable', pdf=1) }}">Shareable PDF</a>
       <a class="b" href="{{ url_for('tc.sheet', tx_id=transaction.id, kind='private', pdf=1) }}">My private PDF</a>
       <a class="b" href="{{ url_for('tc.sheet', tx_id=transaction.id, kind='shareable') }}" target="_blank" rel="noopener">View shareable</a>
+      <a class="b" href="{{ url_for('tc.deadlines_ics', tx_id=transaction.id) }}">Add deadlines to my calendar</a>
     </div>
     <p class="sub" style="margin:.4rem 0 0;font-size:.8rem;">The shareable one never shows your clients' phone or email. The private one is marked internal.</p>
+
+    <details>
+      <summary>Send my clients their dates</summary>
+      {% if tc.client_emails or transaction.client_email %}
+      <p class="sub" style="margin:.5rem 0 .6rem;">A warm email with all their key dates, sent only to {{ (tc.client_emails or [transaction.client_email])|join(', ') }}. You get a copy.</p>
+      <form method="post" action="{{ url_for('tc.client_update', tx_id=transaction.id) }}"><button class="b main" type="submit">Send it</button></form>
+      {% else %}<p class="sub" style="margin:.5rem 0 0;">Add your clients' emails in the contract details to send them their dates.</p>{% endif %}
+    </details>
 
     <details>
       <summary>Send the shareable sheet</summary>

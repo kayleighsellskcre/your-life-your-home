@@ -234,6 +234,50 @@ def deadlines(tx_id):
     return rows
 
 
+TIPS = {
+    "earnest": "Check that title has it and ask for the receipt.",
+    "inspection": "Make sure inspections are booked and any repair request goes out in time.",
+    "appraisal": "Confirm the appraisal is ordered and keep your buyers posted.",
+    "loan": "Check in with the lender on the commitment.",
+    "walkthrough": "Remind your buyers and make sure the utilities are on.",
+    "closing": "Confirm the time and place, and tell your buyers what to bring.",
+}
+
+
+def upcoming_for_agent(agent_id, days=14, limit=6):
+    """Open deadlines across all of an agent's active transactions: overdue first, then the next two weeks."""
+    cutoff = (date.today() + timedelta(days=days)).isoformat()
+    conn = _db()
+    rows = [dict(r) for r in conn.execute("""SELECT d.*, t.property_address FROM transaction_deadlines d
+                JOIN transactions t ON t.id = d.transaction_id
+                WHERE t.agent_id=? AND COALESCE(t.status,'active')='active' AND COALESCE(d.done,0)=0 AND d.due_date <= ?
+                ORDER BY d.due_date LIMIT ?""", (agent_id, cutoff, limit)).fetchall()]
+    conn.close()
+    today = date.today()
+    for r in rows:
+        dd = _d(r["due_date"])
+        r["pretty"] = short_date(dd)
+        r["days"] = (dd - today).days if dd else 0
+        r["when"] = ("Overdue" if r["days"] < 0 else "Today" if r["days"] == 0 else "Tomorrow" if r["days"] == 1 else f"In {r['days']} days")
+    return rows
+
+
+def sanity_warnings(d):
+    """Gentle heads-ups about dates that look off. Never blocks saving."""
+    out = []
+    contract, closing = _d(d.get("contract_date")), _d(d.get("closing_date"))
+    if not contract:
+        out.append("Add the contract date so your deadlines can be worked out.")
+    if contract and closing and closing < contract:
+        out.append("The closing date is before the contract date. Please double check.")
+    for key, label, due in compute_deadlines(d):
+        if closing and key != "closing" and due > closing:
+            out.append(f"{label} ({short_date(due)}) falls after closing. Please double check.")
+        if due.weekday() == 6 and key in ("earnest", "inspection"):
+            out.append(f"{label} lands on a Sunday ({short_date(due)}). Worth confirming with the contract.")
+    return out[:3]
+
+
 # ───────────────────────── sheet building ─────────────────────────
 def money(v):
     v = (v or "").strip()
@@ -381,6 +425,8 @@ def contract(tx_id):
         except Exception:
             pass
         flash("Saved. Your deadlines are set and both sheets are ready.", "success")
+        for w in sanity_warnings(new):
+            flash("Heads up: " + w, "error")
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
     shown = {**defaults(tx, user), **{k: v for k, v in data.items() if v not in (None, "")}} if data else defaults(tx, user)
     return render_template("tc/contract_form.html", tx=tx, sections=SECTIONS, d=shown, has_saved=bool(data),
@@ -493,6 +539,84 @@ def new_link(tx_id):
     return redirect(url_for("agent_transaction_detail", tx_id=tx_id) + "#contract-card")
 
 
+@bp.route("/agent/transactions/<int:tx_id>/deadlines.ics")
+def deadlines_ics(tx_id):
+    """Every open deadline for this transaction as a calendar file (one tap to add them all)."""
+    user, tx = _mine(tx_id)
+    if not tx:
+        return redirect(url_for("login", role="agent"))
+    rows = [r for r in deadlines(tx_id) if not r["done"]]
+    if not rows:
+        abort(404)
+
+    def esc(v):
+        return str(v or "").replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\n", "\\n")
+    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Your Life Your Home//Deadlines//EN", "CALSCALE:GREGORIAN"]
+    for r in rows:
+        dd = _d(r["due_date"])
+        lines += ["BEGIN:VEVENT", f"UID:{tx_id}-{r['key']}@yourlifeyourhome", "DTSTAMP:" + datetime.utcnow().strftime("%Y%m%dT%H%M%SZ"),
+                  f"DTSTART;VALUE=DATE:{dd.strftime('%Y%m%d')}", f"DTEND;VALUE=DATE:{(dd + timedelta(days=1)).strftime('%Y%m%d')}",
+                  f"SUMMARY:{esc(r['label'] + ': ' + (tx.get('property_address') or ''))}",
+                  f"DESCRIPTION:{esc(TIPS.get(r['key'], ''))}",
+                  "BEGIN:VALARM", "TRIGGER:-P1D", "ACTION:DISPLAY", "DESCRIPTION:Coming up tomorrow", "END:VALARM", "END:VEVENT"]
+    lines.append("END:VCALENDAR")
+    return Response("\r\n".join(lines) + "\r\n", mimetype="text/calendar",
+                    headers={"Content-Disposition": f"attachment; filename=deadlines-{_slug(tx)}.ics"})
+
+
+def _first_names(full):
+    names = []
+    for part in re.split(r"\s+and\s+|&|,|/", full or ""):
+        w = part.strip().split(" ")[0]
+        if w and w not in names:
+            names.append(w)
+    if not names:
+        return "there"
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+
+
+@bp.route("/agent/transactions/<int:tx_id>/client-update", methods=["POST"])
+def client_update(tx_id):
+    """A warm email to the clients with their key dates. Goes only to the clients themselves."""
+    user, tx = _mine(tx_id)
+    if not tx:
+        return redirect(url_for("login", role="agent"))
+    back = redirect(url_for("agent_transaction_detail", tx_id=tx_id) + "#contract-card")
+    data, _ = load(tx_id)
+    rows = [r for r in deadlines(tx_id) if not r["done"]]
+    emails = []
+    for e in _first_emails((data.get("buyer_emails") or "") + " " + (tx.get("client_email") or "")):
+        if e.lower() not in emails:
+            emails.append(e.lower())
+    if not emails or not rows:
+        flash("Add your clients' emails and the contract dates first, then you can send this.", "error")
+        return back
+    sell = (tx.get("side") or "") == "seller"
+    home = f"the sale of your home at {tx.get('property_address')}" if sell else f"your new home at {tx.get('property_address')}"
+    lines = []
+    for r in rows:
+        extra = f" at {data['closing_time']}" if r["key"] == "closing" and data.get("closing_time") not in (None, "", "TBD") else ""
+        lines.append(f"  {short_date(r['due_date'])}: {r['label']}{extra}")
+    sender = user.get("name") or "Your agent"
+    body = (f"Hi {_first_names(tx.get('client_name'))},\n\nCongratulations again on {home}! Here are the dates to keep in mind, "
+            f"so nothing sneaks up on you:\n\n" + "\n".join(lines) +
+            "\n\nYou do not need to do anything about most of these. I am keeping track of everything and will let you know "
+            "the moment I need something from you. If you have any questions at all, just reply to this email.\n\n"
+            f"Warmly,\n{sender}")
+    send, bg = _H["send_email"], _H["bg"]
+    for e in emails[:4]:
+        bg(send, e, f"Your important dates: {tx.get('property_address')}", body, sender, user.get("email"))
+    if user.get("email"):
+        bg(send, user["email"], f"Copy: dates sent to your clients ({tx.get('property_address')})",
+           f"Sent to: {', '.join(emails[:4])}\n\n" + body)
+    try:
+        _H["log"](tx_id, "contract", "Sent the clients their key dates", user["id"])
+    except Exception:
+        pass
+    flash("Sent your clients their dates. A copy is in your inbox.", "success")
+    return back
+
+
 # ───────────────────────── fill from the contract PDF ─────────────────────────
 AI_FIELDS = {
     "contract_date": "contract/acceptance date, YYYY-MM-DD", "effective_date": "effective date if stated, YYYY-MM-DD",
@@ -568,6 +692,8 @@ def card_context(tx_id):
     data, token = load(tx_id)
     dl = deadlines(tx_id) if data else []
     upcoming = [r for r in dl if not r["done"]][:4]
+    for r in upcoming:
+        r["tip"] = TIPS.get(r["key"], "")
     missing = []
     if data:
         for k, label in (("contract_date", "contract date"), ("closing_date", "closing date"), ("earnest_amount", "earnest money"),
@@ -581,7 +707,8 @@ def card_context(tx_id):
             for e in _first_emails(data.get(key)):
                 if e.lower() not in [r["email"] for r in recipients]:
                     recipients.append({"email": e.lower(), "label": label})
-    return {"has_data": bool(data), "upcoming": upcoming, "all": dl, "missing": missing, "recipients": recipients,
+    client_emails = sorted({e.lower() for e in _first_emails(data.get("buyer_emails") or "")}) if data else []
+    return {"has_data": bool(data), "client_emails": client_emails, "upcoming": upcoming, "all": dl, "missing": missing, "recipients": recipients,
             "link": url_for("tc.public_sheet", token=token, _external=True) if token else ""}
 
 
