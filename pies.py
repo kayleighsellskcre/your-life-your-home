@@ -593,6 +593,22 @@ def flyer(event_id):
                            public_url=url, qr=_qr_data_url(url))
 
 
+@bp.route("/pies/<int:event_id>/qr.png")
+def qr_png(event_id):
+    """The sign-up link as a QR code image you can save, text or email. ?download=1 saves it."""
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    import qrcode
+    img = qrcode.make(_public_url(ev), box_size=14, border=4)
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    headers = {}
+    if request.args.get("download"):
+        headers["Content-Disposition"] = "attachment; filename=pie-signup-qr-code.png"
+    return Response(buf.getvalue(), mimetype="image/png", headers=headers)
+
+
 @bp.route("/pies/<int:event_id>/ai-art", methods=["POST"])
 def ai_art(event_id):
     """Optional: ask OpenAI for flyer artwork (no text in the picture). Needs OPENAI_API_KEY."""
@@ -616,29 +632,47 @@ def ai_art(event_id):
               "cozy and inviting, cream, olive green and golden brown color palette, wide composition with calm empty space "
               "near the top for a headline. Absolutely no text, letters or numbers anywhere in the image. "
               + (f"Extra direction: {style}" if style else ""))
-    try:
-        import requests
-        r = requests.post("https://api.openai.com/v1/images/generations",
-                          headers={"Authorization": f"Bearer {key}"},
-                          json={"model": os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1"), "prompt": prompt,
-                                "size": "1536x1024", "n": 1},
-                          timeout=120)
-        r.raise_for_status()
-        item = r.json()["data"][0]
-        if item.get("b64_json"):
-            raw = base64.b64decode(item["b64_json"])
-        else:
-            raw = requests.get(item["url"], timeout=60).content
-        from PIL import Image
-        img = Image.open(io.BytesIO(raw)).convert("RGB")
-        if img.width > 1400:
-            img = img.resize((1400, round(img.height * 1400 / img.width)), Image.LANCZOS)
-        buf = io.BytesIO()
-        img.save(buf, "JPEG", quality=82, optimize=True)
-        art = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
-    except Exception as exc:
-        current_app.logger.warning("pie ai art failed: %s", exc)
-        flash("We couldn't create artwork just now. Please try again in a minute.", "error")
+    import requests
+    wanted = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
+    attempts = [(wanted, "1536x1024", {})]
+    if wanted != "dall-e-3":
+        attempts.append(("dall-e-3", "1792x1024", {"response_format": "b64_json"}))
+    art, problem = None, ""
+    for model, size, extra in attempts:
+        try:
+            r = requests.post("https://api.openai.com/v1/images/generations",
+                              headers={"Authorization": f"Bearer {key}"},
+                              json={"model": model, "prompt": prompt, "size": size, "n": 1, **extra}, timeout=150)
+            if r.status_code != 200:
+                try:
+                    msg = r.json().get("error", {}).get("message", "")
+                except Exception:
+                    msg = r.text[:200]
+                current_app.logger.warning("pie ai art %s -> %s %s", model, r.status_code, msg)
+                if r.status_code == 401:
+                    problem = "The OpenAI key on the site isn't being accepted. Please check OPENAI_API_KEY."
+                elif r.status_code == 429 or "billing" in msg.lower() or "quota" in msg.lower():
+                    problem = "Your OpenAI account is out of credit or at its limit. Please check billing at platform.openai.com."
+                elif r.status_code == 403 or "verif" in msg.lower():
+                    problem = "OpenAI needs your organization verified before it will make images. You can verify at platform.openai.com."
+                else:
+                    problem = "OpenAI could not make the picture just now."
+                continue
+            item = r.json()["data"][0]
+            raw = base64.b64decode(item["b64_json"]) if item.get("b64_json") else requests.get(item["url"], timeout=60).content
+            from PIL import Image
+            img = Image.open(io.BytesIO(raw)).convert("RGB")
+            if img.width > 1400:
+                img = img.resize((1400, round(img.height * 1400 / img.width)), Image.LANCZOS)
+            buf = io.BytesIO()
+            img.save(buf, "JPEG", quality=82, optimize=True)
+            art = "data:image/jpeg;base64," + base64.b64encode(buf.getvalue()).decode()
+            break
+        except Exception as exc:
+            current_app.logger.warning("pie ai art failed (%s): %s", model, exc)
+            problem = problem or "We couldn't reach OpenAI just now."
+    if not art:
+        flash(f"We couldn't create artwork yet. {problem} Your own flyer or the built-in flyer still work in the meantime.", "error")
         return back
     conn = _db()
     conn.execute("UPDATE pie_events SET art_image=? WHERE id=?", (art, ev["id"]))
