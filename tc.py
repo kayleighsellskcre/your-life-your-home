@@ -21,6 +21,7 @@ PRIVATE_KEYS = ("buyer_phones", "buyer_emails", "internal_notes")
 
 SECTIONS = [
     ("The deal", True, [
+        ("purchase_price", "Purchase price", "text", "$270,000"),
         ("contract_date", "Contract date", "date", ""),
         ("effective_date", "Effective date (only if different)", "date", ""),
         ("closing_date", "Closing date", "date", ""),
@@ -396,7 +397,8 @@ def defaults(tx, user):
     p = dict(get_user_profile(user["id"]) or {})
     brokerage = p.get("brokerage_name") or p.get("team_name") or ""
     first = (user.get("name") or "").split(" ")[0]
-    d = {"possession": "At closing", "earnest_due_days": "3", "inspection_days": "10",
+    price = tx.get("purchase_price")
+    d = {"purchase_price": ("{:,.0f}".format(float(price)) if price else ""), "possession": "At closing", "earnest_due_days": "3", "inspection_days": "10",
          "resolution_terms": "5 calendar days after seller receives notice", "contingency": "None",
          "buyer_phones": tx.get("client_phone") or "", "buyer_emails": tx.get("client_email") or "",
          "closing_date": tx.get("target_close_date") or "", "closing_time": "TBD",
@@ -409,6 +411,30 @@ def defaults(tx, user):
 
 
 # ───────────────────────── pages ─────────────────────────
+def _sync_transaction(tx, user, d):
+    """Keep the transaction itself in step with the contract details: price, closing date and stage."""
+    price = None
+    digits = re.sub(r"[^\d.]", "", d.get("purchase_price") or "")
+    try:
+        price = float(digits) if digits else None
+    except ValueError:
+        price = None
+    closing = d.get("closing_date") if _d(d.get("closing_date")) else None
+    conn = _db()
+    if price:
+        conn.execute("UPDATE transactions SET purchase_price=? WHERE id=?", (price, tx["id"]))
+    if closing:
+        conn.execute("UPDATE transactions SET target_close_date=? WHERE id=?", (closing, tx["id"]))
+    conn.commit()
+    conn.close()
+    if d.get("contract_date") and (tx.get("current_stage") or "pre_contract") == "pre_contract":
+        try:
+            from transaction_helpers import update_transaction_stage
+            update_transaction_stage(tx["id"], "under_contract", user["id"], auto_changed=True)
+        except Exception:
+            pass
+
+
 @bp.route("/agent/transactions/<int:tx_id>/contract", methods=["GET", "POST"])
 def contract(tx_id):
     user, tx = _mine(tx_id)
@@ -427,6 +453,7 @@ def contract(tx_id):
             new[k] = v
         token = save(tx_id, new)
         sync_deadlines(tx_id, new)
+        _sync_transaction(tx, user, new)
         try:
             _H["log"](tx_id, "contract", "Contract details updated", user["id"])
         except Exception:

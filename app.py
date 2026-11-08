@@ -6776,6 +6776,9 @@ def agent_transactions():
                 automation.link_transaction_parties(new_tx_id, request.form.get("lender_email", "").strip())
                 _bg(automation.invite_client_if_needed, new_tx_id, send_reminder_email, _site_url())
                 flash("Transaction created!", "success")
+                if db_stage != "pre_contract":
+                    flash("Let us add the contract details next, so your deadlines and sheets are ready.", "success")
+                    return redirect(url_for("tc.contract", tx_id=new_tx_id))
             except Exception as e:
                 flash("We could not create that transaction. Please try again in a moment.", "error")
 
