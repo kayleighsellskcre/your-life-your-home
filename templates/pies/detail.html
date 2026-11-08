@@ -16,7 +16,7 @@
     </div>
     <p class="pie-hint" style="margin:.6rem 0 0;">Paste it into a text, email or social post. Clients don't need an account.</p>
     <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;margin-top:.9rem;">
-      <img src="{{ url_for('pies.qr_png', event_id=ev.id) }}" alt="QR code for your sign-up link" style="width:110px;height:110px;border:1px solid #E4EBD8;border-radius:10px;padding:4px;background:#fff;">
+      <img src="{{ url_for('pies.qr_png', event_id=ev.id) }}" alt="QR code for your sign-up link" style="width:110px;height:110px;border:1px solid #F1E6D8;border-radius:10px;padding:4px;background:#fff;">
       <div><b style="font-size:.95rem;">QR code</b><p class="pie-hint" style="margin:.2rem 0 .5rem;">People scan it with their phone camera to open your sign-up page. Save it to text, email or add to your own flyer.</p>
       <a class="pie-btn secondary small" href="{{ url_for('pies.qr_png', event_id=ev.id, download=1) }}">Download QR code</a></div>
     </div>
@@ -41,13 +41,13 @@
     {% if pie_totals %}
     <div class="pie-card" style="margin:0;">
       <h2>Bake list</h2>
-      {% for k, v in pie_totals.items() %}<div style="display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid #EEF1E8;"><span>{{ k }}</span><b>{{ v }}</b></div>{% endfor %}
+      {% for k, v in pie_totals.items() %}<div style="display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid #F5EEE4;"><span>{{ k }}</span><b>{{ v }}</b></div>{% endfor %}
     </div>
     {% endif %}
     {% if slots %}
     <div class="pie-card" style="margin:0;">
       <h2>Pickups</h2>
-      {% for s in slots %}<div style="padding:.3rem 0;border-bottom:1px solid #EEF1E8;font-size:.9rem;">{{ s.label }}{% if s.location %} <a class="pie-maplink" href="{{ maps_url(s.location) }}" target="_blank" rel="noopener">Directions</a>{% endif %}<br><span class="pie-hint">{{ s.taken }} pie{{ '' if s.taken == 1 else 's' }}{% if s.capacity %} of {{ s.capacity }}{% endif %}</span></div>{% endfor %}
+      {% for s in slots %}<div style="padding:.3rem 0;border-bottom:1px solid #F5EEE4;font-size:.9rem;">{{ s.label }}{% if s.location %} <a class="pie-maplink" href="{{ maps_url(s.location) }}" target="_blank" rel="noopener">Directions</a>{% endif %}<br><span class="pie-hint">{{ s.taken }} pie{{ '' if s.taken == 1 else 's' }}{% if s.capacity %} of {{ s.capacity }}{% endif %}</span></div>{% endfor %}
     </div>
     {% endif %}
   </div>
@@ -91,7 +91,7 @@
     </table>
     </div>
     {% else %}
-    <p style="color:#55684F;margin:0;">No responses yet. Share your link to get started.</p>
+    <p style="color:#7D6858;margin:0;">No responses yet. Share your link to get started.</p>
     {% endif %}
   </div>
 

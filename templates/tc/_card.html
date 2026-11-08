@@ -3,19 +3,19 @@
   #contract-card h2 { font-family:'Playfair Display',serif; font-size:1.25rem; margin:0 0 .15rem; color:#1F2A24; }
   #contract-card .sub { color:#6B746C; font-size:.88rem; margin:0 0 .8rem; }
   #contract-card .btns { display:flex; gap:.5rem; flex-wrap:wrap; margin:.2rem 0 .2rem; }
-  #contract-card .b { display:inline-block; font:inherit; font-size:.85rem; font-weight:600; padding:.45rem .95rem; border-radius:999px; border:1px solid #5E6E4A; background:#fff; color:#364A2B !important; text-decoration:none; cursor:pointer; }
-  #contract-card .b.main { background:#364A2B; color:#fff !important; }
+  #contract-card .b { display:inline-block; font:inherit; font-size:.85rem; font-weight:600; padding:.45rem .95rem; border-radius:999px; border:1px solid #8F6244; background:#fff; color:#7A5238 !important; text-decoration:none; cursor:pointer; }
+  #contract-card .b.main { background:#7A5238; color:#fff !important; }
   #contract-card .dl { display:flex; align-items:center; gap:.7rem; padding:.5rem 0; border-bottom:1px solid #F0EADB; }
   #contract-card .dl:last-child { border-bottom:0; }
   #contract-card .dl .nm { flex:1; font-weight:600; font-size:.93rem; }
   #contract-card .dl .nm small { display:block; font-weight:400; color:#6B746C; }
-  #contract-card .pill { font-size:.72rem; font-weight:700; padding:.15rem .6rem; border-radius:999px; background:#EEF4E8; color:#364A2B; }
+  #contract-card .pill { font-size:.72rem; font-weight:700; padding:.15rem .6rem; border-radius:999px; background:#FBF6EE; color:#7A5238; }
   #contract-card .pill.soon { background:#F6EEDC; color:#6F5624; }
   #contract-card .pill.late { background:#F6E3DE; color:#8C3A28; }
   #contract-card form { margin:0; }
-  #contract-card .tick { font:inherit; font-size:.8rem; background:none; border:1px solid #C9D3BC; color:#364A2B; padding:.2rem .6rem; border-radius:8px; cursor:pointer; }
+  #contract-card .tick { font:inherit; font-size:.8rem; background:none; border:1px solid #C9D3BC; color:#7A5238; padding:.2rem .6rem; border-radius:8px; cursor:pointer; }
   #contract-card details { margin-top:.8rem; border-top:1px solid #F0EADB; padding-top:.7rem; }
-  #contract-card summary { cursor:pointer; font-weight:600; font-size:.9rem; color:#364A2B; }
+  #contract-card summary { cursor:pointer; font-weight:600; font-size:.9rem; color:#7A5238; }
   #contract-card .chk { display:flex; gap:.5rem; align-items:center; font-size:.9rem; margin:.35rem 0; }
   #contract-card .chk input { width:auto; }
   #contract-card input.t { width:100%; padding:.5rem .7rem; border:1px solid #D8D2C0; border-radius:8px; font:inherit; margin-top:.3rem; }
@@ -26,7 +26,7 @@
     <p class="sub">Add the contract details once and we will do the rest: your deadlines, a private sheet and a shareable one, and a friendly reminder before anything is due.</p>
     <div class="btns"><a class="b main" href="{{ url_for('tc.contract', tx_id=transaction.id) }}">Add contract details</a></div>
   {% else %}
-    <p class="sub">{% if tc.missing %}Still missing: {{ tc.missing|join(', ') }}. {% endif %}<a href="{{ url_for('tc.contract', tx_id=transaction.id) }}" style="color:#364A2B;">Edit details</a></p>
+    <p class="sub">{% if tc.missing %}Still missing: {{ tc.missing|join(', ') }}. {% endif %}<a href="{{ url_for('tc.contract', tx_id=transaction.id) }}" style="color:#7A5238;">Edit details</a></p>
     {% if tc.upcoming %}
       {% for r in tc.upcoming %}
       <div class="dl">

@@ -9,19 +9,19 @@
 <style>
   @page { size: letter; margin: 0; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: #E9E5DC; font-family: 'Lato', Arial, sans-serif; color: #364A2B; }
+  body { margin: 0; background: #E9E5DC; font-family: 'Lato', Arial, sans-serif; color: #7A5238; }
   .bar { max-width: 8.5in; margin: 1rem auto 0; padding: 0 .5rem; display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; }
-  .bar button, .bar a { padding: .6rem 1.1rem; border-radius: 10px; border: 1px solid #5E6E4A; background: #364A2B; color: #fff; font: 700 .9rem 'Lato', Arial, sans-serif; cursor: pointer; text-decoration: none; }
-  .bar a { background: #fff; color: #364A2B; }
-  .bar span { font-size: .85rem; color: #55684F; }
-  .sheet { width: 8.5in; min-height: 11in; margin: 1rem auto 2rem; background: #F4F8F0; position: relative; overflow: hidden; box-shadow: 0 6px 30px rgba(0,0,0,.15); display: flex; flex-direction: column; }
-  .upload { background: #E4EBD8; padding: .25in .3in 0; text-align: center; }
+  .bar button, .bar a { padding: .6rem 1.1rem; border-radius: 10px; border: 1px solid #8F6244; background: #7A5238; color: #fff; font: 700 .9rem 'Lato', Arial, sans-serif; cursor: pointer; text-decoration: none; }
+  .bar a { background: #fff; color: #7A5238; }
+  .bar span { font-size: .85rem; color: #7D6858; }
+  .sheet { width: 8.5in; min-height: 11in; margin: 1rem auto 2rem; background: #FCF8F2; position: relative; overflow: hidden; box-shadow: 0 6px 30px rgba(0,0,0,.15); display: flex; flex-direction: column; }
+  .upload { background: #F1E6D8; padding: .25in .3in 0; text-align: center; }
   .upload img { max-width: 100%; max-height: 7.4in; width: auto; height: auto; display: block; margin: 0 auto; border-radius: 6px 6px 0 0; box-shadow: 0 4px 18px rgba(54,74,43,.18); }
-  .art { height: 3.6in; background: #E4EBD8 center/cover no-repeat; position: relative; }
-  .art.empty { background: linear-gradient(135deg, #E4EBD8, #D2DEC0); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-size: 8rem; color: rgba(54,74,43,.4); }
+  .art { height: 3.6in; background: #F1E6D8 center/cover no-repeat; position: relative; }
+  .art.empty { background: linear-gradient(135deg, #F1E6D8, #D2DEC0); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-size: 8rem; color: rgba(54,74,43,.4); }
   .body { padding: .45in .6in .3in; flex: 1; }
-  .kicker { text-transform: uppercase; letter-spacing: .22em; font-size: .8rem; font-weight: 700; color: #55684F; margin: 0 0 .15in; text-align: center; }
-  h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 3rem; line-height: 1.1; margin: 0 0 .15in; text-align: center; color: #364A2B; }
+  .kicker { text-transform: uppercase; letter-spacing: .22em; font-size: .8rem; font-weight: 700; color: #7D6858; margin: 0 0 .15in; text-align: center; }
+  h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 3rem; line-height: 1.1; margin: 0 0 .15in; text-align: center; color: #7A5238; }
   .msg { text-align: center; font-size: 1.08rem; line-height: 1.55; color: #3d4f35; margin: 0 auto .28in; max-width: 6in; white-space: pre-line; }
   .cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: .35in; margin-bottom: .25in; }
   h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.15rem; margin: 0 0 .1in; border-bottom: 2px solid #C8B497; padding-bottom: .05in; }
@@ -31,9 +31,9 @@
   .cta { display: flex; align-items: center; gap: .3in; background: #fff; border: 1px solid rgba(94,110,74,.25); border-radius: 14px; padding: .2in .3in; }
   .cta img.qr { width: 1.35in; height: 1.35in; }
   .cta b { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; display: block; margin-bottom: .05in; }
-  .cta .url { font-size: .82rem; word-break: break-all; color: #55684F; margin-top: .06in; }
+  .cta .url { font-size: .82rem; word-break: break-all; color: #7D6858; margin-top: .06in; }
   .cta .by { font-size: .95rem; color: #3d4f35; }
-  .foot { background: #364A2B; color: #fff; padding: .22in .6in; display: flex; align-items: center; gap: .22in; }
+  .foot { background: #7A5238; color: #fff; padding: .22in .6in; display: flex; align-items: center; gap: .22in; }
   .foot img.avatar { width: .8in; height: .8in; border-radius: 50%; object-fit: cover; border: 2px solid #fff; }
   .foot .who b { font-family: 'Playfair Display', Georgia, serif; font-size: 1.3rem; display: block; }
   .foot .who span { font-size: .95rem; opacity: .92; display: block; }

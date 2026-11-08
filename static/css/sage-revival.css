@@ -3,12 +3,12 @@
    Quiet Luxury · Serenity · Earthy Warmth
 
    Palette (all greens are warm-toned, not cool/gray-green):
-   --sage         #8C9E78  Warm dusty sage   (primary accent, buttons)
-   --sage-dark    #5E6E4A  Warm olive depth  (hover, depth)
-   --sage-deeper  #2E3D25  Deep sage espresso (header, rich depth)
-   --sage-light   #B8C9A2  Pale warm sage    (light accents, chips)
-   --sage-tint    #E8EFE0  Sage whisper      (section fills)
-   --sage-mist    #F3F5EC  Warm near-white   (page accents)
+   --sage         #A47551  Warm dusty sage   (primary accent, buttons)
+   --sage-dark    #8F6244  Warm olive depth  (hover, depth)
+   --sage-deeper  #6B4630  Deep sage espresso (header, rich depth)
+   --sage-light   #E3CDB5  Pale warm sage    (light accents, chips)
+   --sage-tint    #F7EFE5  Sage whisper      (section fills)
+   --sage-mist    #FBF7F1  Warm near-white   (page accents)
 
    All warm creams, charcoal browns, and taupes are preserved.
    The green is deliberately warm-leaning (yellow-green, not blue-green)
@@ -17,26 +17,26 @@
 
 /* ── TOKENS ───────────────────────────────────────────────── */
 :root {
-  --sage:         #8C9E78;
-  --sage-dark:    #5E6E4A;
-  --sage-deeper:  #2E3D25;
-  --sage-light:   #B8C9A2;
-  --sage-tint:    #E8EFE0;
-  --sage-mist:    #F3F5EC;
+  --sage:         #A47551;
+  --sage-dark:    #8F6244;
+  --sage-deeper:  #6B4630;
+  --sage-light:   #E3CDB5;
+  --sage-tint:    #F7EFE5;
+  --sage-mist:    #FBF7F1;
 
   /* Override semantic tokens so any component using --esp gets warm sage */
-  --esp:              #8C9E78;
-  --esp-dark:         #5E6E4A;
-  --btn-primary:      #8C9E78;
-  --btn-primary-hover:#5E6E4A;
-  --input-focus:      #8C9E78;
-  --nav-active-bar:   #8C9E78;
-  --header-bg:        linear-gradient(160deg, #364A2B 0%, #2A3C20 100%);
+  --esp:              #A47551;
+  --esp-dark:         #8F6244;
+  --btn-primary:      #A47551;
+  --btn-primary-hover:#8F6244;
+  --input-focus:      #A47551;
+  --nav-active-bar:   #A47551;
+  --header-bg:        linear-gradient(160deg, #9A6F4E 0%, #86593C 100%);
 
   /* Olive aliases (old templates reference these) */
-  --olive-green:        #5E6E4A;
-  --olive-green-dark:   #3F5130;
-  --olive-green-light:  #B8C9A2;
+  --olive-green:        #8F6244;
+  --olive-green-dark:   #7A5238;
+  --olive-green-light:  #E3CDB5;
 }
 
 
@@ -44,9 +44,9 @@
    SITE HEADER — deep warm sage, grounded and serene
    ══════════════════════════════════════════════════════════════ */
 .site-header {
-  background: linear-gradient(160deg, #364A2B 0%, #2A3C20 100%) !important;
-  border-bottom: 1px solid rgba(46,61,37,0.5) !important;
-  box-shadow: 0 2px 16px rgba(30,40,22,0.18) !important;
+  background: linear-gradient(160deg, #9A6F4E 0%, #86593C 100%) !important;
+  border-bottom: 1px solid rgba(104,67,46,0.5) !important;
+  box-shadow: 0 2px 16px rgba(70,45,30,0.18) !important;
 }
 
 /* Keep brand logo soft cream */
@@ -64,7 +64,7 @@
 /* Mobile header */
 @media (max-width: 768px) {
   .site-header {
-    background: #2E3D25 !important;
+    background: #6B4630 !important;
   }
 }
 
@@ -77,115 +77,115 @@
 button[class*="btn-primary"],
 .btn-premium,
 input[type="submit"]:not(.crm-sf-submit) {
-  background: linear-gradient(135deg, #8C9E78 0%, #5E6E4A 100%) !important;
+  background: linear-gradient(135deg, #A47551 0%, #8F6244 100%) !important;
   color: #F5F0EB !important;
 }
 .btn:hover,
 .btn-primary:hover,
 .btn-premium:hover,
 input[type="submit"]:not(.crm-sf-submit):hover {
-  background: linear-gradient(135deg, #5E6E4A 0%, #8C9E78 100%) !important;
+  background: linear-gradient(135deg, #8F6244 0%, #A47551 100%) !important;
   box-shadow: 0 4px 14px rgba(94,110,74,0.28) !important;
   color: #ffffff !important;
 }
 
 /* Financials / inline add buttons */
-.btn-add { background: linear-gradient(135deg,#8C9E78,#5E6E4A) !important; }
-.btn-add:hover { background: linear-gradient(135deg,#5E6E4A,#8C9E78) !important; }
-.btn-coach { background: linear-gradient(135deg,#8C9E78,#5E6E4A) !important; }
+.btn-add { background: linear-gradient(135deg,#A47551,#8F6244) !important; }
+.btn-add:hover { background: linear-gradient(135deg,#8F6244,#A47551) !important; }
+.btn-coach { background: linear-gradient(135deg,#A47551,#8F6244) !important; }
 
 /* Secondary — warm sage border only */
 .btn-secondary,
 button[class*="btn-secondary"] {
-  color: #5E6E4A !important;
-  border-color: rgba(140,158,120,0.4) !important;
+  color: #8F6244 !important;
+  border-color: rgba(164,117,81,0.4) !important;
 }
 .btn-secondary:hover {
-  background: rgba(140,158,120,0.07) !important;
-  border-color: #8C9E78 !important;
-  color: #5E6E4A !important;
+  background: rgba(164,117,81,0.07) !important;
+  border-color: #A47551 !important;
+  color: #8F6244 !important;
 }
 
 /* Gradient accent buttons */
 .btn-ai,
 [class*="ai-btn"],
 [class*="btn-ai"] {
-  background: linear-gradient(135deg, #8C9E78 0%, #B8C9A2 100%) !important;
-  color: #2E3D25 !important;
+  background: linear-gradient(135deg, #A47551 0%, #E3CDB5 100%) !important;
+  color: #6B4630 !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    AGENT HORIZONTAL NAV — cream bg, warm sage accents
    ══════════════════════════════════════════════════════════════ */
-.ylh-nav-title { color: #5E6E4A !important; }
-.ylh-nav-title:hover { color: #5E6E4A !important; }
+.ylh-nav-title { color: #8F6244 !important; }
+.ylh-nav-title:hover { color: #8F6244 !important; }
 
 .ylh-nav-link,
 .ylh-nav-button {
-  color: #4A5A38 !important;
+  color: #85593C !important;
 }
 .ylh-nav-link:hover,
 .ylh-nav-button:hover {
-  background: rgba(140,158,120,0.08) !important;
-  color: #4A5A38 !important;
-  border-bottom-color: rgba(140,158,120,0.4) !important;
+  background: rgba(164,117,81,0.08) !important;
+  color: #85593C !important;
+  border-bottom-color: rgba(164,117,81,0.4) !important;
 }
 .ylh-nav-link.active,
 .ylh-nav-button.active {
-  background: rgba(140,158,120,0.1) !important;
+  background: rgba(164,117,81,0.1) !important;
   color: #3A4D2C !important;
-  border-bottom-color: #8C9E78 !important;
+  border-bottom-color: #A47551 !important;
   font-weight: 700 !important;
 }
 
 /* Dropdown */
 .ylh-dropdown-item:hover {
-  border-left-color: #B8C9A2 !important;
+  border-left-color: #E3CDB5 !important;
 }
 .ylh-dropdown-item.active {
-  background: rgba(140,158,120,0.08) !important;
-  border-left-color: #8C9E78 !important;
+  background: rgba(164,117,81,0.08) !important;
+  border-left-color: #A47551 !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    LENDER / HOMEOWNER SIDEBAR — warm sage active states
    ══════════════════════════════════════════════════════════════ */
-.dashboard-sidebar__title { color: #5E6E4A !important; }
+.dashboard-sidebar__title { color: #8F6244 !important; }
 
 .ylh-menu-button {
-  color: #4A5A38 !important;
+  color: #85593C !important;
 }
 .ylh-menu-button:hover {
-  background: rgba(140,158,120,0.06) !important;
-  color: #4A5A38 !important;
-  border-left-color: rgba(140,158,120,0.35) !important;
+  background: rgba(164,117,81,0.06) !important;
+  color: #85593C !important;
+  border-left-color: rgba(164,117,81,0.35) !important;
 }
 .ylh-menu-button.is-open {
-  color: #5E6E4A !important;
-  border-left-color: #8C9E78 !important;
-  background: rgba(140,158,120,0.08) !important;
+  color: #8F6244 !important;
+  border-left-color: #A47551 !important;
+  background: rgba(164,117,81,0.08) !important;
 }
 
 .ylh-submenu-link {
-  color: #4A5A38 !important;
+  color: #85593C !important;
 }
 .ylh-submenu-link:hover {
-  background: rgba(140,158,120,0.06) !important;
-  color: #4A5A38 !important;
+  background: rgba(164,117,81,0.06) !important;
+  color: #85593C !important;
 }
 .ylh-submenu-link.active {
-  background: rgba(140,158,120,0.12) !important;
-  color: #5E6E4A !important;
-  border-left-color: #8C9E78 !important;
+  background: rgba(164,117,81,0.12) !important;
+  color: #8F6244 !important;
+  border-left-color: #A47551 !important;
 }
-.ylh-submenu-bullet { background: #B8C9A2 !important; }
+.ylh-submenu-bullet { background: #E3CDB5 !important; }
 
 /* Public-facing sidebar nav links */
-.sidebar-nav-link { color: #4A5A38 !important; }
-.sidebar-nav-link:hover { color: #4A5A38 !important; background: rgba(140,158,120,.06) !important; }
-.sidebar-nav-link.active { color: #5E6E4A !important; background: rgba(140,158,120,.1) !important; border-left-color: #8C9E78 !important; }
+.sidebar-nav-link { color: #85593C !important; }
+.sidebar-nav-link:hover { color: #85593C !important; background: rgba(164,117,81,.06) !important; }
+.sidebar-nav-link.active { color: #8F6244 !important; background: rgba(164,117,81,.1) !important; border-left-color: #A47551 !important; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -196,15 +196,15 @@ select:focus,
 textarea:focus,
 .premium-input:focus,
 .premium-select:focus {
-  border-color: #8C9E78 !important;
-  box-shadow: 0 0 0 3px rgba(140,158,120,0.14) !important;
+  border-color: #A47551 !important;
+  box-shadow: 0 0 0 3px rgba(164,117,81,0.14) !important;
 }
 *:focus-visible {
-  outline: 2px solid rgba(140,158,120,0.5) !important;
+  outline: 2px solid rgba(164,117,81,0.5) !important;
   outline-offset: 2px !important;
 }
 button:focus, input:focus, select:focus, textarea:focus, a:focus {
-  outline: 2px solid rgba(140,158,120,0.4) !important;
+  outline: 2px solid rgba(164,117,81,0.4) !important;
   outline-offset: 2px !important;
 }
 
@@ -216,12 +216,12 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 [class*="progress-fill"],
 [class*="bar-fill"],
 .progress-bar-fill {
-  background: linear-gradient(90deg, #8C9E78, #B8C9A2) !important;
+  background: linear-gradient(90deg, #A47551, #E3CDB5) !important;
 }
 .progress-bar-container,
 .goal-bar-bg,
 [class*="progress-bg"] {
-  background: rgba(140,158,120,0.12) !important;
+  background: rgba(164,117,81,0.12) !important;
 }
 
 
@@ -230,28 +230,28 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
    ══════════════════════════════════════════════════════════════ */
 /* Plain links: sage-dark (5.6:1 on white). :where() keeps specificity at zero and no !important,
    so buttons that are links keep the colours they set themselves. */
-:where(a) { color: #5E6E4A; }
-:where(a):hover { color: #364A2B; }
+:where(a) { color: #8F6244; }
+:where(a):hover { color: #7A5238; }
 
 
 /* ══════════════════════════════════════════════════════════════
    FLASH / ALERT — success in warm sage
    ══════════════════════════════════════════════════════════════ */
 .ylh-flash.success {
-  background: rgba(140,158,120,0.1) !important;
-  border-color: rgba(140,158,120,0.35) !important;
-  color: #5E6E4A !important;
+  background: rgba(164,117,81,0.1) !important;
+  border-color: rgba(164,117,81,0.35) !important;
+  color: #8F6244 !important;
 }
 .ylh-flash.info {
-  background: rgba(140,158,120,0.06) !important;
-  border-color: rgba(140,158,120,0.3) !important;
-  color: #5E6E4A !important;
+  background: rgba(164,117,81,0.06) !important;
+  border-color: rgba(164,117,81,0.3) !important;
+  color: #8F6244 !important;
 }
 .flash-success,
 .alert-success {
-  background: rgba(140,158,120,0.1) !important;
-  border-color: rgba(140,158,120,0.3) !important;
-  color: #5E6E4A !important;
+  background: rgba(164,117,81,0.1) !important;
+  border-color: rgba(164,117,81,0.3) !important;
+  color: #8F6244 !important;
 }
 
 
@@ -263,9 +263,9 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 .status-active,
 .status-closed,
 .tbl-act-green {
-  color: #5E6E4A !important;
-  background: rgba(140,158,120,0.12) !important;
-  border-color: rgba(140,158,120,0.3) !important;
+  color: #8F6244 !important;
+  background: rgba(164,117,81,0.12) !important;
+  border-color: rgba(164,117,81,0.3) !important;
 }
 
 
@@ -274,15 +274,15 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
    ══════════════════════════════════════════════════════════════ */
 .action-card:hover,
 [class*="quick-action"]:hover {
-  border-color: rgba(140,158,120,0.4) !important;
-  box-shadow: 0 4px 16px rgba(140,158,120,0.1) !important;
+  border-color: rgba(164,117,81,0.4) !important;
+  box-shadow: 0 4px 16px rgba(164,117,81,0.1) !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    AGENT FINANCIALS overrides
    ══════════════════════════════════════════════════════════════ */
-.fin-tab.active { color: #5E6E4A !important; border-bottom-color: #8C9E78 !important; }
+.fin-tab.active { color: #8F6244 !important; border-bottom-color: #A47551 !important; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -291,13 +291,13 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 .crm-abtn,
 .crm-act,
 .crm-cbtn {
-  border-color: rgba(140,158,120,0.4) !important;
-  color: #5E6E4A !important;
+  border-color: rgba(164,117,81,0.4) !important;
+  color: #8F6244 !important;
 }
 .crm-abtn:hover,
 .crm-act:hover {
-  background: rgba(140,158,120,0.08) !important;
-  color: #5E6E4A !important;
+  background: rgba(164,117,81,0.08) !important;
+  color: #8F6244 !important;
 }
 
 
@@ -307,40 +307,40 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 .tx-act,
 .tx-btn,
 .action-btn--primary {
-  background: linear-gradient(135deg, #8C9E78 0%, #5E6E4A 100%) !important;
+  background: linear-gradient(135deg, #A47551 0%, #8F6244 100%) !important;
   color: #F5F0EB !important;
   border-color: transparent !important;
 }
 .action-btn--secondary {
-  border-color: rgba(140,158,120,0.45) !important;
-  color: #5E6E4A !important;
+  border-color: rgba(164,117,81,0.45) !important;
+  color: #8F6244 !important;
 }
 .action-btn--secondary:hover {
-  background: rgba(140,158,120,0.08) !important;
-  color: #5E6E4A !important;
+  background: rgba(164,117,81,0.08) !important;
+  color: #8F6244 !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    MISC OLIVE ALIASES
    ══════════════════════════════════════════════════════════════ */
-.text-olive   { color: #5E6E4A !important; }
-.bg-olive     { background: #8C9E78 !important; }
-.border-olive { border-color: rgba(140,158,120,0.4) !important; }
+.text-olive   { color: #8F6244 !important; }
+.bg-olive     { background: #A47551 !important; }
+.border-olive { border-color: rgba(164,117,81,0.4) !important; }
 
 /* Premium gradient — warm sage */
 .premium-gradient,
 [class*="premium-grad"] {
-  background: linear-gradient(135deg, #8C9E78 0%, #B8C9A2 100%) !important;
+  background: linear-gradient(135deg, #A47551 0%, #E3CDB5 100%) !important;
 }
 
 
 /* ══════════════════════════════════════════════════════════════
    SCROLLBAR — warm sage thumb
    ══════════════════════════════════════════════════════════════ */
-::-webkit-scrollbar-thumb { background: rgba(140,158,120,0.3); }
-::-webkit-scrollbar-thumb:hover { background: rgba(140,158,120,0.5); }
-* { scrollbar-color: rgba(140,158,120,0.3) transparent; }
+::-webkit-scrollbar-thumb { background: rgba(164,117,81,0.3); }
+::-webkit-scrollbar-thumb:hover { background: rgba(164,117,81,0.5); }
+* { scrollbar-color: rgba(164,117,81,0.3) transparent; }
 
 
 /* ══════════════════════════════════════════════════════════════
@@ -348,22 +348,22 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
    ══════════════════════════════════════════════════════════════ */
 [style*="border-bottom: 3px solid #6B5B4D"],
 [style*="border-bottom:3px solid #6B5B4D"] {
-  border-bottom-color: #8C9E78 !important;
+  border-bottom-color: #A47551 !important;
 }
 [style*="color: #6B5B4D"],
 [style*="color:#6B5B4D"] {
-  color: #5E6E4A !important;
+  color: #8F6244 !important;
 }
 [style*="background: #6B5B4D"],
 [style*="background:#6B5B4D"] {
-  background: #5E6E4A !important;
+  background: #8F6244 !important;
 }
 
 .agent-sub-nav .active,
 .agent-nav .active,
 .fin-tab.active {
-  border-bottom-color: #8C9E78 !important;
-  color: #5E6E4A !important;
+  border-bottom-color: #A47551 !important;
+  color: #8F6244 !important;
 }
 
 
@@ -377,47 +377,47 @@ button:focus, input:focus, select:focus, textarea:focus, a:focus {
 /* ylh-hero sage gradient */
 .ylh-hero {
   background: linear-gradient(135deg,
-    rgba(140,158,120,0.1) 0%,
+    rgba(164,117,81,0.1) 0%,
     rgba(248,244,236,0.6) 60%,
     rgba(255,255,255,0.4) 100%) !important;
-  border-color: rgba(140,158,120,0.22) !important;
+  border-color: rgba(164,117,81,0.22) !important;
 }
-.ylh-hero__eyebrow { color: #5E6E4A !important; }
+.ylh-hero__eyebrow { color: #8F6244 !important; }
 
 /* ylh-btn colors */
 .ylh-btn-primary {
-  background: #8C9E78 !important;
-  box-shadow: 0 2px 8px rgba(140,158,120,0.28) !important;
+  background: #A47551 !important;
+  box-shadow: 0 2px 8px rgba(164,117,81,0.28) !important;
 }
 .ylh-btn-primary:hover {
-  background: #5E6E4A !important;
-  box-shadow: 0 5px 14px rgba(140,158,120,0.32) !important;
+  background: #8F6244 !important;
+  box-shadow: 0 5px 14px rgba(164,117,81,0.32) !important;
 }
 .ylh-btn-ghost {
-  background: rgba(140,158,120,0.1) !important;
-  color: #5E6E4A !important;
-  border-color: rgba(140,158,120,0.28) !important;
+  background: rgba(164,117,81,0.1) !important;
+  color: #8F6244 !important;
+  border-color: rgba(164,117,81,0.28) !important;
 }
 .ylh-btn-ghost:hover {
-  background: rgba(140,158,120,0.18) !important;
+  background: rgba(164,117,81,0.18) !important;
 }
 
 /* ylh-ai-panel sage accent */
 .ylh-ai-panel {
   background: linear-gradient(135deg,
-    rgba(140,158,120,0.08) 0%,
+    rgba(164,117,81,0.08) 0%,
     rgba(248,244,236,0.5) 100%) !important;
-  border-color: rgba(140,158,120,0.28) !important;
-  border-left-color: #8C9E78 !important;
+  border-color: rgba(164,117,81,0.28) !important;
+  border-left-color: #A47551 !important;
 }
-.ylh-ai-panel__label { color: #5E6E4A !important; }
+.ylh-ai-panel__label { color: #8F6244 !important; }
 
 /* ylh-stat cards */
-.ylh-stat { border-color: rgba(140,158,120,0.18) !important; }
-.ylh-stat__value { color: #2E3D25 !important; }
+.ylh-stat { border-color: rgba(164,117,81,0.18) !important; }
+.ylh-stat__value { color: #6B4630 !important; }
 
 /* ylh spinner */
 .ylh-spin {
-  border-color: rgba(140,158,120,0.2) !important;
-  border-top-color: #8C9E78 !important;
+  border-color: rgba(164,117,81,0.2) !important;
+  border-top-color: #A47551 !important;
 }

@@ -17,8 +17,8 @@
     <a href="{{ url_for('pies.event_detail', event_id=e.id) }}" class="pie-card" style="display:block;text-decoration:none;color:inherit;">
       <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;">
         <div>
-          <strong style="font-size:1.05rem;color:#364A2B;">{{ e.title }}</strong>
-          <div style="color:#55684F;font-size:.85rem;margin-top:.2rem;">{{ e.people }} response{{ '' if e.people == 1 else 's' }} &middot; {{ e.pies }} pie{{ '' if e.pies == 1 else 's' }} requested</div>
+          <strong style="font-size:1.05rem;color:#7A5238;">{{ e.title }}</strong>
+          <div style="color:#7D6858;font-size:.85rem;margin-top:.2rem;">{{ e.people }} response{{ '' if e.people == 1 else 's' }} &middot; {{ e.pies }} pie{{ '' if e.pies == 1 else 's' }} requested</div>
         </div>
         <span class="pie-pill {{ 'grey' if e.closed else '' }}">{{ 'Closed' if e.closed else 'Open' }}</span>
       </div>
@@ -26,7 +26,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="pie-card" style="text-align:center;color:#55684F;">No pie events yet. Create your first one and share the link with your clients.</div>
+  <div class="pie-card" style="text-align:center;color:#7D6858;">No pie events yet. Create your first one and share the link with your clients.</div>
   {% endif %}
 </div>
 {% endblock %}

@@ -10,14 +10,14 @@
   <div class="pie-card" style="text-align:left;">
     {% if answer.choice == 'pickup' %}
       <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
-      <p style="margin:0;color:#55684F;">Pickup: {{ answer.slot }}</p>
+      <p style="margin:0;color:#7D6858;">Pickup: {{ answer.slot }}</p>
     {% elif answer.choice == 'cant_make' and answer.fulfil == 'delivery' %}
       <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
-      <p style="margin:0;color:#55684F;">{{ answer.slot }}</p>
+      <p style="margin:0;color:#7D6858;">{{ answer.slot }}</p>
       <p style="margin:.6rem 0 0;">{{ brand.name.split(' ')[0] if brand.name else 'Your host' }} will bring it to you as soon as they can and reach out before stopping by.</p>
     {% elif answer.choice == 'cant_make' and answer.fulfil == 'home' %}
       <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
-      <p style="margin:0;color:#55684F;">{{ answer.slot }}</p>
+      <p style="margin:0;color:#7D6858;">{{ answer.slot }}</p>
       <p style="margin:.6rem 0 0;">I will have it ready for you at {{ answer.where }}.</p>
     {% elif answer.choice == 'cant_make' %}
       <p style="margin:0;">We got your note and {{ brand.name.split(' ')[0] if brand.name else 'your host' }} will be in touch to arrange a time that works.</p>
