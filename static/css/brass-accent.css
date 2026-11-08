@@ -71,3 +71,6 @@ html body .site-header .ylh-ham-btn:hover { background: rgba(255,245,225,.35); }
   color: #3A2518 !important;
   box-shadow: 0 6px 18px rgba(150,120,60,.38), inset 0 1px 0 rgba(255,255,255,.65) !important;
 }
+
+/* A blur on the header would trap the pull-down menu inside it (fixed children are measured from the header), so keep it off. */
+html body .site-header { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
