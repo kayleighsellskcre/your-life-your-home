@@ -1,0 +1,58 @@
+{% set pt = planner_today() %}
+{% if pt %}
+<div class="pt-card" id="plan-today">
+  <style>
+  .pt-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1.1rem 1.3rem 1.2rem; margin-bottom: 1.1rem; }
+  .pt-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: .5rem; }
+  .pt-hd h2 { margin: 0; font-size: 1.2rem !important; }
+  .pt-hd a { font-size: .8rem; font-weight: 700; color: #8F6244; text-decoration: none; }
+  .pt-hd a:hover { color: #6B4630; }
+  .pt-row { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .6rem 0; border-top: 1px solid rgba(160,125,85,.16); }
+  .pt-row:first-of-type { border-top: none; }
+  .pt-lbl b { display: block; font-size: .9rem; color: #3A2518; }
+  .pt-lbl small { color: #7A6855; font-size: .75rem; }
+  .pt-chk { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid rgba(143,98,68,.5); background: #FFFDFA; color: transparent; cursor: pointer; padding: 0; font-size: .9rem; flex-shrink: 0; }
+  .pt-chk.on { background: linear-gradient(135deg, #F3E6C1, #C9AD70); border-color: #B8975E; color: #4A3222; }
+  .pt-step { display: inline-flex; align-items: center; gap: .25rem; flex-shrink: 0; }
+  .pt-step button { width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(143,98,68,.35); background: #FFFDFA; color: #6B4630; cursor: pointer; padding: 0; line-height: 1; }
+  .pt-step span { min-width: 1.4rem; text-align: center; font-weight: 700; color: #3A2518; }
+  .pt-bar { height: 8px; background: #EFE6D8; border-radius: 99px; overflow: hidden; margin: .2rem 0 .3rem; }
+  .pt-bar i { display: block; height: 100%; background: linear-gradient(90deg, #C9AD70, #A47551); border-radius: 99px; transition: width .3s ease; }
+  </style>
+  <div class="pt-hd">
+    <h2>Today's Plan</h2>
+    <a href="{{ url_for('planner.planner_page') }}">Weekly planner</a>
+  </div>
+  <div>
+    {% for it in pt['items'] %}
+    <div class="pt-row" data-act="{{ it.key }}" data-day="{{ it.day }}" data-kind="{{ it.kind }}">
+      <div class="pt-lbl"><b>{{ it.label }}</b><small>{% if it.kind == 'theme' %}Today's call block{% else %}<span class="pt-wk">{{ it.week_total }}</span> of {{ it.tgt }} this week{% endif %}</small></div>
+      {% if it.kind == 'theme' %}
+      <button type="button" class="pt-chk {{ 'on' if it.value }}" aria-label="Mark done">&#10003;</button>
+      {% else %}
+      <span class="pt-step"><button type="button" data-d="-1" aria-label="Less">&minus;</button><span>{{ it.value }}</span><button type="button" data-d="1" aria-label="More">+</button></span>
+      {% endif %}
+    </div>
+    {% endfor %}
+    <div style="margin-top:.8rem;">
+      <div class="pt-bar"><i id="pt-bar" style="width:{{ pt.pct }}%"></i></div>
+      <small style="color:#7A6855;"><span id="pt-pct">{{ pt.pct }}</span>% of your week is done</small>
+    </div>
+  </div>
+  <script>
+  (function () {
+    var week = {{ pt.week|tojson }};
+    function send(body) { return fetch('/planner/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' }).then(function (r) { return r.json(); }); }
+    document.querySelectorAll('#plan-today .pt-row').forEach(function (row) {
+      function done(d) { if (!d.ok) return; var w = row.querySelector('.pt-wk'); if (w) w.textContent = d.total; document.getElementById('pt-pct').textContent = d.pct; document.getElementById('pt-bar').style.width = d.pct + '%'; }
+      var chk = row.querySelector('.pt-chk');
+      if (chk) chk.addEventListener('click', function () { var on = !chk.classList.contains('on'); chk.classList.toggle('on', on); send({ week: week, activity: row.dataset.act, day: +row.dataset.day, value: on ? 1 : 0 }).then(done); });
+      var num = row.querySelector('.pt-step span');
+      row.querySelectorAll('.pt-step button').forEach(function (b) {
+        b.addEventListener('click', function () { var v = Math.max(0, Math.min(99, (parseInt(num.textContent, 10) || 0) + parseInt(b.dataset.d, 10))); num.textContent = v; send({ week: week, activity: row.dataset.act, day: +row.dataset.day, value: v }).then(done); });
+      });
+    });
+  })();
+  </script>
+</div>
+{% endif %}

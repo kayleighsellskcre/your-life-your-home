@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Weekly Success Planner{% endblock %}
+{% block content %}
+<style>
+.pl-wrap { max-width: 1100px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+.pl-nav { display: flex; align-items: center; justify-content: center; gap: .8rem; flex-wrap: wrap; margin: .2rem 0 1.1rem; }
+.pl-nav a, .pl-nav button { border: 1px solid rgba(143,98,68,.4); background: #FFFDFA; color: #6B4630; border-radius: 10px; padding: .4rem .9rem; font-weight: 700; font-size: .85rem; text-decoration: none; cursor: pointer; }
+.pl-nav a:hover, .pl-nav button:hover { background: #F5EEE4; }
+.pl-nav .pl-week { font-family: var(--font-heading); font-size: 1.1rem; color: #3A2518; min-width: 190px; text-align: center; }
+.pl-sum { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1rem 1.3rem; margin-bottom: 1.1rem; }
+.pl-pct { font-family: var(--font-heading); font-size: 2.4rem; font-weight: 600; color: #7A5238; line-height: 1; }
+.pl-bar { flex: 1; min-width: 180px; height: 10px; background: #EFE6D8; border-radius: 99px; overflow: hidden; }
+.pl-bar > i { display: block; height: 100%; background: linear-gradient(90deg, #C9AD70, #A47551); border-radius: 99px; transition: width .3s ease; }
+.pl-msg { font-size: .9rem; color: #7A6855; flex-basis: 100%; margin: 0; }
+.pl-scroll { overflow-x: auto; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; background: #FFFDFA; box-shadow: 0 2px 16px rgba(110,72,40,.07); }
+.pl-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.pl-table th { padding: .7rem .5rem; text-align: center; }
+.pl-table th:first-child { text-align: left; padding-left: 1rem; }
+.pl-table th.pl-today { background: #EBDDC8; }
+.pl-table td { padding: .55rem .4rem; text-align: center; border-top: 1px solid rgba(160,125,85,.16); vertical-align: middle; }
+.pl-table td.pl-today { background: rgba(235,221,200,.35); }
+.pl-table tr.pl-grp td { background: #F5EEE4; text-align: left; padding: .35rem 1rem; font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6B4630; border-top: 1px solid rgba(160,125,85,.2); }
+.pl-label { text-align: left !important; padding-left: 1rem !important; min-width: 210px; }
+.pl-label b { display: block; font-size: .92rem; color: #3A2518; }
+.pl-label small { display: block; color: #7A6855; font-size: .76rem; line-height: 1.35; margin-top: .15rem; }
+.pl-step { display: inline-flex; align-items: center; gap: .15rem; }
+.pl-step button { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(143,98,68,.35); background: #FFFDFA; color: #6B4630; font-size: .95rem; line-height: 1; cursor: pointer; padding: 0; }
+.pl-step button:hover { background: #F5EEE4; }
+.pl-step span { display: inline-block; min-width: 1.5rem; font-weight: 700; color: #3A2518; }
+.pl-step span.pl-zero { color: #B9A895; font-weight: 400; }
+.pl-check { display: inline-flex; flex-direction: column; align-items: center; gap: .2rem; cursor: pointer; background: none; border: none; padding: 0; }
+.pl-check i { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid rgba(143,98,68,.5); display: flex; align-items: center; justify-content: center; color: transparent; font-style: normal; font-size: .85rem; transition: all .15s; background: #FFFDFA; }
+.pl-check.on i { background: linear-gradient(135deg, #F3E6C1, #C9AD70); border-color: #B8975E; color: #4A3222; }
+.pl-check small { font-size: .64rem; color: #7A6855; max-width: 92px; line-height: 1.2; }
+.pl-dash { color: #CBBBA8; }
+.pl-wk { min-width: 130px; text-align: left !important; padding-left: .8rem !important; }
+.pl-wk .pl-tot { font-weight: 700; color: #3A2518; }
+.pl-wk .pl-tgt { border: 1px solid transparent; border-radius: 6px; width: 3.2rem; padding: .1rem .25rem; background: transparent; font: inherit; color: #7A6855; text-align: center; }
+.pl-wk .pl-tgt:hover, .pl-wk .pl-tgt:focus { border-color: rgba(143,98,68,.4); background: #FFFDFA; outline: none; }
+.pl-wk .pl-bar { height: 6px; margin-top: .3rem; min-width: 0; }
+.pl-foot { text-align: center; color: #7A6855; font-size: .82rem; margin-top: 1rem; }
+@media print { .pl-nav, .ylh-hdr-title, .pl-foot { display: none !important; } .pl-scroll { box-shadow: none; } }
+</style>
+
+<div class="pl-wrap">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">{{ 'Lender' if role == 'lender' else 'Agent' }} habits</div>
+    <h1 class="ylh-page-hd__title">{{ view.plan.title }}</h1>
+    <p class="ylh-page-hd__sub">{{ view.plan.sub }}</p>
+  </div>
+
+  <div class="pl-nav">
+    <a href="{{ url_for('planner.planner_page', week=prev_week) }}">&larr; Last week</a>
+    <span class="pl-week">{{ week_label }}</span>
+    <a href="{{ url_for('planner.planner_page', week=next_week) }}">Next week &rarr;</a>
+    {% if not is_this_week %}<a href="{{ url_for('planner.planner_page') }}">This week</a>{% endif %}
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+
+  <div class="pl-sum">
+    <div class="pl-pct"><span id="pl-pct">{{ view.pct }}</span>%</div>
+    <div class="pl-bar"><i id="pl-pct-bar" style="width:{{ view.pct }}%"></i></div>
+    <p class="pl-msg" id="pl-msg"></p>
+  </div>
+
+  <div class="pl-scroll">
+    <table class="pl-table">
+      <thead>
+        <tr>
+          <th>Activity</th>
+          {% for d in days %}<th class="{{ 'pl-today' if loop.index0 == today_idx }}">{{ d }}</th>{% endfor %}
+          <th class="pl-wk">This week</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% set ns = namespace(group='') %}
+      {% for r in view.rows %}
+        {% if r.group != ns.group %}{% set ns.group = r.group %}<tr class="pl-grp"><td colspan="8">{{ r.group }}</td></tr>{% endif %}
+        <tr data-act="{{ r.key }}" data-kind="{{ r.kind }}">
+          <td class="pl-label"><b>{{ r.label }}</b>{% if r.hint %}<small>{{ r.hint }}</small>{% endif %}</td>
+          {% for i in range(6) %}
+          <td class="{{ 'pl-today' if i == today_idx }}">
+            {% if r.kind == 'theme' %}
+              {% if i <= 4 %}
+              <button type="button" class="pl-check {{ 'on' if r.days[i] }}" data-day="{{ i }}" aria-label="{{ view.plan.themes[i] }}"><i>&#10003;</i><small>{{ view.plan.themes[i] }}</small></button>
+              {% else %}<span class="pl-dash">&ndash;</span>{% endif %}
+            {% else %}
+              <span class="pl-step" data-day="{{ i }}"><button type="button" data-d="-1" aria-label="Less">&minus;</button><span class="{{ 'pl-zero' if not r.days[i] }}">{{ r.days[i] }}</span><button type="button" data-d="1" aria-label="More">+</button></span>
+            {% endif %}
+          </td>
+          {% endfor %}
+          <td class="pl-wk">
+            <span class="pl-tot">{{ r.total }}</span> of <input class="pl-tgt" type="number" min="1" max="500" value="{{ r.tgt }}" aria-label="Weekly target for {{ r.label }}">
+            <div class="pl-bar"><i style="width:{{ r.pct }}%"></i></div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="pl-foot">Tap + or the circles as you go. Click a weekly number to change your target. Your progress saves automatically.</p>
+</div>
+
+<script>
+(function () {
+  var week = {{ week|tojson }};
+  var msgs = [[0, "A fresh week. Start with one great conversation."], [25, "Nice start. Keep the momentum going."], [50, "Halfway there. You are building something."], [75, "Almost there. Finish strong."], [100, "You did it. Be proud of this week."]];
+  function say(p) { var m = msgs[0][1]; msgs.forEach(function (x) { if (p >= x[0]) m = x[1]; }); document.getElementById('pl-msg').textContent = m; }
+  say({{ view.pct }});
+  function send(url, body) {
+    return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), credentials: 'same-origin' }).then(function (r) { return r.json(); });
+  }
+  function apply(tr, d) {
+    tr.querySelector('.pl-tot').textContent = d.total;
+    tr.querySelector('.pl-wk .pl-bar i').style.width = d.row_pct + '%';
+    document.getElementById('pl-pct').textContent = d.pct;
+    document.getElementById('pl-pct-bar').style.width = d.pct + '%';
+    say(d.pct);
+  }
+  document.querySelectorAll('tr[data-act]').forEach(function (tr) {
+    var act = tr.dataset.act;
+    tr.querySelectorAll('.pl-step').forEach(function (st) {
+      var num = st.querySelector('span');
+      st.querySelectorAll('button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = Math.max(0, Math.min(99, (parseInt(num.textContent, 10) || 0) + parseInt(b.dataset.d, 10)));
+          num.textContent = v; num.classList.toggle('pl-zero', !v);
+          send('/planner/save', { week: week, activity: act, day: +st.dataset.day, value: v }).then(function (d) { if (d.ok) apply(tr, d); });
+        });
+      });
+    });
+    tr.querySelectorAll('.pl-check').forEach(function (c) {
+      c.addEventListener('click', function () {
+        var on = !c.classList.contains('on');
+        c.classList.toggle('on', on);
+        send('/planner/save', { week: week, activity: act, day: +c.dataset.day, value: on ? 1 : 0 }).then(function (d) { if (d.ok) apply(tr, d); });
+      });
+    });
+    var t = tr.querySelector('.pl-tgt');
+    t.addEventListener('change', function () {
+      send('/planner/target', { activity: act, target: parseInt(t.value, 10) || 1 }).then(function (d) { if (d.ok) location.reload(); });
+    });
+  });
+})();
+</script>
+{% endblock %}

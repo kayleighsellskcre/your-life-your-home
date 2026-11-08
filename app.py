@@ -13478,6 +13478,8 @@ Lender Data:
 # ---------------- DEVELOPMENT SERVER ----------------
 import pies as _pies
 _pies.init_app(app, get_current_user, _bg, send_reminder_email)
+import planner as _planner
+_planner.init_app(app, get_current_user)
 import tc as _tc
 _tc.init_app(app, get_current_user, _bg, send_reminder_email, get_transaction_detail,
              lambda tx_id, kind, text, uid: __import__("transaction_helpers").log_timeline_event(tx_id, kind, text, uid))

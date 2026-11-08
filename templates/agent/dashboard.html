@@ -400,16 +400,8 @@
     <!-- Divider -->
     <div style="height:1px;background:rgba(120,90,64,.2);margin-bottom:.85rem;"></div>
 
-    <!-- Today's 3 Priorities — side by side -->
-    <div id="strip-priorities" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;"></div>
-
     <!-- Footer: shuffle + refresh priorities -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;">
-      <span onclick="loadPriorities(true)" role="button" title="Refresh priorities" style="font-size:.68rem;font-weight:600;color:rgba(76,57,41,.7);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
-        onmouseover="this.style.color='rgba(76,57,41,.98)'" onmouseout="this.style.color='rgba(76,57,41,.7)'">
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
-        Refresh Priorities
-      </span>
       <span onclick="shuffleBriefing()" role="button" title="New quote" style="font-size:.68rem;font-weight:600;color:rgba(76,57,41,.7);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
         onmouseover="this.style.color='rgba(76,57,41,.98)'" onmouseout="this.style.color='rgba(76,57,41,.7)'">
         <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
@@ -471,27 +463,8 @@
   <!-- ── MAIN 3-COLUMN GRID ── -->
   <div class="dash-grid">
 
-    <!-- COL 1 — Today's Priorities (AI) -->
-    <div class="lux-card fu fu3">
-      <div class="priorities-hd">
-        <h2 class="lux-card-title">Today's Priorities</h2>
- </div>
- <div class="lux-card-body">
-        <div id="priorities-list">
- <div class="priority-skeleton"></div>
-          <div class="priority-skeleton"></div>
-          <div class="priority-skeleton"></div>
- </div>
- </div>
-      <div class="priority-refresh-footer">
-        <button onclick="loadPriorities(true)" id="priorities-refresh-btn"
-          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:#7a6855;font-weight:600;display:flex;align-items:center;gap:.28rem;padding:0;transition:color .2s;min-height:unset;width:auto;margin:0;"
-          onmouseover="this.style.color='#8A6D2F'" onmouseout="this.style.color='#7a6855'">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
-          Refresh Priorities
-        </button>
-      </div>
- </div>
+    <!-- COL 1 - Today's Plan (weekly success planner) -->
+    {% include "planner/_today_card.html" %}
 
     <!-- COL 2 — Active Transactions -->
     <div class="lux-card fu fu4">
