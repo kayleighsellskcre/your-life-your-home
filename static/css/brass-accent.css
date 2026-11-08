@@ -31,3 +31,42 @@
 
 /* Quiet empty-state text stays readable (AA) */
 .empty-msg, .empty-state, .empty-text { color: #6F6256 !important; }
+
+/* ───── Walnut header with wood grain ───── */
+:root {
+  --walnut-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='720' height='240'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.003 0.2' numOctaves='4' seed='11'/><feColorMatrix values='0 0 0 0 0.20  0 0 0 0 0.10  0 0 0 0 0.05  0 0 0 1.7 -0.55'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
+  --walnut-light: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='300'><filter id='h' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.002 0.12' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.55  0 0 0 0 0.36  0 0 0 1.3 -0.5'/></filter><rect width='100%25' height='100%25' filter='url(%23h)'/></svg>");
+}
+html body .site-header {
+  background:
+    var(--walnut-grain) 0 0 / 720px 100% repeat-x,
+    var(--walnut-light) 0 0 / 900px 100% repeat-x,
+    linear-gradient(180deg, rgba(255,235,205,.10) 0%, rgba(0,0,0,.14) 100%),
+    linear-gradient(100deg, #8B5E41 0%, #7A5037 40%, #86593D 70%, #704730 100%) !important;
+  border-bottom: 1px solid rgba(60,36,22,.55) !important;
+  box-shadow: 0 2px 14px rgba(60,36,22,.28), inset 0 1px 0 rgba(255,225,190,.25) !important;
+}
+
+/* ───── Champagne brushed-gold buttons ───── */
+:root {
+  --champagne-brushed:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.16) 0 1px, rgba(140,105,40,.06) 1px 2px),
+    linear-gradient(135deg, #F3E6C1 0%, #DCC48F 36%, #ECDDAE 54%, #C9AD70 100%);
+  --champagne-brushed-hover:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.18) 0 1px, rgba(140,105,40,.06) 1px 2px),
+    linear-gradient(135deg, #F8EDCD 0%, #E5CE9A 36%, #F2E5BA 54%, #D3B879 100%);
+}
+.btn-brass, .hero-buttons .btn-primary, .auth-card .btn-primary, .auth-form .btn-primary,
+.btn-add, .btn-coach {
+  background: var(--champagne-brushed) !important;
+  color: #4A3222 !important;
+  border: 1px solid rgba(170,140,80,.55) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.35);
+  box-shadow: 0 4px 14px rgba(150,120,60,.28), inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+.btn-brass:hover, .hero-buttons .btn-primary:hover, .auth-card .btn-primary:hover, .auth-form .btn-primary:hover,
+.btn-add:hover, .btn-coach:hover {
+  background: var(--champagne-brushed-hover) !important;
+  color: #3A2518 !important;
+  box-shadow: 0 6px 18px rgba(150,120,60,.38), inset 0 1px 0 rgba(255,255,255,.65) !important;
+}
