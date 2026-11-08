@@ -89,6 +89,7 @@ def ensure_tables():
     _add("pie_responses", "address", "TEXT")
     _add("pie_responses", "want_date", "TEXT")
     _add("pie_responses", "want_time", "TEXT")
+    _add("pie_responses", "reminded", "INTEGER DEFAULT 0")
     conn.commit()
     conn.close()
 
@@ -759,7 +760,7 @@ def public_event(token):
         if existing:
             cur.execute("""UPDATE pie_responses SET name=?, phone=?, email=?, choice=?, slot_id=?, slot_label=?,
                            pie_type=?, quantity=?, notes=?, fulfillment=?, address=?, want_date=?, want_time=?,
-                           created_at=CURRENT_TIMESTAMP WHERE id=?""", (*vals, existing["id"]))
+                           reminded=0, created_at=CURRENT_TIMESTAMP WHERE id=?""", (*vals, existing["id"]))
         else:
             cur.execute("""INSERT INTO pie_responses (event_id, name, phone, email, choice, slot_id, slot_label,
                            pie_type, quantity, notes, fulfillment, address, want_date, want_time)
@@ -844,6 +845,54 @@ def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, note
                 + (f"Notes: {notes}\n" if notes and choice != "cant_make" else "")
                 + f"\nSee everyone: {url_for('pies.event_detail', event_id=ev['id'], _external=True)}")
         _bg(send_reminder_email, brand["email"], f"Pie RSVP: {name} ({'no thanks' if choice == 'no' else 'yes'})", body)
+
+
+def send_reminders(today=None):
+    """Friendly reminder the day before a confirmed pickup. Run once a day by the scheduler.
+    Returns how many were sent."""
+    from datetime import timedelta
+    send = _H.get("send_email")
+    if not send:
+        return 0
+    target = ((today or date.today()) + timedelta(days=1)).isoformat()
+    conn = _db()
+    rows = conn.execute("""SELECT r.*, e.title, e.owner_id, e.home_address, e.token, s.slot_date, s.start_time,
+                                  s.end_time, s.location
+                           FROM pie_responses r JOIN pie_events e ON e.id = r.event_id
+                           LEFT JOIN pie_slots s ON s.id = r.slot_id
+                           WHERE COALESCE(r.reminded,0)=0 AND COALESCE(r.picked_up,0)=0 AND r.email != ''
+                             AND ((r.choice='pickup' AND s.slot_date=?) OR (r.choice='cant_make' AND r.fulfillment='home' AND r.want_date=?))""",
+                        (target, target)).fetchall()
+    sent = 0
+    for r in rows:
+        brand = _branding(r["owner_id"])
+        if r["choice"] == "pickup":
+            cal = {"date": r["slot_date"], "start": r["start_time"], "end": r["end_time"], "location": r["location"] or ""}
+            when = slot_label({"slot_date": r["slot_date"], "start_time": r["start_time"], "end_time": r["end_time"], "location": r["location"]})
+            where = r["location"] or ""
+        else:
+            where = (r["home_address"] or "").strip()
+            cal = {"date": r["want_date"], "start": r["want_time"], "end": "", "location": where, "minutes": 30}
+            when = f"{fmt_date(r['want_date'])} at {fmt_time(r['want_time'])}, {where}"
+        cal["title"] = f"{r['title']}: pie pickup"
+        cal["details"] = f"{r['pie_type'] or 'Pie'} from {brand['name']}" if brand["name"] else "Pie pickup"
+        first = (r["name"] or "there").split(" ")[0]
+        body = (f"Hi {first},\n\nJust a friendly reminder that your {(r['pie_type'] + ' pie') if r['pie_type'] else 'pie'} is ready for you tomorrow.\n\n"
+                f"{when}\n")
+        if where:
+            body += f"\nDirections: {maps_url(where)}\n"
+        if google_cal_url(cal):
+            body += f"Add to your calendar: {google_cal_url(cal)}\n"
+        body += f"\nIf your plans changed, just reply to this message and we will sort it out.\n\nWarmly,\n{brand['name']}"
+        try:
+            send(r["email"], f"See you tomorrow: {r['title']}", body, brand["name"] or None, brand["email"] or None)
+            conn.execute("UPDATE pie_responses SET reminded=1 WHERE id=?", (r["id"],))
+            conn.commit()
+            sent += 1
+        except Exception as exc:
+            __import__("logging").getLogger(__name__).warning("pie reminder failed: %s", exc)
+    conn.close()
+    return sent
 
 
 _H = {}

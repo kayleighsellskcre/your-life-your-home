@@ -2324,6 +2324,7 @@ def start_scheduler():
         # Automatic daily home value updates (Homebot-style)
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
+        scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)  # day-before pie pickup reminders
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
         scheduler.add_job(
             lambda: __import__("automation").send_daily_digests(send_reminder_email, os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")),
