@@ -296,8 +296,8 @@
   transition: border-color .15s, background .15s;
 }
 .tx-doc-item:hover { border-color: rgba(107,91,77,.3); background: #F9F6F2; }
-.tx-doc-item.done { background: rgba(60,120,60,.04); border-color: rgba(60,140,60,.3); }
-.tx-doc-item.done .tx-doc-name { color: #5A8A5A; }
+.tx-doc-item.done { background: rgba(117,88,63,.04); border-color: rgba(130,98,70,.3); }
+.tx-doc-item.done .tx-doc-name { color: #947050; }
 .tx-check {
   width: 17px; height: 17px;
   border-radius: 4px;
@@ -307,7 +307,7 @@
   display: flex; align-items: center; justify-content: center;
   font-size: 9px; color: #fff;
 }
-.tx-check.done { background: #5A8A5A; border-color: #5A8A5A; }
+.tx-check.done { background: #947050; border-color: #947050; }
 .tx-doc-name { font-size: .76rem; font-weight: 600; color: #3D2E24; flex: 1; }
 .tx-doc-tags { display: flex; gap: .25rem; }
 .tx-tag {
@@ -376,7 +376,7 @@
   transform: translateY(50%); z-index: 0;
 }
 .tx-stage-row:last-child .tx-stage-spine { display: none; }
-.tx-stage-row.done .tx-stage-spine { background: rgba(90,138,90,.4); }
+.tx-stage-row.done .tx-stage-spine { background: rgba(148,112,80,.4); }
 .tx-stage-dot {
   width: 16px; height: 16px;
   border-radius: 50%;
@@ -384,17 +384,17 @@
   background: #fff;
   flex-shrink: 0; z-index: 1; position: relative;
 }
-.tx-stage-dot.done   { border-color: #5A8A5A; background: #5A8A5A; }
+.tx-stage-dot.done   { border-color: #947050; background: #947050; }
 .tx-stage-dot.active { border-color: #6B5B4D; background: #6B5B4D; box-shadow: 0 0 0 3px rgba(107,91,77,.15); }
 .tx-stage-label { font-size: .75rem; font-weight: 600; color: #C8B497; flex: 1; }
-.tx-stage-label.done   { color: #5A8A5A; }
+.tx-stage-label.done   { color: #947050; }
 .tx-stage-label.active { color: #3D2E24; }
 .tx-stage-status {
   font-size: .58rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: .06em;
   padding: .1rem .35rem; border-radius: 4px;
 }
-.tx-stage-status.done   { background: rgba(90,138,90,.12); color: #5A8A5A; }
+.tx-stage-status.done   { background: rgba(148,112,80,.12); color: #947050; }
 .tx-stage-status.active { background: rgba(107,91,77,.12); color: #6B5B4D; }
 
 /* Participant card */
@@ -647,10 +647,10 @@
         <div class="tx-comm-row"><span>Sale Price</span><strong>${{ "{:,.0f}".format(tx_commission.sale_price or 0) }}</strong></div>
         <div class="tx-comm-row"><span>Commission</span><strong>{{ tx_commission.commission_rate or 0 }}%</strong></div>
         <div class="tx-comm-row"><span>Gross</span><strong>${{ "{:,.0f}".format(tx_commission.gross_commission or 0) }}</strong></div>
-        <div class="tx-comm-row"><span>Net</span><strong style="color:{% if tx_commission.status=='paid' %}#2e7d32{% else %}#3D2E24{% endif %}">${{ "{:,.0f}".format(tx_commission.net_commission or 0) }}</strong></div>
+        <div class="tx-comm-row"><span>Net</span><strong style="color:{% if tx_commission.status=='paid' %}#6F543C{% else %}#3D2E24{% endif %}">${{ "{:,.0f}".format(tx_commission.net_commission or 0) }}</strong></div>
         <div class="tx-comm-row">
           <span>Status</span>
-          <strong style="background:{% if tx_commission.status=='paid' %}rgba(46,125,50,.12);color:#2e7d32{% else %}rgba(181,132,0,.12);color:#8B6B00{% endif %};padding:.1rem .4rem;border-radius:4px;font-size:.65rem;text-transform:uppercase;">{{ tx_commission.status or 'projected' }}</strong>
+          <strong style="background:{% if tx_commission.status=='paid' %}rgba(111,84,60,.12);color:#6F543C{% else %}rgba(181,132,0,.12);color:#8B6B00{% endif %};padding:.1rem .4rem;border-radius:4px;font-size:.65rem;text-transform:uppercase;">{{ tx_commission.status or 'projected' }}</strong>
         </div>
         <div style="padding:.4rem 1rem .5rem;text-align:right">
           <a href="{{ url_for('agent_financials') }}" style="font-size:.68rem;color:#6B5B4D;text-decoration:underline">View in Financials →</a>

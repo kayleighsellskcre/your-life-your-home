@@ -59,16 +59,16 @@
  {% if templates %}
  <div style="display:grid;gap:.75rem;">
  {% for t in templates %}
- <div style="background:rgba(143,163,130,.06);border:1px solid rgba(143,163,130,.18);border-radius:10px;padding:1rem 1.25rem;">
+ <div style="background:rgba(179,144,114,.06);border:1px solid rgba(179,144,114,.18);border-radius:10px;padding:1rem 1.25rem;">
  <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;">
  <strong style="color:#3D2E24;font-size:.9rem;">{{ t.name }}</strong>
- <span style="font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--sage,#B08560);background:rgba(143,163,130,.12);border-radius:8px;padding:.2rem .6rem;">{{ t.template_type|replace('_',' ')|title }}</span>
+ <span style="font-size:.7rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--sage,#B08560);background:rgba(179,144,114,.12);border-radius:8px;padding:.2rem .6rem;">{{ t.template_type|replace('_',' ')|title }}</span>
  </div>
  {% if t.description %}
  <p style="font-size:.82rem;color:#6B5B4D;margin:.4rem 0 0;">{{ t.description }}</p>
  {% endif %}
  {% if t.content %}
- <p style="font-size:.82rem;color:#6F6256;white-space:pre-wrap;margin:.5rem 0 0;border-top:1px solid rgba(143,163,130,.15);padding-top:.5rem;">{{ t.content }}</p>
+ <p style="font-size:.82rem;color:#6F6256;white-space:pre-wrap;margin:.5rem 0 0;border-top:1px solid rgba(179,144,114,.15);padding-top:.5rem;">{{ t.content }}</p>
  {% endif %}
  </div>
  {% endfor %}

@@ -3,7 +3,7 @@
 
 {% block agent_content %}
 <style>
-#fin { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; }
+#fin { font-family: var(--font-body); color: #3D2E24; }
 
 .fin-topbar {
   background: linear-gradient(135deg, #F0EBE4 0%, #EAE4DC 100%);
@@ -32,11 +32,11 @@
 .kpi.k-gci::before    { background: #6B5B4D; }
 .kpi.k-proj::before   { background: #B8860B; }
 .kpi.k-exp::before    { background: #A0522D; }
-.kpi.k-net::before    { background: #2e7d32; }
-.kpi.k-miles::before  { background: #1565c0; }
-.kpi.k-ded::before    { background: #6a1b9a; }
+.kpi.k-net::before    { background: #6F543C; }
+.kpi.k-miles::before  { background: #796A5C; }
+.kpi.k-ded::before    { background: #5F486D; }
 .kpi__val { font-size: 1.4rem; font-weight: 700; line-height: 1.1; color: #3D2E24; }
-.kpi__val.green { color: #2e7d32; }
+.kpi__val.green { color: #6F543C; }
 .kpi__lbl { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #6B5B4D; margin-top: .2rem; }
 
 .fin-grid { display: grid; grid-template-columns: 1fr 360px; gap: 1rem; align-items: start; }
@@ -83,12 +83,12 @@
 .data-table td { padding: .4rem .65rem; border-bottom: 1px solid rgba(107,91,77,.07); color: #3D2E24; vertical-align: middle; }
 .data-table tr:last-child td { border-bottom: none; }
 .data-table tr:hover td { background: rgba(107,91,77,.025); }
-.badge-paid      { background: #e8f5e9; color: #2e7d32; border-radius: 10px; padding: .15rem .5rem; font-size: .65rem; font-weight: 700; }
+.badge-paid      { background: #F5EEE8; color: #6F543C; border-radius: 10px; padding: .15rem .5rem; font-size: .65rem; font-weight: 700; }
 .badge-projected { background: #fff8e1; color: #9A5300; border-radius: 10px; padding: .15rem .5rem; font-size: .65rem; font-weight: 700; }
-.btn-del { background: none; border: none; color: #c0392b; font-size: .75rem; cursor: pointer; padding: .15rem .35rem; border-radius: 4px; }
-.btn-del:hover { background: rgba(192,57,43,.08); }
-.btn-paid { background: rgba(46,125,50,.1); border: none; color: #2e7d32; font-size: .7rem; font-weight: 600; cursor: pointer; padding: .15rem .5rem; border-radius: 5px; white-space: nowrap; }
-.btn-paid:hover { background: rgba(46,125,50,.2); }
+.btn-del { background: none; border: none; color: #B0463B; font-size: .75rem; cursor: pointer; padding: .15rem .35rem; border-radius: 4px; }
+.btn-del:hover { background: rgba(176,70,59,.08); }
+.btn-paid { background: rgba(111,84,60,.1); border: none; color: #6F543C; font-size: .7rem; font-weight: 600; cursor: pointer; padding: .15rem .5rem; border-radius: 5px; white-space: nowrap; }
+.btn-paid:hover { background: rgba(111,84,60,.2); }
 .empty-row td { text-align: center; color: #6B6B66; padding: 1.25rem; font-style: italic; font-size: .78rem; }
 .tx-link { font-size: .7rem; color: #6B5B4D; text-decoration: none; border-bottom: 1px solid rgba(107,91,77,.3); white-space: nowrap; }
 .tx-link:hover { color: #3D2E24; }
@@ -106,9 +106,9 @@
 .ai-insight { background: white; border: 1px solid rgba(107,91,77,.12); border-radius: 8px; padding: .625rem .875rem; margin-bottom: .5rem; }
 .ai-insight .ai-ins-title { font-size: .8rem; font-weight: 700; color: #3D2E24; margin-bottom: .2rem; }
 .ai-insight .ai-ins-body  { font-size: .78rem; color: #6B5B4D; line-height: 1.45; }
-.ai-insight.positive { border-left: 3px solid #2e7d32; }
+.ai-insight.positive { border-left: 3px solid #6F543C; }
 .ai-insight.warning  { border-left: 3px solid #9A5300; }
-.ai-insight.info     { border-left: 3px solid #1565c0; }
+.ai-insight.info     { border-left: 3px solid #796A5C; }
 .btn-ai { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: rgba(255,255,255,.85); border-radius: 6px; padding: .35rem .75rem; font-size: .72rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: .35rem; transition: all .2s; }
 .btn-ai:hover { background: rgba(255,255,255,.18); color: white; }
 .skeleton { height: .85rem; background: linear-gradient(90deg,rgba(255,255,255,.06) 0%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.06) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; margin-bottom: .4rem; }
@@ -116,8 +116,8 @@
 
 .chart-wrap { position: relative; height: 180px; }
 
-.flash-success { background:#e8f5e9; border:1px solid rgba(46,125,50,.3); color:#2e7d32; padding:.5rem 1rem; border-radius:7px; font-size:.8rem; margin-bottom:.75rem; }
-.flash-error   { background:#ffebee; border:1px solid rgba(192,57,43,.3); color:#c0392b; padding:.5rem 1rem; border-radius:7px; font-size:.8rem; margin-bottom:.75rem; }
+.flash-success { background:#F5EEE8; border:1px solid rgba(111,84,60,.3); color:#6F543C; padding:.5rem 1rem; border-radius:7px; font-size:.8rem; margin-bottom:.75rem; }
+.flash-error   { background:#FAF0F1; border:1px solid rgba(176,70,59,.3); color:#B0463B; padding:.5rem 1rem; border-radius:7px; font-size:.8rem; margin-bottom:.75rem; }
 </style>
 
 <div id="fin">
@@ -257,7 +257,7 @@
             <td style="white-space:nowrap">{{ c.close_date or '-' }}</td>
             <td style="text-transform:capitalize">{{ c.transaction_side or '-' }}</td>
             <td>${{ "{:,.0f}".format(c.sale_price or 0) }}</td>
-            <td style="font-weight:600;color:{% if c.status == 'paid' %}#2e7d32{% else %}#9A5300{% endif %}">${{ "{:,.0f}".format(c.net_commission or 0) }}</td>
+            <td style="font-weight:600;color:{% if c.status == 'paid' %}#6F543C{% else %}#9A5300{% endif %}">${{ "{:,.0f}".format(c.net_commission or 0) }}</td>
             <td>
               {% if c.status == 'paid' %}
               <span class="badge-paid">Paid</span>
@@ -389,7 +389,7 @@
             </div>
           </div>
           <div style="background:white;border:1px solid rgba(107,91,77,.15);border-radius:7px;padding:.5rem .75rem;margin-bottom:.5rem;font-size:.78rem;color:#6B5B4D;">
-            IRS Deduction (@ ${{ irs_rate }}/mile): <strong id="est-deduction" style="color:#6a1b9a">$0.00</strong>
+            IRS Deduction (@ ${{ irs_rate }}/mile): <strong id="est-deduction" style="color:#5F486D">$0.00</strong>
           </div>
           <button type="submit" class="btn-add">Save Trip</button>
         </form>
@@ -406,7 +406,7 @@
             <td style="font-size:.73rem">{{ m.from_location or '-' }} &rarr; {{ m.to_location or '-' }}</td>
             <td>{{ m.purpose or '-' }}</td>
             <td>{{ "{:,.1f}".format(m.miles or 0) }}</td>
-            <td style="color:#6a1b9a;font-weight:600">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
+            <td style="color:#5F486D;font-weight:600">${{ "{:,.2f}".format(m.deduction_amount or 0) }}</td>
             <td>
               <form method="post" action="{{ url_for('agent_financials_mileage_delete', mid=m.id) }}" style="display:inline" onsubmit="return confirm('Delete this entry?')">
                 <button type="submit" class="btn-del">Remove</button>
@@ -493,14 +493,14 @@
         <span class="goal-val">${{ "{:,.0f}".format(net_income) }} / ${{ "{:,.0f}".format(goal.net_income_goal or 0) }}</span>
       </div>
       <div class="progress-bar-wrap" style="margin-bottom:.5rem">
-        <div class="progress-bar-fill" style="width:{{ net_pct }}%;background:linear-gradient(90deg,#2e7d32,#4caf50)"></div>
+        <div class="progress-bar-fill" style="width:{{ net_pct }}%;background:linear-gradient(90deg,#6F543C,#A37B58)"></div>
       </div>
       <div class="goal-row">
         <span class="goal-lbl">Expenses Budget</span>
-        <span class="goal-val" style="color:{% if exp_pct > 90 %}#c0392b{% else %}#3D2E24{% endif %}">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(goal.expenses_budget or 0) }}</span>
+        <span class="goal-val" style="color:{% if exp_pct > 90 %}#B0463B{% else %}#3D2E24{% endif %}">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(goal.expenses_budget or 0) }}</span>
       </div>
       <div class="progress-bar-wrap" style="margin-bottom:.5rem">
-        <div class="progress-bar-fill" style="width:{{ exp_pct }}%;background:linear-gradient(90deg,#A0522D,#c0392b)"></div>
+        <div class="progress-bar-fill" style="width:{{ exp_pct }}%;background:linear-gradient(90deg,#A0522D,#B0463B)"></div>
       </div>
       <div class="goal-row">
         <span class="goal-lbl">Transactions Goal</span>
@@ -602,7 +602,7 @@
     data: {
       labels: Object.keys(cats),
       datasets: [{ data: Object.values(cats),
-        backgroundColor: ['#6B5B4D','#A0522D','#B8860B','#2e7d32','#1565c0','#6a1b9a','#c0392b','#009688','#607d8b'],
+        backgroundColor: ['#6B5B4D','#A0522D','#B8860B','#6F543C','#796A5C','#5F486D','#B0463B','#554B41','#81766A'],
         borderWidth: 2, borderColor: '#fff' }]
     },
     options: {

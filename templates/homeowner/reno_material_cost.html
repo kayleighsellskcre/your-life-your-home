@@ -119,7 +119,7 @@
  <span></span> Edit
  </button>
  </div>
- <div id="save-success" style="display:none; color: #4a7c4a; text-align:center; margin-top:1rem; font-weight:600; font-size: 1.1rem; padding: 0.75rem; background: rgba(74, 124, 74, 0.1); border-radius: 8px;"> Successfully saved!</div>
+ <div id="save-success" style="display:none; color: #816145; text-align:center; margin-top:1rem; font-weight:600; font-size: 1.1rem; padding: 0.75rem; background: rgba(129,97,69, 0.1); border-radius: 8px;"> Successfully saved!</div>
  <a href="{{ url_for('homeowner_reno_roi_guide') }}" class="btn-link" style="display:block; margin-top:1.5rem; text-align:center; color: var(--olive-green); font-weight: 600; text-decoration: none; transition: all 0.3s ease;"> See ROI Guide →</a>
  </div>
 </div>
@@ -661,8 +661,8 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
  if (data.saved_to_board && data.saved_to_planner) {
  // Both saved successfully
  successMsg.innerHTML = ' Successfully saved to Renovation Planner & Mood Board!';
- successMsg.style.color = '#4a7c4a';
- successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+ successMsg.style.color = '#816145';
+ successMsg.style.background = 'rgba(129,97,69, 0.1)';
  } else if (data.warning) {
  // Saved to planner but not board
  successMsg.innerHTML = ' Saved to Planner ' + data.warning;
@@ -671,13 +671,13 @@ document.getElementById('save-to-planner').addEventListener('click', function() 
  } else if (data.message) {
  // Custom message
  successMsg.innerHTML = ' ' + data.message;
- successMsg.style.color = '#4a7c4a';
- successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+ successMsg.style.color = '#816145';
+ successMsg.style.background = 'rgba(129,97,69, 0.1)';
  } else {
  // Default success
  successMsg.innerHTML = ' Successfully saved!';
- successMsg.style.color = '#4a7c4a';
- successMsg.style.background = 'rgba(74, 124, 74, 0.1)';
+ successMsg.style.color = '#816145';
+ successMsg.style.background = 'rgba(129,97,69, 0.1)';
  }
  successMsg.style.display = 'block';
  setTimeout(() => { successMsg.style.display = 'none'; }, 5000);

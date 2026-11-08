@@ -17,7 +17,7 @@
  }
 
  html, body {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: var(--font-heading);
   color: #2C2820;
   background: #F5F1E8;
   margin: 0;
@@ -99,7 +99,7 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-body);
  }
 
  .card-content {
@@ -121,7 +121,7 @@
   letter-spacing: 0.18em;
   margin-bottom: 0.12in;
   font-weight: 600;
-  font-family: 'Arial', sans-serif;
+  font-family: var(--font-body);
   text-align: center;
  }
 
@@ -132,7 +132,7 @@
   margin-bottom: 0.14in;
   letter-spacing: -0.01em;
   line-height: 1.25;
-  font-family: 'Georgia', serif;
+  font-family: var(--font-heading);
   text-align: center;
   max-width: 92%;
  }
@@ -149,7 +149,7 @@
   font-size: 9.5pt;
   color: #3D2E24;
   line-height: 1.6;
-  font-family: 'Georgia', serif;
+  font-family: var(--font-heading);
   font-weight: 400;
   text-align: center;
   max-width: 92%;
@@ -172,7 +172,7 @@
   justify-content: space-between;
   gap: 1rem;
   z-index: 9999;
-  font-family: Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.85rem;
  }
 
@@ -223,7 +223,7 @@
    For best results: set <strong>Margins&nbsp;→&nbsp;None</strong> and <strong>Scale&nbsp;→&nbsp;100%</strong> in the print dialog
   </span>
  </div>
- <button class="print-btn" onclick="doPrint()">&#128438; Print Cards</button>
+ <button class="print-btn" onclick="doPrint()">&#624A34; Print Cards</button>
 </div>
 {% else %}
 <div class="screen-bar">
@@ -233,7 +233,7 @@
    Set <strong>Margins&nbsp;→&nbsp;None</strong> and <strong>Scale&nbsp;→&nbsp;100%</strong> in the print dialog
   </span>
  </div>
- <button class="print-btn" onclick="doPrint()">&#128438; Print Cards</button>
+ <button class="print-btn" onclick="doPrint()">&#624A34; Print Cards</button>
 </div>
 {% endif %}
 

@@ -3,7 +3,7 @@
 
 {% block agent_content %}
 <style>
-#clients-page { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; background: #F8F5F0; }
+#clients-page { font-family: var(--font-body); color: #3D2E24; background: #F8F5F0; }
 
 .client-grid {
  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -25,7 +25,7 @@
 }
 .client-avatar {
  width: 40px; height: 40px; border-radius: 50%;
- background: linear-gradient(135deg, #6B5B4D, #8B8A5A);
+ background: linear-gradient(135deg, #6B5B4D, #957050);
  display: flex; align-items: center; justify-content: center;
  color: white; font-size: .9rem; font-weight: 600; flex-shrink: 0;
 }
@@ -42,7 +42,7 @@
 .data-row:last-child { border-bottom: none; }
 .data-row__label { color: #6B5B4D; font-weight: 500; }
 .data-row__val { color: #3D2E24; font-weight: 600; text-align: right; }
-.data-row__val.green { color: #2e7d32; }
+.data-row__val.green { color: #6F543C; }
 .data-row__val.muted { color: #6B6B66; font-weight: 400; font-style: italic; }
 
 .activity-chips { display: flex; gap: .375rem; flex-wrap: wrap; margin-top: .625rem; }
@@ -57,13 +57,13 @@
  display: flex; gap: .5rem; align-items: center; justify-content: space-between;
 }
 .btn-view {
- background: linear-gradient(135deg, #6B5B4D, #8B8A5A);
+ background: linear-gradient(135deg, #6B5B4D, #957050);
  color: white; border: none; border-radius: 6px;
  padding: .45rem .9rem; font-size: .75rem; font-weight: 600;
  text-decoration: none; cursor: pointer; transition: all .2s ease;
  display: inline-block;
 }
-.btn-view:hover { background: linear-gradient(135deg, #5A5935, #7A7948); color: white; transform: translateY(-1px); }
+.btn-view:hover { background: linear-gradient(135deg, #5D4632, #7E5F44); color: white; transform: translateY(-1px); }
 .btn-portal {
  background: rgba(107,91,77,.1); color: #6B5B4D; border: 1px solid rgba(107,91,77,.2);
  border-radius: 6px; padding: .45rem .9rem; font-size: .75rem; font-weight: 500;
@@ -76,9 +76,9 @@
  font-size: .65rem; font-weight: 600; padding: .2rem .5rem; border-radius: 10px;
  text-transform: uppercase; letter-spacing: .03em;
 }
-.stage-badge.new { background: #e3f2fd; color: #1565c0; }
-.stage-badge.active { background: #e8f5e9; color: #2e7d32; }
-.stage-badge.closed { background: #f3e5f5; color: #6a1b9a; }
+.stage-badge.new { background: #F2F0EE; color: #796A5C; }
+.stage-badge.active { background: #F5EEE8; color: #6F543C; }
+.stage-badge.closed { background: #F0E9F1; color: #5F486D; }
 .stage-badge.prospect { background: #fff3e0; color: #B23C00; }
 
 .empty-state {
@@ -87,12 +87,12 @@
 .empty-state h2 { font-family: 'Playfair Display', Georgia, serif; font-weight: 400; margin-bottom: .75rem; }
 .empty-state p { font-size: .9rem; margin-bottom: 1.5rem; }
 .btn-primary-action {
- background: linear-gradient(135deg, #6B5B4D, #8B8A5A);
+ background: linear-gradient(135deg, #6B5B4D, #957050);
  color: white; border: none; border-radius: 8px;
  padding: .7rem 1.5rem; font-size: .85rem; font-weight: 600;
  text-decoration: none; display: inline-block; transition: all .2s;
 }
-.btn-primary-action:hover { background: linear-gradient(135deg, #5A5935, #7A7948); color: white; }
+.btn-primary-action:hover { background: linear-gradient(135deg, #5D4632, #7E5F44); color: white; }
 
 .search-bar {
  display: flex; gap: .75rem; align-items: center; flex-wrap: wrap;
@@ -116,7 +116,7 @@
  <h1 class="ylh-page-hd__title">My Clients</h1>
  <p class="ylh-page-hd__sub">All linked homeowner clients, live portal data at a glance</p>
  <div class="ylh-page-hd__actions">
- <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)" style="border:1px solid rgba(143,163,130,.3);border-radius:10px;padding:.55rem .9rem;font-size:.82rem;background:white;color:#3D2E24;outline:none;min-width:200px;">
+ <input type="text" id="clientSearch" class="search-input" placeholder="Search by name or address…" oninput="filterClients(this.value)" style="border:1px solid rgba(179,144,114,.3);border-radius:10px;padding:.55rem .9rem;font-size:.82rem;background:white;color:#3D2E24;outline:none;min-width:200px;">
  <a href="{{ url_for('agent_referrals') }}" class="ylh-btn ylh-btn-primary">+ Invite Client</a>
  </div>
  </div>

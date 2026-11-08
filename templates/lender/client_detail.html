@@ -2,7 +2,7 @@
 
 {% block lender_content %}
 <style>
-#lender-client-detail { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #3D2E24; }
+#lender-client-detail { font-family: var(--font-body); color: #3D2E24; }
 
 .detail-header {
  background: linear-gradient(135deg, #F0EBE4 0%, #EDE8DC 100%);
@@ -11,18 +11,18 @@
  display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
 }
 .detail-header__left { display: flex; align-items: center; gap: 1rem; }
-.big-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #6B5B4D, #8B8A5A); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; font-weight: 600; flex-shrink: 0; }
+.big-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #6B5B4D, #957050); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.4rem; font-weight: 600; flex-shrink: 0; }
 .detail-header__name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 400; margin: 0; }
 .detail-header__sub { font-size: .8rem; color: #6B5B4D; margin: .2rem 0 0; }
 
 .btn-back { color: #6B5B4D; text-decoration: none; font-size: .8rem; }
-.btn-portal-header { background: linear-gradient(135deg, #6B5B4D, #8B8A5A); color: white; border: none; border-radius: 8px; padding: .55rem 1.1rem; font-size: .8rem; font-weight: 600; text-decoration: none; display: inline-block; }
-.btn-portal-header:hover { background: linear-gradient(135deg, #5A5935, #7A7948); color: white; }
+.btn-portal-header { background: linear-gradient(135deg, #6B5B4D, #957050); color: white; border: none; border-radius: 8px; padding: .55rem 1.1rem; font-size: .8rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn-portal-header:hover { background: linear-gradient(135deg, #5D4632, #7E5F44); color: white; }
 
 .kpi-row { display: flex; gap: .875rem; flex-wrap: wrap; padding: 1rem 1.5rem; background: white; border-bottom: 1px solid rgba(107,91,77,.1); }
 .kpi-box { flex: 1; min-width: 110px; background: #F8F5F0; border-radius: 8px; padding: .75rem 1rem; border: 1px solid rgba(107,91,77,.1); text-align: center; }
 .kpi-box__val { font-size: 1.35rem; font-weight: 700; color: #3D2E24; line-height: 1.1; }
-.kpi-box__val.green { color: #2e7d32; }
+.kpi-box__val.green { color: #6F543C; }
 .kpi-box__label { font-size: .65rem; color: #6B5B4D; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; margin-top: .2rem; }
 
 .detail-body { padding: 1.25rem 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
@@ -51,7 +51,7 @@
 
 .tx-row { padding: .5rem 0; border-bottom: 1px solid rgba(107,91,77,.07); font-size: .82rem; }
 .tx-row:last-child { border-bottom: none; }
-.tx-stage { display: inline-block; background: #e8f5e9; color: #2e7d32; border-radius: 10px; padding: .15rem .5rem; font-size: .68rem; font-weight: 600; }
+.tx-stage { display: inline-block; background: #F5EEE8; color: #6F543C; border-radius: 10px; padding: .15rem .5rem; font-size: .68rem; font-weight: 600; }
 
 .empty-panel { text-align: center; padding: 1.5rem 1rem; color: #6B6B66; font-size: .82rem; }
 </style>
@@ -106,7 +106,7 @@
  <div class="panel__body">
  <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '-' }}</span></div>
  <div class="data-row"><span class="data-row__label">Est. Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#2e7d32">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#6F543C">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %} - {% endif %}</span></div>
@@ -138,7 +138,7 @@
  {% if professionals %}
  {% for prof in professionals %}
  <div style="display:flex;align-items:center;gap:.625rem;padding:.5rem 0;border-bottom:1px solid rgba(107,91,77,.07)">
- <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6B5B4D,#8B8A5A);display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;font-weight:600;flex-shrink:0">{{ (prof.name or 'P')[0]|upper }}</div>
+ <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6B5B4D,#957050);display:flex;align-items:center;justify-content:center;color:white;font-size:.75rem;font-weight:600;flex-shrink:0">{{ (prof.name or 'P')[0]|upper }}</div>
  <div>
  <div style="font-size:.82rem;font-weight:600;color:#3D2E24">{{ prof.name or '-' }}</div>
  <div style="font-size:.72rem;color:#6B5B4D">{{ (prof.professional_role or '')|capitalize }} · {{ prof.email or '' }}</div>

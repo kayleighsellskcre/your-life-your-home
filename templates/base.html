@@ -33,7 +33,7 @@
 
  <!-- Google Fonts - Optimized Loading -->
  <link
- href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500;600;700&display=swap"
+ href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
  rel="stylesheet"
  />
  
@@ -657,7 +657,7 @@
  <style>
  /* ── TOP NAV HAMBURGER ──────────────────────────── */
 .ylh-hdr-title {
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-body);
   font-size: .72rem; font-weight: 500; color: rgba(255,255,255,.85);
   letter-spacing: .1em; white-space: nowrap; text-transform: uppercase;
  }
@@ -699,7 +699,7 @@
  .ylh-ham-more summary { list-style:none; cursor:pointer; padding:.6rem 1rem; font-size:.82rem; font-weight:600; color:#5c4e42; border-top:1px solid rgba(159,129,90,.14); }
  .ylh-ham-more summary::-webkit-details-marker { display:none; }
  .ylh-ham-more summary::after { content:'+'; float:right; font-weight:400; }
- .ylh-ham-more[open] summary::after { content:'2'; }
+ .ylh-ham-more[open] summary::after { content:'\2212'; }
  .ylh-ham-more .ylh-ham-item { padding-left:1.6rem; font-size:.8rem; }
  .ylh-ham-more .ylh-ham-item:hover { padding-left:1.85rem; }
  .ylh-ham-signout {
@@ -709,6 +709,18 @@
    transition: background .12s;
  }
  .ylh-ham-signout:hover { background: rgba(198,146,112,.1); }
+ /* Compact menu: two columns, tighter rows */
+ .ylh-ham-menu { min-width: 300px; max-width: 94vw; }
+ .ylh-ham-menu.open { display: grid; grid-template-columns: 1fr 1fr; }
+ .ylh-ham-menu > .ylh-ham-item { padding: .42rem .8rem; font-size: .78rem; line-height: 1.25; }
+ .ylh-ham-menu > .ylh-ham-item:hover { padding-left: .95rem; }
+ .ylh-ham-menu > .ylh-ham-section, .ylh-ham-menu > .ylh-ham-more, .ylh-ham-menu > .ylh-ham-signout { grid-column: 1 / -1; }
+ .ylh-ham-more summary { padding: .42rem .8rem; font-size: .78rem; }
+ .ylh-ham-more[open] { background: rgba(159,129,90,.06); font-size: 0; }
+ .ylh-ham-more[open] summary { font-size: .78rem; }
+ .ylh-ham-more .ylh-ham-item { display: inline-block; width: 50%; box-sizing: border-box; vertical-align: top; padding: .36rem .8rem .36rem 1rem; font-size: .76rem; line-height: 1.25; }
+ .ylh-ham-more .ylh-ham-item:hover { padding-left: 1.15rem; }
+ .ylh-ham-signout { padding: .5rem .8rem; font-size: .78rem; }
 
  /* Signed-out header on phones: the brand gets the room, Sign In stays compact */
  @media (max-width: 768px) {

@@ -107,11 +107,11 @@
  align-items: center;
  gap: 0.375rem;
  padding: 0.375rem 0.75rem;
- background: rgba(90, 109, 71, 0.1);
+ background: rgba(117,88,63, 0.1);
  border-radius: 6px;
  font-size: 0.8rem;
  font-weight: 600;
- color: #5A6D47;
+ color: #75583F;
  margin-top: 0.75rem;
  }
  
@@ -879,7 +879,7 @@
  </div>
  <div>
  <div style="font-size: 0.85rem; color: rgba(61, 46, 36, 0.78); margin-bottom: 0.5rem;">Projected Equity</div>
- <div style="font-family: var(--font-heading); font-size: 2rem; color: #5A6D47;" id="projectedEquity">
+ <div style="font-family: var(--font-heading); font-size: 2rem; color: #75583F;" id="projectedEquity">
  {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
  ${{ "{:,}".format(((snapshot.get('value_estimate') * 1.15) - (snapshot.get('loan_balance') * 0.85))|int) }}
  {% else %}
@@ -889,7 +889,7 @@
  </div>
  <div>
  <div style="font-size: 0.85rem; color: rgba(61, 46, 36, 0.78); margin-bottom: 0.5rem;">Equity Gain</div>
- <div style="font-family: var(--font-heading); font-size: 2rem; color: #5A6D47;" id="equityGain">
+ <div style="font-family: var(--font-heading); font-size: 2rem; color: #75583F;" id="equityGain">
  {% if snapshot and snapshot.get('value_estimate') and snapshot.get('loan_balance') %}
  ${{ "{:,}".format((((snapshot.get('value_estimate') * 1.15) - (snapshot.get('loan_balance') * 0.85)) - (snapshot.get('value_estimate') - snapshot.get('loan_balance')))|int) }}
  {% else %}
@@ -1048,8 +1048,8 @@
  {
  label: 'Equity',
  data: equities,
- borderColor: '#5A6D47',
- backgroundColor: 'rgba(90, 109, 71, 0.1)',
+ borderColor: '#75583F',
+ backgroundColor: 'rgba(117,88,63, 0.1)',
  tension: 0.4,
  fill: true,
  borderWidth: 3

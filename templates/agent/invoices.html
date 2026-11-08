@@ -1,7 +1,7 @@
 {% extends "agent/layout.html" %}
 {% block agent_content %}
 <style>
-#inv-wrap{all:revert;font-family:'Lato',sans-serif;color:#3D2E24;background:#F9F7F2;min-height:80vh;}
+#inv-wrap{all:revert;font-family: var(--font-body);color:#3D2E24;background:#F9F7F2;min-height:80vh;}
 #inv-wrap *{box-sizing:border-box;}
 #inv-wrap a{text-decoration:none;}
 
@@ -47,7 +47,7 @@
 }
 .inv-stat__label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#6F6B4D;margin-bottom:.3rem;}
 .inv-stat__val{font-family:'Playfair Display',serif;font-size:1.35rem;color:#3D2E24;font-weight:400;}
-.inv-stat__val--green{color:#4A7C59;}
+.inv-stat__val--green{color:#816145;}
 .inv-stat__val--gold{color:#8B6914;}
 .inv-stat__val--muted{color:#6F6B4D;}
 
@@ -67,8 +67,8 @@
 /* ── FLASH ── */
 .inv-flash{padding:.6rem 1.5rem;}
 .inv-flash .flash-msg{padding:.55rem 1rem;border-radius:6px;font-size:.8rem;font-weight:600;margin-bottom:.35rem;}
-.flash-msg--success{background:#eaf4ec;color:#2e6b3c;border:1px solid #b8dfbf;}
-.flash-msg--error{background:#fdecea;color:#b94040;border:1px solid #f5b8b0;}
+.flash-msg--success{background:#F6EFE8;color:#634B36;border:1px solid #DBCABC;}
+.flash-msg--error{background:#F9EFEE;color:#b94040;border:1px solid #E9C1BC;}
 
 /* ── INVOICE TABLE ── */
 .inv-body{padding:1.25rem 1.5rem;}
@@ -95,7 +95,7 @@
 }
 .s-badge--draft {background:rgba(200,180,151,.22);color:#5A4A3C;}
 .s-badge--sent {background:rgba(107,91,77,.15);color:#3D2E24;}
-.s-badge--paid {background:rgba(74,124,89,.15);color:#2e6b3c;}
+.s-badge--paid {background:rgba(129,97,69,.15);color:#634B36;}
 .s-badge--overdue {background:rgba(185,64,64,.12);color:#b94040;}
 
 /* ── EMPTY STATE ── */

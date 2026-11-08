@@ -8,7 +8,7 @@
 
 /* ─── Page wrapper ─── */
 #txpage {
- font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+ font-family: var(--font-body);
  color: #3D2E24;
  background: #F8F5F0;
  padding: 0;
@@ -81,10 +81,10 @@
  font-weight: 500;
  margin-bottom: .25rem;
 }
-.flash-item--success { background: #e8f5e9; color: #2e7d32; }
-.flash-item--error { background: #fdecea; color: #c62828; }
+.flash-item--success { background: #F5EEE8; color: #6F543C; }
+.flash-item--error { background: #F9EFEE; color: #B23C3C; }
 .flash-item--warning { background: #fff8e1; color: #9A5300; }
-.flash-item--info { background: #e3f2fd; color: #1565c0; }
+.flash-item--info { background: #F2F0EE; color: #796A5C; }
 
 /* ─── Stage summary strip ─── */
 .stage-strip {
@@ -192,7 +192,7 @@
 }
 .tx-td--addr {
  font-weight: 600;
- color: #2c3320;
+ color: #36291D;
  max-width: 220px;
 }
 .tx-td--muted { color: #6F6B4D; }
@@ -213,14 +213,14 @@
  white-space: nowrap;
 }
 .stg--summary { background: rgba(200,180,151,.22); color: #5A4A3C; }
-.stg--showings { background: rgba(33,150,243,.12); color: #1565C0; }
+.stg--showings { background: rgba(153,138,123,.12); color: #796A5C; }
 .stg--under_contract { background: rgba(255,152,0,.14); color: #B23C00; }
-.stg--earnest_money { background: rgba(156,39,176,.12); color: #6A1B9A; }
-.stg--inspection { background: rgba(244,67,54,.12); color: #B71C1C; }
-.stg--appraisal { background: rgba(0,150,136,.12); color: #00695C; }
-.stg--loan_commitment{ background: rgba(63,81,181,.12); color: #283593; }
-.stg--final_walkthrough{background:rgba(139,195,74,.14); color: #33691E; }
-.stg--closing { background: rgba(76,175,80,.14); color: #2E7D32; }
+.stg--earnest_money { background: rgba(123,86,129,.12); color: #5F486D; }
+.stg--inspection { background: rgba(202,103,96,.12); color: #9E3535; }
+.stg--appraisal { background: rgba(85,75,65,.12); color: #3B342E; }
+.stg--loan_commitment{ background: rgba(138,122,106,.12); color: #6A5E51; }
+.stg--final_walkthrough{background:rgba(171,132,98,.14); color: #58422F; }
+.stg--closing { background: rgba(163,123,88,.14); color: #6F543C; }
 
 /* ─── Side badge ─── */
 .side-b {
@@ -232,9 +232,9 @@
  letter-spacing: .04em;
  text-transform: uppercase;
 }
-.side-b--buyer { background: rgba(33,150,243,.12); color: #1565C0; }
+.side-b--buyer { background: rgba(153,138,123,.12); color: #796A5C; }
 .side-b--seller { background: rgba(255,152,0,.14); color: #B23C00; }
-.side-b--both { background: rgba(156,39,176,.12); color: #6A1B9A; }
+.side-b--both { background: rgba(123,86,129,.12); color: #5F486D; }
 
 /* ─── Action buttons ─── */
 .tx-act {
@@ -262,8 +262,8 @@
  vertical-align: middle;
 }
 .tx-act:hover { background: #F0EBE4; border-color: #6B5B4D; color: #3D2E24; }
-.tx-act--del { color: #c0392b; border-color: rgba(192,57,43,.25); background: #fff; }
-.tx-act--del:hover { background: rgba(192,57,43,.08); color: #c0392b; border-color: rgba(192,57,43,.5); }
+.tx-act--del { color: #B0463B; border-color: rgba(176,70,59,.25); background: #fff; }
+.tx-act--del:hover { background: rgba(176,70,59,.08); color: #B0463B; border-color: rgba(176,70,59,.5); }
 .tx-actions { display: flex; gap: .35rem; justify-content: flex-end; align-items: center; }
 
 /* ─── Empty state ─── */

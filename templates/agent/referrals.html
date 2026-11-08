@@ -7,7 +7,7 @@
 #referrals-page, #referrals-page * { box-sizing: border-box; }
 
 #referrals-page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   color: #3D2E24;
   background: #F8F5F0;
   padding: 0;
@@ -459,7 +459,7 @@ function showCopied(btn) {
   if (!btn) return;
   var orig = btn.innerHTML;
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-  btn.style.background = 'linear-gradient(135deg, #8F6244 0%, #3A4D2C 100%)';
+  btn.style.background = 'linear-gradient(135deg, #8F6244 0%, #4F3B2A 100%)';
   setTimeout(function(){
     btn.innerHTML = orig;
     btn.style.background = '';

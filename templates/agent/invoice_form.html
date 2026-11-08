@@ -1,7 +1,7 @@
 {% extends "agent/layout.html" %}
 {% block agent_content %}
 <style>
-#iform{all:revert;font-family:'Lato',sans-serif;color:#3D2E24;background:#F9F7F2;min-height:80vh;}
+#iform{all:revert;font-family: var(--font-body);color:#3D2E24;background:#F9F7F2;min-height:80vh;}
 #iform *{box-sizing:border-box;}
 
 /* TOP BAR */
@@ -95,8 +95,8 @@
 }
 .if-btn--primary{background:#6B5B4D;color:#fff;}
 .if-btn--primary:hover{background:#5A4A3C;}
-.if-btn--send{background:#4A7C59;color:#fff;}
-.if-btn--send:hover{background:#3d6a4a;}
+.if-btn--send{background:#816145;color:#fff;}
+.if-btn--send:hover{background:#6D523A;}
 .if-btn--ghost{background:transparent;color:#6B5B4D;border:1px solid rgba(107,91,77,.38);}
 .if-btn--ghost:hover{background:rgba(107,91,77,.07);}
 
@@ -283,7 +283,7 @@
  <button type="submit" name="save_action" value="save" class="if-btn if-btn--primary">Save Draft</button>
  <button type="submit" name="save_action" value="send" class="if-btn if-btn--send">Save &amp; Mark Sent →</button>
  {% if mode=='edit' and invoice.status != 'paid' %}
- <button type="submit" name="save_action" value="paid" class="if-btn if-btn--send" style="background:#4A7C59;"> Mark Paid</button>
+ <button type="submit" name="save_action" value="paid" class="if-btn if-btn--send" style="background:#816145;"> Mark Paid</button>
  {% endif %}
  </div>
  </div>

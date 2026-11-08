@@ -11,11 +11,11 @@
  --charcoal: #3D2E24;
  --warm-gray: rgba(61,46,36,.52);
  --accent: #C2B1A1;
- --green: #15803d;
- --red: #dc2626;
+ --green: #614934;
+ --red: #C04242;
  --amber: #b45309;
- --blue: #1d4ed8;
- --purple: #7c3aed;
+ --blue: #8B7A6A;
+ --purple: #8E7EA9;
  --border: rgba(200,180,151,.28);
  --shadow-sm: 0 2px 8px rgba(61,46,36,.07);
  --shadow-md: 0 8px 32px rgba(61,46,36,.10);
@@ -34,17 +34,17 @@
  .fin-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem; position:relative; overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .2s,box-shadow .2s; }
  .fin-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
  .fin-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
- .fin-card.green::before { background:linear-gradient(90deg,#15803d,#4ade80); }
+ .fin-card.green::before { background:linear-gradient(90deg,#614934,#B49274); }
  .fin-card.amber::before { background:linear-gradient(90deg,#b45309,#fbbf24); }
- .fin-card.red::before { background:linear-gradient(90deg,#dc2626,#f87171); }
- .fin-card.blue::before { background:linear-gradient(90deg,#1d4ed8,#60a5fa); }
- .fin-card.purple::before { background:linear-gradient(90deg,#7c3aed,#c084fc); }
+ .fin-card.red::before { background:linear-gradient(90deg,#C04242,#DA8F8F); }
+ .fin-card.blue::before { background:linear-gradient(90deg,#8B7A6A,#B8ADA2); }
+ .fin-card.purple::before { background:linear-gradient(90deg,#8E7EA9,#C0B3CD); }
  .fin-card-icon { position:absolute; top:1.1rem; right:1.1rem; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
- .fin-card.green .fin-card-icon { background:rgba(21,128,61,.1); }
+ .fin-card.green .fin-card-icon { background:rgba(97,73,52,.1); }
  .fin-card.amber .fin-card-icon { background:rgba(180,83,9,.1); }
- .fin-card.red .fin-card-icon { background:rgba(220,38,38,.09); }
- .fin-card.blue .fin-card-icon { background:rgba(29,78,216,.09); }
- .fin-card.purple .fin-card-icon { background:rgba(124,58,237,.09); }
+ .fin-card.red .fin-card-icon { background:rgba(192,66,66,.09); }
+ .fin-card.blue .fin-card-icon { background:rgba(139,122,106,.09); }
+ .fin-card.purple .fin-card-icon { background:rgba(142,126,169,.09); }
  .fin-card-label { font-size:.66rem; text-transform:uppercase; letter-spacing:.09em; color:var(--warm-gray); font-weight:700; margin-bottom:.5rem; }
  .fin-card-value { font-family:'Playfair Display',serif; font-size:1.65rem; color:var(--charcoal); font-weight:700; line-height:1; margin-bottom:.3rem; }
  .fin-card-sub { font-size:.71rem; color:var(--warm-gray); }
@@ -88,7 +88,7 @@
  .ai-forecast-card .val { font-family:'Playfair Display',serif; font-size:1.45rem; color:var(--charcoal); font-weight:700; margin-bottom:.2rem; }
  .ai-forecast-card .lbl { font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--warm-gray); font-weight:700; }
  .ai-confidence { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:600; padding:.2rem .6rem; border-radius:20px; margin-top:.5rem; }
- .ai-confidence.high { background:rgba(21,128,61,.1); color:#15803d; }
+ .ai-confidence.high { background:rgba(97,73,52,.1); color:#614934; }
  .ai-confidence.medium { background:rgba(180,83,9,.1); color:#b45309; }
  .ai-confidence.low { background:rgba(107,91,77,.1); color:var(--olive); }
  .ai-forecast-headline { font-size:.88rem; color:var(--charcoal); line-height:1.5; font-style:italic; margin-bottom:.5rem; }
@@ -107,9 +107,9 @@
  font-family:'Playfair Display',serif; font-size:1.5rem;
  font-weight:700; color:#fff;
  }
- .score-circle.high { background:linear-gradient(135deg,#15803d,#4ade80); }
+ .score-circle.high { background:linear-gradient(135deg,#614934,#B49274); }
  .score-circle.medium { background:linear-gradient(135deg,#b45309,#fbbf24); }
- .score-circle.low { background:linear-gradient(135deg,#dc2626,#f87171); }
+ .score-circle.low { background:linear-gradient(135deg,#C04242,#DA8F8F); }
  .score-circle.na { background:linear-gradient(135deg,#6B5B4D,#C2B1A1); }
  .pipeline-rec { background:#fff; border:1px solid var(--border); border-radius:var(--radius-sm); padding:.85rem 1.1rem; margin-bottom:.6rem; display:flex; align-items:flex-start; gap:.75rem; }
  .priority-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:.35rem; }
@@ -149,22 +149,22 @@
  .fin-table tr:last-child td { border-bottom:none; }
  .fin-table tr:hover td { background:rgba(107,91,77,.025); }
  .badge { display:inline-flex; align-items:center; padding:.22rem .6rem; border-radius:20px; font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
- .badge-funded { background:rgba(21,128,61,.12); color:#15803d; }
+ .badge-funded { background:rgba(97,73,52,.12); color:#614934; }
  .badge-proj { background:rgba(180,83,9,.12); color:#b45309; }
- .badge-lost { background:rgba(220,38,38,.1); color:#dc2626; }
+ .badge-lost { background:rgba(192,66,66,.1); color:#C04242; }
  .empty-msg { text-align:center; padding:3.5rem 1rem; color:var(--warm-gray); font-size:.88rem; line-height:1.7; }
  .empty-msg .big { font-size:2.5rem; margin-bottom:.75rem; }
  .tbl-act { display:inline-flex; align-items:center; gap:.25rem; font-size:.71rem; font-weight:700; padding:.2rem .55rem; border-radius:6px; border:1px solid; cursor:pointer; background:none; text-decoration:none; transition:all .12s; letter-spacing:.02em; }
- .tbl-act-green { color:var(--green); border-color:rgba(21,128,61,.3); }
- .tbl-act-green:hover { background:rgba(21,128,61,.08); }
- .tbl-act-red { color:var(--red); border-color:rgba(220,38,38,.25); }
- .tbl-act-red:hover { background:rgba(220,38,38,.07); }
+ .tbl-act-green { color:var(--green); border-color:rgba(97,73,52,.3); }
+ .tbl-act-green:hover { background:rgba(97,73,52,.08); }
+ .tbl-act-red { color:var(--red); border-color:rgba(192,66,66,.25); }
+ .tbl-act-red:hover { background:rgba(192,66,66,.07); }
 
  .goal-card { background:var(--cream2); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1.4rem; margin-bottom:.85rem; }
  .goal-label { display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; color:var(--charcoal); margin-bottom:.55rem; }
  .goal-bar-bg { height:10px; background:rgba(107,91,77,.12); border-radius:5px; overflow:hidden; }
  .goal-bar-fill { height:100%; border-radius:5px; background:linear-gradient(90deg,var(--olive),var(--accent)); transition:width .8s cubic-bezier(.4,0,.2,1); }
- .goal-bar-fill.danger { background:linear-gradient(90deg,#dc2626,#f87171); }
+ .goal-bar-fill.danger { background:linear-gradient(90deg,#C04242,#DA8F8F); }
  .goal-sub { font-size:.69rem; color:var(--warm-gray); margin-top:.35rem; text-align:right; }
 
  .fin-modal-overlay { display:none; position:fixed; inset:0; background:rgba(30,24,18,.5); z-index:9000; align-items:center; justify-content:center; backdrop-filter:blur(2px); }
@@ -690,8 +690,8 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
  datasets: [{
  label: 'Revenue ($)',
  data: monthlyData,
- backgroundColor: monthlyData.map(v => v > 0 ? 'rgba(107,91,77,0.7)' : 'rgba(220,38,38,0.25)'),
- borderColor: monthlyData.map(v => v > 0 ? '#6B5B4D' : '#dc2626'),
+ backgroundColor: monthlyData.map(v => v > 0 ? 'rgba(107,91,77,0.7)' : 'rgba(192,66,66,0.25)'),
+ borderColor: monthlyData.map(v => v > 0 ? '#6B5B4D' : '#C04242'),
  borderWidth: 1, borderRadius: 5,
  }]
  },
@@ -708,7 +708,7 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
 const expCtx = document.getElementById('expenseChart').getContext('2d');
 const expLabels = {{ expense_by_cat.keys() | list | tojson }};
 const expVals = {{ expense_by_cat.values() | list | tojson }};
-const palette = ['#6B5B4D','#C2B1A1','#8B8A5A','#b45309','#15803d','#1d4ed8','#7c3aed','#dc2626','#0891b2','#be185d','#92400e','#374151'];
+const palette = ['#6B5B4D','#C2B1A1','#957050','#b45309','#614934','#8B7A6A','#8E7EA9','#C04242','#695D51','#805667','#92400e','#4B443D'];
 new Chart(expCtx, {
  type: 'doughnut',
  data: { labels: expLabels, datasets: [{ data: expVals, backgroundColor: palette.slice(0,expLabels.length), borderWidth:2, borderColor:'#fff' }] },
