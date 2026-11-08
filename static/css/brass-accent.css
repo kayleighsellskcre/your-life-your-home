@@ -32,20 +32,21 @@
 /* Quiet empty-state text stays readable (AA) */
 .empty-msg, .empty-state, .empty-text { color: #6F6256 !important; }
 
-/* ───── Walnut header with wood grain ───── */
-:root {
-  --walnut-grain: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='720' height='240'><filter id='g' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.003 0.2' numOctaves='4' seed='11'/><feColorMatrix values='0 0 0 0 0.20  0 0 0 0 0.10  0 0 0 0 0.05  0 0 0 1.7 -0.55'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>");
-  --walnut-light: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='300'><filter id='h' x='0' y='0' width='100%25' height='100%25'><feTurbulence type='fractalNoise' baseFrequency='0.002 0.12' numOctaves='3' seed='4'/><feColorMatrix values='0 0 0 0 0.78  0 0 0 0 0.55  0 0 0 0 0.36  0 0 0 1.3 -0.5'/></filter><rect width='100%25' height='100%25' filter='url(%23h)'/></svg>");
-}
+/* ───── Oak slab header (image made by scripts/make_wood.py) ───── */
 html body .site-header {
   background:
-    var(--walnut-grain) 0 0 / 720px 100% repeat-x,
-    var(--walnut-light) 0 0 / 900px 100% repeat-x,
-    linear-gradient(180deg, rgba(255,235,205,.10) 0%, rgba(0,0,0,.14) 100%),
-    linear-gradient(100deg, #8B5E41 0%, #7A5037 40%, #86593D 70%, #704730 100%) !important;
-  border-bottom: 1px solid rgba(60,36,22,.55) !important;
-  box-shadow: 0 2px 14px rgba(60,36,22,.28), inset 0 1px 0 rgba(255,225,190,.25) !important;
+    linear-gradient(180deg, rgba(255,240,215,.14) 0%, rgba(90,55,28,.08) 100%),
+    url("../img/oak-slab.jpg") center / cover no-repeat,
+    #C9A074 !important;
+  border-bottom: 1px solid rgba(110,72,40,.5) !important;
+  box-shadow: 0 2px 12px rgba(110,72,40,.25), inset 0 1px 0 rgba(255,240,215,.45) !important;
 }
+html body .site-header .brand-logo, html body .site-header #ylhBrand { color: #3F2817 !important; text-shadow: 0 1px 0 rgba(255,235,205,.45); }
+html body .site-header .ylh-hdr-title { color: #4A3222 !important; opacity: .9; }
+html body .site-header .main-nav ul li a { color: #3F2817 !important; font-weight: 700; }
+html body .site-header .main-nav ul li a:hover { background: rgba(255,245,225,.35) !important; color: #2E1C0F !important; }
+html body .site-header .ylh-ham-btn span { background: #3F2817; }
+html body .site-header .ylh-ham-btn:hover { background: rgba(255,245,225,.35); }
 
 /* ───── Champagne brushed-gold buttons ───── */
 :root {
