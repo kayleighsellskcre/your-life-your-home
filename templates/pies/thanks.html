@@ -41,7 +41,13 @@
     <p class="pie-hint" style="margin:.6rem 0 0;">The address is added to your calendar event.</p>
     {% endif %}
     {% if answer.choice in ('pickup', 'cant_make') %}
-    <p class="pie-hint" style="margin:.8rem 0 0;">We've emailed you a confirmation. Need to change something? Fill the form out again with the same email.</p>
+    <p class="pie-hint" style="margin:.8rem 0 0;">We've emailed you a confirmation with a link to change or cancel your response.</p>
+    {% endif %}
+    {% if answer.edit_token %}
+    <div class="pie-actions" style="margin-top:.8rem;">
+      <a class="pie-btn secondary small" href="{{ url_for('pies.public_event', token=ev.token, edit_token=answer.edit_token) }}">Change my response</a>
+      <form method="post" action="{{ url_for('pies.public_delete', token=ev.token, edit_token=answer.edit_token) }}" style="margin:0;" onsubmit="return confirm('Cancel your response? This removes your pie request.');"><button class="pie-link danger" type="submit">Cancel my response</button></form>
+    </div>
     {% endif %}
   </div>
 </div>

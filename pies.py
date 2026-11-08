@@ -92,6 +92,7 @@ def ensure_tables():
     _add("pie_responses", "want_date", "TEXT")
     _add("pie_responses", "want_time", "TEXT")
     _add("pie_responses", "reminded", "INTEGER DEFAULT 0")
+    _add("pie_responses", "edit_token", "TEXT")
     conn.commit()
     conn.close()
 
@@ -729,18 +730,101 @@ def _event_by_token(token):
     return ev
 
 
-@bp.route("/pies/r/<token>", methods=["GET", "POST"])
-def public_event(token):
+def _response_by_edit_token(ev, edit_token):
+    if not edit_token:
+        return None
+    conn = _db()
+    r = conn.execute("SELECT * FROM pie_responses WHERE event_id=? AND edit_token=?", (ev["id"], edit_token)).fetchone()
+    conn.close()
+    return r
+
+
+def _edit_link(token, edit_token):
+    return url_for("pies.public_event", token=token, edit_token=edit_token, _external=True)
+
+
+def _form_from_response(r):
+    return {"choice": r["choice"], "slot_id": str(r["slot_id"] or ""), "fulfillment": r["fulfillment"] or "",
+            "delivery_address": r["address"] or "", "want_date": r["want_date"] or "", "want_time": r["want_time"] or "",
+            "pie_type": r["pie_type"] or "", "notes": r["notes"] or "", "name": r["name"] or "",
+            "phone": r["phone"] or "", "email": r["email"] or ""}
+
+
+@bp.route("/pies/r/<token>/mine/<edit_token>/delete", methods=["POST"])
+def public_delete(token, edit_token):
     ev = _event_by_token(token)
     if not ev:
         abort(404)
+    r = _response_by_edit_token(ev, edit_token)
+    if not r:
+        abort(404)
+    conn = _db()
+    conn.execute("DELETE FROM pie_responses WHERE id=?", (r["id"],))
+    conn.commit()
+    conn.close()
+    session.pop(f"pie_{token}", None)
+    flash("Your response has been cancelled. You can fill the form out again any time.", "success")
+    return redirect(url_for("pies.public_event", token=token))
+
+
+@bp.route("/pies/<int:event_id>/response/<int:response_id>/delete", methods=["POST"])
+def owner_delete_response(event_id, response_id):
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    conn = _db()
+    conn.execute("DELETE FROM pie_responses WHERE id=? AND event_id=?", (response_id, ev["id"]))
+    conn.commit()
+    conn.close()
+    flash("Response deleted.", "success")
+    return redirect(url_for("pies.event_detail", event_id=ev["id"]) + "#responses")
+
+
+@bp.route("/pies/<int:event_id>/response/<int:response_id>/edit")
+def owner_edit_response(event_id, response_id):
+    """Opens the public form pre-filled with this person's answer, so the owner can change it for them."""
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    conn = _db()
+    r = conn.execute("SELECT * FROM pie_responses WHERE id=? AND event_id=?", (response_id, ev["id"])).fetchone()
+    if not r:
+        conn.close()
+        abort(404)
+    tok = r["edit_token"]
+    if not tok:
+        tok = secrets.token_urlsafe(16)
+        conn.execute("UPDATE pie_responses SET edit_token=? WHERE id=?", (tok, r["id"]))
+        conn.commit()
+    conn.close()
+    return redirect(url_for("pies.public_event", token=ev["token"], edit_token=tok))
+
+
+@bp.route("/pies/r/<token>", methods=["GET", "POST"])
+@bp.route("/pies/r/<token>/mine/<edit_token>", methods=["GET", "POST"])
+def public_event(token, edit_token=None):
+    ev = _event_by_token(token)
+    if not ev:
+        abort(404)
+    editing_row = _response_by_edit_token(ev, edit_token) if edit_token else None
+    if edit_token and not editing_row:
+        flash("That link is no longer valid. You can fill the form out again below.", "error")
+        return redirect(url_for("pies.public_event", token=token))
     conn = _db()
     slots = _slot_rows(conn, ev["id"])
     conn.close()
+    if editing_row and editing_row["choice"] == "pickup" and editing_row["slot_id"]:
+        # their own spot should not count against them when they re-save
+        for s in slots:
+            if s["id"] == editing_row["slot_id"]:
+                s["taken"] -= (editing_row["quantity"] or 0)
+                s["full"] = False
     brand = _branding(ev["owner_id"])
-    closed = _is_closed(ev)
+    closed = _is_closed(ev) and not editing_row
     ctx = dict(ev=dict(ev), slots=slots, pies=_pie_list(ev), brand=brand, closed=closed,
-               fmt_order_by=fmt_date(ev["order_by"]), form={}, today=date.today().isoformat(),
+               editing=edit_token if editing_row else "",
+               fmt_order_by=fmt_date(ev["order_by"]), form=_form_from_response(editing_row) if editing_row else {},
+               today=date.today().isoformat(),
                home_min=max([x for x in (date.today().isoformat(), ev["home_from"] or "") if x]),
                home_max=ev["home_to"] or "", home_range=" to ".join(x for x in (fmt_date(ev["home_from"]), fmt_date(ev["home_to"])) if x))
 
@@ -775,7 +859,7 @@ def public_event(token):
                 pie_type = (f.get("pie_type") or "").strip()[:60]
                 if pies and pie_type not in pies:
                     err = "Please choose a type of pie."
-                qty = 1  # one pie per person
+                qty = 1  # one pie per household
                 if choice == "pickup" and not err:
                     sid = f.get("slot_id", "")
                     match = next((s for s in slots if str(s["id"]) == sid), None)
@@ -830,19 +914,23 @@ def public_event(token):
         conn = _db()
         cur = conn.cursor()
         existing = None
-        if email:
-            existing = cur.execute("SELECT id FROM pie_responses WHERE event_id=? AND lower(email)=?",
+        if editing_row:
+            existing = {"id": editing_row["id"], "edit_token": editing_row["edit_token"]}
+        elif email:
+            existing = cur.execute("SELECT id, edit_token FROM pie_responses WHERE event_id=? AND lower(email)=?",
                                    (ev["id"], email)).fetchone()
+        my_token = (existing["edit_token"] if existing else None) or secrets.token_urlsafe(16)
         vals = (name, phone, email, choice, slot_id, slot_lbl, pie_type, qty if choice != "no" else 0, notes,
                 fulfil, address, want_date, want_time)
         if existing:
             cur.execute("""UPDATE pie_responses SET name=?, phone=?, email=?, choice=?, slot_id=?, slot_label=?,
                            pie_type=?, quantity=?, notes=?, fulfillment=?, address=?, want_date=?, want_time=?,
-                           reminded=0, created_at=CURRENT_TIMESTAMP WHERE id=?""", (*vals, existing["id"]))
+                           edit_token=?, reminded=0, created_at=CURRENT_TIMESTAMP WHERE id=?""",
+                        (*vals, my_token, existing["id"]))
         else:
             cur.execute("""INSERT INTO pie_responses (event_id, name, phone, email, choice, slot_id, slot_label,
-                           pie_type, quantity, notes, fulfillment, address, want_date, want_time)
-                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (ev["id"], *vals))
+                           pie_type, quantity, notes, fulfillment, address, want_date, want_time, edit_token)
+                           VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""", (ev["id"], *vals, my_token))
         conn.commit()
         conn.close()
         if cal:
@@ -851,9 +939,9 @@ def public_event(token):
             if brand["phone"]:
                 cal["details"] += f" Questions? {brand['phone']}"
         _notify(dict(ev), brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, bool(existing),
-                fulfil=fulfil, where=where, cal=cal)
+                fulfil=fulfil, where=where, cal=cal, edit_link=_edit_link(token, my_token))
         session[f"pie_{token}"] = {"choice": choice, "slot": slot_lbl, "pie": pie_type, "qty": qty, "name": name,
-                                   "fulfil": fulfil, "where": where, "cal": cal}
+                                   "fulfil": fulfil, "where": where, "cal": cal, "edit_token": my_token}
         return redirect(url_for("pies.public_thanks", token=token))
 
     return render_template("pies/public.html", **ctx)
@@ -885,15 +973,18 @@ def public_calendar(token):
                     headers={"Content-Disposition": "attachment; filename=pie-pickup.ics"})
 
 
-def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, updated, fulfil="", where="", cal=None):
+def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, updated, fulfil="", where="", cal=None,
+            edit_link=""):
     """Confirmation to the client and a heads-up to the agent/lender. Never blocks the response."""
     _bg, send_reminder_email = _H["bg"], _H["send_email"]
     owner_first = (brand["name"] or "your host").split(" ")[0]
     extras = ""
-    if where:
+    if where and fulfil != "delivery":
         extras += f"Directions: {maps_url(where)}\n"
     if cal and google_cal_url(cal):
         extras += f"Add to your calendar: {google_cal_url(cal)}\n"
+    if edit_link:
+        extras += f"Change or cancel your response: {edit_link}\n"
     if extras:
         extras = "\n" + extras
     if choice == "pickup":
@@ -904,7 +995,7 @@ def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, note
     elif choice == "cant_make" and fulfil == "delivery":
         line = f"{qty} x {pie_type or 'pie'}, delivered to {where}"
         client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll bring your pie to you as soon as I can, and I'll text or email "
-                       f"before I stop by.\n\n{line}\n\nWarmly,\n{brand['name']}")
+                       f"before I stop by.\n\n{line}\n{extras}\nWarmly,\n{brand['name']}")
     elif choice == "cant_make" and fulfil == "home":
         line = f"{qty} x {pie_type or 'pie'}, pickup at my home: {slot_lbl}\nAddress: {where}"
         client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll have your pie ready for you.\n\n{line}\n{extras}\n"
@@ -912,7 +1003,7 @@ def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, note
     elif choice == "cant_make":
         line = f"{qty} x {pie_type or 'pie'}. Needs a different time: {notes}"
         client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I got your note and will reach out to arrange a time that works.\n\n"
-                       f"{line}\n\nWarmly,\n{brand['name']}")
+                       f"{line}\n{extras}\nWarmly,\n{brand['name']}")
     else:
         line = "No pie needed this year"
         client_body = None

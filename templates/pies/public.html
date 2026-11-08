@@ -23,6 +23,8 @@
 
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
 
+  {% if editing %}<div class="pie-flash success">You're changing your response. Update anything below and save, or cancel it at the bottom.</div>{% endif %}
+
   {% if closed %}
   <div class="pie-card" style="text-align:center;color:#55684F;">Sign-ups for this event are closed. Please contact {{ brand.name or 'your host' }} if you have a question.</div>
   {% else %}
@@ -58,7 +60,7 @@
         <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if form.get('fulfillment') == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it. I will deliver when I can, so there is no set day or time.</small></span></label>
         {% endif %}
         {% if ev.home_address %}
-        <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you{% if home_range %}, {{ home_range }}{% endif %}.</small></span></label>
+        <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you{% if home_range %}, {{ home_range }}{% endif %}.<br><b>Address: {{ ev.home_address }}</b></small></span></label>
         {% endif %}
       </div>
       <div id="fulfil-delivery" style="display:none;margin-top:.6rem;">
@@ -67,20 +69,27 @@
         <p class="pie-hint" style="margin:.5rem 0 0;">I will bring it as soon as I can, so please be flexible on timing. I will reach out before I stop by.</p>
       </div>
       <div id="fulfil-home" style="display:none;margin-top:.6rem;">
+        {% if ev.home_address %}
+        <div class="pie-card" style="background:#F4F7EE;margin:0 0 .8rem;">
+          <b>Pickup address</b>
+          <div style="white-space:pre-line;margin:.2rem 0 .1rem;">{{ ev.home_address }}</div>
+          <div class="pie-dir"><a href="{{ maps_url(ev.home_address) }}" target="_blank" rel="noopener">Get directions</a> <span>&middot;</span> <a href="{{ apple_maps_url(ev.home_address) }}" target="_blank" rel="noopener">Apple Maps</a></div>
+        </div>
+        {% endif %}
         <div class="pie-row">
           <div><label class="pie-label" for="want_date" style="margin-top:0;">Day</label>
             <input class="pie-input" type="date" id="want_date" name="want_date" min="{{ home_min }}"{% if home_max %} max="{{ home_max }}"{% endif %} value="{{ form.get('want_date', '') }}"></div>
           <div><label class="pie-label" for="want_time" style="margin-top:0;">Time</label>
             <input class="pie-input" type="time" id="want_time" name="want_time" value="{{ form.get('want_time', '') }}"></div>
         </div>
-        <p class="pie-hint" style="margin:.5rem 0 0;">I'll have your pie ready. You'll get the address and a directions button once you send your answer.</p>
+        <p class="pie-hint" style="margin:.5rem 0 0;">I'll have your pie ready. We'll also email you the address and a directions link.</p>
       </div>
       {% endif %}
     </div>
 
     <div class="pie-card" id="sec-pie" style="display:none;">
       <h2>Your pie</h2>
-      <p class="pie-hint" style="margin:-.3rem 0 .6rem;">One pie per person, so choose your favorite.</p>
+      <p class="pie-hint" style="margin:-.3rem 0 .6rem;">One pie per household, so choose your favorite.</p>
       <div class="pie-row">
         {% if pies %}
         <div><label class="pie-label" for="pie_type" style="margin-top:0;">Type of pie</label>
@@ -101,9 +110,14 @@
         <div><label class="pie-label" for="email">Email <span class="pie-hint" id="req-email">(required)</span></label>
           <input class="pie-input" id="email" name="email" type="email" autocomplete="email" maxlength="150" value="{{ form.get('email', '') }}"></div>
       </div>
-      <div class="pie-actions"><button class="pie-btn" type="submit">Send my answer</button></div>
+      <div class="pie-actions"><button class="pie-btn" type="submit">{{ 'Save my changes' if editing else 'Send my answer' }}</button></div>
     </div>
   </form>
+  {% if editing %}
+  <form method="post" action="{{ url_for('pies.public_delete', token=ev.token, edit_token=editing) }}" style="text-align:center;margin-top:.8rem;" onsubmit="return confirm('Cancel your response? This removes your pie request.');">
+    <button class="pie-link danger" type="submit">Cancel my response</button>
+  </form>
+  {% endif %}
   {% endif %}
 
   {% if brand.phone or brand.email %}<p class="pie-hint" style="text-align:center;margin-top:1rem;">Questions? {% if brand.phone %}Call or text {{ brand.phone }}{% endif %}</p>{% endif %}

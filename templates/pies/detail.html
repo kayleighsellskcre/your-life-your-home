@@ -58,7 +58,7 @@
     {% if responses %}
     <div class="pie-table-wrap">
     <table class="pie-table">
-      <thead><tr><th>Name</th><th>Contact</th><th>Answer</th><th>Pie</th><th>Notes</th><th>Picked up</th></tr></thead>
+      <thead><tr><th>Name</th><th>Contact</th><th>Answer</th><th>Pie</th><th>Notes</th><th>Picked up / manage</th></tr></thead>
       <tbody>
       {% for r in responses %}
         <tr>
@@ -80,6 +80,10 @@
               <button class="pie-link" type="submit">{{ 'Yes. Undo' if r.picked_up else 'Mark picked up' }}</button>
             </form>
             {% endif %}
+            <a class="pie-link" href="{{ url_for('pies.owner_edit_response', event_id=ev.id, response_id=r.id) }}">Edit</a>
+            <form method="post" action="{{ url_for('pies.owner_delete_response', event_id=ev.id, response_id=r.id) }}" onsubmit="return confirm('Delete this response? This cannot be undone.');">
+              <button class="pie-link danger" type="submit">Delete</button>
+            </form>
           </td>
         </tr>
       {% endfor %}
