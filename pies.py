@@ -647,34 +647,46 @@ def ai_art(event_id):
               "cozy and inviting, cream, olive green and golden brown color palette, wide composition with calm empty space "
               "near the top for a headline. Absolutely no text, letters or numbers anywhere in the image. "
               + (f"Extra direction: {style}" if style else ""))
+    import time
     import requests
-    wanted = os.environ.get("OPENAI_IMAGE_MODEL", "gpt-image-1")
-    attempts = [(wanted, "1536x1024", {})]
-    if wanted != "dall-e-3":
-        attempts.append(("dall-e-3", "1792x1024", {"response_format": "b64_json"}))
-    art, problem = None, ""
-    for model, size, extra in attempts:
+    deadline = time.time() + 105  # stay inside the server's 120 second limit
+    wanted = os.environ.get("OPENAI_IMAGE_MODEL", "").strip()
+    prefs = [m for m in (wanted, "gpt-image-1.5", "gpt-image-1", "gpt-image-1-mini", "dall-e-3") if m]
+    models = []
+    try:  # use only what this OpenAI account can actually use
+        lr = requests.get("https://api.openai.com/v1/models", headers={"Authorization": f"Bearer {key}"}, timeout=12)
+        ids = {m.get("id") for m in lr.json().get("data", [])} if lr.status_code == 200 else set()
+    except Exception:
+        ids = set()
+    if ids:
+        models = [m for m in prefs if m in ids] + sorted((i for i in ids if i and i.startswith("gpt-image") and i not in prefs), reverse=True)
+    models = list(dict.fromkeys(models or prefs))[:4]
+    art, first_status, first_msg = None, None, ""
+    for model in models:
+        left = deadline - time.time()
+        if left < 8:
+            break
+        body = {"model": model, "prompt": prompt, "n": 1}
+        if model.startswith("dall-e-3"):
+            body.update(size="1792x1024", response_format="b64_json")
+        elif model.startswith("dall-e"):
+            body.update(size="1024x1024", response_format="b64_json")
+        else:
+            body.update(size="1536x1024")
         try:
             r = requests.post("https://api.openai.com/v1/images/generations",
-                              headers={"Authorization": f"Bearer {key}"},
-                              json={"model": model, "prompt": prompt, "size": size, "n": 1, **extra}, timeout=150)
+                              headers={"Authorization": f"Bearer {key}"}, json=body, timeout=min(95, left))
             if r.status_code != 200:
                 try:
                     msg = r.json().get("error", {}).get("message", "")
                 except Exception:
                     msg = r.text[:200]
                 current_app.logger.warning("pie ai art %s -> %s %s", model, r.status_code, msg)
-                if r.status_code == 401:
-                    problem = "The OpenAI key on the site isn't being accepted. Please check OPENAI_API_KEY."
-                elif r.status_code == 429 or "billing" in msg.lower() or "quota" in msg.lower():
-                    problem = "Your OpenAI account is out of credit or at its limit. Please check billing at platform.openai.com."
-                elif r.status_code == 403 or "verif" in msg.lower():
-                    problem = "OpenAI needs your organization verified before it will make images. You can verify at platform.openai.com."
-                else:
-                    problem = "OpenAI could not make the picture just now."
+                if first_status is None:
+                    first_status, first_msg = r.status_code, msg
                 continue
             item = r.json()["data"][0]
-            raw = base64.b64decode(item["b64_json"]) if item.get("b64_json") else requests.get(item["url"], timeout=60).content
+            raw = base64.b64decode(item["b64_json"]) if item.get("b64_json") else requests.get(item["url"], timeout=40).content
             from PIL import Image
             img = Image.open(io.BytesIO(raw)).convert("RGB")
             if img.width > 1400:
@@ -685,9 +697,21 @@ def ai_art(event_id):
             break
         except Exception as exc:
             current_app.logger.warning("pie ai art failed (%s): %s", model, exc)
-            problem = problem or "We couldn't reach OpenAI just now."
+            if first_status is None:
+                first_status, first_msg = 0, "We could not reach OpenAI."
     if not art:
-        flash(f"We couldn't create artwork yet. {problem} Your own flyer or the built-in flyer still work in the meantime.", "error")
+        low = (first_msg or "").lower()
+        if first_status == 401:
+            problem = "The OpenAI key on the site is not being accepted. Please check OPENAI_API_KEY in Railway."
+        elif first_status == 429 or "billing" in low or "quota" in low or "credit" in low:
+            problem = "Your OpenAI account is out of credit or at its limit. Please check billing at platform.openai.com."
+        elif first_status == 403 or "verif" in low:
+            problem = "OpenAI needs your organization verified before it will make images. You can do that at platform.openai.com."
+        elif first_msg:
+            problem = f"OpenAI said: {first_msg[:220]}"
+        else:
+            problem = "OpenAI could not make the picture just now."
+        flash(f"We couldn't create the AI picture yet. {problem} In the meantime you can upload your own flyer, and the built-in printable flyer still works.", "error")
         return back
     conn = _db()
     conn.execute("UPDATE pie_events SET art_image=? WHERE id=?", (art, ev["id"]))
