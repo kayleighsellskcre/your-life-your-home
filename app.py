@@ -469,6 +469,18 @@ def _inject_now_year():
 
 
 @app.after_request
+def _cache_static(response):
+    """Let browsers keep static files: the stylesheet is versioned (?v=...), so it can be cached for a
+    year; images and other files are kept for a week so a swapped photo still shows up soon."""
+    if request.path.startswith("/static/") and response.status_code == 200 and response.headers.get("Cache-Control", "no-cache") == "no-cache":
+        if request.args.get("v") and request.path.endswith((".css", ".js")):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            response.headers["Cache-Control"] = "public, max-age=604800"
+    return response
+
+
+@app.after_request
 def _security_headers(response):
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")

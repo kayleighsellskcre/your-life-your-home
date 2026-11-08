@@ -43,6 +43,7 @@ def get_connection() -> sqlite3.Connection:
     # Enable WAL mode for better concurrency
     try:
         conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")  # safe with WAL, noticeably faster writes
     except:
         pass  # WAL might not be available in all SQLite versions
     return conn
