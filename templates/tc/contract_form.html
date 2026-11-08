@@ -19,6 +19,16 @@
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
 
   <div class="pie-card">
+    <h2>Look up this address</h2>
+    <p class="pie-hint" style="margin:-.3rem 0 .7rem;">We will check public property information and fill in the county, the seller, the MLS number and the listing agent's details when we can find them. You get the last look before anything is saved or shared.</p>
+    {% if lookup_ready %}
+    <form method="post" action="{{ url_for('tc.lookup', tx_id=tx.id) }}"><button class="pie-btn secondary small" type="submit">Look up {{ tx.property_address }}</button></form>
+    {% else %}
+    <p class="pie-hint" style="margin:0;">This switches on once the site's property data key is added. Until then, the PDF upload and the form below work beautifully.</p>
+    {% endif %}
+  </div>
+
+  <div class="pie-card">
     <h2>Have the contract as a PDF?</h2>
     <p class="pie-hint" style="margin:-.3rem 0 .7rem;">Upload it and we will happily fill in what we can find. You get the last look before anything is shared. It works with typed PDFs, not scans.</p>
     <form method="post" action="{{ url_for('tc.upload', tx_id=tx.id) }}" enctype="multipart/form-data" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">

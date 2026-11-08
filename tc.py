@@ -103,6 +103,13 @@ def ensure_tables():
         reminded TEXT DEFAULT '',
         UNIQUE(transaction_id, key)
     )""")
+    cur.execute("""CREATE TABLE IF NOT EXISTS tc_lookups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        transaction_id INTEGER,
+        calls INTEGER DEFAULT 1,
+        status TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+    )""")
     conn.commit()
     conn.close()
 
@@ -430,7 +437,7 @@ def contract(tx_id):
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
     shown = {**defaults(tx, user), **{k: v for k, v in data.items() if v not in (None, "")}} if data else defaults(tx, user)
     return render_template("tc/contract_form.html", tx=tx, sections=SECTIONS, d=shown, has_saved=bool(data),
-                           has_ai=bool(__import__("os").environ.get("OPENAI_API_KEY")))
+                           has_ai=bool(__import__("os").environ.get("OPENAI_API_KEY")), lookup_ready=lookup_ready())
 
 
 @bp.route("/agent/transactions/<int:tx_id>/sheet/<kind>")
@@ -618,6 +625,115 @@ def client_update(tx_id):
     return back
 
 
+# ───────────────────────── look up an address ─────────────────────────
+def lookup_ready():
+    import os
+    return bool(os.environ.get("RENTCAST_API_KEY"))
+
+
+def _calls_used():
+    conn = _db()
+    used = 0
+    try:
+        used += conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+    except Exception:
+        pass
+    used += conn.execute("SELECT COALESCE(SUM(calls),0) FROM tc_lookups WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+    conn.close()
+    return used
+
+
+def _first(data):
+    if isinstance(data, list) and data:
+        return data[0] if isinstance(data[0], dict) else {}
+    return data if isinstance(data, dict) else {}
+
+
+def lookup_address(address):
+    """Ask the property data service about an address. Returns {'fields': {...}} or {'error': 'reason'}.
+    Only public facts: county, owner of record, MLS number and the listing agent."""
+    import os
+    import urllib.parse
+    import valuation
+    key = os.environ.get("RENTCAST_API_KEY")
+    if not key:
+        return {"error": "no-key"}
+    cap = valuation._int_env("RENTCAST_MONTHLY_CAP", 45)
+    if _calls_used() + 2 > cap:
+        return {"error": "cap"}
+    hdr = {"X-Api-Key": key, "Accept": "application/json"}
+    q = urllib.parse.urlencode({"address": address})
+    s1, props = valuation._http_get("https://api.rentcast.io/v1/properties?" + q, hdr)
+    s2, lists = valuation._http_get("https://api.rentcast.io/v1/listings/sale?" + q + "&status=Active", hdr)
+    if s1 in (401, 403) or s2 in (401, 403):
+        return {"error": "key", "calls": 2}
+    if s1 == 0 and s2 == 0:
+        return {"error": "network", "calls": 2}
+    prop, lst = _first(props) if s1 == 200 else {}, _first(lists) if s2 == 200 else {}
+    fields = {}
+    county = (prop.get("county") or "").strip()
+    if county:
+        fields["county"] = county if county.lower().endswith("county") else county + " County"
+    owner = prop.get("owner") or {}
+    names = [n.strip() for n in (owner.get("names") or []) if n and n.strip()]
+    if names:
+        fields["seller"] = " and ".join(names[:2])
+    if lst.get("mlsNumber"):
+        fields["mls"] = str(lst["mlsNumber"])
+    agent, office = lst.get("listingAgent") or {}, lst.get("listingOffice") or {}
+    if agent.get("name"):
+        fields["listing_agent"] = _pair(agent.get("name"), office.get("name"))
+        fields["listing_agent_contact"] = _pair(agent.get("phone"), agent.get("email") or office.get("email"))
+    return {"fields": fields, "calls": 2}
+
+
+@bp.route("/agent/transactions/<int:tx_id>/contract/lookup", methods=["POST"])
+def lookup(tx_id):
+    user, tx = _mine(tx_id)
+    if not tx:
+        return redirect(url_for("login", role="agent"))
+    back = redirect(url_for("tc.contract", tx_id=tx_id))
+    address = (tx.get("property_address") or "").strip()
+    if not address:
+        flash("Please add the home's address to the transaction first, and then we can look it up.", "error")
+        return back
+    if not lookup_ready():
+        flash("Address lookup needs the property data key (RENTCAST_API_KEY) turned on first. You can fill the form in by hand for now.", "error")
+        return back
+    res = lookup_address(address)
+    err = res.get("error")
+    if res.get("calls"):
+        conn = _db()
+        conn.execute("INSERT INTO tc_lookups (transaction_id, calls, status) VALUES (?,?,?)", (tx_id, res["calls"], err or "ok"))
+        conn.commit()
+        conn.close()
+    if err == "cap":
+        flash("We have used this month's lookups already. No worries, you can fill the form in by hand, and lookups reset soon.", "error")
+        return back
+    if err:
+        flash("We could not reach the property data just now. No worries, you can fill the form in by hand.", "error")
+        return back
+    found = res["fields"]
+    data, _ = load(tx_id)
+    filled = []
+    labels = {"county": "county", "seller": "seller", "mls": "MLS number", "listing_agent": "listing agent",
+              "listing_agent_contact": None}
+    for k, v in found.items():
+        if v and not data.get(k):
+            data[k] = v
+            if labels.get(k):
+                filled.append(labels[k])
+    if not filled:
+        flash("We could not find anything new for that address yet. It may not be listed, or the listing may be very new. "
+              "No worries, you can fill the form in by hand.", "error")
+        return back
+    for k in ALL_KEYS:
+        data.setdefault(k, "")
+    save(tx_id, data)
+    flash(f"Found it! We filled in the {', '.join(filled)}. Please give it a quick look, since online information is not always up to date.", "success")
+    return back
+
+
 # ───────────────────────── fill from the contract PDF ─────────────────────────
 AI_FIELDS = {
     "contract_date": "contract/acceptance date, YYYY-MM-DD", "effective_date": "effective date if stated, YYYY-MM-DD",
@@ -709,7 +825,7 @@ def card_context(tx_id):
                 if e.lower() not in [r["email"] for r in recipients]:
                     recipients.append({"email": e.lower(), "label": label})
     client_emails = sorted({e.lower() for e in _first_emails(data.get("buyer_emails") or "")}) if data else []
-    return {"has_data": bool(data), "client_emails": client_emails, "upcoming": upcoming, "all": dl, "missing": missing, "recipients": recipients,
+    return {"has_data": bool(data and (data.get("contract_date") or data.get("closing_date"))), "client_emails": client_emails, "upcoming": upcoming, "all": dl, "missing": missing, "recipients": recipients,
             "link": url_for("tc.public_sheet", token=token, _external=True) if token else ""}
 
 
