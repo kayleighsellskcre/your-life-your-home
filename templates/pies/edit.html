@@ -57,7 +57,7 @@
 
     <div class="pie-card">
       <h2>For people who can't make the pickup times</h2>
-      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">When someone says yes but can't come, they can choose delivery, or pick a day and time to come to your home. Turn on whichever you like.</p>
+      <p class="pie-hint" style="margin:-.3rem 0 .8rem;">When someone says yes but can't come, they can choose delivery, or pick a day and time to come to your home. Turn on whichever you like. Nothing is filled in for you, so add your home address each time you create an event. Delivery has no day or time, since you deliver when you can.</p>
       <label style="display:flex;gap:.5rem;align-items:center;font-size:.95rem;"><input type="checkbox" name="offer_delivery" value="1" style="width:auto;" {{ 'checked' if ev.offer_delivery is none or ev.offer_delivery }}> I can deliver pies</label>
       <label class="pie-label" for="home_address">Your home pickup address <span class="pie-hint">(leave blank to turn off home pickup)</span></label>
       <input class="pie-input" id="home_address" name="home_address" maxlength="250" placeholder="123 Main St, Shawnee, KS 66218" value="{{ ev.home_address or '' }}">

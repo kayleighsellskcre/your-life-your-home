@@ -14,7 +14,7 @@
     {% elif answer.choice == 'cant_make' and answer.fulfil == 'delivery' %}
       <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
       <p style="margin:0;color:#55684F;">{{ answer.slot }}</p>
-      <p style="margin:.6rem 0 0;">{{ brand.name.split(' ')[0] if brand.name else 'Your host' }} will bring it to you and reach out when it is on the way.</p>
+      <p style="margin:.6rem 0 0;">{{ brand.name.split(' ')[0] if brand.name else 'Your host' }} will bring it to you as soon as they can and reach out before stopping by.</p>
     {% elif answer.choice == 'cant_make' and answer.fulfil == 'home' %}
       <p style="margin:0 0 .4rem;"><b>{{ answer.qty }} &times; {{ answer.pie or 'pie' }}</b></p>
       <p style="margin:0;color:#55684F;">{{ answer.slot }}</p>

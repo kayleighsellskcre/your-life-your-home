@@ -879,8 +879,8 @@ def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, note
                        f"Warmly,\n{brand['name']}")
     elif choice == "cant_make" and fulfil == "delivery":
         line = f"{qty} x {pie_type or 'pie'}, delivered to {where}"
-        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll bring your pie to you and will text or email "
-                       f"to let you know when I'm on my way.\n\n{line}\n\nWarmly,\n{brand['name']}")
+        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll bring your pie to you as soon as I can, and I'll text or email "
+                       f"before I stop by.\n\n{line}\n\nWarmly,\n{brand['name']}")
     elif choice == "cant_make" and fulfil == "home":
         line = f"{qty} x {pie_type or 'pie'}, pickup at my home: {slot_lbl}\nAddress: {where}"
         client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll have your pie ready for you.\n\n{line}\n{extras}\n"

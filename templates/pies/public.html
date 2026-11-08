@@ -55,7 +55,7 @@
       {% if ev.offer_delivery or ev.home_address %}
       <div id="fulfil-opts">
         {% if ev.offer_delivery %}
-        <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if form.get('fulfillment') == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it.</small></span></label>
+        <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if form.get('fulfillment') == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it. I will deliver when I can, so there is no set day or time.</small></span></label>
         {% endif %}
         {% if ev.home_address %}
         <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you{% if home_range %}, {{ home_range }}{% endif %}.</small></span></label>
@@ -64,6 +64,7 @@
       <div id="fulfil-delivery" style="display:none;margin-top:.6rem;">
         <label class="pie-label" for="delivery_address" style="margin-top:0;">Delivery address</label>
         <textarea id="delivery_address" name="delivery_address" rows="2" maxlength="250" placeholder="Street, city and zip">{{ form.get('delivery_address', '') }}</textarea>
+        <p class="pie-hint" style="margin:.5rem 0 0;">I will bring it as soon as I can, so please be flexible on timing. I will reach out before I stop by.</p>
       </div>
       <div id="fulfil-home" style="display:none;margin-top:.6rem;">
         <div class="pie-row">
