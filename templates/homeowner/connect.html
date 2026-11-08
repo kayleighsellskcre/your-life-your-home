@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Connect with {{ pro.name }}{% endblock %}
+{% block content %}
+<div style="max-width:560px;margin:0 auto;padding:2rem 1rem 3rem;">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Your {{ 'agent' if role == 'agent' else 'lender' }}</div>
+    <h1 class="ylh-page-hd__title">Connect with {{ pro.name }}?</h1>
+  </div>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="alert" style="margin-bottom:1rem;">{{ m }}</div>{% endfor %}{% endwith %}
+
+  <div class="card" style="padding:1.4rem;text-align:center;">
+    {% if prof.professional_photo %}<img src="{{ prof.professional_photo }}" alt="{{ pro.name }}" style="width:96px;height:96px;border-radius:50%;object-fit:cover;margin-bottom:.8rem;">{% endif %}
+    <h2 style="margin:.2rem 0;">{{ pro.name }}</h2>
+    {% if prof.brokerage_name or prof.team_name %}<p style="margin:0 0 .6rem;color:#7A6855;">{{ prof.brokerage_name or prof.team_name }}</p>{% endif %}
+    {% if prof.bio %}<p style="font-size:.92rem;">{{ prof.bio[:240] }}</p>{% endif %}
+
+    {% if already %}
+      <p style="margin:1rem 0 0;">You are already connected with {{ pro.name.split(' ')[0] }}.</p>
+      <a class="btn btn-primary" href="{{ url_for('homeowner_overview') }}" style="margin-top:1rem;display:inline-block;">Back to my home</a>
+    {% else %}
+      {% if cur_pro %}
+      <p style="margin:1rem 0 0;padding:.8rem 1rem;background:#F5EEE4;border-radius:10px;font-size:.92rem;">
+        You are currently connected with <b>{{ cur_pro.name }}</b> as your {{ role }}. Connecting with {{ pro.name.split(' ')[0] }} will
+        <b>replace</b> {{ cur_pro.name.split(' ')[0] }}. You can only have one {{ role }} at a time.
+      </p>
+      {% else %}
+      <p style="margin:1rem 0 0;font-size:.92rem;color:#7A6855;">They will be able to see the home details you share with your {{ role }}, and help you with your next steps.</p>
+      {% endif %}
+      <form method="post" style="margin-top:1.2rem;display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary" type="submit" name="choice" value="yes">{{ 'Yes, switch to ' + pro.name.split(' ')[0] if cur_pro else 'Yes, connect' }}</button>
+        <button class="btn btn-secondary" type="submit" name="choice" value="no">No thanks</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

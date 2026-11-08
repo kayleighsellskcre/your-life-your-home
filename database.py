@@ -4819,6 +4819,63 @@ def create_client_relationship(
     return relationship_id
 
 
+def get_active_professional_id(homeowner_id: int, role: str) -> Optional[int]:
+    """The one agent (or lender) this homeowner is connected to right now, or None.
+    Looks at active client_relationships first, then the users.agent_id / lender_id link."""
+    if role not in ("agent", "lender"):
+        return None
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(client_relationships)")
+        cols = [r[1] for r in cur.fetchall()]
+        hcol = "homeowner_id" if "homeowner_id" in cols else "client_id"
+        rcol = "professional_role" if "professional_role" in cols else "professional_type"
+        cur.execute(
+            f"SELECT professional_id FROM client_relationships WHERE {hcol} = ? AND {rcol} = ? "
+            "AND status = 'active' ORDER BY id DESC LIMIT 1", (homeowner_id, role))
+        row = cur.fetchone()
+        if row:
+            return row[0]
+        col = "agent_id" if role == "agent" else "lender_id"
+        cur.execute(f"SELECT {col} FROM users WHERE id = ?", (homeowner_id,))
+        row = cur.fetchone()
+        return row[0] if row and row[0] else None
+    finally:
+        conn.close()
+
+
+def connect_homeowner_to_professional(homeowner_id: int, professional_id: int, role: str,
+                                      referral_code: Optional[str] = None, replace: bool = False) -> str:
+    """Connect a homeowner to an agent or lender, keeping at most ONE of each role.
+    Returns "connected", "already" (same professional) or "conflict" (they already have a different
+    professional of that role and replace was not confirmed by the homeowner)."""
+    current = get_active_professional_id(homeowner_id, role)
+    if current == professional_id:
+        create_client_relationship(homeowner_id, professional_id, role, referral_code)
+        return "already"
+    if current and not replace:
+        return "conflict"
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(client_relationships)")
+        cols = [r[1] for r in cur.fetchall()]
+        hcol = "homeowner_id" if "homeowner_id" in cols else "client_id"
+        rcol = "professional_role" if "professional_role" in cols else "professional_type"
+        if current:
+            cur.execute(
+                f"UPDATE client_relationships SET status = 'inactive' WHERE {hcol} = ? AND {rcol} = ? AND professional_id != ?",
+                (homeowner_id, role, professional_id))
+        col = "agent_id" if role == "agent" else "lender_id"
+        cur.execute(f"UPDATE users SET {col} = ? WHERE id = ?", (professional_id, homeowner_id))
+        conn.commit()
+    finally:
+        conn.close()
+    create_client_relationship(homeowner_id, professional_id, role, referral_code)
+    return "connected"
+
+
 def get_homeowner_professionals(homeowner_id: int) -> List[Dict]:
     """Get all professionals (agents and lenders) associated with a homeowner."""
     conn = get_connection()

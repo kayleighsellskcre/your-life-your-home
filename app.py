@@ -2566,8 +2566,73 @@ def referral_landing(referral_code):
     Public landing page for agent/lender referral links (legacy support).
     Redirects to new signup flow with ref token.
     """
-    # For backward compatibility, redirect old referral codes to new signup flow
+    # A signed-in homeowner who opens someone's link is asked first; nothing changes until they say yes.
+    _u = get_current_user()
+    if _u and _u.get("role") == "homeowner":
+        return redirect(url_for("connect_with_professional", token=referral_code))
+    if _u:
+        flash("This invite link is for homeowners. Share it with your clients so they connect with you.", "info")
+        return redirect(url_for("agent_dashboard") if _u.get("role") == "agent" else url_for("lender_dashboard"))
     return redirect(url_for("signup", role="homeowner", ref=referral_code))
+
+
+@app.route("/connect/<token>", methods=["GET", "POST"])
+def connect_with_professional(token):
+    """A homeowner chooses whether to connect with the agent or lender behind an invite link.
+    A homeowner has at most one agent and one lender, and only changes it by confirming here."""
+    user = get_current_user()
+    if not user or user.get("role") != "homeowner":
+        session["pending_connect"] = token
+        flash("Please sign in to connect with this professional.", "info")
+        return redirect(url_for("login", role="homeowner"))
+    from database import (get_referral_link_by_token, get_user_by_id, get_user_profile,
+                          get_active_professional_id, connect_homeowner_to_professional)
+    link = get_referral_link_by_token(token)
+    if not link:
+        flash("That invite link is no longer active. Please ask for their current link.", "error")
+        return redirect(url_for("homeowner_overview"))
+    link = dict(link)
+    pro_id = link.get("agent_id") or link.get("lender_id")
+    role = "agent" if link.get("agent_id") else "lender"
+    pro = get_user_by_id(pro_id)
+    if not pro:
+        return redirect(url_for("homeowner_overview"))
+    pro = dict(pro)
+    prof = get_user_profile(pro_id) or {}
+    prof = dict(prof) if not isinstance(prof, dict) else prof
+    cur_id = get_active_professional_id(user["id"], role)
+    cur_row = get_user_by_id(cur_id) if cur_id and cur_id != pro_id else None
+    cur_pro = dict(cur_row) if cur_row else None
+    if request.method == "POST":
+        if request.form.get("choice") != "yes":
+            flash("No problem. Nothing was changed.", "info")
+            return redirect(url_for("homeowner_overview"))
+        result = connect_homeowner_to_professional(user["id"], pro_id, role, referral_code=token, replace=True)
+        if result == "connected":
+            try:
+                if role == "agent":
+                    from database import add_agent_contact, list_agent_contacts
+                    have = any((dict(c).get("email") or "").lower() == (user.get("email") or "").lower() for c in list_agent_contacts(pro_id))
+                    if not have:
+                        add_agent_contact(agent_user_id=pro_id, name=user.get("name") or "", email=user.get("email") or "", phone="",
+                                          stage="new", best_contact=user.get("email") or "", last_touch="", birthday="",
+                                          home_anniversary="", address="", notes="Chose to connect via invite link",
+                                          tags="referral", property_address="", property_value=None, equity_estimate=None,
+                                          user_id=user["id"])
+                else:
+                    from database import add_lender_borrower, list_lender_borrowers
+                    have = any((dict(c).get("email") or "").lower() == (user.get("email") or "").lower() for c in list_lender_borrowers(pro_id))
+                    if not have:
+                        add_lender_borrower(lender_user_id=pro_id, name=user.get("name") or "", email=user.get("email") or "",
+                                            status="prospect", notes="Chose to connect via invite link", tags="referral",
+                                            user_id=user["id"])
+            except Exception as exc:
+                print(f"connect: CRM add skipped: {exc}")
+        session.pop("pending_connect", None)
+        flash(f"You are now connected with {pro.get('name') or 'your professional'}.", "success")
+        return redirect(url_for("homeowner_overview"))
+    return render_template("homeowner/connect.html", brand_name=FRONT_BRAND_NAME, pro=pro, prof=prof, role=role,
+                           cur_pro=cur_pro, token=token, already=(cur_id == pro_id))
     
     # Convert to dict if needed
     if hasattr(professional, 'keys'):
@@ -2783,11 +2848,11 @@ def signup():
                 referral_link = get_referral_link_by_token(referral_token_from_form)
                 
                 if not referral_link:
-                    # Fallback to default agent if token is invalid
-                    agent_id = session.get("default_agent_id") or get_or_create_default_agent()
-                    if not session.get("default_agent_id"):
-                        session["default_agent_id"] = agent_id
-                    referral_token_from_form = "default"
+                    # An invite link that is no longer active must never quietly connect the client to
+                    # someone else. Ask them to get a fresh link from their own agent or lender.
+                    flash("That invite link is no longer active. Please ask your agent or lender for their current link, "
+                          "so you are connected to the right person.", "error")
+                    return redirect(url_for("signup", role="homeowner"))
                 else:
                     # Extract agent_id and lender_id from referral link
                     # Convert Row to dict if needed
@@ -2805,6 +2870,7 @@ def signup():
                         referral_token_from_form = "default"
                         print(f"SIGNUP: No agent/lender in referral link, using default agent {agent_id}")
 
+        kept_existing = False
         # Debug: Print signup attempt
         print(f"Signup attempt: role={role}, agent_id={agent_id}, lender_id={lender_id}")
         
@@ -2885,6 +2951,20 @@ def signup():
                                     flash(f"This email is registered as a {existing_role}, not a {role}. Please sign in instead.", "error")
                                     return redirect(url_for("login", role=existing_role))
                                 
+                                # A pre-created client keeps the agent/lender who added them. A different link
+                                # (or the default agent) never takes them over; it is offered as an optional connect.
+                                if role == "homeowner":
+                                    from database import get_active_professional_id
+                                    offered = False
+                                    keep_a = get_active_professional_id(existing_user["id"], "agent")
+                                    keep_l = get_active_professional_id(existing_user["id"], "lender")
+                                    if keep_a and agent_id and keep_a != agent_id:
+                                        agent_id, offered = None, True
+                                    if keep_l and lender_id and keep_l != lender_id:
+                                        lender_id, offered = None, True
+                                    kept_existing = bool(keep_a or keep_l)
+                                    if offered and referral_token_from_form not in (None, "", "default"):
+                                        session["pending_connect"] = referral_token_from_form
                                 # Update the incomplete account with password, name, and role/agent_id/lender_id if needed
                                 update_user_password(
                                     existing_user["id"],
@@ -2917,6 +2997,8 @@ def signup():
                                 return redirect(url_for("signup", role=role, ref=referral_token_from_form))
                         else:
                             # Account already has a password: never overwrite it from signup.
+                            if role == "homeowner" and referral_token_from_form not in (None, "", "default"):
+                                session["pending_connect"] = referral_token_from_form
                             flash("An account with that email already exists. Please sign in, or use \"Forgot password?\".", "error")
                             return redirect(url_for("login", role=existing_user.get("role") or role))
                     else:
@@ -3177,7 +3259,9 @@ def signup():
             print(f"{'='*60}\n")
             
             # Success message
-            if referral_token_from_form == "default":
+            if kept_existing and not relationships_created:
+                flash("Welcome back! You are still connected with the agent or lender who set you up.", "success")
+            elif referral_token_from_form == "default":
                 flash("Welcome! You've been connected to Kayleigh Biggs at Worth Clark Realty.", "success")
             else:
                 if relationships_created and crm_contacts_created:
@@ -3490,6 +3574,11 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
     """
     from database import get_homeowner_professionals, get_user_by_id
     
+    _pending = session.get("pending_connect")
+    if _pending and not homeowner_id and session.get("role") == "homeowner":
+        session.pop("pending_connect", None)
+        return redirect(url_for("connect_with_professional", token=_pending))
+
     # Determine which homeowner to show
     if homeowner_id:
         # Agent/lender viewing a specific homeowner
@@ -5689,7 +5778,11 @@ def agent_crm():
                     if email:
                         from database import get_user_by_email, create_client_relationship, get_or_create_referral_code
                         homeowner = get_user_by_email(email)
-                        if homeowner and homeowner.get("role") == "homeowner":
+                        from database import get_active_professional_id as _gap
+                        if homeowner and homeowner.get("role") == "homeowner" and _gap(homeowner["id"], "agent") not in (None, user["id"]):
+                            flash("Contact added. That email already has a homeowner account connected to another agent, so "
+                                  "send them your invite link and they can choose to connect with you.", "success")
+                        elif homeowner and homeowner.get("role") == "homeowner":
                             # Create relationship
                             referral_code = get_or_create_referral_code(user["id"], "agent")
                             create_client_relationship(
@@ -9641,7 +9734,11 @@ def lender_crm():
                 if email:
                     from database import get_user_by_email, create_client_relationship, get_or_create_referral_code
                     homeowner = get_user_by_email(email)
-                    if homeowner and homeowner.get("role") == "homeowner":
+                    from database import get_active_professional_id as _gap
+                    if homeowner and homeowner.get("role") == "homeowner" and _gap(homeowner["id"], "lender") not in (None, user["id"]):
+                        flash("Borrower added. That email already has a homeowner account connected to another lender, so "
+                              "send them your invite link and they can choose to connect with you.", "success")
+                    elif homeowner and homeowner.get("role") == "homeowner":
                         # Create relationship
                         referral_code = get_or_create_referral_code(user["id"], "lender")
                         create_client_relationship(
