@@ -999,48 +999,70 @@ def public_calendar(token):
                     headers={"Content-Disposition": "attachment; filename=pie-pickup.ics"})
 
 
+def _client_email(ev, brand, name, choice, slot_lbl, pie_type, qty, notes, updated, fulfil, where, cal, edit_link):
+    """The one email a guest gets for an order: warm, in the host's voice, with everything they need."""
+    first = (name or "there").split(" ")[0]
+    pie = f"{pie_type} pie" if pie_type else "pie"
+    phone = (brand.get("phone") or "").strip()
+    opener = (f"Hi {first}, it's {(brand['name'] or 'your host').split(' ')[0]}! I've updated your order, thank you for letting me know."
+              if updated else
+              f"Hi {first}, it's {(brand['name'] or 'your host').split(' ')[0]}! Thank you so much for ordering, I'm really glad you said yes.")
+    lines = [opener, ""]
+    if choice == "pickup":
+        lines += [f"Here's what I have for you: one {pie}, ready for pickup.", "", f"When and where: {slot_lbl}"]
+        if where:
+            lines += [f"Address: {where}", f"Directions: {maps_url(where)}"]
+    elif choice == "cant_make" and fulfil == "delivery":
+        lines += [f"Here's what I have for you: one {pie}, delivered.", "", f"I'll bring it to: {where}",
+                  "There's no set day or time, so I'll text or email you before I stop by."]
+    elif choice == "cant_make" and fulfil == "home":
+        lines += [f"Here's what I have for you: one {pie}, waiting at my house.", "", f"When: {slot_lbl.replace('Home pickup, ', '')}"]
+        if where:
+            lines += [f"Address: {where}", f"Directions: {maps_url(where)}"]
+    else:
+        lines += [f"Here's what I have for you: one {pie}.", "",
+                  "I got your note about the times, and I'll reach out soon so we can find one that works for you."]
+    if notes:
+        lines += ["", f"Your note to me: {notes}"]
+    if cal and google_cal_url(cal):
+        lines += ["", f"Add it to your calendar so you don't forget: {google_cal_url(cal)}"]
+    lines += ["", "(It's one pie per household, so this one is for the whole family to enjoy.)"]
+    if edit_link:
+        if ev.get("order_by"):
+            lines += ["", f"Plans change! You can update or cancel your order until {fmt_date(ev['order_by'])} here:",
+                      edit_link, "After that I'll be placing the orders, so I won't be able to make changes."]
+        else:
+            lines += ["", "Plans change! You can update or cancel your order any time here:", edit_link]
+    reach = f"just reply to this email or text me at {phone}" if phone else "just reply to this email"
+    lines += ["", f"Questions about anything? Please {reach}.", "", "Warmly,", brand["name"] or ""]
+    subject = f"Your order is updated, {first}!" if updated else f"You're on the list, {first}!"
+    return subject, "\n".join(lines)
+
+
 def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, notes, updated, fulfil="", where="", cal=None,
             edit_link=""):
-    """Confirmation to the client and a heads-up to the agent/lender. Never blocks the response."""
+    """One confirmation to the guest, and a short heads-up to the host. Never blocks the response."""
     _bg, send_reminder_email = _H["bg"], _H["send_email"]
-    owner_first = (brand["name"] or "your host").split(" ")[0]
-    extras = ""
-    if where and fulfil != "delivery":
-        extras += f"Directions: {maps_url(where)}\n"
-    if cal and google_cal_url(cal):
-        extras += f"Add to your calendar: {google_cal_url(cal)}\n"
-    if edit_link:
-        until = fmt_date(ev.get("order_by")) if ev.get("order_by") else ""
-        extras += f"Change or cancel your response{(' (until ' + until + ')') if until else ''}: {edit_link}\n"
-    if extras:
-        extras = "\n" + extras
     if choice == "pickup":
         line = f"{qty} x {pie_type or 'pie'} for pickup: {slot_lbl}"
-        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! You're all set.\n\n{line}\n{extras}\n"
-                       f"If anything changes, just fill out the form again with the same email or reply to this message.\n\n"
-                       f"Warmly,\n{brand['name']}")
     elif choice == "cant_make" and fulfil == "delivery":
         line = f"{qty} x {pie_type or 'pie'}, delivered to {where}"
-        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll bring your pie to you as soon as I can, and I'll text or email "
-                       f"before I stop by.\n\n{line}\n{extras}\nWarmly,\n{brand['name']}")
     elif choice == "cant_make" and fulfil == "home":
         line = f"{qty} x {pie_type or 'pie'}, pickup at my home: {slot_lbl}\nAddress: {where}"
-        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I'll have your pie ready for you.\n\n{line}\n{extras}\n"
-                       f"If your plans change, just reply to this message.\n\nWarmly,\n{brand['name']}")
     elif choice == "cant_make":
         line = f"{qty} x {pie_type or 'pie'}. Needs a different time: {notes}"
-        client_body = (f"Hi {name.split(' ')[0]},\n\nThank you! I got your note and will reach out to arrange a time that works.\n\n"
-                       f"{line}\n{extras}\nWarmly,\n{brand['name']}")
     else:
         line = "No pie needed this year"
-        client_body = None
-    if client_body and email:
-        _bg(send_reminder_email, email, f"Your pie request: {ev['title']}", client_body, brand["name"] or None, brand["email"] or None)
-    if brand["email"]:
+    if choice != "no" and email:
+        subject, body = _client_email(ev, brand, name, choice, slot_lbl, pie_type, qty, notes, updated, fulfil, where, cal, edit_link)
+        _bg(send_reminder_email, email, subject, body, brand["name"] or None, brand["email"] or None)
+    host = (brand["email"] or "").strip()
+    # The host does not need a second email when the order came from their own address (a test order).
+    if host and host.lower() != (email or "").strip().lower():
         body = (f"{'Updated response' if updated else 'New response'} for {ev['title']}\n\n{name}\n{phone}\n{email}\n\n{line}\n"
                 + (f"Notes: {notes}\n" if notes and choice != "cant_make" else "")
                 + f"\nSee everyone: {url_for('pies.event_detail', event_id=ev['id'], _external=True)}")
-        _bg(send_reminder_email, brand["email"], f"Pie RSVP: {name} ({'no thanks' if choice == 'no' else 'yes'})", body)
+        _bg(send_reminder_email, host, f"Pie RSVP: {name} ({'no thanks' if choice == 'no' else 'yes'})", body)
 
 
 def send_reminders(today=None):
