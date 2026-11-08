@@ -14,13 +14,13 @@
 <div class="pie-wrap">
   <p class="pie-kicker"><a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" style="color:inherit;">&larr; {{ tx.property_address }}</a></p>
   <h1 class="pie-h1">Contract details</h1>
-  <p class="pie-sub">Fill this in once. Your deadlines, your private sheet and the shareable sheet are all made from it, so they always match.</p>
+  <p class="pie-sub">Fill this in once and we will take care of the rest. Your deadlines, your private sheet and the shareable sheet are all made from it, so everything always matches.</p>
 
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
 
   <div class="pie-card">
     <h2>Have the contract as a PDF?</h2>
-    <p class="pie-hint" style="margin:-.3rem 0 .7rem;">Upload it and we will fill in what we can find. You check it before anything is shared. It works with typed PDFs, not scans.</p>
+    <p class="pie-hint" style="margin:-.3rem 0 .7rem;">Upload it and we will happily fill in what we can find. You get the last look before anything is shared. It works with typed PDFs, not scans.</p>
     <form method="post" action="{{ url_for('tc.upload', tx_id=tx.id) }}" enctype="multipart/form-data" style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;">
       <input type="file" name="contract" accept="application/pdf" required>
       <button class="pie-btn secondary small" type="submit">Fill it in for me</button>

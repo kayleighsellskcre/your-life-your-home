@@ -408,7 +408,7 @@ def contract(tx_id):
     if not user:
         return redirect(url_for("login", role="agent"))
     if not tx:
-        flash("We could not find that transaction.", "error")
+        flash("We could not find that transaction. Let us head back to your list.", "error")
         return redirect(url_for("agent_transactions"))
     data, token = load(tx_id)
     if request.method == "POST":
@@ -424,9 +424,9 @@ def contract(tx_id):
             _H["log"](tx_id, "contract", "Contract details updated", user["id"])
         except Exception:
             pass
-        flash("Saved. Your deadlines are set and both sheets are ready.", "success")
+        flash("All saved! Your deadlines are set and both sheets are ready to go. You are so organized.", "success")
         for w in sanity_warnings(new):
-            flash("Heads up: " + w, "error")
+            flash("A quick heads up: " + w, "error")
         return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
     shown = {**defaults(tx, user), **{k: v for k, v in data.items() if v not in (None, "")}} if data else defaults(tx, user)
     return render_template("tc/contract_form.html", tx=tx, sections=SECTIONS, d=shown, has_saved=bool(data),
@@ -442,7 +442,7 @@ def sheet(tx_id, kind):
         abort(404)
     data, token = load(tx_id)
     if not data:
-        flash("Add the contract details first and your sheets will be ready.", "error")
+        flash("Let us add the contract details first, and your sheets will be ready in a moment.", "error")
         return redirect(url_for("tc.contract", tx_id=tx_id))
     html = _sheet_html(tx, data, kind, pdf=bool(request.args.get("pdf")), share_token=token)
     return _respond(html, f"{kind}-{_slug(tx)}", bool(request.args.get("pdf")))
@@ -485,7 +485,7 @@ def share(tx_id):
     data, token = load(tx_id)
     back = redirect(url_for("agent_transaction_detail", tx_id=tx_id) + "#contract-card")
     if not data or not token:
-        flash("Add the contract details first, then you can share the sheet.", "error")
+        flash("Let us add the contract details first, then you can share the sheet.", "error")
         return back
     picked = [e.strip().lower() for e in request.form.getlist("to") if "@" in e]
     extra = [e.strip().lower() for e in re.split(r"[,\s;]+", request.form.get("extra") or "") if "@" in e]
@@ -502,16 +502,16 @@ def share(tx_id):
         if e not in recipients and not re.search(r"\s", e):
             recipients.append(e)
     if not recipients:
-        flash("Please choose at least one person to send it to.", "error")
+        flash("Who would you like to send it to? Please choose at least one person.", "error")
         return back
     link = url_for("tc.public_sheet", token=token, _external=True)
     sender = user.get("name") or "Your agent"
     tc_first = (data.get("tc_name") or user.get("name") or "").split("|")[0].strip().split(" ")[0]
     subject = f"Transaction info: {tx.get('property_address')}"
-    body = (f"Hello,\n\nHere is the transaction summary for {tx.get('property_address')}. "
+    body = (f"Hello,\n\nI hope your day is going beautifully! Here is the transaction summary for {tx.get('property_address')}. "
             f"You can view it, print it or download it as a PDF here:\n\n{link}\n\n"
             f"{data.get('comm_request') or (f'Please copy {tc_first} on transaction emails.' if tc_first else '')}\n\n"
-            f"Thank you so much,\n{sender}")
+            f"Thank you so much for all you do to make this a smooth one. I truly appreciate you.\n\nWarmly,\n{sender}")
     send, bg = _H["send_email"], _H["bg"]
     for e in recipients:
         bg(send, e, subject, body, sender, user.get("email"))
@@ -521,7 +521,7 @@ def share(tx_id):
         _H["log"](tx_id, "contract", f"Shared the transaction sheet with {len(recipients)} {'person' if len(recipients) == 1 else 'people'}", user["id"])
     except Exception:
         pass
-    flash(f"Sent to {len(recipients)} {'person' if len(recipients) == 1 else 'people'}. A copy is in your inbox.", "success")
+    flash(f"Sent! It is on its way to {len(recipients)} {'person' if len(recipients) == 1 else 'people'}, and a copy is in your inbox.", "success")
     return back
 
 
@@ -535,7 +535,7 @@ def new_link(tx_id):
     conn.execute("UPDATE transaction_contract SET token=? WHERE transaction_id=?", (secrets.token_urlsafe(14), tx_id))
     conn.commit()
     conn.close()
-    flash("Done. The old share link no longer works. Send the new one when you are ready.", "success")
+    flash("All set. The old link is switched off. Send the new one whenever you are ready.", "success")
     return redirect(url_for("agent_transaction_detail", tx_id=tx_id) + "#contract-card")
 
 
@@ -589,7 +589,7 @@ def client_update(tx_id):
         if e.lower() not in emails:
             emails.append(e.lower())
     if not emails or not rows:
-        flash("Add your clients' emails and the contract dates first, then you can send this.", "error")
+        flash("Let us add your clients' emails and the contract dates first, then you can send them this.", "error")
         return back
     sell = (tx.get("side") or "") == "seller"
     home = f"the sale of your home at {tx.get('property_address')}" if sell else f"your new home at {tx.get('property_address')}"
@@ -598,10 +598,11 @@ def client_update(tx_id):
         extra = f" at {data['closing_time']}" if r["key"] == "closing" and data.get("closing_time") not in (None, "", "TBD") else ""
         lines.append(f"  {short_date(r['due_date'])}: {r['label']}{extra}")
     sender = user.get("name") or "Your agent"
-    body = (f"Hi {_first_names(tx.get('client_name'))},\n\nCongratulations again on {home}! Here are the dates to keep in mind, "
+    body = (f"Hi {_first_names(tx.get('client_name'))},\n\nCongratulations again on {home}! We are so excited for you. Here are the dates to keep in mind, "
             f"so nothing sneaks up on you:\n\n" + "\n".join(lines) +
-            "\n\nYou do not need to do anything about most of these. I am keeping track of everything and will let you know "
-            "the moment I need something from you. If you have any questions at all, just reply to this email.\n\n"
+            "\n\nPlease do not worry about most of these. I am keeping track of everything and will let you know "
+            "the moment I need something from you. I am so happy to be part of this with you, and if you have any questions at all, "
+            "just reply to this email.\n\n"
             f"Warmly,\n{sender}")
     send, bg = _H["send_email"], _H["bg"]
     for e in emails[:4]:
@@ -613,7 +614,7 @@ def client_update(tx_id):
         _H["log"](tx_id, "contract", "Sent the clients their key dates", user["id"])
     except Exception:
         pass
-    flash("Sent your clients their dates. A copy is in your inbox.", "success")
+    flash("Sent! Your clients will love having their dates in one place. A copy is in your inbox.", "success")
     return back
 
 
@@ -641,7 +642,7 @@ def upload(tx_id):
     back = redirect(url_for("tc.contract", tx_id=tx_id))
     f = request.files.get("contract")
     if not f or not f.filename.lower().endswith(".pdf"):
-        flash("Please choose the contract as a PDF.", "error")
+        flash("Please choose the contract as a PDF and we will take it from there.", "error")
         return back
     try:
         from pypdf import PdfReader
@@ -649,12 +650,12 @@ def upload(tx_id):
     except Exception:
         text = ""
     if len(text.strip()) < 200:
-        flash("That PDF looks like a scan, so we could not read it. You can still fill the form in by hand.", "error")
+        flash("That PDF looks like a scan, so we could not read it this time. No worries, you can fill the form in by hand.", "error")
         return back
     import os
     key = os.environ.get("OPENAI_API_KEY")
     if not key:
-        flash("Auto-fill needs the site's AI key. You can fill the form in by hand for now.", "error")
+        flash("Auto-fill needs the site's AI key. No worries, you can fill the form in by hand for now.", "error")
         return back
     try:
         from openai import OpenAI
@@ -667,7 +668,7 @@ def upload(tx_id):
                       {"role": "user", "content": f"Return a JSON object with these keys:\n{spec}\n\nContract text:\n{text}"}])
         found = json.loads(r.choices[0].message.content or "{}")
     except Exception:
-        flash("We could not read that contract just now. You can fill the form in by hand.", "error")
+        flash("We could not read that contract just now. No worries, you can fill the form in by hand.", "error")
         return back
     data, _ = load(tx_id)
     base = {**defaults(tx, user), **{k: v for k, v in data.items() if v}}
@@ -683,7 +684,7 @@ def upload(tx_id):
         base[k] = re.sub(r"\D", "", v) if k.endswith("_days") else v
         filled += 1
     save(tx_id, {k: base.get(k, "") for k in ALL_KEYS})
-    flash(f"We filled in {filled} details from your contract. Please check them before you share anything.", "success")
+    flash(f"Wonderful! We filled in {filled} details from your contract. Please give them a quick look before you share anything.", "success")
     return back
 
 
@@ -743,8 +744,8 @@ def send_deadline_reminders(today=None):
         for r, stage in items:
             when = "TODAY" if stage == "0d" else "in 2 days"
             lines.append(f"{r['label']}, {when} ({short_date(r['due_date'])})\n{r['property_address']}\n{site}/agent/transactions/{r['transaction_id']}")
-        body = (f"Hi {first},\n\nA gentle heads-up on what is coming up:\n\n" + "\n\n".join(lines)
-                + "\n\nOnce something is done, tick it off on the transaction page and it will stop showing up.\n\nYou have got this!")
+        body = (f"Hi {first},\n\nJust a friendly heads-up on what is coming up:\n\n" + "\n\n".join(lines)
+                + "\n\nOnce something is done, tick it off on the transaction page and it will stop showing up. Thank you for taking such good care of your clients. You have got this!")
         try:
             send(email, f"Coming up: {items[0][0]['label']} at {items[0][0]['property_address']}"
                  + (f" (+{len(items) - 1} more)" if len(items) > 1 else ""), body)

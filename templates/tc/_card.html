@@ -23,7 +23,7 @@
 <div id="contract-card">
   <h2>Contract, deadlines and sheets</h2>
   {% if not tc.has_data %}
-    <p class="sub">Add the contract details once and we will set your deadlines, make the private and shareable sheets, and remind you before anything is due.</p>
+    <p class="sub">Add the contract details once and we will do the rest: your deadlines, a private sheet and a shareable one, and a friendly reminder before anything is due.</p>
     <div class="btns"><a class="b main" href="{{ url_for('tc.contract', tx_id=transaction.id) }}">Add contract details</a></div>
   {% else %}
     <p class="sub">{% if tc.missing %}Still missing: {{ tc.missing|join(', ') }}. {% endif %}<a href="{{ url_for('tc.contract', tx_id=transaction.id) }}" style="color:#364A2B;">Edit details</a></p>
@@ -36,7 +36,7 @@
       </div>
       {% endfor %}
     {% else %}
-      <p class="sub" style="margin:0;">Everything is checked off. Nicely done.</p>
+      <p class="sub" style="margin:0;">Everything is checked off. Congratulations, you are all caught up!</p>
     {% endif %}
     <div class="btns" style="margin-top:.8rem;">
       <a class="b main" href="{{ url_for('tc.sheet', tx_id=transaction.id, kind='shareable', pdf=1) }}">Shareable PDF</a>
@@ -49,7 +49,7 @@
     <details>
       <summary>Send my clients their dates</summary>
       {% if tc.client_emails or transaction.client_email %}
-      <p class="sub" style="margin:.5rem 0 .6rem;">A warm email with all their key dates, sent only to {{ (tc.client_emails or [transaction.client_email])|join(', ') }}. You get a copy.</p>
+      <p class="sub" style="margin:.5rem 0 .6rem;">A warm little email with all their key dates, sent only to {{ (tc.client_emails or [transaction.client_email])|join(', ') }}. You get a copy.</p>
       <form method="post" action="{{ url_for('tc.client_update', tx_id=transaction.id) }}"><button class="b main" type="submit">Send it</button></form>
       {% else %}<p class="sub" style="margin:.5rem 0 0;">Add your clients' emails in the contract details to send them their dates.</p>{% endif %}
     </details>

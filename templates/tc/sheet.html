@@ -43,7 +43,7 @@
   <p class="kicker">{{ 'Internal transaction information' if kind == 'private' else 'Transaction summary' }}</p>
   <h1>{{ address }}</h1>
   <p class="sub">{% if county %}{{ county }}{% endif %}{% if county and mls %} &nbsp;|&nbsp; {% endif %}{% if mls %}MLS {{ mls }}{% endif %}</p>
-  {% if kind == 'private' %}<p class="internal">INTERNAL COPY. This page has your clients' phone numbers and emails. Please do not forward it. Use the shareable sheet for other agents, title and lenders.</p>{% endif %}
+  {% if kind == 'private' %}<p class="internal">INTERNAL COPY. This page has your clients' phone numbers and emails, so please keep it just between us. Use the shareable sheet for other agents, title and lenders.</p>{% endif %}
 
   {% for b in blocks %}
   <div class="block">
@@ -58,7 +58,7 @@
     </div>
   </div>
   {% endfor %}
-  <p class="foot">Prepared by your transaction coordinator. Please double check dates against the contract.</p>
+  <p class="foot">Prepared with care by your transaction coordinator. Please double check the dates against the contract.</p>
 </div>
 </body>
 </html>
