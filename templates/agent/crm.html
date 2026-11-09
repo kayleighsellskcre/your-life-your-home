@@ -971,6 +971,18 @@
  {% endif %}
  </tbody>
  </table>
+ {% if pages > 1 %}
+ {% set qs = [] %}
+ {% if search_query %}{% set _ = qs.append('search=' ~ search_query|urlencode) %}{% endif %}
+ {% if stage_filter %}{% set _ = qs.append('stage=' ~ stage_filter|urlencode) %}{% endif %}
+ {% if tag_filter %}{% set _ = qs.append('tag=' ~ tag_filter|urlencode) %}{% endif %}
+ {% set _ = qs.append('sort=' ~ sort_by) %}
+ <div style="display:flex;align-items:center;justify-content:center;gap:.8rem;padding:1rem;flex-wrap:wrap;color:#7a6855;font-size:.85rem;">
+  {% if page > 1 %}<a class="t-btn" href="?{{ qs|join('&') }}&page={{ page - 1 }}">&larr; Previous</a>{% endif %}
+  <span>Page {{ page }} of {{ pages }} &middot; {{ filtered_total }} contacts</span>
+  {% if page < pages %}<a class="t-btn t-btn--solid" href="?{{ qs|join('&') }}&page={{ page + 1 }}">Next &rarr;</a>{% endif %}
+ </div>
+ {% endif %}
  </div>
 
 </div><!-- /main-layout -->
@@ -1229,6 +1241,7 @@
 
 <script>
 var CD = {{ contacts|tojson|default('[]') }};
+var BD = {{ bday_data|tojson|default('[]') }};
 var openId = null;
 
 function openAddModal(stage){
@@ -1379,17 +1392,7 @@ function closeHist(){document.getElementById('histModal').classList.remove('open
 });
 
 function doExport(){
- if(!CD.length){alert('No contacts to export');return;}
- var csv='Name,Email,Phone,Stage,Lead Source,Next Action Date,Birthday,Anniversary,Address,City,State,ZIP,Property,Equity,Tags,Notes\n';
- CD.forEach(function(c){
- csv+=[c.name,c.email,c.phone,c.stage,c.lead_source||'',c.next_action_date||'',c.birthday,c.home_anniversary,c.address,c.city,c.state,c.zip_code,c.property_address,c.equity_estimate||'',c.tags,c.notes]
- .map(function(v){return'"'+(v||'').toString().replace(/"/g,'""')+'"';})
- .join(',') +'\n';
- });
- var a=document.createElement('a');
- a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
- a.download='contacts_'+new Date().toISOString().split('T')[0]+'.csv';
- a.click();
+ window.location.href = '{{ url_for("agent_crm_export") }}';
 }
 
 document.getElementById('qaForm').addEventListener('submit',function(e){
@@ -1508,14 +1511,12 @@ function showBirthdayView(){
  var groups = {};
  for(var m=1;m<=12;m++) groups[m]=[];
 
- CD.forEach(function(c){
-  if(!c.birthday) return;
+ BD.forEach(function(c){
   var parts = (c.birthday+'').split('/');
   var month = parseInt(parts[0]);
   var day   = parseInt(parts[1]) || 0;
   if(month>=1 && month<=12){
-   groups[month].push({ name:c.name, bday:c.birthday, day:day,
-    addr:[c.address,c.city,c.state,c.zip_code].filter(Boolean).join(', ') });
+   groups[month].push({ name:c.name, bday:c.birthday, day:day, addr:c.addr || '' });
   }
  });
 

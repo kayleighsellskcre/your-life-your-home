@@ -282,6 +282,8 @@ init_db()
 try:
     from database import ensure_rbac_tables
     ensure_rbac_tables()
+    from database import ensure_indexes
+    ensure_indexes()
 except Exception as _rbac_err:
     print(f"[DATABASE] RBAC tables check skipped: {_rbac_err}")
 
@@ -1166,6 +1168,12 @@ def agent_add_participant(tx_id):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json or request.content_type == 'application/json':
             return jsonify({"success": True, "message": "Client added successfully", "participant_id": participant_id}), 200
         
+        if role == "lender" and email:
+            try:
+                import automation
+                automation.link_transaction_parties(tx_id, email)  # a lender on the platform sees the deal on their own dashboard
+            except Exception:
+                pass
         flash("Participant added!", "success")
     except Exception as e:
         import traceback
@@ -2392,7 +2400,9 @@ def backup_database(keep=7):
 def start_scheduler():
     """Start background scheduler safely without blocking app startup."""
     try:
-        scheduler = BackgroundScheduler()
+        # Run on Central time so "9 AM" emails land at 9 AM for clients, not 3 AM. One run at a time per job.
+        scheduler = BackgroundScheduler(timezone=os.environ.get("YLH_TIMEZONE", "America/Chicago"),
+                                        job_defaults={"coalesce": True, "max_instances": 1, "misfire_grace_time": 1800})
         scheduler.add_job(send_due_reminders, "cron", hour=12, minute=0)
         # CRM automated emails
         scheduler.add_job(send_birthday_emails, "cron", hour=9, minute=0)  # 9 AM daily
@@ -2407,7 +2417,7 @@ def start_scheduler():
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
         scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)
-        scheduler.add_job(lambda: __import__("tc").send_deadline_reminders(), "cron", hour=14, minute=0)  # 9 AM Central deadline heads-ups  # day-before pie pickup reminders
+        scheduler.add_job(lambda: __import__("tc").send_deadline_reminders(), "cron", hour=9, minute=0)  # 9 AM Central deadline heads-ups  # day-before pie pickup reminders
         scheduler.add_job(lambda: __import__("pies").send_thank_yous(), "cron", hour=10, minute=15)  # pie thank-you emails on their chosen date
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
         scheduler.add_job(
@@ -5830,17 +5840,23 @@ def agent_crm():
             else:
                 try:
                     # Prevent duplicates: check if contact already exists (by email, phone, or name)
-                    existing = list_agent_contacts(user["id"])
-                    for ex in existing:
-                        if email and ex.get("email") and str(ex["email"]).strip().lower() == email.lower():
+                    _dc = get_db_connection()
+                    try:
+                        if email and _dc.execute("SELECT 1 FROM agent_contacts WHERE agent_user_id=? AND LOWER(TRIM(email))=? LIMIT 1", (user["id"], email.lower())).fetchone():
                             flash("You already have a contact with that email. Open them to make changes.", "error")
                             return redirect(url_for("agent_crm"))
-                        if phone and ex.get("phone") and _normalize_phone(str(ex.get("phone") or "")) == _normalize_phone(phone):
-                            flash("You already have a contact with that phone. Open them to make changes.", "error")
-                            return redirect(url_for("agent_crm"))
-                        if _names_match(name, ex.get("name") or ""):
-                            flash(f"You already have a contact named {name}. Open them to make changes.", "error")
-                            return redirect(url_for("agent_crm"))
+                        if phone:
+                            _pn = _normalize_phone(phone)
+                            if _pn and any(_normalize_phone(str(r["phone"] or "")) == _pn for r in _dc.execute("SELECT phone FROM agent_contacts WHERE agent_user_id=? AND phone LIKE ?", (user["id"], "%" + _pn[-4:] + "%")).fetchall()):
+                                flash("You already have a contact with that phone. Open them to make changes.", "error")
+                                return redirect(url_for("agent_crm"))
+                        _first = (name.split()[0] if name.split() else name)
+                        for r in _dc.execute("SELECT name FROM agent_contacts WHERE agent_user_id=? AND LOWER(name) LIKE ?", (user["id"], "%" + _first.lower() + "%")).fetchall():
+                            if _names_match(name, r["name"] or ""):
+                                flash(f"You already have a contact named {name}. Open them to make changes.", "error")
+                                return redirect(url_for("agent_crm"))
+                    finally:
+                        _dc.close()
                     prop_val = float(property_value) if property_value else None
                     equity_val = float(equity_estimate) if equity_estimate else None
                     lead_source = request.form.get("lead_source", "").strip()
@@ -6119,14 +6135,6 @@ def agent_crm():
     tag_filter = request.args.get("tag", "").strip()
     sort_by = request.args.get("sort", "name")  # name, stage, last_touch, created_at
     
-    # DEBUG: Log contact loading
-    print(f"\n{'='*60}")
-    print(f"AGENT CRM: Loading contacts for agent {user['id']}")
-    print(f"  Stage filter: {stage_filter}")
-    print(f"  Search query: {search_query}")
-    print(f"  Tag filter: {tag_filter}")
-    print(f"{'='*60}\n")
-    
     try:
         contacts = list_agent_contacts(user["id"], stage_filter)
         print(f"AGENT CRM: Found {len(contacts)} contacts from database")
@@ -6195,92 +6203,6 @@ def agent_crm():
                     if tag_filter.lower() not in contact_tags:
                         continue
                 
-                # Fetch interaction count and history for this contact
-                try:
-                    interactions = list_crm_interactions(
-                        contact_dict['id'], "agent_contact", user["id"], limit=50
-                    )
-                    contact_dict['interaction_count'] = len(interactions)
-                    contact_dict['recent_interactions'] = [
-                        dict(i) if hasattr(i, 'keys') else i for i in interactions[:3]
-                    ]
-                    contact_dict['all_interactions'] = [
-                        dict(i) if hasattr(i, 'keys') else i for i in interactions
-                    ]
-                except Exception as e:
-                    print(f"Error fetching interactions: {e}")
-                    contact_dict['interaction_count'] = 0
-                    contact_dict['recent_interactions'] = []
-                    contact_dict['all_interactions'] = []
-                
-                # Fetch tasks for this contact
-                try:
-                    tasks = list_crm_tasks(user["id"], contact_dict['id'], "agent_contact", status="pending")
-                    tasks_list = []
-                    for t in tasks:
-                        if hasattr(t, 'keys'):
-                            tasks_list.append(dict(t))
-                        else:
-                            tasks_list.append(t)
-                    contact_dict['pending_tasks'] = tasks_list
-                    contact_dict['task_count'] = len(tasks_list)
-                except Exception as e:
-                    print(f"Error fetching tasks: {e}")
-                    contact_dict['pending_tasks'] = []
-                    contact_dict['task_count'] = 0
-                
-                # Fetch deals for this contact
-                try:
-                    deals = list_crm_deals(user["id"], contact_dict['id'], "agent_contact")
-                    deals_list = []
-                    for d in deals:
-                        if hasattr(d, 'keys'):
-                            deals_list.append(dict(d))
-                        else:
-                            deals_list.append(d)
-                    contact_dict['deals'] = deals_list
-                    contact_dict['deal_count'] = len(deals_list)
-                    contact_dict['total_pipeline_value'] = sum([
-                        (d.get('deal_value') if isinstance(d, dict) else (d['deal_value'] if 'deal_value' in d else 0)) or 0 
-                        for d in deals_list
-                    ])
-                except Exception as e:
-                    print(f"Error fetching deals for contact {contact_dict.get('id')}: {e}")
-                    contact_dict['deals'] = []
-                    contact_dict['deal_count'] = 0
-                    contact_dict['total_pipeline_value'] = 0
-                
-                # Fetch relationships for this contact
-                try:
-                    relationships = list_crm_relationships(contact_dict['id'], "agent_contact", user["id"])
-                    relationships_list = []
-                    for r in relationships:
-                        if hasattr(r, 'keys'):
-                            relationships_list.append(dict(r))
-                        else:
-                            relationships_list.append(r)
-                    contact_dict['relationships'] = relationships_list
-                except Exception as e:
-                    print(f"Error fetching relationships for contact {contact_dict.get('id')}: {e}")
-                    contact_dict['relationships'] = []
-
-                # Check if contact has a homeowner portal account
-                try:
-                    contact_email = (contact_dict.get('email') or '').lower().strip()
-                    if contact_email:
-                        portal_row = get_db_connection().execute(
-                            "SELECT id FROM users WHERE LOWER(email)=? AND role='homeowner'",
-                            (contact_email,)
-                        ).fetchone()
-                        contact_dict['has_portal'] = portal_row is not None
-                        contact_dict['portal_user_id'] = portal_row['id'] if portal_row else None
-                    else:
-                        contact_dict['has_portal'] = False
-                        contact_dict['portal_user_id'] = None
-                except Exception:
-                    contact_dict['has_portal'] = False
-                    contact_dict['portal_user_id'] = None
-
                 contacts_list.append(contact_dict)
             except Exception as e:
                 import traceback
@@ -6321,8 +6243,64 @@ def agent_crm():
         elif sort_by == "created_at":
             contacts_list_dicts.sort(key=lambda x: (x.get('created_at') or '') if isinstance(x, dict) else '', reverse=True)
         
-        # Calculate stats
-        total_contacts = len(contacts_list_dicts)
+        # One page at a time: stats, search, tags and birthdays cover everyone, but the heavy
+        # per-contact lookups (history, tasks, deals, relationships) only run for the 50 on screen.
+        PER_PAGE = 50
+        try:
+            page = max(1, int(request.args.get("page", 1)))
+        except ValueError:
+            page = 1
+        filtered_total = len(contacts_list_dicts)
+        pages = max(1, -(-filtered_total // PER_PAGE))
+        page = min(page, pages)
+        all_filtered = contacts_list_dicts
+        bday_data = [
+            {"name": c.get("name"), "birthday": c.get("birthday"),
+             "addr": ", ".join(x for x in (c.get("address"), c.get("city"), c.get("state"), c.get("zip_code")) if x)}
+            for c in all_filtered if c.get("birthday")
+        ]
+        contacts_list_dicts = all_filtered[(page - 1) * PER_PAGE: page * PER_PAGE]
+        _page_emails = list({(c.get("email") or "").lower().strip() for c in contacts_list_dicts if c.get("email")})
+        _portal_map = {}
+        if _page_emails:
+            _pc = get_db_connection()
+            try:
+                for _r in _pc.execute(
+                        "SELECT id, LOWER(email) AS em FROM users WHERE role='homeowner' AND LOWER(email) IN (%s)"
+                        % ",".join("?" * len(_page_emails)), _page_emails).fetchall():
+                    _portal_map[_r["em"]] = _r["id"]
+            finally:
+                _pc.close()
+        from database import crm_page_bundle
+        _bundle = crm_page_bundle(user["id"], [c["id"] for c in contacts_list_dicts])
+        for contact_dict in contacts_list_dicts:
+            try:
+                _cid = contact_dict['id']
+                _ints = _bundle["interactions"].get(_cid, [])
+                contact_dict['interaction_count'] = len(_ints)
+                contact_dict['recent_interactions'] = _ints[:3]
+                contact_dict['all_interactions'] = _ints
+                _tasks = _bundle["tasks"].get(_cid, [])
+                contact_dict['pending_tasks'] = _tasks
+                contact_dict['task_count'] = len(_tasks)
+                _deals = _bundle["deals"].get(_cid, [])
+                contact_dict['deals'] = _deals
+                contact_dict['deal_count'] = len(_deals)
+                contact_dict['total_pipeline_value'] = sum((d.get('deal_value') or 0) for d in _deals)
+                contact_dict['relationships'] = _bundle["relationships"].get(_cid, [])
+
+                # Does this contact already have a homeowner portal account? (prefetched in one query)
+                _em = (contact_dict.get('email') or '').lower().strip()
+                _pid = _portal_map.get(_em) if _em else None
+                contact_dict['has_portal'] = _pid is not None
+                contact_dict['portal_user_id'] = _pid
+            except Exception as e:
+                print(f"Error enriching contact: {e}")
+        contacts_list_dicts_all = all_filtered
+
+        # Calculate stats (over everyone who matches, not just this page)
+        _all = contacts_list_dicts_all
+        total_contacts = len(_all)
         all_tasks = list_crm_tasks(user["id"], status="pending")
         all_deals_raw = list_crm_deals(user["id"])
         
@@ -6352,14 +6330,14 @@ def agent_crm():
         
         stats = {
             'total': total_contacts,
-            'new': len([c for c in contacts_list_dicts if c.get('stage') == 'new']),
-            'active': len([c for c in contacts_list_dicts if c.get('stage') == 'active']),
-            'past': len([c for c in contacts_list_dicts if c.get('stage') == 'past']),
-            'with_automation': len([c for c in contacts_list_dicts if any([
+            'new': len([c for c in _all if c.get('stage') == 'new']),
+            'active': len([c for c in _all if c.get('stage') == 'active']),
+            'past': len([c for c in _all if c.get('stage') == 'past']),
+            'with_automation': len([c for c in _all if any([
                 c.get('auto_birthday'), c.get('auto_anniversary'),
                 c.get('auto_seasonal'), c.get('auto_equity'), c.get('auto_holidays')
             ])]),
-            'total_equity': sum([c.get('equity_estimate') or 0 for c in contacts_list_dicts]),
+            'total_equity': sum([c.get('equity_estimate') or 0 for c in _all]),
             'pending_tasks': len(all_tasks),
             'total_deals': len(all_deals),
             'pipeline_value': sum([(d.get('deal_value') if isinstance(d, dict) else 0) or 0 for d in all_deals]),
@@ -6370,7 +6348,7 @@ def agent_crm():
         
         # Get all unique tags
         all_tags = set()
-        for contact in contacts_list_dicts:
+        for contact in _all:
             tags = contact.get('tags', '') or '' if isinstance(contact, dict) else ''
             if tags:
                 all_tags.update([t.strip() for t in tags.split(',') if t.strip()])
@@ -6383,6 +6361,9 @@ def agent_crm():
         flash("We could not load your contacts. Please try again in a moment.", "error")
         contacts_list = []
         contacts_list_dicts = []  # Ensure this is defined even on error
+        bday_data = []
+        page = pages = 1
+        filtered_total = 0
         stats = {'total': 0, 'new': 0, 'active': 0, 'past': 0, 'with_automation': 0, 'total_equity': 0, 'pending_tasks': 0, 'total_deals': 0, 'pipeline_value': 0, 'expected_commission': 0, 'needs_followup': 0, 'follow_up_days': 30}
         all_tags = []
     
@@ -6419,6 +6400,7 @@ def agent_crm():
             all_tags=all_tags,
             upcoming_tasks=upcoming_tasks,
             email_templates=email_templates,
+            page=page, pages=pages, per_page=50, filtered_total=filtered_total, bday_data=bday_data,
         )
     except Exception as e:
         import traceback
@@ -6468,6 +6450,25 @@ def _build_full_address(c):
         if csz:
             parts.append(csz.strip().rstrip(","))
     return "\n".join(parts) if parts else ""
+
+
+@app.route("/agent/crm/export.csv")
+def agent_crm_export():
+    """Download every contact as a spreadsheet (CSV)."""
+    import csv
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    out = io.StringIO()
+    w = csv.writer(out)
+    w.writerow(["Name", "Email", "Phone", "Stage", "Lead Source", "Next Action Date", "Birthday", "Anniversary",
+                "Address", "City", "State", "ZIP", "Property", "Equity", "Tags", "Notes"])
+    for c in list_agent_contacts(user["id"]):
+        w.writerow([c.get(k) or "" for k in ("name", "email", "phone", "stage", "lead_source", "next_action_date", "birthday",
+                    "home_anniversary", "address", "city", "state", "zip_code", "property_address", "equity_estimate", "tags", "notes")])
+    resp = Response(out.getvalue(), mimetype="text/csv")
+    resp.headers["Content-Disposition"] = "attachment; filename=contacts_%s.csv" % datetime.now().strftime("%Y-%m-%d")
+    return resp
 
 
 @app.route("/agent/crm/address-labels")
@@ -10003,47 +10004,28 @@ def lender_crm():
     status_filter = request.args.get("status")
     borrowers = list_lender_borrowers(user["id"], status_filter)
     
-    # Convert borrowers to dicts and enrich with tasks/deals
+    # Convert borrowers to dicts and enrich with history/tasks/deals (four batched queries, not three per borrower)
+    from database import crm_page_bundle
+    _bundle = crm_page_bundle(user["id"], [b["id"] for b in borrowers], "lender_borrower")
     borrowers_list = []
     for borrower in borrowers:
         try:
             borrower_dict = dict(borrower)
-            
-            # Fetch interaction count
-            try:
-                interactions = list_crm_interactions(
-                    borrower_dict['id'], "lender_borrower", user["id"], limit=50
-                )
-                borrower_dict['interaction_count'] = len(interactions)
-                borrower_dict['recent_interactions'] = [dict(i) for i in interactions[:3]]
-            except:
-                borrower_dict['interaction_count'] = 0
-                borrower_dict['recent_interactions'] = []
-            
-            # Fetch tasks
-            try:
-                tasks = list_crm_tasks(user["id"], borrower_dict['id'], "lender_borrower", status="pending")
-                borrower_dict['pending_tasks'] = [dict(t) for t in tasks]
-                borrower_dict['task_count'] = len(tasks)
-            except:
-                borrower_dict['pending_tasks'] = []
-                borrower_dict['task_count'] = 0
-            
-            # Fetch deals
-            try:
-                deals = list_crm_deals(user["id"], borrower_dict['id'], "lender_borrower")
-                borrower_dict['deals'] = [dict(d) for d in deals]
-                borrower_dict['deal_count'] = len(deals)
-                borrower_dict['total_pipeline_value'] = sum([d.get('deal_value') or 0 for d in deals])
-            except:
-                borrower_dict['deals'] = []
-                borrower_dict['deal_count'] = 0
-                borrower_dict['total_pipeline_value'] = 0
-            
+            _bid = borrower_dict['id']
+            _ints = _bundle["interactions"].get(_bid, [])
+            borrower_dict['interaction_count'] = len(_ints)
+            borrower_dict['recent_interactions'] = _ints[:3]
+            _tasks = _bundle["tasks"].get(_bid, [])
+            borrower_dict['pending_tasks'] = _tasks
+            borrower_dict['task_count'] = len(_tasks)
+            _deals = _bundle["deals"].get(_bid, [])
+            borrower_dict['deals'] = _deals
+            borrower_dict['deal_count'] = len(_deals)
+            borrower_dict['total_pipeline_value'] = sum([d.get('deal_value') or 0 for d in _deals])
             borrowers_list.append(borrower_dict)
-        except:
+        except Exception:
             continue
-    
+
     # Calculate stats
     all_tasks = list_crm_tasks(user["id"], status="pending")
     all_deals = list_crm_deals(user["id"])

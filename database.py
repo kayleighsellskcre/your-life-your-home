@@ -33,19 +33,27 @@ else:
     print(f"[DATABASE] Using local storage: {DB_PATH}")
 
 
+_WAL_SET = False
+
+
 def get_connection() -> sqlite3.Connection:
     """
     Get a database connection with proper timeout and thread safety.
-    SQLite timeout allows waiting for locks to be released (default 5 seconds).
+    WAL mode is switched on once (it is stored in the database file), so opening a connection stays cheap
+    even when hundreds of people are using the site at the same time.
     """
+    global _WAL_SET
     conn = sqlite3.connect(DB_PATH, timeout=10.0, check_same_thread=False)
     conn.row_factory = sqlite3.Row
-    # Enable WAL mode for better concurrency
     try:
-        conn.execute("PRAGMA journal_mode=WAL")
+        if not _WAL_SET:
+            conn.execute("PRAGMA journal_mode=WAL")
+            _WAL_SET = True
         conn.execute("PRAGMA synchronous=NORMAL")  # safe with WAL, noticeably faster writes
-    except:
-        pass  # WAL might not be available in all SQLite versions
+        conn.execute("PRAGMA cache_size=-20000")   # ~20 MB page cache per connection
+        conn.execute("PRAGMA temp_store=MEMORY")
+    except Exception:
+        pass
     return conn
 
 
@@ -156,6 +164,74 @@ def ensure_rbac_tables() -> None:
 
         """)
         conn.commit()
+    finally:
+        conn.close()
+
+
+INDEX_PLAN = [
+    ("users", "agent_id"), ("users", "lender_id"), ("users", "email"), ("client_relationships", "professional_id"),
+    ("referral_links", "agent_id"), ("referral_links", "lender_id"), ("properties", "user_id"),
+    ("homeowner_notes", "user_id"), ("homeowner_documents", "user_id"), ("homeowner_projects", "user_id"),
+    ("homeowner_questions", "user_id"), ("homeowner_timeline_events", "user_id"), ("simple_notes", "user_id"),
+    ("agent_contacts", "user_id"), ("agent_contacts", "email"), ("lender_borrowers", "user_id"), ("lender_borrowers", "email"),
+    ("transactions", "agent_id"), ("transaction_participants", "transaction_id"), ("transaction_participants", "user_id"),
+    ("transaction_documents", "transaction_id"), ("transaction_timeline", "transaction_id"),
+    ("spotlight_card_sets", "transaction_id"), ("agent_commissions", "transaction_id"), ("tc_lookups", "transaction_id"),
+    ("review_requests", "transaction_id"), ("crm_interactions", "contact_id"), ("crm_tasks", "contact_id"),
+    ("crm_deals", "contact_id"), ("crm_drip_sequences", "contact_id"), ("automated_email_logs", "contact_id"),
+    ("invoices", "contact_id"), ("account_events", "user_id"), ("audit_logs", "user_id"), ("pie_events", "owner_id"),
+    ("pie_responses", "email"), ("concierge_conversations", "homeowner_id"), ("concierge_leads", "homeowner_id"),
+    ("agent_contacts", "agent_user_id"),
+    ("crm_drip_sequences", "agent_user_id"),
+    ("review_requests", "agent_user_id"),
+    ("lender_borrowers", "lender_user_id"),
+    ("agent_transactions", "agent_user_id"),
+    ("agent_transactions", "homeowner_user_id"),
+    ("agent_transactions", "lender_user_id"),
+    ("transactions", "homeowner_user_id"),
+    ("transactions", "lender_user_id"),
+    ("lender_loans", "lender_user_id"),
+    ("message_templates", "owner_user_id"),
+    ("marketing_templates", "owner_user_id"),
+    ("crm_interactions", "professional_user_id"),
+    ("automated_email_logs", "professional_user_id"),
+    ("crm_tasks", "professional_user_id"),
+    ("crm_deals", "professional_user_id"),
+    ("crm_relationships", "professional_user_id"),
+    ("crm_saved_views", "professional_user_id"),
+    ("spotlight_card_sets", "agent_user_id"),
+    ("invoices", "agent_user_id"),
+    ("invoice_items", "invoice_id"),
+    ("agent_contests", "agent_user_id"),
+    ("agent_commissions", "agent_user_id"),
+    ("agent_expenses", "agent_user_id"),
+    ("agent_mileage", "agent_user_id"),
+    ("lender_loan_revenue", "lender_user_id"),
+    ("lender_expenses", "lender_user_id"),
+    ("pie_slots", "event_id"),
+    ("pie_responses", "event_id"),
+    ("homeowner_snapshots", "property_id"),
+    ("homeowner_snapshot_history", "property_id"),
+    ("transaction_vendors", "vendor_id"),
+    ("users", "stripe_customer_id"),
+    ("promo_code_uses", "user_id"),
+]
+
+
+def ensure_indexes() -> None:
+    """Add lookup indexes on the columns every dashboard filters by, so pages stay fast with thousands of
+    agents, lenders and clients. Skips anything that does not exist yet. Safe to run on every start."""
+    conn = get_connection()
+    try:
+        for table, col in INDEX_PLAN:
+            try:
+                cols = {r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+                if col in cols:
+                    conn.execute(f"CREATE INDEX IF NOT EXISTS idx_{table}_{col} ON {table}({col})")
+            except Exception as e:
+                print(f"[DATABASE] index {table}.{col} skipped: {e}")
+        conn.commit()
+        conn.execute("PRAGMA optimize")
     finally:
         conn.close()
 
@@ -4011,6 +4087,66 @@ def add_crm_interaction(
     conn.commit()
     conn.close()
     return interaction_id
+
+
+def crm_page_bundle(professional_user_id: int, contact_ids: list, contact_type: str = "agent_contact") -> dict:
+    """Batched CRM lookups for any number of contacts (runs in chunks of 400 ids)."""
+    ids = [int(i) for i in contact_ids if i is not None]
+    if len(ids) <= 400:
+        return _crm_bundle_chunk(professional_user_id, ids, contact_type)
+    out = {"interactions": {}, "tasks": {}, "deals": {}, "relationships": {}}
+    for i in range(0, len(ids), 400):
+        part = _crm_bundle_chunk(professional_user_id, ids[i:i + 400], contact_type)
+        for k in out:
+            out[k].update(part[k])
+    return out
+
+
+def _crm_bundle_chunk(professional_user_id: int, contact_ids: list, contact_type: str) -> dict:
+    """Everything the CRM list needs for one page of contacts, in four queries total
+    (history, open tasks, deals, relationships) instead of four per contact."""
+    out = {"interactions": {}, "tasks": {}, "deals": {}, "relationships": {}}
+    ids = [int(i) for i in contact_ids if i is not None]
+    if not ids:
+        return out
+    marks = ",".join("?" * len(ids))
+    conn = get_connection()
+    try:
+        for r in conn.execute(
+            f"""SELECT id, contact_id, interaction_type, interaction_date, subject, notes, channel, created_at
+                FROM crm_interactions
+                WHERE professional_user_id = ? AND contact_type = ? AND contact_id IN ({marks})
+                ORDER BY interaction_date DESC, created_at DESC""", [professional_user_id, contact_type] + ids):
+            lst = out["interactions"].setdefault(r["contact_id"], [])
+            if len(lst) < 50:
+                lst.append(dict(r))
+        for r in conn.execute(
+            f"""SELECT id, contact_id, contact_type, title, description, due_date, priority, status,
+                       reminder_date, completed_at, created_at
+                FROM crm_tasks
+                WHERE professional_user_id = ? AND contact_type = ? AND status = 'pending' AND contact_id IN ({marks})
+                ORDER BY due_date ASC, priority DESC, created_at DESC""", [professional_user_id, contact_type] + ids):
+            out["tasks"].setdefault(r["contact_id"], []).append(dict(r))
+        for r in conn.execute(
+            f"""SELECT id, contact_id, contact_type, deal_name, deal_type, property_address, deal_value,
+                       commission_rate, expected_commission, stage, probability, expected_close_date,
+                       actual_close_date, notes, created_at, updated_at
+                FROM crm_deals
+                WHERE professional_user_id = ? AND contact_type = ? AND contact_id IN ({marks})
+                ORDER BY expected_close_date ASC, created_at DESC""", [professional_user_id, contact_type] + ids):
+            out["deals"].setdefault(r["contact_id"], []).append(dict(r))
+        for r in conn.execute(
+            f"""SELECT id, contact_id_1, contact_id_2, relationship_type, notes, created_at
+                FROM crm_relationships
+                WHERE professional_user_id = ? AND contact_type = ?
+                AND (contact_id_1 IN ({marks}) OR contact_id_2 IN ({marks}))""", [professional_user_id, contact_type] + ids + ids):
+            d = dict(r)
+            for cid in (d["contact_id_1"], d["contact_id_2"]):
+                if cid in out["relationships"] or cid in ids:
+                    out["relationships"].setdefault(cid, []).append(d)
+    finally:
+        conn.close()
+    return out
 
 
 def list_crm_interactions(
