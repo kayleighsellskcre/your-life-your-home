@@ -241,7 +241,7 @@ def _recent_row(r):
 def settings_summary():
     """The numbers the admin page shows, so nobody has to dig through logs."""
     cap = _int_env("RENTCAST_MONTHLY_CAP", 45)
-    out = dict(configured=provider_configured(), cap=cap, refresh_days=_int_env("VALUE_REFRESH_DAYS", 30),
+    out = dict(failed_count=0, configured=provider_configured(), cap=cap, refresh_days=_int_env("VALUE_REFRESH_DAYS", 30),
                per_run=_int_env("AVM_MAX_PER_RUN", 10), used=0, homes=0, refreshed=0, recent=[], by_status={})
     try:
         conn = get_connection()
@@ -251,6 +251,7 @@ def settings_summary():
             out["refreshed"] = conn.execute("SELECT COUNT(*) FROM homeowner_snapshots WHERE value_refresh_source = ?", (SOURCE,)).fetchone()[0]
             for r in conn.execute("SELECT status, COUNT(*) n FROM avm_calls WHERE created_at >= datetime('now', '-30 days') GROUP BY status").fetchall():
                 out["by_status"][r["status"]] = r["n"]
+            out["failed_count"] = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE status NOT IN ('ok', 'test-ok')").fetchone()[0]
             out["recent"] = [_recent_row(dict(r)) for r in conn.execute(
                 """SELECT c.created_at, c.status, p.address FROM avm_calls c LEFT JOIN properties p ON p.id = c.property_id
                    ORDER BY c.id DESC LIMIT 10""").fetchall()]

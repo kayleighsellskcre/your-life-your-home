@@ -11305,6 +11305,23 @@ def admin_home_values_refresh_now():
     return redirect(url_for("admin_home_values"))
 
 
+@app.route("/admin/home-values/clear-failed", methods=["POST"])
+def admin_home_values_clear_failed():
+    """Remove lookups that did not work (rejected key, address not found, no connection) from the history."""
+    user = _admin_session_user()
+    if not user:
+        flash("That area is just for site administrators.", "error")
+        return redirect(url_for("login", role="agent"))
+    conn = get_connection()
+    try:
+        n = conn.execute("DELETE FROM avm_calls WHERE status NOT IN ('ok', 'test-ok')").rowcount
+        conn.commit()
+    finally:
+        conn.close()
+    flash(f"Cleared {n} lookup{'s' if n != 1 else ''} that did not work. Lookups that worked were kept.", "success")
+    return redirect(url_for("admin_home_values"))
+
+
 @app.route("/admin/impersonate/<int:user_id>", methods=["POST"])
 def admin_impersonate_user(user_id):
     """Start impersonating a user (View As feature)"""

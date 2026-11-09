@@ -79,7 +79,10 @@
   </div>
 
   <div class="hv-card">
-    <h2>Recent lookups</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.4rem;">
+      <h2 style="margin:0;">Recent lookups</h2>
+      {% if s.failed_count %}<form method="post" action="{{ url_for('admin_home_values_clear_failed') }}" onsubmit="return confirm('Remove the {{ s.failed_count }} lookups that did not work? Lookups that worked stay.');"><button type="submit" class="btn btn-secondary" style="width:auto;">Clear {{ s.failed_count }} that did not work</button></form>{% endif %}
+    </div>
     {% for r in s.recent %}
       <div class="hv-item">
         <div class="hv-item-main"><b>{{ r.address or ('Test lookup' if r.is_test else 'Home lookup') }}</b><span>{{ r.created_at }} UTC</span></div>
