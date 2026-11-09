@@ -1164,17 +1164,20 @@ def agent_add_participant(tx_id):
             added_by=user["id"]
         )
         
+        try:
+            import automation
+            if role == "lender" and email:
+                automation.link_transaction_parties(tx_id, email)  # a lender on the platform sees the deal on their own dashboard
+            if email and role != "client":
+                _bg(automation.notify_partner_added, tx_id, name, email, role, send_reminder_email, _site_url())  # a warm welcome to the new partner
+        except Exception:
+            pass
+
         # Always return JSON for AJAX requests (check if it's a fetch request)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json or request.content_type == 'application/json':
             return jsonify({"success": True, "message": "Client added successfully", "participant_id": participant_id}), 200
-        
-        if role == "lender" and email:
-            try:
-                import automation
-                automation.link_transaction_parties(tx_id, email)  # a lender on the platform sees the deal on their own dashboard
-            except Exception:
-                pass
-        flash("Participant added!", "success")
+
+        flash("Participant added!" + (" We emailed them a welcome." if email and role != "client" else ""), "success")
     except Exception as e:
         import traceback
         print(f"Error adding participant: {traceback.format_exc()}")
@@ -1323,6 +1326,11 @@ def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
         return False
 
 
+def _email_ready():
+    """True when any email route is configured: Resend, Brevo, or SMTP login details."""
+    return bool(os.environ.get("RESEND_API_KEY") or os.environ.get("BREVO_API_KEY") or (EMAIL_USER and EMAIL_PASS))
+
+
 def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None):
     """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout).
 
@@ -1390,7 +1398,7 @@ def pro_sender(user_id):
 
 def send_new_lead_notification(agent_id, homeowner_name, homeowner_email, referral_token=None, signup_timestamp=None):
     """Send email notification to agent when a new lead signs up."""
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         print(f"[WARNING] Email not configured - cannot send lead notification")
         return False
     
@@ -1477,12 +1485,24 @@ def send_due_reminders():
 
 # ====================== CRM AUTOMATED EMAIL FUNCTIONS ======================
 
+def _already_emailed_today(conn, email_type):
+    """Contacts who already got this kind of email in the last 20 hours, so a restart or a rerun never sends twice."""
+    try:
+        rows = conn.execute(
+            "SELECT contact_type, contact_id FROM automated_email_logs WHERE email_type = ? AND status = 'sent' "
+            "AND sent_at >= datetime('now', '-20 hours')", (email_type,)).fetchall()
+        return {(r[0], r[1]) for r in rows}
+    except Exception:
+        return set()
+
+
 def get_birthday_contacts():
     """Get contacts with birthdays today."""
     from datetime import datetime
     from database import get_connection
     today = datetime.now()
     today_str = f"{today.month:02d}/{today.day:02d}"
+    today_dash = f"{today.month:02d}-{today.day:02d}"
     
     contacts = []
     # Get agent contacts
@@ -1494,9 +1514,9 @@ def get_birthday_contacts():
         FROM agent_contacts
         WHERE email IS NOT NULL AND email != '' 
           AND auto_birthday = 1
-          AND birthday LIKE ?
+          AND (birthday LIKE ? OR birthday LIKE ?)
         """,
-        (f"%{today_str}%",)
+        (f"%{today_str}%", f"%-{today_dash}%")
     )
     for row in cur.fetchall():
         contacts.append({
@@ -1514,9 +1534,9 @@ def get_birthday_contacts():
         FROM lender_borrowers
         WHERE email IS NOT NULL AND email != '' 
           AND auto_birthday = 1
-          AND birthday LIKE ?
+          AND (birthday LIKE ? OR birthday LIKE ?)
         """,
-        (f"%{today_str}%",)
+        (f"%{today_str}%", f"%-{today_dash}%")
     )
     for row in cur.fetchall():
         contacts.append({
@@ -1527,8 +1547,9 @@ def get_birthday_contacts():
             'email': row['email']
         })
     
+    done = _already_emailed_today(conn, 'birthday')
     conn.close()
-    return contacts
+    return [c for c in contacts if (c['type'], c['id']) not in done]
 
 
 def get_anniversary_contacts():
@@ -1537,6 +1558,7 @@ def get_anniversary_contacts():
     from database import get_connection
     today = datetime.now()
     today_str = f"{today.month:02d}/{today.day:02d}"
+    today_dash = f"{today.month:02d}-{today.day:02d}"
     
     contacts = []
     conn = get_connection()
@@ -1549,9 +1571,9 @@ def get_anniversary_contacts():
         FROM agent_contacts
         WHERE email IS NOT NULL AND email != '' 
           AND auto_anniversary = 1
-          AND home_anniversary LIKE ?
+          AND (home_anniversary LIKE ? OR home_anniversary LIKE ?)
         """,
-        (f"%{today_str}%",)
+        (f"%{today_str}%", f"%-{today_dash}%")
     )
     for row in cur.fetchall():
         contacts.append({
@@ -1570,9 +1592,9 @@ def get_anniversary_contacts():
         FROM lender_borrowers
         WHERE email IS NOT NULL AND email != '' 
           AND auto_anniversary = 1
-          AND home_anniversary LIKE ?
+          AND (home_anniversary LIKE ? OR home_anniversary LIKE ?)
         """,
-        (f"%{today_str}%",)
+        (f"%{today_str}%", f"%-{today_dash}%")
     )
     for row in cur.fetchall():
         contacts.append({
@@ -1584,8 +1606,9 @@ def get_anniversary_contacts():
             'property_address': row['property_address']
         })
     
+    done = _already_emailed_today(conn, 'anniversary')
     conn.close()
-    return contacts
+    return [c for c in contacts if (c['type'], c['id']) not in done]
 
 
 def _pro_names(professional_id):
@@ -1606,7 +1629,7 @@ def _first(name):
 
 def send_birthday_emails():
     """Send birthday emails to contacts."""
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         return
     
     contacts = get_birthday_contacts()
@@ -1629,7 +1652,7 @@ With warmth,
 
 def send_anniversary_emails():
     """Send home anniversary emails."""
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         return
     
     contacts = get_anniversary_contacts()
@@ -1655,7 +1678,7 @@ Warmly,
 
 def send_seasonal_checklists():
     """Send seasonal home maintenance checklists."""
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         return
     
     from datetime import datetime
@@ -1771,7 +1794,7 @@ Warmly,
 
 def send_equity_updates():
     """Send equity update emails based on frequency."""
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         return
     
     from datetime import datetime
@@ -1878,7 +1901,7 @@ Warmly,
 
 def send_holiday_greetings():
     """Send holiday greeting emails."""
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         return
     
     from datetime import datetime
@@ -2590,27 +2613,21 @@ def get_agent_dashboard_metrics(user_id):
             "pending_tasks": 0,
         }
     from datetime import date as _date
-    contacts = list_agent_contacts(user_id)
     transactions = get_agent_transactions(user_id)
-
-    contacts_list = [dict(c) if hasattr(c, 'keys') else c for c in contacts]
     today_str = _date.today().isoformat()
-
-    new_leads = sum((c.get("stage") or "") == "new" for c in contacts_list)
+    # Counted in the database, so the dashboard opens just as fast with 5,000 contacts as with 50.
+    _c = get_connection()
+    try:
+        new_leads = _c.execute("SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id = ? AND stage = 'new'", (user_id,)).fetchone()[0]
+        followups = _c.execute(
+            """SELECT COUNT(*) FROM agent_contacts
+               WHERE agent_user_id = ? AND LOWER(COALESCE(stage, '')) NOT IN ('closed', 'hold', 'past')
+                 AND ((COALESCE(next_action_date, '') != '' AND next_action_date <= ?)
+                      OR (COALESCE(next_action_date, '') = '' AND COALESCE(last_touch, '') = ''))""",
+            (user_id, today_str)).fetchone()[0]
+    finally:
+        _c.close()
     active_tx = len(transactions) if transactions else 0
-
-    # Proper follow-up count: contacts with next_action_date <= today OR last_touch > 30 days ago
-    followups = 0
-    for c in contacts_list:
-        nad = c.get("next_action_date") or ""
-        lt  = c.get("last_touch") or ""
-        stage = (c.get("stage") or "").lower()
-        if stage in ("closed", "hold", "past"):
-            continue
-        if nad and nad <= today_str:
-            followups += 1
-        elif not nad and not lt:
-            followups += 1  # never touched
 
     return {
         "new_leads":          new_leads,
@@ -2630,23 +2647,17 @@ def get_lender_dashboard_metrics(user_id):
             "loans_in_process": 0,
             "nurture_contacts": 0,
         }
-    borrowers = list_lender_borrowers(user_id)
     loans = list_lender_loans(user_id)
-    
-    # Convert Row objects to dicts if needed
-    borrowers_list = []
-    for b in borrowers:
-        if hasattr(b, 'keys'):
-            borrowers_list.append(dict(b))
-        else:
-            borrowers_list.append(b)
-    
+    _c = get_connection()
+    try:
+        total = _c.execute("SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id = ?", (user_id,)).fetchone()[0]
+        preapproved = _c.execute("SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id = ? AND status = 'preapproval'", (user_id,)).fetchone()[0]
+    finally:
+        _c.close()
     return {
-        "new_applications": sum(
-            (b1.get("status") or "") == "preapproval" for b1 in borrowers_list
-        ),
+        "new_applications": preapproved,
         "loans_in_process": len(loans) if loans else 0,
-        "nurture_contacts": max(len(borrowers_list) // 2, 0),
+        "nurture_contacts": max(total // 2, 0),
     }
 
 
@@ -12851,7 +12862,7 @@ def _send_contest_invites_for(contest, agent_user):
     """Send bracket contest invite emails to all CRM contacts with emails. Returns count sent."""
     from database import list_agent_contacts
     import datetime
-    if not EMAIL_USER or not EMAIL_PASS:
+    if not _email_ready():
         return 0
     contacts = list_agent_contacts(agent_user["id"])
     type_label = "NFL Playoffs" if contest["contest_type"] == "nfl_playoffs" else "NCAA March Madness"

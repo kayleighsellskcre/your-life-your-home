@@ -269,6 +269,48 @@ def invite_client_if_needed(tx_id, send_email, base_url):
         return False
 
 
+def notify_partner_added(tx_id, name, email, role, send_email, base_url):
+    """Welcome a lender, title company, coordinator or other partner when the agent adds them to a deal."""
+    try:
+        email = (email or "").strip()
+        if not email:
+            return False
+        conn = get_connection()
+        try:
+            tx = _transaction(conn, tx_id)
+            if not tx:
+                return False
+            agent = _user(conn, tx.get("agent_id")) or {}
+            known = _user_by_email(conn, email)
+        finally:
+            conn.close()
+        role_words = {"lender": "lender", "title_company": "title company", "transaction_coordinator": "transaction coordinator",
+                      "other_agent": "co-operating agent", "inspector": "inspector", "appraiser": "appraiser", "attorney": "attorney"}
+        what = role_words.get(role, "partner")
+        addr = tx.get("property_address") or "a client's transaction"
+        first = (name or "there").split(" ")[0]
+        agent_name = agent.get("name") or "An agent"
+        contact = f"You can reach {agent_name} at {agent.get('email')}" if agent.get("email") else f"You can reply to this email to reach {agent_name}"
+        if agent.get("phone"):
+            contact += f" or {agent.get('phone')}"
+        for_client = f" for {tx.get('client_name')}" if tx.get("client_name") else ""
+        body = f"Hi {first},\n\n{agent_name} has added you as the {what} on the transaction at {addr}{for_client}.\n\n{contact}.\n"
+        if role == "lender":
+            if known and known.get("role") == "lender":
+                body += f"\nThis deal now shows on your dashboard: {base_url}/lender\n"
+            else:
+                body += (f"\nWant to follow your deals, borrowers and referrals in one calm place? "
+                         f"Create your free lender account with this email address ({email}) and the deal will connect automatically: "
+                         f"{base_url}/signup?role=lender\n")
+        body += "\nThank you for helping make this a smooth closing.\n\nWarmly,\nYour Life, Your Home"
+        ok = send_email(email, f"{agent_name} added you to {addr}", body, **_via(agent))
+        _log(f"partner {email} ({role}) welcomed on transaction {tx_id}: {ok}")
+        return bool(ok)
+    except Exception:
+        _log("notify_partner_added failed:\n" + traceback.format_exc())
+        return False
+
+
 def lender_shared_deals(lender_id, limit=8):
     """Active transactions an agent has shared with this lender."""
     try:
