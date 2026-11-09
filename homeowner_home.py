@@ -48,6 +48,64 @@ def _count(conn, sql, args):
         return 0
 
 
+def _spark(values, w=260, h=56, pad=4):
+    """A tiny trend line as an SVG path, from a list of numbers (oldest first). Empty if there is nothing to draw."""
+    vals = [float(v) for v in values if v]
+    if len(vals) < 2:
+        return ""
+    lo, hi = min(vals), max(vals)
+    span = (hi - lo) or 1.0
+    step = (w - 2 * pad) / (len(vals) - 1)
+    pts = [(pad + i * step, pad + (h - 2 * pad) * (1 - (v - lo) / span)) for i, v in enumerate(vals)]
+    return "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts)
+
+
+def _nice_date(s):
+    from datetime import datetime
+    try:
+        d = datetime.strptime(str(s)[:10], "%Y-%m-%d")
+        return f"{d.strftime('%b')} {d.day}"
+    except ValueError:
+        return s
+
+
+def value_hero(user_id, props):
+    """What the top of the overview shows about the main home: value, range, trend, source, and whether we can refresh it."""
+    import valuation
+    if not props:
+        return None
+    p = props[0]
+    conn = _db()
+    try:
+        snap = conn.execute(
+            """SELECT value_estimate, value_low, value_high, value_refresh_source, last_value_refresh, loan_balance
+               FROM homeowner_snapshots WHERE user_id = ? AND property_id = ?""", (user_id, p["id"])).fetchone()
+        hist = conn.execute(
+            """SELECT snapshot_date, value_estimate FROM homeowner_snapshot_history
+               WHERE user_id = ? AND property_id = ? AND value_estimate IS NOT NULL ORDER BY snapshot_date DESC LIMIT 12""",
+            (user_id, p["id"])).fetchall()
+    finally:
+        conn.close()
+    snap = dict(snap) if snap else {}
+    hist = [dict(h) for h in reversed(hist)]
+    value = snap.get("value_estimate")
+    change = pct = since = None
+    if value and len(hist) >= 2 and hist[0]["value_estimate"]:
+        change = float(value) - float(hist[0]["value_estimate"])
+        pct = change / float(hist[0]["value_estimate"]) * 100
+        since = hist[0]["snapshot_date"]
+    live = valuation.provider_configured()
+    has_address = bool((p.get("address") or "").strip())
+    state = "value" if value else ("pending" if (live and has_address) else "empty")
+    return dict(
+        id=p["id"], address=p.get("address") or "", value=value, low=snap.get("value_low"), high=snap.get("value_high"),
+        source_note=valuation.describe_source({k: v for k, v in snap.items() if k not in ("value_low", "value_high")}) if value else "",
+        change=change, pct=pct, since=_nice_date(since),
+        spark=_spark([h["value_estimate"] for h in hist]), equity=p.get("equity"), state=state,
+        can_refresh=bool(live and has_address), from_rentcast=(snap.get("value_refresh_source") == valuation.SOURCE),
+    )
+
+
 def overview_extras(user_id):
     """Everything the overview needs beyond the basics: goal, next steps, and the property portfolio."""
     goal = get_goal(user_id)
@@ -103,6 +161,7 @@ def overview_extras(user_id):
     total_equity = sum(p["equity"] for p in props if p["equity"] is not None)
     rents = [p for p in props if p.get("monthly_rent")]
     return dict(
+        hero=(value_hero(user_id, props) if goal != "buyer" else None),
         goal=goal, goals=GOALS, steps=pending[:3], steps_done=len(steps) - len(pending), steps_total=len(steps),
         props=props, show_portfolio=(goal == "investor" or len(props) > 1),
         total_value=total_value, total_equity=total_equity,

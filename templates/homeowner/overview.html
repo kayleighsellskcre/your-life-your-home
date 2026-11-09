@@ -8,6 +8,20 @@
 .ho-hello h1 { margin: 0 0 .35rem; }
 .ho-hello p { margin: 0; color: #7A6855; font-size: 1.02rem; }
 .ho-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1.2rem 1.4rem; margin-bottom: 1.1rem; }
+.hv-hero { background: linear-gradient(160deg, #FFFDFA 0%, #F8F0E3 100%); border: 1px solid rgba(160,125,85,.3); border-radius: 16px; box-shadow: 0 4px 22px rgba(110,72,40,.1); padding: 1.3rem 1.4rem 1.2rem; margin-bottom: 1.1rem; text-align: center; }
+.hv-hero small.lbl { display: block; font-size: .74rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8F6244; }
+.hv-hero .addr { color: #7A6855; font-size: .9rem; margin: .15rem 0 .5rem; overflow-wrap: anywhere; }
+.hv-hero .big { font-family: var(--font-heading); font-size: clamp(2.2rem, 9vw, 3.4rem); line-height: 1.05; color: #3A2518; margin: .1rem 0; }
+.hv-hero .range { color: #6B5B4D; font-size: .95rem; }
+.hv-hero .chg { display: inline-block; margin-top: .5rem; padding: .25rem .8rem; border-radius: 99px; font-size: .85rem; font-weight: 700; }
+.hv-hero .chg.up { background: #E7F1E8; color: #2F6B3F; } .hv-hero .chg.down { background: #F7E4E0; color: #A0392D; }
+.hv-hero svg { display: block; width: min(100%, 320px); height: 56px; margin: .7rem auto 0; }
+.hv-hero .src { color: #7A6855; font-size: .8rem; margin: .6rem 0 0; line-height: 1.4; }
+.hv-hero .eq { margin-top: .5rem; font-size: .92rem; color: #3A2518; }
+.hv-hero .acts { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; margin-top: .9rem; }
+.hv-hero .acts form { margin: 0; }
+.hv-hero .acts .btn, .hv-hero .acts button { width: auto !important; margin: 0 !important; }
+.hv-hero .off { margin-top: .6rem; font-size: .8rem; }
 .ho-card > h2 { margin: 0 0 .15rem; font-size: 1.2rem !important; }
 .ho-sub { margin: 0 0 .9rem; color: #7A6855; font-size: .9rem; }
 .ho-goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: .6rem; }
@@ -51,6 +65,32 @@
   <h1>Welcome home, {{ first }}</h1>
   <p>{% if x and x.goal == 'buyer' %}Let's get you ready for a home of your own.{% elif x and x.goal == 'seller' %}Here are your numbers, and what to do before you list.{% elif x and x.goal == 'investor' %}Here is how your properties are doing.{% else %}Your home, at a glance.{% endif %}</p>
 </div>
+
+{% if x and x.hero %}{% set hv = x.hero %}
+<div class="hv-hero" id="home-value">
+  <small class="lbl">Your home's value</small>
+  {% if hv.address %}<div class="addr">{{ hv.address }}</div>{% endif %}
+  {% if hv.state == 'value' %}
+    <div class="big">${{ "{:,.0f}".format(hv.value) }}</div>
+    {% if hv.low and hv.high %}<div class="range">Likely range ${{ "{:,.0f}".format(hv.low) }} to ${{ "{:,.0f}".format(hv.high) }}</div>{% endif %}
+    {% if hv.change is not none %}<span class="chg {{ 'up' if hv.change >= 0 else 'down' }}">{% if hv.change >= 0 %}&#9650;{% else %}&#9660;{% endif %} ${{ "{:,.0f}".format(hv.change|abs) }} ({{ "{:+.1f}".format(hv.pct) }}%) since {{ hv.since }}</span>{% endif %}
+    {% if hv.spark %}<svg viewBox="0 0 260 56" preserveAspectRatio="none" role="img" aria-label="Your home's value over time"><path d="{{ hv.spark }}" fill="none" stroke="#A47551" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>{% endif %}
+    {% if hv.equity is not none %}<div class="eq">Your equity: <b>${{ "{:,.0f}".format(hv.equity) }}</b></div>{% endif %}
+    <p class="src">{{ hv.source_note }}</p>
+  {% elif hv.state == 'pending' %}
+    <div class="big" style="font-size:1.6rem;">We're finding your home's value</div>
+    <p class="src">This takes a moment the first time. Tap the button to check now.</p>
+  {% else %}
+    <div class="big" style="font-size:1.6rem;">Add your home's address</div>
+    <p class="src">Add your full street address and we'll show what your home is worth, kept up to date for you.</p>
+  {% endif %}
+  <div class="acts">
+    {% if hv.can_refresh %}<form method="post" action="{{ url_for('homeowner_value_refresh') }}"><input type="hidden" name="property_id" value="{{ hv.id }}"><button type="submit" class="btn btn-primary">{{ 'Refresh my value' if hv.state == 'value' else 'Find my value' }}</button></form>{% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('homeowner_value_equity_overview') }}">{{ 'Value details and what-ifs' if hv.state == 'value' else 'Add my home' }}</a>
+  </div>
+  {% if hv.state == 'value' %}<div class="off"><a href="{{ url_for('homeowner_support_get_help') }}?tab=ask">Does this look off? Ask your agent</a></div>{% endif %}
+</div>
+{% endif %}
 
 {% if x %}
   {% if not x.goal %}

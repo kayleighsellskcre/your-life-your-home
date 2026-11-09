@@ -1975,6 +1975,45 @@ Warmly,
             )
 
 
+def _value_rise_emails(user_id, property_id, old, new, pct):
+    """Good news for the homeowner, and a friendly nudge for their agent: a real estimate just rose."""
+    try:
+        from database import get_user_by_id, get_homeowner_professionals
+        home = get_user_by_id(user_id)
+        home = dict(home) if home else {}
+        conn = get_connection()
+        addr = (conn.execute("SELECT address FROM properties WHERE id = ?", (property_id,)).fetchone() or {"address": "your home"})["address"]
+        conn.close()
+        base = os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com")
+        agent = next((p for p in get_homeowner_professionals(user_id) if p.get("professional_role") == "agent"), None)
+        agent_id = ((agent.get("professional_id") or agent.get("user_id")) if agent else None) or home.get("agent_id")
+        agent_row = dict(get_user_by_id(agent_id)) if agent_id and get_user_by_id(agent_id) else {}
+        first = (home.get("name") or "there").split(" ")[0]
+        if home.get("email"):
+            body = (f"Hi {first},\n\nGood news about your home. The latest market estimate for {addr} is ${new:,.0f}, "
+                    f"up {pct:.1f}% from ${old:,.0f}.\n\nSee your value, equity and what-ifs here: {base}/homeowner\n\n"
+                    f"This is an automated estimate, not an appraisal. "
+                    + (f"If you'd like to talk about what it means for you, {agent_row.get('name')} would be glad to help." if agent_row.get("name") else "")
+                    + "\n\nWarmly,\nYour Life, Your Home")
+            send_reminder_email(home["email"], f"Your home's value is up {pct:.0f}%", body, **pro_sender(agent_id))
+        if agent_row.get("email"):
+            body = (f"Hi {(agent_row.get('name') or 'there').split(' ')[0]},\n\n{home.get('name') or 'A client'}'s home at {addr} "
+                    f"is now estimated at ${new:,.0f}, up {pct:.1f}% from ${old:,.0f}.\n\n"
+                    f"That is a natural reason to reach out: see how they are feeling about their home and their plans. "
+                    f"Their details are in your Client Portal: {base}/agent/clients\n\nYour Life, Your Home")
+            send_reminder_email(agent_row["email"], f"{home.get('name') or 'A client'}'s home value is up {pct:.0f}%", body)
+    except Exception:
+        print("[VALUES] value-rise email failed")
+
+
+def _register_value_alerts():
+    import valuation
+    valuation.set_change_handler(lambda *a: _bg(_value_rise_emails, *a))
+
+
+_register_value_alerts()
+
+
 def update_home_values_daily():
     """Nightly home value refresh from real market data (RentCast). Never invents or simulates values."""
     import valuation

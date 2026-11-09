@@ -128,6 +128,13 @@ def refresh_property_value(user_id, property_id, min_days=None):
         finally:
             conn.close()
         from database import upsert_homeowner_snapshot_for_property
+        _conn = get_connection()
+        try:
+            _prev = _conn.execute("SELECT value_estimate FROM homeowner_snapshots WHERE user_id = ? AND property_id = ?",
+                                  (user_id, property_id)).fetchone()
+            old_value = _prev["value_estimate"] if _prev else None
+        finally:
+            _conn.close()
         upsert_homeowner_snapshot_for_property(user_id=user_id, property_id=property_id, value_estimate=result["price"])
         conn = get_connection()
         try:
@@ -140,6 +147,7 @@ def refresh_property_value(user_id, property_id, min_days=None):
         finally:
             conn.close()
         _log(f"property {property_id}: ${result['price']:,.0f}")
+        _maybe_alert(user_id, property_id, old_value, result["price"])
         return "ok"
     except Exception:
         _log("refresh failed:\n" + traceback.format_exc())
@@ -287,3 +295,41 @@ def test_address(address):
         return dict(ok=False, message=msg + extra)
     return dict(ok=True, price=result["price"], low=result.get("low"), high=result.get("high"),
                 message="Connected. RentCast returned a value for that address.")
+
+
+# ───────────── telling people when a value moves up ─────────────
+_CHANGE_HANDLER = None
+
+
+def set_change_handler(fn):
+    """The app registers a function(user_id, property_id, old, new, pct) that sends the emails."""
+    global _CHANGE_HANDLER
+    _CHANGE_HANDLER = fn
+
+
+def _maybe_alert(user_id, property_id, old, new):
+    """Tell the homeowner and their agent when a real market estimate rises by VALUE_ALERT_PCT (default 3%) or more.
+    Drops are never announced. At most one alert per home every 25 days."""
+    try:
+        if not _CHANGE_HANDLER or not old or not new or float(old) <= 0:
+            return False
+        pct = (float(new) - float(old)) / float(old) * 100
+        if pct < _int_env("VALUE_ALERT_PCT", 3):
+            return False
+        conn = get_connection()
+        try:
+            conn.execute("CREATE TABLE IF NOT EXISTS value_alerts (id INTEGER PRIMARY KEY AUTOINCREMENT, property_id INTEGER, "
+                         "old_value REAL, new_value REAL, created_at TEXT DEFAULT CURRENT_TIMESTAMP)")
+            recent = conn.execute("SELECT 1 FROM value_alerts WHERE property_id = ? AND created_at >= datetime('now', '-25 days')",
+                                  (property_id,)).fetchone()
+            if recent:
+                return False
+            conn.execute("INSERT INTO value_alerts (property_id, old_value, new_value) VALUES (?, ?, ?)", (property_id, old, new))
+            conn.commit()
+        finally:
+            conn.close()
+        _CHANGE_HANDLER(user_id, property_id, float(old), float(new), pct)
+        return True
+    except Exception:
+        _log("alert failed:\n" + traceback.format_exc())
+        return False

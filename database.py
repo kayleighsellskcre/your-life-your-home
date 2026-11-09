@@ -1421,6 +1421,17 @@ def init_db() -> None:
         )
         """
     )
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS value_alerts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            property_id INTEGER,
+            old_value REAL,
+            new_value REAL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
     for _c in ("value_low REAL", "value_high REAL"):
         try:
             cur.execute(f"ALTER TABLE homeowner_snapshots ADD COLUMN {_c}")
