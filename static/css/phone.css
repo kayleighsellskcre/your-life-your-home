@@ -70,3 +70,17 @@ body {
 }
 /* The hero bar used desktop negative margins that pushed it past the page edge */
 .seasonal-hero { margin: 0 0 1.5rem !important; }
+
+/* Deal page header: the old negative side margins pushed it past the page edge */
+.tx-topbar { margin: 0 0 1.1rem !important; border-radius: 12px; }
+.tx-topbar-left, .tx-topbar-right { min-width: 0; max-width: 100%; }
+@media (max-width: 768px) {
+  .tx-topbar-right { flex: 1 1 100%; justify-content: flex-start; }
+  .tx-topbar-right form { margin: 0 !important; }
+}
+
+/* Deal participants: long emails wrap, and the remove button always stays inside the card */
+.tx-participant { flex-wrap: wrap; }
+.tx-participant > div:nth-child(2) { min-width: 0; flex: 1 1 140px; }
+.tx-p-name, .tx-p-sub { overflow-wrap: anywhere; }
+.tx-participant form { flex-shrink: 0; }

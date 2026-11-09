@@ -625,5 +625,25 @@
  }
  updateProgress();
  </script>
+<script>
+ /* Phones: nothing on the page is smaller than 12px, so small labels stay readable. */
+ (function () {
+   var mq = window.matchMedia('(max-width: 768px), (max-height: 500px) and (max-width: 1000px)');
+   function bump() {
+     if (!mq.matches) return;
+     var els = document.body.querySelectorAll('*');
+     for (var i = 0; i < els.length; i++) {
+       var el = els[i];
+       if (el.children.length || !el.firstChild || el.tagName === 'SCRIPT' || el.tagName === 'STYLE') continue;
+       var txt = el.textContent; if (!txt || txt.trim().length < 2) continue;
+       var fs = parseFloat(getComputedStyle(el).fontSize);
+       if (fs > 0 && fs < 12) el.style.setProperty('font-size', '12px', 'important');
+     }
+   }
+   function later() { setTimeout(bump, 60); }
+   if (document.readyState === 'complete') later(); else window.addEventListener('load', later);
+   if (mq.addEventListener) mq.addEventListener('change', later);
+ })();
+ </script>
 </body>
 </html>

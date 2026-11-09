@@ -6387,3 +6387,13 @@ body {
   .templates-grid { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)) !important; }
 }
 .seasonal-hero { margin: 0 0 1.5rem !important; }
+.tx-topbar { margin: 0 0 1.1rem !important; border-radius: 12px; }
+.tx-topbar-left, .tx-topbar-right { min-width: 0; max-width: 100%; }
+@media (max-width: 768px) {
+  .tx-topbar-right { flex: 1 1 100%; justify-content: flex-start; }
+  .tx-topbar-right form { margin: 0 !important; }
+}
+.tx-participant { flex-wrap: wrap; }
+.tx-participant > div:nth-child(2) { min-width: 0; flex: 1 1 140px; }
+.tx-p-name, .tx-p-sub { overflow-wrap: anywhere; }
+.tx-participant form { flex-shrink: 0; }

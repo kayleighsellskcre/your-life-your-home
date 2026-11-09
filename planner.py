@@ -151,9 +151,15 @@ def _day_date(week, day):
 
 def ago(last):
     """'Today', '3 days ago', '2 weeks ago', 'Never' from a stored date; also returns whole days (None if never)."""
-    try:
-        d = datetime.strptime(str(last or "")[:10], "%Y-%m-%d").date()
-    except ValueError:
+    d = None
+    raw = str(last or "").strip()
+    for fmt, size in (("%Y-%m-%d", 10), ("%m/%d/%Y", 10), ("%m-%d-%Y", 10), ("%Y/%m/%d", 10), ("%m/%d/%y", 8)):
+        try:
+            d = datetime.strptime(raw[:size], fmt).date()
+            break
+        except ValueError:
+            continue
+    if d is None:
         return "Never", None
     n = (date.today() - d).days
     if n <= 0:
