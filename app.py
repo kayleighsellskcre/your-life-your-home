@@ -1976,71 +1976,12 @@ Warmly,
 
 
 def update_home_values_daily():
-    """Nightly home value refresh. Uses real market data (RentCast) when configured; never invents growth."""
+    """Nightly home value refresh from real market data (RentCast). Never invents or simulates values."""
     import valuation
-    if valuation.provider_configured():
-        valuation.refresh_stale_values()
+    if not valuation.provider_configured():
+        print("[VALUES] No value provider configured (set RENTCAST_API_KEY); values are left as they are.")
         return
-    if os.environ.get("ALLOW_SIMULATED_VALUES") != "1":
-        print("[VALUES] No value provider configured (set RENTCAST_API_KEY); not simulating growth.")
-        return
-    from database import get_connection, get_user_properties, get_homeowner_snapshot_for_property, upsert_homeowner_snapshot_for_property
-    from datetime import datetime, timedelta
-    
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        
-        # Get all homeowners with snapshots
-        cur.execute("""
-            SELECT DISTINCT user_id, property_id 
-            FROM homeowner_snapshots 
-            WHERE value_estimate IS NOT NULL OR loan_balance IS NOT NULL
-        """)
-        snapshots = cur.fetchall()
-        conn.close()
-        
-        updated_count = 0
-        for row in snapshots:
-            user_id = row['user_id']
-            property_id = row['property_id'] if row['property_id'] else None
-            
-            if not property_id:
-                continue
-                
-            # Get current snapshot
-            snapshot = get_homeowner_snapshot_for_property(user_id, property_id)
-            if not snapshot:
-                continue
-            
-            # Apply Homebot-style daily appreciation (3.5% annual = ~0.0096% daily)
-            # Only update if value hasn't been refreshed in last 24 hours
-            last_refresh = snapshot.get('last_value_refresh')
-            if last_refresh:
-                try:
-                    last_date = datetime.fromisoformat(last_refresh.replace('Z', '+00:00'))
-                    if (datetime.now() - last_date.replace(tzinfo=None)).days < 1:
-                        continue  # Skip if updated in last 24 hours
-                except:
-                    pass
-            
-            current_value = snapshot.get('value_estimate')
-            if current_value and current_value > 0:
-                # Daily appreciation: 1.035^(1/365) - 1 ≈ 0.000094% per day
-                daily_rate = (1.035 ** (1/365)) - 1
-                new_value = current_value * (1 + daily_rate)
-                
-                # Update snapshot with new value (preserve other fields)
-                upsert_homeowner_snapshot_for_property(
-                    user_id=user_id,
-                    property_id=property_id,
-                    value_estimate=new_value,
-                )
-                updated_count += 1
-        
-        print(f"[OK] Daily value update: {updated_count} properties updated")
-    except Exception as e:
-        print(f"Error in daily value update: {e}")
+    valuation.refresh_stale_values()
 
 
 def schedule_new_lead_drip(agent_user_id: int, contact_id: int, contact_email: str):
@@ -2436,7 +2377,7 @@ def start_scheduler():
         # Drip sequences and review requests
         scheduler.add_job(send_drip_emails, "cron", hour=9, minute=20)  # 9:20 AM daily
         scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
-        # Automatic daily home value updates (Homebot-style)
+        # Nightly home value refresh from real market data
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
         scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)
@@ -2535,30 +2476,6 @@ def _row_get(row, key, default=None):
 # -------------------------------------------------
 # HOMEOWNER SNAPSHOT + CRM METRICS
 # -------------------------------------------------
-def calculate_appreciated_value(
-    initial_value: float, purchase_date: str, annual_rate: float = 0.035
-) -> float:
-    """
-    Calculate home value with automatic appreciation over time.
-    """
-    if not initial_value or not purchase_date:
-        return initial_value
-
-    try:
-        if isinstance(purchase_date, str):
-            purchase_dt = datetime.strptime(purchase_date.split()[0], "%Y-%m-%d")
-        else:
-            purchase_dt = purchase_date
-
-        today = datetime.now()
-        years_elapsed = (today - purchase_dt).days / 365.25
-        appreciated_value = initial_value * ((1 + annual_rate) ** years_elapsed)
-        return round(appreciated_value, 2)
-    except Exception as e:
-        print(f"Error calculating appreciation: {e}")
-        return initial_value
-
-
 def get_homeowner_snapshot_or_default(user_row: Optional[dict]):
     if not user_row:
         return {
@@ -8766,231 +8683,6 @@ def lender_checklist_print(season):
                            checklist=data, user=user, profile=profile,
                            is_kayleigh=is_kayleigh,
                            back_url=url_for("lender_seasonal_checklists"))
-
-
-@app.route("/agent/power-tools/cma/generate", methods=["POST"])
-def generate_cma():
-    """Generate a CMA report using AI."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    try:
-        data = request.get_json()
-        address = data.get("address")
-        bedrooms = data.get("bedrooms")
-        bathrooms = data.get("bathrooms")
-        sqft = data.get("sqft")
-        property_type = data.get("property_type")
-        notes = data.get("notes", "")
-        
-        # Calculate estimated value (simplified - in production would use real MLS data)
-        avg_price_per_sqft = 240  # This would come from market data
-        estimated_value = int(sqft) * avg_price_per_sqft
-        low_range = int(estimated_value * 0.95)
-        high_range = int(estimated_value * 1.05)
-        
-        # Generate report
-        report = {
-            "address": address,
-            "property_details": {
-                "bedrooms": bedrooms,
-                "bathrooms": bathrooms,
-                "sqft": sqft,
-                "property_type": property_type
-            },
-            "valuation": {
-                "estimated_value": estimated_value,
-                "low_range": low_range,
-                "high_range": high_range,
-                "price_per_sqft": avg_price_per_sqft
-            },
-            "market_data": {
-                "comparable_active": 12,
-                "comparable_sold_90d": 8,
-                "avg_days_on_market": 28,
-                "market_condition": "Balanced"
-            },
-            "recommendations": [
-                f"List price: ${estimated_value:,} for optimal positioning",
-                "Professional photography and staging recommended",
-                "Highlight recent upgrades and neighborhood amenities",
-                "Expected time to close: 30-45 days"
-            ],
-            "generated_at": datetime.now().isoformat()
-        }
-        
-        return jsonify({"success": True, "report": report})
-    
-    except Exception as e:
-        print(f"Error generating CMA: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/agent/power-tools/farming/create", methods=["POST"])
-def create_farming_campaign():
-    """Create a geo-targeted farming campaign."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    try:
-        data = request.get_json()
-        campaign_name = data.get("campaign_name")
-        target_area = data.get("target_area")
-        template = data.get("template")
-        duration = data.get("duration")
-        message = data.get("message", "")
-        
-        # Simulate campaign creation
-        campaign = {
-            "id": str(uuid4()),
-            "name": campaign_name,
-            "target_area": target_area,
-            "template": template,
-            "duration": duration,
-            "personalization": message,
-            "estimated_reach": 2500,  # Would be calculated based on target area
-            "estimated_budget": 875,  # Based on quantity and postage
-            "status": "ready_to_launch",
-            "first_mailing_date": (datetime.now() + pd.Timedelta(days=5)).strftime("%Y-%m-%d"),
-            "created_at": datetime.now().isoformat()
-        }
-        
-        # In production, save to database
-        # save_farming_campaign(user["id"], campaign)
-        
-        return jsonify({"success": True, "campaign": campaign})
-    
-    except Exception as e:
-        print(f"Error creating farming campaign: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/agent/power-tools/scripts/generate", methods=["POST"])
-def generate_script_response():
-    """Generate AI-powered script responses for objections."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    try:
-        data = request.get_json()
-        scenario = data.get("scenario")
-        objection = data.get("objection")
-        style = data.get("style")
-        
-        # Pre-defined responses based on style (in production would use OpenAI)
-        style_templates = {
-            "direct": "I appreciate you being straightforward about that. Here's what you need to know: {response}. I'm confident the results will speak for themselves.",
-            "warm": "I completely understand where you're coming from, it's a significant consideration! What I've found is that {response}. Let me walk you through exactly what that looks like...",
-            "data_driven": "Great question. Let me share some data with you. {response}. When you factor in those numbers, the value becomes clear.",
-            "storyteller": "You know, I had another client who {response}. It made all the difference in their experience.",
-            "professional": "I appreciate your inquiry. {response}. The value proposition is designed to maximize your outcomes."
-        }
-        
-        # Simulate AI response generation
-        base_response = "my comprehensive approach includes full-service support, strategic marketing, and expert negotiation that consistently delivers superior results"
-        
-        template = style_templates.get(style, style_templates["direct"])
-        response = template.format(response=base_response)
-        
-        result = {
-            "scenario": scenario,
-            "objection": objection,
-            "style": style,
-            "response": response,
-            "key_points": [
-                "Focus on value, not cost",
-                "Share specific results and testimonials",
-                "Offer to show your marketing plan",
-                "Build trust through transparency"
-            ],
-            "follow_up_tips": [
-                "Show examples of your recent success stories",
-                "Provide references from satisfied clients",
-                "Walk them through your unique approach",
-                "Give them time to think, don't pressure"
-            ],
-            "body_language": [
-                "Maintain confident posture",
-                "Use open hand gestures",
-                "Make steady eye contact",
-                "Smile genuinely"
-            ]
-        }
-        
-        return jsonify({"success": True, "script": result})
-    
-    except Exception as e:
-        print(f"Error generating script: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/agent/power-tools/market/report", methods=["POST"])
-def generate_market_report():
-    """Generate market intelligence report."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    try:
-        data = request.get_json()
-        report_type = data.get("report_type")
-        area = data.get("area")
-        
-        # Simulate market data (in production would use real MLS/market APIs)
-        report = {
-            "type": report_type,
-            "area": area,
-            "generated_at": datetime.now().isoformat(),
-            "stats": {
-                "median_price": 485000,
-                "median_price_change": 3.2,  # percentage
-                "avg_days_on_market": 28,
-                "dom_change": -5,  # change in days
-                "inventory_months": 2.1,
-                "market_type": "Seller's Market",
-                "active_listings": 247,
-                "pending_sales": 189,
-                "sold_last_month": 156
-            },
-            "trends": {
-                "price_direction": "increasing",
-                "demand_level": "high",
-                "inventory_level": "low",
-                "forecast": "Prices expected to increase 2-4% over next quarter"
-            },
-            "download_url": f"/agent/power-tools/market/download/{uuid4()}",
-            "shareable": True
-        }
-        
-        return jsonify({"success": True, "report": report})
-    
-    except Exception as e:
-        print(f"Error generating market report: {e}")
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/agent/power-tools/scripts/save", methods=["POST"])
-def save_script():
-    """Save a script to the agent's library."""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    try:
-        data = request.get_json()
-        script_content = data.get("script")
-        
-        # In production, save to database
-        # save_agent_script(user["id"], script_content)
-        
-        return jsonify({"success": True, "message": "Script saved to your library"})
-    
-    except Exception as e:
-        print(f"Error saving script: {e}")
-        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/agent/clients")
