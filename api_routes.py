@@ -614,7 +614,7 @@ def lead_intake_webhook(agent_token):
     conn = get_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT u.id, u.email, up.full_name
+        SELECT u.id, u.email, u.name AS full_name
         FROM users u
         JOIN user_profiles up ON up.user_id = u.id
         WHERE u.role = 'agent'
