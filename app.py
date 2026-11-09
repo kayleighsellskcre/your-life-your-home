@@ -717,7 +717,7 @@ def hex_to_color_name(hex_code):
         # If very close (within 15 color units), use the closest Sherwin-Williams name
         if min_distance < 15:
             return closest_name
-    except:
+    except Exception:
         pass
     
     # Fallback: return hex code if no match found
@@ -734,7 +734,7 @@ def inject_professionals():
         try:
             homeowner_id = user.get("id")
             profs_raw = get_homeowner_professionals(homeowner_id)
-            print(f"CONTEXT PROCESSOR: Loading professionals for homeowner {homeowner_id} - found {len(profs_raw)}")
+            _dbg(f"CONTEXT PROCESSOR: Loading professionals for homeowner {homeowner_id} - found {len(profs_raw)}")
             
             for prof in profs_raw:
                 if hasattr(prof, 'keys'):
@@ -748,12 +748,12 @@ def inject_professionals():
                         prof_dict['professional_id'] = prof_dict.get('user_id')
                     
                     professionals.append(prof_dict)
-                    print(f"CONTEXT PROCESSOR: Added professional - role: {prof_dict.get('professional_role')}, name: {prof_dict.get('name')}, id: {prof_dict.get('professional_id')}, phone: {prof_dict.get('phone')}")
+                    _dbg(f"CONTEXT PROCESSOR: Added professional - role: {prof_dict.get('professional_role')}, name: {prof_dict.get('name')}, id: {prof_dict.get('professional_id')}, phone: {prof_dict.get('phone')}")
                 else:
                     professionals.append(prof)
             
             if not professionals:
-                print(f"CONTEXT PROCESSOR WARNING: No professionals found for homeowner {homeowner_id}")
+                _dbg(f"CONTEXT PROCESSOR WARNING: No professionals found for homeowner {homeowner_id}")
                 # Try to get from agent_id column as fallback
                 from database import get_user_by_id
                 homeowner_user = get_user_by_id(homeowner_id)
@@ -761,7 +761,7 @@ def inject_professionals():
                     homeowner_dict = dict(homeowner_user) if hasattr(homeowner_user, 'keys') and not isinstance(homeowner_user, dict) else homeowner_user
                     agent_id = homeowner_dict.get("agent_id")
                     if agent_id:
-                        print(f"CONTEXT PROCESSOR: Found agent_id {agent_id} in user record, attempting to load...")
+                        _dbg(f"CONTEXT PROCESSOR: Found agent_id {agent_id} in user record, attempting to load...")
                         try:
                             from database import get_user_by_id, get_user_profile
                             agent_user = get_user_by_id(agent_id)
@@ -787,7 +787,7 @@ def inject_professionals():
                                         'bio': profile_dict.get('bio'),
                                     })
                                 professionals.append(prof_data)
-                                print(f"CONTEXT PROCESSOR: Added agent from agent_id column - {prof_data.get('name')}")
+                                _dbg(f"CONTEXT PROCESSOR: Added agent from agent_id column - {prof_data.get('name')}")
                         except Exception as fallback_error:
                             print(f"CONTEXT PROCESSOR: Fallback failed - {str(fallback_error)}")
         except Exception as e:
@@ -795,9 +795,9 @@ def inject_professionals():
             print(f"CONTEXT PROCESSOR ERROR: {traceback.format_exc()}")
     else:
         if user:
-            print(f"CONTEXT PROCESSOR: User is not a homeowner - role: {user.get('role')}, id: {user.get('id')}")
+            _dbg(f"CONTEXT PROCESSOR: User is not a homeowner - role: {user.get('role')}, id: {user.get('id')}")
         else:
-            print(f"CONTEXT PROCESSOR: No user logged in")
+            _dbg(f"CONTEXT PROCESSOR: No user logged in")
     
     # Helper function to check if photo exists and return correct path
     def get_professional_photo_url(photo_path):
@@ -971,6 +971,12 @@ from transaction_helpers import (
     get_transaction_timeline,
     get_transaction_document_status,
 )
+
+def _dbg(*args, **kwargs):
+    """Chatty diagnostics: only printed when the YLH_DEBUG environment variable is set."""
+    if os.environ.get("YLH_DEBUG"):
+        print(*args, **kwargs)
+
 
 # ---------------- GLOBAL BRAND CONFIG ----------------
 FRONT_BRAND_NAME = "Your Life, Your Home"
@@ -2694,19 +2700,6 @@ def connect_with_professional(token):
         return redirect(url_for("homeowner_overview"))
     return render_template("homeowner/connect.html", brand_name=FRONT_BRAND_NAME, pro=pro, prof=prof, role=role,
                            cur_pro=cur_pro, token=token, already=(cur_id == pro_id))
-    
-    # Convert to dict if needed
-    if hasattr(professional, 'keys'):
-        prof_dict = dict(professional)
-    else:
-        prof_dict = professional if professional else {}
-    
-    return render_template(
-        "public/referral_landing.html",
-        brand_name=FRONT_BRAND_NAME,
-        professional=prof_dict,
-        referral_code=referral_code
-    )
 
 
 def _hero_photos():
@@ -2944,7 +2937,7 @@ def signup():
         while retry_count < max_retries:
             try:
                 user_id = create_user(name, email, password_hash, role, agent_id=agent_id, lender_id=lender_id)
-                print(f"DEBUG Signup: User created successfully with ID {user_id}")
+                _dbg(f"DEBUG Signup: User created successfully with ID {user_id}")
                 
                 # Verify the account was actually created by querying the database
                 from database import get_user_by_email
@@ -2960,7 +2953,7 @@ def signup():
                 if not verify_user.get("password_hash"):
                     raise ValueError("Account creation failed - password hash not set")
                 
-                print(f"DEBUG Signup: Account verified - user exists with ID {verify_user.get('id')}")
+                _dbg(f"DEBUG Signup: Account verified - user exists with ID {verify_user.get('id')}")
                 user_id = verify_user.get('id')  # Use verified user ID
                 break  # Success, exit retry loop
                 
@@ -3045,7 +3038,7 @@ def signup():
                                     
                                     if verify_user.get("password_hash"):
                                         user_id = existing_user["id"]
-                                        print(f"DEBUG Signup: Incomplete account completed successfully - ID {user_id}")
+                                        _dbg(f"DEBUG Signup: Incomplete account completed successfully - ID {user_id}")
                                         # Break out of retry loop and continue with signup flow
                                         break
                                     else:
@@ -4273,8 +4266,8 @@ def homeowner_saved_notes():
     raw_boards_dict = get_design_boards_for_user(user_id) or {}
     # Convert dict to list of board names for template iteration
     boards = list(raw_boards_dict.keys()) if raw_boards_dict else []
-    print(f"[DEBUG][SAVED NOTES] Raw boards dict: {raw_boards_dict}")
-    print(f"[DEBUG][SAVED NOTES] Boards list: {boards}")
+    _dbg(f"[DEBUG][SAVED NOTES] Raw boards dict: {raw_boards_dict}")
+    _dbg(f"[DEBUG][SAVED NOTES] Boards list: {boards}")
     
     board_details = {}
     for board_name in boards:
@@ -4316,7 +4309,7 @@ def homeowner_saved_notes():
                     "files": [],
                 }
         except Exception as e:
-            print(f"[DEBUG][SAVED NOTES] Error getting details for board '{board_name}': {e}")
+            _dbg(f"[DEBUG][SAVED NOTES] Error getting details for board '{board_name}': {e}")
             import traceback
             print(traceback.format_exc())
             board_details[board_name] = {
@@ -5900,7 +5893,7 @@ def agent_crm():
                         elif field in ['property_value', 'equity_estimate']:
                             try:
                                 updates[field] = float(val) if val else None
-                            except:
+                            except Exception:
                                 pass
                         elif field == 'stage':
                             updates[field] = val.lower() if val else None
@@ -6014,7 +6007,7 @@ def agent_crm():
                         if val:
                             try:
                                 updates[field] = float(val) if field != 'probability' else int(val)
-                            except:
+                            except Exception:
                                 pass
                     
                     if updates:
@@ -6133,7 +6126,7 @@ def agent_crm():
                     # Fallback: try to convert
                     try:
                         contact_dict = dict(contact)
-                    except:
+                    except Exception:
                         contact_dict = {key: getattr(contact, key, None) for key in dir(contact) if not key.startswith('_')}
                 
                 # Ensure all expected fields exist with defaults
@@ -6351,7 +6344,7 @@ def agent_crm():
     # Get email templates for quick actions
     try:
         email_templates = list_message_templates(user["id"], "agent", "email")
-    except:
+    except Exception:
         email_templates = []
     
     try:
@@ -6697,7 +6690,7 @@ def agent_crm_import():
                     'tags': request.form.get('map_tags', '').strip(),
                 }
                 
-                print(f"\n=== IMPORT DEBUG ===", flush=True)
+                _dbg(f"\n=== IMPORT DEBUG ===", flush=True)
                 print(f"Mappings: {mappings}", flush=True)
                 print(f"First row sample: {data[0] if data else 'No data'}", flush=True)
                 print(f"First row keys: {list(data[0].keys()) if data else 'No data'}", flush=True)
@@ -6765,7 +6758,7 @@ def agent_crm_import():
                             if prop_val_str:
                                 try:
                                     property_value = float(prop_val_str.replace(',', '').replace('$', ''))
-                                except:
+                                except Exception:
                                     property_value = None
                         
                         equity_estimate = None
@@ -6774,7 +6767,7 @@ def agent_crm_import():
                             if equity_str:
                                 try:
                                     equity_estimate = float(equity_str.replace(',', '').replace('$', ''))
-                                except:
+                                except Exception:
                                     equity_estimate = None
                         
                         if not name:
@@ -6949,7 +6942,7 @@ def agent_transactions():
                     'phone': contact_dict.get('phone', '') if isinstance(contact_dict, dict) else (contact_dict['phone'] if 'phone' in contact_dict else ''),
                     'property_address': contact_dict.get('property_address', '') if isinstance(contact_dict, dict) else (contact_dict['property_address'] if 'property_address' in contact_dict else ''),
                 }
-        except:
+        except Exception:
             pass
     
     transactions = get_agent_transactions(user["id"])
@@ -9626,7 +9619,7 @@ def lender_crm():
                         elif field in ['loan_amount', 'loan_rate']:
                             try:
                                 updates[field] = float(val) if val else None
-                            except:
+                            except Exception:
                                 pass
                         else:
                             updates[field] = val if val else None
@@ -9881,7 +9874,7 @@ def lender_crm():
     # Get upcoming tasks
     try:
         upcoming_tasks = [dict(t) for t in all_tasks[:10]]
-    except:
+    except Exception:
         upcoming_tasks = []
     
     return render_template(
@@ -10055,12 +10048,12 @@ def lender_crm_import():
                         # Parse numeric values
                         try:
                             loan_amount = float(row.get(mappings['loan_amount'], 0)) if mappings['loan_amount'] and str(row.get(mappings['loan_amount'], '')).strip() else None
-                        except:
+                        except Exception:
                             loan_amount = None
                         
                         try:
                             loan_rate = float(row.get(mappings['loan_rate'], 0)) if mappings['loan_rate'] and str(row.get(mappings['loan_rate'], '')).strip() else None
-                        except:
+                        except Exception:
                             loan_rate = None
                         
                         if not name:
@@ -10825,7 +10818,7 @@ def homeowner_next_plan_move():
             if isinstance(plan_dict, dict):
                 plan_dict.update(parsed_notes)
                 plan = type('obj', (object,), plan_dict)
-        except:
+        except Exception:
             pass
     
     return render_template(
@@ -11295,7 +11288,7 @@ def admin_dashboard():
                 log['user_name'] = 'System'
             conn.close()
             recent_activity.append(log)
-    except:
+    except Exception:
         pass
     
     stats = {
@@ -11539,7 +11532,7 @@ def concierge_landing(agent_token):
         agent_id = int(agent_token)
         cur.execute("SELECT id, name FROM users WHERE id = ? AND role = 'agent'", (agent_id,))
         agent = row_to_dict(cur.fetchone())
-    except:
+    except Exception:
         agent = None
     
     if not agent:
@@ -11580,7 +11573,7 @@ def concierge_chat(agent_token):
     # Get agent
     try:
         agent_id = int(agent_token)
-    except:
+    except Exception:
         return jsonify({"error": "Invalid agent"}), 404
     
     # Get message and session
@@ -12176,7 +12169,7 @@ def ai_crm_next_action():
         try:
             lt = _dt.fromisoformat(str(last_touch)[:10])
             days_since = (date.today() - lt.date()).days
-        except:
+        except Exception:
             pass
     from ai_platform import ai_next_action
     result = ai_next_action(
@@ -12211,7 +12204,7 @@ def ai_crm_lead_score():
     if created:
         try:
             days_since = (date.today() - _dt.fromisoformat(str(created)[:10]).date()).days
-        except:
+        except Exception:
             pass
     from ai_platform import ai_lead_score
     result = ai_lead_score(
