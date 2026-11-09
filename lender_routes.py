@@ -5,27 +5,11 @@ helper they use (get_current_user, render_template, send_reminder_email, ...) is
 That is also why this file is not meant to be run or linted on its own. Route names (endpoints) are unchanged, so every
 url_for('lender_...') in the templates keeps working.
 """
-import types
+from route_loader import Registry
 
-_routes = []
-
-
-def route(rule, **options):
-    """Stands in for @app.route while this file loads; install() registers the views for real."""
-    def deco(fn):
-        _routes.append((rule, options, fn))
-        return fn
-    return deco
-
-
-def install(ns):
-    app = ns["app"]
-    for rule, options, fn in _routes:
-        view = types.FunctionType(fn.__code__, ns, fn.__name__, fn.__defaults__, fn.__closure__)
-        view.__kwdefaults__ = fn.__kwdefaults__
-        view.__doc__ = fn.__doc__
-        ns[fn.__name__] = view
-        app.add_url_rule(rule, endpoint=fn.__name__, view_func=view, **options)
+_registry = Registry()
+route = _registry.route
+install = _registry.install
 
 
 @route("/lender", methods=["GET"])
