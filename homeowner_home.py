@@ -165,6 +165,110 @@ def trusted_pros():
     return render_template("homeowner/trusted_pros.html", agent=agent, groups=dict(sorted(groups.items())))
 
 
+def _primary_snapshot(conn, user_id):
+    """The snapshot for the primary property (or the newest one) as a dict, with the address."""
+    row = conn.execute(
+        """SELECT p.address, s.value_estimate, s.equity_estimate, s.loan_rate, s.loan_payment, s.loan_balance,
+                  s.loan_term_years, s.loan_start_date, s.initial_purchase_value, s.last_value_refresh
+           FROM homeowner_snapshots s LEFT JOIN properties p ON p.id = s.property_id
+           WHERE s.user_id = ? ORDER BY COALESCE(p.is_primary, 0) DESC, s.updated_at DESC, s.id DESC LIMIT 1""",
+        (user_id,)).fetchone()
+    return dict(row) if row else {}
+
+
+def _years_left(snap):
+    from datetime import date, datetime
+    term = snap.get("loan_term_years") or 30
+    try:
+        start = datetime.strptime(str(snap.get("loan_start_date") or "")[:10], "%Y-%m-%d").date()
+        left = term - (date.today() - start).days / 365.25
+        return max(1, min(40, round(left)))
+    except ValueError:
+        return min(40, int(term)) if snap.get("loan_term_years") else 25
+
+
+@bp.route("/homeowner/value/refinance")
+def refinance_page():
+    """Refinance and extra-payment calculator, filled in from the homeowner's own loan details."""
+    from flask import render_template
+    u = _user()
+    if not u:
+        return redirect(url_for("login"))
+    conn = _db()
+    snap = _primary_snapshot(conn, u["id"])
+    conn.close()
+    bal = float(snap.get("loan_balance") or 0)
+    rate = float(snap.get("loan_rate") or 0)
+    loan = dict(
+        balance=int(round(bal)) if bal else "",
+        rate=rate if rate else "",
+        payment=int(round(float(snap.get("loan_payment") or 0))) or "",
+        years_left=_years_left(snap),
+        new_rate=round(max(rate - 1, 0), 3) if rate else 6.0,
+        closing=int(round(bal * 0.02 / 100.0) * 100) if bal else "",
+    )
+    return render_template("homeowner/refinance.html", loan=loan, has_loan=bool(bal))
+
+
+@bp.route("/homeowner/report")
+def home_report():
+    """A printable year-in-review for the home: value, equity, care, projects, warranties."""
+    from datetime import date, datetime, timedelta
+    from flask import render_template
+    u = _user()
+    if not u:
+        return redirect(url_for("login"))
+    conn = _db()
+    snap = _primary_snapshot(conn, u["id"])
+    year_ago = (date.today() - timedelta(days=365)).isoformat()
+    soon = (date.today() + timedelta(days=90)).isoformat()
+    today = date.today().isoformat()
+    def rows(sql, args):
+        try:
+            return [dict(r) for r in conn.execute(sql, args).fetchall()]
+        except Exception:
+            return []
+    care = rows("SELECT event_date, title, category, cost FROM homeowner_timeline_events WHERE user_id=? AND event_date >= ? ORDER BY event_date DESC",
+                (u["id"], year_ago))
+    projects = rows("SELECT name, status, budget FROM homeowner_projects WHERE user_id=? ORDER BY id DESC", (u["id"],))
+    warranties = rows("SELECT item_name, warranty_expiry FROM homeowner_warranty_log WHERE user_id=? ORDER BY warranty_expiry", (u["id"],))
+    docs = _count(conn, "SELECT COUNT(*) FROM homeowner_documents WHERE user_id=?", (u["id"],))
+    conn.close()
+    def _num(v):
+        try:
+            return float(str(v).replace("$", "").replace(",", "")) if v not in (None, "") else 0.0
+        except ValueError:
+            return 0.0
+    for c_ in care:
+        c_["cost"] = _num(c_.get("cost"))
+    for p_ in projects:
+        p_["budget"] = _num(p_.get("budget"))
+    for k_ in ("value_estimate", "equity_estimate", "loan_balance", "initial_purchase_value"):
+        if k_ in snap:
+            snap[k_] = _num(snap[k_]) if snap[k_] not in (None, "") else None
+    value = float(snap.get("value_estimate") or 0)
+    bought = float(snap.get("initial_purchase_value") or 0)
+    equity = snap.get("equity_estimate")
+    if equity is None and value:
+        equity = value - float(snap.get("loan_balance") or 0)
+    spent = sum(float(c.get("cost") or 0) for c in care)
+    active_w = [w for w in warranties if (w.get("warranty_expiry") or "") >= today]
+    ending = [w for w in active_w if (w.get("warranty_expiry") or "") <= soon]
+    ideas = []
+    if not care:
+        ideas.append("Log your maintenance as you do it (filters, gutters, servicing). A complete history helps at resale.")
+    if ending:
+        ideas.append(f"{len(ending)} warranty {'ends' if len(ending) == 1 else 'end'} in the next 90 days. Use it or renew it.")
+    if not docs:
+        ideas.append("Upload your closing papers, insurance and manuals so everything lives in one place.")
+    if snap.get("loan_rate"):
+        ideas.append("Check whether a refinance or a little extra each month makes sense with the Refinance & Payoff tool.")
+    ideas.append("Walk through the Seasonal Checklists each season. Small habits prevent expensive repairs.")
+    return render_template("homeowner/report.html", user=u, snap=snap, value=value, bought=bought, growth=(value - bought) if (value and bought) else None,
+                           equity=equity, care=care, spent=spent, projects=projects, active_w=active_w, ending=ending, docs=docs,
+                           ideas=ideas, year=date.today().year, today=datetime.now().strftime("%B %d, %Y").replace(" 0", " "))
+
+
 def init_app(app, get_current_user):
     _H.update(get_current_user=get_current_user)
     ensure_tables()

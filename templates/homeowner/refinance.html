@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Refinance & Payoff{% endblock %}
+{% block content %}
+<style>
+  .rf-wrap { max-width: 960px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .rf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1.1rem; align-items: start; }
+  .rf-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1.1rem 1.2rem 1.2rem; min-width: 0; }
+  .rf-card h2 { margin: 0 0 .2rem; font-size: 1.15rem !important; }
+  .rf-card > p { margin: 0 0 .8rem; color: #7A6855; font-size: .88rem; }
+  .rf-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem .8rem; }
+  .rf-fields .rf-full { grid-column: 1 / -1; }
+  .rf-field label { display: block; font-size: .76rem; font-weight: 700; color: #6B4630; letter-spacing: .03em; margin-bottom: .25rem; }
+  .rf-field input, .rf-field select { width: 100%; box-sizing: border-box; padding: .65rem .75rem; border: 1.5px solid rgba(143,98,68,.4); border-radius: 10px; background: #fff; font-size: 16px; color: #3A2518; }
+  .rf-field input:focus, .rf-field select:focus { outline: none; border-color: #8F6244; box-shadow: 0 0 0 3px rgba(143,98,68,.15); }
+  .rf-hint { font-size: .74rem; color: #7A6855; margin-top: .2rem; }
+  .rf-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; margin-bottom: .9rem; }
+  .rf-stat { background: #FBF6EE; border-radius: 12px; padding: .75rem .85rem; min-width: 0; }
+  .rf-stat small { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8F6244; }
+  .rf-stat b { display: block; font-size: 1.35rem; color: #3A2518; margin-top: .15rem; overflow-wrap: anywhere; }
+  .rf-stat span { font-size: .78rem; color: #7A6855; }
+  .rf-good b { color: #2F6B3F; } .rf-warn b { color: #A0522D; }
+  .rf-verdict { border-radius: 12px; padding: .85rem 1rem; background: #F3EBDD; color: #3A2518; font-size: .95rem; line-height: 1.45; }
+  .rf-note { color: #7A6855; font-size: .8rem; margin-top: 1rem; }
+  .rf-cta { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .9rem; }
+  @media (max-width: 480px) { .rf-fields, .rf-stats { grid-template-columns: 1fr 1fr; } .rf-stat b { font-size: 1.15rem; } }
+</style>
+
+<div class="rf-wrap">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Value &amp; Equity</div>
+    <h1 class="ylh-page-hd__title">Refinance &amp; Payoff</h1>
+    <p class="ylh-page-hd__sub">See what a new rate could save you, and how much sooner you could be mortgage free with a little extra each month.</p>
+  </div>
+
+  <div class="rf-grid">
+    <div class="rf-card">
+      <h2>Your loan today</h2>
+      <p>{% if has_loan %}We filled this in from your home profile. Change anything that is off.{% else %}Add your numbers from your latest mortgage statement.{% endif %}</p>
+      <div class="rf-fields">
+        <div class="rf-field"><label for="bal">Loan balance ($)</label><input id="bal" type="number" inputmode="decimal" min="0" step="1000" value="{{ loan.balance }}"></div>
+        <div class="rf-field"><label for="rate">Interest rate (%)</label><input id="rate" type="number" inputmode="decimal" min="0" step="0.125" value="{{ loan.rate }}"></div>
+        <div class="rf-field"><label for="pay">Principal &amp; interest / month ($)</label><input id="pay" type="number" inputmode="decimal" min="0" step="10" value="{{ loan.payment }}"><div class="rf-hint">Leave out taxes and insurance.</div></div>
+        <div class="rf-field"><label for="yrs">Years left</label><input id="yrs" type="number" inputmode="decimal" min="1" max="40" step="1" value="{{ loan.years_left }}"></div>
+      </div>
+      <h2 style="margin-top:1.2rem;">If you refinance</h2>
+      <p>Try a new rate and term. Closing costs are usually 2% to 3% of the loan.</p>
+      <div class="rf-fields">
+        <div class="rf-field"><label for="nrate">New rate (%)</label><input id="nrate" type="number" inputmode="decimal" min="0" step="0.125" value="{{ loan.new_rate }}"></div>
+        <div class="rf-field"><label for="nterm">New term</label>
+          <select id="nterm"><option value="30">30 years</option><option value="20">20 years</option><option value="15">15 years</option></select></div>
+        <div class="rf-field rf-full"><label for="cc">Closing costs ($)</label><input id="cc" type="number" inputmode="decimal" min="0" step="100" value="{{ loan.closing }}"></div>
+      </div>
+      <h2 style="margin-top:1.2rem;">Pay it off sooner</h2>
+      <div class="rf-fields">
+        <div class="rf-field rf-full"><label for="extra">Extra each month ($)</label><input id="extra" type="number" inputmode="decimal" min="0" step="25" value="100"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="rf-card">
+        <h2>If you refinance</h2>
+        <p>Compared with keeping your current loan.</p>
+        <div class="rf-stats">
+          <div class="rf-stat" id="s-newpay"><small>New payment</small><b id="o-newpay">-</b><span id="o-paydiff"></span></div>
+          <div class="rf-stat" id="s-be"><small>Pays for itself in</small><b id="o-be">-</b><span>closing costs back</span></div>
+          <div class="rf-stat" id="s-int"><small>Interest from here</small><b id="o-int">-</b><span id="o-intsub"></span></div>
+          <div class="rf-stat" id="s-end"><small>Mortgage free</small><b id="o-end">-</b><span id="o-endsub"></span></div>
+        </div>
+        <div class="rf-verdict" id="o-verdict">Enter your numbers to see the picture.</div>
+      </div>
+      <div class="rf-card" style="margin-top:1.1rem;">
+        <h2>With extra payments</h2>
+        <p>Keeping your current loan and adding to each payment.</p>
+        <div class="rf-stats">
+          <div class="rf-stat rf-good"><small>Time saved</small><b id="x-time">-</b><span id="x-time-sub"></span></div>
+          <div class="rf-stat rf-good"><small>Interest saved</small><b id="x-int">-</b><span>over the life of the loan</span></div>
+        </div>
+        <div class="rf-verdict" id="x-verdict"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="rf-note">These are estimates to help you think it through, not a loan offer or financial advice. Real rates, fees and your exact balance come from your lender.</p>
+  <div class="rf-cta">
+    <a class="btn btn-primary" style="width:auto;" href="{{ url_for('homeowner_support_get_help') }}">Talk to someone about it</a>
+    <a class="btn btn-secondary" style="width:auto;" href="{{ url_for('homeowner_value_equity_overview') }}">Back to Value &amp; Equity</a>
+  </div>
+</div>
+
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function num(id) { var v = parseFloat($(id).value); return isFinite(v) ? v : 0; }
+  function money(n) { return '$' + Math.round(Math.abs(n)).toLocaleString('en-US'); }
+  function pmt(p, annual, months) {
+    var r = annual / 1200;
+    if (months <= 0) return 0;
+    if (r === 0) return p / months;
+    return p * r / (1 - Math.pow(1 + r, -months));
+  }
+  // Pay a loan down month by month. Returns months to payoff and total interest.
+  function run(p, annual, pay, extra) {
+    var r = annual / 1200, months = 0, interest = 0, bal = p, total = pay + extra;
+    if (total <= bal * r) return { months: Infinity, interest: Infinity };
+    while (bal > 0.005 && months < 1200) {
+      var i = bal * r; interest += i; bal = bal + i - total; months++;
+    }
+    return { months: months, interest: interest };
+  }
+  function span(months) {
+    var y = Math.floor(months / 12), m = Math.round(months - y * 12);
+    if (m === 12) { y++; m = 0; }
+    var s = [];
+    if (y) s.push(y + (y === 1 ? ' year' : ' years'));
+    if (m) s.push(m + (m === 1 ? ' month' : ' months'));
+    return s.length ? s.join(' ') : '0 months';
+  }
+  function dateIn(months) {
+    var d = new Date(); d.setMonth(d.getMonth() + Math.round(months));
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
+  function calc() {
+    var bal = num('bal'), rate = num('rate'), yrs = num('yrs'), pay = num('pay');
+    var nrate = num('nrate'), nterm = parseInt($('nterm').value, 10) * 12, cc = num('cc'), extra = num('extra');
+    if (bal <= 0) { $('o-verdict').textContent = 'Enter your loan balance to begin.'; return; }
+    if (!pay) pay = pmt(bal, rate, Math.max(1, yrs) * 12);
+    var cur = run(bal, rate, pay, 0);
+    var newPay = pmt(bal, nrate, nterm), nw = run(bal, nrate, newPay, 0);
+    $('o-newpay').textContent = money(newPay);
+    var diff = pay - newPay;
+    $('o-paydiff').textContent = diff > 0 ? money(diff) + ' less each month' : (diff < 0 ? money(diff) + ' more each month' : 'about the same');
+    $('s-newpay').className = 'rf-stat ' + (diff > 0 ? 'rf-good' : (diff < 0 ? 'rf-warn' : ''));
+    var be = diff > 0 ? cc / diff : Infinity;
+    $('o-be').textContent = isFinite(be) ? (be < 1 ? 'under a month' : span(be)) : 'not at this rate';
+    $('s-be').className = 'rf-stat ' + (isFinite(be) ? 'rf-good' : 'rf-warn');
+    var lifeDiff = cur.interest - (nw.interest + cc);
+    $('o-int').textContent = isFinite(nw.interest) ? money(nw.interest) : '-';
+    $('o-intsub').textContent = isFinite(cur.interest) ? 'now ' + money(cur.interest) + ' (plus ' + money(cc) + ' closing)' : '';
+    $('s-int').className = 'rf-stat ' + (lifeDiff > 0 ? 'rf-good' : 'rf-warn');
+    $('o-end').textContent = dateIn(nw.months);
+    $('o-endsub').textContent = isFinite(cur.months) ? 'now ' + dateIn(cur.months) : '';
+    var v;
+    if (diff > 0 && isFinite(be) && lifeDiff > 0) {
+      v = 'A new rate of ' + nrate + '% would lower your payment by ' + money(diff) + ' a month. You would earn back the closing costs in ' + (be < 1 ? 'under a month' : span(be)) + ' and keep about ' + money(lifeDiff) + ' more over the life of the loan. It is worth a conversation if you plan to stay at least that long.';
+    } else if (diff > 0) {
+      v = 'This lowers your monthly payment by ' + money(diff) + ', but stretching the loan out costs about ' + money(-lifeDiff) + ' more in the long run. A shorter term or a lower rate could do better.';
+    } else {
+      v = 'At ' + nrate + '% you would not save on your monthly payment. Rates would need to come down for a refinance to pay off. Extra payments below may be the better move.';
+    }
+    $('o-verdict').textContent = v;
+    var withX = run(bal, rate, pay, extra);
+    if (extra > 0 && isFinite(withX.months) && isFinite(cur.months)) {
+      $('x-time').textContent = span(cur.months - withX.months);
+      $('x-time-sub').textContent = 'done ' + dateIn(withX.months) + ' instead of ' + dateIn(cur.months);
+      $('x-int').textContent = money(cur.interest - withX.interest);
+      $('x-verdict').textContent = 'Adding ' + money(extra) + ' to each payment gets you to a paid-off home ' + span(cur.months - withX.months) + ' sooner. Ask your lender to apply extra money to principal.';
+    } else {
+      $('x-time').textContent = '-'; $('x-time-sub').textContent = ''; $('x-int').textContent = '-';
+      $('x-verdict').textContent = extra > 0 ? '' : 'Add an extra amount above to see how much sooner you could finish.';
+    }
+  }
+  ['bal', 'rate', 'pay', 'yrs', 'nrate', 'cc', 'extra'].forEach(function (id) { $(id).addEventListener('input', calc); });
+  $('nterm').addEventListener('change', calc);
+  calc();
+})();
+</script>
+{% endblock %}

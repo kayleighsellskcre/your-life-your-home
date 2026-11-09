@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Your Home Report{% endblock %}
+{% block content %}
+<style>
+  .hr-wrap { max-width: 880px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .hr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: .8rem; margin: 1rem 0 1.2rem; }
+  .hr-stat { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; padding: .9rem 1rem; min-width: 0; }
+  .hr-stat small { display: block; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: #8F6244; }
+  .hr-stat b { display: block; font-size: 1.45rem; color: #3A2518; margin-top: .15rem; overflow-wrap: anywhere; }
+  .hr-stat span { font-size: .78rem; color: #7A6855; }
+  .hr-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1rem 1.2rem 1.1rem; margin-bottom: 1rem; }
+  .hr-card h2 { margin: 0 0 .5rem; font-size: 1.1rem !important; }
+  .hr-li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .8rem; padding: .5rem 0; border-top: 1px solid rgba(160,125,85,.14); font-size: .92rem; }
+  .hr-li:first-of-type { border-top: none; }
+  .hr-li span { color: #7A6855; font-size: .82rem; white-space: nowrap; }
+  .hr-empty { color: #7A6855; margin: 0; font-size: .9rem; }
+  .hr-ideas { margin: 0; padding-left: 1.2rem; line-height: 1.6; }
+  .hr-actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: .8rem; }
+  @media print { .hr-actions, .site-header, .site-footer, .ylh-page-hd__label { display: none !important; } .hr-card, .hr-stat { box-shadow: none; break-inside: avoid; } }
+</style>
+<div class="hr-wrap">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Value &amp; Equity</div>
+    <h1 class="ylh-page-hd__title">Your Home Report</h1>
+    <p class="ylh-page-hd__sub">{{ snap.address or 'Your home' }}{% if snap.address %}<br>{% endif %}Prepared {{ today }}</p>
+  </div>
+
+  <div class="hr-grid">
+    <div class="hr-stat"><small>Estimated value</small><b>{% if value %}${{ '{:,.0f}'.format(value) }}{% else %}Not set{% endif %}</b><span>{% if snap.last_value_refresh %}updated {{ snap.last_value_refresh[:10] }}{% else %}add your home details{% endif %}</span></div>
+    <div class="hr-stat"><small>Your equity</small><b>{% if equity is not none %}${{ '{:,.0f}'.format(equity) }}{% else %}-{% endif %}</b><span>{% if snap.loan_balance %}loan balance ${{ '{:,.0f}'.format(snap.loan_balance) }}{% endif %}</span></div>
+    <div class="hr-stat"><small>Since you bought</small><b>{% if growth is not none %}{{ '+' if growth >= 0 else '-' }}${{ '{:,.0f}'.format(growth|abs) }}{% else %}-{% endif %}</b><span>{% if bought %}bought at ${{ '{:,.0f}'.format(bought) }}{% else %}add your purchase price{% endif %}</span></div>
+    <div class="hr-stat"><small>Spent on care this year</small><b>${{ '{:,.0f}'.format(spent) }}</b><span>{{ care|length }} {{ 'job' if care|length == 1 else 'jobs' }} logged</span></div>
+  </div>
+
+  <div class="hr-card">
+    <h2>Care and upkeep, last 12 months</h2>
+    {% for c in care %}<div class="hr-li"><div>{{ c.title }}{% if c.category %} <span style="white-space:normal;">&middot; {{ c.category }}</span>{% endif %}</div><span>{{ c.event_date }}{% if c.cost %} &middot; ${{ '{:,.0f}'.format(c.cost) }}{% endif %}</span></div>
+    {% else %}<p class="hr-empty">Nothing logged yet. Add maintenance to your Home Timeline as you do it and it will show up here.</p>{% endfor %}
+  </div>
+
+  <div class="hr-card">
+    <h2>Projects</h2>
+    {% for p in projects[:8] %}<div class="hr-li"><div>{{ p.name }}</div><span>{{ (p.status or 'planned')|replace('_', ' ')|title }}{% if p.budget %} &middot; ${{ '{:,.0f}'.format(p.budget) }}{% endif %}</span></div>
+    {% else %}<p class="hr-empty">No projects yet. Plan one in the Renovation Planner to see the costs and payback.</p>{% endfor %}
+  </div>
+
+  <div class="hr-card">
+    <h2>Warranties and papers</h2>
+    {% for w in active_w[:8] %}<div class="hr-li"><div>{{ w.item_name }}</div><span>covered until {{ w.warranty_expiry }}</span></div>
+    {% else %}<p class="hr-empty">No active warranties on file.</p>{% endfor %}
+    <p class="hr-empty" style="margin-top:.6rem;">{{ docs }} {{ 'document' if docs == 1 else 'documents' }} saved in your home vault.</p>
+  </div>
+
+  <div class="hr-card">
+    <h2>Ideas for the year ahead</h2>
+    <ul class="hr-ideas">{% for i in ideas %}<li>{{ i }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="hr-actions">
+    <button type="button" class="btn btn-primary" style="width:auto;" onclick="window.print()">Print or save as PDF</button>
+    <a class="btn btn-secondary" style="width:auto;" href="{{ url_for('homeowner_home.refinance_page') }}">Refinance &amp; Payoff</a>
+  </div>
+  <p class="hr-empty" style="margin-top:1rem;">Values are estimates and change with the market.</p>
+</div>
+{% endblock %}
