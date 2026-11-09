@@ -25,8 +25,18 @@ API_URL = "https://api.rentcast.io/v1/avm/value"
 SOURCE = "RentCast"
 
 
+def api_key():
+    """The RentCast key, cleaned of the things that often get pasted along with it: spaces, line breaks,
+    quote marks, or a leading 'X-Api-Key:' / 'Bearer '."""
+    key = (os.environ.get("RENTCAST_API_KEY") or "").strip().strip("\"'").strip()
+    for prefix in ("x-api-key:", "bearer "):
+        if key.lower().startswith(prefix):
+            key = key[len(prefix):].strip()
+    return key
+
+
 def provider_configured():
-    return bool(os.environ.get("RENTCAST_API_KEY"))
+    return bool(api_key())
 
 
 def _int_env(name, default):
@@ -58,14 +68,17 @@ def _http_get(url, headers, timeout=15):
 
 def fetch_avm(address):
     """Ask RentCast for a value estimate. Returns {'price', 'low', 'high'} or {'error': code}."""
-    key = os.environ.get("RENTCAST_API_KEY")
+    key = api_key()
     if not key:
         return {"error": "no-key"}
     url = API_URL + "?" + urllib.parse.urlencode({"address": address})
     status, data = _http_get(url, {"X-Api-Key": key, "Accept": "application/json"})
     if status == 200 and data and data.get("price"):
         return {"price": float(data["price"]), "low": data.get("priceRangeLow"), "high": data.get("priceRangeHigh")}
-    return {"error": status or "network"}
+    detail = ""
+    if isinstance(data, dict):
+        detail = str(data.get("message") or data.get("error") or "")[:200]
+    return {"error": status or "network", "detail": detail}
 
 
 def _record_call(conn, property_id, status):
@@ -101,7 +114,7 @@ def refresh_property_value(user_id, property_id, min_days=None):
                 age = conn.execute("SELECT julianday('now') - julianday(?)", (last["created_at"],)).fetchone()[0]
                 if age is not None and age < min_days:
                     return "cooldown"
-            used = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+            used = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days') AND status NOT IN ('401', '403', 'network', 'test-401', 'test-403', 'test-network', '0')").fetchone()[0]
             if used >= cap:
                 _log(f"monthly cap reached ({used}/{cap}); skipping")
                 return "cap"
@@ -210,7 +223,7 @@ def settings_summary():
     try:
         conn = get_connection()
         try:
-            out["used"] = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+            out["used"] = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days') AND status NOT IN ('401', '403', 'network', 'test-401', 'test-403', 'test-network', '0')").fetchone()[0]
             out["homes"] = conn.execute("SELECT COUNT(*) FROM properties WHERE address IS NOT NULL AND TRIM(address) <> ''").fetchone()[0]
             out["refreshed"] = conn.execute("SELECT COUNT(*) FROM homeowner_snapshots WHERE value_refresh_source = ?", (SOURCE,)).fetchone()[0]
             for r in conn.execute("SELECT status, COUNT(*) n FROM avm_calls WHERE created_at >= datetime('now', '-30 days') GROUP BY status").fetchall():
@@ -236,7 +249,7 @@ def test_address(address):
     cap = _int_env("RENTCAST_MONTHLY_CAP", 45)
     conn = get_connection()
     try:
-        used = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+        used = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days') AND status NOT IN ('401', '403', 'network', 'test-401', 'test-403', 'test-network', '0')").fetchone()[0]
         if used >= cap:
             return dict(ok=False, message=f"Your monthly limit of {cap} lookups is used up. Raise RENTCAST_MONTHLY_CAP after upgrading your plan.")
         result = fetch_avm(address)
@@ -244,6 +257,9 @@ def test_address(address):
     finally:
         conn.close()
     if "error" in result:
-        return dict(ok=False, message=describe_error(result["error"]))
+        msg = describe_error(result["error"])
+        code = result["error"]
+        extra = f" (RentCast answered {code}" + (f": {result.get('detail')}" if result.get("detail") else "") + ")"
+        return dict(ok=False, message=msg + extra)
     return dict(ok=True, price=result["price"], low=result.get("low"), high=result.get("high"),
                 message="Connected. RentCast returned a value for that address.")

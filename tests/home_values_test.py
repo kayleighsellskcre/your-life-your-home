@@ -2,7 +2,7 @@ import os, sys, tempfile, io, contextlib
 os.environ["RAILWAY_VOLUME_MOUNT_PATH"] = tempfile.mkdtemp()
 os.environ["YLH_ADMIN_EMAILS"] = "owner@x.com"
 os.environ["RENTCAST_API_KEY"] = "test-key-not-real"
-os.environ["RENTCAST_MONTHLY_CAP"] = "3"
+os.environ["RENTCAST_MONTHLY_CAP"] = "2"
 sys.path.insert(0, ".")
 with contextlib.redirect_stdout(io.StringIO()):
     import app as A
@@ -22,7 +22,7 @@ cr = A.app.test_client()
 with cr.session_transaction() as s: s["user_id"] = other; s["role"] = "agent"
 ok("/login" in cr.get("/admin/home-values", follow_redirects=True).request.path, "regular accounts cannot open the page")
 ok("/login" in cr.post("/admin/home-values", data={"address": "1 A St"}, follow_redirects=True).request.path and not calls, "regular accounts cannot run a lookup")
-t = co.get("/admin/home-values").get_data(as_text=True); ok("RentCast key found" in t and "0 of 3" in t, "owner sees the page with the key detected and usage")
+t = co.get("/admin/home-values").get_data(as_text=True); ok("RentCast key found" in t and "0 of 2" in t, "owner sees the page with the key detected and usage")
 answers.append((200, {"price": 412000, "priceRangeLow": 390000, "priceRangeHigh": 435000}))
 t = co.post("/admin/home-values", data={"address": "123 Main St, Overland Park, KS 66204"}).get_data(as_text=True)
 ok("Connected" in t and "412,000" in t and "390,000" in t and "435,000" in t, "good answer shows value and range")
@@ -35,8 +35,24 @@ answers.append((404, None))
 t = co.post("/admin/home-values", data={"address": "999 Nowhere Rd, Nowhere, KS 00000"}).get_data(as_text=True)
 ok("could not find a value" in t, "address not found explained")
 t = co.post("/admin/home-values", data={"address": "456 Another St, Lenexa, KS 66215"}).get_data(as_text=True)
-ok("monthly limit of 3" in t and len(calls) == 3, "stops at the monthly cap without calling RentCast")
-ok("3 of 3" in co.get("/admin/home-values").get_data(as_text=True), "usage counter updates")
+ok("monthly limit of 2" in t and len(calls) == 3, "stops at the monthly cap without calling RentCast")
+ok("2 of 2" in co.get("/admin/home-values").get_data(as_text=True), "usage counter updates")
 ok("Test lookup" in co.get("/admin/home-values").get_data(as_text=True) and "worked" in co.get("/admin/home-values").get_data(as_text=True), "recent lookups listed")
 ok("Type a full address" in co.post("/admin/home-values", data={"address": "x"}).get_data(as_text=True), "short address is refused before any lookup")
 ok("Home Values" in co.get("/admin/dashboard").get_data(as_text=True), "link on the admin dashboard")
+# ---- key cleaning and RentCast's own words ----
+for raw, want in (("  abc123\n", "abc123"), ('"abc123"', "abc123"), ("'abc123'", "abc123"), ("X-Api-Key: abc123", "abc123"), ("Bearer abc123", "abc123")):
+    os.environ["RENTCAST_API_KEY"] = raw
+    ok(V.api_key() == want, f"key pasted as {raw!r} is cleaned")
+os.environ["RENTCAST_API_KEY"] = "  spaced-key \n"
+os.environ["RENTCAST_MONTHLY_CAP"] = "50"
+answers.append((401, {"message": "Invalid API key"}))
+t = co.post("/admin/home-values", data={"address": "4632 Woodstock St, Shawnee, KS 66226"}).get_data(as_text=True)
+ok("RentCast answered 401: Invalid API key" in t, "page shows what RentCast actually said")
+ok(calls[-1][1].get("X-Api-Key") == "spaced-key", "the cleaned key is what gets sent")
+# rejected-key and network failures do not use up the monthly allowance
+conn = D.get_connection()
+before = V.settings_summary()["used"]
+answers.append((401, None)); co.post("/admin/home-values", data={"address": "1 Test St, Shawnee, KS 66226"})
+answers.append((0, None)); co.post("/admin/home-values", data={"address": "2 Test St, Shawnee, KS 66226"})
+ok(V.settings_summary()["used"] == before, "failed key or network attempts do not count against the monthly limit")

@@ -655,7 +655,8 @@ def client_update(tx_id):
 # ───────────────────────── look up an address ─────────────────────────
 def lookup_ready():
     import os
-    return bool(os.environ.get("RENTCAST_API_KEY"))
+    import valuation
+    return valuation.provider_configured()
 
 
 def _calls_used():
@@ -682,7 +683,7 @@ def lookup_address(address):
     import os
     import urllib.parse
     import valuation
-    key = os.environ.get("RENTCAST_API_KEY")
+    key = valuation.api_key()
     if not key:
         return {"error": "no-key"}
     cap = valuation._int_env("RENTCAST_MONTHLY_CAP", 45)
