@@ -1,0 +1,72 @@
+{% extends "agent/layout.html" %}
+{% block title %}Client Values{% endblock %}
+{% block agent_content %}
+<style>
+  .cvw { max-width: 980px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+  .cv-bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; margin: .8rem 0 1rem; }
+  .cv-sorts { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .cv-sorts a { padding: .4rem .85rem; border-radius: 99px; border: 1px solid rgba(143,98,68,.4); background: #FFFDFA; color: #6B4630; font-size: .82rem; font-weight: 700; text-decoration: none; }
+  .cv-sorts a.on { background: #8F6244; color: #fff; border-color: #8F6244; }
+  .cv-row { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: .9rem 1.1rem; margin-bottom: .7rem;
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: .5rem 1rem; align-items: center; }
+  .cv-name b { display: block; color: #3A2518; font-size: 1.02rem; overflow-wrap: anywhere; }
+  .cv-name span { color: #7A6855; font-size: .82rem; overflow-wrap: anywhere; }
+  .cv-num b { display: block; font-size: 1.08rem; color: #3A2518; }
+  .cv-num small { color: #7A6855; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; font-weight: 700; }
+  .cv-chg { display: inline-block; white-space: nowrap; margin-top: .15rem; padding: .1rem .6rem; border-radius: 99px; font-size: .78rem; font-weight: 700; }
+  .cv-chg.up { background: #E7F1E8; color: #2F6B3F; } .cv-chg.down { background: #F7E4E0; color: #A0392D; }
+  .cv-acts { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
+  .cv-acts a, .cv-acts button { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .45rem .85rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .8rem !important; font-weight: 700 !important; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .cv-quiet { color: #A0522D; font-weight: 700; }
+  .cv-off { margin-top: 1.5rem; text-align: center; color: #7A6855; font-size: .85rem; }
+  .cv-off button { background: none !important; border: none !important; color: #8F6244 !important; text-decoration: underline; cursor: pointer; font-size: .85rem !important; width: auto !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; }
+  @media (max-width: 760px) { .cv-row { grid-template-columns: 1fr 1fr; } .cv-name { grid-column: 1 / -1; } .cv-acts { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+<div class="cvw">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Optional tool</div>
+    <h1 class="ylh-page-hd__title">Client Values</h1>
+    <p class="ylh-page-hd__sub">How your clients' homes are doing, and who you have not talked to in a while. Your clients can always check their own value whenever they like, whether or not you use this page.</p>
+  </div>
+
+  <div class="cv-bar">
+    <div class="cv-sorts">{% for key, label in sorts.items() %}<a href="?sort={{ key }}" class="{{ 'on' if key == sort }}">{{ label }}</a>{% endfor %}</div>
+    <span style="color:#7A6855;font-size:.85rem;">{{ rows|length }} {{ 'client' if rows|length == 1 else 'clients' }}</span>
+  </div>
+
+  {% for r in rows %}
+  <div class="cv-row" data-name="{{ r.name }}" data-contact="{{ r.contact_id or '' }}">
+    <div class="cv-name"><b>{{ r.name }}</b><span>{{ r.address or 'No home added yet' }}</span></div>
+    <div class="cv-num"><small>Home value</small><b>{% if r.value %}${{ '{:,.0f}'.format(r.value) }}{% else %}Not yet{% endif %}</b>
+      {% if r.change %}<span class="cv-chg {{ 'up' if r.change.pct >= 0 else 'down' }}" title="Change over the last year">{% if r.change.pct >= 0 %}&#9650;{% else %}&#9660;{% endif %} {{ '{:+.1f}'.format(r.change.pct) }}%</span>{% endif %}</div>
+    <div class="cv-num"><small>Equity</small><b>{% if r.equity is not none %}${{ '{:,.0f}'.format(r.equity) }}{% else %}&ndash;{% endif %}</b>
+      <span style="font-size:.8rem;color:#7A6855;">Last spoke: <span class="{{ 'cv-quiet' if r.days is none or r.days > 90 }}">{{ 'Never' if r.days is none else r.last }}</span></span></div>
+    <div class="cv-acts">
+      {% if r.phone %}<a href="tel:{{ r.phone }}" aria-label="Call {{ r.name }}">Call</a>{% endif %}
+      {% if r.email %}<a href="mailto:{{ r.email }}" aria-label="Email {{ r.name }}">Email</a>{% endif %}
+      <button type="button" class="cv-log" aria-label="Log a call with {{ r.name }}">Log call</button>
+    </div>
+  </div>
+  {% else %}
+  <div class="cv-row" style="display:block;text-align:center;color:#7A6855;">No clients yet. When homeowners join through your invite link, they will show up here.</div>
+  {% endfor %}
+
+  <form method="post" action="{{ url_for('client_values.client_values_toggle') }}" class="cv-off">
+    <input type="hidden" name="on" value="0">
+    Not for you? <button type="submit">Turn Client Values off</button>
+  </form>
+</div>
+{% include "planner/_touch_sheet.html" %}
+<script>
+document.querySelectorAll('.cv-log').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var row = btn.closest('.cv-row');
+    var now = new Date(), dow = (now.getDay() + 6) % 7, mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+    var monIso = mon.getFullYear() + '-' + ('0' + (mon.getMonth() + 1)).slice(-2) + '-' + ('0' + mon.getDate()).slice(-2);
+    window.ylhAskWho({ activity: 'calls', label: 'Great phone calls', title: 'Log your call', day: Math.min(dow, 5), week: monIso,
+      name: row.dataset.name, contact_id: row.dataset.contact ? +row.dataset.contact : null,
+      onSaved: function () { var s = row.querySelector('.cv-quiet'); btn.textContent = 'Logged'; btn.disabled = true; var span = row.querySelector('.cv-num span span'); if (span) { span.textContent = 'Today'; span.classList.remove('cv-quiet'); } } });
+  });
+});
+</script>
+{% endblock %}

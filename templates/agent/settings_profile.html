@@ -535,6 +535,24 @@
 </div>
 </form>
 
+<!-- Client Values (optional) -->
+<div class="settings-section" id="client-values" style="margin-top:1.5rem;">
+ <h3 style="margin:0 0 .35rem;">Client Values <span style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#8F6244;">Optional</span></h3>
+ <p style="margin:0 0 .6rem;color:#7D6858;font-size:.9rem;">Your clients can always check what their home is worth whenever they like. This tool is only for you, and only if you want it.</p>
+ <p style="margin:0 0 .9rem;color:#7D6858;font-size:.9rem;">When it is on, you get a page that lists your clients with their home value, how it has changed, their equity and when you last spoke, plus an email when a client's value rises 3 percent or more. When it is off, you get none of that and nothing changes for your clients.</p>
+ <form method="post" action="{{ url_for('client_values.client_values_toggle') }}">
+ {% if client_values_on() %}
+ <input type="hidden" name="on" value="0">
+ <span style="margin-right:.8rem;font-weight:700;color:#2F6B3F;">On</span>
+ <button type="submit" class="btn-save" style="margin:0;">Turn off</button>
+ {% else %}
+ <input type="hidden" name="on" value="1">
+ <span style="margin-right:.8rem;font-weight:700;color:#7A6855;">Off</span>
+ <button type="submit" class="btn-save" style="margin:0;">Turn on</button>
+ {% endif %}
+ </form>
+</div>
+
 <!-- Invite page photo -->
 <div class="settings-section" style="margin-top:1.5rem;">
  <h3 style="margin:0 0 .35rem;">Invite page photo</h3>

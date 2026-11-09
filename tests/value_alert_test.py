@@ -15,6 +15,7 @@ conn.execute("INSERT INTO homeowner_snapshots (user_id, property_id, value_estim
 sent = []
 A.send_reminder_email = lambda to, subj, body, **kw: (sent.append((to, subj, body)) or True)
 A._bg = lambda fn, *a: fn(*a)
+import client_values; client_values.set_on(ag, True)
 answers = []
 V._http_get = lambda url, headers, timeout=15: answers.pop(0)
 def refresh(price):

@@ -1996,7 +1996,8 @@ def _value_rise_emails(user_id, property_id, old, new, pct):
                     + (f"If you'd like to talk about what it means for you, {agent_row.get('name')} would be glad to help." if agent_row.get("name") else "")
                     + "\n\nWarmly,\nYour Life, Your Home")
             send_reminder_email(home["email"], f"Your home's value is up {pct:.0f}%", body, **pro_sender(agent_id))
-        if agent_row.get("email"):
+        import client_values
+        if agent_row.get("email") and client_values.is_on(agent_id):
             body = (f"Hi {(agent_row.get('name') or 'there').split(' ')[0]},\n\n{home.get('name') or 'A client'}'s home at {addr} "
                     f"is now estimated at ${new:,.0f}, up {pct:.1f}% from ${old:,.0f}.\n\n"
                     f"That is a natural reason to reach out: see how they are feeling about their home and their plans. "
@@ -13480,6 +13481,8 @@ import planner as _planner
 _planner.init_app(app, get_current_user)
 import homeowner_home as _homeowner_home
 _homeowner_home.init_app(app, get_current_user)
+import client_values as _client_values
+_client_values.init_app(app, get_current_user)
 import tc as _tc
 _tc.init_app(app, get_current_user, _bg, send_reminder_email, get_transaction_detail,
              lambda tx_id, kind, text, uid: __import__("transaction_helpers").log_timeline_event(tx_id, kind, text, uid))
