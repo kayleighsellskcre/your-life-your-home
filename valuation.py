@@ -177,3 +177,73 @@ def describe_source(snapshot):
     if snap.get("value_estimate"):
         return "This is the value you entered. Connect a live estimate to keep it current."
     return ""
+
+
+ERROR_HELP = {
+    "no-key": "No RentCast key is set. Add RENTCAST_API_KEY in your Railway variables.",
+    401: "RentCast did not accept the key. Check RENTCAST_API_KEY in Railway for typos or extra spaces, and that the key is active in your RentCast account.",
+    403: "RentCast did not accept the key. Check RENTCAST_API_KEY in Railway for typos or extra spaces, and that the key is active in your RentCast account.",
+    404: "RentCast could not find a value for that address. Check the street, city, state and ZIP.",
+    400: "RentCast did not understand that address. Use the full form: street, city, state ZIP.",
+    422: "RentCast did not understand that address. Use the full form: street, city, state ZIP.",
+    429: "RentCast says you are over your plan's limit or sending too fast. Check your usage in your RentCast account.",
+    "network": "The site could not reach RentCast. Try again in a minute.",
+}
+
+
+def describe_error(code):
+    if code in ERROR_HELP:
+        return ERROR_HELP[code]
+    try:
+        if int(code) >= 500:
+            return "RentCast had a problem on its side. Try again later."
+    except (TypeError, ValueError):
+        pass
+    return f"RentCast returned an unexpected answer ({code})."
+
+
+def settings_summary():
+    """The numbers the admin page shows, so nobody has to dig through logs."""
+    cap = _int_env("RENTCAST_MONTHLY_CAP", 45)
+    out = dict(configured=provider_configured(), cap=cap, refresh_days=_int_env("VALUE_REFRESH_DAYS", 30),
+               per_run=_int_env("AVM_MAX_PER_RUN", 10), used=0, homes=0, refreshed=0, recent=[], by_status={})
+    try:
+        conn = get_connection()
+        try:
+            out["used"] = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+            out["homes"] = conn.execute("SELECT COUNT(*) FROM properties WHERE address IS NOT NULL AND TRIM(address) <> ''").fetchone()[0]
+            out["refreshed"] = conn.execute("SELECT COUNT(*) FROM homeowner_snapshots WHERE value_refresh_source = ?", (SOURCE,)).fetchone()[0]
+            for r in conn.execute("SELECT status, COUNT(*) n FROM avm_calls WHERE created_at >= datetime('now', '-30 days') GROUP BY status").fetchall():
+                out["by_status"][r["status"]] = r["n"]
+            out["recent"] = [dict(r) for r in conn.execute(
+                """SELECT c.created_at, c.status, p.address FROM avm_calls c LEFT JOIN properties p ON p.id = c.property_id
+                   ORDER BY c.id DESC LIMIT 10""").fetchall()]
+        finally:
+            conn.close()
+    except Exception:
+        _log("summary failed:\n" + traceback.format_exc())
+    out["remaining"] = max(0, cap - out["used"])
+    return out
+
+
+def test_address(address):
+    """One real lookup for any address, to prove the connection works. Counts toward the monthly cap."""
+    address = (address or "").strip()
+    if not provider_configured():
+        return dict(ok=False, message=describe_error("no-key"))
+    if len(address) < 8:
+        return dict(ok=False, message="Type a full address: street, city, state ZIP.")
+    cap = _int_env("RENTCAST_MONTHLY_CAP", 45)
+    conn = get_connection()
+    try:
+        used = conn.execute("SELECT COUNT(*) FROM avm_calls WHERE created_at >= datetime('now', '-30 days')").fetchone()[0]
+        if used >= cap:
+            return dict(ok=False, message=f"Your monthly limit of {cap} lookups is used up. Raise RENTCAST_MONTHLY_CAP after upgrading your plan.")
+        result = fetch_avm(address)
+        _record_call(conn, None, "test-ok" if "error" not in result else f"test-{result['error']}")
+    finally:
+        conn.close()
+    if "error" in result:
+        return dict(ok=False, message=describe_error(result["error"]))
+    return dict(ok=True, price=result["price"], low=result.get("low"), high=result.get("high"),
+                message="Connected. RentCast returned a value for that address.")

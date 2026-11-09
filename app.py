@@ -11272,6 +11272,23 @@ def admin_dashboard():
         recent_activity=recent_activity
     )
 
+@app.route("/admin/home-values", methods=["GET", "POST"])
+def admin_home_values():
+    """Owner-only status page for the RentCast connection: settings, usage, recent lookups, and a test lookup."""
+    import valuation
+    user = _admin_session_user()
+    if not user:
+        flash("That area is just for site administrators.", "error")
+        return redirect(url_for("login", role="agent"))
+    test = None
+    address = ""
+    if request.method == "POST":
+        address = request.form.get("address", "").strip()
+        test = valuation.test_address(address)
+    return render_template("admin/home_values.html", s=valuation.settings_summary(), test=test, address=address,
+                           describe=valuation.describe_error)
+
+
 @app.route("/admin/impersonate/<int:user_id>", methods=["POST"])
 def admin_impersonate_user(user_id):
     """Start impersonating a user (View As feature)"""
