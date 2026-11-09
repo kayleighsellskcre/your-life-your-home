@@ -149,6 +149,22 @@ def save_rental(property_id):
     return redirect(url_for("homeowner_overview") + "#portfolio")
 
 
+@bp.route("/homeowner/pros")
+def trusted_pros():
+    """The home-service pros the homeowner's agent recommends (plumbers, inspectors, painters...)."""
+    from flask import render_template
+    from database import get_homeowner_professionals, get_trusted_vendors
+    u = _user()
+    if not u:
+        return redirect(url_for("login"))
+    agent = next((p for p in get_homeowner_professionals(u["id"]) if p.get("professional_role") == "agent"), None)
+    groups = {}
+    if agent:
+        for v in get_trusted_vendors(agent["professional_id"] if "professional_id" in agent else agent["user_id"]):
+            groups.setdefault(v.get("category") or "Other", []).append(v)
+    return render_template("homeowner/trusted_pros.html", agent=agent, groups=dict(sorted(groups.items())))
+
+
 def init_app(app, get_current_user):
     _H.update(get_current_user=get_current_user)
     ensure_tables()

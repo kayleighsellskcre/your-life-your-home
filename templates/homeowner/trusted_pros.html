@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Trusted Pros{% endblock %}
+{% block content %}
+<div style="max-width:880px;margin:0 auto;padding:2rem 1rem 3rem;">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Home Care</div>
+    <h1 class="ylh-page-hd__title">Trusted Pros</h1>
+  </div>
+
+  {% if not agent %}
+  <div class="card" style="padding:1.4rem;text-align:center;">
+    <p style="margin:0 0 .5rem;">When you are connected with a real estate agent, the plumbers, electricians, inspectors and other pros they trust will show up here.</p>
+    <a class="btn btn-secondary" href="{{ url_for('homeowner_support_get_help') }}">Get help finding someone</a>
+  </div>
+  {% elif not groups %}
+  <div class="card" style="padding:1.4rem;text-align:center;">
+    <p style="margin:0 0 .8rem;">{{ agent.name.split(' ')[0] }} has not added any recommended pros yet. Ask them who they would call. They are always happy to help.</p>
+    <a class="btn btn-primary" href="{{ url_for('homeowner_support_get_help') }}?tab=ask">Ask {{ agent.name.split(' ')[0] }}</a>
+  </div>
+  {% else %}
+  <p style="color:#7A6855;margin:0 0 1.2rem;">People {{ agent.name.split(' ')[0] }} trusts for your home. Mention their name when you call.</p>
+  {% for cat, items in groups.items() %}
+  <h2 style="font-size:1.1rem;margin:1.4rem 0 .6rem;">{{ cat }}</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:.9rem;">
+    {% for v in items %}
+    <div class="card" style="padding:1rem 1.1rem;">
+      <div style="font-weight:700;">{{ v.name }}</div>
+      {% if v.contact_name %}<div style="color:#7A6855;font-size:.9rem;">{{ v.contact_name }}</div>{% endif %}
+      {% if v.notes %}<p style="font-size:.9rem;margin:.5rem 0;">{{ v.notes }}</p>{% endif %}
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem;">
+        {% if v.phone %}<a class="btn btn-primary" style="padding:.4rem .9rem;" href="tel:{{ v.phone }}">Call</a>{% endif %}
+        {% if v.email %}<a class="btn btn-secondary" style="padding:.4rem .9rem;" href="mailto:{{ v.email }}">Email</a>{% endif %}
+        {% if v.website %}<a class="btn btn-secondary" style="padding:.4rem .9rem;" href="{{ v.website if v.website.startswith('http') else 'https://' + v.website }}" target="_blank" rel="noopener">Website</a>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}
