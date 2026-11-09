@@ -674,53 +674,50 @@
    background: rgba(255,255,255,.9); border-radius: 2px;
    transition: all .2s;
  }
+/* Menu: a slide-in panel from the right. Works the same on any phone, either way up. */
 .ylh-ham-menu {
-  display: none; position: fixed; top: 96px; right: 0;
-  background: #f5f0e4; min-width: 240px; border-radius: 0 0 12px 12px;
-  box-shadow: 0 8px 32px rgba(68,60,54,.2);
-  border: 1px solid rgba(159,129,90,.18);
-  overflow-y: auto; max-height: calc(100vh - 96px);
-  z-index: 999999;
+  display: none; position: fixed; top: 0; right: 0; bottom: 0;
+  width: min(340px, 88vw); max-width: 88vw;
+  background: #f5f0e4; box-shadow: -10px 0 36px rgba(68,60,54,.3);
+  overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  padding: calc(env(safe-area-inset-top, 0px) + 4rem) env(safe-area-inset-right, 0px) calc(env(safe-area-inset-bottom, 0px) + 1.25rem) 0;
+  z-index: 1000000;
 }
 .ylh-ham-menu.open { display: block; }
- .ylh-ham-section {
-   font-size: .58rem; font-weight: 700; letter-spacing: .14em;
-   text-transform: uppercase; color: #5c4e42;
-   padding: .6rem 1rem .25rem; border-top: 1px solid rgba(159,129,90,.14);
- }
- .ylh-ham-section:first-child { border-top: none; }
- .ylh-ham-item {
-   display: block; padding: .6rem 1rem; color: #443c36;
-   text-decoration: none; font-size: .82rem; font-weight: 500;
-   transition: background .12s, padding-left .12s;
-   border-left: 3px solid transparent;
- }
- .ylh-ham-item:hover { background: rgba(159,129,90,.1); border-left-color: #8A6D2F; padding-left: 1.25rem; color: #3a332d; }
- .ylh-ham-more summary { list-style:none; cursor:pointer; padding:.6rem 1rem; font-size:.82rem; font-weight:600; color:#5c4e42; border-top:1px solid rgba(159,129,90,.14); }
- .ylh-ham-more summary::-webkit-details-marker { display:none; }
- .ylh-ham-more summary::after { content:'+'; float:right; font-weight:400; }
- .ylh-ham-more[open] summary::after { content:'\2212'; }
- .ylh-ham-more .ylh-ham-item { padding-left:1.6rem; font-size:.8rem; }
- .ylh-ham-more .ylh-ham-item:hover { padding-left:1.85rem; }
- .ylh-ham-signout {
-   display: block; padding: .7rem 1rem; color: #8b4a3a;
-   text-decoration: none; font-size: .82rem; font-weight: 600;
-   border-top: 1px solid rgba(159,129,90,.15);
-   transition: background .12s;
- }
- .ylh-ham-signout:hover { background: rgba(198,146,112,.1); }
- /* Compact menu: two columns, tighter rows */
- .ylh-ham-menu { min-width: 300px; max-width: 94vw; }
- .ylh-ham-menu.open { display: grid; grid-template-columns: 1fr 1fr; }
- .ylh-ham-menu > .ylh-ham-item { padding: .42rem .8rem; font-size: .78rem; line-height: 1.25; }
- .ylh-ham-menu > .ylh-ham-item:hover { padding-left: .95rem; }
- .ylh-ham-menu > .ylh-ham-section, .ylh-ham-menu > .ylh-ham-more, .ylh-ham-menu > .ylh-ham-signout { grid-column: 1 / -1; }
- .ylh-ham-more summary { padding: .42rem .8rem; font-size: .78rem; }
- .ylh-ham-more[open] { background: rgba(159,129,90,.06); font-size: 0; }
- .ylh-ham-more[open] summary { font-size: .78rem; }
- .ylh-ham-more .ylh-ham-item { display: inline-block; width: 50%; box-sizing: border-box; vertical-align: top; padding: .36rem .8rem .36rem 1rem; font-size: .76rem; line-height: 1.25; }
- .ylh-ham-more .ylh-ham-item:hover { padding-left: 1.15rem; }
- .ylh-ham-signout { padding: .5rem .8rem; font-size: .78rem; }
+.ylh-ham-scrim { display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(40,28,20,.45); z-index: 999999; }
+.ylh-ham-scrim.open { display: block; }
+.ylh-ham-close {
+  position: absolute; top: calc(env(safe-area-inset-top, 0px) + .5rem); right: calc(env(safe-area-inset-right, 0px) + .6rem);
+  width: 44px !important; min-width: 44px !important; max-width: 44px !important; height: 44px !important; min-height: 44px !important;
+  padding: 0 !important; margin: 0 !important; border-radius: 50% !important; border: none !important; background: rgba(159,129,90,.16) !important;
+  color: #443c36 !important; font-size: 1.7rem !important; line-height: 1 !important; cursor: pointer; box-shadow: none !important;
+}
+.ylh-ham-section {
+  font-size: .62rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #5c4e42;
+  padding: .8rem 1.1rem .3rem; border-top: 1px solid rgba(159,129,90,.14);
+}
+.ylh-ham-section:first-child { border-top: none; }
+.ylh-ham-item {
+  display: block; padding: .8rem 1.1rem; min-height: 44px; box-sizing: border-box; color: #443c36;
+  text-decoration: none; font-size: .95rem; font-weight: 500; line-height: 1.3;
+  border-left: 3px solid transparent;
+}
+.ylh-ham-item:hover, .ylh-ham-item:active { background: rgba(159,129,90,.12); border-left-color: #8A6D2F; color: #3a332d; }
+.ylh-ham-more { border-top: 1px solid rgba(159,129,90,.14); }
+.ylh-ham-more summary {
+  list-style: none; cursor: pointer; padding: .8rem 1.1rem; min-height: 44px; box-sizing: border-box;
+  font-size: .95rem; font-weight: 700; color: #5c4e42; display: flex; align-items: center; justify-content: space-between;
+}
+.ylh-ham-more summary::-webkit-details-marker { display: none; }
+.ylh-ham-more summary::after { content: "+"; font-size: 1.2rem; font-weight: 400; }
+.ylh-ham-more[open] summary::after { content: "\2212"; }
+.ylh-ham-more[open] { background: rgba(159,129,90,.06); }
+.ylh-ham-more .ylh-ham-item { padding-left: 1.9rem; font-size: .9rem; }
+.ylh-ham-signout {
+  display: block; padding: .9rem 1.1rem; min-height: 44px; box-sizing: border-box; color: #8b4a3a;
+  text-decoration: none; font-size: .95rem; font-weight: 600; border-top: 1px solid rgba(159,129,90,.15);
+}
+.ylh-ham-signout:hover { background: rgba(198,146,112,.1); }
 
  /* Signed-out header on phones: the brand gets the room, Sign In stays compact */
  @media (max-width: 768px) {
@@ -811,8 +808,6 @@
        <a class="ylh-ham-item" href="{{ url_for('homeowner_upload_documents') }}">Documents</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_home_timeline') }}">Home Timeline</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_warranty_log') }}">Warranties &amp; Appliances</a>
-       </details>
-       <details class="ylh-ham-more"><summary>Projects</summary>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_planner') }}">Renovation Planner</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_saved_notes') }}">Design Boards</a>
        </details>
@@ -849,14 +844,20 @@
    var btn = document.getElementById('ylhHamBtn');
    var menu = document.getElementById('ylhHamMenu');
    if(!btn || !menu) return;
-   btn.addEventListener('click', function(e){
-     e.stopPropagation();
-     menu.classList.toggle('open');
-     btn.setAttribute('aria-expanded', menu.classList.contains('open') ? 'true' : 'false');
-   });
-   document.addEventListener('click', function(e){
-     if(!menu.contains(e.target) && e.target !== btn) menu.classList.remove('open');
-   });
+   // Move the panel to the page root so no header clipping or stacking quirk can hide it.
+   document.body.appendChild(menu);
+   var scrim = document.createElement('div'); scrim.className = 'ylh-ham-scrim'; document.body.appendChild(scrim);
+   var x = document.createElement('button'); x.type = 'button'; x.className = 'ylh-ham-close';
+   x.setAttribute('aria-label', 'Close menu'); x.innerHTML = '&times;'; menu.insertBefore(x, menu.firstChild);
+   function setOpen(o){
+     menu.classList.toggle('open', o); scrim.classList.toggle('open', o);
+     btn.setAttribute('aria-expanded', o ? 'true' : 'false');
+     document.documentElement.style.overflowY = o ? 'hidden' : '';
+   }
+   btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); setOpen(!menu.classList.contains('open')); });
+   scrim.addEventListener('click', function(){ setOpen(false); });
+   x.addEventListener('click', function(){ setOpen(false); });
+   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') setOpen(false); });
  })();
  </script>
 
