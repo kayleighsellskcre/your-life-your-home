@@ -13483,6 +13483,8 @@ import homeowner_home as _homeowner_home
 _homeowner_home.init_app(app, get_current_user)
 import client_values as _client_values
 _client_values.init_app(app, get_current_user)
+import refi_alerts as _refi_alerts
+_refi_alerts.init_app(app, get_current_user)
 import tc as _tc
 _tc.init_app(app, get_current_user, _bg, send_reminder_email, get_transaction_detail,
              lambda tx_id, kind, text, uid: __import__("transaction_helpers").log_timeline_event(tx_id, kind, text, uid))

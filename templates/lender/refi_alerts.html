@@ -1,0 +1,83 @@
+{% extends "lender/layout.html" %}
+{% block title %}Refinance Opportunities{% endblock %}
+{% block lender_content %}
+<style>
+  .rfw { max-width: 980px; margin: 0 auto; padding: 0 0 3rem; }
+  .rf-bar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; margin: .8rem 0 1rem; }
+  .rf-sorts { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .rf-sorts a { padding: .4rem .85rem; border-radius: 99px; border: 1px solid rgba(143,98,68,.4); background: #FFFDFA; color: #6B4630; font-size: .82rem; font-weight: 700; text-decoration: none; }
+  .rf-sorts a.on { background: #8F6244; color: #fff; border-color: #8F6244; }
+  .rf-rate { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; padding: .8rem 1.1rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: .6rem 1.2rem; align-items: center; color: #5A4636; font-size: .9rem; }
+  .rf-rate form { display: flex; gap: .4rem; align-items: center; margin: 0; }
+  .rf-rate input[type=number] { width: 5.5rem !important; min-height: 0 !important; padding: .35rem .5rem !important; font-size: 16px !important; }
+  .rf-rate button, .rf-rate .reset { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .4rem .9rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .8rem !important; font-weight: 700 !important; text-decoration: none; cursor: pointer; }
+  .rf-row { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: .9rem 1.1rem; margin-bottom: .7rem;
+    display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: .5rem 1rem; align-items: center; }
+  .rf-name b { display: block; color: #3A2518; font-size: 1.02rem; overflow-wrap: anywhere; }
+  .rf-name span { color: #7A6855; font-size: .82rem; overflow-wrap: anywhere; }
+  .rf-num b { display: block; font-size: 1.08rem; color: #3A2518; }
+  .rf-num small { color: #7A6855; font-size: .74rem; letter-spacing: .05em; text-transform: uppercase; font-weight: 700; }
+  .rf-tag { display: inline-block; margin: .25rem .3rem 0 0; padding: .1rem .6rem; border-radius: 99px; font-size: .76rem; font-weight: 700; white-space: nowrap; background: #E7F1E8; color: #2F6B3F; }
+  .rf-tag.eq { background: #F3EBDD; color: #7A5230; }
+  .rf-acts { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; }
+  .rf-acts a, .rf-acts button { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .45rem .85rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .8rem !important; font-weight: 700 !important; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .rf-quiet { color: #A0522D; font-weight: 700; }
+  .rf-note { margin-top: 1.2rem; color: #7A6855; font-size: .82rem; line-height: 1.5; }
+  @media (max-width: 760px) { .rf-row { grid-template-columns: 1fr 1fr; } .rf-name { grid-column: 1 / -1; } .rf-acts { grid-column: 1 / -1; justify-content: flex-start; } }
+</style>
+<div class="rfw">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Your clients</div>
+    <h1 class="ylh-page-hd__title">Refinance Opportunities</h1>
+    <p class="ylh-page-hd__sub">Clients whose rate is well above today's, or who have built up a lot of equity. Nothing is sent to them. This is just a list of good reasons to reach out.</p>
+  </div>
+
+  <div class="rf-rate">
+    <span>Compared with today's rate of <b>{{ '{:.2f}'.format(rate) }}%</b>{% if custom %} (what-if){% elif posted %} (your posted 30-year rate){% else %} (a typical rate; <a href="{{ url_for('lender_settings_profile') }}">post yours in Settings</a>){% endif %}</span>
+    <form method="get">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <input type="number" name="rate" step="0.01" min="1" max="15" value="{{ '{:.2f}'.format(rate) }}" aria-label="Try a different rate">
+      <button type="submit">Try this rate</button>
+    </form>
+    {% if custom %}<a class="reset" href="?sort={{ sort }}">Back to mine</a>{% endif %}
+  </div>
+
+  <div class="rf-bar">
+    <div class="rf-sorts">{% for key, label in sorts.items() %}<a href="?sort={{ key }}{% if custom %}&amp;rate={{ rate }}{% endif %}" class="{{ 'on' if key == sort }}">{{ label }}</a>{% endfor %}</div>
+    <span style="color:#7A6855;font-size:.85rem;">{{ rows|length }} {{ 'conversation' if rows|length == 1 else 'conversations' }} worth having</span>
+  </div>
+
+  {% for r in rows %}
+  <div class="rf-row" data-name="{{ r.name }}" data-contact="{{ r.contact_id or '' }}">
+    <div class="rf-name"><b>{{ r.name }}</b><span>{{ r.address or 'No address on file' }}</span>
+      <div>{% if 'rate' in r.tags %}<span class="rf-tag">Rate could drop</span>{% endif %}{% if 'equity' in r.tags %}<span class="rf-tag eq">Equity to tap</span>{% endif %}</div></div>
+    <div class="rf-num"><small>Their rate</small><b>{% if r.rate %}{{ '{:.2f}'.format(r.rate) }}%{% else %}&ndash;{% endif %}</b>
+      {% if r.savings %}<span style="font-size:.8rem;color:#2F6B3F;font-weight:700;">Save about ${{ '{:,.0f}'.format(r.savings) }}/mo</span>{% endif %}</div>
+    <div class="rf-num"><small>Equity</small><b>{% if r.equity is not none %}${{ '{:,.0f}'.format(r.equity) }}{% else %}&ndash;{% endif %}</b>
+      <span style="font-size:.8rem;color:#7A6855;">Last spoke: <span class="{{ 'rf-quiet' if r.days is none or r.days > 90 }}">{{ 'Never' if r.days is none else r.last }}</span></span></div>
+    <div class="rf-acts">
+      {% if r.phone %}<a href="tel:{{ r.phone }}" aria-label="Call {{ r.name }}">Call</a>{% endif %}
+      {% if r.email %}<a href="mailto:{{ r.email }}" aria-label="Email {{ r.name }}">Email</a>{% endif %}
+      <button type="button" class="rf-log" aria-label="Log a call with {{ r.name }}">Log call</button>
+    </div>
+  </div>
+  {% else %}
+  <div class="rf-row" style="display:block;text-align:center;color:#7A6855;">No one stands out right now. Clients appear here when their rate is at least {{ drop }} points above {{ '{:.2f}'.format(rate) }}% or they have $75,000 or more in equity. Rates and loan balances come from your CRM and from what clients share in their portal.</div>
+  {% endfor %}
+
+  <p class="rf-note">Savings are rough: the monthly principal and interest on their balance at their rate compared with today's rate over 30 years. It is a reason to talk, not a quote. Equity uses the home's latest estimated value.</p>
+</div>
+{% include "planner/_touch_sheet.html" %}
+<script>
+document.querySelectorAll('.rf-log').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var row = btn.closest('.rf-row');
+    var now = new Date(), dow = (now.getDay() + 6) % 7, mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+    var monIso = mon.getFullYear() + '-' + ('0' + (mon.getMonth() + 1)).slice(-2) + '-' + ('0' + mon.getDate()).slice(-2);
+    window.ylhAskWho({ activity: 'calls', label: 'Great phone calls', title: 'Log your call', day: Math.min(dow, 5), week: monIso,
+      name: row.dataset.name, contact_id: row.dataset.contact ? +row.dataset.contact : null,
+      onSaved: function () { btn.textContent = 'Logged'; btn.disabled = true; var q = row.querySelector('.rf-quiet'); if (q) { q.textContent = 'Today'; q.classList.remove('rf-quiet'); } } });
+  });
+});
+</script>
+{% endblock %}

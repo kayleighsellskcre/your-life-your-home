@@ -596,11 +596,21 @@ def build_digest(user_id, role, force_weekly=False):
                 if rich:
                     sections.append(("Clients with strong equity (possible conversations)", [f"{r['name']}: about ${int(r['eq']):,} in equity" for r in rich]))
             else:
-                high = rows(
-                    """SELECT u.name AS name, s.loan_rate AS rate FROM homeowner_snapshots s JOIN users u ON u.id = s.user_id
-                       WHERE u.lender_id = ? AND s.loan_rate >= 6.5 ORDER BY s.loan_rate DESC LIMIT 5""", (user_id,))
-                if high:
-                    sections.append(("Clients who may want a refinance conversation", [f"{r['name']}: current rate {r['rate']}%" for r in high]))
+                try:
+                    import refi_alerts
+                    opp, _mkt = refi_alerts.find(user_id)
+                except Exception:
+                    opp = []
+                if opp:
+                    lines = []
+                    for r in opp[:5]:
+                        bits = []
+                        if r.get("savings"):
+                            bits.append(f"rate {r['rate']:.2f}%, could save about ${r['savings']:,.0f}/mo")
+                        if "equity" in r["tags"] and r.get("equity"):
+                            bits.append(f"about ${r['equity']:,.0f} in equity")
+                        lines.append(f"{r['name']}: " + "; ".join(bits))
+                    sections.append(("Clients who may want a refinance conversation", lines))
 
         celebrate = [f"{p['name']}: birthday today" for p in people if _md(p.get("birthday")) == mmdd] + \
                     [f"{p['name']}: home anniversary today" for p in people if _md(p.get("home_anniversary")) == mmdd]
