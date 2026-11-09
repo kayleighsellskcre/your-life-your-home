@@ -62,3 +62,11 @@ body {
   html body .crm-card-actions { flex-wrap: wrap !important; gap: .4rem !important; }
   html body .crm-card-hd { flex-wrap: wrap !important; gap: .6rem !important; }
 }
+
+/* Tablets and laptops: grids may not push the page wider than the screen */
+.templates-grid > * { min-width: 0; }
+@media (min-width: 861px) {
+  .templates-grid { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)) !important; }
+}
+/* The hero bar used desktop negative margins that pushed it past the page edge */
+.seasonal-hero { margin: 0 0 1.5rem !important; }

@@ -1,0 +1,114 @@
+{# "Who was it?" pop-up shared by the dashboard card and the weekly planner. Included once per page. #}
+<div class="tw-scrim" id="tw-scrim" hidden></div>
+<div class="tw-sheet" id="tw-sheet" role="dialog" aria-modal="true" aria-labelledby="tw-title" hidden>
+  <style>
+  .tw-scrim { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(40,28,20,.5); z-index: 1000001; }
+  .tw-scrim[hidden], .tw-sheet[hidden] { display: none !important; }
+  .tw-sheet { position: fixed; z-index: 1000002; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 1.5rem));
+    max-height: calc(100vh - 1.5rem); overflow-y: auto; background: #FFFDFA; border-radius: 16px; padding: 1.2rem 1.2rem 1.1rem;
+    box-shadow: 0 18px 60px rgba(40,28,20,.35); box-sizing: border-box; }
+  .tw-sheet h3 { margin: 0 0 .15rem; font-size: 1.25rem; color: #3A2518; }
+  .tw-sub { margin: 0 0 .8rem; color: #7A6855; font-size: .88rem; }
+  .tw-sheet label { display: block; font-size: .78rem; font-weight: 700; color: #6B4630; margin: .7rem 0 .25rem; letter-spacing: .03em; }
+  .tw-sheet input[type="text"] { width: 100%; box-sizing: border-box; padding: .7rem .8rem; border: 1.5px solid rgba(143,98,68,.4); border-radius: 10px; background: #fff; font-size: 16px; color: #3A2518; }
+  .tw-sheet input[type="text"]:focus { outline: none; border-color: #8F6244; box-shadow: 0 0 0 3px rgba(143,98,68,.15); }
+  .tw-list { margin-top: .4rem; display: flex; flex-direction: column; gap: .3rem; max-height: 190px; overflow-y: auto; }
+  .tw-list:empty { display: none; }
+  .tw-list-hd { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8F6244; margin-top: .2rem; }
+  .tw-pick { display: flex; justify-content: space-between; align-items: center; gap: .6rem; text-align: left; width: 100%; padding: .55rem .75rem;
+    border: 1px solid rgba(160,125,85,.25); border-radius: 10px; background: #FBF6EE; color: #3A2518; cursor: pointer; font: inherit; font-size: .92rem; box-sizing: border-box; }
+  .tw-pick:hover, .tw-pick:active { background: #F3E9D9; }
+  .tw-pick small { color: #7A6855; font-size: .75rem; white-space: nowrap; }
+  .tw-pick.tw-never small { color: #A0522D; font-weight: 700; }
+  .tw-crmrow { display: flex !important; align-items: center; gap: .5rem; font-weight: 600 !important; letter-spacing: 0 !important; }
+  .tw-crmrow[hidden] { display: none !important; }
+  .tw-crmrow input { width: 20px; height: 20px; margin: 0; flex-shrink: 0; }
+  .tw-actions { display: flex; flex-direction: column; gap: .5rem; margin-top: 1rem; }
+  .tw-actions button { margin: 0 !important; width: 100% !important; min-height: 46px !important; border-radius: 10px !important; font-weight: 700 !important; font-size: 1rem !important; cursor: pointer; box-sizing: border-box !important; }
+  .tw-save { background: linear-gradient(135deg, #A47551, #8F6244) !important; color: #fff !important; border: none !important; }
+  .tw-skip { background: #FFFDFA !important; color: #6B4630 !important; border: 1.5px solid rgba(143,98,68,.45) !important; }
+  .tw-cancel { background: transparent !important; color: #7A6855 !important; border: none !important; font-weight: 600 !important; }
+  .tw-err { color: #A0392D; font-size: .85rem; margin: .5rem 0 0; min-height: 1em; }
+  @media (max-width: 600px) { .tw-sheet { top: auto; bottom: 0; left: 0; transform: none; width: 100%; border-radius: 18px 18px 0 0;
+    padding-bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px)); max-height: 92vh; } }
+  @media (max-height: 500px) { .tw-sheet { top: 0; bottom: 0; transform: none; left: 50%; margin-left: calc(min(440px, 100vw - 1.5rem) / -2); border-radius: 0 0 16px 16px; max-height: none; }
+    .tw-actions { flex-direction: row; } .tw-actions button { min-height: 42px !important; } }
+  </style>
+  <h3 id="tw-title">Who was it?</h3>
+  <p class="tw-sub" id="tw-sub"></p>
+  <label for="tw-name">Name</label>
+  <input id="tw-name" type="text" autocomplete="off" autocapitalize="words" placeholder="Start typing a name">
+  <div class="tw-list" id="tw-list"></div>
+  <label for="tw-note">Quick note <span style="font-weight:400;">(optional)</span></label>
+  <input id="tw-note" type="text" autocomplete="off" placeholder="What did you talk about?">
+  <label class="tw-crmrow" id="tw-crmrow" hidden><input type="checkbox" id="tw-crm" checked> Not in your CRM yet. Add them.</label>
+  <div class="tw-actions">
+    <button type="button" class="tw-save" id="tw-save">Save</button>
+    <button type="button" class="tw-skip" id="tw-skip">Just count it</button>
+    <button type="button" class="tw-cancel" id="tw-cancel">Cancel</button>
+  </div>
+  <p class="tw-err" id="tw-err" role="alert"></p>
+  <script>
+  (function () {
+    var sheet = document.getElementById('tw-sheet'), scrim = document.getElementById('tw-scrim');
+    var nameEl = document.getElementById('tw-name'), noteEl = document.getElementById('tw-note'), listEl = document.getElementById('tw-list');
+    var crmRow = document.getElementById('tw-crmrow'), crmBox = document.getElementById('tw-crm'), errEl = document.getElementById('tw-err');
+    var cur = null, picked = null, timer = null, shown = [];
+    document.body.appendChild(scrim); document.body.appendChild(sheet);
+    function close() { sheet.hidden = true; scrim.hidden = true; cur = null; }
+    function api(url) { return fetch(url, { credentials: 'same-origin' }).then(function (r) { return r.json(); }); }
+    function renderList(people, heading) {
+      shown = people; listEl.textContent = '';
+      if (!people.length) return;
+      if (heading) { var h = document.createElement('div'); h.className = 'tw-list-hd'; h.textContent = heading; listEl.appendChild(h); }
+      people.forEach(function (p) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'tw-pick' + (p.days === null ? ' tw-never' : '');
+        b.setAttribute('aria-label', 'Choose ' + p.name);
+        var n = document.createElement('span'); n.textContent = p.name;
+        var s = document.createElement('small'); s.textContent = p.days === null ? 'Never spoken to' : 'Last: ' + p.last;
+        b.appendChild(n); b.appendChild(s);
+        b.addEventListener('click', function () { picked = p; nameEl.value = p.name; listEl.textContent = ''; crmRow.hidden = true; });
+        listEl.appendChild(b);
+      });
+    }
+    function search() {
+      var q = nameEl.value.trim();
+      api('/planner/people' + (q ? '?q=' + encodeURIComponent(q) : '')).then(function (d) {
+        if (!d.ok) return;
+        renderList(d.people, q ? '' : 'Longest since you spoke');
+        var exact = d.people.some(function (p) { return p.name.toLowerCase() === q.toLowerCase(); });
+        crmRow.hidden = !q || exact || !!picked;
+      });
+    }
+    nameEl.addEventListener('input', function () {
+      picked = null; errEl.textContent = '';
+      clearTimeout(timer); timer = setTimeout(search, 180);
+    });
+    document.getElementById('tw-cancel').addEventListener('click', close);
+    scrim.addEventListener('click', close);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && cur) close(); });
+    document.getElementById('tw-skip').addEventListener('click', function () { var c = cur; close(); if (c && c.onSkip) c.onSkip(); });
+    document.getElementById('tw-save').addEventListener('click', function () {
+      var name = nameEl.value.trim();
+      if (!name) { errEl.textContent = 'Type a name, or tap "Just count it".'; nameEl.focus(); return; }
+      var c = cur;
+      fetch('/planner/touch', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin',
+        body: JSON.stringify({ activity: c.activity, day: c.day, week: c.week, name: name, contact_id: picked ? picked.id : null,
+                               note: noteEl.value, add_to_crm: !crmRow.hidden && crmBox.checked }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { if (!d.ok) { errEl.textContent = d.error || 'That did not save. Please try again.'; return; } close(); if (c.onSaved) c.onSaved(d); })
+        .catch(function () { errEl.textContent = 'No connection. Please try again.'; });
+    });
+    window.ylhAskWho = function (o) {
+      cur = o; picked = null; errEl.textContent = ''; noteEl.value = ''; crmBox.checked = true; crmRow.hidden = true;
+      document.getElementById('tw-title').textContent = o.title || 'Who was it?';
+      document.getElementById('tw-sub').textContent = o.label ? 'Adds one to ' + o.label + ' and remembers who it was.' : '';
+      nameEl.value = o.name || '';
+      if (o.contact_id) picked = { id: o.contact_id, name: o.name };
+      sheet.hidden = false; scrim.hidden = false; listEl.textContent = '';
+      if (!o.name) search();
+      setTimeout(function () { (o.name ? noteEl : nameEl).focus(); }, 60);
+    };
+  })();
+  </script>
+</div>

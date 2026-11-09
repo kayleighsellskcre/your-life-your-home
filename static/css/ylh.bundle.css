@@ -2342,7 +2342,7 @@ tr:hover {
     padding: 1.25rem 1rem !important;
     margin: 1rem 0 !important;
   }
-  button,
+  button:not([aria-label]):not([data-d]):not([class*="step"]):not([class*="chk"]):not([class*="check"]):not([class*="close"]):not([class*="toggle"]):not([class*="icon"]),
   .btn,
   .btn-primary,
   .btn-secondary {
@@ -2406,7 +2406,7 @@ tr:hover {
   .card-premium {
     padding: 1rem 0.75rem !important;
   }
-  button,
+  button:not([aria-label]):not([data-d]):not([class*="step"]):not([class*="chk"]):not([class*="check"]):not([class*="close"]):not([class*="toggle"]):not([class*="icon"]),
   .btn {
     padding: 0.875rem 1rem !important;
     font-size: 0.95rem !important;
@@ -3260,7 +3260,7 @@ img:hover {
     max-height: 85vh !important;
     padding: 1rem !important;
   }
-  button,
+  button:not([aria-label]):not([data-d]):not([class*="step"]):not([class*="chk"]):not([class*="check"]):not([class*="close"]):not([class*="toggle"]):not([class*="icon"]),
   .btn {
     padding: 0.75rem 1.5rem !important;
     min-height: 44px !important;
@@ -6382,3 +6382,8 @@ body {
   html body .crm-card-actions { flex-wrap: wrap !important; gap: .4rem !important; }
   html body .crm-card-hd { flex-wrap: wrap !important; gap: .6rem !important; }
 }
+.templates-grid > * { min-width: 0; }
+@media (min-width: 861px) {
+  .templates-grid { grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)) !important; }
+}
+.seasonal-hero { margin: 0 0 1.5rem !important; }

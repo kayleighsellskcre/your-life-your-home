@@ -218,6 +218,13 @@ INDEX_PLAN = [
 ]
 
 
+# Two-column indexes: "who have I not talked to in the longest time" for each person's own contacts.
+EXTRA_INDEXES = [
+    ("idx_agent_contacts_touch", "agent_contacts", "agent_user_id, last_touch"),
+    ("idx_lender_borrowers_touch", "lender_borrowers", "lender_user_id, last_touch"),
+]
+
+
 def ensure_indexes() -> None:
     """Add lookup indexes on the columns every dashboard filters by, so pages stay fast with thousands of
     agents, lenders and clients. Skips anything that does not exist yet. Safe to run on every start."""
@@ -230,6 +237,13 @@ def ensure_indexes() -> None:
                     conn.execute(f"CREATE INDEX IF NOT EXISTS idx_{table}_{col} ON {table}({col})")
             except Exception as e:
                 print(f"[DATABASE] index {table}.{col} skipped: {e}")
+        for name, table, cols in EXTRA_INDEXES:
+            try:
+                have = {r[1] for r in conn.execute(f"PRAGMA table_info({table})").fetchall()}
+                if all(c in have for c in cols.replace(" ", "").split(",")):
+                    conn.execute(f"CREATE INDEX IF NOT EXISTS {name} ON {table}({cols})")
+            except Exception as e:
+                print(f"[DATABASE] index {name} skipped: {e}")
         conn.commit()
         conn.execute("PRAGMA optimize")
     finally:
@@ -4084,6 +4098,16 @@ def add_crm_interaction(
          interaction_date, subject, notes, channel),
     )
     interaction_id = cur.lastrowid
+    # Keep "last spoken to" on the contact itself up to date, so the CRM and the planner agree.
+    _tbl = {"agent_contact": ("agent_contacts", "agent_user_id"),
+            "lender_borrower": ("lender_borrowers", "lender_user_id")}.get(contact_type)
+    if _tbl:
+        _d = str(interaction_date)[:10]
+        cur.execute(
+            f"UPDATE {_tbl[0]} SET last_touch = ? WHERE id = ? AND {_tbl[1]} = ? "
+            f"AND (last_touch IS NULL OR last_touch = '' OR substr(last_touch, 1, 10) < ?)",
+            (_d, contact_id, professional_user_id, _d),
+        )
     conn.commit()
     conn.close()
     return interaction_id

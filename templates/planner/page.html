@@ -39,6 +39,50 @@
 .pl-wk .pl-tgt:hover, .pl-wk .pl-tgt:focus { border-color: rgba(143,98,68,.4); background: #FFFDFA; outline: none; }
 .pl-wk .pl-bar { height: 6px; margin-top: .3rem; min-width: 0; }
 .pl-foot { text-align: center; color: #7A6855; font-size: .82rem; margin-top: 1rem; }
+.pl-people { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.1rem; margin-top: 1.1rem; }
+.pl-box { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1rem 1.2rem 1.1rem; min-width: 0; }
+.pl-box h2 { margin: 0 0 .15rem; font-size: 1.1rem !important; }
+.pl-box > p { margin: 0 0 .5rem; color: #7A6855; font-size: .82rem; }
+.pl-li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem .8rem; padding: .55rem 0; border-top: 1px solid rgba(160,125,85,.14); align-items: center; }
+.pl-li:first-of-type { border-top: none; }
+.pl-li b { color: #3A2518; font-size: .93rem; overflow-wrap: anywhere; }
+.pl-li small { color: #7A6855; font-size: .76rem; }
+.pl-li .pl-note { grid-column: 1 / -1; color: #6B5B4D; font-size: .8rem; font-style: italic; overflow-wrap: anywhere; }
+.pl-li.pl-never small.pl-last { color: #A0522D; font-weight: 700; }
+.pl-empty { color: #7A6855; font-size: .88rem; margin: .3rem 0 0; }
+.pl-box button.pl-go { width: auto !important; min-width: 0 !important; margin: 0 !important; height: 38px !important; min-height: 0 !important; padding: 0 .9rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .82rem !important; font-weight: 700 !important; white-space: nowrap !important; cursor: pointer; }
+.pl-box button.pl-go.done { background: #EFE6D8 !important; border-color: transparent !important; color: #7A6855 !important; }
+.pl-day { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #8F6244; margin: .6rem 0 0; }
+.pl-day:first-of-type { margin-top: 0; }
+
+/* Phones and small tablets: each habit becomes its own card, days in a tidy 3-up grid */
+@media (max-width: 860px) {
+  .pl-wrap { padding: .8rem .75rem 2.5rem; }
+  .pl-scroll { overflow: visible; border: none; background: transparent; box-shadow: none; }
+  .pl-table { display: block; min-width: 0; width: 100%; }
+  .pl-table thead { display: none; }
+  .pl-table tbody { display: flex; flex-direction: column; gap: .75rem; }
+  .pl-table tr.pl-grp { display: block; }
+  .pl-table tr.pl-grp td { display: block; background: none; border: none; padding: .6rem .2rem 0; }
+  .pl-table tr[data-act] { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem .4rem; background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: .9rem .9rem 1rem; }
+  .pl-table td { display: block; border: none; padding: 0; text-align: center; }
+  .pl-table td.pl-today { background: transparent; }
+  .pl-table td.pl-label { grid-column: 1 / -1; padding: 0 !important; min-width: 0; text-align: left !important; }
+  .pl-table td[data-dn] { background: #FBF6EE; border-radius: 10px; padding: .45rem .2rem .5rem; }
+  .pl-table td[data-dn].pl-today { background: #EBDDC8; }
+  .pl-table td[data-dn]::before { content: attr(data-dn); display: block; font-size: .66rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #8F6244; margin-bottom: .3rem; }
+  .pl-table td.pl-wk { grid-column: 1 / -1; padding: .3rem 0 0 !important; min-width: 0; text-align: left !important; order: 9; }
+  .pl-step { gap: .25rem; }
+  .pl-wk input.pl-tgt, .pl-table td.pl-wk .pl-tgt { display: inline-block !important; width: 3.6rem !important; min-width: 0 !important; max-width: 3.6rem !important; margin: 0 .2rem !important; padding: .3rem .25rem !important; border-color: rgba(143,98,68,.4) !important; background: #FFFDFA !important; font-size: 16px !important; text-align: center; }
+  .pl-check { width: 100%; }
+  .pl-check small { display: block; white-space: normal; overflow-wrap: anywhere; text-align: center; max-width: 100%; font-size: .62rem; line-height: 1.2; }
+  .pl-step button { width: 34px !important; height: 34px !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; font-size: 1.1rem !important; }
+  .pl-step span { min-width: 1.4rem; font-size: 1rem; }
+  .pl-check i { width: 34px; height: 34px; }
+  .pl-check small { max-width: none; }
+  .pl-table td .pl-dash { display: inline-block; line-height: 34px; }
+}
+@media (max-width: 380px) { .pl-step button { width: 30px !important; height: 30px !important; } }
 @media print { .pl-nav, .ylh-hdr-title, .pl-foot { display: none !important; } .pl-scroll { box-shadow: none; } }
 </style>
 
@@ -79,7 +123,7 @@
         <tr data-act="{{ r.key }}" data-kind="{{ r.kind }}">
           <td class="pl-label"><b>{{ r.label }}</b>{% if r.hint %}<small>{{ r.hint }}</small>{% endif %}</td>
           {% for i in range(6) %}
-          <td class="{{ 'pl-today' if i == today_idx }}">
+          <td class="{{ 'pl-today' if i == today_idx }}" data-dn="{{ days[i] }}">
             {% if r.kind == 'theme' %}
               {% if i <= 4 %}
               <button type="button" class="pl-check {{ 'on' if r.days[i] }}" data-day="{{ i }}" aria-label="{{ view.plan.themes[i] }}"><i>&#10003;</i><small>{{ view.plan.themes[i] }}</small></button>
@@ -98,12 +142,41 @@
       </tbody>
     </table>
   </div>
+  <div class="pl-people">
+    <div class="pl-box">
+      <h2>Who you talked to this week</h2>
+      <p>Tap + on calls, meetings or notes and add a name. It lands here and in your CRM.</p>
+      <div id="pl-log">
+      {% set ns2 = namespace(day='') %}
+      {% for e in week_people %}
+        {% if e.touched_on != ns2.day %}{% set ns2.day = e.touched_on %}<div class="pl-day">{{ e.pretty }}</div>{% endif %}
+        <div class="pl-li"><b>{{ e.name }}</b><small>{% if e.activity == 'calls' %}Phone call{% elif e.activity == 'face' %}Face to face{% elif e.activity == 'bread' %}Coffee or meal{% else %}Handwritten note{% endif %}</small>{% if e.note %}<span class="pl-note">{{ e.note }}</span>{% endif %}</div>
+      {% else %}
+        <p class="pl-empty">No names yet this week. Your first one will show up here.</p>
+      {% endfor %}
+      </div>
+    </div>
+    <div class="pl-box">
+      <h2>Reach out next</h2>
+      <p>The people you have gone the longest without speaking to.</p>
+      {% for p in next_up %}
+      <div class="pl-li {{ 'pl-never' if p.days is none }}" data-id="{{ p.id }}" data-name="{{ p.name }}">
+        <div><b>{{ p.name }}</b><br><small class="pl-last">{% if p.days is none %}Never spoken to{% else %}Last spoken: {{ p.last }}{% endif %}</small></div>
+        <button type="button" class="pl-go" aria-label="Log a call with {{ p.name }}">Log call</button>
+      </div>
+      {% else %}
+      <p class="pl-empty">Add people in your CRM and the ones you have not spoken to in a while will show up here.</p>
+      {% endfor %}
+    </div>
+  </div>
   <p class="pl-foot">Tap + or the circles as you go. Click a weekly number to change your target. Your progress saves automatically.</p>
 </div>
+{% include "planner/_touch_sheet.html" %}
 
 <script>
 (function () {
   var week = {{ week|tojson }};
+  var PEOPLE = { calls: 'Great phone calls', face: 'Face-to-face meetings', bread: 'Break bread', notes: 'Handwritten thank-you notes' };
   var msgs = [[0, "A fresh week. Start with one great conversation."], [25, "Nice start. Keep the momentum going."], [50, "Halfway there. You are building something."], [75, "Almost there. Finish strong."], [100, "You did it. Be proud of this week."]];
   function say(p) { var m = msgs[0][1]; msgs.forEach(function (x) { if (p >= x[0]) m = x[1]; }); document.getElementById('pl-msg').textContent = m; }
   say({{ view.pct }});
@@ -117,15 +190,31 @@
     document.getElementById('pl-pct-bar').style.width = d.pct + '%';
     say(d.pct);
   }
+  document.querySelectorAll('.pl-box .pl-go').forEach(function (btn) {
+    var r = btn.closest('.pl-li');
+    btn.addEventListener('click', function () {
+      var now = new Date(), dow = (now.getDay() + 6) % 7, mon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+      var monIso = mon.getFullYear() + '-' + ('0' + (mon.getMonth() + 1)).slice(-2) + '-' + ('0' + mon.getDate()).slice(-2);
+      window.ylhAskWho({ activity: 'calls', label: PEOPLE.calls, title: 'Log your call', day: Math.min(dow, 5), week: monIso,
+        name: r.dataset.name, contact_id: +r.dataset.id, onSaved: function () { location.reload(); } });
+    });
+  });
   document.querySelectorAll('tr[data-act]').forEach(function (tr) {
     var act = tr.dataset.act;
     tr.querySelectorAll('.pl-step').forEach(function (st) {
       var num = st.querySelector('span');
+      var day = +st.dataset.day;
+      function setVal(v, undo) {
+        v = Math.max(0, Math.min(99, v)); num.textContent = v; num.classList.toggle('pl-zero', !v);
+        send('/planner/save', { week: week, activity: act, day: day, value: v, undo_touch: !!undo }).then(function (d) { if (d.ok) { apply(tr, d); if (undo) location.reload(); } });
+      }
       st.querySelectorAll('button').forEach(function (b) {
         b.addEventListener('click', function () {
-          var v = Math.max(0, Math.min(99, (parseInt(num.textContent, 10) || 0) + parseInt(b.dataset.d, 10)));
-          num.textContent = v; num.classList.toggle('pl-zero', !v);
-          send('/planner/save', { week: week, activity: act, day: +st.dataset.day, value: v }).then(function (d) { if (d.ok) apply(tr, d); });
+          var dir = parseInt(b.dataset.d, 10), cur = parseInt(num.textContent, 10) || 0;
+          if (dir < 0) return setVal(cur - 1, !!PEOPLE[act]);
+          if (!PEOPLE[act]) return setVal(cur + 1, false);
+          window.ylhAskWho({ activity: act, label: PEOPLE[act], day: day, week: week,
+            onSaved: function () { location.reload(); }, onSkip: function () { setVal(cur + 1, false); } });
         });
       });
     });
