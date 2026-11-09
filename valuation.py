@@ -195,7 +195,7 @@ def describe_source(snapshot):
 ERROR_HELP = {
     "no-key": "No RentCast key is set. Add RENTCAST_API_KEY in your Railway variables.",
     401: "RentCast did not accept the key. Check RENTCAST_API_KEY in Railway for typos or extra spaces, and that the key is active in your RentCast account.",
-    403: "RentCast did not accept the key. Check RENTCAST_API_KEY in Railway for typos or extra spaces, and that the key is active in your RentCast account.",
+    403: "Your RentCast key is not tied to an active plan yet. Open app.rentcast.io/app/api, pick a plan (there is a free starter level), then run the test again.",
     404: "RentCast could not find a value for that address. Check the street, city, state and ZIP.",
     400: "RentCast did not understand that address. Use the full form: street, city, state ZIP.",
     422: "RentCast did not understand that address. Use the full form: street, city, state ZIP.",
