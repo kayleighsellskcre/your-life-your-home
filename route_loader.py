@@ -19,9 +19,12 @@ class Registry:
 
     def install(self, ns):
         app = ns["app"]
+        views = {}   # a view with several URLs (stacked @route lines) is rebuilt once and registered under each
         for rule, options, fn in self._routes:
-            view = types.FunctionType(fn.__code__, ns, fn.__name__, fn.__defaults__, fn.__closure__)
-            view.__kwdefaults__ = fn.__kwdefaults__
-            view.__doc__ = fn.__doc__
-            ns[fn.__name__] = view
+            view = views.get(fn)
+            if view is None:
+                view = types.FunctionType(fn.__code__, ns, fn.__name__, fn.__defaults__, fn.__closure__)
+                view.__kwdefaults__ = fn.__kwdefaults__
+                view.__doc__ = fn.__doc__
+                ns[fn.__name__] = views[fn] = view
             app.add_url_rule(rule, endpoint=fn.__name__, view_func=view, **options)
