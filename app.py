@@ -1060,6 +1060,68 @@ def require_homeowner_access(homeowner_id: int) -> Tuple[Optional[dict], Optiona
 
 
 # ---------------- AGENT TRANSACTION ROUTES ----------------
+def _tx_docs_dir(tx_id):
+    base = os.environ.get("RAILWAY_VOLUME_MOUNT_PATH")
+    root = Path(base) / "tx_docs" if base else BASE_DIR / "uploads" / "tx_docs"
+    d = root / str(int(tx_id))
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+@app.route("/agent/transactions/<int:tx_id>/documents/upload", methods=["POST"])
+def agent_transaction_document_upload(tx_id):
+    """Attach a document (contract, inspection, title report...) to a deal."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        flash("We could not find that transaction.", "error")
+        return redirect(url_for("agent_transactions"))
+    back = redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+    f = request.files.get("file")
+    if not f or not f.filename:
+        flash("Please choose a file to upload.", "error")
+        return back
+    safe = secure_filename(f.filename) or "document"
+    stored = f"{uuid4().hex[:10]}_{safe}"
+    try:
+        path = _tx_docs_dir(tx_id) / stored
+        f.save(path)
+        from transaction_helpers import upload_transaction_document
+        doc_type = (request.form.get("document_type") or "other").strip().lower().replace(" ", "_")[:60]
+        upload_transaction_document(tx_id, doc_type, safe, stored, user["id"], path.stat().st_size)
+        flash("Uploaded. It is saved to this deal.", "success")
+    except Exception as e:
+        app.logger.warning(f"tx document upload failed: {e}")
+        flash("We could not upload that file. Please try again in a moment.", "error")
+    return back
+
+
+@app.route("/agent/transactions/<int:tx_id>/documents/<int:doc_id>/view")
+def agent_transaction_document_view(tx_id, doc_id):
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return redirect(url_for("login", role="agent"))
+    transaction = get_transaction_detail(tx_id)
+    if not transaction or transaction.get("agent_id") != user["id"]:
+        return redirect(url_for("agent_transactions"))
+    from transaction_helpers import get_transaction_documents
+    doc = next((d for d in get_transaction_documents(tx_id) if d.get("id") == doc_id), None)
+    if not doc or not doc.get("file_path"):
+        flash("We could not find that document.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+    folder = _tx_docs_dir(tx_id)
+    name = Path(doc["file_path"]).name
+    if not (folder / name).exists():
+        flash("That file is no longer available.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
+    return send_from_directory(folder, name, download_name=doc.get("document_name") or name)
+
+
+PARTICIPANT_ROLES = {"client", "lender", "title_company", "transaction_coordinator", "other_agent", "inspector", "appraiser", "attorney", "other"}
+
+
 @app.route("/agent/transactions/<int:tx_id>/participants/add", methods=["POST"])
 def agent_add_participant(tx_id):
     """Add a participant to an agent transaction."""
@@ -1091,7 +1153,7 @@ def agent_add_participant(tx_id):
         from transaction_helpers import add_transaction_participant
         participant_id = add_transaction_participant(
             transaction_id=tx_id,
-            participant_type='client',
+            participant_type=role if role in PARTICIPANT_ROLES else 'client',
             name=name,
             email=email or None,
             phone=phone or None,
@@ -1139,6 +1201,9 @@ def agent_remove_participant(tx_id, participant_id):
             cursor.execute("UPDATE transaction_participants SET status = 'removed' WHERE id = ?", (participant_id,))
             conn.commit()
         
+        if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+            flash("Removed from this deal.", "success")
+            return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
         return jsonify({"success": True, "message": "Client removed successfully"}), 200
     except Exception as e:
         import traceback

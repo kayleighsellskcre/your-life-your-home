@@ -764,7 +764,7 @@
         <div class="tx-uploaded-row">
           <span class="tx-uploaded-icon">📄</span>
           <div style="min-width:0;flex:1">
-            <div class="tx-uploaded-name">{{ doc.document_name or doc.document_type }}</div>
+            <div class="tx-uploaded-name"><a href="{{ url_for('agent_transaction_document_view', tx_id=transaction.id, doc_id=doc.id) }}" style="color:inherit">{{ doc.document_name or doc.document_type }}</a></div>
             <div class="tx-uploaded-sub">{{ (doc.document_type or '')|replace('_',' ')|title }}{% if doc.uploader_name %} &middot; {{ doc.uploader_name }}{% endif %}{% if doc.uploaded_at %} &middot; {{ doc.uploaded_at[:10] }}{% endif %}</div>
           </div>
         </div>
@@ -848,6 +848,9 @@
             <div class="tx-p-sub">{{ p.email or p.user_email or '' }}{% if p.phone %} &middot; {{ p.phone }}{% endif %}</div>
           </div>
           <span class="tx-p-badge">{{ (p.participant_type or 'other')|replace('_',' ')|title }}</span>
+          <form method="post" action="{{ url_for('agent_remove_participant', tx_id=transaction.id, participant_id=p.id) }}" onsubmit="return confirm('Remove {{ (p.name or 'this person')|replace("'", '') }} from this deal?');" style="margin:0">
+            <button type="submit" class="tx-btn tx-btn-ghost" title="Remove" style="font-size:.7rem;padding:.15rem .45rem">&times;</button>
+          </form>
         </div>
         {% endif %}
         {% endfor %}
@@ -888,27 +891,27 @@
       <h2>Upload Document</h2>
       <button class="tx-modal-close" onclick="document.getElementById('upload-modal').style.display='none'">&times;</button>
     </div>
-    <form style="display:grid;gap:.85rem">
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('agent_transaction_document_upload', tx_id=transaction.id) }}" style="display:grid;gap:.85rem">
       <div class="tx-field">
         <label>Document Type</label>
-        <select class="tx-select">
-          <option>Purchase Agreement</option>
-          <option>Earnest Money Receipt</option>
-          <option>Seller Disclosures</option>
-          <option>Home Inspection Report</option>
-          <option>Appraisal Report</option>
-          <option>Title Report</option>
-          <option>Pre-Approval Letter</option>
-          <option>Clear to Close Letter</option>
-          <option>Closing Disclosure</option>
-          <option>Other</option>
+        <select class="tx-select" name="document_type">
+          <option value="purchase_agreement">Purchase Agreement</option>
+          <option value="earnest_money_receipt">Earnest Money Receipt</option>
+          <option value="seller_disclosures">Seller Disclosures</option>
+          <option value="home_inspection_report">Home Inspection Report</option>
+          <option value="appraisal_report">Appraisal Report</option>
+          <option value="title_report">Title Report</option>
+          <option value="pre-approval_letter">Pre-Approval Letter</option>
+          <option value="clear_to_close_letter">Clear to Close Letter</option>
+          <option value="closing_disclosure">Closing Disclosure</option>
+          <option value="other">Other</option>
         </select>
       </div>
       <div class="tx-dropzone" onclick="document.getElementById('file-input').click()" id="upload-dropzone">
         <div style="font-size:1.5rem;margin-bottom:.3rem">↑</div>
         <div style="font-weight:600;margin-bottom:.2rem">Drag &amp; drop or click to select</div>
         <div style="font-size:.72rem">Supports PDF, DOC, DOCX, JPG, PNG</div>
-        <input type="file" id="file-input" style="display:none" onchange="updateDropzone(this)">
+        <input type="file" name="file" id="file-input" required style="display:none" onchange="updateDropzone(this)">
       </div>
       <div class="tx-modal-btns">
         <button type="submit" class="tx-btn tx-btn-primary">Upload</button>
@@ -941,33 +944,39 @@
 <div id="add-participant-modal" class="tx-modal">
   <div class="tx-modal-box">
     <div class="tx-modal-hd">
-      <h2>Add Participant</h2>
+      <h2>Add to this deal</h2>
       <button class="tx-modal-close" onclick="document.getElementById('add-participant-modal').style.display='none'">&times;</button>
     </div>
-    <form style="display:grid;gap:.85rem">
+    <form method="post" action="{{ url_for('agent_add_participant', tx_id=transaction.id) }}" style="display:grid;gap:.85rem">
       <div class="tx-field">
-        <label>Participant Type</label>
-        <select class="tx-select">
-          <option>Lender</option><option>Title Company</option><option>Inspector</option>
-          <option>Appraiser</option><option>Attorney</option><option>Other Agent</option><option>Other</option>
+        <label>Who are they?</label>
+        <select class="tx-select" name="participant_role">
+          <option value="lender">Lender</option>
+          <option value="title_company">Title / Escrow</option>
+          <option value="transaction_coordinator">Transaction Coordinator</option>
+          <option value="other_agent">Other Agent (co-op or listing)</option>
+          <option value="inspector">Inspector</option>
+          <option value="appraiser">Appraiser</option>
+          <option value="attorney">Attorney</option>
+          <option value="other">Other</option>
         </select>
       </div>
       <div class="tx-field">
         <label>Full Name</label>
-        <input type="text" class="tx-input" placeholder="Full Name">
+        <input type="text" class="tx-input" name="participant_name" placeholder="Full name" required>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:.65rem">
         <div class="tx-field" style="margin:0">
           <label>Email</label>
-          <input type="email" class="tx-input" placeholder="email@company.com">
+          <input type="email" class="tx-input" name="participant_email" placeholder="email@company.com">
         </div>
         <div class="tx-field" style="margin:0">
           <label>Phone</label>
-          <input type="tel" class="tx-input" placeholder="(555) 000-0000">
+          <input type="tel" class="tx-input" name="participant_phone" placeholder="(555) 000-0000">
         </div>
       </div>
       <div class="tx-modal-btns">
-        <button type="submit" class="tx-btn tx-btn-primary">Add Participant</button>
+        <button type="submit" class="tx-btn tx-btn-primary">Add</button>
         <button type="button" class="tx-btn tx-btn-ghost" onclick="document.getElementById('add-participant-modal').style.display='none'">Cancel</button>
       </div>
     </form>

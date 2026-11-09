@@ -229,6 +229,7 @@ def upload_transaction_document(transaction_id: int, document_type: str,
           uploaded_by, triggers_stage))
     
     document_id = cursor.lastrowid
+    conn.commit()  # release the write lock before logging on another connection
     
     # Log timeline event
     log_timeline_event(
