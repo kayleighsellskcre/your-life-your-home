@@ -59,6 +59,107 @@ def rows_to_dicts(rows: List[sqlite3.Row]) -> List[Dict]:
     return [dict(row) for row in rows]
 
 
+def ensure_rbac_tables() -> None:
+    """Create the roles, audit-log, impersonation and two-step sign-in tables if they are missing, so a fresh
+    database never fails on Account security or the admin audit log. Safe to run on every start."""
+    conn = get_connection()
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS roles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS permissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE NOT NULL,
+            resource TEXT NOT NULL,
+            action TEXT NOT NULL,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS role_permissions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            role_id INTEGER NOT NULL,
+            permission_id INTEGER NOT NULL,
+            granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (role_id) REFERENCES roles(id),
+            FOREIGN KEY (permission_id) REFERENCES permissions(id),
+            UNIQUE(role_id, permission_id)
+        )
+
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_roles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            role_id INTEGER NOT NULL,
+            granted_by INTEGER,
+            granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (role_id) REFERENCES roles(id),
+            FOREIGN KEY (granted_by) REFERENCES users(id),
+            UNIQUE(user_id, role_id)
+        )
+
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS audit_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            action TEXT NOT NULL,
+            resource TEXT,
+            resource_id INTEGER,
+            details TEXT,
+            ip_address TEXT,
+            user_agent TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS impersonation_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            admin_id INTEGER NOT NULL,
+            target_user_id INTEGER NOT NULL,
+            reason TEXT,
+            consent_given BOOLEAN DEFAULT 0,
+            started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ended_at TIMESTAMP,
+            ip_address TEXT,
+            FOREIGN KEY (admin_id) REFERENCES users(id),
+            FOREIGN KEY (target_user_id) REFERENCES users(id)
+        )
+
+        """)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS mfa_settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            method TEXT NOT NULL,
+            secret TEXT NOT NULL,
+            backup_codes TEXT,
+            enabled BOOLEAN DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+
+        """)
+        conn.commit()
+    finally:
+        conn.close()
+
+
 def init_db() -> None:
     conn = get_connection()
     cur = conn.cursor()

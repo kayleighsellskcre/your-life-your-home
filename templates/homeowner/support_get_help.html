@@ -36,9 +36,8 @@
  gap: 0;
  border-bottom: 2px solid rgba(107,91,77,.15);
  margin-bottom: 2rem;
- overflow-x: auto;
- -webkit-overflow-scrolling: touch;
- scrollbar-width: none;
+ flex-wrap: wrap;
+ justify-content: center;
  }
  .gh-tabs::-webkit-scrollbar { display: none; }
  .gh-tab {
@@ -67,7 +66,7 @@
  /* ── CONTACT CARDS ──────────────────── */
  .gh-contact-grid {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+ grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
  gap: 1.25rem;
  margin-bottom: 2rem;
  }
@@ -200,7 +199,7 @@
  /* ── RESOURCES ────────────────────────── */
  .gh-resource-grid {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+ grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
  gap: 1.1rem;
  }
  .gh-resource-card {
@@ -261,7 +260,7 @@
  }
  .gh-team-cards {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+ grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
  gap: 1.1rem;
  }
  .gh-team-card {
@@ -324,7 +323,7 @@
  @media (max-width: 640px) {
  .gh-page { padding: 1.5rem .875rem 3rem; }
  .gh-hero h1 { font-size: 1.65rem; }
- .gh-tab { padding: .5rem .875rem; font-size: .7rem; }
+ .gh-tab { padding: .5rem .7rem; font-size: .72rem; }
  .gh-form-card { padding: 1.25rem; }
  }
 </style>
@@ -338,64 +337,14 @@
 
  <!-- Tabs -->
  <div class="gh-tabs">
- <button class="gh-tab active" onclick="showTab('contact', this)">Contact Us</button>
- <button class="gh-tab" onclick="showTab('ask', this)">Ask a Question</button>
- <button class="gh-tab" onclick="showTab('schedule', this)">Schedule a Chat</button>
+ <button class="gh-tab active" onclick="showTab('ask', this)">Ask a Question</button>
+ <button class="gh-tab" onclick="showTab('schedule', this)">Talk to Us</button>
  <button class="gh-tab" onclick="showTab('resources', this)">Resources</button>
- <button class="gh-tab" onclick="showTab('team', this)">Meet the Team</button>
  <button class="gh-tab" onclick="showTab('faq', this)">FAQ</button>
  </div>
 
- <!-- Contact Tab -->
- <div id="tab-contact" class="gh-panel active">
- <div class="gh-contact-grid">
- <div class="gh-contact-card">
- <div class="icon"></div>
- <h3>Ask a Question</h3>
- <p>Send a written question anytime. A real person will review it and respond with care, no bots, no scripted replies.</p>
- <button class="gh-btn" onclick="showTab('ask', document.querySelectorAll('.gh-tab')[1])">Ask Now</button>
- </div>
- <div class="gh-contact-card">
- <div class="icon"></div>
- <h3>Chat with a Human</h3>
- <p>Sometimes you just want to talk it through with someone who listens. Message your agent or lender directly.</p>
- {% if professionals %}
- {% for prof in professionals %}
- {% if prof.get('professional_role') == 'agent' or prof.get('role') == 'agent' %}
- {% if prof.get('email') %}
- <a href="mailto:{{ prof.email }}" class="gh-btn">Message Agent</a>
- {% else %}
- <a href="{{ url_for('homeowner_support_chat_human') }}" class="gh-btn">Start Chat</a>
- {% endif %}
- {% endif %}
- {% else %}
- <a href="{{ url_for('homeowner_support_chat_human') }}" class="gh-btn">Start Chat</a>
- {% endfor %}
- {% else %}
- <a href="{{ url_for('homeowner_support_chat_human') }}" class="gh-btn">Start Chat</a>
- {% endif %}
- </div>
- <div class="gh-contact-card">
- <div class="icon"></div>
- <h3>Schedule a Call</h3>
- <p>Book a focused conversation at a time that works for you. No pressure, just clarity.</p>
- <button class="gh-btn" onclick="showTab('schedule', document.querySelectorAll('.gh-tab')[2])">Book Time</button>
- </div>
- </div>
-
- <!-- Quick links below contact cards -->
- <div style="text-align:center;margin-top:1.5rem;">
- <p style="font-size:.82rem;color:rgba(61, 46, 36, 0.78);margin-bottom:.75rem;">Looking for something specific?</p>
- <div style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;">
- <button onclick="showTab('resources', document.querySelectorAll('.gh-tab')[3])" class="gh-btn gh-btn--ghost"> Resource Library</button>
- <button onclick="showTab('faq', document.querySelectorAll('.gh-tab')[5])" class="gh-btn gh-btn--ghost"> FAQ</button>
- <button onclick="showTab('team', document.querySelectorAll('.gh-tab')[4])" class="gh-btn gh-btn--ghost"> Meet the Team</button>
- </div>
- </div>
- </div>
-
  <!-- Ask a Question Tab -->
- <div id="tab-ask" class="gh-panel">
+ <div id="tab-ask" class="gh-panel active">
  {% if question_submitted %}
  <div style="max-width:640px;margin:0 auto 1.5rem;background:rgba(163,123,88,.08);border:1px solid #A37B58;border-radius:8px;padding:1rem 1.25rem;">
  <strong style="color:#6F543C;"> Your question was sent!</strong>
@@ -496,31 +445,6 @@
  </div>
 
  <!-- Meet the Team Tab -->
- <div id="tab-team" class="gh-panel">
- <div class="gh-team-section">
- <p>Real people stand behind this platform. You're not navigating your home alone, there's a team that wants to help you move forward with clarity and confidence.</p>
- <div class="gh-team-cards">
- {% if professionals %}
- {% for prof in professionals %}
- <div class="gh-team-card">
- <h3>{{ prof.get('brokerage_name') or prof.get('name') or 'Your Professional' }}</h3>
- <div class="role">{{ 'Agent' if (prof.get('professional_role') == 'agent' or prof.get('role') == 'agent') else 'Lender' }}</div>
- <p>Your dedicated real estate professional. Here to answer questions, guide decisions, and make your home journey as smooth as possible.</p>
- {% if prof.get('email') %}<a href="mailto:{{ prof.email }}" class="gh-btn" style="font-size:.75rem;padding:.35rem .875rem;"> Email</a>{% endif %}
- </div>
- {% endfor %}
- {% else %}
- <div class="gh-team-card">
- <h3>Your Life, Your Home Team</h3>
- <div class="role">Your Support Team</div>
- <p>Real people who care about your home and your peace of mind, not just transactions. Your agent and lender will appear here once connected.</p>
- </div>
- {% endif %}
- </div>
- </div>
- </div>
-
- <!-- FAQ Tab -->
  <div id="tab-faq" class="gh-panel">
  <div class="gh-faq">
  <div class="gh-faq-item">
@@ -564,11 +488,12 @@ function toggleFaq(el) {
  el.classList.toggle('open');
 }
 
-// If redirected back after question submit, show ask tab
+// Deep links: ?tab=ask | schedule (or contact) | resources | faq
 (function(){
- var params = new URLSearchParams(window.location.search);
- if (params.get('tab') === 'ask') {
- showTab('ask', document.querySelectorAll('.gh-tab')[1]);
+ var t = new URLSearchParams(window.location.search).get('tab');
+ var map = {ask: 0, schedule: 1, contact: 1, team: 1, resources: 2, faq: 3};
+ if (t in map) {
+  showTab(t === 'contact' || t === 'team' ? 'schedule' : t, document.querySelectorAll('.gh-tab')[map[t]]);
  }
 })();
 </script>

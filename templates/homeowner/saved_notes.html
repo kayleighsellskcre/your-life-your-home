@@ -335,7 +335,7 @@
 
  .boards-grid {
  display: grid;
- grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+ grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
  gap: 0.6rem;
  justify-items: center;
  }
@@ -626,7 +626,7 @@
  </div>
  
  <!-- Color Grid -->
- <div id="colorGrid" style="max-height: 500px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.5rem;">
+ <div id="colorGrid" style="max-height: 500px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 110px), 1fr)); gap: 0.5rem;">
  <!-- Colors will be dynamically loaded by JavaScript -->
  </div>
  </div>

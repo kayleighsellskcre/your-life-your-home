@@ -63,7 +63,7 @@
 
  .protection-grid {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+ grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
  gap: 0.6rem;
  margin-bottom: 4rem;
  }
@@ -222,11 +222,14 @@
 
  .checklist-grid {
  display: grid;
- grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+ grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
  gap: 1.5rem;
  }
 
  .checklist-item {
+ max-width: 100%;
+ box-sizing: border-box;
+ min-width: 0;
  padding: 1.25rem;
  background: linear-gradient(135deg, #F9F7F4 0%, #FFFFFF 100%);
  border-radius: 12px;

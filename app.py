@@ -279,6 +279,11 @@ get_db_connection = get_connection
 
 # Initialize DBs so platform loads with no manual trigger
 init_db()
+try:
+    from database import ensure_rbac_tables
+    ensure_rbac_tables()
+except Exception as _rbac_err:
+    print(f"[DATABASE] RBAC tables check skipped: {_rbac_err}")
 
 # Run Stripe column migration safely
 try:
