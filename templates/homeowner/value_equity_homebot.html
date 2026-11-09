@@ -901,20 +901,16 @@
  </div>
  </div>
  
- <!-- Homebot Widget Section -->
+ <!-- Homebot Widget Section (only when your agent or lender has connected it) -->
+ {% if homebot_widget_html %}
  <div class="homebot-section">
  <h2>Your Homebot Digest</h2>
  <p>Get personalized insights about your home's value, equity opportunities, and market trends.</p>
  <div class="homebot-widget">
- {% if homebot_widget_html %}
  {{ homebot_widget_html|safe }}
- {% else %}
- <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: rgba(61, 46, 36, 0.78);">
- <p>Homebot insights will appear here once configured.</p>
+ </div>
  </div>
  {% endif %}
- </div>
- </div>
  
  <!-- Tabs Section - ENHANCED -->
  <div class="tabs-container">
@@ -978,12 +974,12 @@
  <div class="info-cards-grid">
  <div class="info-card" onclick="location.href='{{ url_for('homeowner_next_loan_paths') }}'" style="cursor:pointer;">
  <h4>Refinance Opportunity</h4>
- <p>See how refinancing at today's rates could impact your monthly payment and long-term savings. Click to explore.</p>
+ <p>See how refinancing at today's rates could impact your monthly payment and long-term savings. Tap to learn how it works.</p>
  </div>
  
  <div class="info-card" onclick="location.href='{{ url_for('homeowner_next_loan_paths') }}'" style="cursor:pointer;">
  <h4>Cash-Out Refinance</h4>
- <p>Your equity can help with renovations, investments, or other goals. Click to explore.</p>
+ <p>Your equity can help with renovations, investments, or other goals. Tap to learn how it works.</p>
  </div>
  
  <div class="info-card">

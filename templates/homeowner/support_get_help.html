@@ -432,11 +432,23 @@
  {% endif %}
  {% endfor %}
  {% endif %}
- <div style="background:rgba(107,91,77,.06);border:1px solid rgba(107,91,77,.15);border-radius:10px;padding:2rem;margin-top:1rem;">
- <div style="font-size:1.5rem;margin-bottom:.5rem;"></div>
- <h3 style="font-family:'Playfair Display',Georgia,serif;font-size:1.15rem;font-weight:400;color:#3D2E24;margin-bottom:.4rem;">Scheduling Coming Soon</h3>
- <p style="font-size:.85rem;color:rgba(61, 46, 36, 0.78);line-height:1.55;margin-bottom:1rem;">Your agent is setting up their calendar. In the meantime, send a question or reach out directly.</p>
- <button onclick="showTab('ask', document.querySelectorAll('.gh-tab')[1])" class="gh-btn">Ask a Question Instead</button>
+ {% set has_cal = namespace(v=false) %}
+ {% for prof in professionals %}{% if prof.get('calendly_url') or prof.get('schedule_url') %}{% set has_cal.v = true %}{% endif %}{% endfor %}
+ <div style="background:rgba(107,91,77,.06);border:1px solid rgba(107,91,77,.15);border-radius:10px;padding:1.4rem;margin-top:1rem;">
+ {% for prof in professionals %}
+ {% set rl = 'agent' if (prof.get('professional_role') or prof.get('role')) == 'agent' else 'lender' %}
+ <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.6rem 0;{% if not loop.first %}border-top:1px solid rgba(107,91,77,.15);{% endif %}">
+ <div><b>{{ prof.get('name') }}</b><div style="font-size:.82rem;color:#7A6855;">Your {{ rl }}</div></div>
+ <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+ {% if prof.get('schedule_url') and not prof.get('calendly_url') %}<a class="gh-btn" href="{{ prof.schedule_url }}" target="_blank" rel="noopener">Book a time</a>{% endif %}
+ {% if prof.get('phone') %}<a class="gh-btn" href="tel:{{ prof.phone }}">Call or text</a>{% endif %}
+ {% if prof.get('email') %}<a class="gh-btn" href="mailto:{{ prof.email }}">Email</a>{% endif %}
+ </div>
+ </div>
+ {% else %}
+ <p style="margin:0 0 .8rem;font-size:.9rem;">You are not connected with an agent or lender yet. Ask your agent or lender for their invite link to connect.</p>
+ {% endfor %}
+ {% if professionals and not has_cal.v %}<p style="margin:.8rem 0 0;font-size:.85rem;color:#7A6855;">Prefer to write first? Use the Ask a Question tab and they'll reply directly.</p>{% endif %}
  </div>
  </div>
  </div>

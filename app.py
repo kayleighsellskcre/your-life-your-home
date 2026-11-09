@@ -2254,7 +2254,7 @@ def _inject_onboarding():
                 ]
             else:
                 spec = [
-                    ("Add your home", "homeowner_overview", "SELECT COUNT(*) FROM properties WHERE user_id=?"),
+                    ("Add your home", "homeowner_value_equity_overview", "SELECT COUNT(*) FROM properties WHERE user_id=?"),
                     ("Upload an important document", "homeowner_upload_documents", "SELECT COUNT(*) FROM homeowner_documents WHERE user_id=?"),
                     ("Log a home project or repair", "homeowner_home_timeline", "SELECT COUNT(*) FROM homeowner_timeline_events WHERE user_id=?"),
                     ("Track a warranty or appliance", "homeowner_care_warranty_log", "SELECT COUNT(*) FROM homeowner_warranty_log WHERE user_id=?"),
@@ -3768,9 +3768,17 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
     except Exception as _e:
         print(f"[Overview] activity feed skipped: {_e}")
 
+    extras = None
+    if homeowner_id and homeowner_user and not viewing_as_professional:
+        try:
+            extras = _homeowner_home.overview_extras(homeowner_id)
+        except Exception as _e:
+            print(f"[Overview] extras skipped: {_e}")
+
     return render_template(
         "homeowner/overview.html",
         brand_name=FRONT_BRAND_NAME,
+        extras=extras,
         recent_items=recent_items,
         snapshot=snapshot,
         cloud_cma_url=CLOUD_CMA_URL,
@@ -11187,7 +11195,8 @@ def homeowner_support_get_help():
         return redirect(url_for("login"))
     professionals = []
     try:
-        professionals = get_professionals_for_homeowner(user["id"])
+        from database import get_homeowner_professionals as _ghp
+        professionals = [dict(p) for p in _ghp(user["id"])]
     except Exception:
         pass
     question_submitted = request.args.get("sent") == "1"
@@ -11209,7 +11218,8 @@ def homeowner_next_home_hub():
         return redirect(url_for("login"))
     professionals = []
     try:
-        professionals = get_professionals_for_homeowner(user["id"])
+        from database import get_homeowner_professionals as _ghp
+        professionals = [dict(p) for p in _ghp(user["id"])]
     except Exception:
         pass
     return render_template(
@@ -13590,6 +13600,8 @@ import pies as _pies
 _pies.init_app(app, get_current_user, _bg, send_reminder_email)
 import planner as _planner
 _planner.init_app(app, get_current_user)
+import homeowner_home as _homeowner_home
+_homeowner_home.init_app(app, get_current_user)
 import tc as _tc
 _tc.init_app(app, get_current_user, _bg, send_reminder_email, get_transaction_detail,
              lambda tx_id, kind, text, uid: __import__("transaction_helpers").log_timeline_event(tx_id, kind, text, uid))
