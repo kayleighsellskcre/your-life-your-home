@@ -1,0 +1,65 @@
+/* Phone fit, any orientation. Loads last so it wins. */
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+img, video, canvas, iframe, svg { max-width: 100%; }
+/* Notched phones in landscape: keep content out from under the notch and home bar. */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ---- Any phone: portrait or landscape ---- */
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1000px) {
+  /* Wide tables scroll inside their card instead of pushing the page sideways */
+  .data-table, .items-table, table.table, .table-responsive table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Two-column layouts stack */
+  .crm-container { grid-template-columns: 1fr !important; margin-top: 1rem !important; }
+  .crm-sidebar { position: static !important; top: auto !important; }
+  .templates-grid { grid-template-columns: 1fr !important; }
+  .template-card, .template-header { max-width: 100% !important; min-width: 0 !important; }
+  /* Full-bleed hero bars were using desktop negative margins */
+  .seasonal-hero { margin: 0 0 1.5rem !important; }
+  /* Form fields at 16px so iPhones do not zoom in when you tap one */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea {
+    font-size: 16px !important;
+  }
+  /* Finger-sized tap targets */
+  .c-act { height: 36px !important; min-width: 36px !important; padding: 0 .75rem !important; }
+  a.btn, button.btn, .btn { min-height: 40px; }
+  /* Long words and emails wrap instead of stretching the page */
+  p, li, td, th, h1, h2, h3, h4, label, .card { overflow-wrap: anywhere; }
+  /* Pop-ups never taller than the screen */
+  [id*="modal" i] > div, .modal-content, .modal-box, .cmod { max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ---- Phones on their side: short screens ---- */
+@media (max-height: 500px) and (max-width: 1000px) {
+  /* The 96px sticky header ate a quarter of the screen. Slimmer, and it scrolls away. */
+  html body .site-header { position: static !important; min-height: 56px !important; max-height: 56px !important; }
+  html body .header-content { min-height: 56px !important; max-height: 56px !important; }
+  html body #ylhBrand { font-size: 1.25rem !important; }
+  html body .ylh-hdr-title { display: none !important; }
+  html body .ylh-ham-menu { top: 56px !important; max-height: calc(100vh - 56px) !important; position: absolute !important; }
+  /* Pop-ups, forms and long pages use the full width and less height */
+  .container, .dashboard-container { max-width: 100% !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+  [id*="modal" i] > div, .modal-content, .modal-box, .cmod { max-height: 86vh; }
+  section { margin: .75rem 0 !important; padding: .75rem 1rem !important; }
+}
+
+/* The older "never scroll sideways" rules clip every div, which cut off tab rows and
+   button rows. Rows that are meant to scroll scroll again; button rows wrap. */
+@media (max-width: 768px), (max-height: 500px) and (max-width: 1000px) {
+  html body :is(.pills-bar, .fin-tabs, [class*="-tabs"], [class*="tab-bar"], [class*="scroller"],
+                .table-scroll, .table-wrap, .table-responsive, [style*="overflow-x:auto"], [style*="overflow-x: auto"]) {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  html body .crm-card-actions { flex-wrap: wrap !important; gap: .4rem !important; }
+  html body .crm-card-hd { flex-wrap: wrap !important; gap: .6rem !important; }
+}

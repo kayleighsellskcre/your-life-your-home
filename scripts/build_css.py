@@ -18,7 +18,8 @@ ORDER = [
     "ylh-luxury.css",
     "sage-revival.css",   # overrides ylh-luxury
     "calm-unify.css",     # one calm standard for type, cards, buttons, forms
-    "brass-accent.css",   # loads last = highest priority
+    "brass-accent.css",
+    "phone.css",          # phone fit in any orientation, loads last = highest priority
 ]
 
 parts = []
