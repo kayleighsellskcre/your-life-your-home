@@ -18,6 +18,14 @@
   .hv-msg { margin-top: .8rem; padding: .8rem 1rem; border-radius: 12px; background: #F3EBDD; line-height: 1.45; }
   .hv-msg.good { background: #E7F1E8; } .hv-msg.bad { background: #F7E4E0; }
   ol.hv-steps { margin: .3rem 0 0; padding-left: 1.2rem; line-height: 1.7; }
+  .hv-item { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .25rem .8rem; padding: .65rem 0; border-top: 1px solid rgba(160,125,85,.14); }
+  .hv-item:first-of-type { border-top: none; }
+  .hv-item-main { min-width: 0; flex: 1 1 220px; }
+  .hv-item-main b { display: block; font-weight: 600; overflow-wrap: anywhere; }
+  .hv-item-main span { color: #7A6855; font-size: .8rem; }
+  .hv-badge { font-size: .78rem; font-weight: 700; border-radius: 99px; padding: .2rem .7rem; white-space: nowrap; }
+  .hv-badge.good { background: #E7F1E8; color: #2F6B3F; } .hv-badge.bad { background: #F7E4E0; color: #A0392D; }
+  .hv-why { flex-basis: 100%; color: #7A6855; font-size: .82rem; line-height: 1.4; }
   code { background: #F3EBDD; padding: .05rem .35rem; border-radius: 5px; font-size: .85em; }
 </style>
 <div class="hv-wrap">
@@ -65,10 +73,19 @@
   </div>
 
   <div class="hv-card">
+    <h2>Update homeowner values now</h2>
+    <p style="margin:0 0 .7rem;color:#7A6855;font-size:.9rem;">This also happens every night at 2 AM. Use it after you connect RentCast so homes already on the site get real values today. It stays inside your limits.</p>
+    <form method="post" action="{{ url_for('admin_home_values_refresh_now') }}"><button type="submit" class="btn btn-secondary" style="width:auto;">Update values now</button></form>
+  </div>
+
+  <div class="hv-card">
     <h2>Recent lookups</h2>
     {% for r in s.recent %}
-      <div class="hv-row"><div>{{ r.address or 'Test lookup' }}<br><span>{{ r.created_at }} UTC</span></div>
-        <span class="{{ 'hv-ok' if r.status in ('ok', 'test-ok') else 'hv-bad' }}">{% if r.status in ('ok', 'test-ok') %}worked{% else %}{{ describe((r.status|replace('test-', '')) if (r.status|replace('test-', '')) in ('no-key', 'network') else (r.status|replace('test-', '')|int(0))) }}{% endif %}</span></div>
+      <div class="hv-item">
+        <div class="hv-item-main"><b>{{ r.address or ('Test lookup' if r.is_test else 'Home lookup') }}</b><span>{{ r.created_at }} UTC</span></div>
+        <div class="hv-badge {{ 'good' if r.ok else 'bad' }}">{{ r.label }}</div>
+        {% if r.why %}<div class="hv-why">{{ r.why }}</div>{% endif %}
+      </div>
     {% else %}
       <p style="margin:0;color:#7A6855;">No lookups yet. They start when a homeowner adds a home, or tonight at 2 AM.</p>
     {% endfor %}

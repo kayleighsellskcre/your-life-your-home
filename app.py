@@ -11289,6 +11289,22 @@ def admin_home_values():
                            describe=valuation.describe_error)
 
 
+@app.route("/admin/home-values/refresh-now", methods=["POST"])
+def admin_home_values_refresh_now():
+    """Run the nightly value refresh right now (still inside the caps), so new homes do not wait until 2 AM."""
+    import valuation
+    user = _admin_session_user()
+    if not user:
+        flash("That area is just for site administrators.", "error")
+        return redirect(url_for("login", role="agent"))
+    if not valuation.provider_configured():
+        flash(valuation.describe_error("no-key"), "error")
+    else:
+        done = valuation.refresh_stale_values()
+        flash(f"Checked {done} home{'s' if done != 1 else ''} with RentCast. See the list below for what came back.", "success")
+    return redirect(url_for("admin_home_values"))
+
+
 @app.route("/admin/impersonate/<int:user_id>", methods=["POST"])
 def admin_impersonate_user(user_id):
     """Start impersonating a user (View As feature)"""

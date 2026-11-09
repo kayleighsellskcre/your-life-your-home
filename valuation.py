@@ -109,7 +109,8 @@ def refresh_property_value(user_id, property_id, min_days=None):
                 except ValueError:
                     pass
             last = conn.execute(
-                "SELECT created_at FROM avm_calls WHERE property_id = ? ORDER BY created_at DESC LIMIT 1", (property_id,)).fetchone()
+                "SELECT created_at FROM avm_calls WHERE property_id = ? AND status IN ('ok', '404', '400', '422') "
+                "ORDER BY created_at DESC LIMIT 1", (property_id,)).fetchone()  # a rejected key or a dropped connection never blocks a retry
             if last:
                 age = conn.execute("SELECT julianday('now') - julianday(?)", (last["created_at"],)).fetchone()[0]
                 if age is not None and age < min_days:
@@ -215,6 +216,28 @@ def describe_error(code):
     return f"RentCast returned an unexpected answer ({code})."
 
 
+SHORT_LABEL = {"401": "Key rejected", "403": "Key rejected", "404": "Address not found", "400": "Address not understood",
+               "422": "Address not understood", "429": "Over the limit", "0": "No connection", "network": "No connection",
+               "no-key": "No key", "cooldown": "Skipped (too soon)", "cap": "Skipped (limit)", "homebot": "Skipped (Homebot value)"}
+
+
+def _recent_row(r):
+    """Turn a stored lookup into a short label plus, for problems, a one-line explanation."""
+    status = str(r.get("status") or "")
+    code = status.replace("test-", "")
+    r["is_test"] = status.startswith("test-")
+    r["ok"] = code == "ok"
+    r["label"] = "worked" if r["ok"] else SHORT_LABEL.get(code, "Problem")
+    if r["ok"]:
+        r["why"] = ""
+    else:
+        try:
+            r["why"] = describe_error(int(code))
+        except ValueError:
+            r["why"] = describe_error(code)
+    return r
+
+
 def settings_summary():
     """The numbers the admin page shows, so nobody has to dig through logs."""
     cap = _int_env("RENTCAST_MONTHLY_CAP", 45)
@@ -228,7 +251,7 @@ def settings_summary():
             out["refreshed"] = conn.execute("SELECT COUNT(*) FROM homeowner_snapshots WHERE value_refresh_source = ?", (SOURCE,)).fetchone()[0]
             for r in conn.execute("SELECT status, COUNT(*) n FROM avm_calls WHERE created_at >= datetime('now', '-30 days') GROUP BY status").fetchall():
                 out["by_status"][r["status"]] = r["n"]
-            out["recent"] = [dict(r) for r in conn.execute(
+            out["recent"] = [_recent_row(dict(r)) for r in conn.execute(
                 """SELECT c.created_at, c.status, p.address FROM avm_calls c LEFT JOIN properties p ON p.id = c.property_id
                    ORDER BY c.id DESC LIMIT 10""").fetchall()]
         finally:
