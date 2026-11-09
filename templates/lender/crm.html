@@ -361,11 +361,16 @@
  <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
  <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Status</h3>
  <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+ <form method="get" class="crm-search" style="flex:1 1 220px;display:flex;gap:.4rem;margin:0 0 .6rem;">
+ {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+ <input type="search" name="q" value="{{ search_query }}" placeholder="Search name, email or phone" aria-label="Search borrowers" style="flex:1;min-width:0;padding:.55rem .75rem;border:var(--border-light);border-radius:var(--border-radius);font-size:16px;">
+ <button type="submit" class="btn btn-small" aria-label="Search" style="width:auto!important;margin:0!important;min-height:0!important;padding:.55rem 1rem!important;">Search</button>
+ </form>
  <a href="?status=" class="filter-btn {% if not status_filter %}active{% endif %}">All Borrowers</a>
- <a href="?status=prospect" class="filter-btn {% if status_filter == 'prospect' %}active{% endif %}">Prospects</a>
- <a href="?status=preapproval" class="filter-btn {% if status_filter == 'preapproval' %}active{% endif %}">Pre-Approval</a>
- <a href="?status=in_process" class="filter-btn {% if status_filter == 'in_process' %}active{% endif %}">In Process</a>
- <a href="?status=closed" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
+ <a href="?status=prospect{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'prospect' %}active{% endif %}">Prospects</a>
+ <a href="?status=preapproval{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'preapproval' %}active{% endif %}">Pre-Approval</a>
+ <a href="?status=in_process{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'in_process' %}active{% endif %}">In Process</a>
+ <a href="?status=closed{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
  </div>
  </div>
  </div>
@@ -550,6 +555,13 @@
  </div>
  </div>
  {% endfor %}
+ {% if pages > 1 %}
+ <nav class="crm-pager" aria-label="Pages" style="display:flex;justify-content:center;align-items:center;gap:1rem;margin:1rem 0;flex-wrap:wrap;">
+ {% if page > 1 %}<a class="btn btn-small" style="width:auto!important;margin:0!important;" href="?page={{ page - 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">&larr; Previous</a>{% endif %}
+ <span style="color:var(--charcoal-brown);">Page {{ page }} of {{ pages }} &middot; {{ filtered_total }} borrowers</span>
+ {% if page < pages %}<a class="btn btn-small" style="width:auto!important;margin:0!important;" href="?page={{ page + 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">Next &rarr;</a>{% endif %}
+ </nav>
+ {% endif %}
  {% else %}
  <div class="empty-state">
  <div style="font-size: 4rem; margin-bottom: 1rem;"></div>

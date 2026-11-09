@@ -85,7 +85,7 @@
 
 <div id="sc-wrap">
 
- <a href="{{ back_url }}" class="sc-back">← Back to Power Tools</a>
+ <a href="{{ back_url }}" class="sc-back">← {{ back_label|default('Back to Power Tools') }}</a>
 
  <div class="sc-header">
  <div class="sc-header__tag">{{ 'Agent Resources' if role == 'agent' else 'Lender Resources' }}</div>

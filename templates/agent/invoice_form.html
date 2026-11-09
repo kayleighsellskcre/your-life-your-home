@@ -148,21 +148,8 @@
  <div class="if-row if-row--full" style="margin-bottom:.85rem;">
  <div class="if-field">
  <label>Pull from CRM Contact</label>
- <select id="contactSelect" onchange="fillFromContact(this.value)">
- <option value=""> -  Select contact (optional)  - </option>
- {% for c in contacts %}
- <option value="{{ c.id }}"
- data-name="{{ c.name or '' }}"
- data-email="{{ c.email or '' }}"
- data-address="{{ c.address or '' }}"
- data-city="{{ c.city or '' }}"
- data-state="{{ c.state or '' }}"
- data-zip="{{ c.zip_code or '' }}"
- {% if invoice and invoice.contact_id == c.id %}selected{% endif %}
- {% if prefill_contact and prefill_contact.id == c.id %}selected{% endif %}
- >{{ c.name }}</option>
- {% endfor %}
- </select>
+ <input type="search" id="contactSearch" autocomplete="off" placeholder="Type a name to pull from your CRM (optional)" value="{{ prefill_contact.name if prefill_contact else (invoice.client_name if invoice and invoice.contact_id else '') }}">
+ <div id="contactResults" style="display:flex;flex-direction:column;gap:.3rem;margin-top:.3rem;"></div>
  <input type="hidden" name="contact_id" id="contactIdHidden" value="{{ (invoice.contact_id if invoice and invoice.contact_id) or (prefill_contact.id if prefill_contact) or '' }}">
  </div>
  </div>
@@ -372,19 +359,34 @@
 </div>
 
 <script>
-var contacts = {{ contacts|tojson }};
 
-function fillFromContact(val){
- var sel = document.getElementById('contactSelect');
- var opt = sel.options[sel.selectedIndex];
- if(!val){ return; }
- document.getElementById('contactIdHidden').value = val;
- document.getElementById('f_name').value = opt.dataset.name || '';
- document.getElementById('f_email').value = opt.dataset.email || '';
- document.getElementById('f_addr').value = opt.dataset.address || '';
- document.getElementById('f_city').value = opt.dataset.city || '';
- document.getElementById('f_state').value = opt.dataset.state || '';
- document.getElementById('f_zip').value = opt.dataset.zip || '';
+var _ct = null;
+document.getElementById('contactSearch').addEventListener('input', function () {
+ var q = this.value.trim(), box = document.getElementById('contactResults');
+ clearTimeout(_ct);
+ if (q.length < 2) { box.textContent = ''; return; }
+ _ct = setTimeout(function () {
+  fetch('/agent/crm/lookup?q=' + encodeURIComponent(q), {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (d) {
+   box.textContent = '';
+   (d.contacts || []).forEach(function (c) {
+    var b = document.createElement('button'); b.type = 'button';
+    b.setAttribute('aria-label', 'Use ' + c.name);
+    b.style.cssText = 'text-align:left;width:100%;padding:.55rem .75rem;border:1px solid rgba(160,125,85,.3);border-radius:8px;background:#fff;cursor:pointer;font:inherit;';
+    b.textContent = c.name + (c.email ? '  ·  ' + c.email : '');
+    b.addEventListener('click', function () { fillFromContact(c); box.textContent = ''; document.getElementById('contactSearch').value = c.name; });
+    box.appendChild(b);
+   });
+  });
+ }, 200);
+});
+function fillFromContact(c){
+ document.getElementById('contactIdHidden').value = c.id;
+ document.getElementById('f_name').value = c.name || '';
+ document.getElementById('f_email').value = c.email || '';
+ document.getElementById('f_addr').value = c.address || '';
+ document.getElementById('f_city').value = c.city || '';
+ document.getElementById('f_state').value = c.state || '';
+ document.getElementById('f_zip').value = c.zip_code || '';
 }
 
 function calcRow(input){

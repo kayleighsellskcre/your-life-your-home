@@ -8225,11 +8225,8 @@ def agent_power_tools():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
 
-    return render_template(
-        "agent/power_tools.html",
-        brand_name=FRONT_BRAND_NAME,
-        user=user,
-    )
+    # Power Tools only ever held two links (Invoices and Seasonal Checklists), which now sit in the menu.
+    return redirect(url_for("agent_invoices"))
 
 
 # ─────────────────────────────────────────────
@@ -8249,7 +8246,7 @@ def agent_invoices():
     total_outstanding = sum(i["total"] for i in all_inv if i["status"] in ("sent", "overdue"))
     total_paid = sum((i["paid_amount"] or i["total"]) for i in all_inv if i["status"] == "paid")
     total_draft = sum(i["total"] for i in all_inv if i["status"] == "draft")
-    contacts = list_agent_contacts(user["id"])
+    contacts = []
     return render_template(
         "agent/invoices.html",
         brand_name=FRONT_BRAND_NAME,
@@ -8263,6 +8260,24 @@ def agent_invoices():
     )
 
 
+@app.route("/agent/crm/lookup")
+def agent_crm_lookup():
+    """Type-ahead over the signed-in agent's own contacts (name, email or phone), eight at a time."""
+    user = get_current_user()
+    if not user or user.get("role") != "agent":
+        return jsonify(ok=False), 401
+    q = (request.args.get("q") or "").strip().replace("%", "").replace("_", "")
+    if len(q) < 2:
+        return jsonify(ok=True, contacts=[])
+    conn = get_connection()
+    rows = conn.execute(
+        """SELECT id, name, email, address, city, state, zip_code FROM agent_contacts
+           WHERE agent_user_id = ? AND (name LIKE ? OR email LIKE ? OR phone LIKE ?)
+           ORDER BY name LIMIT 8""", (user["id"], "%" + q + "%", "%" + q + "%", "%" + q + "%")).fetchall()
+    conn.close()
+    return jsonify(ok=True, contacts=[dict(r) for r in rows])
+
+
 @app.route("/agent/invoices/new", methods=["GET", "POST"])
 def agent_invoice_new():
     """Create a new invoice."""
@@ -8272,11 +8287,13 @@ def agent_invoice_new():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
 
-    contacts = list_agent_contacts(user["id"])
+    contacts = []  # the form searches the CRM as you type, so the page never carries every contact
     prefill_contact_id = request.args.get("contact_id", type=int)
     prefill_contact = None
     if prefill_contact_id:
-        prefill_contact = next((c for c in contacts if c["id"] == prefill_contact_id), None)
+        from database import get_agent_contact
+        _pc = get_agent_contact(prefill_contact_id, user["id"])
+        prefill_contact = dict(_pc) if _pc else None
 
     if request.method == "POST":
         # Gather client info
@@ -8368,7 +8385,7 @@ def agent_invoice_edit(inv_id):
         flash("We could not find that invoice.", "error")
         return redirect(url_for("agent_invoices"))
 
-    contacts = list_agent_contacts(user["id"])
+    contacts = []
 
     if request.method == "POST":
         contact_id = request.form.get("contact_id", "").strip() or None
@@ -8691,7 +8708,7 @@ def agent_seasonal_checklists():
     return render_template("shared/seasonal_checklists.html",
                            brand_name=FRONT_BRAND_NAME, user=user,
                            role="agent", previews=previews,
-                           back_url=url_for("agent_power_tools"))
+                           back_url=url_for("agent_dashboard"), back_label="Back to Dashboard")
 
 
 @app.route("/agent/seasonal-checklists/<season>")
@@ -10002,9 +10019,23 @@ def lender_crm():
                 flash("Invalid number. Please enter a number between 1 and 365.", "error")
 
     status_filter = request.args.get("status")
-    borrowers = list_lender_borrowers(user["id"], status_filter)
-    
-    # Convert borrowers to dicts and enrich with history/tasks/deals (four batched queries, not three per borrower)
+    borrowers_all = list_lender_borrowers(user["id"], status_filter)
+    search_query = (request.args.get("q") or "").strip()
+    if search_query:
+        _q = search_query.lower()
+        borrowers_all = [b for b in borrowers_all if _q in " ".join(str(b[k] or "") for k in ("name", "email", "phone") if k in b.keys()).lower()]
+    # Fifty borrowers per page: the page stays fast and small however many borrowers there are.
+    PER_PAGE = 50
+    filtered_total = len(borrowers_all)
+    pages = max(1, -(-filtered_total // PER_PAGE))
+    try:
+        page = int(request.args.get("page", 1))
+    except (TypeError, ValueError):
+        page = 1
+    page = max(1, min(page, pages))
+    borrowers = borrowers_all[(page - 1) * PER_PAGE: page * PER_PAGE]
+
+    # Enrich only this page with history/tasks/deals (four batched queries, not three per borrower)
     from database import crm_page_bundle
     _bundle = crm_page_bundle(user["id"], [b["id"] for b in borrowers], "lender_borrower")
     borrowers_list = []
@@ -10077,19 +10108,20 @@ def lender_crm():
         print(f"Error getting borrowers needing followup: {e}")
         needs_followup_count = 0
     
+    _all_rows = [dict(b) for b in list_lender_borrowers(user["id"], None)]
     stats = {
-        'total': len(borrowers_list),
-        'prospect': len([b for b in borrowers_list if b.get('status') == 'prospect']),
-        'preapproval': len([b for b in borrowers_list if b.get('status') == 'preapproval']),
-        'in_process': len([b for b in borrowers_list if b.get('status') == 'in_process']),
-        'closed': len([b for b in borrowers_list if b.get('status') == 'closed']),
+        'total': len(_all_rows),
+        'prospect': len([b for b in _all_rows if b.get('status') == 'prospect']),
+        'preapproval': len([b for b in _all_rows if b.get('status') == 'preapproval']),
+        'in_process': len([b for b in _all_rows if b.get('status') == 'in_process']),
+        'closed': len([b for b in _all_rows if b.get('status') == 'closed']),
         'pending_tasks': len(all_tasks),
         'total_deals': len(all_deals),
         'pipeline_value': sum([d.get('deal_value') or 0 for d in all_deals]),
         'expected_commission': sum([d.get('expected_commission') or 0 for d in all_deals]),
         'needs_followup': needs_followup_count,
         'follow_up_days': follow_up_days,
-        'with_automation': len([b for b in borrowers_list if any([
+        'with_automation': len([b for b in _all_rows if any([
             b.get('auto_birthday'), b.get('auto_anniversary'),
             b.get('auto_seasonal'), b.get('auto_equity'), b.get('auto_holidays')
         ])]),
@@ -10097,7 +10129,7 @@ def lender_crm():
     
     # Get all unique tags
     all_tags = set()
-    for borrower in borrowers_list:
+    for borrower in _all_rows:
         tags = borrower.get('tags', '') or ''
         if tags:
             all_tags.update([t.strip() for t in tags.split(',') if t.strip()])
@@ -10115,6 +10147,8 @@ def lender_crm():
         user=user,
         borrowers=borrowers_list,
         status_filter=status_filter,
+        search_query=search_query,
+        page=page, pages=pages, filtered_total=filtered_total,
         stats=stats,
         all_tags=all_tags,
         upcoming_tasks=upcoming_tasks,
