@@ -9,7 +9,7 @@
     <ol class="bk-steps">
       <li><b>Choose when you are free.</b> Below, tick the days you take appointments, then set your hours, how long each visit lasts, and how much notice you need. Check that the time zone is yours.</li>
       <li><b>Say how you will meet.</b> Write it the way a client would read it, like "Phone call. I will call you at the number you give me." If it mentions a phone or a call, clients will be asked for their number.</li>
-      <li><b>Connect your own calendar.</b> Under "Hide times when I am already busy," paste the link to the calendar on your phone. Anything already on it, like showings or closings, is hidden from clients so you are never double booked. Tap "How to get the link" for the steps.</li>
+      <li><b>Connect your own calendar.</b> Under "Hide times when I am already busy," paste the link to the calendar on your phone. Anything already on it, like showings or closings, is hidden from clients so you are never double booked. Tap the kind of calendar you use and follow the steps for just that one.</li>
       <li><b>Block your days off.</b> Add holidays, vacations, or any day you are not working under "Days off." Those days will not show to clients.</li>
       <li><b>Turn it on.</b> Tick "Turn on my booking page" and tap Save. Your link to share appears right under the box.</li>
       <li><b>Try it yourself.</b> Tap "See what clients see," pick a time, and book with an email you can check. You will get the client's confirmation and your own "new booking" note. Then cancel it under "Coming up."</li>
@@ -63,27 +63,75 @@
       {% endfor %}
       {% if bk.busy %}<p class="pie-hint" style="margin:.2rem 0 .5rem;">Untick a calendar and tap Save to disconnect it.</p>{% endif %}
       <input class="pie-input" name="busy_new" placeholder="Paste a calendar link here (starts with webcal:// or https://)" autocomplete="off">
-      <details class="bk-how">
-        <summary>How to get the link</summary>
-        <div class="bk-how-body">
-          <b>iPhone Calendar</b>
-          <ol>
-            <li>Open the <b>Calendar</b> app and tap <b>Calendars</b> at the bottom.</li>
-            <li>Tap the <b>i</b> next to the calendar you put your appointments on (under iCloud).</li>
-            <li>Turn on <b>Public Calendar</b>, then tap <b>Share Link</b> and choose <b>Copy</b>.</li>
-            <li>Paste it in the box above and tap <b>Save</b>. Use more than one calendar? Add each one the same way.</li>
-          </ol>
-          <p class="pie-hint" style="margin:.2rem 0 .7rem;">"Public" only means anyone who has this exact link could see that calendar. The link is long and impossible to guess, and it is kept private here, so just do not post it anywhere. If your calendars are not under iCloud (for example they are under Gmail), use the Google steps instead.</p>
-          <b>Google Calendar</b>
-          <ol>
-            <li>On a computer, open <b>calendar.google.com</b>.</li>
-            <li>Click the gear, then <b>Settings</b>, then your calendar's name on the left.</li>
-            <li>Scroll to <b>Integrate calendar</b> and copy the <b>Secret address in iCal format</b>.</li>
-            <li>Paste it in the box above and tap <b>Save</b>.</li>
-          </ol>
-          <p class="pie-hint" style="margin:.2rem 0 0;">Changes on your calendar show up here within a few minutes. All-day events, like birthdays or holidays, do not block times. Use Days off for those.</p>
+      <div class="bk-how">
+        <p style="margin:.6rem 0 .4rem;font-weight:600;">Where do you keep your appointments? Tap one to see the steps.</p>
+        <div class="bk-pick" role="tablist">
+          <button type="button" class="bk-pickbtn" data-cal="google">Google Calendar</button>
+          <button type="button" class="bk-pickbtn" data-cal="icloud">iPhone (iCloud)</button>
+          <button type="button" class="bk-pickbtn" data-cal="outlook">Outlook</button>
+          <button type="button" class="bk-pickbtn" data-cal="unsure">I am not sure</button>
         </div>
-      </details>
+
+        <div class="bk-panel" data-cal="unsure" hidden>
+          <b>Let's find out together.</b>
+          <ol>
+            <li>On your iPhone, open the <b>Calendar</b> app.</li>
+            <li>Tap <b>Calendars</b> at the bottom of the screen.</li>
+            <li>Find the calendar your appointments go on. Look at the small gray word <b>above</b> it.</li>
+            <li>It says <b>GMAIL</b> or <b>GOOGLE</b>? Tap <b>Google Calendar</b> above.</li>
+            <li>It says <b>ICLOUD</b>? Tap <b>iPhone (iCloud)</b> above.</li>
+            <li>It says <b>OUTLOOK</b> or <b>EXCHANGE</b>? Tap <b>Outlook</b> above.</li>
+            <li>It says <b>ON MY IPHONE</b>? That calendar only lives on your phone, so a website cannot see it. Ask us for help moving it to iCloud.</li>
+          </ol>
+          <p class="pie-hint" style="margin:0;">Have an Android phone? Your calendar is almost always Google. Tap <b>Google Calendar</b> above.</p>
+        </div>
+
+        <div class="bk-panel" data-cal="google" hidden>
+          <b>Google Calendar</b> <span class="pie-hint">(you need a computer for this part)</span>
+          <ol>
+            <li>On a computer, go to <b>calendar.google.com</b> and sign in.</li>
+            <li>Click the <b>gear</b> at the top right. Then click <b>Settings</b>.</li>
+            <li>On the left, under <b>Settings for my calendars</b>, click <b>your name</b>.</li>
+            <li>Under your name, click <b>Integrate calendar</b>.</li>
+            <li>Find <b>Secret address in iCal format</b>. Click the <b>copy</b> button next to it (it looks like two little squares).</li>
+            <li>Come back to this page. Click the box above that says <b>Paste a calendar link here</b>.</li>
+            <li>Paste it (<b>Ctrl+V</b> on a PC, <b>Cmd+V</b> on a Mac). Then click <b>Save</b>.</li>
+            <li>You will see a green box that says <b>Connected</b>. You are done!</li>
+          </ol>
+          <p class="pie-hint" style="margin:0;">Please do not click <b>Reset</b> in Google. That would break the link and you would need to do this again.</p>
+        </div>
+
+        <div class="bk-panel" data-cal="icloud" hidden>
+          <b>iPhone (iCloud)</b>
+          <ol>
+            <li>On your iPhone, open the <b>Calendar</b> app.</li>
+            <li>Tap <b>Calendars</b> at the bottom.</li>
+            <li>Under <b>ICLOUD</b>, find the calendar your appointments go on. Tap the little <b>i</b> next to it.</li>
+            <li>Scroll all the way down. Turn on <b>Public Calendar</b>.</li>
+            <li>Tap <b>Share Link</b>, then tap <b>Copy</b>.</li>
+            <li>Open this page on your phone. Tap the box above that says <b>Paste a calendar link here</b>.</li>
+            <li>Tap the box again and tap <b>Paste</b>. Then tap <b>Save</b>.</li>
+            <li>You will see a green box that says <b>Connected</b>. You are done!</li>
+          </ol>
+          <p class="pie-hint" style="margin:0;">"Public" just means someone would need this exact link to see it. The link is long and random, and we keep it private. Just do not post it anywhere. Do not see Public Calendar? Then this calendar is not iCloud. Tap <b>I am not sure</b> above.</p>
+        </div>
+
+        <div class="bk-panel" data-cal="outlook" hidden>
+          <b>Outlook</b> <span class="pie-hint">(you need a computer for this part)</span>
+          <ol>
+            <li>On a computer, go to <b>outlook.com</b> (or <b>outlook.office.com</b> for a work account) and sign in.</li>
+            <li>Click the <b>calendar</b> icon on the left.</li>
+            <li>Click the <b>gear</b> at the top right.</li>
+            <li>Click <b>Calendar</b>, then <b>Shared calendars</b>.</li>
+            <li>Find <b>Publish a calendar</b>. Pick your calendar. Pick <b>Can view when I'm busy</b>. Click <b>Publish</b>.</li>
+            <li>Two links appear. Click the <b>ICS</b> link and choose <b>Copy link</b>.</li>
+            <li>Come back to this page. Paste it in the box above that says <b>Paste a calendar link here</b>. Then click <b>Save</b>.</li>
+            <li>You will see a green box that says <b>Connected</b>. You are done!</li>
+          </ol>
+          <p class="pie-hint" style="margin:0;">No Publish a calendar section? Some work accounts turn it off. Ask your office tech person to allow calendar publishing.</p>
+        </div>
+        <p class="pie-hint" style="margin:.6rem 0 0;">Good to know: changes on your calendar show up here within a few minutes. All-day events, like birthdays or holidays, do not block times. Use Days off for those. Use more than one calendar? Add each link the same way.</p>
+      </div>
 
       <label class="pie-label" for="bk_title">What clients are booking</label>
       <input class="pie-input" id="bk_title" name="title" maxlength="120" value="{{ bk.s.title }}">
@@ -134,6 +182,18 @@
   </div>
 </div>
 <script>
+(function () {
+  var pick = document.querySelectorAll('.bk-pickbtn'), panels = document.querySelectorAll('.bk-panel');
+  function show(k) {
+    pick.forEach(function (b) { b.classList.toggle('on', b.dataset.cal === k); b.setAttribute('aria-pressed', b.dataset.cal === k); });
+    panels.forEach(function (p) { p.hidden = p.dataset.cal !== k; });
+    try { localStorage.setItem('bkCal', k); } catch (e) {}
+  }
+  pick.forEach(function (b) { b.addEventListener('click', function () { show(b.dataset.cal); }); });
+  var saved = null;
+  try { saved = localStorage.getItem('bkCal'); } catch (e) {}
+  if (saved && document.querySelector('.bk-panel[data-cal="' + saved + '"]')) show(saved);
+})();
 function bkCopy(id, btn) {
   var i = document.getElementById(id); i.select();
   try { navigator.clipboard.writeText(i.value); } catch (e) { document.execCommand('copy'); }

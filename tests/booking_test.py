@@ -194,3 +194,7 @@ with contextlib.redirect_stdout(io.StringIO()):
     c.post("/booking/save", data={**form})
 ok(B.get_settings(ag)["busy_list"] == [], "unticking calendars disconnects them")
 _ur.urlopen = _real
+with contextlib.redirect_stdout(io.StringIO()):
+    page = c.get("/agent/booking")
+ok(all(f'data-cal="{k}"'.encode() in page.data for k in ("google", "icloud", "outlook", "unsure")) and b"Secret address in iCal format" in page.data,
+   "the page lets each person pick their calendar and shows steps for each kind")
