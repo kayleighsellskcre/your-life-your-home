@@ -235,10 +235,10 @@
 <div class="ylh-page-hd">
   <div class="ylh-page-hd__label">AI Assistant</div>
   <h1 class="ylh-page-hd__title">Concierge</h1>
-  <p class="ylh-page-hd__sub">Lead qualification &amp; vendor routing</p>
+  <p class="ylh-page-hd__sub">Lead qualification &amp; lead partners</p>
   <div class="ylh-page-hd__actions">
     <a href="{{ url_for('agent_concierge_settings') }}" class="ylh-btn ylh-btn-ghost">Settings</a>
-    <a href="{{ url_for('agent_concierge_vendors') }}" class="ylh-btn ylh-btn-primary">Manage Vendors</a>
+    <a href="{{ url_for('agent_concierge_vendors') }}" class="ylh-btn ylh-btn-primary">Lead Partners</a>
   </div>
 </div>
 
@@ -260,7 +260,7 @@
     <div class="con-kpi__icon con-kpi__icon--green">&#534A40;</div>
     <div class="con-kpi__label">Monthly Revenue</div>
     <div class="con-kpi__value">${{ "{:,.0f}".format(stats.monthly_revenue) }}</div>
-    <div class="con-kpi__sub">{{ stats.active_vendors }} active vendors</div>
+    <div class="con-kpi__sub">{{ stats.active_vendors }} active lead partners</div>
   </div>
 </div>
 
@@ -292,7 +292,7 @@
           <span>&#534A40;</span> All Conversations
         </a>
         <a href="{{ url_for('agent_concierge_vendors') }}" class="con-quick-link">
-          <span>&#54402D;</span> Vendor Performance
+          <span>&#54402D;</span> Lead Partner Results
         </a>
         <a href="{{ url_for('agent_concierge_settings') }}" class="con-quick-link">
           <span>&#9881;</span> Concierge Settings
@@ -311,7 +311,7 @@
           <span class="con-status-val">Active</span>
         </div>
         <div class="con-status-row">
-          <span class="con-status-label"><span class="con-status-dot con-status-dot--blue"></span>Active Vendors</span>
+          <span class="con-status-label"><span class="con-status-dot con-status-dot--blue"></span>Active Lead Partners</span>
           <span class="con-status-val">{{ stats.active_vendors }}</span>
         </div>
         <div class="con-status-row">
