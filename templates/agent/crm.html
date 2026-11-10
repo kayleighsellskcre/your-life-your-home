@@ -3,6 +3,10 @@
 
 {% block agent_content %}
 <style>
+#crm a.crm-nudge{display:flex!important;box-sizing:border-box;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;text-decoration:none!important;background:#FBF7F1;border:1px solid #EFE4D4;border-radius:14px;padding:.85rem 1.2rem!important;margin:0 0 1rem;color:#443c36!important;font-size:.92rem;}
+.crm-nudge b{font-size:1.05rem;color:#a0413d;}
+.crm-nudge-go{color:#7A5238!important;font-weight:700;font-size:.85rem;}
+
 .c-call{font-size:.72rem;font-weight:600;color:#2F6B3F;margin-top:.1rem;letter-spacing:0;text-transform:none;}
 .c-partner{font-size:.72rem;font-weight:500;color:#8F6244;margin-top:.1rem;letter-spacing:0;text-transform:none;}
 .couple-box{border:1px solid #EFE4D4;background:#FBF7F1;border-radius:10px;padding:.7rem .85rem;font-size:.85rem;line-height:1.5;margin-bottom:.6rem;}
@@ -17,7 +21,7 @@
 
 /* Hard reset — excludes every styled component class so pills/buttons keep their look */
 #crm button:not(.stg-pill):not(.mbtn):not(.x-btn):not(.c-act):not(.cmod-x):not(.filter-chip-x):not(.t-go),
-#crm a:not(.stg-pill):not(.t-btn):not(.x-btn):not(.c-act):not(.exp-tag):not(.filter-chip):not(.s-stat):not(.crm-kpi-tile),
+#crm a:not(.stg-pill):not(.t-btn):not(.x-btn):not(.c-act):not(.exp-tag):not(.filter-chip):not(.s-stat):not(.crm-kpi-tile):not(.crm-nudge),
 #crm input,#crm select,#crm textarea,#crm form,#crm label{
  width:auto!important;min-height:unset!important;max-width:none!important;
  margin:0!important;padding:0!important;
@@ -211,7 +215,7 @@
 .stg-pill--on .stg-pill-x:hover{background:rgba(255,255,255,.5)!important;}
 
 /* ── MAIN LAYOUT ─────────────────────────── */
-.main-layout{display:grid;grid-template-columns:1fr;min-height:calc(100vh - 200px);}
+.main-layout{display:grid;grid-template-columns:1fr;align-content:start;min-height:calc(100vh - 200px);}
 .qa-panel{ display:none!important; }
 
 /* ── CONTACT TABLE ───────────────────────── */
@@ -673,7 +677,7 @@
 <!-- ── PAGE HEADER ───────────────────────────── -->
 <div class="ylh-page-hd crm-fu">
   <h1 class="ylh-page-hd__title">Your CRM</h1>
-  <p class="ylh-page-hd__sub">Contacts &middot; Pipeline &middot; Relationship Management</p>
+  <p class="ylh-page-hd__sub">Everyone you care about, in one place.</p>
 </div>
 
 <!-- ── FLASH ─────────────────────────────────── -->
@@ -687,38 +691,12 @@
  {% endif %}
 {% endwith %}
 
-<!-- ── KPI STRIP (dashboard-style) ───────────── -->
-<div class="crm-kpi-strip crm-fu crm-fu1">
-
- <a class="crm-kpi-tile" href="?" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
-  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#8A6D2F;border-radius:18px 18px 0 0;"></div>
-  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:#443c36;margin-bottom:.2rem;">{{ stats.total }}</div>
-  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">Total Contacts</div>
-  <div style="font-size:.75rem;color:#7a6855;">In your CRM</div>
- </a>
-
- <a class="crm-kpi-tile" href="?stage=active" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
-  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#A68A4E;border-radius:18px 18px 0 0;"></div>
-  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:#443c36;margin-bottom:.2rem;">{{ stats.active }}</div>
-  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">Active Pipeline</div>
-  <div style="font-size:.75rem;color:#7a6855;">Ready to move</div>
- </a>
-
- <a class="crm-kpi-tile" href="?stage=new" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
-  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#8F6244;border-radius:18px 18px 0 0;"></div>
-  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:#443c36;margin-bottom:.2rem;">{{ stats.new }}</div>
-  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">New Leads</div>
-  <div style="font-size:.75rem;color:#7a6855;">Ready for your call</div>
- </a>
-
- <a class="crm-kpi-tile" href="?" style="display:block;text-decoration:none;background:#fff;border:1px solid rgba(200,180,151,.22);border-radius:18px;padding:1.1rem 1.3rem .95rem;box-shadow:0 2px 14px rgba(68,60,54,.055);position:relative;overflow:hidden;transition:box-shadow .25s,transform .25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 8px 28px rgba(68,60,54,.10)'" onmouseout="this.style.transform='';this.style.boxShadow='0 2px 14px rgba(68,60,54,.055)'">
-  <div style="position:absolute;top:0;left:0;right:0;height:3px;background:#443c36;border-radius:18px 18px 0 0;"></div>
-  <div style="font-family:'Playfair Display',Georgia,serif;font-size:2.1rem;font-weight:700;line-height:1;color:{% if stats.needs_followup|default(0) > 0 %}#a0413d{% else %}#443c36{% endif %};margin-bottom:.2rem;">{{ stats.needs_followup|default(0) }}</div>
-  <div style="font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#5c4e42;margin-bottom:.1rem;">Need Follow-up</div>
-  <div style="font-size:.75rem;color:#7a6855;">Don't let them slip away</div>
- </a>
-
-</div><!-- /crm-kpi-strip -->
+{% if stats.needs_followup|default(0) > 0 %}
+<a class="crm-nudge crm-fu crm-fu1" href="{{ url_for('followups.followups_page') }}">
+ <span><b>{{ stats.needs_followup }}</b> {{ 'person is' if stats.needs_followup == 1 else 'people are' }} waiting to hear from you.</span>
+ <span class="crm-nudge-go">Open Follow-ups &rsaquo;</span>
+</a>
+{% endif %}
 
 <!-- ── CONTACT CARD ───────────────────────────── -->
 <div class="crm-lux-card crm-fu crm-fu2">
@@ -726,8 +704,7 @@
  <!-- Card header: title + action buttons -->
  <div class="crm-card-hd">
   <div>
-   <h2 class="crm-card-title">Your Contacts</h2>
-   <p class="crm-card-sub">Contacts &middot; Pipeline &middot; Follow-ups</p>
+   <h2 class="crm-card-title">{{ filtered_total }} {{ 'person' if filtered_total == 1 else 'people' }}</h2>
   </div>
   <div class="crm-card-actions">
    <button class="stg-pill stg-pill--on" onclick="openAddModal()">+ Add Contact</button>
@@ -804,30 +781,7 @@
 <!-- ── MAIN ───────────────────────────────────── -->
 <div class="main-layout crm-fu crm-fu3">
 
- <!-- Quick-Add Sidebar -->
- <aside class="qa-panel open" id="qaPanel">
- <span class="qa-h">Quick Add</span>
- <form method="post" id="qaForm">
- <input type="hidden" name="action" value="add">
- <div class="qa-f"><label>Name *</label><input type="text" name="name" id="qaName" required placeholder="Full name"></div>
- <div class="qa-f"><label>Email</label><input type="email" name="email" placeholder="email@example.com"></div>
- <div class="qa-f"><label>Phone</label><input type="tel" name="phone" placeholder="555-555-5555"></div>
- <div class="qa-f"><label>Stage</label>
- <select name="stage">
- <option value="new">New Lead</option>
- <option value="nurture">Nurture</option>
- <option value="active">Active</option>
- <option value="past">Past Client</option>
- <option value="sphere">Sphere</option>
- <option value="closed">Closed</option>
- <option value="hold">Hold</option>
- </select>
- </div>
- <button type="submit" class="qa-submit">Add Contact</button>
- </form>
- <div class="qa-hr"></div>
- <a href="{{ url_for('agent_crm_import') }}" class="qa-link">↑ Import from Excel</a>
- </aside>
+
 
  <!-- Inline-add form (referenced by inputs via form="quick-add-form") -->
  <form id="quick-add-form" method="post" action="/agent/crm">
@@ -892,7 +846,7 @@
  <input type="checkbox" class="c-chk contact-checkbox" value="{{ contact.id }}">
  </td>
  <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}{% if contact.partner_name %}<div class="c-partner">with {{ contact.partner_name }}</div>{% endif %}{% if contact.next_call %}<div class="c-call">Call booked: {{ contact.next_call }}</div>{% endif %}</td>
- <td class="c-td"><span class="s-badge s-badge--{{ contact.stage }}">{{ contact.stage }}</span></td>
+ <td class="c-td"><span class="s-badge s-badge--{{ contact.stage }}">{{ (contact.stage or "")|replace("_"," ") }}</span></td>
  <td class="c-td">
  {% if contact.email %}<a href="mailto:{{ contact.email }}" onclick="event.stopPropagation()" title="{{ contact.email }}">{{ contact.email }}</a>{% else %}<span class="c-td--muted"> - </span>{% endif %}
  </td>

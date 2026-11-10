@@ -20,18 +20,20 @@
   <div class="ylh-page-hd">
     <div class="ylh-page-hd__label">Your day</div>
     <h1 class="ylh-page-hd__title">Follow-ups</h1>
-    <p class="ylh-page-hd__sub">People you planned to reach, oldest first. Mark one done when you have followed up, or snooze it and it comes back when you choose.</p>
+    <p class="ylh-page-hd__sub">People you planned to reach, oldest first. After you reach out, tell me how it went and I will log it and set the next step for you. Or snooze it and it comes back when you choose.</p>
   </div>
   {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="fu-flash">{{ m }}</div>{% endfor %}
   {% for r in rows %}
   <div class="fu-row">
-    <div class="fu-name"><b>{{ r.name }}</b>
-      <span>{{ r.note or 'No note' }}{% if r.stage %} &middot; {{ r.stage|title }}{% endif %} &middot; Last spoke: {{ 'Never' if r.days is none else r.last }}</span>
+    <div class="fu-name"><b>{{ r.name }}{% if r.partner_name %} <small style="font-weight:500;color:#8F6244;">&amp; {{ r.partner_name }}</small>{% endif %}</b>
+      <span>{{ r.note or 'No note' }}{% if r.stage %} &middot; {{ r.stage|replace('_',' ')|title }}{% endif %} &middot; Last spoke: {{ 'Never' if r.days is none else r.last }}</span>
       <div><span class="fu-tag {{ 'late' if r.late }}">{{ r.status }}</span></div></div>
     <div class="fu-acts">
       {% if r.phone %}<a href="tel:{{ r.phone }}" aria-label="Call {{ r.name }}">Call</a><a href="sms:{{ r.phone }}" aria-label="Text {{ r.name }}">Text</a>{% endif %}
       {% if r.email %}<a href="mailto:{{ r.email }}" aria-label="Email {{ r.name }}">Email</a>{% endif %}
-      <form method="post" action="{{ url_for('followups.followup_act', contact_id=r.id, action='done') }}"><button class="done" type="submit" aria-label="Mark {{ r.name }} done">Done</button></form>
+      <form method="post" action="{{ url_for('followups.followup_act', contact_id=r.id, action='outcome') }}">
+        <select name="result" aria-label="How did it go with {{ r.name }}?">{% for k, v in outcomes.items() %}<option value="{{ k }}">{{ v[0] }}</option>{% endfor %}</select>
+        <button class="done" type="submit" aria-label="Save how it went with {{ r.name }}">Done</button></form>
       <form method="post" action="{{ url_for('followups.followup_act', contact_id=r.id, action='snooze') }}">
         <select name="days" aria-label="Snooze {{ r.name }} until">{% for k, v in snoozes.items() %}<option value="{{ k }}">{{ v[0] }}</option>{% endfor %}</select>
         <button type="submit">Snooze</button></form>

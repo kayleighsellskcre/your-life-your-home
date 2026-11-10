@@ -10,6 +10,15 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 bp = Blueprint("followups", __name__)
 _H = {}
 SNOOZES = {"1": ("Tomorrow", 1), "3": ("In 3 days", 3), "7": ("Next week", 7)}
+# How did it go? key: (label, what we log, new stage or None, days until the next check-in or None, note for that check-in)
+OUTCOMES = {
+    "talked": ("We talked, all good", "We talked and it went well.", None, None, ""),
+    "message": ("I left a message", "Left a message.", None, 3, "Try again"),
+    "listings": ("I will send them listings", "Promised to send listings.", None, 2, "Send listings"),
+    "later": ("Check in again in 2 weeks", "Agreed to talk again in a couple of weeks.", None, 14, "Friendly check in"),
+    "ready": ("They are ready to work together", "Ready to work together.", "active", None, ""),
+    "notnow": ("Not the right time yet", "Not the right time yet. Keeping in touch gently.", "nurture", 60, "Gentle check in"),
+}
 
 
 def _db():
@@ -29,7 +38,8 @@ def due_for(agent_id):
     conn = _db()
     try:
         rows = conn.execute(
-            """SELECT id, name, phone, email, stage, last_touch, COALESCE(next_action_date,'') AS due, COALESCE(next_action_note,'') AS note
+            """SELECT id, name, phone, email, stage, last_touch, COALESCE(next_action_date,'') AS due, COALESCE(next_action_note,'') AS note,
+                      partner_id, (SELECT p.name FROM agent_contacts p WHERE p.id = agent_contacts.partner_id) AS partner_name
                FROM agent_contacts
                WHERE agent_user_id = ? AND LOWER(COALESCE(stage, '')) NOT IN ('closed', 'hold', 'past')
                  AND ((COALESCE(next_action_date, '') != '' AND next_action_date <= ?)
@@ -39,8 +49,11 @@ def due_for(agent_id):
     finally:
         conn.close()
     out = []
+    due_ids = {r["id"] for r in rows}
     for r in rows:
         r = dict(r)
+        if r["partner_id"] in due_ids and r["partner_id"] < r["id"]:
+            continue  # a couple is one reminder, not two
         label, days = ago(r["last_touch"])
         r["last"], r["days"] = label, days
         if r["due"]:
@@ -61,7 +74,7 @@ def followups_page():
     u = _agent()
     if not u:
         return redirect(url_for("login", role="agent"))
-    return render_template("agent/followups.html", rows=due_for(u["id"]), snoozes=SNOOZES)
+    return render_template("agent/followups.html", rows=due_for(u["id"]), snoozes=SNOOZES, outcomes=OUTCOMES)
 
 
 @bp.route("/agent/followups/<int:contact_id>/<action>", methods=["POST"])
@@ -71,20 +84,39 @@ def followup_act(contact_id, action):
         return redirect(url_for("login", role="agent"))
     conn = _db()
     try:
-        row = conn.execute("SELECT id, name, COALESCE(next_action_date,'') AS due FROM agent_contacts WHERE id = ? AND agent_user_id = ?",
+        row = conn.execute("SELECT id, name, partner_id, COALESCE(next_action_date,'') AS due FROM agent_contacts WHERE id = ? AND agent_user_id = ?",
                            (contact_id, u["id"])).fetchone()
         if not row:
             flash("We could not find that contact.", "error")
             return redirect(url_for("followups.followups_page"))
         today = date.today()
+        group = [contact_id] + ([row["partner_id"]] if row["partner_id"] else [])
         if action == "done":
-            conn.execute("UPDATE agent_contacts SET next_action_date = '', next_action_note = '', last_touch = ? WHERE id = ?",
-                         (today.isoformat(), contact_id))
+            for cid in group:
+                conn.execute("UPDATE agent_contacts SET next_action_date = '', next_action_note = '', last_touch = ? WHERE id = ?",
+                             (today.isoformat(), cid))
             flash(f"Done. {row['name']} is marked as followed up today.", "success")
+        elif action == "outcome":
+            label, what, stage, days, note = OUTCOMES.get(request.form.get("result", ""), OUTCOMES["talked"])
+            nxt = (today + timedelta(days=days)).isoformat() if days else ""
+            for cid in group:
+                conn.execute("UPDATE agent_contacts SET next_action_date = ?, next_action_note = ?, last_touch = ? WHERE id = ?",
+                             (nxt, note, today.isoformat(), cid))
+            if stage:
+                conn.execute("UPDATE agent_contacts SET stage = ? WHERE agent_user_id = ? AND (id = ? OR id = (SELECT partner_id FROM agent_contacts WHERE id = ?))",
+                             (stage, u["id"], contact_id, contact_id))
+            conn.commit()  # release the lock before the history entry is written
+            try:
+                from database import add_crm_interaction
+                add_crm_interaction(contact_id, "agent_contact", u["id"], "call", label, what, "phone")
+            except Exception:
+                pass
+            flash(f"Saved. {row['name']}: {label.lower()}." + (f" I will remind you on {nxt}." if nxt else ""), "success")
         elif action == "snooze":
             n = SNOOZES.get(request.form.get("days", "1"), SNOOZES["1"])[1]
             new = (today + timedelta(days=n)).isoformat()
-            conn.execute("UPDATE agent_contacts SET next_action_date = ? WHERE id = ?", (new, contact_id))
+            for cid in group:
+                conn.execute("UPDATE agent_contacts SET next_action_date = ? WHERE id = ?", (new, cid))
             flash(f"Snoozed. {row['name']} will come back on {new}.", "success")
         else:
             flash("That action is not available.", "error")
