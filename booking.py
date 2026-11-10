@@ -59,6 +59,9 @@ def ensure_tables():
         reminded INTEGER DEFAULT 0,
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )""")
+    cols = [r[1] for r in cur.execute("PRAGMA table_info(booking_settings)").fetchall()]
+    if "blocked_days" not in cols:
+        cur.execute("ALTER TABLE booking_settings ADD COLUMN blocked_days TEXT DEFAULT ''")
     cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_booking_slot ON bookings(user_id, day, start_time) WHERE status='confirmed'")
     cur.execute("CREATE INDEX IF NOT EXISTS ix_booking_user_day ON bookings(user_id, day)")
     conn.commit()
@@ -85,7 +88,18 @@ def get_settings(user_id, create=False):
             if v not in (None, "") or k in ("token", "feed_token"):
                 s[k] = v
     s["day_list"] = [d for d in (s["days"] or "").split(",") if d in DAY_KEYS]
+    s["blocked"] = sorted({d for d in (s.get("blocked_days") or "").split(",") if _parse_day(d)})
+    s["needs_phone"] = needs_phone(s.get("place"))
     return s
+
+
+def needs_phone(place):
+    """A phone number is required when the host will be calling (the meeting place mentions a phone or a call)."""
+    return bool(re.search(r"\b(phone|call|calls|calling)\b", place or "", re.I))
+
+
+def phone_ok(v):
+    return len(re.sub(r"\D", "", v or "")) >= 10
 
 
 def _by_token(token):
@@ -179,7 +193,7 @@ def _taken(conn, user_id, day):
 def open_times(s, day, conn=None):
     """Start times (HH:MM) still open on a date for this person's settings."""
     d = _parse_day(day) if isinstance(day, str) else day
-    if not d or DAY_KEYS[d.weekday()] not in s["day_list"]:
+    if not d or DAY_KEYS[d.weekday()] not in s["day_list"] or d.isoformat() in s.get("blocked", []):
         return []
     st, en = _parse_time(s["start_time"]), _parse_time(s["end_time"])
     mins = int(s["minutes"] or 30)
@@ -346,26 +360,93 @@ def _site(root=None):
     return (root or os.environ.get("YLH_SITE_URL") or "https://itsyourlifeyourhome.com").rstrip("/")
 
 
+def _e(v):
+    import html
+    return html.escape(str(v or ""))
+
+
+def email_html(paragraphs, details=None, buttons=None, footer=None, sign=None):
+    """A quiet, polished HTML email: short paragraphs, one details box, and labeled buttons instead of long web addresses.
+
+    paragraphs and footer are lists of plain sentences, details a list of (label or "", text), buttons a list of
+    (label, url, primary). Everything is escaped here."""
+    font = "font-family:Georgia,'Times New Roman',serif;"
+    out = ['<div style="background:#F8F4EE;padding:24px 12px;">',
+           '<div style="max-width:520px;margin:0 auto;background:#ffffff;border:1px solid #EADFD0;border-radius:14px;'
+           'padding:28px 26px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#3E2C20;">']
+    for p in paragraphs:
+        out.append(f'<p style="margin:0 0 14px;">{_e(p)}</p>')
+    if details:
+        out.append('<div style="background:#FBF7F1;border:1px solid #EFE4D4;border-radius:10px;padding:14px 16px;margin:6px 0 18px;">')
+        for i, (label, text) in enumerate(details):
+            if i == 0 and not label:
+                out.append(f'<div style="{font}font-size:18px;color:#4A3222;margin-bottom:4px;">{_e(text)}</div>')
+            elif label:
+                out.append(f'<div style="margin:2px 0;"><span style="color:#8A7563;">{_e(label)}:</span> {_e(text)}</div>')
+            else:
+                out.append(f'<div style="margin:2px 0;">{_e(text)}</div>')
+        out.append('</div>')
+    if buttons:
+        out.append('<div style="margin:4px 0 18px;">')
+        for label, url, primary in buttons:
+            style = ("background:#7A5238;color:#ffffff;border:1px solid #7A5238;" if primary
+                     else "background:#ffffff;color:#7A5238;border:1px solid #C8B497;")
+            out.append(f'<a href="{_e(url)}" style="display:inline-block;{style}text-decoration:none;font-weight:bold;'
+                       f'font-size:14px;padding:10px 16px;border-radius:999px;margin:0 6px 8px 0;">{_e(label)}</a>')
+        out.append('</div>')
+    for p in footer or []:
+        out.append(f'<p style="margin:0 0 12px;color:#6E5B4C;font-size:14px;">{_e(p)}</p>')
+    if sign:
+        out.append(f'<p style="margin:18px 0 0;">Warmly,<br><span style="{font}font-size:17px;">{_e(sign)}</span></p>')
+    out.append('</div></div>')
+    return "".join(out)
+
+
+def _send_html(to, subject, text, html_body, host=None):
+    """Send with an HTML version when the mail sender supports it, otherwise the plain text alone."""
+    fn = _H.get("send_email")
+    if not fn or not to:
+        return
+    args = (to, subject, text) + ((host["name"] or None, host["email"] or None) if host else (None, None))
+    kw = {"html": html_body} if _H.get("html_ok") else {}
+    bg = _H.get("bg")
+    try:
+        bg(fn, *args, **kw) if bg else fn(*args, **kw)
+    except Exception:
+        pass
+
+
 def email_booked(b, s, host, root):
     first = _first(b["name"])
-    when = when_text(b)
-    manage = f"{root}/book/c/{b['token']}"
+    when = f"{when_text(b)} ({zone_label(s['tz'])})"
+    mine = f"{root}/b/{b['token']}"
     gcal = google_url({**b, "host_name": host["name"]}, s["tz"])
-    body = (f"Hi {first},\n\nYou are all set! I am so looking forward to talking with you.\n\n{b['title']}\n{when} ({zone_label(s['tz'])})\n"
-            f"{b['place']}\n\nAdd it to your calendar: {gcal}\nApple or Outlook calendar file: {root}/book/{s['token']}/{b['token']}.ics\n\n"
-            f"Need a different time? You can change or cancel here, no worries at all: {manage}\n\nWarmly,\n{host['name']}")
-    _send(b["email"], f"You are booked for {pretty_day(b['day'], True)} at {pretty_time(b['start_time'])}", body, host)
+    ics = f"{root}/book/{s['token']}/{b['token']}.ics"
+    body = (f"Hi {first},\n\nYou are all set! I am so looking forward to talking with you.\n\n{b['title']}\n{when}\n{b['place']}\n\n"
+            f"To add it to your calendar, or to change or cancel, open your booking here:\n{mine}\n\nWarmly,\n{host['name']}")
+    html_body = email_html(
+        [f"Hi {first},", "You are all set! I am so looking forward to talking with you."],
+        details=[("", b["title"]), ("", when), ("", b["place"])],
+        buttons=[("Add to Google Calendar", gcal, True), ("Add to Apple or Outlook", ics, False)],
+        footer=["Need a different time? No worries at all."], sign=host["name"])
+    html_body = html_body.replace("No worries at all.</p>", f'No worries at all. <a href="{_e(root)}/book/c/{_e(b["token"])}" '
+                                  'style="color:#7A5238;">Change or cancel</a></p>', 1)
+    _send_html(b["email"], f"You are booked for {pretty_day(b['day'], True)} at {pretty_time(b['start_time'])}", body, html_body, host)
+
+    rows = [("", b["name"]), ("", when), ("Phone", b["phone"] or "not given"), ("Email", b["email"])]
+    if b.get("note"):
+        rows.append(("Their note", b["note"]))
+    page = f"{root}/{host['role']}/booking"
     note = f"\nTheir note: {b['note']}" if b.get("note") else ""
-    hbody = (f"Hi {_first(host['name'])},\n\nGood news, you have a new booking!\n\n{b['name']}\n{when} ({zone_label(s['tz'])})\n"
-             f"Phone: {b['phone'] or 'not given'}\nEmail: {b['email']}{note}\n\nIt is already on your phone calendar if you have turned on "
-             f"your calendar link. You can see all of your bookings here: {root}/{host['role']}/booking\n\nYou are doing great!")
-    fn = _H.get("send_email")
-    if fn and host["email"]:
-        try:
-            (_H["bg"](fn, host["email"], f"New booking: {b['name']}, {pretty_day(b['day'], True)} {pretty_time(b['start_time'])}", hbody)
-             if _H.get("bg") else fn(host["email"], "New booking", hbody))
-        except Exception:
-            pass
+    hbody = (f"Hi {_first(host['name'])},\n\nGood news, you have a new booking!\n\n{b['name']}\n{when}\n"
+             f"Phone: {b['phone'] or 'not given'}\nEmail: {b['email']}{note}\n\nIt is already on your phone calendar if you have "
+             f"added your calendar link. See all of your bookings here:\n{page}")
+    hhtml = email_html([f"Hi {_first(host['name'])},", "Good news, you have a new booking!"], details=rows,
+                       buttons=[("See my bookings", page, True)],
+                       footer=["It is already on your phone calendar if you have added your calendar link."])
+    if host["email"]:
+        _send_html(host["email"], f"New booking: {b['name']}, {pretty_day(b['day'], True)} {pretty_time(b['start_time'])}",
+                   hbody, hhtml)
 
 
 def email_cancelled(b, s, host, by_host):
@@ -373,7 +454,13 @@ def email_cancelled(b, s, host, by_host):
     if by_host:
         body = (f"Hi {_first(b['name'])},\n\nI am so sorry, I need to cancel our time on {when}. I would love to find another time that "
                 f"works for you. Just reply to this email or book a new time anytime.\n\nWarmly,\n{host['name']}")
-        _send(b["email"], "A quick change to our time together", body, host)
+        btn = []
+        if s.get("enabled") and s.get("token"):
+            btn = [("Pick a new time", f"{_site()}/book/{s['token']}", True)]
+        _send_html(b["email"], "A quick change to our time together", body,
+                   email_html([f"Hi {_first(b['name'])},", f"I am so sorry, I need to cancel our time on {when}. I would love to find "
+                               "another time that works for you. Just reply to this email, or pick a new time whenever you are ready."],
+                              buttons=btn, sign=host["name"]), host)
     else:
         fn = _H.get("send_email")
         if fn and host["email"]:
@@ -401,10 +488,15 @@ def send_reminders(now=None):
         host = _host(b["user_id"])
         root = _site()
         body = (f"Hi {_first(b['name'])},\n\nJust a friendly reminder that we are talking tomorrow.\n\n{b['title']}\n{when_text(b)} "
-                f"({zone_label(b['tz'])})\n{b['place']}\n\nIf your plans changed, you can pick a new time here: {root}/book/c/{b['token']}\n\n"
+                f"({zone_label(b['tz'])})\n{b['place']}\n\nIf your plans changed, you can pick a new time here:\n{root}/book/c/{b['token']}\n\n"
                 f"See you soon!\n{host['name']}")
+        html_body = email_html([f"Hi {_first(b['name'])},", "Just a friendly reminder that we are talking tomorrow."],
+                               details=[("", b["title"]), ("", f"{when_text(b)} ({zone_label(b['tz'])})"), ("", b["place"])],
+                               buttons=[("Change or cancel", f"{root}/book/c/{b['token']}", False)],
+                               footer=["See you soon!"], sign=host["name"])
+        kw = {"html": html_body} if _H.get("html_ok") else {}
         try:
-            send(b["email"], f"See you tomorrow at {pretty_time(b['start_time'])}", body, host["name"] or None, host["email"] or None)
+            send(b["email"], f"See you tomorrow at {pretty_time(b['start_time'])}", body, host["name"] or None, host["email"] or None, **kw)
             conn.execute("UPDATE bookings SET reminded=1 WHERE id=?", (b["id"],))
             conn.commit()
             sent += 1
@@ -450,6 +542,8 @@ def public_book(token):
         problem = "Please tell me your name so I know who to look for."
     elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
         problem = "That email does not look quite right. Could you check it for me?"
+    elif s["needs_phone"] and not phone_ok(phone):
+        problem = "Please share a phone number with the area code so I can call you."
     elif not day or not start:
         problem = "Please tap the time that works best for you."
     elif start not in open_times(s, day):
@@ -497,6 +591,16 @@ def done(token, btoken):
     host = _host(b["user_id"])
     return render_template("booking/done.html", b=b, s=s, host=host, when=when_text(b), zone=zone_label(s["tz"]),
                            gcal=google_url({**b, "host_name": host["name"]}, s["tz"]), token=token)
+
+
+@bp.route("/b/<btoken>")
+def mine(btoken):
+    """Short link from the confirmation email: the booking with its calendar buttons and change or cancel."""
+    b = _booking(btoken)
+    if not b:
+        abort(404)
+    s = get_settings(b["user_id"])
+    return done(s["token"], btoken)
 
 
 @bp.route("/book/<token>/<btoken>.ics")
@@ -565,16 +669,60 @@ def save():
     if not days:
         flash("Please choose at least one day you would like to take appointments.", "error")
         return _back(u)
+    blocked, added, block_problem = _blocked_from_form(f, tz)
+    if block_problem:
+        flash(block_problem, "error")
+        return _back(u)
     get_settings(u["id"], create=True)
     conn = _db()
     conn.execute("UPDATE booking_settings SET enabled=?, days=?, start_time=?, end_time=?, minutes=?, notice_hours=?, tz=?, "
-                 "title=?, place=? WHERE user_id=?",
+                 "title=?, place=?, blocked_days=? WHERE user_id=?",
                  (1 if f.get("enabled") else 0, days, st, en, mins if mins in LENGTHS else 30, notice, tz,
-                  (f.get("title") or DEFAULTS["title"]).strip()[:120], (f.get("place") or DEFAULTS["place"]).strip()[:250], u["id"]))
+                  (f.get("title") or DEFAULTS["title"]).strip()[:120], (f.get("place") or DEFAULTS["place"]).strip()[:250],
+                  ",".join(blocked), u["id"]))
     conn.commit()
+    clash = []
+    if added:
+        marks = ",".join("?" * len(added))
+        clash = conn.execute(f"SELECT name, day FROM bookings WHERE user_id=? AND status='confirmed' AND day IN ({marks}) "
+                             "ORDER BY day", (u["id"], *added)).fetchall()
     conn.close()
     flash("Your booking page is " + ("live. Clients can book with you now!" if f.get("enabled") else "saved, and switched off for now."), "success")
+    if clash:
+        who = ", ".join(f"{r['name']} on {pretty_day(r['day'], True)}" for r in clash)
+        flash(f"Heads up: you still have a booking on a day you just blocked ({who}). It is still on, so cancel it below if "
+              "you will not be available.", "error")
     return _back(u)
+
+
+MAX_BLOCKED = 120
+
+
+def _blocked_from_form(f, tz):
+    """Days off: the dates still ticked, plus any new day or stretch of days. Past dates drop off by themselves.
+
+    Returns (all blocked dates, newly added dates, problem message or "")."""
+    today = now_local(tz).date()
+    keep = {d for d in f.getlist("blocked") if _parse_day(d)}
+    a, b = _parse_day(f.get("block_from", "")), _parse_day(f.get("block_to", ""))
+    added = []
+    if b and not a:
+        a = b
+    if a:
+        b = b or a
+        if b < a:
+            return [], [], "For days off, the last day needs to come on or after the first day."
+        if (b - a).days > 92:
+            return [], [], "Days off can cover up to three months at a time. Add a longer stretch in two parts."
+        d = a
+        while d <= b:
+            if d >= today:
+                added.append(d.isoformat())
+            d += timedelta(days=1)
+    every = sorted(d for d in keep | set(added) if _parse_day(d) >= today)
+    if len(every) > MAX_BLOCKED:
+        return [], [], f"That is a lot of days off. You can block up to {MAX_BLOCKED} days at once."
+    return every, [d for d in added if d not in keep], ""
 
 
 @bp.route("/booking/<int:booking_id>/cancel", methods=["POST"])
@@ -622,14 +770,19 @@ def card_context(user_id):
     root = request.url_root.rstrip("/")
     host_only = root.split("://", 1)[-1]
     feed_https = f"{root}/cal/{s['feed_token']}.ics"
-    return {"s": s, "upcoming": upcoming, "zones": ZONES, "lengths": LENGTHS, "notice": NOTICE,
+    return {"s": s, "upcoming": upcoming, "zones": ZONES, "today": today, "pretty_day": pretty_day, "lengths": LENGTHS, "notice": NOTICE,
             "day_keys": list(zip(DAY_KEYS, DAY_NAMES)), "page_url": f"{root}/book/{s['token']}",
             "feed_https": feed_https, "feed_webcal": f"webcal://{host_only}/cal/{s['feed_token']}.ics",
             "feed_google": "https://calendar.google.com/calendar/r?cid=" + quote(f"webcal://{host_only}/cal/{s['feed_token']}.ics", safe="")}
 
 
 def init_app(app, get_current_user, bg, send_email):
-    _H.update(get_current_user=get_current_user, bg=bg, send_email=send_email)
+    import inspect
+    try:
+        html_ok = "html" in inspect.signature(send_email).parameters
+    except (TypeError, ValueError):
+        html_ok = False
+    _H.update(get_current_user=get_current_user, bg=bg, send_email=send_email, html_ok=html_ok)
     ensure_tables()
     app.register_blueprint(bp)
     app.add_template_global(booking_link, "booking_link")

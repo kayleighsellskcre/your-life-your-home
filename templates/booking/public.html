@@ -44,7 +44,7 @@
       <input class="pie-input" id="name" name="name" required maxlength="120" autocomplete="name" value="{{ form.get('name', '') }}">
       <div class="pie-row">
         <div><label class="pie-label" for="email">Email</label><input class="pie-input" type="email" id="email" name="email" required autocomplete="email" value="{{ form.get('email', '') }}"></div>
-        <div><label class="pie-label" for="phone">Phone <span class="pie-hint">(optional)</span></label><input class="pie-input" type="tel" id="phone" name="phone" autocomplete="tel" value="{{ form.get('phone', '') }}"></div>
+        <div><label class="pie-label" for="phone">Phone{% if not s.needs_phone %} <span class="pie-hint">(optional)</span>{% endif %}</label><input class="pie-input" type="tel" id="phone" name="phone" autocomplete="tel" {{ 'required' if s.needs_phone }} value="{{ form.get('phone', '') }}"></div>
       </div>
       <label class="pie-label" for="note">Anything you would like me to know? <span class="pie-hint">(optional)</span></label>
       <textarea id="note" name="note" rows="3" maxlength="600">{{ form.get('note', '') }}</textarea>

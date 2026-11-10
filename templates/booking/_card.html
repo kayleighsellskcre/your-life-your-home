@@ -4,6 +4,20 @@
 <div class="pie-wrap" style="padding-top:.5rem;padding-bottom:1rem;">
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
 
+  <details class="pie-card bk-help" {{ 'open' if not bk.s.enabled }}>
+    <summary><h2 style="display:inline;">How to set this up</h2> <span class="pie-hint">About 5 minutes, one time</span></summary>
+    <ol class="bk-steps">
+      <li><b>Choose when you are free.</b> Below, tick the days you take appointments, then set your hours, how long each visit lasts, and how much notice you need. Check that the time zone is yours.</li>
+      <li><b>Say how you will meet.</b> Write it the way a client would read it, like "Phone call. I will call you at the number you give me." If it mentions a phone or a call, clients will be asked for their number.</li>
+      <li><b>Block your days off.</b> Add holidays, vacations, or any day you are not working under "Days off." Those days will not show to clients.</li>
+      <li><b>Turn it on.</b> Tick "Turn on my booking page" and tap Save. Your link to share appears right under the box.</li>
+      <li><b>Try it yourself.</b> Tap "See what clients see," pick a time, and book with an email you can check. You will get the client's confirmation and your own "new booking" note. Then cancel it under "Coming up."</li>
+      <li><b>Put it on your phone.</b> Open this page on your phone, signed in, and tap "Add to my iPhone calendar" (then Subscribe), or "Add to Google Calendar" on Android. Bookings, transaction deadlines and pie pickups will all show up there. Phones check for changes about once an hour, so new bookings can take a little while to appear.</li>
+      <li><b>Share your link.</b> Tap "Copy link" and paste it into texts, emails, your email signature, or your social profiles.</li>
+    </ol>
+    <p class="pie-hint" style="margin:.4rem 0 0;">When someone books, you both get an email, they get a friendly reminder the day before, and it shows under "Coming up." You can cancel any booking there and they will get a kind note.</p>
+  </details>
+
   <div class="pie-card">
     <h2>Your booking page</h2>
     <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Choose when you are free, switch it on, and share one link. Clients pick a time, and it lands on your calendar by itself.</p>
@@ -26,9 +40,21 @@
           <select id="bk_tz" name="tz">{% for z, n in bk.zones %}<option value="{{ z }}" {{ 'selected' if z == bk.s.tz }}>{{ n }}</option>{% endfor %}</select></div>
       </div>
 
+      <label class="pie-label">Days off <span class="pie-hint">(holidays, vacations, or any day you are not working)</span></label>
+      {% if bk.s.blocked %}
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.4rem;">
+        {% for d in bk.s.blocked %}<label class="bk-daychk"><input type="checkbox" name="blocked" value="{{ d }}" checked> {{ bk.pretty_day(d, True) }}</label>{% endfor %}
+      </div>
+      <p class="pie-hint" style="margin:0 0 .5rem;">Untick a day and tap Save to open it back up.</p>
+      {% endif %}
+      <div class="pie-row">
+        <div><label class="pie-label" for="bk_bfrom">First day off</label><input class="pie-input" type="date" id="bk_bfrom" name="block_from" min="{{ bk.today }}"></div>
+        <div><label class="pie-label" for="bk_bto">Last day off <span class="pie-hint">(leave empty for one day)</span></label><input class="pie-input" type="date" id="bk_bto" name="block_to" min="{{ bk.today }}"></div>
+      </div>
+
       <label class="pie-label" for="bk_title">What clients are booking</label>
       <input class="pie-input" id="bk_title" name="title" maxlength="120" value="{{ bk.s.title }}">
-      <label class="pie-label" for="bk_place">How we will meet <span class="pie-hint">(phone, video link, or an address)</span></label>
+      <label class="pie-label" for="bk_place">How we will meet <span class="pie-hint">(phone, video link, or an address. If it mentions a phone or a call, clients must give their number.)</span></label>
       <input class="pie-input" id="bk_place" name="place" maxlength="250" value="{{ bk.s.place }}">
       <div class="pie-actions"><button class="pie-btn" type="submit">Save</button></div>
     </form>

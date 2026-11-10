@@ -1000,7 +1000,7 @@ def _reply_to_address(reply_to=None):
     return _clean_header(reply_to or os.environ.get("MAIL_REPLY_TO") or "")
 
 
-def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
+def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None, html=None):
     """Send over HTTPS (port 443) with Resend. Works on hosts that block SMTP, like Railway's Hobby plan."""
     import json as _json
     import urllib.request as _req
@@ -1010,6 +1010,8 @@ def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
         _EMAIL_LAST.update(ok=False, detail="MAIL_FROM is not set in Railway.")
         return False
     data = {"from": sender, "to": [to_email], "subject": subject, "text": body}
+    if html:
+        data["html"] = html
     reply = _reply_to_address(reply_to)
     if reply:
         data["reply_to"] = [reply]
@@ -1034,7 +1036,7 @@ def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
         return False
 
 
-def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
+def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None, html=None):
     """Send over HTTPS (port 443) with Brevo's API. Works on hosts that block SMTP, like Railway's Hobby plan."""
     import json as _json
     import html as _html
@@ -1047,7 +1049,8 @@ def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
     sender = {"email": addr}
     if name:
         sender["name"] = name
-    html_body = "<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.5\">" + _html.escape(body).replace("\n", "<br>") + "</div>"
+    html_body = html or ("<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.5\">"
+                         + _html.escape(body).replace("\n", "<br>") + "</div>")
     data = {
         "sender": sender, "to": [{"email": to_email}], "subject": subject,
         "htmlContent": html_body, "textContent": body,
@@ -1081,22 +1084,22 @@ def _email_ready():
     return bool(os.environ.get("RESEND_API_KEY") or os.environ.get("BREVO_API_KEY") or (EMAIL_USER and EMAIL_PASS))
 
 
-def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None):
+def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None, html=None):
     """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout).
 
     from_name replaces the display name (e.g. "Jane Smith via Your Life Your Home") and reply_to sends
     replies to that address. The From address itself always stays MAIL_FROM, so emails stay authenticated.
     """
     if os.environ.get("RESEND_API_KEY"):
-        return _send_via_resend(to_email, subject, body, from_name, reply_to)
+        return _send_via_resend(to_email, subject, body, from_name, reply_to, html=html)
     if os.environ.get("BREVO_API_KEY"):
-        return _send_via_brevo(to_email, subject, body, from_name, reply_to)
+        return _send_via_brevo(to_email, subject, body, from_name, reply_to, html=html)
     if not EMAIL_USER or not EMAIL_PASS:
         print(f"[WARNING] Email not configured - cannot send to {to_email}")
         _EMAIL_LAST.update(ok=False, detail="No email service is set up. Add BREVO_API_KEY and MAIL_FROM in Railway.")
         return False
 
-    msg = MIMEMultipart()
+    msg = MIMEMultipart("alternative") if html else MIMEMultipart()
     msg["From"] = _from_address(from_name)[2] or EMAIL_USER
     msg["To"] = to_email
     msg["Subject"] = subject
@@ -1104,6 +1107,8 @@ def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None):
     if reply:
         msg["Reply-To"] = reply
     msg.attach(MIMEText(body, "plain"))
+    if html:
+        msg.attach(MIMEText(html, "html"))
     try:
         with smtplib.SMTP(EMAIL_HOST, EMAIL_PORT, timeout=10) as server:
             server.starttls()
@@ -2038,12 +2043,12 @@ def _inject_unverified():
 
 
 # ── CONNECTIVE AUTOMATION HELPERS ──────────────────────────────────────────
-def _bg(fn, *args):
+def _bg(fn, *args, **kwargs):
     """Run slow work (email) off the request thread; run inline under tests."""
     if app.config.get("TESTING"):
-        return fn(*args)
+        return fn(*args, **kwargs)
     import threading
-    threading.Thread(target=fn, args=args, daemon=True).start()
+    threading.Thread(target=fn, args=args, kwargs=kwargs, daemon=True).start()
 
 
 def _site_url():
