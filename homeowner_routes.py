@@ -4,6 +4,8 @@ Moved out of app.py. Loaded by install(), which runs these views in app.py's own
 helper they use is looked up there, exactly as before. This file is not meant to be run or linted on its own. Route names
 (endpoints) are unchanged, so url_for(...) keeps working.
 """
+from typing import Optional
+
 from route_loader import Registry
 
 _registry = Registry()
