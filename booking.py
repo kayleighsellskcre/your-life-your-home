@@ -687,6 +687,9 @@ def public_book(token):
     return redirect(url_for("booking.done", token=token, btoken=btoken))
 
 
+FOLLOW_NOTE = "Check in after your call"
+
+
 def add_to_crm(b, host):
     """Agents only: put the person in the CRM at Appt Set (or move early-stage contacts up), no duplicates."""
     if (host or {}).get("role") != "agent":
@@ -700,6 +703,8 @@ def add_to_crm(b, host):
         row = conn.execute("SELECT id, stage, notes, phone FROM agent_contacts WHERE agent_user_id=? AND LOWER(TRIM(email))=LOWER(TRIM(?)) LIMIT 1",
                            (b["user_id"], b["email"])).fetchone()
         today = datetime.now().strftime("%Y-%m-%d")
+        follow_day = (datetime.strptime(b["day"], "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+        follow_note = FOLLOW_NOTE + " (booked for %s)" % when
         if row:
             stage = (row["stage"] or "").strip().lower()
             new_stage = "appt_set" if stage in ("", "new", "attempted", "contacted") else row["stage"]
@@ -707,9 +712,11 @@ def add_to_crm(b, host):
             phone = row["phone"] or b.get("phone") or ""
             conn.execute("UPDATE agent_contacts SET stage=?, notes=?, phone=?, last_touch=? WHERE id=?",
                          (new_stage, notes, phone, today, row["id"]))
+            conn.execute("UPDATE agent_contacts SET next_action_date=?, next_action_note=? WHERE id=? AND COALESCE(next_action_date,'')=''",
+                         (follow_day, follow_note, row["id"]))
         else:
-            conn.execute("INSERT INTO agent_contacts (agent_user_id, name, email, phone, stage, notes, last_touch, lead_source) VALUES (?,?,?,?,?,?,?,?)",
-                         (b["user_id"], b["name"], b["email"], b.get("phone") or "", "appt_set", line, today, "Booking page"))
+            conn.execute("INSERT INTO agent_contacts (agent_user_id, name, email, phone, stage, notes, last_touch, lead_source, next_action_date, next_action_note) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                         (b["user_id"], b["name"], b["email"], b.get("phone") or "", "appt_set", line, today, "Booking page", follow_day, follow_note))
         conn.commit()
     finally:
         conn.close()
@@ -766,6 +773,8 @@ def cancel(btoken):
         conn.execute("UPDATE bookings SET status='cancelled' WHERE id=?", (b["id"],))
         conn.commit()
         conn.close()
+        try: undo_crm_followup(b, host)
+        except Exception: pass
         email_cancelled(b, s, host, by_host=False)
         b["status"] = "cancelled"
     return render_template("booking/cancel.html", b=b, host=host, when=when_text(b), page=page)
@@ -893,6 +902,8 @@ def host_cancel(booking_id):
     if row and row["status"] == "confirmed":
         conn.execute("UPDATE bookings SET status='cancelled' WHERE id=?", (booking_id,))
         conn.commit()
+        try: undo_crm_followup(dict(row), _host(u["id"]))
+        except Exception: pass
         email_cancelled(dict(row), get_settings(u["id"]), _host(u["id"]), by_host=True)
         flash("That booking is cancelled and I let them know kindly.", "success")
     conn.close()
@@ -944,3 +955,16 @@ def init_app(app, get_current_user, bg, send_email):
     ensure_tables()
     app.register_blueprint(bp)
     app.add_template_global(booking_link, "booking_link")
+
+
+def undo_crm_followup(b, host):
+    """A cancelled booking should not leave a follow-up reminder behind."""
+    if (host or {}).get("role") != "agent":
+        return
+    conn = _db()
+    try:
+        conn.execute("UPDATE agent_contacts SET next_action_date='', next_action_note='' WHERE agent_user_id=? AND LOWER(TRIM(email))=LOWER(TRIM(?)) "
+                     "AND next_action_note LIKE ?", (b["user_id"], b["email"], FOLLOW_NOTE + "%"))
+        conn.commit()
+    finally:
+        conn.close()
