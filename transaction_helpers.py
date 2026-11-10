@@ -580,16 +580,7 @@ def handle_document_upload_and_auto_progression(transaction_id, document_type):
         """, (transaction_id,))
         participants = [dict(row) for row in cursor.fetchall()]
         return participants
-    if document_type in progression_map:
-        next_stage = progression_map[document_type]
-        db.execute("UPDATE transactions SET stage = ? WHERE id = ?", (next_stage, transaction_id))
-        db.commit()
-        # Optionally, add to timeline
-        db.execute(
-            "INSERT INTO transaction_timeline (transaction_id, event, timestamp) VALUES (?, ?, datetime('now'))",
-            (transaction_id, f"Stage auto-progressed to {next_stage} via {document_type}")
-        )
-        db.commit()
+
 
 def update_transaction(transaction_id: int, agent_id: int, **kwargs) -> bool:
     """Update transaction details"""
