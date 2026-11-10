@@ -535,6 +535,12 @@ def build_digest(user_id, role, force_weekly=False):
     soon_s = (today + timedelta(days=14)).isoformat()
     mmdd = today.strftime("%m-%d")
     sections = []
+    try:
+        calls = __import__("booking").todays(user_id)
+        if calls:
+            sections.append(("Booked calls today", calls))
+    except Exception:
+        pass
     conn = get_connection()
     try:
         def rows(sql, args=()):

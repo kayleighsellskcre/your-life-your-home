@@ -716,7 +716,7 @@ def add_to_crm(b, host):
                          (follow_day, follow_note, row["id"]))
         else:
             conn.execute("INSERT INTO agent_contacts (agent_user_id, name, email, phone, stage, notes, last_touch, lead_source, next_action_date, next_action_note) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                         (b["user_id"], b["name"], b["email"], b.get("phone") or "", "appt_set", line, today, "Booking page", follow_day, follow_note))
+                         (b["user_id"], b["name"], b["email"], b.get("phone") or "", "appt_set", line, today, "website_booking", follow_day, follow_note))
         conn.commit()
     finally:
         conn.close()
@@ -968,3 +968,26 @@ def undo_crm_followup(b, host):
         conn.commit()
     finally:
         conn.close()
+
+
+def todays(user_id):
+    """Short lines for the dashboard: who is booked today, in the host's own time zone."""
+    s = get_settings(user_id)
+    tz = (s or {}).get("tz") or "America/Chicago"
+    today = now_local(tz).date().isoformat()
+    conn = _db()
+    try:
+        rows = conn.execute("SELECT name, start_time, place FROM bookings WHERE user_id=? AND status='confirmed' AND day=? ORDER BY start_time",
+                            (user_id, today)).fetchall()
+    finally:
+        conn.close()
+    return ["%s with %s (%s)" % (pretty_time(r["start_time"]), r["name"], r["place"]) for r in rows]
+
+
+def full_link(user_id):
+    """The whole https link to share with a client, or '' when the booking page is off."""
+    try:
+        link = booking_link(user_id)
+        return (request.url_root.rstrip("/") + link) if link else ""
+    except Exception:
+        return ""

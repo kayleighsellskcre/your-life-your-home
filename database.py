@@ -1016,6 +1016,12 @@ def init_db() -> None:
     except:
         pass
 
+    # Spouse / partner link (each person stays their own contact)
+    try:
+        cur.execute("ALTER TABLE agent_contacts ADD COLUMN partner_id INTEGER")
+    except:
+        pass
+
     # --- Drip / follow-up sequence tracking ---
     try:
         cur.execute("""
@@ -2818,7 +2824,8 @@ def list_agent_contacts(agent_user_id: int, stage_filter: str = None) -> List[di
                COALESCE(lead_source, '') as lead_source,
                COALESCE(next_action_date, '') as next_action_date,
                COALESCE(next_action_note, '') as next_action_note,
-               user_id
+               user_id, partner_id,
+               (SELECT p.name FROM agent_contacts p WHERE p.id = agent_contacts.partner_id) AS partner_name
         FROM agent_contacts
         WHERE agent_user_id = ?
     """

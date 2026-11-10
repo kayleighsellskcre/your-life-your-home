@@ -298,6 +298,13 @@ def agent_crm():
                         next_action_note=next_action_note
                     )
                     print(f"SUCCESS: Contact added with ID {contact_id}")
+                    try:
+                        import couples as _couples
+                        if request.form.get("partner_name", "").strip():
+                            _couples.add_partner(user["id"], contact_id, request.form.get("partner_name"),
+                                                 request.form.get("partner_email", ""), request.form.get("partner_phone", ""))
+                    except Exception as _pe:
+                        print(f"[COUPLES] partner not added: {_pe}")
 
                     # Schedule new-lead follow-up drip if stage is 'new'
                     if stage == 'new' and email:
@@ -367,12 +374,38 @@ def agent_crm():
                 
                 try:
                     update_agent_contact(int(contact_id), user["id"], **updates)
+                    import couples as _couples
+                    if request.form.get("partner_name", "").strip():
+                        _couples.add_partner(user["id"], int(contact_id), request.form.get("partner_name"),
+                                             request.form.get("partner_email", ""), request.form.get("partner_phone", ""))
                     flash("Contact updated!", "success")
                 except Exception as e:
                     flash("We could not update that contact. Please try again in a moment.", "error")
                     import traceback
                     print(f"Error updating contact: {traceback.format_exc()}")
         
+        elif action == "split_couple":
+            import couples as _couples
+            try:
+                done = _couples.split_couple(user["id"], int(request.form.get("contact_id")), request.form.get("name", ""),
+                                             request.form.get("email", ""), request.form.get("phone", ""))
+            except Exception:
+                done = None
+            if done:
+                flash("Done! They are now two contacts, linked together as a couple.", "success")
+            else:
+                flash("I could not tell where one person ends and the next begins. Try a name like 'Michael & Mindy Beard'.", "error")
+            return redirect(url_for("agent_crm"))
+
+        elif action == "unlink_partner":
+            import couples as _couples
+            try:
+                _couples.unlink(user["id"], int(request.form.get("contact_id")))
+                flash("Unlinked. They are each their own contact now.", "success")
+            except Exception:
+                flash("We could not unlink them. Please try again in a moment.", "error")
+            return redirect(url_for("agent_crm"))
+
         elif action == "add_interaction":
             contact_id = request.form.get("contact_id")
             interaction_type = request.form.get("interaction_type", "").strip()
@@ -504,6 +537,7 @@ def agent_crm():
             if contact_id:
                 try:
                     from database import delete_agent_contact
+                    __import__("couples").forget(user["id"], int(contact_id))
                     if delete_agent_contact(int(contact_id), user["id"]):
                         flash("Contact deleted!", "success")
                     else:
@@ -826,6 +860,7 @@ def agent_crm():
             all_tags=all_tags,
             upcoming_tasks=upcoming_tasks,
             email_templates=email_templates,
+            booking_url=__import__("booking").full_link(user["id"]),
             page=page, pages=pages, per_page=50, filtered_total=filtered_total, bday_data=bday_data,
         )
     except Exception as e:
