@@ -733,6 +733,10 @@ def agent_crm():
                 _pc.close()
         from database import crm_page_bundle
         _bundle = crm_page_bundle(user["id"], [c["id"] for c in contacts_list_dicts])
+        try:
+            _calls = __import__("booking").next_calls(user["id"])
+        except Exception:
+            _calls = {}
         for contact_dict in contacts_list_dicts:
             try:
                 _cid = contact_dict['id']
@@ -753,6 +757,8 @@ def agent_crm():
                 _em = (contact_dict.get('email') or '').lower().strip()
                 _pid = _portal_map.get(_em) if _em else None
                 contact_dict['has_portal'] = _pid is not None
+                _ce = [e.lower() for e in __import__("couples").EMAIL_RE.findall(contact_dict.get('email') or '')]
+                contact_dict['next_call'] = next((_calls[e] for e in _ce if e in _calls), '')
                 contact_dict['portal_user_id'] = _pid
             except Exception as e:
                 print(f"Error enriching contact: {e}")

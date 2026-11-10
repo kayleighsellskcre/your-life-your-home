@@ -991,3 +991,22 @@ def full_link(user_id):
         return (request.url_root.rstrip("/") + link) if link else ""
     except Exception:
         return ""
+
+
+def next_calls(user_id):
+    """{lowercase email: 'Tue, Nov 11 at 2:00 PM'} for each person who has a call coming up, soonest only."""
+    s = get_settings(user_id)
+    tz = (s or {}).get("tz") or "America/Chicago"
+    today = now_local(tz).date().isoformat()
+    conn = _db()
+    try:
+        rows = conn.execute("SELECT email, day, start_time FROM bookings WHERE user_id=? AND status='confirmed' AND day>=? ORDER BY day, start_time",
+                            (user_id, today)).fetchall()
+    finally:
+        conn.close()
+    out = {}
+    for r in rows:
+        em = (r["email"] or "").strip().lower()
+        if em and em not in out:
+            out[em] = "%s at %s" % (pretty_day(r["day"]), pretty_time(r["start_time"]))
+    return out

@@ -3,6 +3,7 @@
 
 {% block agent_content %}
 <style>
+.c-call{font-size:.72rem;font-weight:600;color:#2F6B3F;margin-top:.1rem;letter-spacing:0;text-transform:none;}
 .c-partner{font-size:.72rem;font-weight:500;color:#8F6244;margin-top:.1rem;letter-spacing:0;text-transform:none;}
 .couple-box{border:1px solid #EFE4D4;background:#FBF7F1;border-radius:10px;padding:.7rem .85rem;font-size:.85rem;line-height:1.5;margin-bottom:.6rem;}
 .couple-box button{margin-left:.35rem;}
@@ -890,7 +891,7 @@
  <td class="c-td" onclick="event.stopPropagation()">
  <input type="checkbox" class="c-chk contact-checkbox" value="{{ contact.id }}">
  </td>
- <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}{% if contact.partner_name %}<div class="c-partner">with {{ contact.partner_name }}</div>{% endif %}</td>
+ <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}{% if contact.partner_name %}<div class="c-partner">with {{ contact.partner_name }}</div>{% endif %}{% if contact.next_call %}<div class="c-call">Call booked: {{ contact.next_call }}</div>{% endif %}</td>
  <td class="c-td"><span class="s-badge s-badge--{{ contact.stage }}">{{ contact.stage }}</span></td>
  <td class="c-td">
  {% if contact.email %}<a href="mailto:{{ contact.email }}" onclick="event.stopPropagation()" title="{{ contact.email }}">{{ contact.email }}</a>{% else %}<span class="c-td--muted"> - </span>{% endif %}
