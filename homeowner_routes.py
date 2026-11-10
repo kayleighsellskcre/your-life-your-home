@@ -1251,8 +1251,11 @@ def homeowner_document_view(doc_id):
             return redirect(url_for("homeowner_upload_documents"))
 
     # Fallback to local file
+    if not row.get("file_path"):
+        flash("That document has no file attached. You can upload it again.", "error")
+        return redirect(url_for("homeowner_upload_documents"))
     return send_from_directory(
-        HOMEOWNER_DOCS_DIR, row["file_name"], as_attachment=False
+        HOMEOWNER_DOCS_DIR, row["file_path"], as_attachment=False
     )
 
 
@@ -1271,25 +1274,22 @@ def homeowner_document_replace(doc_id):
             return redirect(request.url)
 
         safe_name = secure_filename(file.filename)
-        save_path = HOMEOWNER_DOCS_DIR / safe_name
-        HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-        file.save(save_path)
+        if not safe_name:
+            flash("Please choose a file to upload.", "error")
+            return redirect(request.url)
+        if is_r2_enabled() and R2_CLIENT:
+            r2_key = f"homeowner_docs/{user_id}/{uuid4().hex}_{safe_name}"
+            upload_file_to_r2(file, r2_key)
+            stored_name = safe_name
+        else:
+            stored_name = f"{uuid4().hex}_{safe_name}"      # a unique name, so nobody's file can overwrite another's
+            HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+            file.save(HOMEOWNER_DOCS_DIR / stored_name)
+            r2_key = None
 
         conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            """
-            UPDATE homeowner_documents
-            SET file_name = ?, uploaded_at = ?
-            WHERE id = ? AND user_id = ?
-            """,
-            (
-                safe_name,
-                datetime.utcnow().isoformat(sep=" ", timespec="seconds"),
-                doc_id,
-                user_id,
-            ),
-        )
+        conn.execute("UPDATE homeowner_documents SET file_path = ?, r2_key = ?, r2_url = NULL WHERE id = ? AND user_id = ?",
+                     (stored_name, r2_key, doc_id, user_id))
         conn.commit()
         conn.close()
 
@@ -1311,7 +1311,7 @@ def homeowner_upload_documents():
     # DELETE FILE
     if request.method == "POST" and request.form.get("delete_id"):
         delete_id = request.form["delete_id"]
-        delete_homeowner_document(delete_id)
+        delete_homeowner_document(delete_id, user_id)       # only ever their own
         flash("Document removed.", "success")
         return redirect(url_for("homeowner_upload_documents"))
 
@@ -1323,10 +1323,17 @@ def homeowner_upload_documents():
     ):
         doc_id = request.form["reattach_id"]
         new_file = request.files["file"]
-        save_name = secure_filename(new_file.filename)
+        if not str(doc_id).isdigit() or not get_homeowner_document_for_user(int(doc_id), user_id) or not secure_filename(new_file.filename):
+            flash("That document could not be found.", "error")
+            return redirect(url_for("homeowner_upload_documents"))
+        save_name = f"{uuid4().hex}_{secure_filename(new_file.filename)}"
         HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
         new_file.save(HOMEOWNER_DOCS_DIR / save_name)
-        update_homeowner_document_file(doc_id, save_name)
+        conn = get_connection()
+        conn.execute("UPDATE homeowner_documents SET file_path = ?, r2_key = NULL, r2_url = NULL WHERE id = ? AND user_id = ?",
+                     (save_name, int(doc_id), user_id))
+        conn.commit()
+        conn.close()
         flash("File updated.", "success")
         return redirect(url_for("homeowner_upload_documents"))
 
@@ -1349,10 +1356,9 @@ def homeowner_upload_documents():
             stored_name = filename  # For DB reference, still keep original name
         else:
             HOMEOWNER_DOCS_DIR.mkdir(parents=True, exist_ok=True)
-            save_path = HOMEOWNER_DOCS_DIR / filename
-            file.save(save_path)
+            stored_name = f"{uuid4().hex}_{filename}"        # a unique name, so nobody's file can overwrite another's
+            file.save(HOMEOWNER_DOCS_DIR / stored_name)
             r2_key = None
-            stored_name = filename
 
         add_homeowner_document(
             user_id=user_id,

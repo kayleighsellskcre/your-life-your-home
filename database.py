@@ -1413,6 +1413,20 @@ def init_db() -> None:
 
     cur.execute(
         """
+        CREATE TABLE IF NOT EXISTS transaction_stage_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            transaction_id INTEGER NOT NULL,
+            from_stage TEXT,
+            to_stage TEXT,
+            changed_by INTEGER,
+            auto_changed INTEGER DEFAULT 0,
+            trigger_document_id INTEGER,
+            changed_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS avm_calls (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             property_id INTEGER,
@@ -3327,10 +3341,14 @@ def list_marketing_templates(
 # =========================
 
 
-def delete_homeowner_document(doc_id: int) -> None:
+def delete_homeowner_document(doc_id: int, user_id: int = None) -> None:
+    """Delete a document. Pass user_id so a homeowner can only ever delete their own."""
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute("DELETE FROM homeowner_documents WHERE id = ?", (doc_id,))
+    if user_id is None:
+        cur.execute("DELETE FROM homeowner_documents WHERE id = ?", (doc_id,))
+    else:
+        cur.execute("DELETE FROM homeowner_documents WHERE id = ? AND user_id = ?", (doc_id, user_id))
     conn.commit()
     conn.close()
 
@@ -3340,6 +3358,7 @@ def update_homeowner_document_file(
     file_path: str = None,
     r2_key: str = None,
     r2_url: str = None,
+    user_id: int = None,
 ) -> None:
     conn = get_connection()
     cur = conn.cursor()
@@ -3356,8 +3375,12 @@ def update_homeowner_document_file(
         values.append(r2_url)
     if updates:
         values.append(doc_id)
+        owner_sql = ""
+        if user_id is not None:
+            owner_sql = " AND user_id = ?"
+            values.append(user_id)
         cur.execute(
-            f"UPDATE homeowner_documents SET {', '.join(updates)} WHERE id = ?",
+            f"UPDATE homeowner_documents SET {', '.join(updates)} WHERE id = ?{owner_sql}",
             tuple(values),
         )
         conn.commit()
