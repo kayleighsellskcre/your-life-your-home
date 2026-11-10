@@ -2383,24 +2383,6 @@ def homeowner_support_ask_question():
     return redirect(url_for("homeowner_support_get_help") + "?tab=ask")
 
 
-@route("/homeowner/support/chat-human", methods=["GET"])
-def homeowner_support_chat_human():
-    """Redirects to unified Get Help page, Contact tab."""
-    return redirect(url_for("homeowner_support_get_help") + "?tab=contact")
-
-
-@route("/homeowner/support/schedule-chat", methods=["GET"])
-def homeowner_support_schedule_chat():
-    """Redirects to unified Get Help page, Schedule tab."""
-    return redirect(url_for("homeowner_support_get_help") + "?tab=schedule")
-
-
-@route("/homeowner/support/resources", methods=["GET"])
-def homeowner_support_resources():
-    """Redirects to unified Get Help page, Resources tab."""
-    return redirect(url_for("homeowner_support_get_help") + "?tab=resources")
-
-
 @route("/homeowner/support/get-help", methods=["GET"])
 @route("/homeowner/support", methods=["GET"])
 def homeowner_support_get_help():

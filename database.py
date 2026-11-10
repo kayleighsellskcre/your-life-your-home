@@ -2065,65 +2065,6 @@ def update_user_password(user_id: int, password_hash: str, name: str = None, rol
                 pass
 
 
-def find_incomplete_accounts() -> List[Dict]:
-    """
-    Find all accounts that have an email but no password_hash.
-    These are incomplete accounts that need to be cleaned up or completed.
-    """
-    conn = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute(
-            "SELECT * FROM users WHERE email IS NOT NULL AND (password_hash IS NULL OR password_hash = '')"
-        )
-        rows = cur.fetchall()
-        return rows_to_dicts(rows)
-    except Exception as e:
-        raise
-    finally:
-        if conn:
-            try:
-                conn.close()
-            except:
-                pass
-
-
-def delete_incomplete_account(user_id: int) -> bool:
-    """
-    Delete an incomplete account (one without a password_hash).
-    Use with caution - only for cleaning up truly incomplete accounts.
-    """
-    conn = None
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        
-        # Verify it's actually incomplete before deleting
-        cur.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,))
-        user = cur.fetchone()
-        
-        if user and (not user[0] or user[0] == ''):
-            cur.execute("DELETE FROM users WHERE id = ?", (user_id,))
-            conn.commit()
-            return True
-        else:
-            return False  # Account has password, don't delete
-    except Exception as e:
-        if conn:
-            try:
-                conn.rollback()
-            except:
-                pass
-        raise
-    finally:
-        if conn:
-            try:
-                conn.close()
-            except:
-                pass
-
-
 def get_user_by_id(user_id: int) -> Optional[Dict]:
     """
     Get user by ID.
@@ -4889,41 +4830,6 @@ def create_or_update_user_profile(
     return profile_id
 
 
-def get_homebot_widget_id(user_id: int) -> Optional[str]:
-    """Get Homebot widget ID for a user (agent or lender)."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT homebot_widget_id FROM user_profiles WHERE user_id = ?", (user_id,))
-    row = cur.fetchone()
-    conn.close()
-    if row and row[0]:
-        return row[0]
-    return None
-
-
-def update_homebot_widget_id(user_id: int, widget_id: Optional[str]) -> None:
-    """Update Homebot widget ID for a user."""
-    conn = get_connection()
-    cur = conn.cursor()
-    # Ensure profile exists
-    cur.execute("SELECT id FROM user_profiles WHERE user_id = ?", (user_id,))
-    if not cur.fetchone():
-        # Create minimal profile if it doesn't exist
-        from database import get_user_by_id
-        user = get_user_by_id(user_id)
-        if user:
-            role = user.get("role", "agent")
-            cur.execute("""
-                INSERT INTO user_profiles (user_id, role) VALUES (?, ?)
-            """, (user_id, role))
-    # Update widget ID
-    cur.execute("""
-        UPDATE user_profiles SET homebot_widget_id = ? WHERE user_id = ?
-    """, (widget_id, user_id))
-    conn.commit()
-    conn.close()
-
-
 def generate_referral_code(user_id: int, role: str) -> str:
     """Generate a unique referral code for an agent or lender."""
     import secrets
@@ -5038,31 +4944,6 @@ def get_or_create_referral_code(user_id: int, role: str) -> str:
         print(f"Error in get_or_create_referral_code: {traceback.format_exc()}")
         # Return a fallback code if everything fails
         return f"{role[:1].upper()}-{user_id:06d}"
-
-
-def get_professional_by_referral_code(referral_code: str) -> Optional[Dict]:
-    """Get professional (agent or lender) by their referral code."""
-    conn = get_connection()
-    cur = conn.cursor()
-    
-    # Check if referral_code column exists
-    cur.execute("PRAGMA table_info(user_profiles)")
-    columns = [row[1] for row in cur.fetchall()]
-    has_referral_code = 'referral_code' in columns
-    
-    if not has_referral_code:
-        conn.close()
-        return None
-    
-    cur.execute("""
-        SELECT up.*, u.name, u.email, u.id as user_id
-        FROM user_profiles up
-        JOIN users u ON up.user_id = u.id
-        WHERE up.referral_code = ?
-    """, (referral_code,))
-    row = cur.fetchone()
-    conn.close()
-    return row_to_dict(row)
 
 
 def create_client_relationship(
@@ -5470,21 +5351,6 @@ def get_referral_links_for_lender(lender_id: int) -> List[Dict]:
     return rows_to_dicts(rows)
 
 
-def deactivate_referral_link(token: str) -> bool:
-    """Deactivate a referral link. Returns True if successful."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """UPDATE referral_links SET is_active = 0, updated_at = CURRENT_TIMESTAMP
-           WHERE token = ?""",
-        (token,)
-    )
-    success = cur.rowcount > 0
-    conn.commit()
-    conn.close()
-    return success
-
-
 # =========================
 # SPOTLIGHT CARD SETS
 # =========================
@@ -5765,16 +5631,6 @@ def get_trusted_vendors(agent_id: int, category: Optional[str] = None) -> List[D
     return rows_to_dicts(rows)
 
 
-def get_trusted_vendor_by_id(vendor_id: int) -> Optional[Dict]:
-    """Get a specific trusted vendor by ID."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM trusted_vendors WHERE id = ?", (vendor_id,))
-    row = cur.fetchone()
-    conn.close()
-    return row_to_dict(row)
-
-
 def update_trusted_vendor(
     vendor_id: int,
     name: Optional[str] = None,
@@ -5854,54 +5710,6 @@ def delete_trusted_vendor(vendor_id: int, agent_id: Optional[int] = None) -> boo
             "UPDATE trusted_vendors SET is_active = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
             (vendor_id,)
         )
-    success = cur.rowcount > 0
-    conn.commit()
-    conn.close()
-    return success
-
-
-def link_vendor_to_transaction(transaction_id: int, vendor_id: int) -> bool:
-    """Link a trusted vendor to a transaction. Returns True if successful."""
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "INSERT INTO transaction_vendors (transaction_id, vendor_id) VALUES (?, ?)",
-            (transaction_id, vendor_id)
-        )
-        conn.commit()
-        conn.close()
-        return True
-    except sqlite3.IntegrityError:
-        # Already linked
-        conn.close()
-        return False
-
-
-def get_transaction_vendors(transaction_id: int) -> List[Dict]:
-    """Get all vendors linked to a transaction."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """SELECT tv.* FROM trusted_vendors tv
-           JOIN transaction_vendors txv ON tv.id = txv.vendor_id
-           WHERE txv.transaction_id = ? AND tv.is_active = 1
-           ORDER BY tv.name ASC""",
-        (transaction_id,)
-    )
-    rows = cur.fetchall()
-    conn.close()
-    return rows_to_dicts(rows)
-
-
-def unlink_vendor_from_transaction(transaction_id: int, vendor_id: int) -> bool:
-    """Unlink a vendor from a transaction. Returns True if successful."""
-    conn = get_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "DELETE FROM transaction_vendors WHERE transaction_id = ? AND vendor_id = ?",
-        (transaction_id, vendor_id)
-    )
     success = cur.rowcount > 0
     conn.commit()
     conn.close()
@@ -6211,15 +6019,6 @@ def seed_promo_codes(codes):
             except Exception as e:
                 print(f"[Promo] Could not insert code {code}: {e}")
         conn.commit()
-
-
-def get_promo_code(code):
-    """Look up a promo code. Returns dict or None."""
-    with get_connection() as conn:
-        row = conn.execute(
-            "SELECT * FROM promo_codes WHERE code = ?", (code.upper().strip(),)
-        ).fetchone()
-        return dict(row) if row else None
 
 
 def redeem_promo_code(code, user_id):

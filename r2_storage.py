@@ -118,31 +118,6 @@ def upload_local_file_to_r2(local_path, folder="documents"):
     }
 
 
-def download_file_from_r2(file_key, destination_path):
-    """
-    Download a file from R2 to local disk
-    
-    Args:
-        file_key: R2 object key (e.g., "documents/abc123.pdf")
-        destination_path: Where to save the file locally
-    
-    Returns:
-        Path to downloaded file
-    """
-    if not is_r2_enabled():
-        raise Exception("R2 storage is not configured.")
-    
-    client = get_r2_client()
-    bucket = os.environ["R2_BUCKET"]
-    
-    destination_path = Path(destination_path)
-    destination_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    client.download_file(bucket, file_key, str(destination_path))
-    
-    return destination_path
-
-
 def get_file_url_from_r2(file_key):
     """
     Get a presigned URL for a file (for private access)
@@ -193,24 +168,3 @@ def delete_file_from_r2(file_key):
     
     return True
 
-
-def file_exists_in_r2(file_key):
-    """
-    Check if a file exists in R2
-    
-    Args:
-        file_key: R2 object key
-    
-    Returns:
-        True if file exists, False otherwise
-    """
-    if not is_r2_enabled():
-        return False
-    
-    try:
-        client = get_r2_client()
-        bucket = os.environ["R2_BUCKET"]
-        client.head_object(Bucket=bucket, Key=file_key)
-        return True
-    except:
-        return False

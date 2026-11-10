@@ -75,17 +75,6 @@ def get_agent_transactions(agent_id: int, status: str = 'active') -> List[Dict]:
     print(f"[DEBUG] get_agent_transactions(agent_id={agent_id}, status={status}) found {len(transactions)} transactions")
     return transactions
 
-def get_transactions_by_stage(agent_id: int, stage: str) -> List[Dict]:
-    """Get transactions in a specific stage"""
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT * FROM transactions
-            WHERE agent_id = ? AND current_stage = ? AND status = 'active'
-            ORDER BY target_close_date ASC
-        """, (agent_id, stage))
-        transactions = [dict(row) for row in cursor.fetchall()]
-        return transactions
 
 def get_transaction_detail(transaction_id: int) -> Optional[Dict]:
     """Get full transaction details"""
@@ -478,24 +467,6 @@ def get_transaction_participants(transaction_id: int) -> List[Dict]:
     
     return participants
 
-def accept_transaction_invitation(invitation_token: str, user_id: int) -> Optional[int]:
-    """Accept an invitation to join a transaction"""
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE transaction_participants
-            SET user_id = ?, status = 'active', invitation_accepted_at = CURRENT_TIMESTAMP
-            WHERE invitation_token = ?
-        """, (user_id, invitation_token))
-        if cursor.rowcount == 0:
-            return None
-        cursor.execute("""
-            SELECT transaction_id FROM transaction_participants
-            WHERE invitation_token = ?
-        """, (invitation_token,))
-        transaction_id = cursor.fetchone()[0]
-        conn.commit()
-        return transaction_id
 
 # ============================================================================
 # TIMELINE & ACTIVITY
@@ -533,53 +504,6 @@ def get_transaction_timeline(transaction_id: int, limit: int = 50) -> List[Dict]
 # ============================================================================
 # DASHBOARD METRICS
 # ============================================================================
-
-def get_agent_transaction_metrics(agent_id: int) -> Dict:
-    """Get transaction metrics for agent dashboard"""
-    with get_db() as conn:
-        cursor = conn.cursor()
-        # Total active transactions
-        cursor.execute("""
-            SELECT COUNT(*) FROM transactions
-            WHERE agent_id = ? AND status = 'active'
-        """, (agent_id,))
-        active_count = cursor.fetchone()[0]
-        # By stage
-        cursor.execute("""
-            SELECT current_stage, COUNT(*) as count
-            FROM transactions
-            WHERE agent_id = ? AND status = 'active'
-            GROUP BY current_stage
-        """, (agent_id,))
-        by_stage = {row[0]: row[1] for row in cursor.fetchall()}
-        # Closing soon (within 30 days)
-        cursor.execute("""
-            SELECT COUNT(*) FROM transactions
-            WHERE agent_id = ? AND status = 'active'
-            AND target_close_date <= date('now', '+30 days')
-        """, (agent_id,))
-        closing_soon = cursor.fetchone()[0]
-        return {
-            'active_transactions': active_count,
-            'by_stage': by_stage,
-            'closing_soon': closing_soon,
-            'pre_contract': by_stage.get('pre_contract', 0),
-            'under_contract': by_stage.get('under_contract', 0),
-            'in_escrow': by_stage.get('in_escrow', 0),
-            'clear_to_close': by_stage.get('clear_to_close', 0),
-            'closed_this_month': by_stage.get('closed', 0)
-        }
-
-def handle_document_upload_and_auto_progression(transaction_id, document_type):
-    with get_db() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT * FROM transaction_participants
-            WHERE transaction_id = ?
-            ORDER BY participant_type, name
-        """, (transaction_id,))
-        participants = [dict(row) for row in cursor.fetchall()]
-        return participants
 
 
 def update_transaction(transaction_id: int, agent_id: int, **kwargs) -> bool:

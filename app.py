@@ -2229,29 +2229,6 @@ except Exception as e:
 # -------------------------------------------------
 # SHARED UTILS
 # -------------------------------------------------
-def json_or_list(value):
-    """Convert DB string/json text into a Python list safely."""
-    if isinstance(value, list):
-        return value
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except Exception:
-            return [ln.strip() for ln in value.splitlines() if ln.strip()]
-    return []
-
-
-def _row_get(row, key, default=None):
-    """Safe getter that supports dicts, sqlite rows, objects."""
-    if row is None:
-        return default
-    if isinstance(row, dict):
-        return row.get(key, default)
-    try:
-        return row[key]
-    except Exception:
-        pass
-    return getattr(row, key, default)
 
 
 # -------------------------------------------------
