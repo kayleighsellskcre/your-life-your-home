@@ -85,3 +85,112 @@ ok(c.get(f"/b/{btok}").status_code == 200, "the short link opens the booking")
 with contextlib.redirect_stdout(io.StringIO()):
     c.post("/booking/save", data={**form, "place": "Zoom. I will send you the link."})
 ok(not B.get_settings(ag)["needs_phone"], "a video meeting keeps the phone number optional")
+
+# ── the host's own calendar hides busy times ──
+import urllib.request as _ur
+d3 = d2 + timedelta(days=7)
+while d3.weekday() > 4:
+    d3 += timedelta(days=1)
+ymd = lambda d: d.strftime("%Y%m%d")
+ICS = f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Apple Inc.//iOS//EN
+BEGIN:VTIMEZONE
+TZID:America/Chicago
+BEGIN:STANDARD
+DTSTART:19701101T020000
+RRULE:FREQ=YEARLY;BYMONTH=11;BYDAY=1SU
+TZOFFSETFROM:-0500
+TZOFFSETTO:-0600
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:19700308T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=2SU
+TZOFFSETFROM:-0600
+TZOFFSETTO:-0500
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:showing-1
+DTSTART;TZID=America/Chicago:{ymd(d3)}T140000
+DTEND;TZID=America/Chicago:{ymd(d3)}T150000
+SUMMARY:Showing at 123 Main
+END:VEVENT
+BEGIN:VEVENT
+UID:weekly-1
+DTSTART;TZID=America/Chicago:{ymd(d3 - timedelta(days=14))}T100000
+DTEND;TZID=America/Chicago:{ymd(d3 - timedelta(days=14))}T103000
+RRULE:FREQ=WEEKLY
+SUMMARY:Team meeting
+END:VEVENT
+BEGIN:VEVENT
+UID:free-1
+DTSTART;TZID=America/Chicago:{ymd(d3)}T120000
+DTEND;TZID=America/Chicago:{ymd(d3)}T130000
+TRANSP:TRANSPARENT
+SUMMARY:Maybe lunch
+END:VEVENT
+BEGIN:VEVENT
+UID:allday-1
+DTSTART;VALUE=DATE:{ymd(d3)}
+DTEND;VALUE=DATE:{ymd(d3 + timedelta(days=1))}
+SUMMARY:Mom's birthday
+END:VEVENT
+END:VCALENDAR
+""".replace("\n", "\r\n").encode()
+
+class _Resp(io.BytesIO):
+    status = 200
+    def __enter__(self): return self
+    def __exit__(self, *a): pass
+fetched = []
+_real = _ur.urlopen
+def _fake(req, timeout=None):
+    url = req.full_url if hasattr(req, "full_url") else req
+    fetched.append(url)
+    if "icloud.com" in url:
+        return _Resp(ICS)
+    raise OSError("HTTP Error 404: Not Found")
+_ur.urlopen = _fake
+
+ok(B.clean_cal_link("webcal://p12-caldav.icloud.com/published/2/abc") == "https://p12-caldav.icloud.com/published/2/abc", "a webcal iPhone link is accepted")
+ok(B.clean_cal_link("https://evil.example.com/cal.ics") == "" and B.clean_cal_link("http://localhost/x") == "", "links to other sites are refused")
+with contextlib.redirect_stdout(io.StringIO()):
+    r = c.post("/booking/save", data={**form, "busy_new": "https://evil.example.com/cal.ics"}, follow_redirects=True)
+ok(b"did not look right" in r.data and B.get_settings(ag)["busy_list"] == [], "a bad calendar link is refused kindly and not saved")
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post("/booking/save", data={**form, "busy_new": "webcal://p12-caldav.icloud.com/published/2/abc"})
+s = B.get_settings(ag); s["user_id"] = ag
+ok(s["busy_list"] == ["https://p12-caldav.icloud.com/published/2/abc"], "the iPhone calendar link is saved")
+times = B.open_times(s, d3)
+ok("14:00" not in times and "14:30" not in times, "a showing at 2 PM hides 2:00 and 2:30")
+ok("13:30" in times and "15:00" in times, "the times right before and after the showing stay open")
+ok("10:00" not in times, "a weekly repeating meeting hides its time")
+ok("12:00" in times and "09:00" in times, "free events and all-day events do not block times")
+nxt = d3 + timedelta(days=7)
+ok("10:00" not in B.open_times(s, nxt) and "14:00" in B.open_times(s, nxt), "the weekly meeting repeats, the one-time showing does not")
+with contextlib.redirect_stdout(io.StringIO()):
+    page = c.get("/agent/booking")
+ok(b"iPhone (iCloud) calendar" in page.data and b"busy time" in page.data and b"Showing at 123 Main" not in page.data,
+   "the setup page shows the calendar is connected, without event names")
+pub = c.get(f"/book/{token}?d={d3.isoformat()}")
+ok(b"Showing at 123 Main" not in pub.data and b"Team meeting" not in pub.data, "clients never see event names")
+with contextlib.redirect_stdout(io.StringIO()):
+    rb = c.post(f"/book/{token}", data={"name": "Sam", "email": "sam@x.com", "phone": "9135551234", "day": d3.isoformat(), "time": "14:00"})
+ok(rb.status_code == 400, "a busy time cannot be booked even by sending the form directly")
+n = len(fetched)
+B.open_times(s, d3); B.open_times(s, nxt)
+ok(len(fetched) == n, "the calendar is read once and reused for a few minutes")
+B._busy_cache.clear()
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post("/booking/save", data={**form, "busy_url": "https://p12-caldav.icloud.com/published/2/abc",
+                                  "busy_new": "https://calendar.google.com/calendar/ical/x/private-y/basic.ics"})
+s = B.get_settings(ag); s["user_id"] = ag
+ok(len(s["busy_list"]) == 2, "a second calendar can be added")
+ok("14:00" not in B.open_times(s, d3), "one calendar failing does not stop the other from hiding times")
+chk = B.busy_check(s)
+ok(any(not x["ok"] and "could not read" in x["text"] for x in chk), "a calendar that cannot be read is flagged on the setup page")
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post("/booking/save", data={**form})
+ok(B.get_settings(ag)["busy_list"] == [], "unticking calendars disconnects them")
+_ur.urlopen = _real

@@ -5,10 +5,11 @@
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
 
   <details class="pie-card bk-help" {{ 'open' if not bk.s.enabled }}>
-    <summary><h2 style="display:inline;">How to set this up</h2> <span class="pie-hint">About 5 minutes, one time</span></summary>
+    <summary><h2 style="display:inline;">How to set this up</h2> <span class="pie-hint">About 10 minutes, one time</span></summary>
     <ol class="bk-steps">
       <li><b>Choose when you are free.</b> Below, tick the days you take appointments, then set your hours, how long each visit lasts, and how much notice you need. Check that the time zone is yours.</li>
       <li><b>Say how you will meet.</b> Write it the way a client would read it, like "Phone call. I will call you at the number you give me." If it mentions a phone or a call, clients will be asked for their number.</li>
+      <li><b>Connect your own calendar.</b> Under "Hide times when I am already busy," paste the link to the calendar on your phone. Anything already on it, like showings or closings, is hidden from clients so you are never double booked. Tap "How to get the link" for the steps.</li>
       <li><b>Block your days off.</b> Add holidays, vacations, or any day you are not working under "Days off." Those days will not show to clients.</li>
       <li><b>Turn it on.</b> Tick "Turn on my booking page" and tap Save. Your link to share appears right under the box.</li>
       <li><b>Try it yourself.</b> Tap "See what clients see," pick a time, and book with an email you can check. You will get the client's confirmation and your own "new booking" note. Then cancel it under "Coming up."</li>
@@ -51,6 +52,38 @@
         <div><label class="pie-label" for="bk_bfrom">First day off</label><input class="pie-input" type="date" id="bk_bfrom" name="block_from" min="{{ bk.today }}"></div>
         <div><label class="pie-label" for="bk_bto">Last day off <span class="pie-hint">(leave empty for one day)</span></label><input class="pie-input" type="date" id="bk_bto" name="block_to" min="{{ bk.today }}"></div>
       </div>
+
+      <label class="pie-label">Hide times when I am already busy</label>
+      <p class="pie-hint" style="margin:0 0 .5rem;">Connect the calendar on your phone and anything already on it (showings, closings, appointments) is hidden from clients. Only the times are used. Your event names and details are never shown to anyone.</p>
+      {% for c in bk.busy %}
+      <div class="bk-busy {{ 'ok' if c.ok else 'bad' }}">
+        <label style="display:flex;gap:.5rem;align-items:flex-start;"><input type="checkbox" name="busy_url" value="{{ c.url }}" checked style="width:auto;margin-top:.2rem;">
+          <span><b>{{ c.kind }} calendar</b><br><span class="pie-hint">{{ c.text }}</span></span></label>
+      </div>
+      {% endfor %}
+      {% if bk.busy %}<p class="pie-hint" style="margin:.2rem 0 .5rem;">Untick a calendar and tap Save to disconnect it.</p>{% endif %}
+      <input class="pie-input" name="busy_new" placeholder="Paste a calendar link here (starts with webcal:// or https://)" autocomplete="off">
+      <details class="bk-how">
+        <summary>How to get the link</summary>
+        <div class="bk-how-body">
+          <b>iPhone Calendar</b>
+          <ol>
+            <li>Open the <b>Calendar</b> app and tap <b>Calendars</b> at the bottom.</li>
+            <li>Tap the <b>i</b> next to the calendar you put your appointments on (under iCloud).</li>
+            <li>Turn on <b>Public Calendar</b>, then tap <b>Share Link</b> and choose <b>Copy</b>.</li>
+            <li>Paste it in the box above and tap <b>Save</b>. Use more than one calendar? Add each one the same way.</li>
+          </ol>
+          <p class="pie-hint" style="margin:.2rem 0 .7rem;">"Public" only means anyone who has this exact link could see that calendar. The link is long and impossible to guess, and it is kept private here, so just do not post it anywhere. If your calendars are not under iCloud (for example they are under Gmail), use the Google steps instead.</p>
+          <b>Google Calendar</b>
+          <ol>
+            <li>On a computer, open <b>calendar.google.com</b>.</li>
+            <li>Click the gear, then <b>Settings</b>, then your calendar's name on the left.</li>
+            <li>Scroll to <b>Integrate calendar</b> and copy the <b>Secret address in iCal format</b>.</li>
+            <li>Paste it in the box above and tap <b>Save</b>.</li>
+          </ol>
+          <p class="pie-hint" style="margin:.2rem 0 0;">Changes on your calendar show up here within a few minutes. All-day events, like birthdays or holidays, do not block times. Use Days off for those.</p>
+        </div>
+      </details>
 
       <label class="pie-label" for="bk_title">What clients are booking</label>
       <input class="pie-input" id="bk_title" name="title" maxlength="120" value="{{ bk.s.title }}">

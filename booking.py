@@ -62,6 +62,9 @@ def ensure_tables():
     cols = [r[1] for r in cur.execute("PRAGMA table_info(booking_settings)").fetchall()]
     if "blocked_days" not in cols:
         cur.execute("ALTER TABLE booking_settings ADD COLUMN blocked_days TEXT DEFAULT ''")
+    for col in ("busy_urls", "busy_status"):
+        if col not in cols:
+            cur.execute(f"ALTER TABLE booking_settings ADD COLUMN {col} TEXT DEFAULT ''")
     cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_booking_slot ON bookings(user_id, day, start_time) WHERE status='confirmed'")
     cur.execute("CREATE INDEX IF NOT EXISTS ix_booking_user_day ON bookings(user_id, day)")
     conn.commit()
@@ -90,6 +93,7 @@ def get_settings(user_id, create=False):
     s["day_list"] = [d for d in (s["days"] or "").split(",") if d in DAY_KEYS]
     s["blocked"] = sorted({d for d in (s.get("blocked_days") or "").split(",") if _parse_day(d)})
     s["needs_phone"] = needs_phone(s.get("place"))
+    s["busy_list"] = [u for u in (s.get("busy_urls") or "").split("\n") if u.strip()]
     return s
 
 
@@ -204,6 +208,7 @@ def open_times(s, day, conn=None):
     taken = _taken(conn, s["user_id"], d.isoformat())
     if own:
         conn.close()
+    busy = busy_times(s, d) if s.get("busy_list") else []
     earliest = now_local(s["tz"]) + timedelta(hours=int(s["notice_hours"] or 0))
     cur = datetime.combine(d, st)
     last = datetime.combine(d, en)
@@ -212,6 +217,7 @@ def open_times(s, day, conn=None):
         a, b = cur, cur + timedelta(minutes=mins)
         base = datetime.combine(date.today(), cur.time())
         clash = any(base < t1 and base + timedelta(minutes=mins) > t0 for t0, t1 in taken)
+        clash = clash or any(a < z1 and b > z0 for z0, z1 in busy)
         if a >= earliest and not clash:
             out.append(cur.strftime("%H:%M"))
         cur += timedelta(minutes=mins)
@@ -230,6 +236,107 @@ def open_days(s, limit=14):
                 break
         d += timedelta(days=1)
     conn.close()
+    return out
+
+
+# ───────────────────────── the host's own calendar (busy times) ─────────────────────────
+# Hosts can paste a private link to their phone or Google calendar. Before times are offered, that calendar is read
+# and any time that overlaps something on it is hidden. Only the start and end of each event are used; titles and
+# details are never stored or shown. Links are cached for a few minutes so the booking page stays quick.
+MAX_BUSY_LINKS = 5
+BUSY_TTL = 300            # seconds between reads of the same calendar
+BUSY_MAX_BYTES = 8_000_000
+BUSY_HOSTS = ("icloud.com", "google.com", "googleusercontent.com", "outlook.com", "office365.com", "live.com",
+              "office.com", "yahoo.com", "fastmail.com", "calendar.zoho.com", "zoho.com", "proton.me")
+_busy_cache = {}          # url -> (fetched_at, events [(start_utc, end_utc)], problem)
+
+
+def clean_cal_link(v):
+    """A calendar link as people paste it (webcal:// or https://), checked and normalized, or "" if it is not one."""
+    from urllib.parse import urlparse
+    v = (v or "").strip().strip("<>\"' ")
+    if v.lower().startswith("webcal://"):
+        v = "https://" + v[9:]
+    if v.lower().startswith("http://"):
+        v = "https://" + v[7:]
+    try:
+        u = urlparse(v)
+    except ValueError:
+        return ""
+    host = (u.hostname or "").lower()
+    if u.scheme != "https" or not host or not any(host == h or host.endswith("." + h) for h in BUSY_HOSTS):
+        return ""
+    return v[:1500]
+
+
+def _fetch_events(url):
+    """Every timed event in a calendar link for the next few weeks, as (start, end) in UTC. Uses a short cache."""
+    import time as _t
+    hit = _busy_cache.get(url)
+    if hit and _t.time() - hit[0] < BUSY_TTL:
+        return hit[1], hit[2]
+    events, problem = (hit[1] if hit else []), ""
+    try:
+        import urllib.request as _req
+        import icalendar
+        import recurring_ical_events
+        r = _req.Request(url, headers={"User-Agent": "YourLifeYourHome-Booking/1.0", "Accept": "text/calendar,*/*"})
+        with _req.urlopen(r, timeout=8) as resp:
+            raw = resp.read(BUSY_MAX_BYTES + 1)
+        if len(raw) > BUSY_MAX_BYTES:
+            raise ValueError("calendar too large")
+        cal = icalendar.Calendar.from_ical(raw)
+        now = datetime.now(timezone.utc)
+        found = []
+        for ev in recurring_ical_events.of(cal).between(now - timedelta(days=1), now + timedelta(days=DAYS_AHEAD + 2)):
+            if str(ev.get("TRANSP", "OPAQUE")).upper() == "TRANSPARENT" or str(ev.get("STATUS", "")).upper() == "CANCELLED":
+                continue
+            st, en = ev.get("DTSTART"), ev.get("DTEND")
+            st = st.dt if st else None
+            if not isinstance(st, datetime):
+                continue          # all-day events (birthdays, holidays, reminders) do not block times; days off do that
+            en = en.dt if en else None
+            if not isinstance(en, datetime):
+                dur = ev.get("DURATION")
+                en = st + (dur.dt if dur else timedelta(minutes=30))
+            if st.tzinfo is None:
+                st, en = st.replace(tzinfo=timezone.utc), en.replace(tzinfo=timezone.utc)
+            found.append((st.astimezone(timezone.utc), en.astimezone(timezone.utc)))
+        events = found
+    except Exception as e:
+        problem = "We could not read this calendar just now" + (" (the link was not found)" if "404" in str(e) else "") + "."
+    _busy_cache[url] = (_t.time(), events, problem)
+    return events, problem
+
+
+def busy_times(s, d):
+    """Busy stretches on one date from the host's own calendars, as naive local datetimes (the host's time zone)."""
+    z = _zone(s["tz"])
+    day_start = datetime.combine(d, time(0, 0)).replace(tzinfo=z)
+    day_end = day_start + timedelta(days=1)
+    out = []
+    for url in s.get("busy_list", []):
+        events, _ = _fetch_events(url)
+        for a, b in events:
+            if a < day_end and b > day_start:
+                out.append((a.astimezone(z).replace(tzinfo=None), b.astimezone(z).replace(tzinfo=None)))
+    return out
+
+
+def busy_check(s):
+    """For the setup page: how each linked calendar is doing, in plain words."""
+    out = []
+    now = datetime.now(timezone.utc)
+    for url in s.get("busy_list", []):
+        events, problem = _fetch_events(url)
+        upcoming = sum(1 for a, b in events if b > now)
+        host = url.split("://", 1)[-1].split("/", 1)[0]
+        kind = ("iPhone (iCloud)" if "icloud" in host else "Google" if "google" in host else
+                "Outlook" if any(h in host for h in ("outlook", "office", "live")) else host)
+        out.append({"url": url, "kind": kind, "ok": not problem, "count": upcoming,
+                    "text": problem or (f"Connected. {upcoming} busy time{'s' if upcoming != 1 else ''} in the next six weeks "
+                                        "will be hidden from clients." if upcoming else
+                                        "Connected. Nothing on this calendar in the next six weeks yet.")})
     return out
 
 
@@ -669,6 +776,24 @@ def save():
     if not days:
         flash("Please choose at least one day you would like to take appointments.", "error")
         return _back(u)
+    links, bad_links = [], 0
+    for raw in f.getlist("busy_url") + [f.get("busy_new", "")]:
+        if not (raw or "").strip():
+            continue
+        clean = clean_cal_link(raw)
+        if clean and clean not in links:
+            links.append(clean)
+        elif not clean:
+            bad_links += 1
+    if bad_links:
+        flash("That calendar link did not look right. Please copy the share link from your iPhone Calendar or the secret "
+              "address from Google Calendar and paste it again. It should start with webcal:// or https://.", "error")
+        return _back(u)
+    if len(links) > MAX_BUSY_LINKS:
+        flash(f"You can connect up to {MAX_BUSY_LINKS} calendars.", "error")
+        return _back(u)
+    for url in links:
+        _busy_cache.pop(url, None)
     blocked, added, block_problem = _blocked_from_form(f, tz)
     if block_problem:
         flash(block_problem, "error")
@@ -676,10 +801,10 @@ def save():
     get_settings(u["id"], create=True)
     conn = _db()
     conn.execute("UPDATE booking_settings SET enabled=?, days=?, start_time=?, end_time=?, minutes=?, notice_hours=?, tz=?, "
-                 "title=?, place=?, blocked_days=? WHERE user_id=?",
+                 "title=?, place=?, blocked_days=?, busy_urls=? WHERE user_id=?",
                  (1 if f.get("enabled") else 0, days, st, en, mins if mins in LENGTHS else 30, notice, tz,
                   (f.get("title") or DEFAULTS["title"]).strip()[:120], (f.get("place") or DEFAULTS["place"]).strip()[:250],
-                  ",".join(blocked), u["id"]))
+                  ",".join(blocked), "\n".join(links), u["id"]))
     conn.commit()
     clash = []
     if added:
@@ -770,7 +895,7 @@ def card_context(user_id):
     root = request.url_root.rstrip("/")
     host_only = root.split("://", 1)[-1]
     feed_https = f"{root}/cal/{s['feed_token']}.ics"
-    return {"s": s, "upcoming": upcoming, "zones": ZONES, "today": today, "pretty_day": pretty_day, "lengths": LENGTHS, "notice": NOTICE,
+    return {"s": s, "upcoming": upcoming, "zones": ZONES, "today": today, "pretty_day": pretty_day, "busy": busy_check(s), "lengths": LENGTHS, "notice": NOTICE,
             "day_keys": list(zip(DAY_KEYS, DAY_NAMES)), "page_url": f"{root}/book/{s['token']}",
             "feed_https": feed_https, "feed_webcal": f"webcal://{host_only}/cal/{s['feed_token']}.ics",
             "feed_google": "https://calendar.google.com/calendar/r?cid=" + quote(f"webcal://{host_only}/cal/{s['feed_token']}.ics", safe="")}
