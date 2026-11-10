@@ -4349,6 +4349,8 @@ import client_values as _client_values
 _client_values.init_app(app, get_current_user)
 import refi_alerts as _refi_alerts
 _refi_alerts.init_app(app, get_current_user)
+import care_alerts as _care_alerts
+_care_alerts.init_app(app, get_current_user, globals())
 
 # ---------------- LENDER ROUTES ----------------
 # The lender pages live in lender_routes.py. They run in this module's namespace, so they behave exactly as before.

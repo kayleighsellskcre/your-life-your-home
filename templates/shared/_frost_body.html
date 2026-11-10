@@ -1,0 +1,92 @@
+<style>
+  .fa-w { max-width: 980px; margin: 0 auto; padding: 0 0 3rem; }
+  .fa-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1rem 1.2rem; margin-bottom: 1rem; }
+  .fa-card h2 { margin: 0 0 .3rem; font-size: 1.1rem !important; }
+  .fa-card p { color: #6B5B4D; font-size: .9rem; margin: .2rem 0 .7rem; line-height: 1.5; }
+  .fa-check { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; }
+  .fa-check select { width: auto !important; min-height: 0 !important; padding: .4rem .6rem !important; font-size: 16px !important; }
+  .fa-btn { width: auto !important; margin: 0 !important; min-height: 0 !important; padding: .55rem 1.2rem !important; border-radius: 99px !important; border: 0 !important; background: #8F6244 !important; color: #fff !important; font-weight: 700 !important; font-size: .9rem !important; cursor: pointer; text-decoration: none; display: inline-block; }
+  .fa-btn.alt { background: #FFFDFA !important; color: #6B4630 !important; border: 1.5px solid rgba(143,98,68,.5) !important; }
+  .fa-banner { border-radius: 12px; padding: .8rem 1rem; margin-bottom: 1rem; font-weight: 700; }
+  .fa-banner.cold { background: #E6EEF7; color: #26456B; } .fa-banner.mild { background: #E7F1E8; color: #2F6B3F; }
+  .fa-card textarea, .fa-card input[type=text] { width: 100%; box-sizing: border-box; font-size: 16px !important; }
+  .fa-card textarea { min-height: 15rem !important; height: 15rem; line-height: 1.5; }
+  .fa-row { display: grid; grid-template-columns: auto minmax(0, 1.5fr) minmax(0, 1fr) auto; gap: .4rem .9rem; align-items: center; padding: .65rem 0; border-top: 1px solid rgba(160,125,85,.18); }
+  .fa-row input[type=checkbox] { width: 1.2rem; height: 1.2rem; margin: 0; }
+  .fa-who b { display: block; color: #3A2518; overflow-wrap: anywhere; }
+  .fa-who span, .fa-temp small { color: #7A6855; font-size: .8rem; overflow-wrap: anywhere; }
+  .fa-temp b { font-size: 1.05rem; color: #26456B; }
+  .fa-note { display: inline-block; margin-top: .15rem; padding: .05rem .55rem; border-radius: 99px; background: #F3EBDD; color: #7A5230; font-size: .74rem; font-weight: 700; }
+  .fa-sms { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .4rem .85rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .8rem !important; font-weight: 700 !important; text-decoration: none; white-space: nowrap; }
+  .fa-tools { display: flex; gap: .6rem; flex-wrap: wrap; margin: .3rem 0 .4rem; font-size: .85rem; }
+  .fa-tools a { color: #8F6244; cursor: pointer; text-decoration: underline; }
+  @media (max-width: 700px) { .fa-row { grid-template-columns: auto 1fr; } .fa-temp, .fa-act { grid-column: 2; } }
+</style>
+<div class="fa-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Helpful, never spammy</div>
+    <h1 class="ylh-page-hd__title">Frost Alert</h1>
+    <p class="ylh-page-hd__sub">Check the forecast for your clients' homes, see who will be affected, and send a short, useful heads-up. Nothing goes out until you review it and press Send.</p>
+  </div>
+
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="fa-banner {{ 'mild' if cat == 'success' else 'cold' }}">{{ m }}</div>{% endfor %}
+
+  <div class="fa-card">
+    <h2>Check the forecast</h2>
+    <p>We look at the National Weather Service forecast for the next two days at each home address.</p>
+    <form method="post" action="{{ url_for('care_alerts.frost_check') }}" class="fa-check">
+      <label for="th">Alert me when it could drop to</label>
+      <select id="th" name="threshold">{% for t in thresholds %}<option value="{{ t }}" {{ 'selected' if t == threshold }}>{{ t }}°F or colder</option>{% endfor %}</select>
+      <button class="fa-btn" type="submit">Check the forecast</button>
+    </form>
+    {% if last_sent %}<p style="margin-top:.7rem;font-size:.8rem;">Your last frost alert went out {{ last_sent }} (UTC). People are never alerted twice within 12 hours.</p>{% endif %}
+  </div>
+
+  {% if result %}
+    {% if result.total == 0 %}
+      <div class="fa-card"><p>No clients with a home address and a way to reach them yet. Add property addresses in your CRM, or invite homeowners to join, and they will appear here.</p></div>
+    {% else %}
+      {% if result.freeze %}
+        <div class="fa-banner cold">{{ result.freeze }} of {{ result.total }} {{ 'home' if result.total == 1 else 'homes' }} could see {{ threshold }}°F or colder in the next two days. Lowest: about {{ result.low }}°F ({{ result.when }}).</div>
+      {% else %}
+        <div class="fa-banner mild">Nothing freezing in the forecast for your clients' homes. No alert needed right now.</div>
+      {% endif %}
+
+      <form method="post" action="{{ url_for('care_alerts.frost_send') }}">
+        <input type="hidden" name="low" value="{{ result.low if result.low is not none else '' }}">
+        {% if result.freeze %}
+        <div class="fa-card">
+          <h2>The message</h2>
+          <p>Edit it however you like. {first} becomes each person's first name. Homes with a sprinkler system get one extra line, and your name goes at the bottom.</p>
+          <input type="text" name="subject" value="{{ result.subject }}" aria-label="Email subject" style="margin-bottom:.6rem;">
+          <textarea name="message" aria-label="Message">{{ result.message }}</textarea>
+        </div>
+        {% endif %}
+
+        <div class="fa-card">
+          <h2>Who gets it</h2>
+          <p>People who could be affected are checked for you. Uncheck anyone you would rather not email. Opted-out clients are never emailed.</p>
+          <div class="fa-tools"><a onclick="faAll(true)">Check everyone who can be emailed</a><a onclick="faAll(false)">Uncheck all</a></div>
+          {% for p in result.people %}
+          <div class="fa-row">
+            <input type="checkbox" name="who" value="{{ p.key }}" aria-label="Send to {{ p.name }}" {{ 'checked' if p.preselect }} {{ 'disabled' if (not p.email or not p.ok) }}>
+            <div class="fa-who"><b>{{ p.name }}</b><span>{{ p.address or 'No address' }}</span>
+              <div>
+                {% if not p.ok %}<span class="fa-note">Opted out of alerts</span>{% endif %}
+                {% if not p.email %}<span class="fa-note">No email</span>{% endif %}
+                {% if p.recent %}<span class="fa-note">Alerted in the last 12 hours</span>{% endif %}
+                {% if p.sprinkler %}<span class="fa-note">Has a sprinkler system</span>{% endif %}
+                {% if not p.faucets %}<span class="fa-note">No outdoor faucets</span>{% endif %}
+              </div></div>
+            <div class="fa-temp">{% if p.state == 'unknown' %}<small>{{ p.why }}</small>{% else %}<b>{{ p.low }}°F</b> <small>{{ p.when }}{% if p.state == 'mild' %} (no freeze){% endif %}</small>{% endif %}</div>
+            <div class="fa-act">{% if p.sms %}<a class="fa-sms" href="{{ p.sms }}">Text</a>{% endif %}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% if result.freeze %}<button class="fa-btn" type="submit">Send emails to the checked people</button>{% endif %}
+      </form>
+      <p style="margin-top:1rem;font-size:.82rem;color:#7A6855;">The Text button opens a message on your own phone, already written, so it comes from your real number.</p>
+    {% endif %}
+  {% endif %}
+</div>
+<script>function faAll(on){document.querySelectorAll('.fa-row input[type=checkbox]:not(:disabled)').forEach(function(c){c.checked=on;});}</script>

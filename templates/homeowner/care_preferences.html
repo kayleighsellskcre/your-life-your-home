@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Home Details & Alerts{% endblock %}
+{% block content %}
+<style>
+  .cp-w { max-width: 640px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .cp-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1.1rem 1.3rem; margin-bottom: 1.1rem; }
+  .cp-card h2 { margin: 0 0 .25rem; font-size: 1.15rem !important; }
+  .cp-card > p { margin: 0 0 .8rem; color: #7A6855; font-size: .9rem; line-height: 1.5; }
+  .cp-opt { display: flex; gap: .7rem; align-items: flex-start; padding: .55rem 0; border-top: 1px solid rgba(160,125,85,.15); }
+  .cp-opt input { width: 1.25rem; height: 1.25rem; margin: .15rem 0 0; flex: none; }
+  .cp-opt b { display: block; color: #3A2518; } .cp-opt span { color: #7A6855; font-size: .85rem; }
+  .cp-save { width: auto !important; margin: 0 !important; padding: .65rem 1.6rem !important; border-radius: 99px !important; border: 0 !important; background: #8F6244 !important; color: #fff !important; font-weight: 700 !important; cursor: pointer; }
+  .cp-w input[type=date] { font-size: 16px !important; max-width: 12rem; }
+</style>
+<div class="cp-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Your home</div>
+    <h1 class="ylh-page-hd__title">Home Details &amp; Alerts</h1>
+    <p class="ylh-page-hd__sub">Tell us a little about your home and we will only send what is actually useful to you. You are always in charge of what you get.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="cp-card" style="color:#2F6B3F;font-weight:700;">{{ m }}</div>{% endfor %}
+  <form method="post">
+    <div class="cp-card">
+      <h2>About your home</h2>
+      <p>These help us tailor reminders, like what to do before a freeze.</p>
+      <label class="cp-opt"><input type="checkbox" name="outdoor_faucets" {{ 'checked' if d.outdoor_faucets }}><div><b>Outdoor faucets</b><span>Hose spigots on the outside of your home.</span></div></label>
+      <label class="cp-opt"><input type="checkbox" name="sprinkler" {{ 'checked' if d.sprinkler }}><div><b>Sprinkler system</b><span>An underground irrigation system.</span></div></label>
+      <label class="cp-opt"><input type="checkbox" name="fireplace" {{ 'checked' if d.fireplace }}><div><b>Fireplace or wood stove</b><span>For yearly chimney reminders.</span></div></label>
+      <label class="cp-opt"><input type="checkbox" name="sump_pump" {{ 'checked' if d.sump_pump }}><div><b>Sump pump</b><span>For storm and spring checks.</span></div></label>
+      <div class="cp-opt"><div><b>Move-in date</b><span>Optional. Used for a friendly home anniversary note.</span><br><input type="date" name="move_in_date" value="{{ d.move_in_date }}"></div></div>
+    </div>
+    <div class="cp-card">
+      <h2>What you would like to get</h2>
+      <p>Short and useful, never a pile of mail. Change these any time.</p>
+      <label class="cp-opt"><input type="checkbox" name="frost_alerts" {{ 'checked' if p.frost_alerts }}><div><b>Freeze heads-ups</b><span>A quick note from your agent or lender when a freeze is coming, so you can protect your pipes.</span></div></label>
+      <label class="cp-opt"><input type="checkbox" name="seasonal_tips" {{ 'checked' if p.seasonal_tips }}><div><b>Seasonal home tips</b><span>A short checklist at the start of each season.</span></div></label>
+    </div>
+    <button type="submit" class="cp-save">Save</button>
+  </form>
+</div>
+{% endblock %}

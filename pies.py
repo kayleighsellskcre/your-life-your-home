@@ -617,11 +617,16 @@ def export_xlsx(event_id):
     wb = Workbook()
     sm = wb.active
     sm.title = "Summary"
-    sm.append([ev["title"]])
+    import re as _re
+    clean_title = _re.sub(r"[𐀀-􏿿☀-➿️‍]", "", ev["title"] or "").strip() or "Pie pickup"   # emoji show as blank boxes in Excel
+    sm.append([clean_title])
     sm["A1"].font = Font(bold=True, size=15)
+    sm.merge_cells("A1:D1")
+    sm["A1"].alignment = Alignment(vertical="center", wrap_text=True)
+    sm.row_dimensions[1].height = 26
     sm.append([])
     sm.append(["Totals", ""])
-    style_header(sm, [34, 14], row=3)
+    style_header(sm, [58, 14], row=3)
     for label, val in (("Total pies to bake", len(yes)), ("People who said yes", len(yes)),
                        ("  Picking up at a pickup time", count("pickup")),
                        ("  Picking up at your home", count("cant_make", "home")),
@@ -633,12 +638,12 @@ def export_xlsx(event_id):
     sm.cell(row=4, column=2).font = bold
     sm.append([])
     sm.append(["Pies by pickup place", "Pies"])
-    style_header(sm, [34, 14], row=sm.max_row)
+    style_header(sm, [58, 14], row=sm.max_row)
     for k, v in sorted(by_place.items()):
         put(sm, [k, v])
     sm.append([])
     sm.append(["Pies by type", "Pies"])
-    style_header(sm, [34, 14], row=sm.max_row)
+    style_header(sm, [58, 14], row=sm.max_row)
     for k, v in sorted(by_type.items()):
         put(sm, [k, v])
 
