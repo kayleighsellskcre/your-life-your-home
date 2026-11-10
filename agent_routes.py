@@ -397,6 +397,19 @@ def agent_crm():
                 flash("I could not tell where one person ends and the next begins. Try a name like 'Michael & Mindy Beard'.", "error")
             return redirect(url_for("agent_crm"))
 
+        elif action == "split_many":
+            import couples as _couples
+            try:
+                ids = [int(x) for x in request.form.getlist("ids")]
+                n = _couples.split_many(user["id"], ids)
+            except Exception:
+                n = 0
+            if n:
+                flash(f"Done! {n} {'couple is' if n == 1 else 'couples are'} now saved as individual contacts, linked together.", "success")
+            else:
+                flash("Nothing needed splitting.", "success")
+            return redirect(url_for("agent_crm"))
+
         elif action == "unlink_partner":
             import couples as _couples
             try:
@@ -867,6 +880,7 @@ def agent_crm():
             upcoming_tasks=upcoming_tasks,
             email_templates=email_templates,
             booking_url=__import__("booking").full_link(user["id"]),
+            combined=__import__("couples").find_combined(user["id"]),
             page=page, pages=pages, per_page=50, filtered_total=filtered_total, bday_data=bday_data,
         )
     except Exception as e:

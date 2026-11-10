@@ -124,3 +124,41 @@ def forget(agent_id, contact_id):
         conn.commit()
     finally:
         conn.close()
+
+
+BUSINESS = re.compile(r"\b(inc|llc|ltd|co|corp|company|realty|group|team|properties|trust|sons|bros|brothers|associates|partners|properties|homes|construction|roofing|plumbing|title|mortgage|bank|church)\b", re.I)
+
+
+def find_combined(agent_id):
+    """Contacts saved as a couple in one record, e.g. 'Beard, Michael & Mindy'. Business-looking names are skipped."""
+    conn = get_connection()
+    try:
+        rows = conn.execute("SELECT id, name, email, phone FROM agent_contacts WHERE agent_user_id=? AND partner_id IS NULL AND name LIKE '%' ", (agent_id,)).fetchall()
+    finally:
+        conn.close()
+    out = []
+    for r in rows:
+        name = r["name"] or ""
+        if BUSINESS.search(name) or not SEP_RE.search(name.replace(",", " ")):
+            continue
+        n1, n2 = split_names(name)
+        if n1 and n2:
+            out.append({"id": r["id"], "name": name, "n1": n1, "n2": n2})
+    return out
+
+
+def split_many(agent_id, ids):
+    """Split each chosen contact that is still a combined couple. Returns how many were split."""
+    ok = {c["id"]: c for c in find_combined(agent_id)}
+    done = 0
+    for cid in ids:
+        if cid not in ok:
+            continue
+        conn = get_connection()
+        try:
+            r = conn.execute("SELECT name, email, phone FROM agent_contacts WHERE id=? AND agent_user_id=?", (cid, agent_id)).fetchone()
+        finally:
+            conn.close()
+        if r and split_couple(agent_id, cid, r["name"], r["email"], r["phone"]):
+            done += 1
+    return done

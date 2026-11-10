@@ -3,6 +3,7 @@
 
 {% block agent_content %}
 <style>
+#crm .crm-nudge--couples{padding:.85rem 1.2rem;background:#FBF7F1;border:1px solid #EFE4D4;border-radius:14px;margin:0 0 1rem;font-size:.92rem;color:#443c36;}
 #crm a.crm-nudge{display:flex!important;box-sizing:border-box;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;text-decoration:none!important;background:#FBF7F1;border:1px solid #EFE4D4;border-radius:14px;padding:.85rem 1.2rem!important;margin:0 0 1rem;color:#443c36!important;font-size:.92rem;}
 .crm-nudge b{font-size:1.05rem;color:#a0413d;}
 .crm-nudge-go{color:#7A5238!important;font-weight:700;font-size:.85rem;}
@@ -691,6 +692,20 @@
  {% endif %}
 {% endwith %}
 
+{% if combined %}
+<form method="post" action="/agent/crm" class="crm-nudge crm-nudge--couples crm-fu crm-fu1" style="display:block;">
+ <input type="hidden" name="action" value="split_many">
+ <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;">
+  <span><b>{{ combined|length }}</b> {{ 'couple is' if combined|length == 1 else 'couples are' }} saved together. Each person is easier to reach with their own contact.</span>
+  <button type="submit" class="mbtn mbtn--p">Split them for me</button>
+ </div>
+ <details style="margin-top:.6rem;"><summary style="cursor:pointer;color:#7A5238;font-weight:600;font-size:.85rem;">See who, or leave some together</summary>
+  <div style="margin-top:.5rem;font-size:.88rem;line-height:1.9;">
+  {% for c in combined %}<label style="display:block;"><input type="checkbox" name="ids" value="{{ c.id }}" checked> {{ c.n1 }} and {{ c.n2 }} <span style="color:#7D6858;">(now saved as "{{ c.name }}")</span></label>{% endfor %}
+  </div>
+ </details>
+</form>
+{% endif %}
 {% if stats.needs_followup|default(0) > 0 %}
 <a class="crm-nudge crm-fu crm-fu1" href="{{ url_for('followups.followups_page') }}">
  <span><b>{{ stats.needs_followup }}</b> {{ 'person is' if stats.needs_followup == 1 else 'people are' }} waiting to hear from you.</span>
