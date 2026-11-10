@@ -1,0 +1,44 @@
+{% extends "agent/layout.html" %}
+{% block title %}Follow-ups{% endblock %}
+{% block agent_content %}
+<style>
+  .fu-w { max-width: 980px; margin: 0 auto; padding: 0 0 3rem; }
+  .fu-row { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: .9rem 1.1rem; margin-bottom: .7rem; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: .6rem 1rem; align-items: center; }
+  .fu-name b { display: block; color: #3A2518; font-size: 1.02rem; overflow-wrap: anywhere; }
+  .fu-name span { color: #7A6855; font-size: .84rem; overflow-wrap: anywhere; }
+  .fu-tag { display: inline-block; margin-top: .25rem; padding: .1rem .6rem; border-radius: 99px; font-size: .76rem; font-weight: 700; background: #F3EBDD; color: #7A5230; }
+  .fu-tag.late { background: #F7E4E0; color: #A0392D; }
+  .fu-acts { display: flex; gap: .4rem; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
+  .fu-acts form { margin: 0; display: inline-flex; gap: .3rem; align-items: center; }
+  .fu-acts a, .fu-acts button { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .45rem .85rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .8rem !important; font-weight: 700 !important; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .fu-acts button.done { background: #8F6244 !important; color: #fff !important; border-color: #8F6244 !important; }
+  .fu-acts select { width: auto !important; min-height: 0 !important; padding: .4rem .5rem !important; font-size: 16px !important; }
+  .fu-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
+  @media (max-width: 760px) { .fu-row { grid-template-columns: 1fr; } .fu-acts { justify-content: flex-start; } }
+</style>
+<div class="fu-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Your day</div>
+    <h1 class="ylh-page-hd__title">Follow-ups</h1>
+    <p class="ylh-page-hd__sub">People you planned to reach, oldest first. Mark one done when you have followed up, or snooze it and it comes back when you choose.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="fu-flash">{{ m }}</div>{% endfor %}
+  {% for r in rows %}
+  <div class="fu-row">
+    <div class="fu-name"><b>{{ r.name }}</b>
+      <span>{{ r.note or 'No note' }}{% if r.stage %} &middot; {{ r.stage|title }}{% endif %} &middot; Last spoke: {{ 'Never' if r.days is none else r.last }}</span>
+      <div><span class="fu-tag {{ 'late' if r.late }}">{{ r.status }}</span></div></div>
+    <div class="fu-acts">
+      {% if r.phone %}<a href="tel:{{ r.phone }}" aria-label="Call {{ r.name }}">Call</a><a href="sms:{{ r.phone }}" aria-label="Text {{ r.name }}">Text</a>{% endif %}
+      {% if r.email %}<a href="mailto:{{ r.email }}" aria-label="Email {{ r.name }}">Email</a>{% endif %}
+      <form method="post" action="{{ url_for('followups.followup_act', contact_id=r.id, action='done') }}"><button class="done" type="submit" aria-label="Mark {{ r.name }} done">Done</button></form>
+      <form method="post" action="{{ url_for('followups.followup_act', contact_id=r.id, action='snooze') }}">
+        <select name="days" aria-label="Snooze {{ r.name }} until">{% for k, v in snoozes.items() %}<option value="{{ k }}">{{ v[0] }}</option>{% endfor %}</select>
+        <button type="submit">Snooze</button></form>
+    </div>
+  </div>
+  {% else %}
+  <div class="fu-row" style="display:block;text-align:center;color:#7A6855;">You are all caught up. Nothing is waiting on you today.</div>
+  {% endfor %}
+</div>
+{% endblock %}

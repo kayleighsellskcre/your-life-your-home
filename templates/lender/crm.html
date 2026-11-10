@@ -547,7 +547,7 @@
  <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;"> Email</a>
  {% endif %}
  {% if borrower.phone %}
- <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;"> Call</a>
+ <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;"> Call</a> <a href="sms:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;"> Text</a>
  {% endif %}
  {% if borrower.interaction_count > 0 %}
  <button onclick="openHistoryModal({{ borrower.id }})" class="btn btn-small" style="background: rgba(107, 91, 77, 0.2); color: var(--charcoal-brown); border: none;"> History ({{ borrower.interaction_count }})</button>

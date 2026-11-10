@@ -56,7 +56,7 @@
     <div class="rf-num"><small>Equity</small><b>{% if r.equity is not none %}${{ '{:,.0f}'.format(r.equity) }}{% else %}&ndash;{% endif %}</b>
       <span style="font-size:.8rem;color:#7A6855;">Last spoke: <span class="{{ 'rf-quiet' if r.days is none or r.days > 90 }}">{{ 'Never' if r.days is none else r.last }}</span></span></div>
     <div class="rf-acts">
-      {% if r.phone %}<a href="tel:{{ r.phone }}" aria-label="Call {{ r.name }}">Call</a>{% endif %}
+      {% if r.phone %}<a href="tel:{{ r.phone }}" aria-label="Call {{ r.name }}">Call</a><a href="sms:{{ r.phone }}" aria-label="Text {{ r.name }}">Text</a>{% endif %}
       {% if r.email %}<a href="mailto:{{ r.email }}" aria-label="Email {{ r.name }}">Email</a>{% endif %}
       <button type="button" class="rf-log" aria-label="Log a call with {{ r.name }}">Log call</button>
     </div>

@@ -942,7 +942,7 @@
  <button onclick="openTask({{ contact.id }})" class="x-btn x-btn--task"> Task</button>
  <a href="{{ url_for('agent_transactions') }}?contact_id={{ contact.id }}" class="x-btn x-btn--tx">+ Transaction</a>
  {% if contact.email %}<a href="mailto:{{ contact.email }}" class="x-btn x-btn--def"> Email</a>{% endif %}
- {% if contact.phone %}<a href="tel:{{ contact.phone }}" class="x-btn x-btn--def"> Call</a>{% endif %}
+ {% if contact.phone %}<a href="tel:{{ contact.phone }}" class="x-btn x-btn--def"> Call</a> <a href="sms:{{ contact.phone }}" class="x-btn x-btn--def"> Text</a>{% endif %}
  {% if contact.interaction_count > 0 %}<button onclick="openHist({{ contact.id }})" class="x-btn x-btn--def">History ({{ contact.interaction_count }})</button>{% endif %}
  <button onclick="openEdit({{ contact.id }})" class="x-btn x-btn--def"> Edit</button>
  <button onclick="aiDraftEmail({{ contact.id }})" class="x-btn" style="background:#8A6D2F!important;color:#ffffff!important;border-color:#8A6D2F!important;"> Draft Email</button>
