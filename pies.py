@@ -548,9 +548,36 @@ def export_csv(event_id):
                     headers={"Content-Disposition": f"attachment; filename=pie-responses-{ev['id']}.csv"})
 
 
+def _response_rows(conn, event_id):
+    """Every response with its pickup place and day/time worked out, for the Excel download."""
+    rows = conn.execute("""SELECT r.*, s.location AS slot_location, s.slot_date, s.start_time, s.end_time
+                           FROM pie_responses r LEFT JOIN pie_slots s ON s.id = r.slot_id
+                           WHERE r.event_id=? ORDER BY r.slot_label, r.name""", (event_id,)).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        d["place"], d["when"] = "", ""
+        if d["choice"] == "pickup":
+            d["place"] = d.get("slot_location") or "Pickup"
+            times = " to ".join(x for x in (fmt_time(d.get("start_time")), fmt_time(d.get("end_time"))) if x)
+            d["when"] = ", ".join(x for x in (fmt_date(d.get("slot_date")), times) if x)
+        elif d["choice"] == "cant_make" and d.get("fulfillment") == "home":
+            d["place"] = "Home pickup"
+            d["when"] = f"{fmt_date(d.get('want_date'))} at {fmt_time(d.get('want_time'))}"
+        elif d["choice"] == "cant_make" and d.get("fulfillment") == "delivery":
+            d["place"] = "Delivery"
+            d["when"] = d.get("address") or ""
+        elif d["choice"] == "cant_make":
+            d["place"] = "Needs another time"
+            d["when"] = d.get("notes") or ""
+        d["pies"] = 1 if d["choice"] in ("pickup", "cant_make") else 0
+        out.append(d)
+    return out
+
+
 @bp.route("/pies/<int:event_id>/export.xlsx")
 def export_xlsx(event_id):
-    """Excel workbook: every response on one sheet, plus a bake list and pickup totals."""
+    """Excel workbook: a Summary with pie counts, every response, a bake list and pies per pickup place."""
     user, ev = _owned_event(event_id)
     if not ev:
         return _need_owner()
@@ -558,57 +585,108 @@ def export_xlsx(event_id):
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
     conn = _db()
-    rows = conn.execute("SELECT * FROM pie_responses WHERE event_id=? ORDER BY slot_label, name", (ev["id"],)).fetchall()
+    rows = _response_rows(conn, ev["id"])
     conn.close()
     names = {"pickup": "Yes, pickup", "cant_make": "Yes, needs another time", "no": "No thank you"}
     head_fill = PatternFill("solid", fgColor="364A2B")
     head_font = Font(bold=True, color="FFFFFF")
+    soft_fill = PatternFill("solid", fgColor="E4EBD8")
+    bold = Font(bold=True)
 
-    def style_header(ws, widths):
+    def put(ws, values):
+        """Append a row. Text that starts with = + - @ is kept as plain text, never turned into a formula."""
+        ws.append(list(values))
+        for c in ws[ws.max_row]:
+            if isinstance(c.value, str) and c.value[:1] in ("=", "+", "-", "@"):
+                c.data_type = "s"
+
+    def style_header(ws, widths, row=1):
         for i, w in enumerate(widths, 1):
-            c = ws.cell(row=1, column=i)
+            c = ws.cell(row=row, column=i)
             c.fill, c.font = head_fill, head_font
             c.alignment = Alignment(vertical="center")
             ws.column_dimensions[get_column_letter(i)].width = w
-        ws.freeze_panes = "A2"
+
+    yes = [r for r in rows if r["pies"]]
+    by_type, by_place = {}, {}
+    for r in yes:
+        by_type[r["pie_type"] or "No preference"] = by_type.get(r["pie_type"] or "No preference", 0) + 1
+        by_place[r["place"]] = by_place.get(r["place"], 0) + 1
+    count = lambda ch, f=None: sum(1 for r in rows if r["choice"] == ch and (f is None or r.get("fulfillment") == f))
 
     wb = Workbook()
-    ws = wb.active
-    ws.title = "Responses"
-    ws.append(["Name", "Phone", "Email", "Answer", "Pickup", "Pie", "Notes", "Picked up", "Submitted"])
+    sm = wb.active
+    sm.title = "Summary"
+    sm.append([ev["title"]])
+    sm["A1"].font = Font(bold=True, size=15)
+    sm.append([])
+    sm.append(["Totals", ""])
+    style_header(sm, [34, 14], row=3)
+    for label, val in (("Total pies to bake", len(yes)), ("People who said yes", len(yes)),
+                       ("  Picking up at a pickup time", count("pickup")),
+                       ("  Picking up at your home", count("cant_make", "home")),
+                       ("  Delivery", count("cant_make", "delivery")),
+                       ("  Needs another time", sum(1 for r in rows if r["choice"] == "cant_make" and not r.get("fulfillment"))),
+                       ("No thank you", count("no")), ("People who answered", len(rows))):
+        put(sm, [label, val])
+    sm.cell(row=4, column=1).font = bold
+    sm.cell(row=4, column=2).font = bold
+    sm.append([])
+    sm.append(["Pies by pickup place", "Pies"])
+    style_header(sm, [34, 14], row=sm.max_row)
+    for k, v in sorted(by_place.items()):
+        put(sm, [k, v])
+    sm.append([])
+    sm.append(["Pies by type", "Pies"])
+    style_header(sm, [34, 14], row=sm.max_row)
+    for k, v in sorted(by_type.items()):
+        put(sm, [k, v])
+
+    ws = wb.create_sheet("Responses")
+    put(ws, ["Name", "Phone", "Email", "Answer", "Place", "Day and time, or delivery address", "Pie", "Pies", "Notes", "Picked up", "Submitted"])
     for r in rows:
-        ws.append([_csv_safe(r["name"]), _csv_safe(r["phone"]), _csv_safe(r["email"]), names.get(r["choice"], r["choice"]),
-                   _csv_safe(r["slot_label"]), _csv_safe(r["pie_type"]), _csv_safe(r["notes"]),
-                   "Yes" if r["picked_up"] else "", r["created_at"]])
-    style_header(ws, [24, 16, 30, 24, 46, 16, 40, 12, 20])
+        put(ws, [r["name"], r["phone"], r["email"], names.get(r["choice"], r["choice"]), r["place"], r["when"],
+                 r["pie_type"], r["pies"] or "", r["notes"], "Yes" if r["picked_up"] else "", r["created_at"]])
+    style_header(ws, [24, 16, 30, 24, 28, 38, 14, 7, 40, 11, 20])
+    ws.freeze_panes = "A2"
     ws.auto_filter.ref = ws.dimensions
     for row in ws.iter_rows(min_row=2):
         for c in row:
             c.alignment = Alignment(wrap_text=True, vertical="top")
+    last = ws.max_row
+    ws.append([])
+    ws.append(["Total pies", "", "", "", "", "", "", len(yes)])
+    for c in ws[ws.max_row]:
+        c.font, c.fill = bold, soft_fill
 
     bl = wb.create_sheet("Bake list")
-    bl.append(["Pie", "How many"])
-    totals = {}
-    for r in rows:
-        if r["choice"] in ("pickup", "cant_make"):
-            k = r["pie_type"] or "No preference"
-            totals[k] = totals.get(k, 0) + 1
-    for k, v in sorted(totals.items()):
-        bl.append([_csv_safe(k), v])
-    bl.append(["Total", sum(totals.values())])
-    bl.cell(row=bl.max_row, column=1).font = Font(bold=True)
-    bl.cell(row=bl.max_row, column=2).font = Font(bold=True)
+    put(bl, ["Pie", "How many"])
+    for k, v in sorted(by_type.items()):
+        put(bl, [k, v])
+    put(bl, ["Total", len(yes)])
+    bl.cell(row=bl.max_row, column=1).font = bold
+    bl.cell(row=bl.max_row, column=2).font = bold
     style_header(bl, [28, 12])
+    bl.freeze_panes = "A2"
 
     pk = wb.create_sheet("By pickup")
-    pk.append(["Pickup", "Pies"])
-    by = {}
-    for r in rows:
-        if r["choice"] == "pickup":
-            by[r["slot_label"]] = by.get(r["slot_label"], 0) + 1
-    for k, v in sorted(by.items()):
-        pk.append([_csv_safe(k), v])
-    style_header(pk, [60, 10])
+    put(pk, ["Place", "Day and time", "Pies"])
+    style_header(pk, [40, 36, 10])
+    groups = {}
+    for r in yes:
+        groups.setdefault(r["place"], {})
+        key = r["when"] if r["place"] != "Delivery" else "Delivered when you can"
+        groups[r["place"]][key] = groups[r["place"]].get(key, 0) + 1
+    for place in sorted(groups):
+        for when, n in sorted(groups[place].items()):
+            put(pk, [place, when, n])
+        put(pk, [f"{place} total", "", sum(groups[place].values())])
+        for c in pk[pk.max_row]:
+            c.font, c.fill = bold, soft_fill
+    put(pk, ["All places", "", len(yes)])
+    for c in pk[pk.max_row]:
+        c.font = bold
+    pk.freeze_panes = "A2"
 
     buf = io.BytesIO()
     wb.save(buf)
