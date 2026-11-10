@@ -678,8 +678,41 @@ def public_book(token):
         return redirect(url_for("booking.public_page", token=token, d=day))
     b = dict(conn.execute("SELECT * FROM bookings WHERE id=?", (cur.lastrowid,)).fetchone())
     conn.close()
-    email_booked(b, s, _host(s["user_id"]), request.url_root.rstrip("/"))
+    host = _host(s["user_id"])
+    try:
+        add_to_crm(b, host)
+    except Exception:
+        pass  # a CRM hiccup must never stop a client from booking
+    email_booked(b, s, host, request.url_root.rstrip("/"))
     return redirect(url_for("booking.done", token=token, btoken=btoken))
+
+
+def add_to_crm(b, host):
+    """Agents only: put the person in the CRM at Appt Set (or move early-stage contacts up), no duplicates."""
+    if (host or {}).get("role") != "agent":
+        return
+    conn = _db()
+    try:
+        when = when_text(b)
+        line = "Booked \"%s\" for %s." % (b["title"], when)
+        if b.get("note"):
+            line += " They wrote: %s" % b["note"]
+        row = conn.execute("SELECT id, stage, notes, phone FROM agent_contacts WHERE agent_user_id=? AND LOWER(TRIM(email))=LOWER(TRIM(?)) LIMIT 1",
+                           (b["user_id"], b["email"])).fetchone()
+        today = datetime.now().strftime("%Y-%m-%d")
+        if row:
+            stage = (row["stage"] or "").strip().lower()
+            new_stage = "appt_set" if stage in ("", "new", "attempted", "contacted") else row["stage"]
+            notes = ((row["notes"] or "").rstrip() + "\n" if row["notes"] else "") + line
+            phone = row["phone"] or b.get("phone") or ""
+            conn.execute("UPDATE agent_contacts SET stage=?, notes=?, phone=?, last_touch=? WHERE id=?",
+                         (new_stage, notes, phone, today, row["id"]))
+        else:
+            conn.execute("INSERT INTO agent_contacts (agent_user_id, name, email, phone, stage, notes, last_touch, lead_source) VALUES (?,?,?,?,?,?,?,?)",
+                         (b["user_id"], b["name"], b["email"], b.get("phone") or "", "appt_set", line, today, "Booking page"))
+        conn.commit()
+    finally:
+        conn.close()
 
 
 def _booking(btoken):
