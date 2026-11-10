@@ -177,7 +177,9 @@
  .fmg input, .fmg select, .fmg textarea { width:100%; border:1.5px solid rgba(107,91,77,.25); border-radius:9px; padding:.52rem .8rem; font-size:.85rem; color:var(--charcoal); background:var(--cream2); box-sizing:border-box; outline:none; font-family:inherit; transition:border-color .15s,background .15s; }
  .fmg input:focus, .fmg select:focus, .fmg textarea:focus { border-color:var(--olive); background:#fff; }
  .fm-row { display:grid; grid-template-columns:1fr 1fr; gap:.75rem; }
- .fm-actions { display:flex; gap:.75rem; margin-top:1.4rem; padding-top:1.1rem; border-top:1px solid var(--border); }
+ .fm-actions { display:flex; gap:.75rem; margin-top:1.4rem; padding-top:1.1rem; border-top:1px solid var(--border);
+ flex-wrap: wrap;
+}
  .fm-submit { background:linear-gradient(135deg,var(--olive),var(--olive-dark)); color:#fff; border:none; border-radius:9px; padding:.62rem 1.5rem; font-size:.88rem; font-weight:700; cursor:pointer; transition:opacity .15s; }
  .fm-submit:hover { opacity:.9; }
  .fm-cancel { background:none; border:1.5px solid var(--border); color:var(--olive); border-radius:9px; padding:.62rem 1.1rem; font-size:.88rem; font-weight:600; cursor:pointer; }

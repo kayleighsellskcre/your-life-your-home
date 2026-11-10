@@ -130,7 +130,8 @@
  margin-top: 1rem;
  padding-top: 1rem;
  border-top: var(--border-light);
- }
+ flex-wrap: wrap;
+}
  .btn-small {
  padding: 0.4rem 0.8rem;
  font-size: 0.85rem;
@@ -361,7 +362,7 @@
  <div style="margin-top: 2rem; padding-top: 2rem; border-top: var(--border-light);">
  <h3 style="font-size: 1rem; color: var(--charcoal-brown); margin-bottom: 1rem; font-family: var(--font-heading);">Filter by Status</h3>
  <div style="display: flex; flex-direction: column; gap: 0.5rem;">
- <form method="get" class="crm-search" style="flex:1 1 220px;display:flex;gap:.4rem;margin:0 0 .6rem;">
+ <form method="get" class="crm-search" style="display:flex;gap:.4rem;margin:0 0 .6rem;align-items:center;">
  {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
  <input type="search" name="q" value="{{ search_query }}" placeholder="Search name, email or phone" aria-label="Search borrowers" style="flex:1;min-width:0;padding:.55rem .75rem;border:var(--border-light);border-radius:var(--border-radius);font-size:16px;">
  <button type="submit" class="btn btn-small" aria-label="Search" style="width:auto!important;margin:0!important;min-height:0!important;padding:.55rem 1rem!important;">Search</button>

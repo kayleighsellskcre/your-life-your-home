@@ -116,6 +116,24 @@
  padding:.5rem 1rem;background:#F5F0EB;border-radius:6px;text-align:center;
  border:1px solid rgba(107,91,77,.2);margin-bottom:.75rem;letter-spacing:.04em;
 }
+
+/* Phones: stack each line item so Qty, Price and Amount are always visible */
+@media (max-width:640px){
+ .items-wrap{overflow-x:visible;}
+ .items-table{min-width:0 !important;display:block;width:100%;border:0;}
+ .items-table tr.item-row .item-input{width:100% !important;min-width:0 !important;box-sizing:border-box;}
+ .items-table tr.item-row td:nth-child(4) .item-amount{display:block;padding:.55rem 0;font-weight:700;}
+ .items-table thead{display:none;}
+ .items-table tbody{display:block;}
+ .items-table tr.item-row{display:grid;grid-template-columns:1fr 1fr 1fr 36px;gap:.35rem .5rem;padding:.8rem 0;border-bottom:1px solid rgba(200,180,151,.3);align-items:end;}
+ .items-table tr.item-row td{display:block;padding:0;border:0;min-width:0;}
+ .items-table tr.item-row td:nth-child(1){grid-column:1 / -1;}
+ .items-table tr.item-row td:nth-child(2)::before{content:"Qty";}
+ .items-table tr.item-row td:nth-child(3)::before{content:"Price";}
+ .items-table tr.item-row td:nth-child(4)::before{content:"Amount";}
+ .items-table tr.item-row td:nth-child(2)::before,.items-table tr.item-row td:nth-child(3)::before,.items-table tr.item-row td:nth-child(4)::before{display:block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#7D6858;margin-bottom:.15rem;}
+ .items-table tr.item-row td:nth-child(4){text-align:right;}
+}
 </style>
 
 <div id="iform">
