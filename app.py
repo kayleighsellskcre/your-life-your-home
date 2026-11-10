@@ -983,6 +983,9 @@ def _clean_header(value):
     return " ".join(str(value or "").split())
 
 
+_EMAIL_LAST = {"ok": None, "detail": ""}   # the most recent send result, shown on the admin Email Check page
+
+
 def _from_address(from_name=None):
     """MAIL_FROM, with its display name swapped for from_name when one is given."""
     from email.utils import parseaddr, formataddr
@@ -1004,6 +1007,7 @@ def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
     _, _, sender = _from_address(from_name)
     if not sender:
         print("[WARNING] RESEND_API_KEY is set but MAIL_FROM is not; cannot send.")
+        _EMAIL_LAST.update(ok=False, detail="MAIL_FROM is not set in Railway.")
         return False
     data = {"from": sender, "to": [to_email], "subject": subject, "text": body}
     reply = _reply_to_address(reply_to)
@@ -1017,6 +1021,7 @@ def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
         with _req.urlopen(request_, timeout=15) as resp:
             ok = 200 <= resp.status < 300
         print(f"[OK] Email sent to {to_email} via Resend" if ok else f"[WARNING] Resend returned {resp.status}")
+        _EMAIL_LAST.update(ok=ok, detail="" if ok else f"Resend returned {resp.status}.")
         return ok
     except Exception as e:
         detail = ""
@@ -1025,6 +1030,7 @@ def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None):
         except Exception:
             pass
         print(f" Failed to send email to {to_email} via Resend: {e} {detail}")
+        _EMAIL_LAST.update(ok=False, detail=f"Resend said: {detail or e}")
         return False
 
 
@@ -1036,6 +1042,7 @@ def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
     name, addr, _ = _from_address(from_name)
     if not addr:
         print("[WARNING] BREVO_API_KEY is set but MAIL_FROM is not; cannot send.")
+        _EMAIL_LAST.update(ok=False, detail="MAIL_FROM is not set in Railway.")
         return False
     sender = {"email": addr}
     if name:
@@ -1056,6 +1063,7 @@ def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
         with _req.urlopen(request_, timeout=15) as resp:
             ok = 200 <= resp.status < 300
         print(f"[OK] Email sent to {to_email} via Brevo" if ok else f"[WARNING] Brevo returned {resp.status}")
+        _EMAIL_LAST.update(ok=ok, detail="" if ok else f"Brevo returned {resp.status}.")
         return ok
     except Exception as e:
         detail = ""
@@ -1064,6 +1072,7 @@ def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None):
         except Exception:
             pass
         print(f" Failed to send email to {to_email} via Brevo: {e} {detail}")
+        _EMAIL_LAST.update(ok=False, detail=f"Brevo said: {detail or e}")
         return False
 
 
@@ -1084,6 +1093,7 @@ def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None):
         return _send_via_brevo(to_email, subject, body, from_name, reply_to)
     if not EMAIL_USER or not EMAIL_PASS:
         print(f"[WARNING] Email not configured - cannot send to {to_email}")
+        _EMAIL_LAST.update(ok=False, detail="No email service is set up. Add BREVO_API_KEY and MAIL_FROM in Railway.")
         return False
 
     msg = MIMEMultipart()
@@ -1100,8 +1110,10 @@ def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None):
             server.login(EMAIL_USER, EMAIL_PASS)
             server.sendmail(EMAIL_USER, to_email, msg.as_string())
         print(f"[OK] Email sent to {to_email}")
+        _EMAIL_LAST.update(ok=True, detail="")
         return True
     except Exception as e:
+        _EMAIL_LAST.update(ok=False, detail=f"SMTP failed: {e}")
         print(f" Failed to send email to {to_email}: {e} (if this says timed out or unreachable, your host may block SMTP; set BREVO_API_KEY or RESEND_API_KEY to send over HTTPS)")
         return False
 
@@ -4330,6 +4342,8 @@ import care_alerts as _care_alerts
 _care_alerts.init_app(app, get_current_user, globals())
 import followups as _followups
 _followups.init_app(app, get_current_user)
+import email_check as _email_check
+_email_check.init_app(app, globals())
 
 # ---------------- LENDER ROUTES ----------------
 # The lender pages live in lender_routes.py. They run in this module's namespace, so they behave exactly as before.

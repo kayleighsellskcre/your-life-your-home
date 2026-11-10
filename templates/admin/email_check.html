@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Email Check - Admin{% endblock %}
+{% block content %}
+<style>
+  .ec-w { max-width: 760px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .ec-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
+  .ec-card h2 { margin: 0 0 .5rem; font-size: 1.1rem !important; }
+  .ec-row { display: flex; gap: .7rem; align-items: flex-start; padding: .6rem 0; border-top: 1px solid rgba(160,125,85,.15); }
+  .ec-row:first-of-type { border-top: 0; }
+  .ec-dot { flex: none; width: .8rem; height: .8rem; border-radius: 50%; margin-top: .35rem; background: #C9BBA8; }
+  .ec-dot.ok { background: #2F6B3F; } .ec-dot.bad { background: #A0392D; } .ec-dot.warn { background: #C98A1B; }
+  .ec-row b { display: block; color: #3A2518; } .ec-row span { color: #6B5B4D; font-size: .9rem; overflow-wrap: anywhere; }
+  .ec-btn { width: auto !important; margin: 0 !important; padding: .6rem 1.4rem !important; border-radius: 99px !important; border: 0 !important; background: #8F6244 !important; color: #fff !important; font-weight: 700 !important; cursor: pointer; }
+  .ec-flash { border-radius: 12px; padding: .8rem 1rem; margin-bottom: 1rem; font-weight: 700; background: #E7F1E8; color: #2F6B3F; }
+  .ec-flash.error { background: #F7E4E0; color: #A0392D; }
+</style>
+<div class="ec-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Site admin</div>
+    <h1 class="ylh-page-hd__title">Email Check</h1>
+    <p class="ylh-page-hd__sub">See whether your emails can really go out, and send yourself a test.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="ec-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+  <div class="ec-card">
+    <h2>Your setup</h2>
+    <div class="ec-row"><i class="ec-dot {{ 'ok' if st.provider else 'bad' }}"></i><div><b>Email service</b><span>{{ st.provider or 'None set up' }}</span></div></div>
+    <div class="ec-row"><i class="ec-dot {{ 'ok' if st.mail_from else 'bad' }}"></i><div><b>Sending address (MAIL_FROM)</b><span>{{ st.mail_from or 'Not set' }}</span></div></div>
+    <div class="ec-row"><i class="ec-dot {{ st.sender_state }}"></i><div><b>Is that address allowed to send?</b><span>{{ st.sender_msg }}</span></div></div>
+    <div class="ec-row"><i class="ec-dot {{ 'ok' if st.reply_to else 'warn' }}"></i><div><b>Replies go to</b><span>{{ st.reply_to or 'Not set. Replies go to the sending address unless an agent or lender is sending.' }}</span></div></div>
+  </div>
+  <div class="ec-card">
+    <h2>Send a test</h2>
+    <p style="color:#6B5B4D;font-size:.9rem;margin:.2rem 0 .8rem;">Sends one short email to <b>{{ me or 'your account email' }}</b> only, through the same path your real emails use. If it fails, you will see the reason.</p>
+    <form method="post" action="{{ url_for('email_check.email_check_send') }}"><button class="ec-btn" type="submit">Send me a test email</button></form>
+  </div>
+</div>
+{% endblock %}
