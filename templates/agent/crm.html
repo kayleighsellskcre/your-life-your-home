@@ -671,6 +671,32 @@
  letter-spacing:.03em!important;transition:background .15s!important;
 }
 .ar-save:hover { background:#6F5624!important; }
+
+/* Phones: each contact becomes a tidy card instead of a wide scrolling table */
+@media (max-width:700px){
+ .list-area{overflow-x:visible !important;}
+ .c-table{min-width:0 !important;display:block;width:100%;}
+ .c-table colgroup,.c-table thead,.c-table .add-row{display:none !important;}
+ .c-table tbody{display:block;}
+ .c-table tr.c-row{display:grid;grid-template-columns:1fr auto;gap:.2rem .6rem;padding:.85rem 1rem;border-bottom:1px solid #EFE4D4;align-items:center;}
+ .c-table tr.c-row td{display:block;padding:0 !important;border:0 !important;min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal !important;}
+ .c-table tr.c-row td:nth-child(1),.c-table tr.c-row td:nth-child(6),.c-table tr.c-row td:nth-child(7),.c-table tr.c-row td:nth-child(8){display:none !important;}
+ .c-table tr.c-row td:nth-child(2){grid-column:1;grid-row:1;font-size:1rem;}
+ .c-table tr.c-row td:nth-child(3){grid-column:2;grid-row:1;text-align:right;}
+ .c-table tr.c-row td:nth-child(4){grid-column:1 / -1;grid-row:2;font-size:.88rem;}
+ .c-table tr.c-row td:nth-child(5){grid-column:1 / -1;grid-row:3;font-size:.88rem;}
+ .c-table tr.c-row td:nth-child(9){grid-column:1 / -1;grid-row:4;margin-top:.45rem;}
+ .c-table tr.c-row td:nth-child(9) .c-actions{width:100%;justify-content:flex-start;gap:.5rem;padding-right:0;}
+ .c-table tr.c-row .c-act{width:auto !important;flex:1 1 0 !important;height:36px !important;min-height:36px !important;font-size:.78rem !important;}
+ .toolbar{flex-direction:column !important;align-items:stretch !important;gap:.6rem !important;}
+ .toolbar-search{width:100% !important;}
+ #crm .t-inp{min-width:0 !important;width:100% !important;}
+ .toolbar-selects{margin-left:0 !important;flex-wrap:wrap;}
+ #crm .crm-nudge--couples{white-space:normal !important;overflow-wrap:anywhere;box-sizing:border-box;max-width:100%;}
+ #crm .crm-nudge--couples span{min-width:0;}
+ .c-table tr.exp-row.open{display:block;}
+ .c-table tr.exp-row td{display:block;width:auto;}
+}
 </style>
 
 <div id="crm">

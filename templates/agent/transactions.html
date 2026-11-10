@@ -383,6 +383,26 @@
  .stage-strip { padding: .5rem .75rem; }
  .tx-bar { padding: .5rem .75rem; }
 }
+
+/* Phones: each deal becomes a card so address, client, stage and close date are all visible */
+@media (max-width:700px){
+ .tx-table-wrap{overflow-x:visible !important;}
+ .tx-table{min-width:0 !important;display:block;width:100%;}
+ .tx-table colgroup,.tx-table thead{display:none !important;}
+ .tx-table tbody{display:block;}
+ .tx-table tr.tx-row{display:grid;grid-template-columns:1fr auto;gap:.25rem .6rem;padding:.9rem 1rem;border-bottom:1px solid #EFE4D4;align-items:center;}
+ .tx-table tr.tx-row td{display:block;padding:0 !important;border:0 !important;min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal !important;}
+ .tx-table tr.tx-row td:nth-child(4),.tx-table tr.tx-row td:nth-child(6){display:none !important;}
+ .tx-table tr.tx-row td:nth-child(1){grid-column:1 / -1;grid-row:1;font-size:1rem;font-weight:700;}
+ .tx-table tr.tx-row td:nth-child(2){grid-column:1;grid-row:2;}
+ .tx-table tr.tx-row td:nth-child(3){grid-column:2;grid-row:2;text-align:right;}
+ .tx-table tr.tx-row td:nth-child(5){grid-column:1 / -1;grid-row:3;font-size:.85rem;color:#7D6858;}
+ .tx-table tr.tx-row td:nth-child(5)::before{content:"Closing ";}
+ .tx-table tr.tx-row td:nth-child(7){grid-column:1 / -1;grid-row:4;text-align:left !important;padding-top:.3rem !important;}
+ .tx-table tr.tx-row td:nth-child(7){display:flex !important;flex-wrap:wrap;gap:.4rem;align-items:center;}
+ body .tx-table tr.tx-row td:nth-child(7) form{margin:0 !important;display:inline-flex !important;width:auto !important;flex:0 0 auto !important;}
+ .tx-table tr.tx-row td:nth-child(7) button[type="submit"]{width:auto !important;min-height:0 !important;margin:0 !important;padding:.4rem .9rem !important;font-size:.78rem !important;background:#fff !important;color:#A0392D !important;border:1px solid rgba(160,57,45,.4) !important;box-shadow:none !important;}
+}
 </style>
 
 <div id="txpage">

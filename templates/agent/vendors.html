@@ -353,6 +353,17 @@
  padding-bottom: 0.3rem;
  border-bottom: 1px solid var(--taupe-beige);
  }
+
+ /* Long names and emails wrap inside the card instead of running out of it */
+ .vendor-card { min-width: 0; overflow-wrap: anywhere; }
+ .vendor-header { gap: .75rem; }
+ .vendor-header > div:first-child { min-width: 0; }
+ .vendor-detail-item > *:not(strong) { min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+ .vendor-detail-item strong { flex-shrink: 0; }
+ .btn-icon { flex-shrink: 0; }
+
+ .vendor-actions button.btn-icon.btn-icon { background: transparent !important; border: 1px solid var(--taupe-beige) !important; color: var(--olive-green) !important; width: 36px !important; height: 36px !important; min-height: 0 !important; padding: .5rem !important; box-shadow: none !important; }
+ .vendor-actions button.btn-icon.btn-icon:hover { background: var(--olive-green) !important; color: var(--white) !important; }
 </style>
 
 <div class="vendors-container ylh-page" style="padding-top:1.25rem;">

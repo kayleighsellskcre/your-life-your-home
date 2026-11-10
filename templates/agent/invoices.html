@@ -112,6 +112,33 @@
  font-size:.65rem;padding:.18rem .3rem;border:1px solid rgba(200,180,151,.4);
  border-radius:4px;background:#fff;color:#6B5B4D;cursor:pointer;font-weight:600;
 }
+
+/* Phones: each invoice becomes a card */
+@media (max-width:700px){
+ .inv-table-wrap{overflow-x:visible !important;}
+ .inv-table{min-width:0 !important;display:block;width:100%;}
+ .inv-table thead{display:none !important;}
+ .inv-table tbody{display:block;}
+ .inv-table tbody tr{display:grid;grid-template-columns:1fr auto;gap:.25rem .6rem;padding:.9rem 1rem;border-bottom:1px solid #EFE4D4;align-items:center;}
+ .inv-table tbody tr td{display:block;padding:0 !important;border:0 !important;min-width:0;max-width:100%;overflow-wrap:anywhere;white-space:normal !important;}
+ .inv-table tbody tr td:nth-child(3){display:none !important;}
+ .inv-table tbody tr td:nth-child(2){grid-column:1;grid-row:1;font-weight:700;font-size:1rem;}
+ .inv-table tbody tr td:nth-child(5){grid-column:2;grid-row:1;text-align:right;font-weight:700;}
+ .inv-table tbody tr td:nth-child(1){grid-column:1;grid-row:2;font-size:.85rem;}
+ .inv-table tbody tr td:nth-child(6){grid-column:2;grid-row:2;text-align:right;}
+ .inv-table tbody tr td:nth-child(4){grid-column:1 / -1;grid-row:3;font-size:.85rem;color:#7D6858;}
+ .inv-table tbody tr td:nth-child(4)::before{content:"Due ";}
+ .inv-table tbody tr td:nth-child(7){grid-column:1 / -1;grid-row:4;text-align:left !important;display:flex;flex-wrap:wrap;gap:.4rem;padding-top:.35rem !important;}
+ html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts{display:grid !important;grid-template-columns:1fr 1fr;gap:.5rem;width:100%;}
+ html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts > *{width:100% !important;max-width:none !important;margin:0 !important;}
+ html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts form{display:block !important;}
+ html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts .i-btn{display:flex !important;align-items:center;justify-content:center;width:100% !important;height:38px !important;min-height:38px !important;padding:0 .5rem !important;font-size:.82rem !important;box-sizing:border-box;}
+ body .inv-table tbody tr td:nth-child(7) form{margin:0 !important;display:inline-flex !important;width:auto !important;flex:0 0 auto !important;}
+ body .inv-table tbody tr td:nth-child(7) form button{width:auto !important;flex:0 0 auto !important;}
+ html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts .i-btn,html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts button.i-btn,html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts form{flex:0 0 auto !important;max-width:none !important;}
+ html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts button.i-btn,html body .inv-table tbody tr td.inv-td:nth-child(7) .inv-acts a.i-btn{display:inline-flex !important;align-items:center;justify-content:center;height:34px !important;min-height:34px !important;width:auto !important;margin:0 !important;padding:0 .9rem !important;font-size:.78rem !important;white-space:nowrap;box-shadow:none !important;}
+ .inv-table tbody tr td:nth-child(7) button.i-btn--danger{background:transparent !important;color:#b94040 !important;border:1px solid rgba(185,64,64,.3) !important;}
+}
 </style>
 
 <div id="inv-wrap">
@@ -199,7 +226,7 @@
  </td>
  <td class="inv-td inv-td--right">
  <div class="inv-acts">
- <a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" class="i-btn i-btn--ghost i-btn--sm" title="View / Print"></a>
+ <a href="{{ url_for('agent_invoice_print', inv_id=inv.id) }}" target="_blank" class="i-btn i-btn--ghost i-btn--sm" title="View / Print">View</a>
  <a href="{{ url_for('agent_invoice_edit', inv_id=inv.id) }}" class="i-btn i-btn--ghost i-btn--sm">Edit</a>
  {% if inv.status != 'paid' %}
  <button class="i-btn i-btn--ghost i-btn--sm" onclick="markPaid({{ inv.id }})">Mark Paid</button>
