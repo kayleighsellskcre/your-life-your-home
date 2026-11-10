@@ -512,6 +512,19 @@
  .animate-in {
  animation: fadeIn 0.5s ease-out;
  }
+
+ /* ── Template cards: tidy, even, nothing spills out ── */
+ .comms-card .templates-grid { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)) !important; gap: 1.1rem !important; align-items: stretch; }
+ .comms-card .template-card { display: flex; flex-direction: column; min-width: 0; cursor: default; padding: 1.25rem 1.25rem 1.1rem; }
+ .comms-card .template-card .template-header { margin-bottom: .4rem; }
+ .comms-card .template-card .template-badges { margin-bottom: .6rem; }
+ .comms-card .template-card .template-body { flex: 1 1 auto; max-height: 10.5em; overflow: hidden; font-size: .9rem; line-height: 1.55;
+   -webkit-mask-image: linear-gradient(#000 72%, transparent); mask-image: linear-gradient(#000 72%, transparent); }
+ .comms-card .template-card .template-actions { margin-top: .9rem; padding-top: .9rem; display: flex; flex-flow: row wrap; gap: .5rem; }
+ .comms-card .template-card .btn-template { width: auto !important; min-height: 0 !important; margin: 0 !important; flex: 1 1 auto; justify-content: center;
+   white-space: nowrap; padding: .55rem 1rem !important; font-size: .84rem !important; line-height: 1.2; }
+ .comms-card .template-card .btn-personal { background: #F3EBDD !important; color: #6B4630 !important; border: 2px solid #F3EBDD !important; box-shadow: none; }
+ .comms-card .template-card .btn-personal:hover { background: #EBDFC9 !important; }
 </style>
 
 <div class="comms-container">
@@ -1702,9 +1715,8 @@ document.addEventListener('DOMContentLoaded', function() {
  var actions = card.querySelector('.template-actions');
  if (!actions) return;
  var btn = document.createElement('button');
- btn.className = 'btn-template';
- btn.style.cssText = 'background:#6B5B4D!important;color:#fff!important;border-color:#6B5B4D!important;';
- btn.textContent = ' Personalize';
+ btn.className = 'btn-template btn-personal';
+ btn.textContent = 'Personalize';
  btn.onclick = function(){ aiPersonalizeCard(card, btn); };
  actions.appendChild(btn);
  });
@@ -1727,7 +1739,7 @@ function aiPersonalizeCard(card, btn) {
  }).then(function(r){ return r.json(); }).then(function(d) {
  if (d.personalized) {
  bodyEl.textContent = d.personalized;
- btn.textContent = ' Done';
+ btn.textContent = 'Done';
  setTimeout(function(){ btn.textContent = origText; btn.disabled = false; }, 2000);
  } else {
  btn.textContent = origText; btn.disabled = false;
