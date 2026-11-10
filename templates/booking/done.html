@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}You are booked{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+{% include "booking/_style.html" %}
+<div class="pie-wrap narrow">
+  <h1 class="pie-h1">You are all set, {{ b.name.split(' ')[0] }}!</h1>
+  <p class="pie-sub">{{ host.name }} is so excited to talk with you. We sent a confirmation to {{ b.email }}.</p>
+  {% if b.status == 'confirmed' %}
+  <div class="pie-card">
+    <h2>{{ b.title }}</h2>
+    <p style="margin:.2rem 0;font-size:1.05rem;"><b>{{ when }}</b></p>
+    <p class="pie-hint" style="margin:0 0 .6rem;">{{ zone }}</p>
+    <p style="margin:0;">{{ b.place }}</p>
+    <div class="pie-actions">
+      {% if gcal %}<a class="pie-btn small" href="{{ gcal }}" target="_blank" rel="noopener">Add to Google Calendar</a>{% endif %}
+      <a class="pie-btn secondary small" href="{{ url_for('booking.guest_ics', token=token, btoken=b.token) }}">Add to Apple or Outlook</a>
+    </div>
+  </div>
+  <p class="pie-hint">Need a different time? <a class="pie-link" href="{{ url_for('booking.cancel', btoken=b.token) }}">Change or cancel</a>. No worries at all.</p>
+  {% else %}
+  <div class="pie-card">This time was cancelled. You are always welcome to <a class="pie-link" href="{{ url_for('booking.public_page', token=token) }}">pick a new one</a>.</div>
+  {% endif %}
+</div>
+{% endblock %}

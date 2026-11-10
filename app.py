@@ -2174,6 +2174,7 @@ def start_scheduler():
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
         scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)
+        scheduler.add_job(lambda: __import__("booking").send_reminders(), "cron", hour=17, minute=10)  # day-before booking reminders
         scheduler.add_job(lambda: __import__("tc").send_deadline_reminders(), "cron", hour=9, minute=0)  # 9 AM Central deadline heads-ups  # day-before pie pickup reminders
         scheduler.add_job(lambda: __import__("pies").send_thank_yous(), "cron", hour=10, minute=15)  # pie thank-you emails on their chosen date
         scheduler.add_job(backup_database, "cron", hour=3, minute=0)  # 3 AM daily DB snapshot
@@ -4366,6 +4367,8 @@ _admin_routes.install(globals())
 # ---------------- API ROUTES ----------------
 import api_routes as _api_routes
 _api_routes.install(globals())
+import booking as _booking
+_booking.init_app(app, get_current_user, _bg, send_reminder_email)
 import tc as _tc
 _tc.init_app(app, get_current_user, _bg, send_reminder_email, get_transaction_detail,
              lambda tx_id, kind, text, uid: __import__("transaction_helpers").log_timeline_event(tx_id, kind, text, uid))

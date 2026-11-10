@@ -382,14 +382,14 @@
  {% endfor %}
  {% endif %}
  {% set has_cal = namespace(v=false) %}
- {% for prof in professionals %}{% if prof.get('calendly_url') or prof.get('schedule_url') %}{% set has_cal.v = true %}{% endif %}{% endfor %}
+ {% for prof in professionals %}{% if prof.get('calendly_url') or prof.get('schedule_url') or (prof.get('user_id') and booking_link(prof.get('user_id'))) %}{% set has_cal.v = true %}{% endif %}{% endfor %}
  <div style="background:rgba(107,91,77,.06);border:1px solid rgba(107,91,77,.15);border-radius:10px;padding:1.4rem;margin-top:1rem;">
  {% for prof in professionals %}
  {% set rl = 'agent' if (prof.get('professional_role') or prof.get('role')) == 'agent' else 'lender' %}
  <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.6rem 0;{% if not loop.first %}border-top:1px solid rgba(107,91,77,.15);{% endif %}">
  <div><b>{{ prof.get('name') }}</b><div style="font-size:.82rem;color:#7A6855;">Your {{ rl }}</div></div>
  <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
- {% if prof.get('schedule_url') and not prof.get('calendly_url') %}<a class="gh-btn" href="{{ prof.schedule_url }}" target="_blank" rel="noopener">Book a time</a>{% endif %}
+ {% set bk_link = booking_link(prof.get('user_id')) if prof.get('user_id') else '' %}{% if bk_link %}<a class="gh-btn" href="{{ bk_link }}" target="_blank" rel="noopener">Book a time</a>{% elif prof.get('schedule_url') and not prof.get('calendly_url') %}<a class="gh-btn" href="{{ prof.schedule_url }}" target="_blank" rel="noopener">Book a time</a>{% endif %}
  {% if prof.get('phone') %}<a class="gh-btn" href="tel:{{ prof.phone }}">Call or text</a>{% endif %}
  {% if prof.get('email') %}<a class="gh-btn" href="mailto:{{ prof.email }}">Email</a>{% endif %}
  </div>

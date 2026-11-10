@@ -196,7 +196,7 @@
  <div class="ylh-page-hd">
  <div class="ylh-page-hd__label">Scheduling</div>
  <h1 class="ylh-page-hd__title">Booking &amp; Calendar</h1>
- <p class="ylh-page-hd__sub">Let your clients self-schedule at a time that works for everyone.</p>
+ <p class="ylh-page-hd__sub">Choose when you are free, share one link, and everything lands on your phone calendar.</p>
  {% if profile and profile.schedule_url %}
  <div class="ylh-page-hd__actions">
  <a href="{{ url_for('agent_settings_profile') }}" class="ylh-btn ylh-btn-ghost">Edit Calendar Link</a>
@@ -204,10 +204,12 @@
  {% endif %}
  </div>
 
+ {% include "booking/_card.html" %}
+
  {% if profile and profile.schedule_url %}
  <!-- ── LIVE CALENDLY EMBED ───────────────────────────── -->
  <div class="booking-section">
- <h2>Your Live Booking Calendar</h2>
+ <h2>Your Calendly or scheduling link</h2>
  <p style="color:var(--warm-gray);font-size:.9rem;margin-bottom:1rem;">Clients can book directly from this page. Your calendar updates in real time based on your availability in Calendly.</p>
  {% if 'calendly.com' in profile.schedule_url %}
  <div class="calendly-inline-widget"
@@ -216,7 +218,7 @@
  </div>
  <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
  {% else %}
- <a href="{{ profile.schedule_url }}" target="_blank" rel="noopener" class="btn-primary" style="margin-top:0;">Open my booking page</a>
+ <a href="{{ profile.schedule_url }}" target="_blank" rel="noopener" class="btn-primary" style="margin-top:0;">Open my other booking page</a>
  {% endif %}
  <div style="margin-top:1rem;padding:.75rem 1rem;background:rgba(107,91,77,.06);border-radius:8px;font-size:.82rem;color:var(--warm-gray);">
  Your booking URL: <a href="{{ profile.schedule_url }}" target="_blank" style="color:var(--olive-green);word-break:break-all;">{{ profile.schedule_url }}</a>
@@ -225,51 +227,6 @@
  </div>
  </div>
 
- {% else %}
- <!-- ── SETUP INSTRUCTIONS ────────────────────────────── -->
- <div class="booking-section">
- <h2>Connect Your Calendar in One Step</h2>
-
- <div class="info-box">
- <h4>You are one minute away from a fully live booking page.</h4>
- <p>Add your Calendly link (or any scheduling link like Acuity, MS Bookings, or Google Booking) in your Settings. Once saved, a live interactive calendar appears right here for clients to book from.</p>
- </div>
-
- <div style="text-align:center;margin:1.5rem 0;">
- <a href="{{ url_for('agent_settings_profile') }}" class="btn-primary">Go to Settings to Add Your Link</a>
- </div>
-
- <h3 style="color:var(--charcoal-brown);font-size:1rem;margin-top:1.5rem;margin-bottom:1rem;">Not on Calendly yet? Here is how to get started:</h3>
-
- <ol class="setup-steps">
- <li>
- <div class="step-number">1</div>
- <div class="step-content">
- <h3>Create a Free Calendly Account</h3>
- <p>Go to <a href="https://calendly.com" target="_blank" style="color:var(--sage,#B08560);">calendly.com</a> and sign up with your Google or Outlook account. Takes about 2 minutes.</p>
- </div>
- </li>
- <li>
- <div class="step-number">2</div>
- <div class="step-content">
- <h3>Connect Your Calendar and Set Your Hours</h3>
- <p>Connect Google or Outlook so Calendly reads your real availability. Set the days and times you want to accept bookings. Create meeting types like "Buyer Consultation" or "Listing Appointment."</p>
- </div>
- </li>
- <li>
- <div class="step-number">3</div>
- <div class="step-content">
- <h3>Paste Your Link into Settings</h3>
- <p>Copy your Calendly link (it looks like calendly.com/yourname) and paste it into the Schedule URL field in your <a href="{{ url_for('agent_settings_profile') }}" style="color:var(--sage,#B08560);">Profile Settings</a>. Save, and your calendar goes live here instantly.</p>
- </div>
- </li>
- </ol>
- </div>
-
- <div class="info-box" style="background:rgba(107,91,77,.05);border-left-color:var(--olive-green);margin-top:.5rem;">
- <h4>Pro tip: Add your booking link everywhere</h4>
- <p>Once your Calendly is live, copy the link and add it to your email signature, your website contact page, your text templates, and your social media bio. Every time someone clicks it, they land on a page that does the scheduling for you automatically, no back and forth.</p>
- </div>
  {% endif %}
 
 </div>

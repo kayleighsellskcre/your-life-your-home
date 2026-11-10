@@ -1,0 +1,83 @@
+{% include "pies/_style.html" %}
+{% include "booking/_style.html" %}
+{% set bk = booking_ctx %}
+<div class="pie-wrap" style="padding-top:.5rem;padding-bottom:1rem;">
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
+
+  <div class="pie-card">
+    <h2>Your booking page</h2>
+    <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Choose when you are free, switch it on, and share one link. Clients pick a time, and it lands on your calendar by itself.</p>
+    <form method="post" action="{{ url_for('booking.save') }}">
+      <label style="display:flex;gap:.5rem;align-items:center;font-weight:600;"><input type="checkbox" name="enabled" value="1" style="width:auto;" {{ 'checked' if bk.s.enabled }}> Turn on my booking page</label>
+
+      <label class="pie-label">Days I take appointments</label>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+        {% for k, n in bk.day_keys %}<label class="bk-daychk"><input type="checkbox" name="day_{{ k }}" value="1" {{ 'checked' if k in bk.s.day_list }}> {{ n[:3] }}</label>{% endfor %}
+      </div>
+
+      <div class="pie-row">
+        <div><label class="pie-label" for="bk_start">From</label><input class="pie-input" type="time" id="bk_start" name="start_time" value="{{ bk.s.start_time }}"></div>
+        <div><label class="pie-label" for="bk_end">Until</label><input class="pie-input" type="time" id="bk_end" name="end_time" value="{{ bk.s.end_time }}"></div>
+        <div><label class="pie-label" for="bk_len">Each visit lasts</label>
+          <select id="bk_len" name="minutes">{% for m in bk.lengths %}<option value="{{ m }}" {{ 'selected' if m == bk.s.minutes }}>{{ m }} minutes</option>{% endfor %}</select></div>
+        <div><label class="pie-label" for="bk_notice">Give me at least</label>
+          <select id="bk_notice" name="notice_hours">{% for h, n in bk.notice %}<option value="{{ h }}" {{ 'selected' if h == bk.s.notice_hours }}>{{ n }}</option>{% endfor %}</select></div>
+        <div><label class="pie-label" for="bk_tz">My time zone</label>
+          <select id="bk_tz" name="tz">{% for z, n in bk.zones %}<option value="{{ z }}" {{ 'selected' if z == bk.s.tz }}>{{ n }}</option>{% endfor %}</select></div>
+      </div>
+
+      <label class="pie-label" for="bk_title">What clients are booking</label>
+      <input class="pie-input" id="bk_title" name="title" maxlength="120" value="{{ bk.s.title }}">
+      <label class="pie-label" for="bk_place">How we will meet <span class="pie-hint">(phone, video link, or an address)</span></label>
+      <input class="pie-input" id="bk_place" name="place" maxlength="250" value="{{ bk.s.place }}">
+      <div class="pie-actions"><button class="pie-btn" type="submit">Save</button></div>
+    </form>
+
+    {% if bk.s.enabled %}
+    <hr style="border:none;border-top:1px solid #F1E6D8;margin:1.1rem 0;">
+    <b style="font-size:.95rem;">Your link to share</b>
+    <div class="bk-copy" style="margin-top:.4rem;">
+      <input class="pie-input" id="bkLink" readonly value="{{ bk.page_url }}" onclick="this.select()">
+      <button type="button" class="pie-btn small" onclick="bkCopy('bkLink', this)">Copy link</button>
+      <a class="pie-btn secondary small" href="{{ bk.page_url }}" target="_blank" rel="noopener">See what clients see</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="pie-card">
+    <h2>Coming up</h2>
+    {% if bk.upcoming %}
+      {% for b in bk.upcoming %}
+      <div class="bk-item">
+        <div><b>{{ b.name }}</b><br><span class="pie-hint">{{ b.when }}{% if b.phone %} &middot; {{ b.phone }}{% endif %} &middot; <a href="mailto:{{ b.email }}">{{ b.email }}</a></span>{% if b.note %}<br><span class="pie-hint">{{ b.note }}</span>{% endif %}</div>
+        <form method="post" action="{{ url_for('booking.host_cancel', booking_id=b.id) }}" onsubmit="return confirm('Cancel this booking? I will kindly let them know.');"><button class="pie-link danger" type="submit">Cancel</button></form>
+      </div>
+      {% endfor %}
+    {% else %}
+    <p class="pie-hint" style="margin:0;">No bookings yet. Once someone books, they will show up right here.</p>
+    {% endif %}
+  </div>
+
+  <div class="pie-card">
+    <h2>Put it all on your phone</h2>
+    <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Add this calendar once and your bookings, transaction deadlines and pie pickups show up on your phone by themselves. When anything changes, it updates for you.</p>
+    <div class="pie-actions" style="margin-top:0;">
+      <a class="pie-btn small" href="{{ bk.feed_webcal }}">Add to my iPhone calendar</a>
+      <a class="pie-btn secondary small" href="{{ bk.feed_google }}" target="_blank" rel="noopener">Add to Google Calendar</a>
+    </div>
+    <p class="pie-hint" style="margin:.8rem 0 .3rem;">On a computer, or another calendar app, copy this link instead:</p>
+    <div class="bk-copy">
+      <input class="pie-input" id="bkFeed" readonly value="{{ bk.feed_https }}" onclick="this.select()">
+      <button type="button" class="pie-btn secondary small" onclick="bkCopy('bkFeed', this)">Copy link</button>
+    </div>
+    <p class="pie-hint" style="margin:.7rem 0 0;">This link is just for you and shows your clients' names, so please do not share it. If it ever gets out, make a new one and the old one stops working.</p>
+    <form method="post" action="{{ url_for('booking.new_feed') }}" style="margin-top:.3rem;" onsubmit="return confirm('Make a new calendar link? The old one will stop working and you will need to add the new one to your phone.');"><button class="pie-link" type="submit">Make a new link</button></form>
+  </div>
+</div>
+<script>
+function bkCopy(id, btn) {
+  var i = document.getElementById(id); i.select();
+  try { navigator.clipboard.writeText(i.value); } catch (e) { document.execCommand('copy'); }
+  var t = btn.textContent; btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = t; }, 1800);
+}
+</script>

@@ -2906,7 +2906,8 @@ def agent_booking():
     from database import get_user_profile
     profile = get_user_profile(user["id"])
     profile_dict = dict(profile) if profile else {}
-    return render_template("agent/booking.html", user=user, profile=profile_dict)
+    return render_template("agent/booking.html", user=user, profile=profile_dict,
+                           booking_ctx=__import__("booking").card_context(user["id"]))
 
 
 @route("/agent/admin/toggle-premium", methods=["GET", "POST"])

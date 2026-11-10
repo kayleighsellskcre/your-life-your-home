@@ -823,7 +823,8 @@ def lender_booking():
         return redirect(url_for("login"))
     from database import get_user_profile
     profile = get_user_profile(user["id"])
-    return render_template("lender/booking.html", user=user, profile=dict(profile) if profile else {})
+    return render_template("lender/booking.html", user=user, profile=dict(profile) if profile else {},
+                           booking_ctx=__import__("booking").card_context(user["id"]))
 
 
 @route("/lender/marketing", methods=["GET"])

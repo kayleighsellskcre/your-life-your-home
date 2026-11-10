@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Book a time with {{ host.name }}{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+{% include "booking/_style.html" %}
+{% set photo = get_professional_photo_url(host.photo) if host.photo else None %}
+<div class="pie-wrap narrow">
+  <div class="pie-host">
+    {% if photo %}<img class="avatar" src="{{ photo }}" alt="{{ host.name }}">{% endif %}
+    <div>
+      <div style="font-weight:700;">{{ host.name }}</div>
+      {% if host.brokerage %}<div style="color:#7D6858;font-size:.85rem;">{{ host.brokerage }}</div>{% endif %}
+    </div>
+    {% if host.logo %}<img class="logo" src="{{ host.logo }}" alt="">{% endif %}
+  </div>
+
+  <h1 class="pie-h1">{{ s.title }}</h1>
+  <p class="pie-sub">I would love to spend {{ s.minutes }} minutes with you. Pick a day and a time that is easy for you, and I will take it from there.</p>
+
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
+
+  {% if not days %}
+  <div class="pie-card" style="text-align:center;color:#7D6858;">There are no open times right now. Please check back soon, or send {{ host.name.split(' ')[0] }} a quick note and we will find something that works.</div>
+  {% else %}
+  <form method="post" novalidate>
+    <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">
+    <input type="hidden" name="day" value="{{ chosen }}">
+    <div class="pie-card">
+      <h2>1. Pick a day</h2>
+      <div class="bk-days">
+        {% for d in days %}<a class="bk-day {{ 'on' if d == chosen }}" href="{{ url_for('booking.public_page', token=s.token, d=d) }}">{{ pretty_day(d, True) }}</a>{% endfor %}
+      </div>
+    </div>
+    <div class="pie-card">
+      <h2>2. Pick a time</h2>
+      <p class="pie-hint" style="margin:-.3rem 0 .4rem;">{{ pretty_day(chosen) }}. Times are in {{ zone }}.</p>
+      <div class="bk-times">
+        {% for t in times %}<label class="bk-time"><input type="radio" name="time" value="{{ t }}" {{ 'checked' if form.get('time') == t }} required><span>{{ pretty_time(t) }}</span></label>{% endfor %}
+      </div>
+    </div>
+    <div class="pie-card">
+      <h2>3. Tell me where to reach you</h2>
+      <label class="pie-label" for="name">Your name</label>
+      <input class="pie-input" id="name" name="name" required maxlength="120" autocomplete="name" value="{{ form.get('name', '') }}">
+      <div class="pie-row">
+        <div><label class="pie-label" for="email">Email</label><input class="pie-input" type="email" id="email" name="email" required autocomplete="email" value="{{ form.get('email', '') }}"></div>
+        <div><label class="pie-label" for="phone">Phone <span class="pie-hint">(optional)</span></label><input class="pie-input" type="tel" id="phone" name="phone" autocomplete="tel" value="{{ form.get('phone', '') }}"></div>
+      </div>
+      <label class="pie-label" for="note">Anything you would like me to know? <span class="pie-hint">(optional)</span></label>
+      <textarea id="note" name="note" rows="3" maxlength="600">{{ form.get('note', '') }}</textarea>
+      <p class="pie-hint" style="margin:.8rem 0 0;">{{ s.place }}</p>
+      <div class="pie-actions"><button class="pie-btn" type="submit">Book my time</button></div>
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Change your time{% endblock %}
+{% block content %}
+{% include "pies/_style.html" %}
+{% include "booking/_style.html" %}
+<div class="pie-wrap narrow">
+  {% if b.status == 'cancelled' %}
+  <h1 class="pie-h1">That time is cancelled</h1>
+  <p class="pie-sub">Thank you for letting {{ host.name }} know. Whenever you are ready, you can pick a new time.</p>
+  <a class="pie-btn" href="{{ url_for('booking.public_page', token=page) }}">Pick a new time</a>
+  {% else %}
+  <h1 class="pie-h1">Need a different time?</h1>
+  <p class="pie-sub">That is completely okay. Your time with {{ host.name }} right now is:</p>
+  <div class="pie-card"><b>{{ b.title }}</b><br>{{ when }}</div>
+  <form method="post">
+    <div class="pie-actions">
+      <button class="pie-btn" type="submit">Cancel this time</button>
+      <a class="pie-link" href="{{ url_for('booking.done', token=page, btoken=b.token) }}">Keep it</a>
+    </div>
+  </form>
+  <p class="pie-hint" style="margin-top:1rem;">After you cancel, you will get a link to pick a new time.</p>
+  {% endif %}
+</div>
+{% endblock %}
