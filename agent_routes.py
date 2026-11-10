@@ -2911,9 +2911,10 @@ def agent_booking():
 
 @route("/agent/admin/toggle-premium", methods=["GET", "POST"])
 def admin_toggle_premium():
-    """Admin page to toggle premium features for testing"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
+    """Admin page to toggle premium features for testing. Site admins only: it changes the signed-in account's plan."""
+    user = _admin_session_user()
+    if not user:
+        flash("That area is just for site administrators.", "error")
         return redirect(url_for("login", role="agent"))
     
     if request.method == "POST":
@@ -2954,9 +2955,10 @@ def admin_toggle_premium():
 
 @route("/agent/admin/settings")
 def admin_settings():
-    """Admin settings page for premium feature testing"""
-    user = get_current_user()
-    if not user or user.get("role") != "agent":
+    """Admin settings page for premium feature testing. Site admins only."""
+    user = _admin_session_user()
+    if not user:
+        flash("That area is just for site administrators.", "error")
         return redirect(url_for("login", role="agent"))
     
     return render_template(

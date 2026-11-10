@@ -14,8 +14,9 @@ install = _registry.install
 @route("/admin/promo-codes")
 def admin_promo_codes():
     """Admin view of all promo codes and usage."""
-    if "user_id" not in session or session.get("role") != "admin":
-        return redirect(url_for("login"))
+    if not _admin_session_user():
+        flash("That area is just for site administrators.", "error")
+        return redirect(url_for("login", role="agent"))
     from database import list_promo_codes
     codes = list_promo_codes()
     return render_template("admin/promo_codes.html", codes=codes)
