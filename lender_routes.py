@@ -821,7 +821,9 @@ def lender_booking():
     user = get_user_by_id(session["user_id"])
     if not user:
         return redirect(url_for("login"))
-    return render_template("lender/booking.html", user=user)
+    from database import get_user_profile
+    profile = get_user_profile(user["id"])
+    return render_template("lender/booking.html", user=user, profile=dict(profile) if profile else {})
 
 
 @route("/lender/marketing", methods=["GET"])
