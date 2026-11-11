@@ -1,0 +1,48 @@
+<style>
+  .ev-w { max-width: 900px; margin: 0 auto; padding: 0 0 3rem; }
+  .ev-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1rem 1.2rem; margin-bottom: 1rem; }
+  .ev-card h2 { margin: 0 0 .5rem; font-size: 1.1rem !important; }
+  .ev-row { display: flex; justify-content: space-between; gap: .8rem; align-items: center; padding: .7rem 0; border-top: 1px solid rgba(160,125,85,.18); text-decoration: none; color: inherit; }
+  .ev-row:first-of-type { border-top: 0; }
+  .ev-row b { display: block; color: #3A2518; overflow-wrap: anywhere; } .ev-row span { color: #7A6855; font-size: .84rem; }
+  .ev-tag { display: inline-block; padding: .1rem .6rem; border-radius: 99px; font-size: .74rem; font-weight: 700; background: #F3EBDD; color: #7A5230; white-space: nowrap; }
+  .ev-tag.soon { background: #E7F1E8; color: #2F6B3F; }
+  .ev-form { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+  .ev-form label { display: block; font-size: .8rem; font-weight: 700; color: #6B4630; margin-bottom: .2rem; }
+  .ev-form input, .ev-form select { width: 100%; box-sizing: border-box; font-size: 16px !important; min-height: 0 !important; }
+  .ev-full { grid-column: 1 / -1; }
+  .ev-btn { width: auto !important; margin: 0 !important; min-height: 0 !important; padding: .55rem 1.3rem !important; border-radius: 99px !important; border: 0 !important; background: #8F6244 !important; color: #fff !important; font-weight: 700 !important; cursor: pointer; }
+  .ev-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
+  .ev-flash.error { background: #F7E4E0; color: #A0392D; }
+  @media (max-width: 700px) { .ev-form { grid-template-columns: 1fr; } }
+</style>
+<div class="ev-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Community &amp; giving back</div>
+    <h1 class="ylh-page-hd__title">Events</h1>
+    <p class="ylh-page-hd__sub">Plan an event once, then do it better every year. Keep a "what to bring" checklist, notes on what worked, and what it cost. The costs go straight into your Financials for taxes.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="ev-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+
+  <div class="ev-card">
+    <h2>Add an event</h2>
+    <form method="post" action="{{ url_for('events.event_new') }}" class="ev-form">
+      <div class="ev-full"><label for="evn">Event name</label><input id="evn" type="text" name="name" maxlength="120" placeholder="Veterans Day assembly at the school" required></div>
+      <div><label for="evk">How often?</label><select id="evk" name="kind"><option value="yearly">Every year</option><option value="one_time">One time</option></select></div>
+      <div><label for="evd">Date</label><input id="evd" type="date" name="event_date"></div>
+      <div><label for="evp">Where</label><input id="evp" type="text" name="place" maxlength="200" placeholder="Lincoln Elementary"></div>
+      <div><label for="evw">Who it is for</label><input id="evw" type="text" name="who" maxlength="200" placeholder="Students, staff and veterans"></div>
+      {% if all_events %}<div class="ev-full"><label for="evc">Start with the checklist from an event you already did?</label>
+        <select id="evc" name="copy_from"><option value="">No, start with a blank list</option>{% for e in all_events %}<option value="{{ e.id }}">{{ e.name }}</option>{% endfor %}</select></div>{% endif %}
+      <div class="ev-full"><button class="ev-btn" type="submit">Create event</button></div>
+    </form>
+  </div>
+
+  {% if upcoming %}<div class="ev-card"><h2>Coming up</h2>
+    {% for e in upcoming %}<a class="ev-row" href="{{ url_for('events.event_page', event_id=e.id) }}"><div><b>{{ e.name }}</b><span>{{ e.latest_nice }}{% if e.place %} &middot; {{ e.place }}{% endif %}</span></div>
+      <div style="text-align:right;">{% if e.when %}<span class="ev-tag soon">{{ e.when }}</span> {% endif %}<span class="ev-tag">{{ 'Yearly' if e.kind == 'yearly' else 'One time' }}</span></div></a>{% endfor %}</div>{% endif %}
+  {% if past %}<div class="ev-card"><h2>Done, ready for next time</h2>
+    {% for e in past %}<a class="ev-row" href="{{ url_for('events.event_page', event_id=e.id) }}"><div><b>{{ e.name }}</b><span>Last held {{ e.latest_nice }} &middot; {{ e.item_count }} thing{{ '' if e.item_count == 1 else 's' }} on the list{% if e.run_count > 1 %} &middot; held {{ e.run_count }} times{% endif %}</span></div>
+      <span class="ev-tag">{{ 'Yearly' if e.kind == 'yearly' else 'One time' }}</span></a>{% endfor %}</div>{% endif %}
+  {% if not upcoming and not past %}<div class="ev-card" style="text-align:center;color:#7A6855;">No events yet. Add your first one above.</div>{% endif %}
+</div>

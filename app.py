@@ -4348,6 +4348,8 @@ import care_alerts as _care_alerts
 _care_alerts.init_app(app, get_current_user, globals())
 import followups as _followups
 _followups.init_app(app, get_current_user)
+import events as _events
+_events.init_app(app, get_current_user)
 import email_check as _email_check
 _email_check.init_app(app, globals())
 

@@ -1,0 +1,133 @@
+<style>
+  .ev-w { max-width: 900px; margin: 0 auto; padding: 0 0 3rem; }
+  .ev-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1rem 1.2rem; margin-bottom: 1rem; }
+  .ev-card h2 { margin: 0 0 .3rem; font-size: 1.1rem !important; }
+  .ev-card p.hint { color: #6B5B4D; font-size: .88rem; margin: .1rem 0 .7rem; line-height: 1.5; }
+  .ev-card label { display: block; font-size: .8rem; font-weight: 700; color: #6B4630; margin: .6rem 0 .2rem; }
+  .ev-card input[type=text], .ev-card input[type=date], .ev-card input[type=number], .ev-card select, .ev-card textarea { width: 100%; box-sizing: border-box; font-size: 16px !important; min-height: 0 !important; }
+  .ev-card textarea { min-height: 6rem !important; height: 6rem; line-height: 1.5; }
+  .ev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .8rem; } .ev-grid .full { grid-column: 1 / -1; }
+  .ev-btn { width: auto !important; margin: .4rem 0 0 !important; min-height: 0 !important; padding: .55rem 1.3rem !important; border-radius: 99px !important; border: 0 !important; background: #8F6244 !important; color: #fff !important; font-weight: 700 !important; cursor: pointer; }
+  .ev-btn.alt, .ev-x { background: #FFFDFA !important; color: #6B4630 !important; border: 1.5px solid rgba(143,98,68,.5) !important; }
+  .ev-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
+  .ev-flash.error { background: #F7E4E0; color: #A0392D; }
+  .ev-last { background: #FFF6DD; border: 1px solid #E8D49A; border-radius: 14px; padding: .9rem 1.2rem; margin-bottom: 1rem; }
+  .ev-last h2 { margin: 0 0 .3rem; font-size: 1.05rem !important; color: #6B4A0E; } .ev-last p { margin: .25rem 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #4A3A12; }
+  .ev-item { display: flex; align-items: center; gap: .6rem; padding: .55rem 0; border-top: 1px solid rgba(160,125,85,.15); }
+  .ev-item:first-of-type { border-top: 0; }
+  .ev-item form { margin: 0; }
+  .ev-tick { flex: none; width: 2rem !important; height: 2rem !important; min-height: 0 !important; padding: 0 !important; margin: 0 !important; border-radius: 50% !important; border: 2px solid #8F6244 !important; background: #FFFDFA !important; color: #fff !important; font-size: 1.1rem !important; line-height: 1 !important; cursor: pointer; }
+  .ev-item.done .ev-tick { background: #2F6B3F !important; border-color: #2F6B3F !important; }
+  .ev-item.done .ev-text { text-decoration: line-through; color: #8A7B6C; }
+  .ev-text { flex: 1; min-width: 0; overflow-wrap: anywhere; color: #3A2518; } .ev-text small { display: block; color: #7A6855; }
+  .ev-x { flex: none; width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .25rem .65rem !important; border-radius: 99px !important; font-size: .75rem !important; cursor: pointer; }
+  .ev-bar { height: .5rem; border-radius: 99px; background: #EFE5D6; overflow: hidden; margin: .3rem 0 .6rem; } .ev-bar i { display: block; height: 100%; background: #2F6B3F; }
+  .ev-runs a { display: inline-block; margin: .15rem .3rem .15rem 0; padding: .25rem .8rem; border-radius: 99px; border: 1.5px solid rgba(143,98,68,.5); color: #6B4630; text-decoration: none; font-size: .82rem; font-weight: 700; }
+  .ev-runs a.on { background: #8F6244; color: #fff; border-color: #8F6244; }
+  .ev-cost { display: flex; justify-content: space-between; gap: .6rem; align-items: center; padding: .5rem 0; border-top: 1px solid rgba(160,125,85,.15); }
+  .ev-cost small { color: #7A6855; display: block; }
+  @media (max-width: 700px) { .ev-grid { grid-template-columns: 1fr; } }
+</style>
+<div class="ev-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label"><a href="{{ url_for('events.events_page') }}" style="color:inherit;">&larr; All events</a> &middot; {{ 'Yearly' if ev.kind == 'yearly' else 'One time' }}</div>
+    <h1 class="ylh-page-hd__title">{{ ev.name }}</h1>
+    <p class="ylh-page-hd__sub">{{ cur.nice }}{% if cur.when %} ({{ cur.when }}){% endif %}{% if ev.place %} &middot; {{ ev.place }}{% endif %}{% if ev.who %} &middot; for {{ ev.who }}{% endif %}</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="ev-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+
+  {% if runs|length > 1 %}<div class="ev-card ev-runs"><h2>Each time you held it</h2>
+    {% for r in runs %}<a href="{{ url_for('events.event_page', event_id=ev.id, run=r.id) }}" class="{{ 'on' if r.id == cur.id }}">{{ r.nice }}</a>{% endfor %}</div>{% endif %}
+
+  {% if last %}<div class="ev-last"><h2>Lessons from last time ({{ last.nice }})</h2>
+    {% if last.improve %}<p><b>Do better:</b> {{ last.improve }}</p>{% endif %}
+    {% if last.went_well %}<p><b>Worked well:</b> {{ last.went_well }}</p>{% endif %}
+    {% if last.notes %}<p><b>Notes:</b> {{ last.notes }}</p>{% endif %}</div>{% endif %}
+
+  <div class="ev-card">
+    <h2>What to bring</h2>
+    <p class="hint">Tap the circle as you pack it. The list carries over every year, so add anything you forgot and it will be there next time. {{ packed }} of {{ items|length }} packed.</p>
+    {% if items %}<div class="ev-bar"><i style="width: {{ (100 * packed / items|length)|round|int }}%"></i></div>{% endif %}
+    {% for i in items %}
+    <div class="ev-item {{ 'done' if i.done }}" id="item{{ i.id }}">
+      <form method="post" action="{{ url_for('events.item_tick', event_id=ev.id, item_id=i.id) }}" class="ev-tickform"><input type="hidden" name="run_id" value="{{ cur.id }}">
+        <button class="ev-tick" type="submit" aria-label="Mark {{ i.text }} packed">{% if i.done %}&#10003;{% endif %}</button></form>
+      <div class="ev-text">{{ i.text }}{% if i.detail %}<small>{{ i.detail }}</small>{% endif %}</div>
+      <form method="post" action="{{ url_for('events.item_delete', event_id=ev.id, item_id=i.id) }}" onsubmit="return confirm('Take this off the list for good?');"><input type="hidden" name="run_id" value="{{ cur.id }}">
+        <button class="ev-x" type="submit" aria-label="Remove {{ i.text }}">Remove</button></form>
+    </div>
+    {% else %}<p class="hint">Nothing on the list yet. Add what you need below.</p>{% endfor %}
+    <form method="post" action="{{ url_for('events.item_add', event_id=ev.id) }}"><input type="hidden" name="run_id" value="{{ cur.id }}">
+      <label for="ni">Add to the list (paste several, one per line)</label>
+      <textarea id="ni" name="text" maxlength="3000" placeholder="Donuts, 4 dozen&#10;Coffee, regular&#10;Coffee, decaf&#10;Hot tea and cups"></textarea>
+      <label for="nd">A detail, if you added just one thing (optional)</label>
+      <input id="nd" type="text" name="detail" maxlength="200" placeholder="Pick up from the bakery by 7am">
+      <button class="ev-btn" type="submit">Add</button>
+    </form>
+  </div>
+
+  <div class="ev-card">
+    <h2>How it went</h2>
+    <p class="hint">Write this while it is fresh. Next year it shows at the top of the page.</p>
+    <form method="post" action="{{ url_for('events.run_save', event_id=ev.id) }}"><input type="hidden" name="run_id" value="{{ cur.id }}">
+      <div class="ev-grid">
+        <div><label for="rd">Date</label><input id="rd" type="date" name="run_date" value="{{ cur.run_date }}"></div>
+        <div><label for="ra">About how many people</label><input id="ra" type="text" name="attendance" maxlength="100" value="{{ cur.attendance }}" placeholder="200 students"></div>
+        <div class="full"><label for="rw">What worked well</label><textarea id="rw" name="went_well" maxlength="2000">{{ cur.went_well }}</textarea></div>
+        <div class="full"><label for="ri">What to do better next time</label><textarea id="ri" name="improve" maxlength="2000">{{ cur.improve }}</textarea></div>
+        <div class="full"><label for="rn">Other notes (contacts, parking, set-up time)</label><textarea id="rn" name="notes" maxlength="6000">{{ cur.notes }}</textarea></div>
+      </div>
+      <button class="ev-btn" type="submit">Save notes</button>
+    </form>
+  </div>
+
+  <div class="ev-card">
+    <h2>What it cost</h2>
+    <p class="hint">Each cost you add here is also saved in your Financials as a business expense on the event date, ready to give to your CPA. Keep your receipts.</p>
+    {% for c in costs %}<div class="ev-cost"><div>{{ c.what }}<small>{{ c.kind_label }}</small></div>
+      <div style="display:flex;gap:.6rem;align-items:center;"><b>${{ '%.2f'|format(c.amount) }}</b>
+        <form method="post" action="{{ url_for('events.cost_delete', event_id=ev.id, cost_id=c.id) }}" style="margin:0;" onsubmit="return confirm('Remove this cost? It will also come out of Financials.');"><input type="hidden" name="run_id" value="{{ cur.id }}"><button class="ev-x" type="submit" aria-label="Remove {{ c.what }}">Remove</button></form></div></div>
+    {% endfor %}
+    {% if costs %}<div class="ev-cost"><b>Total</b><b>${{ '%.2f'|format(total_cost) }}</b></div>{% endif %}
+    <form method="post" action="{{ url_for('events.cost_add', event_id=ev.id) }}"><input type="hidden" name="run_id" value="{{ cur.id }}">
+      <div class="ev-grid">
+        <div><label for="cw">What was it</label><input id="cw" type="text" name="what" maxlength="120" placeholder="Donuts and coffee" required></div>
+        <div><label for="ca">Amount ($)</label><input id="ca" type="number" name="amount" step="0.01" min="0.01" inputmode="decimal" required></div>
+        <div class="full"><label for="ck">Kind of cost</label><select id="ck" name="kind">{% for k, v in cost_kinds.items() %}<option value="{{ k }}">{{ v[0] }}</option>{% endfor %}</select></div>
+      </div>
+      <button class="ev-btn" type="submit">Add cost</button>
+    </form>
+  </div>
+
+  {% if is_latest %}<div class="ev-card"><h2>{{ 'Plan the next one' if ev.kind == 'yearly' else 'Hold this event again' }}</h2>
+    <p class="hint">Starts a fresh checklist with everything on the current list and none of it ticked. This time's notes stay at the top for you.</p>
+    <form method="post" action="{{ url_for('events.run_next', event_id=ev.id) }}"><label for="nd2">Date (leave blank for the same day next year)</label><input id="nd2" type="date" name="run_date" style="max-width:14rem;"><br>
+      <button class="ev-btn" type="submit">Start the next one</button></form></div>{% endif %}
+
+  <div class="ev-card"><h2>Event details</h2>
+    <form method="post" action="{{ url_for('events.event_edit', event_id=ev.id) }}"><input type="hidden" name="run_id" value="{{ cur.id }}">
+      <div class="ev-grid">
+        <div class="full"><label for="en">Name</label><input id="en" type="text" name="name" maxlength="120" value="{{ ev.name }}" required></div>
+        <div><label for="ek">How often?</label><select id="ek" name="kind"><option value="yearly" {{ 'selected' if ev.kind == 'yearly' }}>Every year</option><option value="one_time" {{ 'selected' if ev.kind != 'yearly' }}>One time</option></select></div>
+        <div><label for="ep">Where</label><input id="ep" type="text" name="place" maxlength="200" value="{{ ev.place }}"></div>
+        <div class="full"><label for="ew">Who it is for</label><input id="ew" type="text" name="who" maxlength="200" value="{{ ev.who }}"></div>
+      </div>
+      <button class="ev-btn" type="submit">Save details</button>
+    </form>
+    <form method="post" action="{{ url_for('events.event_delete', event_id=ev.id) }}" style="margin-top:.8rem;" onsubmit="return confirm('Delete this whole event, all its years of notes, and the costs it added to Financials? This cannot be undone.');">
+      <button class="ev-btn alt" type="submit">Delete this event</button></form>
+  </div>
+</div>
+<script>
+// Tick items without reloading the page; the plain form still works if this does not run.
+document.querySelectorAll('.ev-tickform').forEach(function (f) {
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var row = f.closest('.ev-item'), btn = f.querySelector('button');
+    fetch(f.action, { method: 'POST', body: new FormData(f), headers: { 'X-Requested-With': 'fetch' } })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { row.classList.toggle('done', d.done); btn.innerHTML = d.done ? '&#10003;' : ''; })
+      .catch(function () { f.submit(); });
+  });
+});
+</script>
