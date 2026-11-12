@@ -15,6 +15,7 @@ import json
 import os
 import secrets
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 
 from flask import (Blueprint, Response, abort, current_app, flash, redirect,
                    render_template, request, session, url_for)
@@ -28,6 +29,14 @@ DEFAULT_PIES = "Pumpkin\nApple\nPecan\nCherry"
 
 
 # ───────────────────────── helpers ─────────────────────────
+def _today():
+    """Today's date in Central time, so a deadline lasts until 11:59 PM there (the server itself runs on UTC)."""
+    try:
+        return datetime.now(ZoneInfo("America/Chicago")).date()
+    except Exception:
+        return date.today()
+
+
 def _db():
     from database import get_connection
     return get_connection()
@@ -286,7 +295,7 @@ def _is_closed(ev):
     ob = ev["order_by"]
     if ob:
         try:
-            return date.today() > datetime.strptime(ob, "%Y-%m-%d").date()
+            return _today() > datetime.strptime(ob, "%Y-%m-%d").date()
         except ValueError:
             return False
     return False
@@ -932,8 +941,8 @@ def public_event(token, edit_token=None):
     ctx = dict(ev=dict(ev), slots=slots, pies=_pie_list(ev), brand=brand, closed=closed,
                editing=edit_token if editing_row else "",
                fmt_order_by=fmt_date(ev["order_by"]), form=_form_from_response(editing_row) if editing_row else {},
-               today=date.today().isoformat(),
-               home_min=max([x for x in (date.today().isoformat(), ev["home_from"] or "") if x]),
+               today=_today().isoformat(),
+               home_min=max([x for x in (_today().isoformat(), ev["home_from"] or "") if x]),
                home_max=ev["home_to"] or "", home_range=" to ".join(x for x in (fmt_date(ev["home_from"]), fmt_date(ev["home_to"])) if x))
 
     if request.method == "POST":
@@ -994,7 +1003,7 @@ def public_event(token, edit_token=None):
                             want_date = (f.get("want_date") or "").strip()
                             want_time = (f.get("want_time") or "").strip()
                             try:
-                                d_ok = datetime.strptime(want_date, "%Y-%m-%d").date() >= date.today()
+                                d_ok = datetime.strptime(want_date, "%Y-%m-%d").date() >= _today()
                                 datetime.strptime(want_time, "%H:%M")
                             except ValueError:
                                 d_ok = None
@@ -1155,7 +1164,7 @@ def send_reminders(today=None):
     send = _H.get("send_email")
     if not send:
         return 0
-    target = ((today or date.today()) + timedelta(days=1)).isoformat()
+    target = ((today or _today()) + timedelta(days=1)).isoformat()
     conn = _db()
     rows = conn.execute("""SELECT r.*, e.title, e.owner_id, e.home_address, e.token, s.slot_date, s.start_time,
                                   s.end_time, s.location
@@ -1213,7 +1222,7 @@ def send_thank_yous(today=None, event_id=None):
     send = _H.get("send_email")
     if not send:
         return 0
-    day = (today or date.today()).isoformat()
+    day = (today or _today()).isoformat()
     conn = _db()
     if event_id:
         events = conn.execute("SELECT * FROM pie_events WHERE id=?", (event_id,)).fetchall()
