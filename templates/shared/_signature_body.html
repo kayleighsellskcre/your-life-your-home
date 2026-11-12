@@ -1,0 +1,42 @@
+<style>
+  .sg-w { max-width: 760px; margin: 0 auto; padding: 0 0 3rem; }
+  .sg-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1rem 1.2rem; margin-bottom: 1rem; }
+  .sg-card h2 { margin: 0 0 .4rem; font-size: 1.1rem !important; }
+  .sg-card p { color: #6B5B4D; font-size: .9rem; line-height: 1.5; margin: .2rem 0 .7rem; }
+  .sg-card textarea { width: 100%; box-sizing: border-box; font-size: 16px !important; min-height: 9rem !important; height: 9rem; line-height: 1.5; }
+  .sg-btn { width: auto !important; margin: .5rem .5rem 0 0 !important; min-height: 0 !important; padding: .55rem 1.3rem !important; border-radius: 99px !important; border: 0 !important; background: #8F6244 !important; color: #fff !important; font-weight: 700 !important; cursor: pointer; }
+  .sg-btn.alt { background: #FFFDFA !important; color: #6B4630 !important; border: 1.5px solid rgba(143,98,68,.5) !important; }
+  .sg-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
+  .sg-prev { background: #fff; border: 1px solid #E6DACB; border-radius: 10px; padding: .9rem 1rem; color: #3A2518; font-size: .92rem; line-height: 1.5; overflow-wrap: anywhere; }
+  .sg-prev .sg-sig { margin-top: 1rem; white-space: pre-wrap; }
+</style>
+<div class="sg-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Your emails</div>
+    <h1 class="ylh-page-hd__title">Email Signature</h1>
+    <p class="ylh-page-hd__sub">Write it once. It goes at the bottom of the emails sent for you, like follow-ups, frost alerts, home value updates and reminders.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="sg-flash">{{ m }}</div>{% endfor %}
+  <div class="sg-card">
+    <h2>Your signature</h2>
+    <p>Your name, company, phone and website work well. Plain text, up to {{ max_len }} characters.</p>
+    <form method="post">
+      <textarea id="sig" name="signature" maxlength="{{ max_len }}" placeholder="Kayleigh Biggs&#10;Your brokerage&#10;785-555-0100&#10;itsyourlifeyourhome.com">{{ saved }}</textarea>
+      <button class="sg-btn" type="submit">Save signature</button>
+      {% if suggestion %}<button class="sg-btn alt" type="button" id="useSug">Fill in from my profile</button>{% endif %}
+    </form>
+  </div>
+  <div class="sg-card">
+    <h2>How it will look</h2>
+    <div class="sg-prev">Hi Sam,<br><br>Just a quick note to say hello and see how the house is treating you.
+      <div class="sg-sig" id="prevSig">{{ saved or 'Your signature shows here.' }}</div></div>
+  </div>
+</div>
+<script>
+(function () {
+  var ta = document.getElementById('sig'), pv = document.getElementById('prevSig'), btn = document.getElementById('useSug');
+  function show() { pv.textContent = ta.value.trim() || 'Your signature shows here.'; }
+  ta.addEventListener('input', show);
+  if (btn) btn.addEventListener('click', function () { ta.value = {{ suggestion|tojson }}; show(); });
+})();
+</script>

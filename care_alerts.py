@@ -379,6 +379,8 @@ def frost_send():
         low = None
     ns = _H["ns"]
     pro_name = (u.get("name") or "").strip() or "Your Life, Your Home"
+    sender = ns["pro_sender"](u["id"])
+    pro_name = sender.pop("signature", None) or pro_name      # a saved signature replaces the plain name sign-off
     site = ns["_site_url"]()
     mine = {p["key"]: p for p in people_for(u["role"], u["id"])}     # only people who really belong to this pro
     done = recently_alerted(u["id"])
@@ -391,7 +393,7 @@ def frost_send():
                 skipped += 1
                 continue
             body = compose_email(base, p, pro_name, site)
-            ns["_bg"](ns["send_reminder_email"], p["email"], subject, body, **ns["pro_sender"](u["id"]))
+            ns["_bg"](ns["send_reminder_email"], p["email"], subject, body, **sender)
             conn.execute("INSERT INTO frost_sends (sender_id, person_key, low) VALUES (?,?,?)", (u["id"], k, low))
             sent += 1
         conn.commit()

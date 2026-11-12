@@ -1084,12 +1084,17 @@ def _email_ready():
     return bool(os.environ.get("RESEND_API_KEY") or os.environ.get("BREVO_API_KEY") or (EMAIL_USER and EMAIL_PASS))
 
 
-def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None, html=None):
+def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None, html=None, signature=None):
     """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout).
 
     from_name replaces the display name (e.g. "Jane Smith via Your Life Your Home") and reply_to sends
     replies to that address. The From address itself always stays MAIL_FROM, so emails stay authenticated.
+    signature, when given, is added to the bottom of the email.
     """
+    if signature:
+        import email_signature as _sig
+        body = _sig.with_signature(body, signature, (from_name or "").split(" via ")[0])
+        html = _sig.html_with_signature(html, signature)
     if os.environ.get("RESEND_API_KEY"):
         return _send_via_resend(to_email, subject, body, from_name, reply_to, html=html)
     if os.environ.get("BREVO_API_KEY"):
@@ -1135,8 +1140,7 @@ def pro_sender(user_id):
         conn = get_connection()
         try:
             row = conn.execute(
-                "SELECT u.name, u.email, up.full_name FROM users u "
-                "LEFT JOIN user_profiles up ON up.user_id = u.id WHERE u.id = ?", (user_id,)).fetchone()
+                "SELECT u.name, u.email FROM users u WHERE u.id = ?", (user_id,)).fetchone()
         finally:
             conn.close()
     except Exception as e:
@@ -1145,12 +1149,16 @@ def pro_sender(user_id):
     if not row:
         return {}
     row = dict(row)
-    name = _clean_header(row.get("full_name") or row.get("name"))
+    name = _clean_header(row.get("name"))
     out = {}
     if name:
         out["from_name"] = f"{name} via Your Life Your Home"
     if row.get("email"):
         out["reply_to"] = row["email"]
+    from email_signature import get_signature
+    sig = get_signature(user_id)
+    if sig:
+        out["signature"] = sig
     return out
 
 
@@ -1822,7 +1830,7 @@ def send_drip_emails():
         SELECT ds.id, ds.agent_user_id, ds.contact_id, ds.step_number, ds.scheduled_date,
                ac.name as contact_name, ac.email as contact_email,
                u.email as agent_email,
-               up.full_name as agent_name, up.phone as agent_phone
+               u.name as agent_name, up.phone as agent_phone
         FROM crm_drip_sequences ds
         JOIN agent_contacts ac ON ac.id = ds.contact_id
         JOIN users u ON u.id = ds.agent_user_id
@@ -1910,9 +1918,10 @@ def send_review_requests():
     cur = conn.cursor()
     cur.execute("""
         SELECT rr.id, rr.agent_user_id, rr.client_email, rr.client_name,
-               up.full_name as agent_name, up.phone as agent_phone,
+               u.name as agent_name, up.phone as agent_phone,
                up.google_review_link
         FROM review_requests rr
+        LEFT JOIN users u ON u.id = rr.agent_user_id
         LEFT JOIN user_profiles up ON up.user_id = rr.agent_user_id
         WHERE rr.status = 'pending' AND rr.scheduled_date <= ?
     """, (today,))
@@ -4350,6 +4359,8 @@ import followups as _followups
 _followups.init_app(app, get_current_user)
 import events as _events
 _events.init_app(app, get_current_user)
+import email_signature as _email_signature
+_email_signature.init_app(app, get_current_user)
 import email_check as _email_check
 _email_check.init_app(app, globals())
 

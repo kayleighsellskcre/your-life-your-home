@@ -788,6 +788,7 @@
        <a class="ylh-ham-item" href="{{ url_for('agent_subscription') }}">Plan &amp; Billing</a>
        </details>
        <a class="ylh-ham-item" href="{{ url_for('agent_settings_profile') }}">Settings &amp; Profile</a>
+       <a class="ylh-ham-item" href="{{ url_for('email_signature.signature_page') }}">Email Signature</a>
        {% if is_site_admin %}<a class="ylh-ham-item" href="{{ url_for('admin_dashboard') }}">Site Admin</a>{% endif %}
        {% elif session.get('role') == 'lender' %}
        <a class="ylh-ham-item" href="{{ url_for('lender_dashboard') }}">Dashboard</a>
@@ -809,6 +810,7 @@
        <a class="ylh-ham-item" href="{{ url_for('lender_subscription') }}">Plan &amp; Billing</a>
        </details>
        <a class="ylh-ham-item" href="{{ url_for('lender_settings_profile') }}">Settings &amp; Profile</a>
+       <a class="ylh-ham-item" href="{{ url_for('email_signature.signature_page') }}">Email Signature</a>
        {% else %}
        <a class="ylh-ham-item" href="{{ url_for('homeowner_overview') }}">Home Overview</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_value_equity_overview') }}">Value &amp; Equity</a>
