@@ -26,7 +26,7 @@
   {% if editing %}<div class="pie-flash success">You're changing your response. Update anything below and save, or cancel it at the bottom.{% if fmt_order_by %} Changes close after {{ fmt_order_by }}.{% endif %}</div>{% endif %}
 
   {% if closed %}
-  <div class="pie-card" style="text-align:center;color:#7D6858;">Sign-ups for this event are closed and orders are locked in, so changes can no longer be made. Please contact {{ brand.name or 'your host' }} if you have a question.</div>
+  <div class="pie-card" style="text-align:center;color:#7D6858;">{% if ev.closed_message %}{{ ev.closed_message }}{% else %}Sign-ups for this event are closed and orders are locked in, so changes can no longer be made. Please contact {{ brand.name or 'your host' }} if you have a question.{% endif %}</div>
   {% else %}
   <form method="post" id="pieform" novalidate>
     <input type="text" name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" aria-hidden="true">

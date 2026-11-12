@@ -26,6 +26,9 @@
           <input class="pie-input" id="price_note" name="price_note" maxlength="200" placeholder="My gift to you" value="{{ ev.price_note or '' }}">
         </div>
       </div>
+      <label class="pie-label" for="closed_message">What people see after the reply-by date <span class="pie-hint">(optional)</span></label>
+      <textarea id="closed_message" name="closed_message" rows="2" maxlength="600" placeholder="Orders are closed for now. A second round opens December 1, so check back with this same link.">{{ ev.closed_message or '' }}</textarea>
+      <p class="pie-hint" style="margin:.3rem 0 0;">Want a second round with the same QR code? Just move the reply-by date later (or press Reopen on the event page). Nothing about the link changes.</p>
     </div>
 
     <div class="pie-card">

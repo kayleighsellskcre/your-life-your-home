@@ -105,6 +105,7 @@ def ensure_tables():
     _add("pie_responses", "thanked", "INTEGER DEFAULT 0")
     _add("pie_events", "thank_date", "TEXT")
     _add("pie_events", "thank_message", "TEXT")
+    _add("pie_events", "closed_message", "TEXT")
     conn.commit()
     conn.close()
 
@@ -381,6 +382,7 @@ def edit_event(event_id=None):
         except ValueError:
             thank_date = ""
         thank_message = (f.get("thank_message") or "").strip()[:1200]
+        closed_message = (f.get("closed_message") or "").strip()[:600]
         home_address = (f.get("home_address") or "").strip()[:250]
         offer_delivery = 1 if f.get("offer_delivery") else 0
         home_from = (f.get("home_from") or "").strip()
@@ -425,6 +427,8 @@ def edit_event(event_id=None):
                          cant_make_prompt, flyer_image, home_address, offer_delivery, home_from, home_to,
                          thank_date, thank_message))
             eid = cur.lastrowid
+
+        cur.execute("UPDATE pie_events SET closed_message=? WHERE id=?", (closed_message, eid))
 
         # pickup slots: update existing, add new, remove the ones taken off the form
         ids = f.getlist("slot_id")
