@@ -15,7 +15,7 @@
       <p class="pie-hint" style="margin:0 0 .6rem;">Round {{ next_round.round_no }} is {{ 'open' if next_round.is_active else 'set up but not open yet' }}. The same link and QR code {{ 'now show' if next_round.is_active else 'will show it once you open it. Until then they still show this round' }}.</p>
       <a class="pie-btn secondary small" href="{{ url_for('pies.event_detail', event_id=next_round.id) }}">Go to round {{ next_round.round_no }}</a>
     {% else %}
-      <p class="pie-hint" style="margin:0 0 .6rem;">Done taking orders? Start another round for the same people. It keeps this round's orders as they are, gets its own pickup dates and its own list, and uses this same link and QR code.</p>
+      <p class="pie-hint" style="margin:0 0 .6rem;">Done taking orders? Start another round for the same people. It keeps this round's orders as they are, opens right away with the same info (pickup times too) and no reply-by date, gets its own list, and uses this same link and QR code.</p>
       <form method="post" action="{{ url_for('pies.new_round', event_id=ev.id) }}" onsubmit="return confirm('Set up a new round? This round stays as it is.');"><button class="pie-btn secondary small" type="submit">Start round {{ (ev.round_no or 1) + 1 }}</button></form>
     {% endif %}
   </div>

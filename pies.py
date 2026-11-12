@@ -532,7 +532,8 @@ def toggle_event(event_id):
 @bp.route("/pies/<int:event_id>/new-round", methods=["POST"])
 def new_round(event_id):
     """Start another round of orders on the same link and QR code. It has its own pickup dates, its own list of orders and its
-    own exports, so the first round stays exactly as it was. The new round stays closed until the host opens it."""
+    own exports, so the first round stays exactly as it was. It copies everything from the earlier round (pickup times too)
+    except the reply-by date, which is left blank, and it opens right away so the shared link switches to it."""
     import re
     user, ev = _owned_event(event_id)
     if not ev:
@@ -545,17 +546,20 @@ def new_round(event_id):
     conn = _db()
     cur = conn.cursor()
     cur.execute("""INSERT INTO pie_events (owner_id, owner_role, token, title, message, order_by, pie_types, price_note, cant_make_prompt,
-                   flyer_image, art_image, home_address, offer_delivery, thank_message, closed_message, is_active, round_no)
-                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?)""",
+                   flyer_image, art_image, home_address, offer_delivery, home_from, home_to, thank_message, is_active, round_no)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?)""",
                 (ev["owner_id"], ev["owner_role"], secrets.token_urlsafe(9), f"{base} - Round {n}"[:120], ev["message"], "", ev["pie_types"],
                  ev["price_note"], ev["cant_make_prompt"], ev["flyer_image"], ev["art_image"], ev["home_address"], ev["offer_delivery"],
-                 ev["thank_message"], ev["closed_message"], n))
+                 ev["home_from"], ev["home_to"], ev["thank_message"], n))
     new_id = cur.lastrowid
+    for s in cur.execute("SELECT * FROM pie_slots WHERE event_id=? ORDER BY slot_date, start_time, id", (ev["id"],)).fetchall():
+        cur.execute("INSERT INTO pie_slots (event_id, slot_date, start_time, end_time, location, capacity) VALUES (?,?,?,?,?,?)",
+                    (new_id, s["slot_date"], s["start_time"], s["end_time"], s["location"], s["capacity"]))
     cur.execute("UPDATE pie_events SET next_id=? WHERE id=?", (new_id, ev["id"]))
     conn.commit()
     conn.close()
-    flash(f"Round {n} is set up but not open yet. Add its pickup dates and a reply-by date, then press Reopen sign-ups on the event page. "
-          "Your link and QR code will switch to this round the moment it opens.", "success")
+    flash(f"Round {n} is open now on your same link and QR code. It has the same info as before and no reply-by date. "
+          "Check that the pickup dates are right, and add a reply-by date if you want one.", "success")
     return redirect(url_for("pies.edit_event", event_id=new_id))
 
 

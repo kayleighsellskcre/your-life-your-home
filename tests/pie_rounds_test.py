@@ -45,19 +45,13 @@ with contextlib.redirect_stdout(io.StringIO()):
     c.post(f"/pies/{r1['id']}/edit", data={**form, "order_by": "2020-01-01", "closed_message": "Round one is full."})
     r = c.post(f"/pies/{r1['id']}/new-round", follow_redirects=True)
 r2 = q("SELECT * FROM pie_events WHERE id != ?", r1["id"])[0]
-ok(r2["round_no"] == 2 and r2["title"] == "Holiday pies - Round 2" and r2["is_active"] == 0 and r2["token"] != tok and r2["pie_types"] == r1["pie_types"], "round 2 is created closed, with its own link inside and the pies copied")
+ok(r2["round_no"] == 2 and r2["title"] == "Holiday pies - Round 2" and r2["is_active"] == 1 and r2["token"] != tok and r2["pie_types"] == r1["pie_types"] and not r2["order_by"], "round 2 is created open, with the same pies and a blank reply-by date")
 ok(q("SELECT next_id FROM pie_events WHERE id = ?", r1["id"])[0]["next_id"] == r2["id"], "round 1 points to round 2")
-ok(len(q("SELECT * FROM pie_slots WHERE event_id = ?", r2["id"])) == 0, "round 2 starts with no pickup dates, so you add new ones")
+ok([(s["location"], s["start_time"]) for s in q("SELECT * FROM pie_slots WHERE event_id = ?", r2["id"])] == [("My office", "10:00")], "round 2 copies the pickup times from round 1")
 t = A.app.test_client().get(f"/pies/r/{tok}").get_data(as_text=True)
-ok("Round one is full." in t and "Round 2" not in t, "until round 2 opens, the same link still shows round 1 as closed")
+ok("Round 2" in t and "pieform" in t and "Round one is full." not in t, "the same link and QR code switch to round 2 right away")
 ok(c.post(f"/pies/{r1['id']}/new-round").status_code == 302 and len(q("SELECT id FROM pie_events")) == 2, "pressing start again does not make a third round")
 
-# open round 2
-with contextlib.redirect_stdout(io.StringIO()):
-    c.post(f"/pies/{r2['id']}/edit", data={**form, "title": "Holiday pies - Round 2", "order_by": "2099-02-01", "slot_date": ["2031-01-10"]})
-    c.post(f"/pies/{r2['id']}/toggle")
-t = A.app.test_client().get(f"/pies/r/{tok}").get_data(as_text=True)
-ok("Round 2" in t and "pieform" in t, "once round 2 opens, the original link and QR code show it")
 s2 = q("SELECT id FROM pie_slots WHERE event_id = ?", r2["id"])[0]["id"]
 # the same person orders again in round 2: it must not overwrite her round 1 order
 order("Gina Guest", "gina@x.com", pie="Pecan", slot=str(s2))
