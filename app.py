@@ -1036,7 +1036,7 @@ def _send_via_resend(to_email, subject, body, from_name=None, reply_to=None, htm
         return False
 
 
-def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None, html=None):
+def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None, html=None, from_email=None):
     """Send over HTTPS (port 443) with Brevo's API. Works on hosts that block SMTP, like Railway's Hobby plan."""
     import json as _json
     import html as _html
@@ -1046,7 +1046,7 @@ def _send_via_brevo(to_email, subject, body, from_name=None, reply_to=None, html
         print("[WARNING] BREVO_API_KEY is set but MAIL_FROM is not; cannot send.")
         _EMAIL_LAST.update(ok=False, detail="MAIL_FROM is not set in Railway.")
         return False
-    sender = {"email": addr}
+    sender = {"email": from_email or addr}
     if name:
         sender["name"] = name
     html_body = html or ("<div style=\"font-family:Arial,sans-serif;font-size:15px;line-height:1.5\">"
@@ -1084,7 +1084,7 @@ def _email_ready():
     return bool(os.environ.get("RESEND_API_KEY") or os.environ.get("BREVO_API_KEY") or (EMAIL_USER and EMAIL_PASS))
 
 
-def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None, html=None, signature=None):
+def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None, html=None, signature=None, from_email=None):
     """Send an email. Uses Resend or Brevo over HTTPS when their API key is set, otherwise SMTP (with a timeout).
 
     from_name replaces the display name (e.g. "Jane Smith via Your Life Your Home") and reply_to sends
@@ -1098,6 +1098,9 @@ def send_reminder_email(to_email, subject, body, from_name=None, reply_to=None, 
     if os.environ.get("RESEND_API_KEY"):
         return _send_via_resend(to_email, subject, body, from_name, reply_to, html=html)
     if os.environ.get("BREVO_API_KEY"):
+        if from_email:   # the person's own confirmed address; if the service refuses it, send the usual way so nothing is lost
+            if _send_via_brevo(to_email, subject, body, from_name, reply_to, html=html, from_email=from_email):
+                return True
         return _send_via_brevo(to_email, subject, body, from_name, reply_to, html=html)
     if not EMAIL_USER or not EMAIL_PASS:
         print(f"[WARNING] Email not configured - cannot send to {to_email}")
@@ -1155,10 +1158,14 @@ def pro_sender(user_id):
         out["from_name"] = f"{name} via Your Life Your Home"
     if row.get("email"):
         out["reply_to"] = row["email"]
-    from email_signature import get_signature
+    from email_signature import get_own_sender, get_signature
     sig = get_signature(user_id)
     if sig:
         out["signature"] = sig
+    own = get_own_sender(user_id)
+    if own and name:
+        out["from_email"] = own          # confirmed address of their own: the email really comes from them
+        out["from_name"] = name
     return out
 
 

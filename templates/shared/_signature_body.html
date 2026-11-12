@@ -26,6 +26,27 @@
       {% if suggestion %}<button class="sg-btn alt" type="button" id="useSug">Fill in from my profile</button>{% endif %}
     </form>
   </div>
+  <div class="sg-card" id="sender">
+    <h2>Send from my own email address</h2>
+    {% if not brevo_on %}
+    <p>This needs the site's email service to be switched on first, which only the site owner can do.</p>
+    {% elif own and own.verified %}
+    <p><b>Confirmed.</b> Emails sent for you now come from <b>{{ own.email }}</b>, with your name, and replies come to you.</p>
+    <form method="post" action="{{ url_for('email_signature.sender_remove') }}"><button class="sg-btn alt" type="submit">Stop using this address</button></form>
+    {% else %}
+    <p>Right now your emails show your name and replies come to you, but they are sent through Your Life, Your Home. To have them come from your own address instead, confirm it here once. We send a confirmation link to that address, and nothing changes until you tap it.</p>
+    <p><b>Works best with an email at your own business domain</b> (like you@yourcompany.com). Gmail, Yahoo, Outlook and iCloud addresses cannot be used this way, because those companies send mail from services like ours to spam. If you use one of those, you do not need to do anything. Your emails already show your name and replies reach you.</p>
+    {% if own %}<p style="background:#FFF6DD;border-radius:10px;padding:.6rem .8rem;">Waiting for you to tap the confirmation link sent to <b>{{ own.email }}</b>. Check your spam folder too. When you have done that, press Check again.</p>
+      <form method="post" action="{{ url_for('email_signature.signature_page') }}" style="display:inline;margin:0;"><button class="sg-btn" type="submit" formaction="{{ url_for('email_signature.signature_page') }}" formmethod="get">Check again</button></form>
+      <form method="post" action="{{ url_for('email_signature.sender_remove') }}" style="display:inline;margin:0;"><button class="sg-btn alt" type="submit">Cancel</button></form>
+    {% endif %}
+    <form method="post" action="{{ url_for('email_signature.sender_start') }}">
+      <label for="own" style="display:block;font-size:.8rem;font-weight:700;color:#6B4630;margin:.6rem 0 .2rem;">Your email address</label>
+      <input id="own" type="email" name="email" value="{{ own.email if own else account_email }}" maxlength="200" required style="width:100%;box-sizing:border-box;font-size:16px;">
+      <button class="sg-btn" type="submit">Send me the confirmation link</button>
+    </form>
+    {% endif %}
+  </div>
   <div class="sg-card">
     <h2>How it will look</h2>
     <div class="sg-prev">Hi Sam,<br><br>Just a quick note to say hello and see how the house is treating you.
