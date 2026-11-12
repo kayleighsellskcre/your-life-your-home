@@ -106,6 +106,8 @@ def ensure_tables():
     _add("pie_events", "thank_date", "TEXT")
     _add("pie_events", "thank_message", "TEXT")
     _add("pie_events", "closed_message", "TEXT")
+    _add("pie_events", "next_id", "INTEGER")          # the next round of this event, if there is one
+    _add("pie_events", "round_no", "INTEGER DEFAULT 1")
     conn.commit()
     conn.close()
 
@@ -309,7 +311,18 @@ def _is_event_owner(ev):
 
 
 def _public_url(ev):
-    return url_for("pies.public_event", token=ev["token"], _external=True)
+    """Every round shares the first round's link and QR code, which always lands on the round that is open."""
+    token, cur = ev["token"], ev
+    conn = _db()
+    try:
+        for _ in range(20):
+            prev = conn.execute("SELECT * FROM pie_events WHERE next_id=?", (cur["id"],)).fetchone()
+            if not prev:
+                break
+            token, cur = prev["token"], prev
+    finally:
+        conn.close()
+    return url_for("pies.public_event", token=token, _external=True)
 
 
 def _qr_data_url(text):
@@ -480,6 +493,8 @@ def event_detail(event_id):
     slots = _slot_rows(conn, ev["id"])
     responses = [dict(r) for r in conn.execute(
         "SELECT * FROM pie_responses WHERE event_id=? ORDER BY created_at DESC, id DESC", (ev["id"],)).fetchall()]
+    nxt = conn.execute("SELECT id, title, round_no, is_active FROM pie_events WHERE id=?", (ev["next_id"],)).fetchone() if ev["next_id"] else None
+    prv = conn.execute("SELECT id, title, round_no FROM pie_events WHERE next_id=? AND owner_id=?", (ev["id"], ev["owner_id"])).fetchone()
     conn.close()
     pie_totals = {}
     for r in responses:
@@ -497,6 +512,7 @@ def event_detail(event_id):
     stats["thanked"] = sum(1 for r in responses if r.get("thanked"))
     return render_template("pies/detail.html", ev=dict(ev), slots=slots, responses=responses, stats=stats,
                            pie_totals=pie_totals, public_url=_public_url(ev), closed=_is_closed(ev),
+                           next_round=dict(nxt) if nxt else None, prev_round=dict(prv) if prv else None,
                            has_ai=bool(os.environ.get("OPENAI_API_KEY")), role=user["role"])
 
 
@@ -513,6 +529,36 @@ def toggle_event(event_id):
     return redirect(url_for("pies.event_detail", event_id=ev["id"]))
 
 
+@bp.route("/pies/<int:event_id>/new-round", methods=["POST"])
+def new_round(event_id):
+    """Start another round of orders on the same link and QR code. It has its own pickup dates, its own list of orders and its
+    own exports, so the first round stays exactly as it was. The new round stays closed until the host opens it."""
+    import re
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    if ev["next_id"]:
+        flash("The next round already exists.", "success")
+        return redirect(url_for("pies.event_detail", event_id=ev["next_id"]))
+    n = (ev["round_no"] or 1) + 1
+    base = re.sub(r"\s*-\s*Round \d+\s*$", "", ev["title"] or "").strip() or "Pie pickup"
+    conn = _db()
+    cur = conn.cursor()
+    cur.execute("""INSERT INTO pie_events (owner_id, owner_role, token, title, message, order_by, pie_types, price_note, cant_make_prompt,
+                   flyer_image, art_image, home_address, offer_delivery, thank_message, closed_message, is_active, round_no)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,0,?)""",
+                (ev["owner_id"], ev["owner_role"], secrets.token_urlsafe(9), f"{base} - Round {n}"[:120], ev["message"], "", ev["pie_types"],
+                 ev["price_note"], ev["cant_make_prompt"], ev["flyer_image"], ev["art_image"], ev["home_address"], ev["offer_delivery"],
+                 ev["thank_message"], ev["closed_message"], n))
+    new_id = cur.lastrowid
+    cur.execute("UPDATE pie_events SET next_id=? WHERE id=?", (new_id, ev["id"]))
+    conn.commit()
+    conn.close()
+    flash(f"Round {n} is set up but not open yet. Add its pickup dates and a reply-by date, then press Reopen sign-ups on the event page. "
+          "Your link and QR code will switch to this round the moment it opens.", "success")
+    return redirect(url_for("pies.edit_event", event_id=new_id))
+
+
 @bp.route("/pies/<int:event_id>/delete", methods=["POST"])
 def delete_event(event_id):
     user, ev = _owned_event(event_id)
@@ -521,6 +567,7 @@ def delete_event(event_id):
     conn = _db()
     conn.execute("DELETE FROM pie_responses WHERE event_id=?", (ev["id"],))
     conn.execute("DELETE FROM pie_slots WHERE event_id=?", (ev["id"],))
+    conn.execute("UPDATE pie_events SET next_id=? WHERE next_id=?", (ev["next_id"], ev["id"]))   # keep the chain of rounds joined
     conn.execute("DELETE FROM pie_events WHERE id=?", (ev["id"],))
     conn.commit()
     conn.close()
@@ -846,6 +893,28 @@ def _event_by_token(token):
     return ev
 
 
+def _live_round(ev):
+    """The round guests should see on this event's link: the newest round that has been opened, else this one.
+    A round that is still being set up stays hidden, so the link keeps showing the earlier round until it opens."""
+    live = ev
+    conn = _db()
+    try:
+        cur = ev
+        for _ in range(20):
+            nid = cur["next_id"]
+            if not nid:
+                break
+            nxt = conn.execute("SELECT * FROM pie_events WHERE id=?", (nid,)).fetchone()
+            if not nxt:
+                break
+            if nxt["is_active"]:
+                live = nxt
+            cur = nxt
+    finally:
+        conn.close()
+    return live
+
+
 def _response_by_edit_token(ev, edit_token):
     if not edit_token:
         return None
@@ -925,6 +994,10 @@ def public_event(token, edit_token=None):
     ev = _event_by_token(token)
     if not ev:
         abort(404)
+    if not edit_token:
+        live = _live_round(ev)   # one link and QR code for every round
+        if live["id"] != ev["id"]:
+            ev, token = live, live["token"]
     editing_row = _response_by_edit_token(ev, edit_token) if edit_token else None
     if edit_token and not editing_row:
         flash("That link is no longer valid. You can fill the form out again below.", "error")
