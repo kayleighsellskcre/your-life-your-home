@@ -267,22 +267,17 @@
 }
 
 .philosophy-visual {
-  background: rgba(255,255,255,.6);
+  position: relative;
+  aspect-ratio: 3 / 2;
   border-radius: 12px;
-  padding: 3.5rem;
-  text-align: center;
+  overflow: hidden;
+  background: #F3E9DD;
   border: 1px solid rgba(176,133,96,.25);
   box-shadow: 0 4px 24px rgba(70,45,30,.08);
 }
-
-.philosophy-visual-text {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: 5rem;
-  color: rgba(143,98,68,.18);
-  font-weight: 600;
-  line-height: 1.25;
-}
-
+.philosophy-visual img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 1.6s ease-in-out; }
+.philosophy-visual img.is-active { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .philosophy-visual img { transition: none; } }
 
 /* ── HOW IT WORKS ──────────────────────────────────────────────── */
 .how-section { padding: 1rem 3rem 5rem; background: #fff; }
@@ -339,8 +334,6 @@
 
   .philosophy-section { padding: 3rem 1rem !important; }
   .philosophy-text h2 { font-size: 1.875rem !important; }
-  .philosophy-visual { padding: 2rem !important; }
-  .philosophy-visual-text { font-size: 3rem !important; }
 }
 </style>
 
@@ -497,9 +490,23 @@
         no pressure, just the clarity you deserve.
       </p>
     </div>
-    <div class="philosophy-visual">
-      <div class="philosophy-visual-text" aria-hidden="true">Calm<br>Curated<br>Yours</div>
+    <div class="philosophy-visual" id="calmSlides">
+      <img class="is-active" src="{{ url_for('static', filename='img/calm-1.jpg') }}" alt="Calm. Curated. Yours. A sunlit stone patio with an olive tree." width="1200" height="800" loading="lazy">
+      <img src="{{ url_for('static', filename='img/calm-2.jpg') }}" alt="" aria-hidden="true" width="1200" height="800" loading="lazy">
+      <img src="{{ url_for('static', filename='img/calm-3.jpg') }}" alt="" aria-hidden="true" width="1200" height="800" loading="lazy">
     </div>
+    <script>
+    (function () {
+      var imgs = document.querySelectorAll('#calmSlides img');
+      if (imgs.length < 2 || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+      var i = 0;
+      setInterval(function () {
+        imgs[i].classList.remove('is-active');
+        i = (i + 1) % imgs.length;
+        imgs[i].classList.add('is-active');
+      }, 6000);
+    })();
+    </script>
   </div>
 </section>
 
