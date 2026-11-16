@@ -831,6 +831,16 @@ def inject_professionals():
     return dict(professionals=professionals, hex_to_color_name=hex_to_color_name, get_professional_photo_url=get_professional_photo_url)
 
 
+# Pages anyone can see. The dashboard title under the logo is hidden on these, even for someone who is signed in.
+PUBLIC_PAGES = {"index", "login", "login_verify", "signup", "forgot_password", "reset_password", "verify_email",
+                "for_homeowners", "for_agents", "for_lenders"}
+
+
+@app.context_processor
+def _inject_public_pages():
+    return dict(PUBLIC_PAGES=PUBLIC_PAGES)
+
+
 @app.context_processor
 def inject_current_user():
     """Inject current_user into every template so layouts can check role."""
@@ -3105,47 +3115,36 @@ def signup():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """REWRITTEN: Simple, direct login that always works."""
-    role = request.args.get("role") or request.form.get("role")
-    
+    """Sign in with just an email and password. The account itself says whether this is a homeowner, agent or lender."""
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        selected_role = request.form.get("role", "").strip()
-        
+
         if not email or not password:
             flash("Please enter your email and password so we can sign you in.", "error")
-            return redirect(url_for("login", role=selected_role))
-        
-        if not selected_role:
-            flash("Please choose how you use the site: homeowner, agent or lender.", "error")
             return redirect(url_for("login"))
-        
-        # Get user
+
         try:
             user_row = get_user_by_email(email)
         except Exception as e:
             print(f"LOGIN ERROR: {str(e)}")
             flash("Something went wrong on our end. Please try again in a moment.", "error")
-            return redirect(url_for("login", role=selected_role))
-        
+            return redirect(url_for("login"))
+
         if not user_row:
             flash("We could not find a match for that email and password. Please try again, or use \"Forgot password?\" and we will help you get back in.", "error")
-            return redirect(url_for("login", role=selected_role))
-        
-        # Convert to dict
+            return redirect(url_for("login"))
+
         user = dict(user_row) if hasattr(user_row, 'keys') and not isinstance(user_row, dict) else (user_row if isinstance(user_row, dict) else {})
-        
+
         user_id = user.get("id")
         user_role = str(user.get("role") or "").strip().lower()
         stored_hash = user.get("password_hash")
-        
-        # Check password hash exists
+
         if not stored_hash or not stored_hash.strip():
             flash("Account incomplete. Please sign up again with the same email to set your password.", "error")
-            return redirect(url_for("signup", role=selected_role))
-        
-        # Verify password
+            return redirect(url_for("signup"))
+
         try:
             password_correct = check_password_hash(stored_hash, password)
         except Exception as e:
@@ -3154,13 +3153,8 @@ def login():
 
         if not password_correct:
             flash("We could not find a match for that email and password. Please try again, or use \"Forgot password?\" and we will help you get back in.", "error")
-            return redirect(url_for("login", role=selected_role))
+            return redirect(url_for("login"))
 
-        # Check role
-        if user_role != str(selected_role).strip().lower():
-            flash(f"This account is registered as a {user.get('role', 'user').title()}. Please select the correct role.", "error")
-            return redirect(url_for("login", role=user.get("role", "homeowner")))
-        
         # Two-step login: park the user until they enter their authenticator code
         try:
             from mfa import is_mfa_enabled
@@ -3175,7 +3169,6 @@ def login():
         except Exception as _e:
             print(f"[MFA] check skipped: {_e}")
 
-        # Set session
         session.clear()
         session.permanent = request.form.get("remember") == "on"
         session["user_id"] = int(user_id)
@@ -3191,19 +3184,18 @@ def login():
         except Exception as _e:
             print(f"[LOGIN] last_login update skipped: {_e}")
 
-        # Redirect
         redirect_map = {
             "homeowner": url_for("homeowner_overview"),
             "agent": url_for("agent_dashboard"),
             "lender": url_for("lender_dashboard")
         }
         redirect_url = redirect_map.get(user_role, url_for("index"))
-        
+
         response = redirect(redirect_url)
         response.set_cookie("save_email", email, max_age=365*24*60*60 if session.permanent else None)
         return response
-    
-    return render_template("auth/login.html", role=role)
+
+    return render_template("auth/login.html")
 
 
 def _finish_login(uid, name, role, remember=False):
