@@ -20,7 +20,7 @@ def signed_in(uid, role):
 
 # ---- 1. sign in has no role picker and sends people to their own dashboard ----
 page = A.app.test_client().get("/login").get_data(as_text=True)
-ok("I am a" not in page and 'name="role"' not in page and 'id="role"' not in page, "the Sign In page no longer asks 'I am a'")
+ok("<select" not in page and 'name="role"' not in page and 'id="role"' not in page, "the Sign In page no longer has a role dropdown")
 for email, where in (("hal@x.com", "/homeowner"), ("amy@x.com", "/agent"), ("lou@x.com", "/lender")):
     r = A.app.test_client().post("/login", data={"email": email, "password": "password123"})
     ok(r.status_code == 302 and where in r.headers["Location"], f"{email} signs in with just email and password and lands on their own dashboard")
