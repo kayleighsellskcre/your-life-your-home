@@ -263,6 +263,11 @@
  <div class="auth-footer">
  Already have an account?
  <a href="{{ url_for('login') }}">Sign in here</a>
+ <div style="margin-top:.8rem;font-size:.92rem;">
+ {% if role == 'homeowner' %}Are you a real estate agent or a lender? <a href="{{ url_for('signup', role='agent') }}">Agent sign-up</a> &middot; <a href="{{ url_for('signup', role='lender') }}">Lender sign-up</a>
+ {% elif role == 'agent' %}Not an agent? <a href="{{ url_for('signup', role='homeowner') }}">Homeowner sign-up</a> &middot; <a href="{{ url_for('signup', role='lender') }}">Lender sign-up</a>
+ {% else %}Not a lender? <a href="{{ url_for('signup', role='homeowner') }}">Homeowner sign-up</a> &middot; <a href="{{ url_for('signup', role='agent') }}">Agent sign-up</a>{% endif %}
+ </div>
  </div>
  </div>
 </div>
