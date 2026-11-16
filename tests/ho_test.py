@@ -48,5 +48,5 @@ r = c.get("/homeowner/care/energy-savings"); t = text(r); ok(r.status_code == 20
 r = c.get("/homeowner/value/equity-overview"); t = text(r); ok(r.status_code == 200 and "once configured" not in t, "value page has no placeholder text")
 r = c.get("/homeowner/reno/planner"); ok(b"Which projects pay back" in r.data, "renovation planner links to cost estimator and ROI guide")
 t = c.get("/homeowner").get_data(as_text=True)
-ok(t.count('<details class="ylh-ham-more">') == 3 and "My Buyer Profile" in t and "Cost Estimator" not in t and "ylh-ham-scrim" in t, "menu is three tidy groups with the slide-in panel")
+ok(t.count('<details class="ylh-ham-more">') == 2 and "My Buyer Profile" in t and "Cost Estimator" not in t and "ylh-ham-scrim" in t, "menu is three tabs plus tidy More and Account groups with the slide-in panel")
 
