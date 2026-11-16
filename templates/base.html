@@ -740,7 +740,18 @@
    {% if session.get('user_id') %}
    <div style="width:42px;flex-shrink:0;"></div>
    {% else %}
-   <div style="width:42px;flex-shrink:0;"></div>
+   <div class="ylh-ham-wrap" style="flex-shrink:0;">
+     <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Open menu" aria-haspopup="true" aria-controls="ylhHamMenu" aria-expanded="false">
+       <span></span><span></span><span></span>
+     </button>
+     <div class="ylh-ham-menu" id="ylhHamMenu">
+       <a class="ylh-ham-item" href="{{ url_for('index') }}">Home</a>
+       <a class="ylh-ham-item" href="{{ url_for('for_homeowners') }}">For Homeowners</a>
+       <a class="ylh-ham-item" href="{{ url_for('for_agents') }}">For Agents</a>
+       <a class="ylh-ham-item" href="{{ url_for('for_lenders') }}">For Lenders</a>
+       <a class="ylh-ham-item" href="{{ url_for('login') }}">Sign In</a>
+     </div>
+   </div>
    {% endif %}
 
    <!-- Center: Brand + Dashboard Title stacked -->
@@ -902,7 +913,8 @@
  <footer class="site-footer">
  <p>&copy; {{ now_year }} Your Life, Your Home. All rights reserved.</p>
  {% if not session.get('user_id') %}
- <p><a href="{{ url_for('login') }}">Sign in</a> &middot; <a href="{{ url_for('signup') }}">Create an account</a></p>
+ <p><a href="{{ url_for('for_homeowners') }}">For Homeowners</a> &middot; <a href="{{ url_for('for_agents') }}">For Agents</a> &middot; <a href="{{ url_for('for_lenders') }}">For Lenders</a></p>
+ <p><a href="{{ url_for('login') }}">Sign in</a></p>
  {% endif %}
  </footer>
 

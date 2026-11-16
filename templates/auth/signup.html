@@ -215,7 +215,7 @@
  {% endif %}
  <header class="auth-header">
  <p class="auth-tagline">{% if inviter %}Welcome{% else %}Begin your journey{% endif %}</p>
- <h1 class="auth-title">{% if inviter %}Set up your home dashboard{% else %}Create Account{% endif %}</h1>
+ <h1 class="auth-title">{% if inviter %}Set up your home dashboard{% elif role == 'agent' %}Start Your Agent Account{% elif role == 'lender' %}Start Your Lender Account{% else %}Create Your Free Account{% endif %}</h1>
  <p class="auth-description">
  {% if inviter %}Free, private, and shared with {{ inviter.first_name or 'your agent' }} so they can help when you need it.{% else %}We are so glad you are here. Tell us a little about yourself and we will take it from there.{% endif %}
  </p>
@@ -245,35 +245,18 @@
  </div>
  </div>
  
- {% if role != 'homeowner' %}
- <div class="auth-form-group">
- <label for="role">I am signing up as</label>
- <select id="role" name="role">
- <option value="agent" {% if role == 'agent' %}selected{% endif %}>
- Real Estate Agent
- </option>
- <option value="lender" {% if role == 'lender' %}selected{% endif %}>
- Lender or Loan Officer
- </option>
- </select>
- </div>
- {% else %}
- <input type="hidden" name="role" value="homeowner" />
- {% endif %}
+ <input type="hidden" name="role" value="{{ role }}" />
  
  {% if referral_code %}
  <input type="hidden" name="ref_token" value="{{ referral_code }}" />
  {% endif %}
  
  <div class="role-hint">
- <strong>Homeowners:</strong> Free forever. 
- {% if role != 'homeowner' %}
- <strong>Professionals:</strong> Free trial, then subscribe for full access.
- {% endif %}
+ {% if role == 'homeowner' %}<strong>Always free</strong> for homeowners.{% else %}<strong>Start free.</strong> Upgrade any time for full access.{% endif %}
  </div>
  
  <button class="btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
- Create My Account
+ {% if role == 'homeowner' %}Create my free account{% else %}Start my account{% endif %}
  </button>
  </form>
 

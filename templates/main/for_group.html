@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ page.label }} | Your Life, Your Home{% endblock %}
+{% block content %}
+<style>
+  .fg-w { max-width: 640px; margin: 2rem auto 3rem; padding: 0 1rem; text-align: center; }
+  .fg-kicker { font-size: .8rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8F6244; margin: 0 0 .6rem; }
+  .fg-w h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.9rem, 6vw, 2.8rem); color: #3F2817; line-height: 1.15; margin: 0 0 .8rem; }
+  .fg-intro { color: #6B5B4D; font-size: 1.08rem; line-height: 1.55; margin: 0 0 1.6rem; }
+  .fg-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 4px 24px rgba(70,45,30,.08); padding: 1.4rem 1.6rem; text-align: left; margin-bottom: 1.6rem; }
+  .fg-card ul { list-style: none; margin: 0; padding: 0; }
+  .fg-card li { position: relative; padding: .55rem 0 .55rem 1.7rem; color: #3A2518; font-size: 1.02rem; line-height: 1.5; border-top: 1px solid rgba(160,125,85,.15); }
+  .fg-card li:first-child { border-top: 0; }
+  .fg-card li::before { content: ""; position: absolute; left: .2rem; top: 1.05rem; width: .55rem; height: .55rem; border-radius: 50%; background: #B08560; }
+  .fg-btn { display: inline-block; padding: .95rem 2.2rem; border-radius: 99px; background: #8F6244; color: #fff !important; font-weight: 700; font-size: 1.05rem; text-decoration: none; box-shadow: 0 4px 14px rgba(110,72,40,.25); }
+  .fg-btn:hover { background: #7A5238; }
+  .fg-note { color: #7A6855; font-size: .92rem; margin: 1rem 0 0; }
+  .fg-signin { color: #7A6855; font-size: .9rem; margin-top: 1.2rem; }
+  .fg-signin a { color: #8F6244; }
+</style>
+<div class="fg-w">
+  <p class="fg-kicker">{{ page.label }}</p>
+  <h1>{{ page.title }}</h1>
+  <p class="fg-intro">{{ page.intro }}</p>
+  <div class="fg-card"><ul>{% for p in page.points %}<li>{{ p }}</li>{% endfor %}</ul></div>
+  <a class="fg-btn" href="{{ url_for('signup', role=page.role) }}">{{ page.button }}</a>
+  <p class="fg-note">{{ page.note }}</p>
+  {% if not session.get('user_id') %}<p class="fg-signin">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>{% endif %}
+</div>
+{% endblock %}

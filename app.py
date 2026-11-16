@@ -4360,6 +4360,8 @@ import events as _events
 _events.init_app(app, get_current_user)
 import email_signature as _email_signature
 _email_signature.init_app(app, get_current_user)
+import public_pages as _public_pages
+_public_pages.init_app(app)
 import email_check as _email_check
 _email_check.init_app(app, globals())
 
