@@ -1,0 +1,39 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Set up my home{% endblock %}
+{% block homeowner_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Welcome</div>
+    <h1 class="ylh-page-hd__title">Set up your home</h1>
+    <p class="ylh-page-hd__sub">It takes about a minute, and you can change any of it later.</p>
+  </div>
+  {% if team %}
+  <div class="tm-card">
+    {% for role, p in team.items() %}
+    <div class="tm-person" style="{{ 'margin-top:.8rem;' if not loop.first }}">
+      <div class="tm-avatar">{% set ph = get_professional_photo_url(p.photo) if p.photo else None %}{% if ph %}<img src="{{ ph }}" alt="">{% else %}{{ (p.name or '?')[:1] }}{% endif %}</div>
+      <div><b>{{ p.name }}</b><span>{{ 'Your agent' if role == 'agent' else 'Your lender' }}{% if p.brokerage %} &middot; {{ p.brokerage }}{% endif %}</span></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <form method="post" class="tm-form">
+    <div class="tm-card">
+      <label for="address" style="margin-top:0;">Your home address</label>
+      <input id="address" type="text" name="address" maxlength="250" value="{{ address }}" placeholder="123 Main Street, Shawnee, KS" autocomplete="street-address">
+      <label for="move_in_date">Move-in date</label>
+      <input id="move_in_date" type="date" name="move_in_date" value="{{ move_in }}">
+    </div>
+    <div class="tm-card">
+      <h2>What does your home have?</h2>
+      <p>This helps us send the right reminders, like when to protect outdoor faucets before a freeze.</p>
+      <div class="tm-row"><input type="checkbox" id="of" name="outdoor_faucets" {{ 'checked' if d.outdoor_faucets }}><label class="tm-lbl" for="of" style="margin:0;">Outdoor faucets</label></div>
+      <div class="tm-row"><input type="checkbox" id="sp" name="sprinkler" {{ 'checked' if d.sprinkler }}><label class="tm-lbl" for="sp" style="margin:0;">A sprinkler system</label></div>
+      <div class="tm-row"><input type="checkbox" id="fp" name="fireplace" {{ 'checked' if d.fireplace }}><label class="tm-lbl" for="fp" style="margin:0;">A fireplace</label></div>
+      <div class="tm-row"><input type="checkbox" id="sm" name="sump_pump" {{ 'checked' if d.sump_pump }}><label class="tm-lbl" for="sm" style="margin:0;">A sump pump</label></div>
+      <div class="tm-btns"><button class="tm-btn" type="submit">Save and continue</button></div>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}My Team{% endblock %}
+{% block homeowner_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">The people helping with your home</div>
+    <h1 class="ylh-page-hd__title">My Team</h1>
+    <p class="ylh-page-hd__sub">Your agent and your lender, one tap away.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+
+  {% for role, p in team.items() %}
+  <div class="tm-card">
+    <div class="tm-person">
+      <div class="tm-avatar">{% set ph = get_professional_photo_url(p.photo) if p.photo else None %}{% if ph %}<img src="{{ ph }}" alt="">{% else %}{{ (p.name or '?')[:1] }}{% endif %}</div>
+      <div><b>{{ p.name }}</b><span>{{ 'Your agent' if role == 'agent' else 'Your lender' }}{% if p.brokerage %} &middot; {{ p.brokerage }}{% endif %}</span></div>
+    </div>
+    <div class="tm-btns">
+      <a class="tm-btn" href="{{ url_for('team.home_thread', pro_id=p.id) }}">{{ 'Message my agent' if role == 'agent' else 'Message my lender' }}{% if p.unread %} <span class="tm-badge">{{ p.unread }}</span>{% endif %}</a>
+      {% if role == 'lender' %}<a class="tm-btn alt" href="{{ url_for('team.ask_lender') }}">Ask my lender</a>{% endif %}
+      {% if p.phone %}<a class="tm-btn alt" href="tel:{{ p.phone }}">Call</a>{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+  {% if not team %}
+  <div class="tm-card" style="text-align:center;"><p>You are not connected to an agent or lender yet. When someone sends you their invite link, they will show up here.</p></div>
+  {% elif 'lender' not in team %}
+  <div class="tm-card"><h2>Want a lender on your team?</h2><p>If your lender sends you their invite link, open it and they will appear here, ready for you to message.</p></div>
+  {% endif %}
+</div>
+{% endblock %}

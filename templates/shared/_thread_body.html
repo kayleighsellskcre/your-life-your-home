@@ -1,0 +1,26 @@
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label"><a href="{{ back_url }}" style="color:inherit;">&larr; Back</a></div>
+    <h1 class="ylh-page-hd__title">{{ pro.name }}</h1>
+    {% if pro.brokerage %}<p class="ylh-page-hd__sub">{{ pro.brokerage }}</p>{% endif %}
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+  <div class="tm-card">
+    {% for m in messages %}
+    <div class="tm-msg {{ 'mine' if m.mine }}">{{ m.body }}
+      {% if m.scenario %}<div class="tm-sc"><b>{{ m.scenario.kind_label }}</b>
+        {% for label, val in m.scenario.fields %}<div><span>{{ label }}</span><span>{{ val }}</span></div>{% endfor %}
+        {% if m.scenario.note %}<p style="margin:.4rem 0 0;color:#3A2518;">{{ m.scenario.note }}</p>{% endif %}</div>{% endif %}
+      <small>{{ 'You' if m.mine else pro.name }} &middot; {{ m.when }}</small></div>
+    {% else %}<p>No messages yet. Say hello below.</p>{% endfor %}
+  </div>
+  <div class="tm-card tm-form">
+    <form method="post" action="{{ post_url }}">
+      <label for="body">Your message</label>
+      <textarea id="body" name="body" maxlength="2000" required></textarea>
+      <div class="tm-btns"><button class="tm-btn" type="submit">Send</button>
+        {% if is_lender %}<a class="tm-btn alt" href="{{ url_for('team.ask_lender') }}">Share my numbers</a>{% endif %}</div>
+    </form>
+  </div>
+</div>

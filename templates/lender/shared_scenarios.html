@@ -1,0 +1,27 @@
+{% extends "lender/layout.html" %}
+{% block title %}Shared Scenarios{% endblock %}
+{% block lender_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">From your clients</div>
+    <h1 class="ylh-page-hd__title">Shared Scenarios</h1>
+    <p class="ylh-page-hd__sub">Payment and refinance questions your clients chose to share with you. You only see the numbers they ticked.</p>
+  </div>
+  {% for it in items %}
+  <div class="tm-card">
+    <div style="display:flex;justify-content:space-between;gap:.8rem;align-items:center;">
+      <div><b style="color:#3A2518;">{{ it.client }}</b><div style="color:#7A6855;font-size:.85rem;">{{ it.kind_label }} &middot; {{ it.when }}</div></div>
+      {% if it.new %}<span class="tm-badge">New</span>{% endif %}
+    </div>
+    <div class="tm-sc" style="background:#F6EFE4;">
+      {% for label, val in it.fields %}<div><span>{{ label }}</span><span>{{ val }}</span></div>{% else %}<span style="color:#7A6855;font-size:.9rem;">No numbers were shared, just a note.</span>{% endfor %}
+    </div>
+    {% if it.note %}<p style="color:#3A2518;white-space:pre-wrap;">{{ it.note }}</p>{% endif %}
+    <div class="tm-btns"><a class="tm-btn" href="{{ url_for('team.pro_thread', homeowner_id=it.homeowner_id) }}">Reply</a></div>
+  </div>
+  {% else %}
+  <div class="tm-card" style="text-align:center;"><p>Nothing shared yet. When a client chooses to share a payment or refinance scenario with you, it shows up here.</p></div>
+  {% endfor %}
+</div>
+{% endblock %}

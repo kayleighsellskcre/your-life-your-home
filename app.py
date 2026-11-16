@@ -3072,12 +3072,12 @@ def signup():
             if kept_existing and not relationships_created:
                 flash("Welcome back! You are still connected with the agent or lender who set you up.", "success")
             elif referral_token_from_form == "default":
-                flash("Welcome! You've been connected to Kayleigh Biggs at Worth Clark Realty.", "success")
+                flash(f"Welcome! You are connected to {_portal.team_blurb(agent_id, lender_id) or 'your agent'}.", "success")
             else:
                 if relationships_created and crm_contacts_created:
-                    flash("Welcome! You've been connected to your professional team and added to their CRM.", "success")
+                    flash(f"Welcome! You are connected to {_portal.team_blurb(agent_id, lender_id) or 'your professional team'}.", "success")
                 elif relationships_created:
-                    flash("Welcome! You've been connected to your professional team.", "success")
+                    flash(f"Welcome! You are connected to {_portal.team_blurb(agent_id, lender_id) or 'your professional team'}.", "success")
                 else:
                     flash("Your account is ready, but we could not connect you to your agent yet. Please reach out and we will fix it right away.", "error")
 
@@ -3095,9 +3095,12 @@ def signup():
             flash("Account created! Welcome to Your Life Your Home.", "success")
         
         # Save email to localStorage (will be handled by JavaScript)
-        response = redirect(url_for("agent_dashboard") if role == "agent"
-                           else url_for("lender_dashboard") if role == "lender"
-                           else url_for("homeowner_overview"))
+        # A homeowner who arrived through their agent's or lender's personal link goes straight to setting up their home
+        came_from_pro = referral_token_from_form not in (None, "", "default")
+        response = redirect(url_for("portal.agent_my_clients") if role == "agent"
+                           else url_for("lender_clients") if role == "lender"
+                           else url_for("portal.setup") if came_from_pro
+                           else url_for("portal.my_home"))
         
         # Set cookie to trigger JavaScript to save email
         response.set_cookie("save_email", email, max_age=365*24*60*60)
@@ -3185,9 +3188,9 @@ def login():
             print(f"[LOGIN] last_login update skipped: {_e}")
 
         redirect_map = {
-            "homeowner": url_for("homeowner_overview"),
-            "agent": url_for("agent_dashboard"),
-            "lender": url_for("lender_dashboard")
+            "homeowner": url_for("portal.my_home"),
+            "agent": url_for("portal.agent_my_clients"),
+            "lender": url_for("lender_clients")
         }
         redirect_url = redirect_map.get(user_role, url_for("index"))
 
@@ -3212,7 +3215,7 @@ def _finish_login(uid, name, role, remember=False):
         c.close()
     except Exception as e:
         print(f"[LOGIN] last_login update skipped: {e}")
-    target = {"homeowner": "homeowner_overview", "agent": "agent_dashboard", "lender": "lender_dashboard"}.get(role, "index")
+    target = {"homeowner": "portal.my_home", "agent": "portal.agent_my_clients", "lender": "lender_clients"}.get(role, "index")
     return redirect(url_for(target))
 
 
@@ -4362,6 +4365,10 @@ import email_signature as _email_signature
 _email_signature.init_app(app, get_current_user)
 import public_pages as _public_pages
 _public_pages.init_app(app)
+import team_messages as _team_messages
+_team_messages.init_app(app, get_current_user, globals())
+import portal as _portal
+_portal.init_app(app, get_current_user, globals())
 import email_check as _email_check
 _email_check.init_app(app, globals())
 

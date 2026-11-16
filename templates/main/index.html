@@ -368,7 +368,7 @@
   <div class="hero-image-side{% if hero_photos %} has-photo{% endif %}{% if hero_photos|length > 1 %} has-slides{% endif %}">
     {% if hero_photos %}
     {% for p in hero_photos %}
-    <img class="hero-photo{% if loop.first %} is-active{% endif %}" src="{{ url_for('static', filename=p) }}" alt="{% if loop.first %}Your Life, Your Home by Kayleigh Biggs: a warm, sunlit home interior{% endif %}"{% if loop.first %} fetchpriority="high"{% else %} loading="lazy" aria-hidden="true"{% endif %} />
+    <img class="hero-photo{% if loop.first %} is-active{% endif %}" src="{{ url_for('static', filename=p) }}" alt="{% if loop.first %}Your Life, Your Home: a warm, sunlit home interior{% endif %}"{% if loop.first %} fetchpriority="high"{% else %} loading="lazy" aria-hidden="true"{% endif %} />
     {% endfor %}
     {% if hero_photos|length > 1 %}
     <script>

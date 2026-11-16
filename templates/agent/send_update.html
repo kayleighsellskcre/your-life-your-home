@@ -1,0 +1,48 @@
+{% extends "agent/layout.html" %}
+{% block title %}Send an Update{% endblock %}
+{% block agent_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Stay in touch</div>
+    <h1 class="ylh-page-hd__title">Send an Update</h1>
+    <p class="ylh-page-hd__sub">Pick a ready-made note, change anything you like, and choose who gets it. Nothing goes out until you press Send.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+  <form method="post" action="{{ url_for('portal.send_update_go') }}" class="tm-form">
+    <div class="tm-card">
+      <h2>1. Pick a note</h2>
+      <div class="tm-btns" id="chips">
+        {% for k, o in options.items() %}<button type="button" class="tm-btn {{ '' if loop.first else 'alt' }}" data-k="{{ k }}">{{ o.label }}</button>{% endfor %}
+      </div>
+      <label for="subject">Subject</label><input id="subject" type="text" name="subject" maxlength="200" value="{{ subject }}" required>
+      <label for="message">Message (each name replaces {first})</label><textarea id="message" name="message" maxlength="5000" style="min-height:14rem !important;height:14rem;" required>{{ body }}</textarea>
+      <p style="margin-top:.5rem;">Want it sent only when the forecast is cold? Use <a href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>.</p>
+    </div>
+    <div class="tm-card">
+      <h2>2. Who should get it?</h2>
+      <div style="display:flex;gap:1rem;font-size:.85rem;margin-bottom:.3rem;"><a href="#" id="all">Select all</a><a href="#" id="none">Select none</a></div>
+      {% for p in people %}
+      <div class="tm-row"><input type="checkbox" name="who" value="{{ p.key }}" id="w{{ loop.index }}" {{ 'checked' if p.ok }} {{ 'disabled' if not p.ok }}>
+        <label class="tm-lbl" for="w{{ loop.index }}" style="margin:0;">{{ p.name }}<span style="display:block;font-weight:400;color:#7A6855;font-size:.82rem;">{{ p.email }}{% if not p.ok %} &middot; opted out{% endif %}</span></label></div>
+      {% else %}<p>No clients with an email yet. Invite one from My Clients.</p>{% endfor %}
+      <div class="tm-btns"><button class="tm-btn" type="submit">Send</button></div>
+    </div>
+  </form>
+</div>
+<script>
+(function () {
+  var opts = {{ options|tojson }};
+  document.querySelectorAll('#chips button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var o = opts[b.dataset.k];
+      document.getElementById('subject').value = o.subject; document.getElementById('message').value = o.body;
+      document.querySelectorAll('#chips button').forEach(function (x) { x.classList.toggle('alt', x !== b); });
+    });
+  });
+  function setAll(v) { document.querySelectorAll('input[name=who]:not(:disabled)').forEach(function (c) { c.checked = v; }); }
+  document.getElementById('all').addEventListener('click', function (e) { e.preventDefault(); setAll(true); });
+  document.getElementById('none').addEventListener('click', function (e) { e.preventDefault(); setAll(false); });
+})();
+</script>
+{% endblock %}

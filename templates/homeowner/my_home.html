@@ -1,0 +1,42 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}My Home{% endblock %}
+{% block homeowner_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">{% if team.agent %}Your agent: {{ team.agent.name }}{% if team.agent.brokerage %}, {{ team.agent.brokerage }}{% endif %}{% else %}Welcome home{% endif %}</div>
+    <h1 class="ylh-page-hd__title">My Home</h1>
+    <p class="ylh-page-hd__sub">{{ address or 'Your home, all in one calm place.' }}</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+
+  <div class="tm-card">
+    <h2>Next up for your home</h2>
+    {% for title, why in nexts %}
+    <div class="tm-row"><div class="tm-lbl">{{ title }}<span style="display:block;font-weight:400;color:#7A6855;font-size:.85rem;">{{ why }}</span></div></div>
+    {% endfor %}
+  </div>
+
+  <div class="tm-card">
+    <h2>Saved home details</h2>
+    {% if address or d.move_in_nice or d.sprinkler or d.fireplace or d.sump_pump %}
+    <div class="tm-row"><div class="tm-lbl">Address<span style="display:block;font-weight:400;color:#7A6855;">{{ address or 'Not added yet' }}</span></div></div>
+    <div class="tm-row"><div class="tm-lbl">Moved in<span style="display:block;font-weight:400;color:#7A6855;">{{ d.move_in_nice or 'Not added yet' }}</span></div></div>
+    <div class="tm-row"><div class="tm-lbl">Home features<span style="display:block;font-weight:400;color:#7A6855;">{% set f = [] %}{% if d.outdoor_faucets %}{% set _ = f.append('Outdoor faucets') %}{% endif %}{% if d.sprinkler %}{% set _ = f.append('Sprinkler system') %}{% endif %}{% if d.fireplace %}{% set _ = f.append('Fireplace') %}{% endif %}{% if d.sump_pump %}{% set _ = f.append('Sump pump') %}{% endif %}{{ f|join(', ') or 'None added yet' }}</span></div></div>
+    {% else %}<p>Tell us a little about your home so we can send only what is useful to you.</p>{% endif %}
+    <div class="tm-btns"><a class="tm-btn" href="{{ url_for('portal.setup') }}">{{ 'Edit my home details' if address else 'Set up my home' }}</a></div>
+  </div>
+
+  <div class="tm-card">
+    <h2>Documents</h2>
+    {% for x in docs %}<div class="tm-row"><div class="tm-lbl">{{ x.name or x.file_name or 'Document' }}{% if x.category %}<span style="display:block;font-weight:400;color:#7A6855;font-size:.85rem;">{{ x.category }}</span>{% endif %}</div></div>
+    {% else %}<p>Keep your closing papers, warranties and manuals here, safe and easy to find.</p>{% endfor %}
+    <div class="tm-btns"><a class="tm-btn alt" href="{{ url_for('homeowner_upload_documents') }}">{{ 'See all and add more' if docs else 'Add a document' }}</a></div>
+  </div>
+
+  <details class="tm-card">
+    <summary style="cursor:pointer;font-weight:700;color:#3A2518;">More for my home</summary>
+    <div style="margin-top:.6rem;">{% for label, href in more %}<a class="tm-row" href="{{ href }}" style="text-decoration:none;color:#6B4630;font-weight:700;">{{ label }}</a>{% endfor %}</div>
+  </details>
+</div>
+{% endblock %}

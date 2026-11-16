@@ -1,0 +1,28 @@
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Your clients</div>
+    <h1 class="ylh-page-hd__title">Messages</h1>
+    <p class="ylh-page-hd__sub">Conversations with your clients. A client can write to you from their My Team page.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+  <div class="tm-card tm-list">
+    <h2>Conversations</h2>
+    {% for t in threads %}
+    <a class="tm-thread" href="{{ url_for('team.pro_thread', homeowner_id=t.homeowner_id) }}">
+      <div><b>{{ t.name }}</b><span class="s">{{ 'You: ' if t.you }}{{ t.snippet }}</span></div>
+      <div style="text-align:right;white-space:nowrap;"><span class="s">{{ t.when }}</span>{% if t.unread %}<span class="tm-badge">{{ t.unread }}</span>{% endif %}</div>
+    </a>
+    {% else %}<p>No messages yet. When a client writes to you, it shows up here. You can also start one below.</p>{% endfor %}
+  </div>
+  {% if clients %}
+  <div class="tm-card tm-form">
+    <h2>Message a client</h2>
+    <form method="get" onsubmit="var s=this.querySelector('select'); if(!s.value){return false;} window.location='{{ url_for('team.pro_messages') }}/'+s.value; return false;">
+      <label for="who" style="margin-top:0;">Choose a client</label>
+      <select id="who"><option value="">Choose...</option>{% for c in clients %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select>
+      <div class="tm-btns"><button class="tm-btn alt" type="submit">Open conversation</button></div>
+    </form>
+  </div>
+  {% endif %}
+</div>

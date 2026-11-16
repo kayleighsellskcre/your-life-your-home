@@ -1,0 +1,37 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}Ask my lender{% endblock %}
+{% block homeowner_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label"><a href="{{ url_for('team.my_team') }}" style="color:inherit;">&larr; My Team</a></div>
+    <h1 class="ylh-page-hd__title">Ask my lender</h1>
+    <p class="ylh-page-hd__sub">Share a payment or refinance question with {{ lender.name }}. You pick exactly which numbers to share.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+  <form method="post" class="tm-form">
+    <div class="tm-card">
+      <h2>What would you like help with?</h2>
+      <label for="kind">Type</label>
+      <select id="kind" name="kind">{% for k, v in kinds.items() %}<option value="{{ k }}">{{ v }}</option>{% endfor %}</select>
+    </div>
+    <div class="tm-card">
+      <h2>Which numbers should I share?</h2>
+      <p>Tick a number to share it. Anything you leave unticked stays private.</p>
+      {% for key, label in fields %}
+      <div class="tm-row">
+        <input type="checkbox" id="s_{{ key }}" name="share_{{ key }}" value="1" {{ 'checked' if prefill.get(key) }}>
+        <label class="tm-lbl" for="s_{{ key }}" style="margin:0;">{{ label }}</label>
+        <input type="text" inputmode="decimal" name="{{ key }}" value="{{ prefill.get(key, '') }}" aria-label="{{ label }}" placeholder="0">
+      </div>
+      {% endfor %}
+      <div class="tm-secure">Only shared with your lender.</div>
+    </div>
+    <div class="tm-card">
+      <label for="note" style="margin-top:0;">Anything you would like them to know? (optional)</label>
+      <textarea id="note" name="note" maxlength="2000" placeholder="I am wondering if it makes sense to refinance this winter."></textarea>
+      <div class="tm-btns"><button class="tm-btn" type="submit">Share with my lender</button></div>
+    </div>
+  </form>
+</div>
+{% endblock %}
