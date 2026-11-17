@@ -208,7 +208,7 @@
  {% else %}<div class="inviter-photo inviter-initial" aria-hidden="true">{{ inviter.name[:1] }}</div>{% endif %}
  <div class="inviter-text">
  <p class="inviter-kicker">{{ inviter.name }} invited you</p>
- <p class="inviter-sub">{% if inviter.brokerage %}{{ inviter.brokerage }} · {% endif %}Your {{ 'agent' if inviter.role == 'agent' else 'loan officer' }}</p>
+ <p class="inviter-sub">{% if inviter.brokerage %}{{ inviter.brokerage }} · {% endif %}Your {{ 'agent' if inviter.role == 'agent' else 'lender' }}</p>
  </div>
  </div>
  {% if inviter.bio %}<p class="inviter-bio">&ldquo;{{ inviter.bio }}&rdquo;</p>{% endif %}

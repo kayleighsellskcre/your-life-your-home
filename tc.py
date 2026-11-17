@@ -58,7 +58,7 @@ SECTIONS = [
         ("buyer_title_contact", "Their phone and email", "text", ""),
         ("seller_title", "Seller's title company", "text", ""),
         ("seller_title_contact", "Their contacts (one per line)", "area", ""),
-        ("lender", "Lender and loan officer", "text", "Name | Company"),
+        ("lender", "Lender", "text", "Name | Company"),
         ("loan_type", "Loan type", "text", "Conventional"),
         ("lender_contact", "Lender phone and email", "text", ""),
     ]),
