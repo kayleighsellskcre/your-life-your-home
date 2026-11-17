@@ -335,7 +335,6 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
         extras=extras,
         recent_items=recent_items,
         snapshot=snapshot,
-        cloud_cma_url=CLOUD_CMA_URL,
         professionals=professionals,
         homeowner=homeowner_user,
         viewing_as_professional=viewing_as_professional,

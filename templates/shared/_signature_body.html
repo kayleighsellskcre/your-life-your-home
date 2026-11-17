@@ -47,6 +47,11 @@
     </form>
     {% endif %}
   </div>
+  <div class="sg-card" id="test">
+    <h2>Send myself a test</h2>
+    <p>Not sure it works? We will send one test email to your own address, the same way your client emails go out.</p>
+    <form method="post" action="{{ url_for('email_signature.send_test') }}"><button class="sg-btn" type="submit">Send me a test email</button></form>
+  </div>
   <div class="sg-card">
     <h2>How it will look</h2>
     <div class="sg-prev">Hi Sam,<br><br>Just a quick note to say hello and see how the house is treating you.

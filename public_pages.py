@@ -67,8 +67,8 @@ def _legal(key):
 
 def pricing():
     try:
-        from stripe_payments import SUBSCRIPTION_TIERS
-        tiers = [dict(t, key=k) for k, t in SUBSCRIPTION_TIERS.items()]
+        from stripe_payments import live_tiers
+        tiers = [dict(t, key=k) for k, t in live_tiers().items()]
     except Exception:
         tiers = []
     return render_template("main/pricing.html", tiers=tiers)

@@ -232,7 +232,39 @@ def sender_remove():
     return redirect(url_for("email_signature.signature_page") + "#sender")
 
 
-def init_app(app, get_current_user):
-    _H.update(get_current_user=get_current_user)
+@bp.route("/email-signature/test", methods=["POST"])
+def send_test():
+    """Send one test email to the person's own account address, exactly the way their client emails go out."""
+    import time
+    from flask import session
+    u = _pro()
+    if not u:
+        return redirect(url_for("login", role="agent"))
+    back = redirect(url_for("email_signature.signature_page") + "#test")
+    addr = (u.get("email") or "").strip()
+    if not addr:
+        flash("Your account has no email address to send the test to.", "error")
+        return back
+    if time.time() - session.get("sig_test_at", 0) < 30:
+        flash("Please wait a few seconds before sending another test.", "error")
+        return back
+    session["sig_test_at"] = time.time()
+    ns = _H["ns"]
+    body = ("Hi,\n\nThis is a test from Your Life, Your Home. It shows how an email to one of your clients will look, with your name and "
+            "your signature at the bottom.\n\nIf you can read this, sending works.\n\n" + (u.get("name") or ""))
+    try:
+        ok = ns["send_reminder_email"](addr, "Test email from Your Life, Your Home", body, **ns["pro_sender"](u["id"]))
+    except Exception as exc:
+        ok, ns["_EMAIL_LAST"]["detail"] = False, str(exc)[:160]
+    if ok:
+        flash(f"Test sent to {addr}. Check your inbox and your spam folder. Look at the name it comes from and the signature at the bottom.", "success")
+    else:
+        why = (ns["_EMAIL_LAST"].get("detail") or "").strip()
+        flash("The test email did not go out." + (f" {why}" if why else " Email may not be switched on yet."), "error")
+    return back
+
+
+def init_app(app, get_current_user, ns=None):
+    _H.update(get_current_user=get_current_user, ns=ns or {})
     ensure_tables()
     app.register_blueprint(bp)

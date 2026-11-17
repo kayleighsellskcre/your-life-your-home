@@ -874,10 +874,6 @@ def _dbg(*args, **kwargs):
 
 # ---------------- GLOBAL BRAND CONFIG ----------------
 FRONT_BRAND_NAME = "Your Life, Your Home"
-CLOUD_CMA_URL = os.environ.get(
-    "CLOUD_CMA_URL",
-    "https://app.cloudcma.com/api_widget/0183b47b7401642c6ec736103095ebbb/show?post_url=https://app.cloudcma.com&source_url=ua",
-)
 BASE_DIR = Path(__file__).resolve().parent
 
 # Homeowner document storage
@@ -2497,7 +2493,6 @@ def index():
     return render_template(
         "main/index.html",
         brand_name=FRONT_BRAND_NAME,
-        cloud_cma_url=CLOUD_CMA_URL,
         hero_photos=_hero_photos(),
     )
 
@@ -4362,7 +4357,7 @@ _followups.init_app(app, get_current_user)
 import events as _events
 _events.init_app(app, get_current_user)
 import email_signature as _email_signature
-_email_signature.init_app(app, get_current_user)
+_email_signature.init_app(app, get_current_user, globals())
 import public_pages as _public_pages
 _public_pages.init_app(app)
 import home_value as _home_value

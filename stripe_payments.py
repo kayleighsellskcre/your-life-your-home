@@ -48,6 +48,35 @@ SUBSCRIPTION_TIERS = {
     }
 }
 
+_PRICE_CACHE = {"at": 0, "data": {}}
+
+
+def live_tiers(max_age=3600):
+    """The plans with prices read from Stripe (cached for an hour). Any plan Stripe cannot answer for keeps the price written above."""
+    import time
+    tiers = {k: dict(v) for k, v in SUBSCRIPTION_TIERS.items()}
+    if time.time() - _PRICE_CACHE["at"] > max_age:
+        found = {}
+        if os.environ.get("STRIPE_SECRET_KEY"):
+            try:
+                s = get_stripe()
+                for key, tier in SUBSCRIPTION_TIERS.items():
+                    pid = os.environ.get(tier.get("price_env_key", ""), "")
+                    if not pid:
+                        continue
+                    p = s.Price.retrieve(pid)
+                    if p and p.get("unit_amount") is not None and p.get("active", True):
+                        amt = p["unit_amount"]
+                        every = (p.get("recurring") or {}).get("interval") or "month"
+                        found[key] = f"${amt // 100}" + (f".{amt % 100:02d}" if amt % 100 else "") + ("/mo" if every == "month" else "/yr" if every == "year" else f"/{every}")
+            except Exception as exc:
+                print(f"[stripe] price lookup failed: {exc}")
+        _PRICE_CACHE.update(at=time.time(), data=found)
+    for key, text in _PRICE_CACHE["data"].items():
+        tiers[key]["price_display"] = text
+    return tiers
+
+
 def create_checkout_session(user_id, user_email, user_name, tier, role, success_url, cancel_url):
     """
     Create a Stripe Checkout session for a subscription.
