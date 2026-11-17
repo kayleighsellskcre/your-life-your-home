@@ -139,7 +139,7 @@ ok(sent == [], "someone who is not this agent's client cannot be emailed")
 # ---- 6. lender and homeowner menus keep everything ----
 t = l.get("/lender/clients").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
-for item in ("Weekly Planner", "Borrower CRM", "Loan Pipeline", "Refinance Opportunities", "Events", "Frost Alert", "Marketing Hub", "Checklists and Refinance Tools", "Key Contacts"):
+for item in ("Weekly Planner", "CRM", "Loan Pipeline", "Refinance Opportunities", "Events", "Frost Alert", "Marketing Hub", "Checklists and Refinance Tools", "Key Contacts"):
     ok(f">{item}<" in menu, f"lender menu: '{item}' is still there, under More")
 t = h.get("/homeowner/my-home").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")

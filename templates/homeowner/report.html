@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Your Home Report{% endblock %}
+{% block title %}Home Report{% endblock %}
 {% block content %}
 <style>
   .hr-wrap { max-width: 880px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -20,8 +20,8 @@
 </style>
 <div class="hr-wrap">
   <div class="ylh-page-hd">
-    <div class="ylh-page-hd__label">Value &amp; Equity</div>
-    <h1 class="ylh-page-hd__title">Your Home Report</h1>
+    <div class="ylh-page-hd__label">Home Value</div>
+    <h1 class="ylh-page-hd__title">Home Report</h1>
     <p class="ylh-page-hd__sub">{{ snap.address or 'Your home' }}{% if snap.address %}<br>{% endif %}Prepared {{ today }}</p>
   </div>
 

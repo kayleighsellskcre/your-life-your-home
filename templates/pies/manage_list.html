@@ -4,7 +4,7 @@
 {% include "pies/_style.html" %}
 <div class="pie-wrap">
   <p class="pie-kicker">Client events</p>
-  <h1 class="pie-h1">Holiday pie pickup</h1>
+  <h1 class="pie-h1">Holiday Pie Pickup</h1>
   <p class="pie-sub">Set up your pickup days, times and places, then share one link. Clients choose a spot, tell you which pie they want, or let you know they'd like one at another time or no pie this year.</p>
 
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}

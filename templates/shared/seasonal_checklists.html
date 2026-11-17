@@ -4,6 +4,7 @@
 {% extends "lender/layout.html" %}
 {% endif %}
 
+{% block title %}Seasonal Checklists{% endblock %}
 {% block agent_content %}{% block lender_content %}
 <style>
 #sc-wrap{font-family: var(--font-body);color:#3D2E24;background:#F9F7F2;min-height:80vh;}
@@ -89,7 +90,7 @@
 
  <div class="sc-header">
  <div class="sc-header__tag">{{ 'Agent Resources' if role == 'agent' else 'Lender Resources' }}</div>
- <h1 class="sc-header__title">Seasonal Homeowner Checklists</h1>
+ <h1 class="sc-header__title">Seasonal Checklists</h1>
  <p class="sc-header__sub">
  Beautifully designed, print-ready homeowner care guides for every season. Share with your clients on social, by email, or hand them a printed copy, a thoughtful touch that keeps you top of mind all year long.
  </p>

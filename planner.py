@@ -24,7 +24,7 @@ _COMMON_TAIL = [
 
 PLANS = {
     "agent": {
-        "title": "Weekly Success Planner",
+        "title": "Weekly Planner",
         "sub": "Small, steady habits that fill your pipeline. Check them off as you go.",
         "themes": ["Top VIPs (call 15)", "Client updates", "Hot and old leads", "Past clients (call 30)", "New business partners (call 10)"],
         "activities": [
@@ -39,7 +39,7 @@ PLANS = {
         ],
     },
     "lender": {
-        "title": "Weekly Success Planner",
+        "title": "Weekly Planner",
         "sub": "Small, steady habits that keep referrals and applications coming in. Check them off as you go.",
         "themes": ["Top referral partners (call 15)", "Active loan updates", "Hot and old leads", "Past borrowers (call 30)", "New agent partners (call 10)"],
         "activities": [

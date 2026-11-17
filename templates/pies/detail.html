@@ -3,7 +3,7 @@
 {% block content %}
 {% include "pies/_style.html" %}
 <div class="pie-wrap">
-  <p class="pie-kicker"><a href="{{ url_for('pies.manage_list') }}" style="color:inherit;">Holiday pie pickup</a></p>
+  <p class="pie-kicker"><a href="{{ url_for('pies.manage_list') }}" style="color:inherit;">Holiday Pie Pickup</a></p>
   <h1 class="pie-h1">{{ ev.title }} <span class="pie-pill {{ 'grey' if closed else '' }}" style="vertical-align:middle;">{{ 'Closed' if closed else 'Open' }}</span></h1>
 
   {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="pie-flash {{ 'error' if cat == 'error' else 'success' }}">{{ m }}</div>{% endfor %}{% endwith %}
