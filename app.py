@@ -2142,8 +2142,9 @@ def _inject_onboarding():
                 spec = [
                     ("Add your photo and contact info", "lender_settings_profile",
                      "SELECT COUNT(*) FROM user_profiles WHERE user_id=? AND professional_photo IS NOT NULL AND professional_photo<>''"),
-                    ("Add your first borrower", "lender_crm", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=?"),
-                    ("Add a loan", "lender_loans", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=? AND COALESCE(loan_stage, '') <> ''"),
+                    ("Add your people to the CRM", "lender_crm", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=?"),
+                    ("Invite your first homeowner", "lender_clients", "SELECT (SELECT COUNT(*) FROM users WHERE lender_id=?1 AND role='homeowner') + (SELECT COUNT(*) FROM client_invites WHERE pro_id=?1 AND pro_role='lender')"),
+                    ("Add your first loan", "lender_loans", "SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id=? AND COALESCE(loan_stage, '') <> ''"),
                 ]
             else:
                 spec = [
@@ -2401,12 +2402,14 @@ def get_lender_dashboard_metrics(user_id):
     try:
         total = _c.execute("SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id = ?", (user_id,)).fetchone()[0]
         preapproved = _c.execute("SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id = ? AND status = 'preapproval'", (user_id,)).fetchone()[0]
+        # Past borrowers whose loans have closed: the people to keep in touch with. A real count, not a guess.
+        nurture = _c.execute("SELECT COUNT(*) FROM lender_borrowers WHERE lender_user_id = ? AND LOWER(COALESCE(status, '')) = 'closed'", (user_id,)).fetchone()[0]
     finally:
         _c.close()
     return {
         "new_applications": preapproved,
         "loans_in_process": len(loans) if loans else 0,
-        "nurture_contacts": max(total // 2, 0),
+        "nurture_contacts": nurture,
     }
 
 

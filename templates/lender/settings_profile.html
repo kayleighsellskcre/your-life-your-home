@@ -431,6 +431,13 @@
  Set the current market rates that will be displayed to your clients on the Home Value page. 
  <strong>Lender rates take precedence over agent rates.</strong> Update these regularly to keep your clients informed.
  </p>
+ {% set rd = (profile.rates_updated_at|days_since) if profile and profile.rates_updated_at else none %}
+ <p style="font-size:.9rem;margin:-.8rem 0 1.2rem;padding:.5rem .8rem;border-radius:8px;background:{{ '#FFF3E0' if rd is none or rd > 7 else '#F1F5EC' }};color:#4C3929;">
+ {% if rd is none %}These rates have not been confirmed yet. Please check them against today's rates and tap Save.
+ {% elif rd == 0 %}Rates last updated today.
+ {% elif rd > 7 %}Rates last updated {{ rd }} days ago. Your clients can see them, so please check they are still right.
+ {% else %}Rates last updated {{ rd }} day{{ '' if rd == 1 else 's' }} ago.{% endif %}
+ </p>
  
  <div class="form-row">
  <div class="form-group">
@@ -493,6 +500,7 @@
  placeholder="609d2ed47cccc8e5fb0fa47e18bbba4af4a393607881765"
  style="font-family: monospace;"
  >
+ <details style="margin-top:.6rem;"><summary style="cursor:pointer;font-weight:600;color:#7A5238;">Advanced: find your ID and connect loan updates</summary>
  <small>
  <strong>How to get your Homebot Widget ID:</strong><br>
  1. Log into your Homebot account<br>
@@ -506,6 +514,7 @@
  <br><br>
  <strong> Automatic Loan Updates:</strong> To automatically sync loan data when homeowners link their Homebot account, configure your Homebot webhook to point to: <code style="background: white; padding: 0.25rem 0.5rem; border-radius: 3px;">https://itsyourlifeyourhome.com/api/homebot/webhook</code>
  </div>
+ </details>
  </div>
  </div>
 
@@ -555,6 +564,49 @@
 
 </div>
 
+<script>
+/* Settings tabs: Profile, Branding, Links, Rates, Integrations. One form, so Save keeps everything.
+   Without JavaScript every section simply shows. */
+(function () {
+  try {
+    var wrap = document.querySelector('.settings-container');
+    var secs = Array.prototype.slice.call(document.querySelectorAll('.settings-container .settings-section'));
+    var map = [['Photos', 'branding'], ['Invite page photo', 'branding'], ['Client Values', 'integrations'], ['Basic Information', 'profile'],
+               ['Professional Details', 'profile'], ['Company Address', 'profile'], ['Social', 'links'], ['Call & Schedule', 'links'],
+               ['Referral Link', 'links'], ['Market Rates', 'rates'], ['Homebot', 'integrations']];
+    secs.forEach(function (s) {
+      var h = s.querySelector('h2, h3'), t = h ? h.textContent : '';
+      s.dataset.tab = 'profile';
+      map.forEach(function (m) { if (t.indexOf(m[0]) !== -1) s.dataset.tab = m[1]; });
+    });
+    var names = [['profile', 'Profile'], ['branding', 'Branding'], ['links', 'Links'], ['rates', 'Rates'], ['integrations', 'Integrations']];
+    var bar = document.createElement('div');
+    bar.setAttribute('role', 'tablist');
+    bar.style.cssText = 'display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 1.2rem;';
+    function show(k) {
+      secs.forEach(function (s) { s.style.display = s.dataset.tab === k ? '' : 'none'; });
+      Array.prototype.forEach.call(bar.children, function (b) {
+        var on = b.dataset.k === k;
+        b.setAttribute('aria-selected', on);
+        b.style.background = on ? '#8F6244' : '#FFFDFA'; b.style.color = on ? '#fff' : '#4C3929';
+      });
+      try { history.replaceState(null, '', '#' + k); } catch (e) {}
+    }
+    names.forEach(function (n) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.dataset.k = n[0]; b.textContent = n[1]; b.setAttribute('role', 'tab');
+      b.style.cssText = 'border:1px solid rgba(143,98,68,.35);border-radius:99px;padding:.55rem 1.1rem;font-weight:700;cursor:pointer;font-size:.9rem;min-height:44px;';
+      b.addEventListener('click', function () { show(n[0]); });
+      bar.appendChild(b);
+    });
+    var form = document.getElementById('profileForm');
+    wrap.insertBefore(bar, form);
+    var start = (location.hash || '').slice(1);
+    show(names.some(function (n) { return n[0] === start; }) ? start : (location.hash === '#client-values' ? 'integrations' : 'profile'));
+    if (location.hash === '#client-values') show('integrations');
+  } catch (e) { /* if anything goes wrong, every section stays visible */ }
+})();
+</script>
 <script>
 function copyRef(inputId, btn) {
   var el = document.getElementById(inputId);

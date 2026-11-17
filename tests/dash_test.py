@@ -30,7 +30,8 @@ t0 = time.time(); m = A.get_agent_dashboard_metrics(ag); dt = time.time() - t0
 ok(m["new_leads"] == nl and m["followups_today"] == fu, "agent numbers match the old calculation (%d leads, %d follow-ups) in %.3fs" % (nl, fu, dt))
 lm = A.get_lender_dashboard_metrics(ln)
 pre = conn.execute("select count(*) from lender_borrowers where lender_user_id=? and status='preapproval'", (ln,)).fetchone()[0]
-ok(lm["new_applications"] == pre and lm["nurture_contacts"] == 150, "lender numbers right")
+closed = conn.execute("select count(*) from lender_borrowers where lender_user_id=? and status='closed'", (ln,)).fetchone()[0]
+ok(lm["new_applications"] == pre and lm["nurture_contacts"] == closed, "lender numbers right (past borrowers are the ones with closed loans)")
 c = A.app.test_client()
 with c.session_transaction() as s: s["user_id"] = ag; s["role"] = "agent"
 t0 = time.time(); r = c.get("/agent"); print("dashboard %.2fs" % (time.time() - t0)); ok(r.status_code == 200, "agent dashboard loads")

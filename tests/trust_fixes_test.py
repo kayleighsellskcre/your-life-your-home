@@ -127,3 +127,16 @@ ok("1 of 4 done" in t or "2 of 4 done" in t, "inviting a homeowner ticks that st
 t = cn.get("/agent").get_data(as_text=True)
 ok("Seasonal and extras" in t and t.index("Today") < t.index("Seasonal and extras"), "the menu starts with Today and tucks the seasonal extras at the end")
 ok("keep only the one nearest the content" in t, "duplicate messages are collapsed to one")
+
+# ---- round 5: lender and homeowner first day ----
+newl = D.create_user("Leo New", "leo@x.com", gp("password123"), "lender")
+cl = who(newl, "lender")
+t = cl.get("/lender/clients").get_data(as_text=True)
+ok("Invite your first homeowner" in t and "Add your first loan" in t, "a new lender sees a clear Get started card")
+ok("Past Borrowers" in cl.get("/lender").get_data(as_text=True), "the lender dashboard shows a real count of past borrowers")
+ls = cl.get("/lender/settings/profile").get_data(as_text=True)
+ok("Settings tabs" in ls and "Advanced: find your ID" in ls and "not been confirmed" in ls, "lender Settings has tabs, Advanced Homebot steps and a rates date")
+newh = D.create_user("Hannah H", "hannah@x.com", gp("password123"), "homeowner", agent_id=agent)
+ch = who(newh, "homeowner")
+t = ch.get("/homeowner/value/equity-overview").get_data(as_text=True)
+ok("Let's fill this in together" in t or "Let&#39;s fill this in together" in t, "a homeowner with no numbers yet is told what to do first")

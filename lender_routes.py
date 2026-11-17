@@ -1323,6 +1323,8 @@ def lender_settings_profile():
             
             # Get form data
             print(f"LENDER PROFILE: About to save profile with photo={professional_photo}, logo={brokerage_logo}")
+            from database import get_user_profile as _rate_gp
+            _before = _rate_gp(user["id"]) or {}
             profile_id = create_or_update_user_profile(
                 user_id=user["id"],
                 role="lender",
@@ -1357,6 +1359,16 @@ def lender_settings_profile():
                 fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
                 conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
             )
+            try:
+                _after = _rate_gp(user["id"]) or {}
+                _rk = ("va_rate_30yr", "fha_rate_30yr", "conventional_rate_30yr")
+                if any(_before.get(k) != _after.get(k) for k in _rk) or not _before.get("rates_updated_at"):
+                    from database import get_connection as _rc
+                    _c = _rc()
+                    _c.execute("UPDATE user_profiles SET rates_updated_at = ? WHERE user_id = ?", (datetime.now().strftime("%Y-%m-%d"), user["id"]))
+                    _c.commit(); _c.close()
+            except Exception as _e:
+                print(f"[rates] could not record the update date: {_e}")
             flash("Profile updated!", "success")
             return redirect(url_for("lender_settings_profile"))
         except Exception as e:
