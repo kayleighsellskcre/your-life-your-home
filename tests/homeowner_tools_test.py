@@ -34,4 +34,4 @@ t = ce.get("/homeowner/report").get_data(as_text=True); ok("Nothing logged yet" 
 ok("Full Owner" not in ce.get("/homeowner/report").get_data(as_text=True) and "1 Maple" not in ce.get("/homeowner/report").get_data(as_text=True), "another homeowner's report is private")
 cs = A.app.test_client()
 ok("/login" in cs.get("/homeowner/report", follow_redirects=True).request.path, "signed-out visitors go to login")
-m = c.get("/homeowner").get_data(as_text=True); ok("Refinance &amp; Payoff" in m and "Home Report" in m, "both pages are in the menu")
+m = c.get("/homeowner/my-home").get_data(as_text=True); ok("Refinance &amp; Payoff" in m and "Home Report" in m, "both pages are in the menu")

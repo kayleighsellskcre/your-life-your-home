@@ -26,10 +26,14 @@
       <ul>{% for f in t.features %}<li>{{ f }}</li>{% endfor %}</ul></div>
     {% endfor %}
   </div>
+  {% if plan_link %}
+  <div class="pr-btns"><a class="pr-btn" href="{{ plan_link }}">Change my plan</a></div>
+  {% elif not role %}
   <div class="pr-btns">
     <a class="pr-btn" href="{{ url_for('signup', role='agent') }}">Start as an agent</a>
     <a class="pr-btn" href="{{ url_for('signup', role='lender') }}">Start as a lender</a>
   </div>
+  {% endif %}
   <p class="pr-note">Paid plans are billed monthly and securely through Stripe. Manage or cancel any time in Plan &amp; Billing.</p>
 </div>
 {% endblock %}

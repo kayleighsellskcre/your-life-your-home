@@ -146,6 +146,12 @@ def homeowner_overview(homeowner_id: Optional[int] = None):
         session.pop("pending_connect", None)
         return redirect(url_for("connect_with_professional", token=_pending))
 
+    # A homeowner's own overview now lives on My Home
+    if not homeowner_id:
+        _me = get_current_user()
+        if _me and _me.get("role") == "homeowner":
+            return redirect(url_for("portal.my_home"))
+
     # Determine which homeowner to show
     if homeowner_id:
         # Agent/lender viewing a specific homeowner

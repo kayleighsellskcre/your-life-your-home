@@ -22,4 +22,4 @@ lone = D.create_user("Lone", "l@x.com", gp("password123"), "homeowner", agent_id
 c2 = A.app.test_client()
 with c2.session_transaction() as s: s["user_id"] = lone; s["role"] = "homeowner"
 r = c2.get("/homeowner/pros"); ok(r.status_code == 200 and "Best Plumbing" not in r.get_data(as_text=True), "unconnected homeowner gets a friendly empty page")
-ok(b"Trusted Pros" in c.get("/homeowner").data, "menu links to it")
+ok(b"Trusted Pros" in c.get("/homeowner/my-home").data, "menu links to it")

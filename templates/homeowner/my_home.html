@@ -10,6 +10,8 @@
   </div>
   {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
 
+  {% include "homeowner/_overview_parts.html" %}
+
   <div class="tm-card">
     <h2>Next up for your home</h2>
     {% for title, why in nexts %}

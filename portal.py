@@ -118,7 +118,7 @@ def next_up(details, today=None):
 
 
 MORE_HOME_LINKS = [
-    ("Full home overview", "homeowner_overview"), ("Home timeline", "homeowner_home_timeline"), ("Home report", "homeowner_home.home_report"),
+    ("Home timeline", "homeowner_home_timeline"), ("Home report", "homeowner_home.home_report"),
     ("Warranties and appliances", "homeowner_care_warranty_log"), ("Renovation planner", "homeowner_reno_planner"),
     ("Design boards", "homeowner_saved_notes"), ("Care guide", "homeowner_care_maintenance_guide"),
     ("Seasonal checklists", "homeowner_care_seasonal_checklists"), ("Safety and protection", "homeowner_care_home_protection"),
@@ -127,6 +127,46 @@ MORE_HOME_LINKS = [
     ("Loan paths", "homeowner_next_loan_paths"), ("Refinance and payoff", "homeowner_home.refinance_page"),
     ("My buyer profile", "homeowner_next_plan_move"), ("Get help", "homeowner_support_get_help"),
 ]
+
+
+def _overview_data(u):
+    """The useful parts of the old Full home overview: value card, focus and steps, transaction, properties, recent activity."""
+    uid = u["id"]
+    extras = snapshot = active = None
+    recent = []
+    try:
+        from homeowner_home import overview_extras
+        extras = overview_extras(uid)
+    except Exception as e:
+        print(f"[My Home] extras skipped: {e}")
+    try:
+        from database import get_primary_property, get_homeowner_snapshot_for_property
+        prop = get_primary_property(uid)
+        snapshot = get_homeowner_snapshot_for_property(uid, prop.get("id")) if prop else None
+        if snapshot and snapshot.get("value_estimate") and snapshot.get("loan_balance"):
+            snapshot["equity_estimate"] = snapshot["value_estimate"] - snapshot["loan_balance"]
+    except Exception as e:
+        print(f"[My Home] snapshot skipped: {e}")
+    try:
+        em = (u.get("email") or "").lower().strip()
+        conn = _db()
+        try:
+            row = conn.execute("""SELECT *, current_stage AS stage, target_close_date AS close_date FROM transactions
+                   WHERE (homeowner_user_id = ? OR (? <> '' AND lower(client_email) = ?)) AND status = 'active'
+                     AND current_stage NOT IN ('closed','cancelled') ORDER BY created_at DESC LIMIT 1""", (uid, em, em)).fetchone()
+        finally:
+            conn.close()
+        active = dict(row) if row else None
+    except Exception as e:
+        print(f"[My Home] transaction skipped: {e}")
+    try:
+        import automation
+        recent = automation.homeowner_activity(uid, limit=5)
+        for a in recent:
+            a["link_url"] = url_for(a["endpoint"])
+    except Exception as e:
+        print(f"[My Home] activity skipped: {e}")
+    return extras, snapshot, active, recent
 
 
 @bp.route("/homeowner/my-home")
@@ -154,8 +194,10 @@ def my_home():
         except ValueError:
             pass
     more = [(label, url_for(ep)) for label, ep in MORE_HOME_LINKS]
+    extras, snapshot, active_transaction, recent_items = _overview_data(u)
     return render_template("homeowner/my_home.html", d=d, address=(prop or {}).get("address") if prop else "", docs=docs, nexts=next_up(d),
-                           team=pros_for(u["id"]), more=more)
+                           team=pros_for(u["id"]), more=more, extras=extras, snapshot=snapshot, active_transaction=active_transaction,
+                           recent_items=recent_items, homeowner=u)
 
 
 # ───────────────────────── homeowner: set up my home (the closing link lands here) ─────────────────────────

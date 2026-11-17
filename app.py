@@ -333,6 +333,11 @@ _CSRF_EXEMPT_PATHS = ("/stripe/webhook", "/api/homebot/webhook", "/api/lead-inta
 _AREA_HOME = {"agent": "portal.agent_my_clients", "lender": "lender_clients", "homeowner": "portal.my_home"}
 
 
+def _signed_in_home():
+    """Where a signed-in person belongs: their own landing page."""
+    return url_for(_AREA_HOME.get(session.get("role"), "index"))
+
+
 @app.before_request
 def _enforce_area_access():
     """Each area (/agent, /lender, /homeowner) is for signed-in members of that role only."""
@@ -2586,6 +2591,8 @@ def signup():
     For homeowners: Uses referral token if provided, otherwise assigns to default agent (Kayleigh Biggs)
     For agents/lenders: No referral token required
     """
+    if request.method == "GET" and session.get("user_id"):
+        return redirect(_signed_in_home())
     role = request.args.get("role", "homeowner")
     if role not in ("homeowner", "agent", "lender"):
         role = "homeowner"
@@ -3114,6 +3121,8 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Sign in with just an email and password. The account itself says whether this is a homeowner, agent or lender."""
+    if request.method == "GET" and session.get("user_id"):
+        return redirect(_signed_in_home())
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")

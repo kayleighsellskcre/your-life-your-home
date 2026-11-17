@@ -149,4 +149,4 @@ t = lc.post("/frost-alert/check", data={"threshold": "32"}).get_data(as_text=Tru
 ok("Lou Loan" in t and "Cora Cold" not in t, "lenders see only their own clients")
 t = lc.get("/lender").get_data(as_text=True); ok("Frost Alert" in t, "lender menu has the link")
 t = ca.get("/agent").get_data(as_text=True); ok("Frost Alert" in t, "agent menu has the link")
-t = hc.get("/homeowner").get_data(as_text=True); ok("Home Details" in t, "homeowner menu has the link")
+t = hc.get("/homeowner/my-home").get_data(as_text=True); ok("Home Details" in t, "homeowner menu has the link")
