@@ -45,3 +45,10 @@ conn = D.get_connection()
 n = conn.execute("SELECT COUNT(*) FROM home_value_requests").fetchone()[0]
 conn.close()
 ok(n == 2, "both requests are saved")
+
+a = A.app.test_client()
+with a.session_transaction() as s: s["user_id"] = agent; s["role"] = "agent"; s["name"] = "Amy"
+t = a.get("/agent/my-clients").get_data(as_text=True)
+ok("Home value requests (1)" in t and "2 Elm St" in t and "1 Oak St" not in t, "an agent sees only the home value requests sent to them")
+ok("Stay close to every client, without the extra work." in c.get("/agents").get_data(as_text=True), "the For Agents page matches its card")
+ok("Keep in touch long after closing." in c.get("/lenders").get_data(as_text=True), "the For Lenders page matches its card")

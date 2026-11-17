@@ -249,6 +249,13 @@ def agent_my_clients():
         c["move_in"] = moves.get(c["id"]) or ""
         c["phone"] = _clean_phone(phones.get(c["id"]))
         c["sms"] = sms_link(c["phone"], f"Hi {(c.get('name') or '').split(' ')[0] or 'there'}, it's {u.get('name')}. ") if c["phone"] else ""
+    conn = _db()
+    try:
+        conn.execute("""CREATE TABLE IF NOT EXISTS home_value_requests (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id INTEGER, user_id INTEGER,
+            name TEXT, email TEXT, phone TEXT, address TEXT, note TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+        values = [dict(r) for r in conn.execute("SELECT * FROM home_value_requests WHERE agent_id = ? ORDER BY id DESC LIMIT 20", (u["id"],)).fetchall()]
+    finally:
+        conn.close()
     link = _personal_link(u["id"])
     inv_id = request.args.get("invited", type=int)
     just = next((p for p in pending if p["id"] == inv_id), None)
@@ -257,7 +264,7 @@ def agent_my_clients():
         just["text"] = (f"Hi {first}, it's {u.get('name')}. Congratulations on your new home! Here is your personal link to set up your home "
                         f"dashboard. It takes about a minute: {link}")
         just["sms"] = sms_link(_clean_phone(just["phone"]), just["text"]) if just.get("phone") else ""
-    return render_template("agent/my_clients.html", clients=clients, pending=pending, link=link, just=just)
+    return render_template("agent/my_clients.html", clients=clients, pending=pending, link=link, just=just, value_requests=values)
 
 
 @bp.route("/agent/my-clients/invite", methods=["POST"])

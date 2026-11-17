@@ -19,8 +19,8 @@ PAGES = {
     },
     "for_agents": {
         "label": "For agents",
-        "title": "Stay close to every client",
-        "intro": "Be the agent your clients think of first, without the extra work.",
+        "title": "Be the agent clients think of first",
+        "intro": "Stay close to every client, without the extra work.",
         "points": [
             "Invite a client in a minute and set up their home for them.",
             "See who is due for a follow-up, and send a friendly update with a few taps.",
@@ -33,8 +33,8 @@ PAGES = {
     },
     "for_lenders": {
         "label": "For lenders",
-        "title": "Keep in touch long after closing",
-        "intro": "Stay helpful to the homeowners you served, and be there when their next move comes.",
+        "title": "Be there for their next move",
+        "intro": "Keep in touch long after closing.",
         "points": [
             "See which clients could save with a refinance, or have equity to use.",
             "Homeowners can share a payment or refinance scenario with you, privately.",

@@ -35,6 +35,14 @@
     </form>
   </div>
 
+  {% if value_requests %}
+  <div class="tm-card"><h2>Home value requests ({{ value_requests|length }})</h2>
+    {% for v in value_requests %}<div class="tm-row" style="display:block;"><b style="color:#3A2518;">{{ v.address }}</b>
+      <span style="display:block;color:#7A6855;font-size:.85rem;overflow-wrap:anywhere;">{{ v.name }} &middot; {{ v.email }}{% if v.phone %} &middot; {{ v.phone }}{% endif %}</span>
+      {% if v.note %}<span style="display:block;color:#3A2518;font-size:.9rem;margin-top:.2rem;">{{ v.note }}</span>{% endif %}
+      <div class="tm-btns"><a class="tm-btn alt" href="mailto:{{ v.email }}?subject={{ ('About your home at ' ~ v.address)|urlencode }}">Reply</a></div></div>{% endfor %}</div>
+  {% endif %}
+
   {% if pending %}
   <div class="tm-card"><h2>Invited, not signed up yet</h2>
     {% for p in pending %}<div class="tm-row"><div class="tm-lbl">{{ p.name }}<span style="display:block;font-weight:400;color:#7A6855;font-size:.85rem;">{{ p.email }}</span></div>
