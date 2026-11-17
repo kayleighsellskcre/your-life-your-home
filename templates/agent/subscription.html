@@ -493,14 +493,8 @@
  <p class="tier-tagline">Everything you need to grow</p>
  <div class="tier-divider"></div>
  <ul class="feature-list">
- <li><span class="check"></span>Unlimited CRM contacts</li>
- <li><span class="check"></span>Unlimited transactions</li>
- <li><span class="check"></span>AI Concierge with your own name and branding</li>
- <li><span class="check"></span>Full Marketing Hub</li>
- <li><span class="check"></span>Invoices &amp; seasonal checklists</li>
- <li><span class="check"></span>Advanced email templates</li>
- <li><span class="check"></span>Lender partnership features</li>
- <li><span class="check"></span>Priority email support</li>
+ {% for f in tiers.professional.features %}<li><span class="check"></span>{{ f }}</li>
+ {% endfor %}
  </ul>
  <div class="tier-action">
  {% if current_tier == 'professional' %}
@@ -557,7 +551,7 @@
  <!-- Partner Callout -->
  <div class="partner-callout">
  <h3> Partner with Lenders</h3>
- <p>Subscribe to Professional or Elite to team up with lenders on the platform, with co-branding and shared referral tools.</p>
+ <p>Subscribe to Professional to team up with lenders on the platform, with co-branding and shared referral tools.</p>
  </div>
 
  <!-- Promo Code -->

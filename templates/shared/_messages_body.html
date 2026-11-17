@@ -3,7 +3,7 @@
   <div class="ylh-page-hd">
     <div class="ylh-page-hd__label">Your clients</div>
     <h1 class="ylh-page-hd__title">Messages</h1>
-    <p class="ylh-page-hd__sub">Conversations with your clients. A client can write to you from their My Team page.</p>
+    <p class="ylh-page-hd__sub">Conversations with clients who have joined the app. A client can write to you from their My Team page.</p>
   </div>
   {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
   <div class="tm-card tm-list">

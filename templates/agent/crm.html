@@ -704,7 +704,7 @@
 <!-- ── PAGE HEADER ───────────────────────────── -->
 <div class="ylh-page-hd crm-fu">
   <h1 class="ylh-page-hd__title">CRM</h1>
-  <p class="ylh-page-hd__sub">Everyone you care about, in one place.</p>
+  <p class="ylh-page-hd__sub">Everyone you care about, in one place. People who join the app also show up under My Clients.</p>
 </div>
 
 <!-- ── FLASH ─────────────────────────────────── -->
@@ -900,7 +900,7 @@
  </td>
  <td class="c-td c-td--muted" title="{% if contact.address %}{{ contact.address }}{% if contact.city %}, {{ contact.city }}{% endif %}{% if contact.state %} {{ contact.state }}{% endif %}{% if contact.zip_code %} {{ contact.zip_code }}{% endif %}{% endif %}">
  {% if contact.address or contact.city %}
- {{ contact.address or '' }}{% if contact.city %}, {{ contact.city }}{% endif %}{% if contact.state %} {{ contact.state }}{% endif %}{% if contact.zip_code %} {{ contact.zip_code }}{% endif %}
+ {% set place = [contact.city, ((contact.state or '') ~ ' ' ~ (contact.zip_code or ''))|trim]|select|join(', ') %}{{ [contact.address, place]|select|join(', ') }}
  {% else %} - {% endif %}
  </td>
  <td class="c-td c-td--muted">{{ contact.birthday or '-' }}</td>

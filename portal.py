@@ -461,6 +461,22 @@ def _update_text(key):
     return subject, (body if body is not None else draft_message())
 
 
+def _left_out(agent_id):
+    """CRM contacts who have an email but are not on the list, with the plain reason why (so nobody wonders where they went)."""
+    from care_alerts import people_for
+    from database import list_agent_contacts
+    listed = {p["email"].strip().lower() for p in people_for("agent", agent_id) if p["email"]}
+    out, seen = [], set()
+    for c in list_agent_contacts(agent_id):
+        c = dict(c)
+        email = (c.get("email") or "").strip()
+        if not email or email.lower() in listed or email.lower() in seen:
+            continue
+        seen.add(email.lower())
+        out.append({"name": c.get("name") or email, "email": email, "reason": "No home address saved yet"})
+    return out[:200]
+
+
 @bp.route("/agent/send-update")
 def send_update():
     u = _me("agent")
@@ -470,7 +486,8 @@ def send_update():
     people = [p for p in people_for("agent", u["id"]) if p["email"]]
     options = {k: {"label": v[0], "subject": _update_text(k)[0], "body": _update_text(k)[1]} for k, v in UPDATES.items()}
     first = options["freeze"]
-    return render_template("agent/send_update.html", people=people, options=options, subject=first["subject"], body=first["body"])
+    return render_template("agent/send_update.html", people=people, options=options, subject=first["subject"], body=first["body"],
+                           left_out=_left_out(u["id"]))
 
 
 @bp.route("/agent/send-update/send", methods=["POST"])

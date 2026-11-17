@@ -12,7 +12,7 @@ ok = lambda c, m: print(("PASS " if c else "FAIL ") + m)
 os.environ.pop("STRIPE_SECRET_KEY", None)
 SP._PRICE_CACHE.update(at=0, data={})
 t = SP.live_tiers()
-ok(t["professional"]["price_display"] == "$29/mo" and t["elite"]["price_display"] == "$79/mo", "without Stripe the written prices are shown")
+ok(t["professional"]["price_display"] == "$29/mo" and "elite" not in t, "without Stripe the written price is shown, and there is one paid plan")
 
 
 class FakeStripe:
@@ -26,7 +26,7 @@ os.environ.update(STRIPE_SECRET_KEY="sk_test_x", STRIPE_PROFESSIONAL_PRICE_ID="p
 SP.get_stripe = lambda: FakeStripe
 SP._PRICE_CACHE.update(at=0, data={})
 t = SP.live_tiers()
-ok(t["professional"]["price_display"] == "$39/mo" and t["elite"]["price_display"] == "$99.50/mo", "prices come from Stripe when it answers")
+ok(t["professional"]["price_display"] == "$39/mo", "the price comes from Stripe when it answers")
 SP._PRICE_CACHE.update(at=0, data={})
 SP.get_stripe = lambda: (_ for _ in ()).throw(RuntimeError("down"))
 with contextlib.redirect_stdout(io.StringIO()):

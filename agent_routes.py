@@ -3062,7 +3062,7 @@ def agent_subscription_checkout(tier):
     """Start Stripe checkout for agent subscription."""
     if "user_id" not in session or session.get("role") != "agent":
         return redirect(url_for("login"))
-    if tier not in ("professional", "elite"):
+    if tier != "professional":
         flash("We could not find that plan. Please choose one from the list.", "error")
         return redirect(url_for("agent_subscription"))
 
@@ -3171,6 +3171,8 @@ def agent_settings_profile():
             
             print(f"AGENT PROFILE: About to save - photo={professional_photo[:50] if professional_photo else None}, logo={brokerage_logo[:50] if brokerage_logo else None}")
             
+            from database import get_user_profile as _rate_gp
+            _before = _rate_gp(user["id"]) or {}
             profile_id = create_or_update_user_profile(
                 user_id=user["id"],
                 role="agent",
@@ -3204,6 +3206,18 @@ def agent_settings_profile():
                 conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
                 google_review_link=request.form.get("google_review_link", "").strip() or None,
             )
+
+            # Remember when the typed-in mortgage rates last changed, so a stale rate can be pointed out.
+            try:
+                _after = _rate_gp(user["id"]) or {}
+                _rk = ("va_rate_30yr", "fha_rate_30yr", "conventional_rate_30yr")
+                if any(_before.get(k) != _after.get(k) for k in _rk) or not _before.get("rates_updated_at"):
+                    from database import get_connection as _rc
+                    _c = _rc()
+                    _c.execute("UPDATE user_profiles SET rates_updated_at = ? WHERE user_id = ?", (datetime.now().strftime("%Y-%m-%d"), user["id"]))
+                    _c.commit(); _c.close()
+            except Exception as _e:
+                print(f"[rates] could not record the update date: {_e}")
 
             # Auto-generate webhook token if agent doesn't have one yet
             from database import get_connection as _gwc, get_user_profile as _gwp
@@ -3715,6 +3729,21 @@ def agent_financials():
             "SELECT * FROM agent_commissions WHERE agent_user_id=? AND (close_date LIKE ? OR close_date='') ORDER BY close_date DESC",
             (uid, f"{year}%")
         ).fetchall()]
+
+        # Say plainly what became of each linked deal, so Financials and Transactions never seem to disagree.
+        _today = datetime.now().strftime("%Y-%m-%d")
+        for c in commissions:
+            c["tx_note"] = ""
+            c["tx_exists"] = False
+            if c.get("transaction_id"):
+                tx = conn.execute("SELECT id, status FROM transactions WHERE id=? AND agent_id=?", (c["transaction_id"], uid)).fetchone()
+                if tx:
+                    c["tx_exists"] = True
+                    if (tx["status"] or "") != "active":
+                        c["tx_note"] = "Archived deal"
+                else:
+                    c["tx_note"] = "Deal was removed"
+            c["overdue"] = bool(c.get("status") != "paid" and c.get("close_date") and str(c["close_date"])[:10] < _today)
 
         # Expenses
         expenses = [dict(r) for r in conn.execute(

@@ -268,11 +268,13 @@
               <span class="badge-paid">Paid</span>
               {% else %}
               <span class="badge-projected">Projected</span>
+              {% if c.overdue %}<br><span style="color:#9A5300;font-size:.7rem">Close date has passed. Mark paid when you are.</span>{% endif %}
               {% endif %}
             </td>
             <td>
-              {% if c.transaction_id %}
-              <a href="{{ url_for('agent_transaction_detail', tx_id=c.transaction_id) }}" class="tx-link">View Tx</a>
+              {% if c.tx_exists %}
+              <a href="{{ url_for('agent_transaction_detail', tx_id=c.transaction_id) }}" class="tx-link">View Tx</a>{% if c.tx_note %}<br><span style="color:#7A6855;font-size:.7rem">{{ c.tx_note }}</span>{% endif %}
+              {% elif c.tx_note %}<span style="color:#7A6855;font-size:.72rem">{{ c.tx_note }}</span>
               {% else %}<span style="color:#ccc;font-size:.7rem"> - </span>{% endif %}
             </td>
             <td style="white-space:nowrap">

@@ -134,7 +134,7 @@ def lender_subscription_checkout(tier):
     """Start Stripe checkout for lender subscription."""
     if "user_id" not in session or session.get("role") != "lender":
         return redirect(url_for("login"))
-    if tier not in ("professional", "elite"):
+    if tier != "professional":
         flash("We could not find that plan. Please choose one from the list.", "error")
         return redirect(url_for("lender_subscription"))
 

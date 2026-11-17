@@ -373,6 +373,10 @@ def init_db() -> None:
         cur.execute("ALTER TABLE user_profiles ADD COLUMN conventional_rate_30yr REAL")
     except:
         pass
+    try:
+        cur.execute("ALTER TABLE user_profiles ADD COLUMN rates_updated_at TEXT")
+    except:
+        pass
 
     # Admin/user-management columns on users (older databases lack them)
     for _col, _type in [

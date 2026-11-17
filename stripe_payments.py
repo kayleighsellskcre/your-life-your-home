@@ -28,19 +28,8 @@ SUBSCRIPTION_TIERS = {
             "Referral tracking",
             "Priority email support",
             "Partner with subscribed lenders/agents",
-        ]
-    },
-    "elite": {
-        "name": "Elite",
-        "price_monthly": 7900,  # cents = $79.00
-        "price_display": "$79/mo",
-        "price_env_key": "STRIPE_ELITE_PRICE_ID",
-        "features": [
-            "Everything in Professional",
             "Early access to new features",
-            "Dedicated onboarding support",
-            "Featured partner directory listing (coming soon)",
-            "Multiple team member seats (coming soon)",
+            "Personal onboarding help",
         ]
     }
 }

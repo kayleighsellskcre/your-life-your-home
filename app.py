@@ -517,6 +517,18 @@ app.jinja_env.filters["usd"] = _usd                  # -154 -> "-$154"
 app.jinja_env.filters["rate_label"] = _rate_label    # 0.725 -> "$0.725"
 
 
+def _days_since(value):
+    """Whole days since a 'YYYY-MM-DD' date, or None when there is no usable date."""
+    try:
+        from datetime import date as _d, datetime as _dt
+        return (_d.today() - _dt.strptime(str(value)[:10], "%Y-%m-%d").date()).days
+    except Exception:
+        return None
+
+
+app.jinja_env.filters["days_since"] = _days_since
+
+
 @app.template_filter("min")
 def jinja_min(value):
     """Return the minimum of an iterable (Jinja2 doesn't have |min built-in)."""

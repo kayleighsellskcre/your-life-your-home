@@ -6,7 +6,7 @@
   <div class="ylh-page-hd">
     <div class="ylh-page-hd__label">Stay in touch</div>
     <h1 class="ylh-page-hd__title">Send an Update</h1>
-    <p class="ylh-page-hd__sub">Pick a ready-made note, change anything you like, and choose who gets it. Nothing goes out until you press Send.</p>
+    <p class="ylh-page-hd__sub">Pick a ready-made note, change anything you like, and choose who gets it. These are your clients and past clients whose home we can check. Nothing goes out until you press Send.</p>
   </div>
   {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
   <form method="post" action="{{ url_for('portal.send_update_go') }}" class="tm-form">
@@ -27,6 +27,12 @@
       <div class="tm-row"><input type="checkbox" name="who" value="{{ p.key }}" id="w{{ loop.index }}" {{ 'checked' if p.ok }} {{ 'disabled' if not p.ok }}>
         <label class="tm-lbl" for="w{{ loop.index }}" style="margin:0;">{{ p.name }}<span style="display:block;font-weight:400;color:#7A6855;font-size:.82rem;">{{ p.email }}{% if not p.ok %} &middot; opted out{% endif %}</span></label></div>
       {% else %}<p>No clients with an email yet. Invite one from My Clients.</p>{% endfor %}
+      {% if left_out %}
+      <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-weight:600;color:#7A5238;">{{ left_out|length }} {{ 'person is' if left_out|length == 1 else 'people are' }} not on this list. See why.</summary>
+        <p style="font-size:.85rem;color:#7A6855;margin:.4rem 0;">This list is for clients whose home we can check. Add a home address to a contact in your CRM and they join the list.</p>
+        {% for p in left_out %}<div style="font-size:.88rem;padding:.2rem 0;"><b>{{ p.name }}</b> <span style="color:#7A6855;">&middot; {{ p.email }} &middot; {{ p.reason }}</span></div>{% endfor %}
+      </details>
+      {% endif %}
       <div class="tm-btns"><button class="tm-btn" type="submit">Send</button></div>
     </div>
   </form>

@@ -11,7 +11,7 @@ for p, words in (("/privacy", "never sell"), ("/terms", "not an appraisal"), ("/
     ok(r.status_code == 200 and words in t, f"{p} opens and says what it should")
     ok(chr(8212) not in vis(t), f"no em dashes on {p}")
 t = c.get("/pricing").get_data(as_text=True)
-ok("Free" in t and "$79/mo" in t and "Homeowners" in t, "pricing shows homeowners free plus the paid plans")
+ok("Free" in t and "$29/mo" in t and "Homeowners" in t, "pricing shows homeowners free plus the paid plan")
 h = c.get("/").get_data(as_text=True)
 ok("/pricing" in h and "/privacy" in h and "/terms" in h, "the footer links Pricing, Privacy and Terms")
 ok("lending professionals" not in h and "and lenders" in h, "the Journey line says lenders")
