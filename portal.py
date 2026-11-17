@@ -84,7 +84,16 @@ def tab_context():
         tabs = [("My Clients", url_for("lender_clients"), ep in {"lender_clients", "lender_crm"}, 0),
                 ("Shared Scenarios", url_for("team.shared_scenarios"), ep == "team.shared_scenarios", 0),
                 ("Messages", url_for("team.pro_messages"), ep in {"team.pro_messages", "team.pro_thread"}, unread)]
-    return {"tabs": tabs, "unread_messages": unread}
+    # Deeper pages (CRM, Financials, Marketing Hub and so on) get one plain way back to the day's main page.
+    back_home = None
+    if not any(t[2] for t in tabs):
+        if role == "agent" and ep != "agent_dashboard":
+            back_home = ("Dashboard", url_for("agent_dashboard"))
+        elif role == "lender" and ep != "lender_dashboard":
+            back_home = ("Dashboard", url_for("lender_dashboard"))
+        elif role == "homeowner" and ep != "portal.my_home":
+            back_home = ("My Home", url_for("portal.my_home"))
+    return {"tabs": tabs, "unread_messages": unread, "back_home": back_home}
 
 
 # ───────────────────────── homeowner: My Home ─────────────────────────

@@ -140,3 +140,14 @@ newh = D.create_user("Hannah H", "hannah@x.com", gp("password123"), "homeowner",
 ch = who(newh, "homeowner")
 t = ch.get("/homeowner/value/equity-overview").get_data(as_text=True)
 ok("Let's fill this in together" in t or "Let&#39;s fill this in together" in t, "a homeowner with no numbers yet is told what to do first")
+
+# ---- round 6: small polish ----
+import re as _re
+def _title(h): return _re.search(r"<title>(.*?)</title>", h, _re.S).group(1).strip()
+ok(_title(A.app.test_client().get("/pricing").get_data(as_text=True)) == "Pricing • Your Life Your Home", "Pricing's tab title names the brand once")
+ok(_title(A.app.test_client().get("/agents").get_data(as_text=True)).count("Your Life") == 1, "the For agents title names the brand once")
+dash = ca.get("/agent").get_data(as_text=True)
+ok("&larr; Dashboard" not in dash, "the Dashboard has no back link to itself")
+ok("&larr; Dashboard" in ca.get("/agent/financials").get_data(as_text=True) and "&larr; Dashboard" in ca.get("/agent/marketing-hub").get_data(as_text=True), "deeper agent pages have a way back to the Dashboard")
+ok("&larr; Dashboard" in cl.get("/lender/financials").get_data(as_text=True), "deeper lender pages have a way back to the Dashboard")
+ok("&larr; Dashboard" not in ca.get("/agent/my-clients").get_data(as_text=True), "tab pages need no back link")
