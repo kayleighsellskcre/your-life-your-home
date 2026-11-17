@@ -349,6 +349,10 @@ def _enforce_area_access():
         return redirect(url_for("login", role=area))
     if role == "admin" or role == area:
         return None
+    if area == "homeowner" and role in ("agent", "lender"):
+        m = __import__("re").fullmatch(r"/homeowner/(\d+)", request.path)
+        if m:   # an old link to a client's page: send the agent or lender to that client's own page
+            return redirect(url_for("agent_client_detail" if role == "agent" else "lender_client_detail", homeowner_id=int(m.group(1))))
     return redirect(url_for(_AREA_HOME.get(role, "index")))
 
 
@@ -1785,7 +1789,7 @@ def _value_rise_emails(user_id, property_id, old, new, pct):
             body = (f"Hi {(agent_row.get('name') or 'there').split(' ')[0]},\n\n{home.get('name') or 'A client'}'s home at {addr} "
                     f"is now estimated at ${new:,.0f}, up {pct:.1f}% from ${old:,.0f}.\n\n"
                     f"That is a natural reason to reach out: see how they are feeling about their home and their plans. "
-                    f"Their details are in your Client Portal: {base}/agent/clients\n\nYour Life, Your Home")
+                    f"Their details are in My Clients: {base}/agent/my-clients\n\nYour Life, Your Home")
             send_reminder_email(agent_row["email"], f"{home.get('name') or 'A client'}'s home value is up {pct:.0f}%", body)
     except Exception:
         print("[VALUES] value-rise email failed")

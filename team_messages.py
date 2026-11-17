@@ -141,6 +141,21 @@ def _thread(conn, homeowner_id, pro_id, viewer_id):
     return out
 
 
+def recent_messages(pro_id, homeowner_id, limit=4):
+    """The last few messages between this professional and client, oldest first. Does not mark anything as read."""
+    conn = _db()
+    try:
+        rows = [dict(r) for r in conn.execute("SELECT * FROM team_messages WHERE homeowner_id = ? AND pro_id = ? ORDER BY id DESC LIMIT ?",
+                                              (homeowner_id, pro_id, limit)).fetchall()]
+    finally:
+        conn.close()
+    for m in rows:
+        m["when"] = when_text(m["created_at"])
+        m["mine"] = m["sender_id"] == pro_id
+        m["body"] = m.get("body") or ""
+    return rows[::-1]
+
+
 def _too_many(conn, sender_id):
     n = conn.execute("SELECT COUNT(*) FROM team_messages WHERE sender_id = ? AND created_at >= datetime('now','-1 hour')", (sender_id,)).fetchone()[0]
     return n >= MAX_PER_HOUR

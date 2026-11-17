@@ -57,7 +57,7 @@ for head in ("Clients", "Keep in touch", "Marketing", "Business"):
     ok(f'ylh-ham-head">{head}<' in ma, f"agent More has the heading {head}")
 for gone in ("Invite Clients", "Client Portal", "Communications"):
     ok(f">{gone}<" not in ma, f"agent menu no longer lists {gone}")
-ok("Invite a homeowner" in a.get("/agent/my-clients").get_data(as_text=True) and "/agent/clients" in a.get("/agent/my-clients").get_data(as_text=True), "My Clients holds the invite form and the full client list link")
+ok("Invite a homeowner" in a.get("/agent/my-clients").get_data(as_text=True) and "Open the full client list" not in a.get("/agent/my-clients").get_data(as_text=True), "My Clients holds the invite form and is the one client list")
 ml = menu(l.get("/lender/clients").get_data(as_text=True))
 for head in ("Clients", "Keep in touch", "Marketing", "Business"):
     ok(f'ylh-ham-head">{head}<' in ml, f"lender More has the heading {head}")

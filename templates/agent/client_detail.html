@@ -105,8 +105,8 @@
  </div>
  </div>
  <div style="display:flex;gap:.625rem;align-items:center;flex-wrap:wrap">
- <a href="{{ url_for('agent_clients') }}" class="btn-back">← All Clients</a>
- <a href="{{ url_for('homeowner_overview', homeowner_id=homeowner.id) }}" class="btn-portal-header">View Full Portal →</a>
+ <a href="{{ url_for('portal.agent_my_clients') }}" class="btn-back">← My Clients</a>
+ <a href="{{ url_for('team.pro_thread', homeowner_id=homeowner.id) }}" class="btn-portal-header">Message {{ (homeowner.name or 'client').split(' ')[0] }} →</a>
  </div>
  </div>
 
@@ -156,6 +156,20 @@
  <div class="data-row"><span class="data-row__label">Last Refreshed</span><span class="data-row__val">{{ (profile.last_value_refresh or '-')[:10] }}</span></div>
  </div>
  </div>
+
+ <!-- Messages -->
+ <div class="panel">
+ <div class="panel__title"> Messages</div>
+ <div class="panel__body">
+ {% for m in messages %}
+ <div class="data-row"><span class="data-row__label">{{ 'You' if m.mine else (homeowner.name or 'Client').split(' ')[0] }} &middot; {{ m.when }}</span><span class="data-row__val" style="text-align:left;">{{ m.body[:140] }}{{ '...' if m.body|length > 140 }}</span></div>
+ {% else %}
+ <div class="empty-panel">No messages yet. Say hello.</div>
+ {% endfor %}
+ <div style="margin-top:.875rem"><a href="{{ url_for('team.pro_thread', homeowner_id=homeowner.id) }}" style="font-size:.78rem;color:#6B5B4D;text-decoration:underline">Open the conversation &rarr;</a></div>
+ </div>
+ </div>
+
 
  <!-- CRM Contact -->
  <div class="panel">
@@ -230,9 +244,6 @@
  </li>
  {% endfor %}
  </ul>
- <div style="margin-top:.625rem">
- <a href="{{ url_for('homeowner_overview', homeowner_id=homeowner.id) }}" style="font-size:.75rem;color:#6B5B4D;text-decoration:underline">View all in portal →</a>
- </div>
  {% else %}
  <div class="empty-panel">No documents uploaded yet.</div>
  {% endif %}

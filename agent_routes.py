@@ -2683,10 +2683,7 @@ def agent_clients():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
     
-    from database import get_agent_clients
-    clients = get_agent_clients(user["id"])
-    
-    return render_template("agent/clients.html", clients=clients)
+    return redirect(url_for("portal.agent_my_clients"))
 
 
 @route("/agent/clients/<int:homeowner_id>")
@@ -2703,12 +2700,12 @@ def agent_client_detail(homeowner_id):
     
     if not can_access_homeowner(user["id"], "agent", homeowner_id):
         flash("That client is not connected to your account.", "error")
-        return redirect(url_for("agent_clients"))
-    
+        return redirect(url_for("portal.agent_my_clients"))
+
     homeowner = get_user_by_id(homeowner_id)
     if not homeowner or homeowner.get("role") != "homeowner":
         flash("We could not find that client.", "error")
-        return redirect(url_for("agent_clients"))
+        return redirect(url_for("portal.agent_my_clients"))
     
     profile = get_homeowner_full_profile(homeowner_id)
     recent_activity = get_homeowner_recent_activity(homeowner_id, limit=15)
@@ -2754,6 +2751,7 @@ def agent_client_detail(homeowner_id):
         warranties=warranties,
         snapshot_history=snapshot_history,
         crm_contact=crm_contact,
+        messages=__import__("team_messages").recent_messages(user["id"], homeowner_id),
     )
 
 

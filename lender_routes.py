@@ -1223,6 +1223,7 @@ def lender_client_detail(homeowner_id):
         projects=projects,
         snapshot_history=snapshot_history,
         transactions=transactions,
+        messages=__import__("team_messages").recent_messages(user["id"], homeowner_id),
         crm_borrower=crm_borrower,
     )
 
