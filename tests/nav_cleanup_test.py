@@ -53,7 +53,7 @@ def menu(t):
     t = t[t.index('id="ylhHamMenu"'):]
     return t[:t.index("Sign Out")].replace("</a>", "<")
 ma = menu(a.get("/agent/my-clients").get_data(as_text=True))
-for head in ("Clients", "Keep in touch", "Marketing", "Business"):
+for head in ("Today", "Clients and deals", "Marketing", "Business", "Seasonal and extras"):
     ok(f'ylh-ham-head">{head}<' in ma, f"agent More has the heading {head}")
 for gone in ("Invite Clients", "Client Portal", "Communications"):
     ok(f">{gone}<" not in ma, f"agent menu no longer lists {gone}")

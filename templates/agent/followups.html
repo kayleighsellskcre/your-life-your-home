@@ -40,7 +40,7 @@
     </div>
   </div>
   {% else %}
-  <div class="fu-row" style="display:block;text-align:center;color:#7A6855;">You are all caught up. Nothing is waiting on you today.</div>
+  <div class="fu-row" style="display:block;text-align:center;color:#7A6855;">{% if has_people %}You are all caught up. Nothing is waiting on you today.{% else %}Nothing here yet. Add the people you care about to your <a href="{{ url_for('agent_crm') }}">CRM</a>, and the ones you should reach out to will show up here each day.{% endif %}</div>
   {% endfor %}
 </div>
 {% endblock %}

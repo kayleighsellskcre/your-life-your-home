@@ -1,6 +1,7 @@
 {% set lender = (role == 'lender') %}
 {% include "shared/_tm_style.html" %}
 <div class="tm-w">
+  {% if not just %}{% include "_onboarding.html" %}{% endif %}
   <div class="ylh-page-hd">
     <div class="ylh-page-hd__label">Your people</div>
     <h1 class="ylh-page-hd__title">My Clients</h1>

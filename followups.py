@@ -74,7 +74,12 @@ def followups_page():
     u = _agent()
     if not u:
         return redirect(url_for("login", role="agent"))
-    return render_template("agent/followups.html", rows=due_for(u["id"]), snoozes=SNOOZES, outcomes=OUTCOMES)
+    conn = _db()
+    try:
+        people = conn.execute("SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id = ?", (u["id"],)).fetchone()[0]
+    finally:
+        conn.close()
+    return render_template("agent/followups.html", rows=due_for(u["id"]), snoozes=SNOOZES, outcomes=OUTCOMES, has_people=bool(people))
 
 
 @bp.route("/agent/followups/<int:contact_id>/<action>", methods=["POST"])

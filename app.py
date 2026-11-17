@@ -2134,9 +2134,9 @@ def _inject_onboarding():
                 spec = [
                     ("Add your photo and contact info", "agent_settings_profile",
                      "SELECT COUNT(*) FROM user_profiles WHERE user_id=? AND professional_photo IS NOT NULL AND professional_photo<>''"),
-                    ("Add your first client to the CRM", "agent_crm", "SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id=?"),
-                    ("Start a transaction", "agent_transactions", "SELECT COUNT(*) FROM transactions WHERE agent_id=?"),
-                    ("Add a trusted vendor", "agent_vendors", "SELECT COUNT(*) FROM trusted_vendors WHERE agent_id=?"),
+                    ("Add your people to the CRM", "agent_crm", "SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id=?"),
+                    ("Invite your first homeowner", "portal.agent_my_clients", "SELECT (SELECT COUNT(*) FROM users WHERE agent_id=?1 AND role='homeowner') + (SELECT COUNT(*) FROM client_invites WHERE pro_id=?1 AND pro_role='agent')"),
+                    ("Start your first deal", "agent_transactions", "SELECT COUNT(*) FROM transactions WHERE agent_id=?"),
                 ]
             elif role == "lender":
                 spec = [

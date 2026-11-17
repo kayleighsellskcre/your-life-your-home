@@ -785,27 +785,28 @@
        <a class="ylh-ham-item" href="{{ url_for('portal.send_update') }}">Send an Update</a>
        <a class="ylh-ham-item" href="{{ url_for('team.pro_messages') }}">Messages{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</a>
        <details class="ylh-ham-more"><summary>More</summary>
-       <div class="ylh-ham-head">Clients</div>
-       <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">CRM</a>
+       <div class="ylh-ham-head">Today</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">Dashboard</a>
        <a class="ylh-ham-item" href="{{ url_for('followups.followups_page') }}">Follow-ups</a>
+       <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
+       <div class="ylh-ham-head">Clients and deals</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">CRM</a>
        {% if client_values_on() %}<a class="ylh-ham-item" href="{{ url_for('client_values.client_values_page') }}">Client Values</a>{% endif %}
        <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
-       <div class="ylh-ham-head">Keep in touch</div>
-       <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_contests') }}">Client Contests</a>
-       <a class="ylh-ham-item" href="{{ url_for('pies.manage_list') }}">Holiday Pie Pickup</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_seasonal_checklists') }}">Seasonal Checklists</a>
-       <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_booking') }}">Booking &amp; Calendar</a>
        <div class="ylh-ham-head">Marketing</div>
        <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_concierge_dashboard') }}">AI Concierge</a>
        <div class="ylh-ham-head">Business</div>
-       <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_booking') }}">Booking &amp; Calendar</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_financials') }}">Financials</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_invoices') }}">Invoices</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_vendors') }}">Vendor Network</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">Dashboard</a>
+       <div class="ylh-ham-head">Seasonal and extras</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_seasonal_checklists') }}">Seasonal Checklists</a>
+       <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
+       <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
+       <a class="ylh-ham-item" href="{{ url_for('pies.manage_list') }}">Holiday Pie Pickup</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_contests') }}">Client Contests</a>
        </details>
        <details class="ylh-ham-more"><summary>Account</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_settings_profile') }}">Settings &amp; Profile</a>
@@ -934,6 +935,18 @@
  {% endwith %}
 
  {% block content %}{% endblock %}
+ <script>
+ /* Many pages show their own copy of a message. If the same message appears twice, keep only the one nearest the content. */
+ (function () {
+   try {
+     var els = Array.prototype.filter.call(document.querySelectorAll('main [class*="flash"]'), function (e) { return e.children.length === 0 && e.textContent.trim(); });
+     els.forEach(function (e, i) {
+       var t = e.textContent.trim();
+       for (var j = i + 1; j < els.length; j++) { if (els[j].textContent.trim() === t) { e.style.display = 'none'; break; } }
+     });
+   } catch (err) {}
+ })();
+ </script>
  </main>
  </div>
  <footer class="site-footer">
