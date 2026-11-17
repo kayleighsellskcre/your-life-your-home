@@ -19,7 +19,7 @@
     <p class="pie-hint" style="margin:.4rem 0 0;">When someone books, you both get an email, they get a friendly reminder the day before, and it shows under "Coming up." You can cancel any booking there and they will get a kind note.</p>
   </details>
 
-  <div class="pie-card">
+  <div class="pie-card" id="bk-setup">
     <h2>Your booking page</h2>
     <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Choose when you are free, switch it on, and share one link. Clients pick a time, and it lands on your calendar by itself.</p>
     <form method="post" action="{{ url_for('booking.save') }}">
@@ -151,7 +151,7 @@
     {% endif %}
   </div>
 
-  <div class="pie-card">
+  <div class="pie-card" id="bk-upcoming">
     <h2>Coming up</h2>
     {% if bk.upcoming %}
       {% for b in bk.upcoming %}
@@ -165,7 +165,7 @@
     {% endif %}
   </div>
 
-  <div class="pie-card">
+  <div class="pie-card" id="bk-phone">
     <h2>Put it all on your phone</h2>
     <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Add this calendar once and your bookings, transaction deadlines and pie pickups show up on your phone by themselves. When anything changes, it updates for you.</p>
     <div class="pie-actions" style="margin-top:0;">
@@ -200,3 +200,5 @@ function bkCopy(id, btn) {
   var t = btn.textContent; btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = t; }, 1800);
 }
 </script>
+<script src="{{ url_for('static', filename='js/collapsible.js') }}"></script>
+<script>ylhCollapse({cards:'.pie-wrap > .pie-card[id^="bk-"]', head:'h2', open:{{ ('"all"' if not bk.s.enabled else '"#bk-upcoming"')|safe }}});</script>

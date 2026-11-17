@@ -643,8 +643,12 @@ document.addEventListener('DOMContentLoaded', function() {
  updateNavProgress(season);
  });
  
- // Set default active season
- showSeason('spring');
+ // Open on the season we are in; the others are one tap away
+ var m = new Date().getMonth();
+ var now = (m >= 2 && m <= 4) ? 'spring' : (m >= 5 && m <= 7) ? 'summer' : (m >= 8 && m <= 10) ? 'fall' : 'winter';
+ var tag = document.querySelector(`[onclick="showSeason('${now}')"] .season-name`);
+ if (tag) tag.textContent += ' (this season)';
+ showSeason(now);
 });
 
 function showSeason(season) {
