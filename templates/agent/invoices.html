@@ -148,7 +148,7 @@
  <div class="inv-topbar">
  <div>
  <h1 class="inv-topbar__title">Invoices</h1>
- <div class="inv-topbar__sub">Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts</div>
+ <div class="inv-topbar__sub">{{ biz.line }}</div>
  </div>
  <div class="inv-topbar__actions">
  <a href="{{ url_for('agent_invoices') }}" class="i-btn i-btn--ghost">All Invoices</a>
@@ -164,15 +164,15 @@
  </div>
  <div class="inv-stat">
  <div class="inv-stat__label">Outstanding</div>
- <div class="inv-stat__val inv-stat__val--gold">${{ "{:,.2f}".format(total_outstanding) }}</div>
+ <div class="inv-stat__val inv-stat__val--gold">{{ (total_outstanding)|usd(2) }}</div>
  </div>
  <div class="inv-stat">
  <div class="inv-stat__label">Collected</div>
- <div class="inv-stat__val inv-stat__val--green">${{ "{:,.2f}".format(total_paid) }}</div>
+ <div class="inv-stat__val inv-stat__val--green">{{ (total_paid)|usd(2) }}</div>
  </div>
  <div class="inv-stat">
  <div class="inv-stat__label">Drafts</div>
- <div class="inv-stat__val inv-stat__val--muted">${{ "{:,.2f}".format(total_draft) }}</div>
+ <div class="inv-stat__val inv-stat__val--muted">{{ (total_draft)|usd(2) }}</div>
  </div>
  </div>
 
@@ -221,7 +221,7 @@
  </td>
  <td class="inv-td inv-td--muted">{{ inv.issue_date or '-' }}</td>
  <td class="inv-td inv-td--muted {% if inv.status == 'overdue' %}inv-td--bold{% endif %}" style="{% if inv.status == 'overdue' %}color:#b94040{% endif %}">{{ inv.due_date or '-' }}</td>
- <td class="inv-td inv-td--bold">${{ "{:,.2f}".format(inv.total or 0) }}</td>
+ <td class="inv-td inv-td--bold">{{ (inv.total or 0)|usd(2) }}</td>
  <td class="inv-td">
  <span class="s-badge s-badge--{{ inv.status }}">{{ inv.status }}</span>
  </td>

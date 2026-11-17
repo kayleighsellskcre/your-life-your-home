@@ -799,13 +799,18 @@ def agent_crm():
         follow_up_days = user_details.get('follow_up_days', 30) if user_details and isinstance(user_details, dict) else 30
         
         # Get contacts needing follow-up
+        # The banner counts exactly who the Follow-ups page lists, so the two can never disagree.
         try:
-            from database import get_contacts_needing_followup
-            contacts_needing_followup = get_contacts_needing_followup(user["id"], follow_up_days)
-            needs_followup_count = len(contacts_needing_followup)
+            from followups import due_for
+            needs_followup_count = len(due_for(user["id"]))
         except Exception as e:
             print(f"Error getting contacts needing followup: {e}")
             needs_followup_count = 0
+        try:
+            from database import get_contacts_needing_followup
+            quiet_count = len(get_contacts_needing_followup(user["id"], follow_up_days))
+        except Exception:
+            quiet_count = 0
         
         stats = {
             'total': total_contacts,
@@ -822,6 +827,7 @@ def agent_crm():
             'pipeline_value': sum([(d.get('deal_value') if isinstance(d, dict) else 0) or 0 for d in all_deals]),
             'expected_commission': sum([(d.get('expected_commission') if isinstance(d, dict) else 0) or 0 for d in all_deals]),
             'needs_followup': needs_followup_count,
+            'quiet': quiet_count,
             'follow_up_days': follow_up_days,
         }
         
@@ -1067,9 +1073,9 @@ def agent_crm_import():
             try:
                 # Read file into pandas
                 if filename.endswith('.csv'):
-                    df = pd.read_csv(file)
+                    df = pd.read_csv(file, dtype=str)   # text, so a ZIP like 66062 never becomes 66062.0
                 else:
-                    df = pd.read_excel(file)
+                    df = pd.read_excel(file, dtype=str)
                 
                 # Convert to list of dicts for preview
                 data = df.to_dict('records')
@@ -1178,6 +1184,8 @@ def agent_crm_import():
                         city = safe_get(row.get(mappings['city'])) if mappings.get('city') else ''
                         state = safe_get(row.get(mappings['state'])) if mappings.get('state') else ''
                         zip_code = safe_get(row.get(mappings['zip_code'])) if mappings.get('zip_code') else ''
+                        from database import clean_zip
+                        zip_code = clean_zip(zip_code)
                         # If address has "Street, City, ST 12345" but city/state/zip unmapped, parse it
                         if not (city or state or zip_code) and (address or property_address):
                             addr_str = address or property_address
@@ -2381,6 +2389,7 @@ def agent_invoices():
         "agent/invoices.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
+        biz=_invoice_sender(user),
         invoices=invoices,
         status_filter=status_filter,
         total_outstanding=total_outstanding,
@@ -2492,6 +2501,7 @@ def agent_invoice_new():
         "agent/invoice_form.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
+        biz=_invoice_sender(user),
         contacts=contacts,
         prefill_contact=prefill_contact,
         invoice=None,
@@ -2584,6 +2594,7 @@ def agent_invoice_edit(inv_id):
         "agent/invoice_form.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
+        biz=_invoice_sender(user),
         contacts=contacts,
         prefill_contact=None,
         invoice=invoice,
@@ -2644,6 +2655,7 @@ def agent_invoice_print(inv_id):
         invoice=invoice,
         items=items,
         user=user,
+        biz=_invoice_sender(user),
     )
 
 
@@ -3040,7 +3052,7 @@ def agent_subscription():
         user=user_dict,
         profile=profile,
         current_tier=current_tier,
-        tiers=SUBSCRIPTION_TIERS,
+        tiers=__import__('stripe_payments').live_tiers(),
         stripe_configured=stripe_configured,
     )
 
@@ -3265,7 +3277,8 @@ def agent_concierge_dashboard():
     recent_leads = get_recent_leads(user['id'], limit=10)
     
     # Get agent's concierge URL
-    concierge_url = request.host_url.rstrip('/') + url_for('concierge_landing', agent_token=user['id'])
+    from database import get_or_create_referral_code
+    concierge_url = request.host_url.rstrip('/') + url_for('concierge_landing', agent_token=get_or_create_referral_code(user['id'], 'agent'))
     
     return render_template(
         'agent/concierge_dashboard.html',
@@ -3731,8 +3744,14 @@ def agent_financials():
     ytd_projected = sum(c.get("net_commission", 0) or 0 for c in commissions if c.get("status") == "projected")
     ytd_expenses = sum(e.get("amount", 0) or 0 for e in expenses)
     ytd_miles = sum(m.get("miles", 0) or 0 for m in mileage_logs)
-    irs_rate = 0.70
-    mileage_deduction = round(ytd_miles * irs_rate, 2)
+    # Each trip uses the IRS rate for the day it was driven (the rate changes by year, and sometimes mid-year).
+    from mileage import rate_for, RATES
+    for m in mileage_logs:
+        m["irs_rate"] = rate_for(m.get("trip_date"))
+        m["deduction_amount"] = round((m.get("miles", 0) or 0) * m["irs_rate"], 2)
+    irs_rate = rate_for()
+    mileage_deduction = round(sum(m["deduction_amount"] for m in mileage_logs), 2)
+    rate_table = [{"from": s, "rate": r} for s, r in RATES]
     net_income = ytd_gci - ytd_expenses
 
     # Monthly GCI for chart
@@ -3771,6 +3790,7 @@ def agent_financials():
         monthly_gci_list=monthly_gci_list,
         expense_by_cat=expense_by_cat,
         irs_rate=irs_rate,
+        rate_table=rate_table,
     )
 
 
@@ -3877,7 +3897,8 @@ def agent_financials_mileage_add():
     uid = user["id"]
     f = request.form
     miles = float(f.get("miles") or 0)
-    irs_rate = 0.70
+    from mileage import rate_for
+    irs_rate = rate_for(f.get("trip_date"))
     deduction = round(miles * irs_rate, 2)
     conn = get_db_connection()
     conn.execute("""

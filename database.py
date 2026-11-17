@@ -4641,6 +4641,37 @@ def get_contacts_for_automated_email(
 
 
 # ------------- USER PROFILES -------------
+def clean_zip(value) -> str:
+    """A ZIP code as plain text: '66062.0' -> '66062', and a lost leading zero ('2108') is put back."""
+    s = str(value or "").strip()
+    if s.lower() in ("nan", "none", "null"):
+        return ""
+    if s.endswith(".0") and s[:-2].isdigit():
+        s = s[:-2]
+    if s.isdigit() and len(s) == 4:
+        s = "0" + s
+    return s
+
+
+def fix_saved_zip_codes() -> int:
+    """Safe to run on every start: fixes ZIPs an old import saved as '66062.0'."""
+    conn = get_connection()
+    try:
+        rows = conn.execute("SELECT id, zip_code FROM agent_contacts WHERE zip_code IS NOT NULL AND zip_code != ''").fetchall()
+        n = 0
+        for r in rows:
+            fixed = clean_zip(r["zip_code"])
+            if fixed != r["zip_code"]:
+                conn.execute("UPDATE agent_contacts SET zip_code = ? WHERE id = ?", (fixed, r["id"]))
+                n += 1
+        conn.commit()
+        return n
+    except Exception:
+        return 0
+    finally:
+        conn.close()
+
+
 def get_user_profile(user_id: int) -> Optional[Dict]:
     """Get user profile by user_id."""
     conn = get_connection()

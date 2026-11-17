@@ -459,7 +459,7 @@
  <div class="card-badge current">Current Plan</div>
  {% endif %}
  <div class="tier-name">Starter</div>
- <div class="tier-price"><span class="free-text">Free</span><span class="mo">/month</span></div>
+ <div class="tier-price"><span class="free-text">Free</span></div>
  <p class="tier-tagline">Perfect for getting started</p>
  <div class="tier-divider"></div>
  <ul class="feature-list">
@@ -467,7 +467,7 @@
  <li><span class="check"></span>5 active transactions</li>
  <li><span class="check"></span>Basic email templates</li>
  <li><span class="check"></span>Referral link page</li>
- <li><span class="check"></span>Mobile app access</li>
+ <li><span class="check"></span>Works in your phone's web browser</li>
  <li><span class="check dim">-</span>Concierge</li>
  <li><span class="check dim">-</span>Marketing Hub</li>
  <li><span class="check dim">-</span>Invoices &amp; seasonal checklists</li>
@@ -489,13 +489,13 @@
  <div class="card-badge popular"> Most Popular</div>
  {% endif %}
  <div class="tier-name">Professional</div>
- <div class="tier-price">$29<span class="mo">/month</span></div>
+ <div class="tier-price">{{ tiers.professional.price_display.replace('/mo','') }}<span class="mo">/month</span></div>
  <p class="tier-tagline">Everything you need to grow</p>
  <div class="tier-divider"></div>
  <ul class="feature-list">
  <li><span class="check"></span>Unlimited CRM contacts</li>
  <li><span class="check"></span>Unlimited transactions</li>
- <li><span class="check"></span>Smart Concierge (white-label)</li>
+ <li><span class="check"></span>AI Concierge with your own name and branding</li>
  <li><span class="check"></span>Full Marketing Hub</li>
  <li><span class="check"></span>Invoices &amp; seasonal checklists</li>
  <li><span class="check"></span>Advanced email templates</li>
@@ -508,7 +508,7 @@
  {% else %}
  {% if stripe_configured %}
  <form class="btn-plan-form" method="POST" action="{{ url_for('agent_subscription_checkout', tier='professional') }}">
- <button type="submit" class="btn-plan gold">Upgrade Now · $29/mo</button>
+ <button type="submit" class="btn-plan gold">Upgrade Now · {{ tiers.professional.price_display }}</button>
  </form>
  {% else %}
  <button class="btn-plan disabled" disabled>Coming Soon</button>
@@ -516,6 +516,33 @@
  {% endif %}
  </div>
  </div>
+
+ <!-- ── Elite ── -->
+ {% if tiers.elite %}
+ <div class="tier-card {% if current_tier == 'elite' %}active{% endif %}">
+ {% if current_tier == 'elite' %}
+ <div class="card-badge current">Current Plan</div>
+ {% endif %}
+ <div class="tier-name">Elite</div>
+ <div class="tier-price">{{ tiers.elite.price_display.replace('/mo','') }}<span class="mo">/month</span></div>
+ <p class="tier-tagline">For teams and top producers</p>
+ <div class="tier-divider"></div>
+ <ul class="feature-list">
+ {% for f in tiers.elite.features %}<li><span class="check"></span>{{ f }}</li>
+ {% endfor %}</ul>
+ <div class="tier-action">
+ {% if current_tier == 'elite' %}
+ <button class="btn-plan active-plan" disabled> Your Current Plan</button>
+ {% elif stripe_configured %}
+ <form class="btn-plan-form" method="POST" action="{{ url_for('agent_subscription_checkout', tier='elite') }}">
+ <button type="submit" class="btn-plan gold">Upgrade Now · {{ tiers.elite.price_display }}</button>
+ </form>
+ {% else %}
+ <button class="btn-plan disabled" disabled>Coming Soon</button>
+ {% endif %}
+ </div>
+ </div>
+ {% endif %}
  </div>
 
  <!-- Manage Billing -->

@@ -210,7 +210,7 @@
  <span> {{ tx.property_city }}, {{ tx.property_state }}</span>
  {% endif %}
  {% if tx.list_price %}
- <span> ${{ "{:,.0f}".format(tx.list_price) }}</span>
+ <span> {{ (tx.list_price)|usd(0) }}</span>
  {% endif %}
  <span> {{ tx.transaction_type or 'Listing' }}</span>
  </div>

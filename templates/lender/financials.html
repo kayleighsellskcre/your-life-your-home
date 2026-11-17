@@ -219,9 +219,9 @@
  <div class="fin-card green">
  <div class="fin-card-icon">&#x2713;</div>
  <div class="fin-card-label">YTD Revenue (Funded)</div>
- <div class="fin-card-value">${{ "{:,.0f}".format(ytd_revenue) }}</div>
+ <div class="fin-card-value">{{ (ytd_revenue)|usd(0) }}</div>
  {% if ytd_projected > 0 %}
- <div class="fin-card-sub">+ ${{ "{:,.0f}".format(ytd_projected) }} in pipeline</div>
+ <div class="fin-card-sub">+ {{ (ytd_projected)|usd(0) }} in pipeline</div>
  {% else %}
  <div class="fin-card-sub">Funded loans {{ year }}</div>
  {% endif %}
@@ -229,19 +229,19 @@
  <div class="fin-card blue">
  <div class="fin-card-icon">&#x7e;</div>
  <div class="fin-card-label">YTD Loan Volume</div>
- <div class="fin-card-value">${{ "{:,.0f}".format(ytd_loan_volume // 1000) }}k</div>
+ <div class="fin-card-value">{{ (ytd_loan_volume // 1000)|usd(0) }}k</div>
  <div class="fin-card-sub">Total funded loan volume</div>
  </div>
  <div class="fin-card red">
  <div class="fin-card-icon">&#x2212;</div>
  <div class="fin-card-label">YTD Expenses</div>
- <div class="fin-card-value">${{ "{:,.0f}".format(ytd_expenses) }}</div>
+ <div class="fin-card-value">{{ (ytd_expenses)|usd(0) }}</div>
  <div class="fin-card-sub">{{ expenses|length }} entr{{ 'ies' if expenses|length != 1 else 'y' }} logged</div>
  </div>
  <div class="fin-card {% if net_income >= 0 %}green{% else %}red{% endif %}">
  <div class="fin-card-icon">&#x3d;</div>
  <div class="fin-card-label">Net Income</div>
- <div class="fin-card-value">{% if net_income < 0 %}-{% endif %}${{ "{:,.0f}".format(net_income|abs) }}</div>
+ <div class="fin-card-value">{% if net_income < 0 %}-{% endif %}{{ (net_income|abs)|usd(0) }}</div>
  <div class="fin-card-sub">Revenue minus expenses</div>
  </div>
  <div class="fin-card amber">
@@ -354,9 +354,9 @@
  <td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.property_address or '--' }}</td>
  <td style="text-transform:capitalize;">{{ r.loan_type or '--' }}</td>
  <td>{{ r.close_date or '--' }}</td>
- <td>${{ "{:,.0f}".format(r.loan_amount or 0) }}</td>
+ <td>{{ (r.loan_amount or 0)|usd(0) }}</td>
  <td>{{ "{:.3f}".format(r.origination_fee_pct or 0) }}%</td>
- <td style="font-weight:700;color:var(--green);">${{ "{:,.0f}".format(r.origination_fee_amt or 0) }}</td>
+ <td style="font-weight:700;color:var(--green);">{{ (r.origination_fee_amt or 0)|usd(0) }}</td>
  <td>
  <span class="badge {% if r.status=='funded' %}badge-funded{% elif r.status=='lost' %}badge-lost{% else %}badge-proj{% endif %}">{{ r.status or 'projected' }}</span>
  </td>
@@ -378,7 +378,7 @@
  </table>
  </div>
  <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
- Total revenue logged: <strong style="color:var(--charcoal);">${{ "{:,.0f}".format(ytd_revenue + ytd_projected) }}</strong>
+ Total revenue logged: <strong style="color:var(--charcoal);">{{ (ytd_revenue + ytd_projected)|usd(0) }}</strong>
  </div>
  {% else %}
  <div class="empty-msg">
@@ -407,7 +407,7 @@
  <td>{{ e.expense_date or '--' }}</td>
  <td><span class="badge" style="background:rgba(107,91,77,.1);color:var(--olive);">{{ e.category or 'Other' }}</span></td>
  <td>{{ e.description or '--' }}</td>
- <td style="font-weight:700;color:var(--red);">-${{ "{:,.2f}".format(e.amount or 0) }}</td>
+ <td style="font-weight:700;color:var(--red);">-{{ (e.amount or 0)|usd(2) }}</td>
  <td style="color:var(--warm-gray);font-size:.78rem;">{{ e.notes or '' }}</td>
  <td>
  <form method="POST" action="{{ url_for('lender_financials_expense_delete', eid=e.id) }}" onsubmit="return confirm('Remove this expense?');" style="display:inline;">
@@ -420,7 +420,7 @@
  </table>
  </div>
  <div style="margin-top:.75rem;font-size:.78rem;color:var(--warm-gray);text-align:right;">
- Total: <strong style="color:var(--red);">-${{ "{:,.2f}".format(ytd_expenses) }}</strong>
+ Total: <strong style="color:var(--red);">-{{ (ytd_expenses)|usd(2) }}</strong>
  </div>
  {% else %}
  <div class="empty-msg">
@@ -449,7 +449,7 @@
  <div class="goal-card">
  <div class="goal-label">
  <span>Revenue Goal</span>
- <span style="color:var(--green);">${{ "{:,.0f}".format(ytd_revenue) }} / ${{ "{:,.0f}".format(g.revenue_goal or 0) }}</span>
+ <span style="color:var(--green);">{{ (ytd_revenue)|usd(0) }} / {{ (g.revenue_goal or 0)|usd(0) }}</span>
  </div>
  <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ rev_pct|int }}%;"></div></div>
  <div class="goal-sub">{{ "{:.0f}".format(rev_pct) }}% complete</div>
@@ -465,7 +465,7 @@
  <div class="goal-card">
  <div class="goal-label">
  <span>Loan Volume</span>
- <span>${{ "{:,.0f}".format((ytd_loan_volume or 0) // 1000) }}k / ${{ "{:,.0f}".format((g.loan_volume_goal or 0) // 1000) }}k</span>
+ <span>{{ ((ytd_loan_volume or 0) // 1000)|usd(0) }}k / {{ ((g.loan_volume_goal or 0) // 1000)|usd(0) }}k</span>
  </div>
  <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ vol_pct|int }}%;"></div></div>
  <div class="goal-sub">{{ "{:.0f}".format(vol_pct) }}% complete</div>
@@ -473,7 +473,7 @@
  <div class="goal-card">
  <div class="goal-label">
  <span>Expense Budget</span>
- <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">${{ "{:,.0f}".format(ytd_expenses) }} / ${{ "{:,.0f}".format(g.expenses_budget or 0) }}</span>
+ <span style="{% if exp_pct >= 90 %}color:var(--red){% else %}color:var(--warm-gray){% endif %};">{{ (ytd_expenses)|usd(0) }} / {{ (g.expenses_budget or 0)|usd(0) }}</span>
  </div>
  <div class="goal-bar-bg"><div class="goal-bar-fill {% if exp_pct >= 90 %}danger{% endif %}" style="width:{{ exp_pct|int }}%;"></div></div>
  <div class="goal-sub">{{ "{:.0f}".format(exp_pct) }}% of budget used</div>
@@ -720,14 +720,14 @@ new Chart(expCtx, {
 
 // AI context
 const AI_CONTEXT = `Year: {{ year }}
-YTD Revenue (funded): ${{ "{:,.0f}".format(ytd_revenue) }}
-YTD Projected Revenue: ${{ "{:,.0f}".format(ytd_projected) }}
-YTD Loan Volume: ${{ "{:,.0f}".format(ytd_loan_volume) }}
+YTD Revenue (funded): {{ (ytd_revenue)|usd(0) }}
+YTD Projected Revenue: {{ (ytd_projected)|usd(0) }}
+YTD Loan Volume: {{ (ytd_loan_volume)|usd(0) }}
 Loans Funded: {{ revenues|selectattr('status','equalto','funded')|list|length }}
 Loans in Pipeline: {{ revenues|selectattr('status','equalto','projected')|list|length }}
-YTD Expenses: ${{ "{:,.0f}".format(ytd_expenses) }}
-Net Income: ${{ "{:,.0f}".format(net_income) }}
-{% if goals %}Goals, Revenue: ${{ "{:,.0f}".format(goals[0].revenue_goal or 0) }}, Loans: {{ goals[0].loan_count_goal or 0 }}, Volume: ${{ "{:,.0f}".format(goals[0].loan_volume_goal or 0) }}, Expense Budget: ${{ "{:,.0f}".format(goals[0].expenses_budget or 0) }}{% else %}No goals set yet.{% endif %}
+YTD Expenses: {{ (ytd_expenses)|usd(0) }}
+Net Income: {{ (net_income)|usd(0) }}
+{% if goals %}Goals, Revenue: {{ (goals[0].revenue_goal or 0)|usd(0) }}, Loans: {{ goals[0].loan_count_goal or 0 }}, Volume: {{ (goals[0].loan_volume_goal or 0)|usd(0) }}, Expense Budget: {{ (goals[0].expenses_budget or 0)|usd(0) }}{% else %}No goals set yet.{% endif %}
 Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None logged' }}`;
 
 // Auto-load insights

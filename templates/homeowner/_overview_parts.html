@@ -59,11 +59,11 @@
   <small class="lbl">Your home's value</small>
   {% if hv.address %}<div class="addr">{{ hv.address }}</div>{% endif %}
   {% if hv.state == 'value' %}
-    <div class="big">${{ "{:,.0f}".format(hv.value) }}</div>
-    {% if hv.low and hv.high %}<div class="range">Likely range ${{ "{:,.0f}".format(hv.low) }} to ${{ "{:,.0f}".format(hv.high) }}</div>{% endif %}
-    {% if hv.change is not none %}<span class="chg {{ 'up' if hv.change >= 0 else 'down' }}">{% if hv.change >= 0 %}&#9650;{% else %}&#9660;{% endif %} ${{ "{:,.0f}".format(hv.change|abs) }} ({{ "{:+.1f}".format(hv.pct) }}%) since {{ hv.since }}</span>{% endif %}
+    <div class="big">{{ (hv.value)|usd(0) }}</div>
+    {% if hv.low and hv.high %}<div class="range">Likely range {{ (hv.low)|usd(0) }} to {{ (hv.high)|usd(0) }}</div>{% endif %}
+    {% if hv.change is not none %}<span class="chg {{ 'up' if hv.change >= 0 else 'down' }}">{% if hv.change >= 0 %}&#9650;{% else %}&#9660;{% endif %} {{ (hv.change|abs)|usd(0) }} ({{ "{:+.1f}".format(hv.pct) }}%) since {{ hv.since }}</span>{% endif %}
     {% if hv.spark %}<svg viewBox="0 0 260 56" preserveAspectRatio="none" role="img" aria-label="Your home's value over time"><path d="{{ hv.spark }}" fill="none" stroke="#A47551" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>{% endif %}
-    {% if hv.equity is not none %}<div class="eq">Your equity: <b>${{ "{:,.0f}".format(hv.equity) }}</b></div>{% endif %}
+    {% if hv.equity is not none %}<div class="eq">Your equity: <b>{{ (hv.equity)|usd(0) }}</b></div>{% endif %}
     <p class="src">{{ hv.source_note }}</p>
   {% elif hv.state == 'pending' %}
     <div class="big" style="font-size:1.6rem;">We're finding your home's value</div>
@@ -166,9 +166,9 @@
   <h2>Your home's numbers</h2>
   <p class="ho-sub">{{ x.props[0].address }}</p>
   <div class="ho-stats">
-    <div class="ho-stat"><b>{% if snapshot and snapshot.get('value_estimate') %}${{ "{:,.0f}".format(snapshot.get('value_estimate')) }}{% else %}<a href="{{ url_for('homeowner_value_equity_overview') }}">Add</a>{% endif %}</b><span>Value</span></div>
-    <div class="ho-stat"><b>{% if snapshot and snapshot.get('equity_estimate') %}${{ "{:,.0f}".format(snapshot.get('equity_estimate')) }}{% else %}<a href="{{ url_for('homeowner_value_equity_overview') }}">Add loan</a>{% endif %}</b><span>Equity</span></div>
-    <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_payment') %}${{ "{:,.0f}".format(snapshot.get('loan_payment')) }}{% else %}&ndash;{% endif %}</b><span>Monthly payment</span></div>
+    <div class="ho-stat"><b>{% if snapshot and snapshot.get('value_estimate') %}{{ (snapshot.get('value_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_value_equity_overview') }}">Add</a>{% endif %}</b><span>Value</span></div>
+    <div class="ho-stat"><b>{% if snapshot and snapshot.get('equity_estimate') %}{{ (snapshot.get('equity_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_value_equity_overview') }}">Add loan</a>{% endif %}</b><span>Equity</span></div>
+    <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_payment') %}{{ (snapshot.get('loan_payment'))|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Monthly payment</span></div>
     <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_rate') %}{{ "{:.2f}".format(snapshot.get('loan_rate')) }}%{% else %}&ndash;{% endif %}</b><span>Rate</span></div>
   </div>
   <p style="margin:.9rem 0 0;text-align:center;"><a class="btn btn-secondary" href="{{ url_for('homeowner_value_equity_overview') }}" style="display:inline-block;">See value and what-ifs</a></p>
@@ -180,18 +180,18 @@
   <h2>Your properties</h2>
   <p class="ho-sub">Add the monthly rent and any other costs (HOA, repairs, management) to see your cash flow. It already counts your payment, taxes and insurance when you've added them.</p>
   <div class="ho-stats" style="margin-bottom:.4rem;">
-    <div class="ho-stat"><b>${{ "{:,.0f}".format(x.total_value) }}</b><span>Total value</span></div>
-    <div class="ho-stat"><b>${{ "{:,.0f}".format(x.total_equity) }}</b><span>Total equity</span></div>
-    <div class="ho-stat"><b>{% if x.total_rent %}${{ "{:,.0f}".format(x.total_rent) }}{% else %}&ndash;{% endif %}</b><span>Monthly rent</span></div>
-    <div class="ho-stat"><b class="{{ 'ho-pos' if x.total_cash_flow is not none and x.total_cash_flow >= 0 else ('ho-neg' if x.total_cash_flow is not none) }}">{% if x.total_cash_flow is not none %}{{ '-' if x.total_cash_flow < 0 }}${{ "{:,.0f}".format(x.total_cash_flow|abs) }}{% else %}&ndash;{% endif %}</b><span>Monthly cash flow</span></div>
+    <div class="ho-stat"><b>{{ (x.total_value)|usd(0) }}</b><span>Total value</span></div>
+    <div class="ho-stat"><b>{{ (x.total_equity)|usd(0) }}</b><span>Total equity</span></div>
+    <div class="ho-stat"><b>{% if x.total_rent %}{{ (x.total_rent)|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Monthly rent</span></div>
+    <div class="ho-stat"><b class="{{ 'ho-pos' if x.total_cash_flow is not none and x.total_cash_flow >= 0 else ('ho-neg' if x.total_cash_flow is not none) }}">{% if x.total_cash_flow is not none %}{{ '-' if x.total_cash_flow < 0 }}{{ (x.total_cash_flow|abs)|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Monthly cash flow</span></div>
   </div>
   {% for p in x.props %}
   <div class="ho-prop">
     <h3>{{ p.address }}{% if p.is_primary %} <small>Main home</small>{% endif %}</h3>
     <div class="ho-stats">
-      <div class="ho-stat"><b>{% if p.value_estimate %}${{ "{:,.0f}".format(p.value_estimate) }}{% else %}&ndash;{% endif %}</b><span>Value</span></div>
-      <div class="ho-stat"><b>{% if p.equity is not none %}${{ "{:,.0f}".format(p.equity) }}{% else %}&ndash;{% endif %}</b><span>Equity</span></div>
-      <div class="ho-stat"><b class="{{ 'ho-pos' if p.cash_flow is not none and p.cash_flow >= 0 else ('ho-neg' if p.cash_flow is not none) }}">{% if p.cash_flow is not none %}{{ '-' if p.cash_flow < 0 }}${{ "{:,.0f}".format(p.cash_flow|abs) }}{% else %}&ndash;{% endif %}</b><span>Cash flow / mo</span></div>
+      <div class="ho-stat"><b>{% if p.value_estimate %}{{ (p.value_estimate)|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Value</span></div>
+      <div class="ho-stat"><b>{% if p.equity is not none %}{{ (p.equity)|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Equity</span></div>
+      <div class="ho-stat"><b class="{{ 'ho-pos' if p.cash_flow is not none and p.cash_flow >= 0 else ('ho-neg' if p.cash_flow is not none) }}">{% if p.cash_flow is not none %}{{ '-' if p.cash_flow < 0 }}{{ (p.cash_flow|abs)|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Cash flow / mo</span></div>
     </div>
     <form method="post" action="{{ url_for('homeowner_home.save_rental', property_id=p.id) }}" class="ho-rent">
       <div><label for="rent{{ p.id }}">Monthly rent</label><input class="form-input" id="rent{{ p.id }}" name="monthly_rent" inputmode="decimal" placeholder="0" value="{{ '%.0f'|format(p.monthly_rent) if p.monthly_rent }}"></div>

@@ -124,7 +124,7 @@ def lender_subscription():
         user=user_dict,
         profile=profile,
         current_tier=current_tier,
-        tiers=SUBSCRIPTION_TIERS,
+        tiers=__import__('stripe_payments').live_tiers(),
         stripe_configured=stripe_configured,
     )
 

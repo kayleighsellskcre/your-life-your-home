@@ -21,9 +21,9 @@ SUBSCRIPTION_TIERS = {
         "features": [
             "Unlimited CRM contacts",
             "Unlimited transactions",
-            "AI Concierge (lead qualification)",
+            "AI Concierge with your own name and branding",
             "Full Marketing Hub",
-            "All Power Tools (CMA, Farming, Scripts)",
+            "Follow-ups, weekly planner and booking page",
             "Seasonal checklists & invoicing",
             "Referral tracking",
             "Priority email support",
@@ -37,12 +37,9 @@ SUBSCRIPTION_TIERS = {
         "price_env_key": "STRIPE_ELITE_PRICE_ID",
         "features": [
             "Everything in Professional",
-            "Custom branding & white-label concierge",
-            "Advanced farming & geo mailers",
-            "Featured partner directory listing",
             "Early access to new features",
             "Dedicated onboarding support",
-            "Revenue share on referred subscriptions",
+            "Featured partner directory listing (coming soon)",
             "Multiple team member seats (coming soon)",
         ]
     }

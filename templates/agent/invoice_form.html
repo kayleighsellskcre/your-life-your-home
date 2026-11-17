@@ -140,7 +140,7 @@
  <div class="if-topbar">
  <div>
  <h1 class="if-topbar__title">{{ 'Edit Invoice' if mode=='edit' else 'New Invoice' }}</h1>
- <div class="if-topbar__sub">Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts</div>
+ <div class="if-topbar__sub">{{ biz.line }}</div>
  </div>
  <div style="display:flex;gap:.5rem;">
  <a href="{{ url_for('agent_invoices') }}" class="if-btn if-btn--ghost">← Back</a>
@@ -233,10 +233,10 @@
  {% if items %}
  {% for item in items %}
  <tr class="item-row">
- <td><input type="text" name="item_desc[]" class="item-input" value="{{ item.description }}" placeholder="e.g. Custom Cabinet Design - Kitchen" required></td>
+ <td><input type="text" name="item_desc[]" class="item-input" value="{{ item.description }}" placeholder="e.g. Consultation, Staging, Photography" required></td>
  <td><input type="number" name="item_qty[]" class="item-input item-input--num" value="{{ item.quantity }}" min="0" step="0.01" oninput="calcRow(this)"></td>
  <td><input type="number" name="item_price[]" class="item-input item-input--price" value="{{ item.unit_price }}" min="0" step="0.01" oninput="calcRow(this)"></td>
- <td><span class="item-amount">${{ "{:,.2f}".format(item.amount) }}</span></td>
+ <td><span class="item-amount">{{ (item.amount)|usd(2) }}</span></td>
  <td><button type="button" class="del-row" onclick="delRow(this)" title="Remove">×</button></td>
  </tr>
  {% endfor %}
@@ -364,9 +364,9 @@
  <div class="if-card__body">
  <label class="if-label-sm">Client Notes (shown on invoice)</label>
  <textarea name="notes" class="if-input-sm" rows="3"
- placeholder="e.g. Thank you for choosing Kayleigh Biggs Custom Cabinetry!">{{ invoice.notes if invoice else '' }}</textarea>
+ placeholder="e.g. Thank you for choosing me. It was a pleasure working with you!">{{ invoice.notes if invoice else '' }}</textarea>
  <label class="if-label-sm">Payment Terms</label>
- <textarea name="terms" class="if-input-sm" rows="3">{{ invoice.terms if invoice else 'Payment due within 30 days of invoice date.\n\nNote: In KC Metro area. Further away will be an additional cost. We are not responsible for wrong measurements if onsite measurements are not done. Our/your cabinet maker will remeasure before constructing.' }}</textarea>
+ <textarea name="terms" class="if-input-sm" rows="3" placeholder="How should they pay? For example: Venmo @yourname, a check made out to you, or Zelle to your phone number.">{{ invoice.terms if invoice else 'Payment due within 30 days of invoice date.' }}</textarea>
  </div>
  </div>
 

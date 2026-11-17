@@ -249,7 +249,7 @@
  <img src="{% if profile.professional_photo.startswith('data:') %}{{ profile.professional_photo }}{% elif profile.professional_photo.startswith('http') %}{{ profile.professional_photo }}{% else %}{{ url_for('static', filename=profile.professional_photo) }}{% endif %}" alt="Professional Photo" id="photo-preview" style="max-height: 150px; width: auto; object-fit: contain;">
  <div>
  <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Photo</p>
- <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;"> Permanently saved - never disappears on redeploy</p>
+ <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;"> Saved. It will stay on your profile.</p>
  </div>
  </div>
  {% else %}
@@ -277,7 +277,7 @@
  <img src="{% if profile.brokerage_logo.startswith('data:') %}{{ profile.brokerage_logo }}{% elif profile.brokerage_logo.startswith('http') %}{{ profile.brokerage_logo }}{% else %}{{ url_for('static', filename=profile.brokerage_logo) }}{% endif %}" alt="Brokerage Logo" id="logo-preview" style="max-height: 120px; width: auto; object-fit: contain;">
  <div>
  <p style="font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem;">Current Logo</p>
- <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;"> Permanently saved - never disappears on redeploy</p>
+ <p style="font-size: 0.85rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;"> Saved. It will stay on your profile.</p>
  </div>
  </div>
  {% else %}

@@ -74,7 +74,7 @@
  </div>
  <div class="d-flex justify-content-between align-items-center">
  <span class="text-muted small">Monthly Fee</span>
- <strong class="text-success">${{ "{:,.0f}".format(vendor.monthly_fee) }}/mo</strong>
+ <strong class="text-success">{{ (vendor.monthly_fee)|usd(0) }}/mo</strong>
  </div>
  </div>
 
@@ -119,7 +119,7 @@
  </div>
  <div class="col-auto">
  <h2 class="mb-0 text-success">
- ${{ "{:,.0f}".format(vendors|sum(attribute='monthly_fee')|default(0, true)) }}
+ {{ (vendors|sum(attribute='monthly_fee')|default(0, true))|usd(0) }}
  </h2>
  </div>
  </div>

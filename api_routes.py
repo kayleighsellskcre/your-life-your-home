@@ -180,13 +180,14 @@ def api_agent_dashboard_metrics_refresh():
             "new_leads":      metrics.get("new_leads", 0),
             "active_deals":   len(txns),
             "followups_today": metrics.get("followups_today", 0),
+            "total_contacts": metrics.get("total_contacts", 0),
         })
         resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
         resp.headers["Pragma"] = "no-cache"
         return resp
     except Exception as e:
         print(f"[dashboard-metrics] Error: {e}")
-        return jsonify({"new_leads": 0, "active_deals": 0, "followups_today": 0})
+        return jsonify({"new_leads": 0, "active_deals": 0, "followups_today": 0, "total_contacts": 0})
 
 
 @route("/api/ai/dashboard-briefing", methods=["POST"])

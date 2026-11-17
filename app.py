@@ -280,6 +280,11 @@ get_db_connection = get_connection
 # Initialize DBs so platform loads with no manual trigger
 init_db()
 try:
+    from database import fix_saved_zip_codes
+    fix_saved_zip_codes()     # old imports saved ZIPs like "66062.0"
+except Exception as _e:
+    print(f"[startup] ZIP cleanup skipped: {_e}")
+try:
     from database import ensure_rbac_tables
     ensure_rbac_tables()
     from database import ensure_indexes
@@ -507,6 +512,11 @@ def _security_headers(response):
     return response
 
 # ── Custom Jinja2 filters ────────────────────────────────────────────────────
+from mileage import usd as _usd, rate_label as _rate_label
+app.jinja_env.filters["usd"] = _usd                  # -154 -> "-$154"
+app.jinja_env.filters["rate_label"] = _rate_label    # 0.725 -> "$0.725"
+
+
 @app.template_filter("min")
 def jinja_min(value):
     """Return the minimum of an iterable (Jinja2 doesn't have |min built-in)."""
@@ -2331,6 +2341,7 @@ def get_agent_dashboard_metrics(user_id):
             "new_leads": 0,
             "active_transactions": 0,
             "followups_today": 0,
+            "total_contacts": 0,
             # aliases used by ai_dashboard_briefing
             "active": 0,
             "needs_followup": 0,
@@ -2343,6 +2354,7 @@ def get_agent_dashboard_metrics(user_id):
     _c = get_connection()
     try:
         new_leads = _c.execute("SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id = ? AND stage = 'new'", (user_id,)).fetchone()[0]
+        total_contacts = _c.execute("SELECT COUNT(*) FROM agent_contacts WHERE agent_user_id = ?", (user_id,)).fetchone()[0]
         followups = _c.execute(
             """SELECT COUNT(*) FROM agent_contacts
                WHERE agent_user_id = ? AND LOWER(COALESCE(stage, '')) NOT IN ('closed', 'hold', 'past')
@@ -2355,6 +2367,7 @@ def get_agent_dashboard_metrics(user_id):
 
     return {
         "new_leads":          new_leads,
+        "total_contacts":     total_contacts,
         "active_transactions": active_tx,
         "followups_today":    followups,
         # aliases so ai_dashboard_briefing gets real numbers
@@ -4126,6 +4139,34 @@ def _admin_session_user():
 # AI CONCIERGE ROUTES
 # -------------------------------------------------
 
+def _invoice_sender(user):
+    """Who an invoice is from: the signed-in agent's own name, business, phone and email. Nothing is hard-coded."""
+    try:
+        from database import get_user_profile
+        p = get_user_profile(user["id"]) or {}
+    except Exception:
+        p = {}
+    name = (user.get("name") or user.get("full_name") or "").strip() or "Your name"
+    business = (p.get("team_name") or p.get("brokerage_name") or "").strip()
+    return {"name": name, "business": business, "phone": (p.get("phone") or "").strip(),
+            "email": (user.get("email") or "").strip(), "line": f"{name}, {business}" if business else name}
+
+
+def _concierge_agent_id(token):
+    """The agent a concierge link belongs to, found by the random code in the link. None if the code is unknown."""
+    token = str(token or "").strip()
+    if not token or token.isdigit():
+        return None
+    conn = get_connection()
+    try:
+        row = conn.execute(
+            """SELECT p.user_id FROM user_profiles p JOIN users u ON u.id = p.user_id
+               WHERE p.referral_code = ? AND u.role = 'agent'""", (token,)).fetchone()
+        return row[0] if row else None
+    finally:
+        conn.close()
+
+
 # Public-facing homeowner concierge chat
 @app.route("/concierge/<agent_token>")
 def concierge_landing(agent_token):
@@ -4137,11 +4178,11 @@ def concierge_landing(agent_token):
     conn = get_connection()
     cur = conn.cursor()
     
-    # Try to find agent by token (for now, use agent ID)
+    # The link carries a random code (the agent's referral code), so nobody can guess other agents' pages by counting.
     try:
-        agent_id = int(agent_token)
-        cur.execute("SELECT id, name FROM users WHERE id = ? AND role = 'agent'", (agent_id,))
-        agent = row_to_dict(cur.fetchone())
+        agent_id = _concierge_agent_id(agent_token)
+        cur.execute("SELECT id, name FROM users WHERE id = ? AND role = 'agent'", (agent_id,)) if agent_id else None
+        agent = row_to_dict(cur.fetchone()) if agent_id else None
     except Exception:
         agent = None
     
@@ -4159,11 +4200,18 @@ def concierge_landing(agent_token):
         settings = {
             'branding_name': 'Your Home Concierge',
             'branding_tagline': 'Answers, guidance, and trusted local connections',
-            'primary_color': '#1a1a1a',
-            'secondary_color': '#f5f5f5',
+            'primary_color': '#6B4A33',
+            'secondary_color': '#F6F2E8',
             'welcome_message': 'How can I help you with your home today?'
         }
     
+    try:
+        from database import get_user_profile
+        _p = get_user_profile(agent['id']) or {}
+    except Exception:
+        _p = {}
+    agent['brokerage'] = (_p.get('team_name') or _p.get('brokerage_name') or '').strip()
+    agent['photo'] = (_p.get('professional_photo') or '').strip()
     return render_template(
         'concierge/landing.html',
         agent=agent,
@@ -4181,9 +4229,8 @@ def concierge_chat(agent_token):
     from ai_concierge import ConciergeAI
     
     # Get agent
-    try:
-        agent_id = int(agent_token)
-    except Exception:
+    agent_id = _concierge_agent_id(agent_token)
+    if not agent_id:
         return jsonify({"error": "Invalid agent"}), 404
     
     # Get message and session

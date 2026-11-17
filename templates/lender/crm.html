@@ -304,7 +304,7 @@
  <div class="stat-card-clickable" onclick="openStatModal('deals')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
  <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Active Deals</h3>
  <div style="font-size: 1.75rem; font-weight: 600; color: var(--olive-green); margin-bottom: 0.1rem;">{{ stats.total_deals }}</div>
- <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">${{ "{:,.0f}".format(stats.pipeline_value|default(0)) }} pipeline</p>
+ <p style="font-size: 0.7rem; color: var(--charcoal-brown); opacity: 0.7; margin: 0;">{{ (stats.pipeline_value|default(0))|usd(0) }} pipeline</p>
  </div>
  {% else %}
  <div class="stat-card-clickable" onclick="openStatModal('automation')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
@@ -427,7 +427,7 @@
  {% if borrower.loan_amount %}
  <div class="info-item">
  <strong>Loan Amount:</strong>
- <span>${{ "{:,.0f}".format(borrower.loan_amount) }}</span>
+ <span>{{ (borrower.loan_amount)|usd(0) }}</span>
  </div>
  {% endif %}
  {% if borrower.loan_rate %}
@@ -529,7 +529,7 @@
  <div style="flex: 1;">
  <div style="font-weight: 600; color: var(--charcoal-brown); font-size: 0.85rem;">{{ deal.deal_name }}</div>
  {% if deal.deal_value %}
- <div style="font-size: 0.75rem; color: var(--olive-green); font-weight: 600;">${{ "{:,.0f}".format(deal.deal_value) }}</div>
+ <div style="font-size: 0.75rem; color: var(--olive-green); font-weight: 600;">{{ (deal.deal_value)|usd(0) }}</div>
  {% endif %}
  </div>
  <span style="padding: 0.2rem 0.5rem; background: rgba(163,123,88, 0.2); color: var(--charcoal-brown); border-radius: var(--border-radius); font-size: 0.7rem; font-weight: 600; text-transform: capitalize;">{{ deal.stage|replace('_', ' ') }}</span>

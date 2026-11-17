@@ -114,15 +114,15 @@
  <div style="padding:1rem 1.5rem;background:white;border-bottom:1px solid rgba(107,91,77,.1)">
  <div class="kpi-row">
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</div>
+ <div class="kpi-box__val">{% if profile.value_estimate %}{{ (profile.value_estimate)|usd(0) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Home Value</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val green">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</div>
+ <div class="kpi-box__val green">{% if profile.equity_estimate %}{{ (profile.equity_estimate)|usd(0) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Equity</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</div>
+ <div class="kpi-box__val">{% if profile.loan_balance %}{{ (profile.loan_balance)|usd(0) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Loan Balance</div>
  </div>
  <div class="kpi-box">
@@ -148,11 +148,11 @@
  <div class="panel__body">
  <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '-' }}</span></div>
  <div class="data-row"><span class="data-row__label">Type</span><span class="data-row__val">{{ profile.property_type or '-' }}</span></div>
- <div class="data-row"><span class="data-row__label">Estimated Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#6F543C">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Estimated Value</span><span class="data-row__val">{% if profile.value_estimate %}{{ (profile.value_estimate)|usd(0) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#6F543C">{% if profile.equity_estimate %}{{ (profile.equity_estimate)|usd(0) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}{{ (profile.loan_balance)|usd(0) }}{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}{{ (profile.loan_payment)|usd(0) }}{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Last Refreshed</span><span class="data-row__val">{{ (profile.last_value_refresh or '-')[:10] }}</span></div>
  </div>
  </div>
@@ -186,7 +186,7 @@
  <a href="{{ url_for('agent_crm') }}#contact-{{ crm_contact.id }}" style="font-size:.78rem;color:#6B5B4D;text-decoration:underline">Open in CRM →</a>
  </div>
  {% else %}
- <div class="empty-panel">No CRM record linked yet.<br><small>This client signed up before CRM linking was added, or via a different path.</small></div>
+ <div class="empty-panel">No CRM record linked yet.<br><small>This client is not in your contact list yet. Add them to your CRM to see their history here.</small></div>
  {% endif %}
  </div>
  </div>
@@ -259,7 +259,7 @@
  {% for proj in projects %}
  <li>
  <span class="item-name">{{ proj.name or 'Project' }}</span>
- <span class="item-meta">{{ proj.status or '' }}{% if proj.budget %} · ${{ "{:,.0f}".format(proj.budget) }}{% endif %}</span>
+ <span class="item-meta">{{ proj.status or '' }}{% if proj.budget %} · {{ (proj.budget)|usd(0) }}{% endif %}</span>
  </li>
  {% endfor %}
  </ul>
@@ -298,8 +298,8 @@
  <li>
  <span class="item-name">{{ snap.snapshot_date or '-' }}</span>
  <span class="item-meta">
- {% if snap.value_estimate %}${{ "{:,.0f}".format(snap.value_estimate) }} value · {% endif %}
- {% if snap.equity_estimate %}${{ "{:,.0f}".format(snap.equity_estimate) }} equity{% endif %}
+ {% if snap.value_estimate %}{{ (snap.value_estimate)|usd(0) }} value · {% endif %}
+ {% if snap.equity_estimate %}{{ (snap.equity_estimate)|usd(0) }} equity{% endif %}
  </span>
  </li>
  {% endfor %}

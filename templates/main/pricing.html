@@ -13,6 +13,8 @@
   .pr-card ul { margin: 0; padding-left: 1.1rem; color: #3A2518; font-size: .95rem; line-height: 1.5; }
   .pr-btns { margin-top: 1.6rem; display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
   .pr-btn { display: inline-block; padding: .85rem 1.8rem; border-radius: 99px; background: #8F6244; color: #fff !important; font-weight: 700; text-decoration: none; }
+  .pr-now { border-color: #8F6244; box-shadow: 0 4px 24px rgba(143,98,68,.25); }
+  .pr-here { font-size: .7rem; background: #8F6244; color: #fff; padding: .15rem .5rem; border-radius: 99px; vertical-align: middle; margin-left: .3rem; }
   .pr-note { color: #7A6855; font-size: .9rem; margin-top: 1rem; }
 </style>
 <div class="pr-w">
@@ -21,8 +23,12 @@
   <div class="pr-grid">
     <div class="pr-card"><h2>Homeowners</h2><p class="pr-price">Free</p><p class="pr-who">Always</p>
       <ul><li>Home value and equity</li><li>Next steps for your house</li><li>Your agent and lender in one place</li></ul></div>
+    {% if role in ('agent', 'lender') or not role %}
+    <div class="pr-card{{ ' pr-now' if current_tier == 'free' }}"><h2>Starter{% if current_tier == 'free' %} <span class="pr-here">Your plan</span>{% endif %}</h2><p class="pr-price">Free</p><p class="pr-who">For agents and lenders</p>
+      <ul><li>CRM up to 50 contacts</li><li>5 active transactions</li><li>Basic email templates</li><li>Referral link page</li><li>Works in your phone's web browser</li></ul></div>
+    {% endif %}
     {% for t in tiers %}
-    <div class="pr-card"><h2>{{ t.name }}</h2><p class="pr-price">{{ t.price_display }}</p><p class="pr-who">For agents and lenders</p>
+    <div class="pr-card{{ ' pr-now' if current_tier == t.key }}"><h2>{{ t.name }}{% if current_tier == t.key %} <span class="pr-here">Your plan</span>{% endif %}</h2><p class="pr-price">{{ t.price_display }}</p><p class="pr-who">For agents and lenders</p>
       <ul>{% for f in t.features %}<li>{{ f }}</li>{% endfor %}</ul></div>
     {% endfor %}
   </div>

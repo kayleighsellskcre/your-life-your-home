@@ -73,15 +73,15 @@
 
  <div class="kpi-row">
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</div>
+ <div class="kpi-box__val">{% if profile.value_estimate %}{{ (profile.value_estimate)|usd(0) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Home Value</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val green">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</div>
+ <div class="kpi-box__val green">{% if profile.equity_estimate %}{{ (profile.equity_estimate)|usd(0) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Equity</div>
  </div>
  <div class="kpi-box">
- <div class="kpi-box__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</div>
+ <div class="kpi-box__val">{% if profile.loan_balance %}{{ (profile.loan_balance)|usd(0) }}{% else %} - {% endif %}</div>
  <div class="kpi-box__label">Loan Balance</div>
  </div>
  <div class="kpi-box">
@@ -105,11 +105,11 @@
  <div class="panel__title"> Property & Loan Data</div>
  <div class="panel__body">
  <div class="data-row"><span class="data-row__label">Address</span><span class="data-row__val">{{ profile.property_address or '-' }}</span></div>
- <div class="data-row"><span class="data-row__label">Est. Value</span><span class="data-row__val">{% if profile.value_estimate %}${{ "{:,.0f}".format(profile.value_estimate) }}{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#6F543C">{% if profile.equity_estimate %}${{ "{:,.0f}".format(profile.equity_estimate) }}{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}${{ "{:,.0f}".format(profile.loan_balance) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Est. Value</span><span class="data-row__val">{% if profile.value_estimate %}{{ (profile.value_estimate)|usd(0) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Equity</span><span class="data-row__val" style="color:#6F543C">{% if profile.equity_estimate %}{{ (profile.equity_estimate)|usd(0) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Loan Balance</span><span class="data-row__val">{% if profile.loan_balance %}{{ (profile.loan_balance)|usd(0) }}{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Rate</span><span class="data-row__val">{% if profile.loan_rate %}{{ profile.loan_rate }}%{% else %} - {% endif %}</span></div>
- <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}${{ "{:,.0f}".format(profile.loan_payment) }}{% else %} - {% endif %}</span></div>
+ <div class="data-row"><span class="data-row__label">Monthly Payment</span><span class="data-row__val">{% if profile.loan_payment %}{{ (profile.loan_payment)|usd(0) }}{% else %} - {% endif %}</span></div>
  <div class="data-row"><span class="data-row__label">Loan Term</span><span class="data-row__val">{% if profile.loan_term_years %}{{ profile.loan_term_years }} yrs{% else %} - {% endif %}</span></div>
  </div>
  </div>
@@ -176,7 +176,7 @@
  {% if tx.current_stage %}<span class="tx-stage">{{ tx.current_stage }}</span>{% endif %}
  </div>
  <div style="font-size:.75rem;color:#6B5B4D">
- {% if tx.purchase_price %}${{ "{:,.0f}".format(tx.purchase_price) }} · {% endif %}
+ {% if tx.purchase_price %}{{ (tx.purchase_price)|usd(0) }} · {% endif %}
  {% if tx.agent_name %}Agent: {{ tx.agent_name }} · {% endif %}
  Close: {{ tx.target_close_date or '-' }}
  </div>
@@ -198,8 +198,8 @@
  <li>
  <span class="item-name">{{ snap.snapshot_date or '-' }}</span>
  <span class="item-meta">
- {% if snap.value_estimate %}${{ "{:,.0f}".format(snap.value_estimate) }}{% endif %}
- {% if snap.equity_estimate %} · ${{ "{:,.0f}".format(snap.equity_estimate) }} equity{% endif %}
+ {% if snap.value_estimate %}{{ (snap.value_estimate)|usd(0) }}{% endif %}
+ {% if snap.equity_estimate %} · {{ (snap.equity_estimate)|usd(0) }} equity{% endif %}
  {% if snap.loan_rate %} · {{ snap.loan_rate }}%{% endif %}
  </span>
  </li>

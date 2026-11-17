@@ -734,9 +734,13 @@
 {% endif %}
 {% if stats.needs_followup|default(0) > 0 %}
 <a class="crm-nudge crm-fu crm-fu1" href="{{ url_for('followups.followups_page') }}">
- <span><b>{{ stats.needs_followup }}</b> {{ 'person is' if stats.needs_followup == 1 else 'people are' }} waiting to hear from you.</span>
+ <span><b>{{ stats.needs_followup }}</b> {{ 'follow-up is' if stats.needs_followup == 1 else 'follow-ups are' }} due for you today or earlier.</span>
  <span class="crm-nudge-go">Open Follow-ups &rsaquo;</span>
 </a>
+{% elif stats.quiet|default(0) > 0 %}
+<div class="crm-nudge crm-fu crm-fu1" style="cursor:default;">
+ <span>Nothing is due today. <b>{{ stats.quiet }}</b> {{ 'person has' if stats.quiet == 1 else 'people have' }} not heard from you in {{ stats.follow_up_days }} days, if you would like to say hello.</span>
+</div>
 {% endif %}
 
 <!-- ── CONTACT CARD ───────────────────────────── -->
@@ -922,8 +926,8 @@
  <td class="c-td exp-cell" colspan="9">
  <div class="exp-grid">
  {% if contact.property_address %}<div class="exp-field"><span class="exp-key">Property</span>{{ contact.property_address }}</div>{% endif %}
- {% if contact.property_value %}<div class="exp-field"><span class="exp-key">Value</span>${{ "{:,.0f}".format(contact.property_value) }}</div>{% endif %}
- {% if contact.equity_estimate %}<div class="exp-field"><span class="exp-key">Equity</span><span style="color:#8A6D2F;font-weight:700;">${{ "{:,.0f}".format(contact.equity_estimate) }}</span></div>{% endif %}
+ {% if contact.property_value %}<div class="exp-field"><span class="exp-key">Value</span>{{ (contact.property_value)|usd(0) }}</div>{% endif %}
+ {% if contact.equity_estimate %}<div class="exp-field"><span class="exp-key">Equity</span><span style="color:#8A6D2F;font-weight:700;">{{ (contact.equity_estimate)|usd(0) }}</span></div>{% endif %}
  {% if contact.zip_code %}<div class="exp-field"><span class="exp-key">ZIP</span>{{ contact.zip_code }}</div>{% endif %}
  {% if contact.home_anniversary %}<div class="exp-field"><span class="exp-key">Anniversary</span>{{ contact.home_anniversary }}</div>{% endif %}
  {% if contact.interaction_count > 0 %}<div class="exp-field"><span class="exp-key">Interactions</span>{{ contact.interaction_count }}</div>{% endif %}

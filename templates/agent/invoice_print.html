@@ -3,7 +3,7 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1">
- <title>Invoice {{ invoice.invoice_number }} - Kayleigh Biggs Custom Cabinetry</title>
+ <title>Invoice {{ invoice.invoice_number }} - {{ biz.name }}</title>
  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet">
  <style>
  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -380,11 +380,8 @@
  <!-- HEADER -->
  <div class="inv-header">
  <div class="brand-block">
- <div class="brand-name">Kayleigh Biggs</div>
- <div class="brand-tagline">Custom Cabinetry &amp; Visual Layouts</div>
- <div class="brand-quote">
- Each design is carefully curated with intention, balancing seamless functionality and refined aesthetics. We take pride in delivering cabinetry and layouts that reflect exceptional care, detail, and timeless beauty!
- </div>
+ <div class="brand-name">{{ biz.name }}</div>
+ {% if biz.business %}<div class="brand-tagline">{{ biz.business }}</div>{% endif %}
  </div>
  <div class="inv-meta">
  <div class="inv-label">Invoice</div>
@@ -426,11 +423,11 @@
  </div>
  <div class="inv-party">
  <div class="party-label">Bill From</div>
- <div class="party-name">Kayleigh Biggs</div>
+ <div class="party-name">{{ biz.name }}</div>
  <div class="party-detail">
- Custom Cabinetry &amp; Visual Layouts<br>
- <a href="tel:7852491464">785.249.1464</a><br>
- <a href="mailto:kayleighsellskcre@gmail.com">kayleighsellskcre@gmail.com</a>
+ {% if biz.business %}{{ biz.business }}<br>{% endif %}
+ {% if biz.phone %}<a href="tel:{{ biz.phone }}">{{ biz.phone }}</a><br>{% endif %}
+ {% if biz.email %}<a href="mailto:{{ biz.email }}">{{ biz.email }}</a>{% endif %}
  </div>
  </div>
  </div>
@@ -452,8 +449,8 @@
  <tr>
  <td class="item-desc">{{ item.description }}</td>
  <td class="item-qty">{{ item.quantity|int if item.quantity == item.quantity|int else item.quantity }}</td>
- <td class="item-rate">${{ "{:,.2f}".format(item.unit_price or 0) }}</td>
- <td class="item-amount">${{ "{:,.2f}".format(item.amount or 0) }}</td>
+ <td class="item-rate">{{ (item.unit_price or 0)|usd(2) }}</td>
+ <td class="item-amount">{{ (item.amount or 0)|usd(2) }}</td>
  </tr>
  {% endfor %}
  {% if not items %}
@@ -468,23 +465,23 @@
  <div class="totals-box">
  <div class="tot-row">
  <span class="tot-label">Subtotal</span>
- <span class="tot-val">${{ "{:,.2f}".format(invoice.subtotal or 0) }}</span>
+ <span class="tot-val">{{ (invoice.subtotal or 0)|usd(2) }}</span>
  </div>
  {% if invoice.tax_rate %}
  <div class="tot-row">
  <span class="tot-label">Tax ({{ invoice.tax_rate }}%)</span>
- <span class="tot-val">${{ "{:,.2f}".format(invoice.tax_amount or 0) }}</span>
+ <span class="tot-val">{{ (invoice.tax_amount or 0)|usd(2) }}</span>
  </div>
  {% endif %}
  {% if invoice.discount_amount %}
  <div class="tot-row">
  <span class="tot-label">Discount</span>
- <span class="tot-val" style="color:var(--green)">-${{ "{:,.2f}".format(invoice.discount_amount or 0) }}</span>
+ <span class="tot-val" style="color:var(--green)">-{{ (invoice.discount_amount or 0)|usd(2) }}</span>
  </div>
  {% endif %}
  <div class="tot-row tot-row--total">
  <span class="tot-label">Total Due</span>
- <span class="tot-val">${{ "{:,.2f}".format(invoice.total or 0) }}</span>
+ <span class="tot-val">{{ (invoice.total or 0)|usd(2) }}</span>
  </div>
  </div>
  </div>
@@ -501,43 +498,25 @@
  {% endif %}
  </div>
 
- <!-- Payment Options -->
+ <!-- How to pay: whatever the agent wrote in the terms box -->
  <div>
- <div class="footer-section-label">Payment Options</div>
- <div class="pay-row">
- <span class="pay-method">Venmo</span>
- <span class="pay-detail">@Kayleigh-Biggs-1<span class="pay-note">PIN: last 4 of phone (1464)</span></span>
- </div>
- <div class="pay-row">
- <span class="pay-method">PayPal</span>
- <span class="pay-detail">kayleighsellskcre@gmail.com<span class="pay-note">Select "Friends &amp; Family"</span></span>
- </div>
- <div class="pay-row">
- <span class="pay-method">Apple Pay</span>
- <span class="pay-detail">785-249-1464</span>
- </div>
- <div class="pay-row">
- <span class="pay-method">Check / Cash</span>
- <span class="pay-detail">Made out to Kayleigh Biggs</span>
- </div>
+ <div class="footer-section-label">How to Pay</div>
+ <div class="footer-text">{{ invoice.terms or 'Payment due within 30 days of invoice date. Please contact me with any questions.' }}</div>
  </div>
 
  <!-- Terms -->
  <div>
- <div class="footer-section-label">Payment Terms</div>
- <div class="footer-text">{{ invoice.terms or 'Payment due within 30 days of invoice date.' }}</div>
- {% if invoice.status == 'paid' and invoice.paid_date %}
- <div style="margin-top:.5rem;font-size:.73rem;color:var(--green);font-weight:600;"> Paid in full on {{ invoice.paid_date }}</div>
- {% endif %}
+ <div class="footer-section-label">Status</div>
+ <div class="footer-text">{% if invoice.status == 'paid' and invoice.paid_date %}<span style="color:var(--green);font-weight:600;">Paid in full on {{ invoice.paid_date }}. Thank you!</span>{% else %}Due {{ invoice.due_date or 'on receipt' }}.{% endif %}</div>
  </div>
 
  </div>
  <div style="text-align:center;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--tan);">
  <div style="font-family:'Playfair Display',serif;font-size:.85rem;color:var(--muted);letter-spacing:.08em;">
- Thank you for choosing Kayleigh Biggs Custom Cabinetry &amp; Visual Layouts
+ Thank you for choosing {{ biz.name }}{% if biz.business %}, {{ biz.business }}{% endif %}
  </div>
  <div style="margin-top:.35rem;font-size:.7rem;color:var(--muted);">
- 785.249.1464 &nbsp;·&nbsp; <a href="mailto:kayleighsellskcre@gmail.com" style="color:var(--muted);text-decoration:none;">kayleighsellskcre@gmail.com</a>
+ {% if biz.phone %}{{ biz.phone }}{% endif %}{% if biz.phone and biz.email %} &nbsp;·&nbsp; {% endif %}{% if biz.email %}<a href="mailto:{{ biz.email }}" style="color:var(--muted);text-decoration:none;">{{ biz.email }}</a>{% endif %}
  </div>
  </div>
  </div>

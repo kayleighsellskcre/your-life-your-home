@@ -74,7 +74,15 @@ def pricing():
     from flask import session
     role = session.get("role") if session.get("user_id") else None
     plan_link = url_for("agent_subscription") if role == "agent" else url_for("lender_subscription") if role == "lender" else ""
-    return render_template("main/pricing.html", tiers=tiers, role=role, plan_link=plan_link)
+    current = ""
+    if role in ("agent", "lender"):
+        try:
+            from database import get_user_by_id
+            u = get_user_by_id(session["user_id"])
+            current = (dict(u).get("subscription_tier") or "free") if u else ""
+        except Exception:
+            current = ""
+    return render_template("main/pricing.html", tiers=tiers, role=role, plan_link=plan_link, current_tier=current)
 
 
 def init_app(app):

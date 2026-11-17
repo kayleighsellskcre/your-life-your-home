@@ -646,10 +646,10 @@
 
       {% if tx_commission %}
       <div id="comm-summary">
-        <div class="tx-comm-row"><span>Sale Price</span><strong>${{ "{:,.0f}".format(tx_commission.sale_price or 0) }}</strong></div>
+        <div class="tx-comm-row"><span>Sale Price</span><strong>{{ (tx_commission.sale_price or 0)|usd(0) }}</strong></div>
         <div class="tx-comm-row"><span>Commission</span><strong>{{ tx_commission.commission_rate or 0 }}%</strong></div>
-        <div class="tx-comm-row"><span>Gross</span><strong>${{ "{:,.0f}".format(tx_commission.gross_commission or 0) }}</strong></div>
-        <div class="tx-comm-row"><span>Net</span><strong style="color:{% if tx_commission.status=='paid' %}#6F543C{% else %}#3D2E24{% endif %}">${{ "{:,.0f}".format(tx_commission.net_commission or 0) }}</strong></div>
+        <div class="tx-comm-row"><span>Gross</span><strong>{{ (tx_commission.gross_commission or 0)|usd(0) }}</strong></div>
+        <div class="tx-comm-row"><span>Net</span><strong style="color:{% if tx_commission.status=='paid' %}#6F543C{% else %}#3D2E24{% endif %}">{{ (tx_commission.net_commission or 0)|usd(0) }}</strong></div>
         <div class="tx-comm-row">
           <span>Status</span>
           <strong style="background:{% if tx_commission.status=='paid' %}rgba(111,84,60,.12);color:#6F543C{% else %}rgba(181,132,0,.12);color:#8B6B00{% endif %};padding:.1rem .4rem;border-radius:4px;font-size:.65rem;text-transform:uppercase;">{{ tx_commission.status or 'projected' }}</strong>
@@ -703,7 +703,7 @@
             </div>
           </div>
           <div style="font-size:.72rem;color:#6B5B4D;background:rgba(107,91,77,.05);border-radius:6px;padding:.35rem .6rem;margin-bottom:.4rem">
-            Est. Net: <strong id="tx-est-net" style="color:#3D2E24">${{ "{:,.0f}".format(tx_commission.net_commission if tx_commission else 0) }}</strong>
+            Est. Net: <strong id="tx-est-net" style="color:#3D2E24">{{ (tx_commission.net_commission if tx_commission else 0)|usd(0) }}</strong>
           </div>
           <div style="margin-bottom:.4rem">
             <label class="tx-comm-lbl">Private Notes</label>
