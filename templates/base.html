@@ -713,6 +713,7 @@
 .ylh-ham-more[open] summary::after { content: "\2212"; }
 .ylh-ham-more[open] { background: rgba(159,129,90,.06); }
 .ylh-ham-more .ylh-ham-item { padding-left: 1.9rem; font-size: .9rem; }
+.ylh-ham-head { padding: .7rem 1.1rem .15rem 1.9rem; font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8F6244; }
 .ylh-ham-signout {
   display: block; padding: .9rem 1.1rem; min-height: 44px; box-sizing: border-box; color: #8b4a3a;
   text-decoration: none; font-size: .95rem; font-weight: 600; border-top: 1px solid rgba(159,129,90,.15);
@@ -761,7 +762,7 @@
 
    <!-- Center: Brand + Dashboard Title stacked -->
    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-     <a id="ylhBrand" href="{{ url_for('index') }}" class="brand-logo" style="font-size:clamp(.95rem,4.9vw,2.8rem) !important;letter-spacing:.05em !important;line-height:1.05 !important;font-family:'Playfair Display',Georgia,serif !important;color:#3F2817 !important;text-decoration:none !important;display:block !important;">Your Life • Your Home</a>
+     <a id="ylhBrand" href="{% if session.get('user_id') and session.get('role') == 'agent' %}{{ url_for('portal.agent_my_clients') }}{% elif session.get('user_id') and session.get('role') == 'lender' %}{{ url_for('lender_clients') }}{% elif session.get('user_id') and session.get('role') == 'homeowner' %}{{ url_for('portal.my_home') }}{% else %}{{ url_for('index') }}{% endif %}" class="brand-logo" style="font-size:clamp(.95rem,4.9vw,2.8rem) !important;letter-spacing:.05em !important;line-height:1.05 !important;font-family:'Playfair Display',Georgia,serif !important;color:#3F2817 !important;text-decoration:none !important;display:block !important;">Your Life • Your Home</a>
      {% if session.get('user_id') and request.endpoint not in PUBLIC_PAGES %}
      <span class="ylh-hdr-title" style="position:static;transform:none;font-size:.78rem;opacity:.82;font-weight:500;letter-spacing:.16em;text-transform:uppercase;margin-top:3px;display:block;">
        {% if session.get('role') == 'agent' %}Agent Dashboard
@@ -784,26 +785,27 @@
        <a class="ylh-ham-item" href="{{ url_for('portal.send_update') }}">Send an Update</a>
        <a class="ylh-ham-item" href="{{ url_for('team.pro_messages') }}">Messages{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</a>
        <details class="ylh-ham-more"><summary>More</summary>
-       <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">Dashboard</a>
-       <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
+       <div class="ylh-ham-head">Clients</div>
        <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">CRM</a>
        <a class="ylh-ham-item" href="{{ url_for('followups.followups_page') }}">Follow-ups</a>
-       <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_booking') }}">Booking &amp; Calendar</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_communications') }}">Communications</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_referrals') }}">Invite Clients</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_financials') }}">Financials</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_clients') }}">Client Portal</a>
        {% if client_values_on() %}<a class="ylh-ham-item" href="{{ url_for('client_values.client_values_page') }}">Client Values</a>{% endif %}
-       <a class="ylh-ham-item" href="{{ url_for('agent_invoices') }}">Invoices</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_vendors') }}">Vendor Network</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
+       <div class="ylh-ham-head">Keep in touch</div>
+       <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_contests') }}">Client Contests</a>
        <a class="ylh-ham-item" href="{{ url_for('pies.manage_list') }}">Holiday Pie Pickup</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_concierge_dashboard') }}">AI Concierge</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_seasonal_checklists') }}">Seasonal Checklists</a>
        <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
+       <div class="ylh-ham-head">Marketing</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_concierge_dashboard') }}">AI Concierge</a>
+       <div class="ylh-ham-head">Business</div>
+       <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_booking') }}">Booking &amp; Calendar</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_financials') }}">Financials</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_invoices') }}">Invoices</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_vendors') }}">Vendor Network</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}">Dashboard</a>
        </details>
        <details class="ylh-ham-more"><summary>Account</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_settings_profile') }}">Settings &amp; Profile</a>
@@ -817,21 +819,23 @@
        <a class="ylh-ham-item" href="{{ url_for('team.shared_scenarios') }}">Shared Scenarios</a>
        <a class="ylh-ham-item" href="{{ url_for('team.pro_messages') }}">Messages{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</a>
        <details class="ylh-ham-more"><summary>More</summary>
-       <a class="ylh-ham-item" href="{{ url_for('lender_dashboard') }}">Dashboard</a>
-       <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
+       <div class="ylh-ham-head">Clients</div>
        <a class="ylh-ham-item" href="{{ url_for('lender_crm') }}">Borrower CRM</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_loans') }}">Loan Pipeline</a>
        <a class="ylh-ham-item" href="{{ url_for('refi_alerts.refi_page') }}">Refinance Opportunities</a>
+       <div class="ylh-ham-head">Keep in touch</div>
        <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
-       <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_referrals') }}">Invite Clients</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_marketing_hub_global') }}">Marketing Hub</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_booking') }}">Booking &amp; Calendar</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_messages') }}">Email &amp; Text Library</a>
        <a class="ylh-ham-item" href="{{ url_for('pies.manage_list') }}">Holiday Pie Pickup</a>
+       <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_power_suite') }}">Checklists and Refinance Tools</a>
+       <div class="ylh-ham-head">Marketing</div>
+       <a class="ylh-ham-item" href="{{ url_for('lender_marketing_hub_global') }}">Marketing Hub</a>
+       <div class="ylh-ham-head">Business</div>
+       <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_booking') }}">Booking &amp; Calendar</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_financials') }}">Financials</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_power_suite') }}">Power Suite</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_roles') }}">Roles &amp; Partners</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_roles') }}">Key Contacts</a>
+       <a class="ylh-ham-item" href="{{ url_for('lender_dashboard') }}">Dashboard</a>
        </details>
        <details class="ylh-ham-more"><summary>Account</summary>
        <a class="ylh-ham-item" href="{{ url_for('lender_settings_profile') }}">Settings &amp; Profile</a>
@@ -844,27 +848,31 @@
        <a class="ylh-ham-item" href="{{ url_for('homeowner_value_equity_overview') }}">Home Value</a>
        <a class="ylh-ham-item" href="{{ url_for('team.my_team') }}">My Team{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</a>
        <details class="ylh-ham-more"><summary>More</summary>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_overview') }}">Full home overview</a>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_get_help') }}">Get Help</a>
+       <div class="ylh-ham-head">My home records</div>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_upload_documents') }}">Documents</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_home_timeline') }}">Home Timeline</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_home.home_report') }}">Home Report</a>
-       <a class="ylh-ham-item" href="{{ url_for('care_alerts.care_preferences') }}">Home Details &amp; Alerts</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_warranty_log') }}">Warranties &amp; Appliances</a>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_planner') }}">Renovation Planner</a>
-       <a class="ylh-ham-item" href="{{ url_for('homeowner_saved_notes') }}">Design Boards</a>
+       <a class="ylh-ham-item" href="{{ url_for('care_alerts.care_preferences') }}">Home Details &amp; Alerts</a>
+       <div class="ylh-ham-head">Care and projects</div>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_maintenance_guide') }}">Care Guide</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_seasonal_checklists') }}">Seasonal Checklists</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_home_protection') }}">Safety &amp; Protection</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_care_energy_savings') }}">Energy Savings</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_reno_planner') }}">Renovation Planner</a>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_saved_notes') }}">Design Boards</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_home.trusted_pros') }}">Trusted Pros</a>
+       <div class="ylh-ham-head">Plan my next move</div>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_buy_sell_guidance') }}">Buy &amp; Sell Guide</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_affordability') }}">Affordability</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_loan_paths') }}">Loan Paths</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_home.refinance_page') }}">Refinance &amp; Payoff</a>
        <a class="ylh-ham-item" href="{{ url_for('homeowner_next_plan_move') }}">My Buyer Profile</a>
+       <div class="ylh-ham-head">Help</div>
+       <a class="ylh-ham-item" href="{{ url_for('homeowner_support_get_help') }}">Get Help</a>
        </details>
        <details class="ylh-ham-more"><summary>Account</summary>
+       <a class="ylh-ham-item" href="{{ url_for('portal.my_profile') }}">My Profile</a>
        <a class="ylh-ham-item" href="{{ url_for('account_security') }}">Account security</a>
        </details>
        {% endif %}

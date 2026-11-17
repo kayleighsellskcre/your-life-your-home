@@ -1,0 +1,29 @@
+{% extends "homeowner/layout.html" %}
+{% block title %}My Profile{% endblock %}
+{% block homeowner_content %}
+{% include "shared/_tm_style.html" %}
+<div class="tm-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Account</div>
+    <h1 class="ylh-page-hd__title">My Profile</h1>
+    <p class="ylh-page-hd__sub">Your name, phone and the emails you would like to get.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="tm-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+  <form method="post" action="{{ url_for('portal.my_profile') }}" class="tm-form">
+    <div class="tm-card">
+      <h2>About you</h2>
+      <label for="name" style="margin-top:0;">Your name</label><input id="name" type="text" name="name" maxlength="120" value="{{ me.name }}" required>
+      <label for="phone">Phone (optional)</label><input id="phone" type="text" inputmode="tel" name="phone" maxlength="40" value="{{ me.phone }}">
+      <label for="email">Email</label><input id="email" type="text" value="{{ me.email }}" disabled>
+      <p style="margin-top:.4rem;">To change your email or password, open <a href="{{ url_for('account_security') }}">Account security</a>.</p>
+    </div>
+    <div class="tm-card">
+      <h2>Emails I would like</h2>
+      <div class="tm-row" style="border-top:0;"><input type="checkbox" id="fa" name="frost_alerts" {{ 'checked' if p.frost_alerts }}><label class="tm-lbl" for="fa" style="margin:0;">Freeze warnings, so my pipes stay safe</label></div>
+      <div class="tm-row"><input type="checkbox" id="st" name="seasonal_tips" {{ 'checked' if p.seasonal_tips }}><label class="tm-lbl" for="st" style="margin:0;">Seasonal home care tips</label></div>
+      <div class="tm-row"><input type="checkbox" id="dg" name="digest_enabled" {{ 'checked' if me.digest_enabled }}><label class="tm-lbl" for="dg" style="margin:0;">A friendly summary of my home now and then</label></div>
+      <div class="tm-btns"><button class="tm-btn" type="submit">Save</button></div>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -330,7 +330,7 @@ app.config["MAX_CONTENT_LENGTH"] = 250 * 1024 * 1024  # 250 MB upload cap
 _CSRF_EXEMPT_PATHS = ("/stripe/webhook", "/api/homebot/webhook", "/api/lead-intake/")
 
 
-_AREA_HOME = {"agent": "agent_dashboard", "lender": "lender_dashboard", "homeowner": "homeowner_overview"}
+_AREA_HOME = {"agent": "portal.agent_my_clients", "lender": "lender_clients", "homeowner": "portal.my_home"}
 
 
 @app.before_request

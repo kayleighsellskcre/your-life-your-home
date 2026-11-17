@@ -215,25 +215,69 @@ def setup():
                            move_in=d.get("move_in_date") or inv.get("move_in_date", ""))
 
 
+# ───────────────────────── homeowner: My Profile ─────────────────────────
+@bp.route("/homeowner/profile", methods=["GET", "POST"])
+def my_profile():
+    u = _me("homeowner")
+    if not u:
+        return _need("homeowner")
+    from flask import session
+    conn = _db()
+    try:
+        if request.method == "POST":
+            f = request.form
+            name = " ".join((f.get("name") or "").split())[:120]
+            phone = (f.get("phone") or "").strip()[:40]
+            if not name:
+                flash("Please add your name.", "error")
+                return redirect(url_for("portal.my_profile"))
+            flag = lambda k: 1 if f.get(k) == "on" else 0
+            conn.execute("UPDATE users SET name = ?, phone = ?, digest_enabled = ? WHERE id = ?", (name, phone, flag("digest_enabled"), u["id"]))
+            conn.execute("""INSERT INTO care_prefs (user_id, frost_alerts, seasonal_tips) VALUES (?,?,?)
+                            ON CONFLICT(user_id) DO UPDATE SET frost_alerts=excluded.frost_alerts, seasonal_tips=excluded.seasonal_tips""",
+                         (u["id"], flag("frost_alerts"), flag("seasonal_tips")))
+            conn.commit()
+            session["name"] = name
+            flash("Your profile is saved.", "success")
+            return redirect(url_for("portal.my_profile"))
+        row = conn.execute("SELECT name, email, phone, digest_enabled FROM users WHERE id = ?", (u["id"],)).fetchone()
+    finally:
+        conn.close()
+    from care_alerts import get_prefs
+    p = get_prefs(u["id"])
+    me = {"name": row["name"] or "", "email": row["email"] or "", "phone": row["phone"] or "",
+          "digest_enabled": 1 if row["digest_enabled"] in (None, 1) else 0}
+    return render_template("homeowner/my_profile.html", me=me, p=p)
+
+
 # ───────────────────────── agent: My Clients ─────────────────────────
-def _personal_link(agent_id):
-    from database import create_referral_link, get_referral_links_for_agent
-    links = get_referral_links_for_agent(agent_id)
+def _personal_link(pro_id, role="agent"):
+    from database import create_referral_link, get_referral_links_for_agent, get_referral_links_for_lender
+    get = get_referral_links_for_lender if role == "lender" else get_referral_links_for_agent
+    links = get(pro_id)
     if not links:
-        create_referral_link(agent_id=agent_id)
-        links = get_referral_links_for_agent(agent_id)
+        create_referral_link(**({"lender_id": pro_id} if role == "lender" else {"agent_id": pro_id}))
+        links = get(pro_id)
     token = dict(links[0])["token"] if links else ""
     return request.url_root.rstrip("/") + f"/signup?role=homeowner&ref={token}" if token else ""
 
 
 @bp.route("/agent/my-clients")
 def agent_my_clients():
-    u = _me("agent")
+    return _clients_view("agent")
+
+
+def lender_my_clients():
+    return _clients_view("lender")
+
+
+def _clients_view(role):
+    u = _me(role)
     if not u:
-        return _need("agent")
-    from database import get_agent_clients
+        return _need(role)
+    from database import get_agent_clients, get_lender_clients
     from care_alerts import _clean_phone, sms_link
-    clients = [dict(c) for c in get_agent_clients(u["id"])]
+    clients = [dict(c) for c in (get_lender_clients if role == "lender" else get_agent_clients)(u["id"])]
     conn = _db()
     try:
         ids = [c["id"] for c in clients]
@@ -241,7 +285,7 @@ def agent_my_clients():
         moves = {r["user_id"]: r["move_in_date"] for r in conn.execute(f"SELECT user_id, move_in_date FROM home_details WHERE user_id IN ({marks})", ids).fetchall()} if ids else {}
         phones = {r["id"]: r["phone"] for r in conn.execute(f"SELECT id, phone FROM users WHERE id IN ({marks})", ids).fetchall()} if ids else {}
         emails = {c["email"].strip().lower() for c in clients if c.get("email")}
-        pending = [dict(r) for r in conn.execute("SELECT * FROM client_invites WHERE pro_id = ? ORDER BY id DESC LIMIT 50", (u["id"],)).fetchall()
+        pending = [dict(r) for r in conn.execute("SELECT * FROM client_invites WHERE pro_id = ? AND pro_role = ? ORDER BY id DESC LIMIT 50", (u["id"], role)).fetchall()
                    if (r["email"] or "").strip().lower() not in emails]
     finally:
         conn.close()
@@ -253,10 +297,10 @@ def agent_my_clients():
     try:
         conn.execute("""CREATE TABLE IF NOT EXISTS home_value_requests (id INTEGER PRIMARY KEY AUTOINCREMENT, agent_id INTEGER, user_id INTEGER,
             name TEXT, email TEXT, phone TEXT, address TEXT, note TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
-        values = [dict(r) for r in conn.execute("SELECT * FROM home_value_requests WHERE agent_id = ? ORDER BY id DESC LIMIT 20", (u["id"],)).fetchall()]
+        values = [dict(r) for r in conn.execute("SELECT * FROM home_value_requests WHERE agent_id = ? ORDER BY id DESC LIMIT 20", (u["id"],)).fetchall()] if role == "agent" else []
     finally:
         conn.close()
-    link = _personal_link(u["id"])
+    link = _personal_link(u["id"], role)
     inv_id = request.args.get("invited", type=int)
     just = next((p for p in pending if p["id"] == inv_id), None)
     if just:
@@ -264,67 +308,93 @@ def agent_my_clients():
         just["text"] = (f"Hi {first}, it's {u.get('name')}. Congratulations on your new home! Here is your personal link to set up your home "
                         f"dashboard. It takes about a minute: {link}")
         just["sms"] = sms_link(_clean_phone(just["phone"]), just["text"]) if just.get("phone") else ""
-    return render_template("agent/my_clients.html", clients=clients, pending=pending, link=link, just=just, value_requests=values)
+    return render_template(f"{role}/my_clients.html", clients=clients, pending=pending, link=link, just=just, value_requests=values, role=role)
+
+
+def _back(role, **kw):
+    return redirect(url_for("lender_clients" if role == "lender" else "portal.agent_my_clients", **kw))
 
 
 @bp.route("/agent/my-clients/invite", methods=["POST"])
 def agent_invite():
-    u = _me("agent")
+    return _invite("agent")
+
+
+@bp.route("/lender/my-clients/invite", methods=["POST"])
+def lender_invite():
+    return _invite("lender")
+
+
+def _invite(role):
+    u = _me(role)
     if not u:
-        return _need("agent")
+        return _need(role)
     f = request.form
     name, email = (f.get("name") or "").strip()[:120], (f.get("email") or "").strip().lower()[:200]
     if not name or "@" not in email:
         flash("Add their name and a valid email so we can set them up.", "error")
-        return redirect(url_for("portal.agent_my_clients"))
+        return _back(role)
     phone, address, move_in = (f.get("phone") or "").strip()[:40], (f.get("address") or "").strip()[:250], _valid_date(f.get("move_in_date"))
     conn = _db()
     try:
         iid = conn.execute("INSERT INTO client_invites (pro_id, pro_role, name, email, phone, address, move_in_date) VALUES (?,?,?,?,?,?,?)",
-                           (u["id"], "agent", name, email, phone, address, move_in)).lastrowid
+                           (u["id"], role, name, email, phone, address, move_in)).lastrowid
         conn.commit()
     finally:
         conn.close()
     try:   # keep the CRM in step: the move-in date becomes their home anniversary
+        if role != "agent":
+            raise RuntimeError("agents only")
         from database import add_agent_contact, list_agent_contacts
         if not any((dict(c).get("email") or "").strip().lower() == email for c in list_agent_contacts(u["id"])):
             add_agent_contact(agent_user_id=u["id"], name=name, email=email, phone=phone, stage="new", property_address=address,
                               home_anniversary=move_in, notes="Invited from My Clients", tags="invite")
     except Exception as e:
-        print(f"[WARNING] invite CRM add skipped: {e}")
-    link = _personal_link(u["id"])
+        if role == "agent":
+            print(f"[WARNING] invite CRM add skipped: {e}")
+    link = _personal_link(u["id"], role)
     if f.get("send_email"):
         ns = _H["ns"]
         body = (f"Hi {name.split(' ')[0]},\n\nCongratulations on your new home! I set up a free home dashboard for you. It keeps your home "
                 f"details, documents and care reminders in one place, and you can message me right there.\n\nSet it up here (it takes about a minute):\n{link}\n")
         ns["_bg"](ns["send_reminder_email"], email, f"{u.get('name')} set up your home dashboard", body, **ns["pro_sender"](u["id"]))
     flash(f"Invite ready for {name}." + (" We also emailed it to them." if f.get("send_email") else ""), "success")
-    return redirect(url_for("portal.agent_my_clients", invited=iid))
+    return _back(role, invited=iid)
 
 
 @bp.route("/agent/my-clients/<int:client_id>/move-in", methods=["POST"])
 def agent_move_in(client_id):
-    u = _me("agent")
+    return _move_in("agent", client_id)
+
+
+@bp.route("/lender/my-clients/<int:client_id>/move-in", methods=["POST"])
+def lender_move_in(client_id):
+    return _move_in("lender", client_id)
+
+
+def _move_in(role, client_id):
+    u = _me(role)
     if not u:
-        return _need("agent")
-    from database import get_agent_clients
-    if client_id not in {c["id"] for c in get_agent_clients(u["id"])}:
+        return _need(role)
+    from database import get_agent_clients, get_lender_clients
+    if client_id not in {c["id"] for c in (get_lender_clients if role == "lender" else get_agent_clients)(u["id"])}:
         flash("That client is not connected to your account.", "error")
-        return redirect(url_for("portal.agent_my_clients"))
+        return _back(role)
     move_in = _valid_date(request.form.get("move_in_date"))
     if not move_in:
         flash("Pick a move-in date first.", "error")
-        return redirect(url_for("portal.agent_my_clients"))
+        return _back(role)
     conn = _db()
     try:
         conn.execute("""INSERT INTO home_details (user_id, move_in_date) VALUES (?, ?) ON CONFLICT(user_id) DO UPDATE SET move_in_date = excluded.move_in_date""",
                      (client_id, move_in))
-        conn.execute("UPDATE agent_contacts SET home_anniversary = ? WHERE user_id = ? AND agent_user_id = ?", (move_in, client_id, u["id"]))
+        if role == "agent":
+            conn.execute("UPDATE agent_contacts SET home_anniversary = ? WHERE user_id = ? AND agent_user_id = ?", (move_in, client_id, u["id"]))
         conn.commit()
     finally:
         conn.close()
     flash("Move-in date saved.", "success")
-    return redirect(url_for("portal.agent_my_clients"))
+    return _back(role)
 
 
 # ───────────────────────── agent: Send an Update ─────────────────────────

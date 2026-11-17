@@ -1150,10 +1150,8 @@ def lender_clients():
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
     
-    from database import get_lender_clients
-    clients = get_lender_clients(user["id"])
-    
-    return render_template("lender/clients.html", clients=clients)
+    import portal
+    return portal.lender_my_clients()
 
 
 @route("/lender/clients/<int:homeowner_id>")

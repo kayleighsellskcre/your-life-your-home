@@ -15,6 +15,9 @@
     </a>
     {% else %}<p>No messages yet. When a client writes to you, it shows up here. You can also start one below.</p>{% endfor %}
   </div>
+  {% if session.get('role') == 'lender' %}
+  <div class="tm-card"><h2>Ready-made emails and texts</h2><p>Need the right words? Open your <a href="{{ url_for('lender_messages') }}">email and text library</a>.</p></div>
+  {% endif %}
   {% if clients %}
   <div class="tm-card tm-form">
     <h2>Message a client</h2>

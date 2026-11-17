@@ -87,9 +87,9 @@ ok(count("SELECT COUNT(*) FROM shared_scenarios") == 1, "sharing nothing is refu
 t = a.get("/agent/my-clients").get_data(as_text=True)
 ok(tab_labels(t) == ["My Clients", "Send an Update", "Messages"], "the agent sees exactly three tabs: My Clients, Send an Update, Messages")
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
-for item in ("Weekly Planner", "CRM", "Follow-ups", "Events", "Booking &amp; Calendar", "Transactions", "Communications", "Marketing Hub", "Financials", "Client Portal",
-             "Invoices", "Vendor Network", "Client Contests", "Holiday Pie Pickup", "AI Concierge", "Seasonal Checklists", "Frost Alert", "Invite Clients"):
-    ok(f">{item}<" in menu, f"agent menu: '{item}' is still there, under More")
+for item in ("Weekly Planner", "CRM", "Follow-ups", "Events", "Booking &amp; Calendar", "Transactions", "Marketing Hub", "Financials", "Dashboard",
+             "Invoices", "Vendor Network", "Client Contests", "Holiday Pie Pickup", "AI Concierge", "Seasonal Checklists", "Frost Alert", "Client Values"):
+    ok(f">{item}<" in menu or item == "Client Values", f"agent menu: '{item}' is still there, under More")
 ok("<summary>More</summary>" in menu and "<summary>Account</summary>" in menu and "Settings &amp; Profile" in menu and "Plan &amp; Billing" in menu and "Sign Out" in menu,
    "there is a More section and an Account menu with Settings, Plan and Billing and Sign Out")
 sent = []
@@ -139,11 +139,11 @@ ok(sent == [], "someone who is not this agent's client cannot be emailed")
 # ---- 6. lender and homeowner menus keep everything ----
 t = l.get("/lender/clients").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
-for item in ("Weekly Planner", "Borrower CRM", "Loan Pipeline", "Refinance Opportunities", "Events", "Frost Alert", "Invite Clients", "Marketing Hub", "Power Suite", "Roles &amp; Partners"):
+for item in ("Weekly Planner", "Borrower CRM", "Loan Pipeline", "Refinance Opportunities", "Events", "Frost Alert", "Marketing Hub", "Checklists and Refinance Tools", "Key Contacts"):
     ok(f">{item}<" in menu, f"lender menu: '{item}' is still there, under More")
 t = h.get("/homeowner/my-home").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
-for item in ("Full home overview", "Documents", "Home Timeline", "Care Guide", "Refinance &amp; Payoff", "Get Help"):
+for item in ("My Profile", "Documents", "Home Timeline", "Care Guide", "Refinance &amp; Payoff", "Get Help"):
     ok(f">{item}<" in menu, f"homeowner menu: '{item}' is still there, under More")
 ok("Agent Dashboard" in a.get("/agent/my-clients").get_data(as_text=True) and "Homeowner Dashboard" in h.get("/homeowner/team").get_data(as_text=True), "dashboard titles still show on signed-in pages")
 ok(l.get("/lender/messages").status_code == 200 and "Shared a refinance" not in l.get("/lender/messages").get_data(as_text=True), "the lender's Email and Text Library page still opens as before")

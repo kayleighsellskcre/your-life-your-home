@@ -17,6 +17,7 @@
       </div>
       <label for="subject">Subject</label><input id="subject" type="text" name="subject" maxlength="200" value="{{ subject }}" required>
       <label for="message">Message (each name replaces {first})</label><textarea id="message" name="message" maxlength="5000" style="min-height:14rem !important;height:14rem;" required>{{ body }}</textarea>
+      <p style="margin-top:.5rem;">Want a full library of ready-made emails and texts? Open <a href="{{ url_for('agent_communications') }}">Communications</a>.</p>
       <p style="margin-top:.5rem;">Want it sent only when the forecast is cold? Use <a href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>.</p>
     </div>
     <div class="tm-card">
