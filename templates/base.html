@@ -724,6 +724,11 @@
    .header-content > .main-nav { flex: 0 0 auto !important; }
    .header-content:has(> .main-nav) > div:first-child:empty { display: none; }
  }
+ /* Small phones: the whole logo fits. Sign In lives in the menu, so the header button steps aside. */
+ @media (max-width: 480px) {
+   .header-content > .main-nav { display: none !important; }
+   .header-content:has(> .main-nav) > div:nth-child(2) { min-width: 0; }
+ }
 
  /* Readability on phones: small labels and badges never go below 12px */
  @media (max-width: 768px) {
@@ -756,7 +761,7 @@
 
    <!-- Center: Brand + Dashboard Title stacked -->
    <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;">
-     <a id="ylhBrand" href="{{ url_for('index') }}" class="brand-logo" style="font-size:clamp(1.05rem,5.3vw,2.8rem) !important;letter-spacing:.05em !important;line-height:1.05 !important;font-family:'Playfair Display',Georgia,serif !important;color:#3F2817 !important;text-decoration:none !important;display:block !important;">Your Life • Your Home</a>
+     <a id="ylhBrand" href="{{ url_for('index') }}" class="brand-logo" style="font-size:clamp(.95rem,4.9vw,2.8rem) !important;letter-spacing:.05em !important;line-height:1.05 !important;font-family:'Playfair Display',Georgia,serif !important;color:#3F2817 !important;text-decoration:none !important;display:block !important;">Your Life • Your Home</a>
      {% if session.get('user_id') and request.endpoint not in PUBLIC_PAGES %}
      <span class="ylh-hdr-title" style="position:static;transform:none;font-size:.78rem;opacity:.82;font-weight:500;letter-spacing:.16em;text-transform:uppercase;margin-top:3px;display:block;">
        {% if session.get('role') == 'agent' %}Agent Dashboard
@@ -925,6 +930,7 @@
  </div>
  <footer class="site-footer">
  <p>&copy; {{ now_year }} Your Life, Your Home. All rights reserved.</p>
+ <p><a href="{{ url_for('pricing') }}">Pricing</a> &middot; <a href="{{ url_for('privacy') }}">Privacy</a> &middot; <a href="{{ url_for('terms') }}">Terms</a></p>
  {% if not session.get('user_id') %}
  <p><a href="{{ url_for('for_homeowners') }}">For Homeowners</a> &middot; <a href="{{ url_for('for_agents') }}">For Agents</a> &middot; <a href="{{ url_for('for_lenders') }}">For Lenders</a></p>
  <p><a href="{{ url_for('login') }}">Sign in</a></p>

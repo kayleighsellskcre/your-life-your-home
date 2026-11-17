@@ -833,7 +833,7 @@ def inject_professionals():
 
 # Pages anyone can see. The dashboard title under the logo is hidden on these, even for someone who is signed in.
 PUBLIC_PAGES = {"index", "login", "login_verify", "signup", "forgot_password", "reset_password", "verify_email",
-                "for_homeowners", "for_agents", "for_lenders", "home_value_request"}
+                "for_homeowners", "for_agents", "for_lenders", "home_value_request", "pricing", "privacy", "terms"}
 
 
 @app.context_processor

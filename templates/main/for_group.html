@@ -24,6 +24,7 @@
   <div class="fg-card"><ul>{% for p in page.points %}<li>{{ p }}</li>{% endfor %}</ul></div>
   <a class="fg-btn" href="{{ url_for('signup', role=page.role) }}">{{ page.button }}</a>
   <p class="fg-note">{{ page.note }}</p>
+  {% if page.role != "homeowner" %}<p class="fg-signin"><a href="{{ url_for("pricing") }}">See pricing</a></p>{% endif %}
   {% if not session.get('user_id') %}<p class="fg-signin">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>{% endif %}
 </div>
 {% endblock %}

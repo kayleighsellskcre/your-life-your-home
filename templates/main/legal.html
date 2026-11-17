@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | Your Life, Your Home{% endblock %}
+{% block content %}
+<style>
+  .lg-w { max-width: 680px; margin: 2rem auto 3rem; padding: 0 1rem; }
+  .lg-w h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.9rem, 6vw, 2.6rem); color: #3F2817; line-height: 1.15; margin: 0 0 .6rem; text-align: center; }
+  .lg-intro { text-align: center; color: #6B5B4D; font-size: 1.05rem; margin: 0 0 1.6rem; }
+  .lg-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 4px 24px rgba(70,45,30,.08); padding: 1.3rem 1.5rem; margin-bottom: 1rem; }
+  .lg-card h2 { font-size: 1.1rem; color: #8F6244; margin: 0 0 .5rem; }
+  .lg-card ul { margin: 0; padding-left: 1.2rem; color: #3A2518; line-height: 1.6; }
+  .lg-card li { margin: .3rem 0; }
+</style>
+<div class="lg-w">
+  <h1>{{ title }}</h1>
+  <p class="lg-intro">{{ intro }}</p>
+  {% for head, items in sections %}
+  <div class="lg-card"><h2>{{ head }}</h2><ul>{% for i in items %}<li>{{ i }}</li>{% endfor %}</ul></div>
+  {% endfor %}
+</div>
+{% endblock %}
