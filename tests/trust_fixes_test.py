@@ -186,3 +186,7 @@ ok("Tidied" in _t, "tidy says what it did")
 # Last Touch reads as a date
 _f = A.app.jinja_env.filters["touch_label"]
 ok(_f("2026-03-04T12:30:00") == "Mar 4, 2026" and _f("2026-03-04 09:00") == "Mar 4, 2026" and _f("") == "-" and _f(None) == "-" and _f("01/15/2026") == "01/15/2026" and _f("called Tuesday") == "called Tuesday", "Last Touch shows a friendly date, other text is left as typed")
+
+# Vendor starter chips
+_t = who(D.create_user("Vic Vendorless", "vic@x.com", gp("password123"), "agent")).get("/agent/vendors").get_data(as_text=True)
+ok("vendor-starter" in _t and "+ Lender" in _t and "+ Home inspector" in _t, "an empty Vendor Network offers one-tap starter categories")

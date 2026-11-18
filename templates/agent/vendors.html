@@ -459,7 +459,12 @@
  <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="opacity:.35"><rect x="8" y="16" width="40" height="30" rx="4" stroke="#B08560" stroke-width="2"/><path d="M18 16V12a4 4 0 018 0v4M30 16V12a4 4 0 018 0v4M28 30v4M24 34h8" stroke="#B08560" stroke-width="2" stroke-linecap="round"/></svg>
  </div>
  <h3>No vendors yet</h3>
- <p>Start building your trusted network by adding your first vendor.</p>
+ <p>Your clients ask "who do you recommend?" all the time. Add the people you already trust, and they'll be one tap away. Start with whoever comes to mind first:</p>
+ <div class="vendor-starters" style="display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:0 0 1.1rem;">
+ {% for val, label in [('Lending','Lender'),('Inspection','Home inspector'),('Title','Title company'),('Repairs','Handyman or plumber'),('Insurance','Insurance agent'),('Contractor','Contractor'),('Design','Stager')] %}
+ <button type="button" class="vendor-starter" onclick="openVendorModal();document.getElementById('category').value='{{ val }}';" style="padding:.5rem .9rem;border-radius:99px;border:1.5px solid rgba(143,98,68,.35);background:#FFFDFA;color:#6B4630;font-weight:600;cursor:pointer;">+ {{ label }}</button>
+ {% endfor %}
+ </div>
  <button class="btn-primary" onclick="openVendorModal()">
  Add Your First Vendor
  </button>
