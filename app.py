@@ -2457,13 +2457,26 @@ def lender_needs_today(user_id, today=None):
             r["note"] = "Not contacted yet" if idle is None else f"Last talked {idle} days ago"
             r["sort"] = idle if idle is not None else 9999
             out["quiet"].append(r)
+    # People the lender planned to reach (a next-action date has come up): the same list as the Follow-ups page.
+    out["due"] = []
+    try:
+        import lender_followups as _lf
+        for r in _lf.due_for(user_id):
+            if r["due"]:
+                r["note"] = r["status_label"] + (": " + r["note"] if r.get("note") else "")
+                r["how"] = "tel:" + r["phone"] if r.get("phone") else ("mailto:" + r["email"] if r.get("email") else "")
+                out["due"].append(r)
+    except Exception:
+        out["due"] = []
+    _planned = {r["id"] for r in out["due"]}
+    out["quiet"] = [r for r in out["quiet"] if r["id"] not in _planned]
     out["closing"].sort(key=lambda x: x["sort"])
     out["quiet"].sort(key=lambda x: -x["sort"])
     out["past"].sort(key=lambda x: -(x["idle"] if x["idle"] is not None else 9999))
-    out["counts"] = {k: len(out[k]) for k in ("closing", "quiet", "past")}
+    out["counts"] = {k: len(out[k]) for k in ("closing", "due", "quiet", "past")}
     out["total"] = sum(out["counts"].values())
     out["has_borrowers"] = bool(rows)
-    for k in ("closing", "quiet", "past"):
+    for k in ("closing", "due", "quiet", "past"):
         out[k] = out[k][:5]
     return out
 
@@ -4507,6 +4520,8 @@ import care_alerts as _care_alerts
 _care_alerts.init_app(app, get_current_user, globals())
 import followups as _followups
 _followups.init_app(app, get_current_user)
+import lender_followups as _lender_followups
+_lender_followups.init_app(app, get_current_user)
 import events as _events
 _events.init_app(app, get_current_user)
 import email_signature as _email_signature

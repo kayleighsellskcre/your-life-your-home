@@ -1115,6 +1115,11 @@ def init_db() -> None:
                 cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {col} TEXT")
         except:
             pass
+    for _col in ("next_action_date", "next_action_note"):
+        try:
+            cur.execute(f"ALTER TABLE lender_borrowers ADD COLUMN {_col} TEXT")
+        except Exception:
+            pass
 
     # Link lender CRM borrower to actual homeowner user account
     try:

@@ -225,3 +225,24 @@ ok([p["name"] for p in _lo["past"]] == ["Past Pat"], "lender sees a past borrowe
 _lt = who(_lender, "lender").get("/lender").get_data(as_text=True)
 ok("Needs you today" in _lt and "Closing Cara" in _lt and "Closing soon" in _lt and "tel:9135550001" in _lt, "lender dashboard shows the Needs you today card with a Call link")
 ok(_lt.index("Needs you today") < _lt.index("New Applications"), "the card comes before the number tiles")
+
+# Lender follow-ups
+_lc = who(_lender, "lender")
+_c = D.get_connection()
+_c.execute("INSERT INTO lender_borrowers (lender_user_id, name, status, last_touch, next_action_date, next_action_note, phone) VALUES (?,?,?,?,?,?,?)", (_lender, "Due Dana", "preapproval", (_t0 - _td(days=5)).isoformat(), (_t0 - _td(days=2)).isoformat(), "Send rates", "9135550009"))
+_dana = _c.execute("SELECT max(id) FROM lender_borrowers").fetchone()[0]
+_c.execute("INSERT INTO lender_borrowers (lender_user_id, name, status) VALUES (?,?,?)", (agent, "Not Theirs", "preapproval"))
+_theirs = _c.execute("SELECT max(id) FROM lender_borrowers").fetchone()[0]
+_c.commit()
+_fp = _lc.get("/lender/followups").get_data(as_text=True)
+ok("Due Dana" in _fp and "2 days late" in _fp and "Send rates" in _fp and "Not Theirs" not in _fp, "lender Follow-ups lists who is due, oldest first, and only their own people")
+ok("Fresh Fay" not in _fp and "Recent Rae" not in _fp and "Past Pat" not in _fp, "people who were recently contacted or closed do not clutter Follow-ups")
+_dash = _lc.get("/lender").get_data(as_text=True)
+ok("Follow-ups you planned" in _dash and "Open my follow-ups" in _dash, "the dashboard card shows planned follow-ups and links to the page")
+_r = _lc.post(f"/lender/followups/{_dana}/outcome", data={"result": "later"}, follow_redirects=True).get_data(as_text=True)
+_row = D.get_connection().execute("SELECT next_action_date, last_touch, next_action_note FROM lender_borrowers WHERE id=?", (_dana,)).fetchone()
+ok(_row[0] == (_t0 + _td(days=14)).isoformat() and _row[1] == _t0.isoformat() and "Saved. Due Dana" in _r, "Done with an outcome logs it and schedules the next check-in")
+ok("Due Dana" not in _lc.get("/lender/followups").get_data(as_text=True), "once handled, they leave the list")
+_lc.post(f"/lender/followups/{_theirs}/snooze", data={"days": "3"})
+ok(D.get_connection().execute("SELECT COALESCE(next_action_date,'') FROM lender_borrowers WHERE id=?", (_theirs,)).fetchone()[0] == "", "a lender cannot snooze another pro's borrower")
+ok("Follow-ups" in _lc.get("/lender").get_data(as_text=True) and ca.get("/lender/followups").status_code in (302, 303), "menu has Follow-ups for lenders, and agents are sent away")

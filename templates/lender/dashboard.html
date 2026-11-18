@@ -513,7 +513,7 @@
  {% if needs_today.total == 0 %}
  <p style="margin:.4rem 0 0;color:#7A5238;">You are all caught up. Nobody is waiting on you right now. Nice work.</p>
  {% else %}
- {% for key, heading in (('closing', 'Closing soon'), ('quiet', 'Going quiet'), ('past', 'Past borrowers to say hi to')) %}
+ {% for key, heading in (('closing', 'Closing soon'), ('due', 'Follow-ups you planned'), ('quiet', 'Going quiet'), ('past', 'Past borrowers to say hi to')) %}
  {% if needs_today[key] %}
  <div style="margin-top:.8rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#8A6D2F;font-weight:700;">{{ heading }}{% if needs_today.counts[key] > needs_today[key]|length %} <span style="text-transform:none;letter-spacing:0;font-weight:400;">&middot; showing {{ needs_today[key]|length }} of {{ needs_today.counts[key] }}</span>{% endif %}</div>
  {% for p in needs_today[key] %}
@@ -524,7 +524,7 @@
  {% endfor %}
  {% endif %}
  {% endfor %}
- <div style="margin-top:.7rem;"><a href="/lender/crm" style="color:#7A5238;font-weight:600;font-size:.88rem;text-decoration:none;">Open my CRM &rarr;</a></div>
+ <div style="margin-top:.7rem;display:flex;gap:1.2rem;flex-wrap:wrap;"><a href="{{ url_for('lender_followups.followups_page') }}" style="color:#7A5238;font-weight:600;font-size:.88rem;text-decoration:none;">Open my follow-ups &rarr;</a><a href="/lender/crm" style="color:#7A5238;font-weight:600;font-size:.88rem;text-decoration:none;">Open my CRM &rarr;</a></div>
  {% endif %}
  </div>
  {% endif %}
