@@ -765,9 +765,9 @@
      <a id="ylhBrand" href="{% if session.get('user_id') and session.get('role') == 'agent' %}{{ url_for('portal.agent_my_clients') }}{% elif session.get('user_id') and session.get('role') == 'lender' %}{{ url_for('lender_clients') }}{% elif session.get('user_id') and session.get('role') == 'homeowner' %}{{ url_for('portal.my_home') }}{% else %}{{ url_for('index') }}{% endif %}" class="brand-logo" style="font-size:clamp(.95rem,4.9vw,2.8rem) !important;letter-spacing:.05em !important;line-height:1.05 !important;font-family:'Playfair Display',Georgia,serif !important;color:#3F2817 !important;text-decoration:none !important;display:block !important;">Your Life • Your Home</a>
      {% if session.get('user_id') and request.endpoint not in PUBLIC_PAGES %}
      <span class="ylh-hdr-title" style="position:static;transform:none;font-size:.78rem;opacity:.82;font-weight:500;letter-spacing:.16em;text-transform:uppercase;margin-top:3px;display:block;">
-       {% if session.get('role') == 'agent' %}Agent Dashboard
-       {% elif session.get('role') == 'lender' %}Lender Dashboard
-       {% else %}Homeowner Dashboard{% endif %}
+       {% if session.get('role') == 'agent' %}Agent
+       {% elif session.get('role') == 'lender' %}Lender
+       {% else %}Homeowner{% endif %}
      </span>
      {% endif %}
    </div>

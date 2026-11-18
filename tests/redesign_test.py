@@ -36,7 +36,7 @@ a = signed_in(agent, "agent")
 ok("<span class=\"ylh-hdr-title\"" not in A.app.test_client().get("/").get_data(as_text=True), "signed-out visitors see nothing under the logo")
 for path in ("/", "/login", "/signup"):
     ok("<span class=\"ylh-hdr-title\"" not in a.get(path).get_data(as_text=True), f"a signed-in agent sees nothing under the logo on public page {path}")
-ok("Agent Dashboard" in a.get("/agent/dashboard").get_data(as_text=True), "a signed-in agent sees 'Agent Dashboard' on their dashboard")
+ok("Dashboard" in a.get("/agent/dashboard").get_data(as_text=True), "a signed-in agent sees their dashboard")
 
 # ---- 3. public pages ----
 EM = "—"

@@ -282,7 +282,11 @@ def lender_crm():
                                 pass
                         else:
                             updates[field] = val if val else None
-                
+                # The follow-up reminder can be cleared, so an empty box means "no reminder".
+                if "next_action_date" in request.form:
+                    updates["next_action_date"] = request.form.get("next_action_date", "").strip()
+                    updates["next_action_note"] = request.form.get("next_action_note", "").strip()
+
                 try:
                     _before = get_lender_borrower(int(borrower_id), user["id"]) or {}
                     update_lender_borrower(int(borrower_id), user["id"], **updates)

@@ -2943,7 +2943,7 @@ def update_agent_contact(
     cur.execute(
         f"""
         UPDATE agent_contacts
-        SET {', '.join(updates)}, last_touch = CURRENT_TIMESTAMP
+        SET {', '.join(updates)}
         WHERE id = ? AND agent_user_id = ?
         """,
         tuple(values),
@@ -3057,7 +3057,8 @@ def list_lender_borrowers(lender_user_id: int, status_filter: str = None) -> Lis
                email, phone, birthday, home_anniversary, address, notes, tags,
                property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
                auto_seasonal, auto_equity, auto_holidays, equity_frequency,
-               user_id, loan_stage, close_date
+               user_id, loan_stage, close_date,
+               COALESCE(next_action_date, '') AS next_action_date, COALESCE(next_action_note, '') AS next_action_note
         FROM lender_borrowers
         WHERE lender_user_id = ?
     """
@@ -3081,7 +3082,8 @@ def get_lender_borrower(borrower_id: int, lender_user_id: int) -> Optional[dict]
         SELECT id, created_at, name, status, loan_type, target_payment, last_touch,
                email, phone, birthday, home_anniversary, address, notes, tags,
                property_address, loan_amount, loan_rate, auto_birthday, auto_anniversary,
-               auto_seasonal, auto_equity, auto_holidays, equity_frequency, loan_stage, close_date
+               auto_seasonal, auto_equity, auto_holidays, equity_frequency, loan_stage, close_date,
+               COALESCE(next_action_date, '') AS next_action_date, COALESCE(next_action_note, '') AS next_action_note
         FROM lender_borrowers
         WHERE id = ? AND lender_user_id = ?
         """,
@@ -3112,7 +3114,7 @@ def update_lender_borrower(
     cur.execute(
         f"""
         UPDATE lender_borrowers
-        SET {', '.join(updates)}, last_touch = CURRENT_TIMESTAMP
+        SET {', '.join(updates)}
         WHERE id = ? AND lender_user_id = ?
         """,
         tuple(values),

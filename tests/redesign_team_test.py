@@ -145,5 +145,6 @@ t = h.get("/homeowner/my-home").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
 for item in ("My Profile", "Documents", "Home Timeline", "Care Guide", "Refinance &amp; Payoff", "Get Help"):
     ok(f">{item}<" in menu, f"homeowner menu: '{item}' is still there, under More")
-ok("Agent Dashboard" in a.get("/agent/my-clients").get_data(as_text=True) and "Homeowner Dashboard" in h.get("/homeowner/team").get_data(as_text=True), "dashboard titles still show on signed-in pages")
+import re as _re
+ok(_re.search(r"ylh-hdr-title[^>]*>\s*Agent\s*<", a.get("/agent/my-clients").get_data(as_text=True)) and _re.search(r"ylh-hdr-title[^>]*>\s*Homeowner\s*<", h.get("/homeowner/team").get_data(as_text=True)), "the header names who is signed in (Agent, Homeowner) without calling every page a dashboard")
 ok(l.get("/lender/messages").status_code == 200 and "Shared a refinance" not in l.get("/lender/messages").get_data(as_text=True), "the lender's Email and Text Library page still opens as before")
