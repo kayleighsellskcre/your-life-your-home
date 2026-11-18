@@ -2364,6 +2364,7 @@ def agent_automatic_emails():
         return redirect(url_for("login", role="agent"))
     if request.method == "POST":
         if request.form.get("sample"):
+            save_auto_emails(user, request.form)  # keep the switches as they are on screen
             _ok, _msg = send_auto_email_sample(user, request.form.get("sample"))
             flash(_msg, "success" if _ok else "error")
             return redirect(url_for("agent_automatic_emails"))

@@ -70,3 +70,8 @@ ok(sent[-1][2].count("g.page/r/your-review-link") == 1 and "(your review link)" 
 cl2 = who(lender, "lender")
 cl2.post("/lender/automatic-emails", data={"sample": "review"})
 ok(all(s[0] != "lou@x.com" for s in sent), "lenders cannot send the agent-only thank-you sample")
+
+# a sample press keeps the switches as they are on screen
+cy = who(agent, "agent")
+cy.post("/agent/automatic-emails", data={"on_birthday": "1", "sample": "birthday"})
+ok(A.auto_email_enabled(agent, "birthday") is True and A.auto_email_enabled(agent, "anniversary") is False and A.auto_email_enabled(agent, "review") is False, "pressing a sample button also saves the switches you changed")
