@@ -599,7 +599,13 @@ def agent_crm():
                             stage = request.form.get("bulk_stage", "").strip()
                             if stage:
                                 update_agent_contact(int(contact_id), user["id"], stage=stage)
-                    flash(f"Bulk action completed for {len(contact_ids)} contact(s)!", "success")
+                    n = len(contact_ids)
+                    who = "1 person" if n == 1 else f"{n} people"
+                    if bulk_action_type == "add_tag":
+                        flash(f"Added the tag \"{request.form.get('bulk_tag', '').strip()}\" to {who}.", "success")
+                    else:
+                        label = (request.form.get("bulk_stage", "") or "").replace("_", " ")
+                        flash(f"Moved {who} to {label}.", "success")
                 except Exception as e:
                     flash("We could not complete that bulk action. Please try again in a moment.", "error")
 

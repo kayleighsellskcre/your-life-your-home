@@ -151,3 +151,20 @@ ok("&larr; Dashboard" not in dash, "the Dashboard has no back link to itself")
 ok("&larr; Dashboard" in ca.get("/agent/financials").get_data(as_text=True) and "&larr; Dashboard" in ca.get("/agent/marketing-hub").get_data(as_text=True), "deeper agent pages have a way back to the Dashboard")
 ok("&larr; Dashboard" in cl.get("/lender/financials").get_data(as_text=True), "deeper lender pages have a way back to the Dashboard")
 ok("&larr; Dashboard" not in ca.get("/agent/my-clients").get_data(as_text=True), "tab pages need no back link")
+
+# CRM bulk actions
+_c = D.get_connection()
+_ids = []
+for _n in ("Bulk One", "Bulk Two"):
+    _c.execute("INSERT INTO agent_contacts (agent_user_id, name, stage) VALUES (?,?,?)", (agent, _n, "new"))
+    _ids.append(_c.execute("SELECT max(id) FROM agent_contacts").fetchone()[0])
+_c.execute("INSERT INTO agent_contacts (agent_user_id, name, stage) VALUES (?,?,?)", (other, "Not Mine", "new"))
+_theirs = _c.execute("SELECT max(id) FROM agent_contacts").fetchone()[0]
+_c.commit()
+_page = ca.get("/agent/crm").get_data(as_text=True)
+ok('id="bulk-bar"' in _page and 'id="bulk-all"' in _page, "CRM has a select-all box and a bulk bar")
+_r = ca.post("/agent/crm", data={"action": "bulk_action", "bulk_action_type": "change_stage", "bulk_stage": "past", "contact_ids": [str(i) for i in _ids] + [str(_theirs)]}, follow_redirects=True)
+_t = _r.get_data(as_text=True)
+_rows = {r[0]: r[1] for r in D.get_connection().execute("SELECT id, stage FROM agent_contacts WHERE id IN (?,?,?)", (_ids[0], _ids[1], _theirs)).fetchall()}
+ok(_rows[_ids[0]] == "past" and _rows[_ids[1]] == "past" and _rows[_theirs] == "new", "bulk move changes mine and never touches another agent's contact")
+ok("to past" in _t, "bulk move says what happened in plain words")
