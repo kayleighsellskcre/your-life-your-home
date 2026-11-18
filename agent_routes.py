@@ -1803,8 +1803,17 @@ def agent_transaction_change_stage(tx_id):
                     client_email = transaction.get("client_email") or ""
                     client_name = transaction.get("client_name") or ""
                     if client_email:
-                        schedule_review_request(user["id"], tx_id, client_name, client_email)
-                        print(f"[REVIEW] Scheduled review request for {client_email}")
+                        if schedule_review_request(user["id"], tx_id, client_name, client_email):
+                            _first = (client_name or "your client").split()[0]
+                            from database import get_connection as _gc
+                            _pc = _gc()
+                            try:
+                                _pr = _pc.execute("SELECT google_review_link FROM user_profiles WHERE user_id = ?", (user["id"],)).fetchone()
+                            finally:
+                                _pc.close()
+                            _link = (_pr["google_review_link"] if _pr else "") or ""
+                            flash(f"Congratulations on the closing! In 3 days {_first} will get a warm thank-you email from you"
+                                  + (" with your review link." if _link else ". Add your Google review link in Settings and it will include it."), "success")
                 except Exception as rev_err:
                     print(f"[REVIEW] Could not schedule review request: {rev_err}")
         else:

@@ -335,7 +335,7 @@ app.config["MAX_CONTENT_LENGTH"] = 250 * 1024 * 1024  # 250 MB upload cap
 _CSRF_EXEMPT_PATHS = ("/stripe/webhook", "/api/homebot/webhook", "/api/lead-intake/")
 
 
-_AREA_HOME = {"agent": "portal.agent_my_clients", "lender": "lender_clients", "homeowner": "portal.my_home"}
+_AREA_HOME = {"agent": "agent_dashboard", "lender": "lender_dashboard", "homeowner": "portal.my_home"}
 
 
 def _signed_in_home():
@@ -1956,12 +1956,20 @@ def schedule_review_request(agent_user_id: int, transaction_id: int,
                              client_name: str, client_email: str):
     """Schedule a Google review request 3 days after closing."""
     if not client_email:
-        return
+        return False
     from database import get_connection
     from datetime import timedelta
     send_date = (datetime.now().date() + timedelta(days=3)).isoformat()
     conn = get_connection()
     cur = conn.cursor()
+    # One thank-you per deal, and never the same person twice in half a year, even if a deal is moved to Closed again.
+    dup = cur.execute(
+        """SELECT 1 FROM review_requests WHERE agent_user_id = ? AND (transaction_id = ?
+               OR (LOWER(client_email) = LOWER(?) AND COALESCE(sent_at, scheduled_date, '') >= date('now', '-180 day')))
+           LIMIT 1""", (agent_user_id, transaction_id, client_email)).fetchone()
+    if dup:
+        conn.close()
+        return False
     cur.execute("""
         INSERT INTO review_requests
             (agent_user_id, transaction_id, client_email, client_name, scheduled_date, status)
@@ -1969,6 +1977,7 @@ def schedule_review_request(agent_user_id: int, transaction_id: int,
     """, (agent_user_id, transaction_id, client_email, client_name, send_date))
     conn.commit()
     conn.close()
+    return True
 
 
 def send_review_requests():
@@ -3222,8 +3231,8 @@ def signup():
         # Save email to localStorage (will be handled by JavaScript)
         # A homeowner who arrived through their agent's or lender's personal link goes straight to setting up their home
         came_from_pro = referral_token_from_form not in (None, "", "default")
-        response = redirect(url_for("portal.agent_my_clients") if role == "agent"
-                           else url_for("lender_clients") if role == "lender"
+        response = redirect(url_for("agent_dashboard") if role == "agent"
+                           else url_for("lender_dashboard") if role == "lender"
                            else url_for("portal.setup") if came_from_pro
                            else url_for("portal.my_home"))
         
@@ -3316,8 +3325,8 @@ def login():
 
         redirect_map = {
             "homeowner": url_for("portal.my_home"),
-            "agent": url_for("portal.agent_my_clients"),
-            "lender": url_for("lender_clients")
+            "agent": url_for("agent_dashboard"),
+            "lender": url_for("lender_dashboard")
         }
         redirect_url = redirect_map.get(user_role, url_for("index"))
 
@@ -3342,7 +3351,7 @@ def _finish_login(uid, name, role, remember=False):
         c.close()
     except Exception as e:
         print(f"[LOGIN] last_login update skipped: {e}")
-    target = {"homeowner": "portal.my_home", "agent": "portal.agent_my_clients", "lender": "lender_clients"}.get(role, "index")
+    target = {"homeowner": "portal.my_home", "agent": "agent_dashboard", "lender": "lender_dashboard"}.get(role, "index")
     return redirect(url_for(target))
 
 

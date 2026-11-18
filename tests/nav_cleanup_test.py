@@ -24,12 +24,12 @@ def who(uid, role):
 
 a, l, h = who(agent, "agent"), who(lender, "lender"), who(home, "homeowner")
 brand = lambda t: re.search(r'<a id="ylhBrand" href="([^"]*)"', t).group(1)
-ok(brand(a.get("/agent/my-clients").get_data(as_text=True)) == "/agent/my-clients", "an agent's logo goes to My Clients")
-ok(brand(l.get("/lender/clients").get_data(as_text=True)) == "/lender/clients", "a lender's logo goes to My Clients")
+ok(brand(a.get("/agent/my-clients").get_data(as_text=True)) == "/agent", "an agent's logo goes to the Dashboard")
+ok(brand(l.get("/lender/clients").get_data(as_text=True)) == "/lender", "a lender's logo goes to the Dashboard")
 ok(brand(h.get("/homeowner/my-home").get_data(as_text=True)) == "/homeowner/my-home", "a homeowner's logo goes to My Home")
 ok(brand(A.app.test_client().get("/").get_data(as_text=True)) == "/", "a visitor's logo goes to the public home page")
-ok(A._AREA_HOME == {"agent": "portal.agent_my_clients", "lender": "lender_clients", "homeowner": "portal.my_home"}, "wrong-area redirects use the new landing pages")
-ok(a.get("/homeowner/my-home").headers["Location"].endswith("/agent/my-clients"), "an agent opening a homeowner page lands on My Clients")
+ok(A._AREA_HOME == {"agent": "agent_dashboard", "lender": "lender_dashboard", "homeowner": "portal.my_home"}, "wrong-area redirects use the new landing pages")
+ok(a.get("/homeowner/my-home").headers["Location"].endswith("/agent"), "an agent opening a homeowner page lands on the Dashboard")
 ok(h.get("/agent/my-clients").headers["Location"].endswith("/homeowner/my-home"), "a homeowner opening an agent page lands on My Home")
 
 # lender My Clients matches the agent page

@@ -150,7 +150,7 @@ dash = ca.get("/agent").get_data(as_text=True)
 ok("&larr; Dashboard" not in dash, "the Dashboard has no back link to itself")
 ok("&larr; Dashboard" in ca.get("/agent/financials").get_data(as_text=True) and "&larr; Dashboard" in ca.get("/agent/marketing-hub").get_data(as_text=True), "deeper agent pages have a way back to the Dashboard")
 ok("&larr; Dashboard" in cl.get("/lender/financials").get_data(as_text=True), "deeper lender pages have a way back to the Dashboard")
-ok("&larr; Dashboard" not in ca.get("/agent/my-clients").get_data(as_text=True), "tab pages need no back link")
+ok("&larr; Dashboard" in ca.get("/agent/my-clients").get_data(as_text=True), "My Clients also has a way back to the Dashboard, the home page")
 
 # CRM bulk actions
 _c = D.get_connection()

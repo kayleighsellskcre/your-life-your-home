@@ -351,7 +351,7 @@
         Discover Your Home's Worth
       </a>
       {% if session.get('user_id') %}
-      <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('portal.agent_my_clients') if session.get('role') == 'agent' else url_for('lender_clients') if session.get('role') == 'lender' else url_for('portal.my_home') }}">Go to My Dashboard</a>
+      <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('agent_dashboard') if session.get('role') == 'agent' else url_for('lender_dashboard') if session.get('role') == 'lender' else url_for('portal.my_home') }}">Go to My Dashboard</a>
       {% else %}
       <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('signup', role='homeowner') }}">Create a Free Account</a>
       {% endif %}

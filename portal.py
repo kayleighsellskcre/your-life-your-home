@@ -86,7 +86,7 @@ def tab_context():
                 ("Messages", url_for("team.pro_messages"), ep in {"team.pro_messages", "team.pro_thread"}, unread)]
     # Deeper pages (CRM, Financials, Marketing Hub and so on) get one plain way back to the day's main page.
     back_home = None
-    if not any(t[2] for t in tabs):
+    if True:
         if role == "agent" and ep != "agent_dashboard":
             back_home = ("Dashboard", url_for("agent_dashboard"))
         elif role == "lender" and ep != "lender_dashboard":
@@ -359,7 +359,12 @@ def _clients_view(role):
         just["text"] = (f"Hi {first}, it's {u.get('name')}. Congratulations on your new home! Here is your personal link to set up your home "
                         f"dashboard. It takes about a minute: {link}")
         just["sms"] = sms_link(_clean_phone(just["phone"]), just["text"]) if just.get("phone") else ""
-    return render_template(f"{role}/my_clients.html", clients=clients, pending=pending, link=link, just=just, value_requests=values, role=role)
+    conn = _db()
+    try:
+        crm_total = conn.execute("SELECT COUNT(*) FROM " + ("lender_borrowers WHERE lender_user_id" if role == "lender" else "agent_contacts WHERE agent_user_id") + " = ?", (u["id"],)).fetchone()[0]
+    finally:
+        conn.close()
+    return render_template(f"{role}/my_clients.html", clients=clients, pending=pending, link=link, just=just, value_requests=values, role=role, crm_total=crm_total)
 
 
 def _back(role, **kw):

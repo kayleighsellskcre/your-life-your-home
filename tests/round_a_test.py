@@ -25,7 +25,7 @@ fresh = lambda: A.app.test_client()
 dest = lambda r: r.headers.get("Location", "")
 
 # 2. signed-in people skip login and sign-up
-for name, c, where in (("agent", a, "/agent/my-clients"), ("lender", l, "/lender/clients"), ("homeowner", h, "/homeowner/my-home")):
+for name, c, where in (("agent", a, "/agent"), ("lender", l, "/lender"), ("homeowner", h, "/homeowner/my-home")):
     for p in ("/login", "/signup", "/signup?role=agent"):
         r = c.get(p)
         ok(r.status_code == 302 and dest(r).endswith(where), f"a signed-in {name} opening {p} goes to {where}")
@@ -43,7 +43,7 @@ ok("Start as an agent" not in t and "Change my plan" not in t, "a homeowner is n
 
 # 4. account security back link
 back = lambda c: re.search(r'<a class="back" href="([^"]*)"', c.get("/account/security").get_data(as_text=True))
-ok(back(a) and back(a).group(1) == "/agent/my-clients" and back(l).group(1) == "/lender/clients" and back(h).group(1) == "/homeowner/my-home", "Account security Back goes to each person's own home page")
+ok(back(a) and back(a).group(1) == "/agent" and back(l).group(1) == "/lender" and back(h).group(1) == "/homeowner/my-home", "Account security Back goes to each person's own home page")
 
 # 5. Full home overview retired
 r = h.get("/homeowner")

@@ -58,6 +58,6 @@ ok("homeowner" in actors["lonely" if False else "no-lender homeowner"].get("/hom
 ok(actors["no-lender homeowner"].get("/homeowner/team/ask-lender").status_code == 302, "a homeowner with no lender is sent back from Ask my lender")
 ok(who(home, "homeowner").get("/messages").status_code in (302, 403), "a homeowner cannot open the agent and lender Messages area")
 ok(who(agent, "agent").get("/homeowner/my-home").status_code == 302, "an agent cannot open a homeowner's My Home")
-for role, uid, where in (("agent", agent, "/agent/my-clients"), ("lender", lender, "/lender/clients"), ("homeowner", home, "/homeowner/my-home")):
+for role, uid, where in (("agent", agent, "/agent"), ("lender", lender, "/lender"), ("homeowner", home, "/homeowner/my-home")):
     t = who(uid, role).get("/").get_data(as_text=True)
     ok(f'href="{where}">Go to My Dashboard' in t, f"the home page button takes a signed-in {role} to their own landing page")

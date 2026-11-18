@@ -29,7 +29,7 @@
       <p class="lead">Add a second step when you sign in: a code from an authenticator app on your phone. Recommended for agents and lenders.</p>
       <form method="post"><input type="hidden" name="action" value="start"><button class="btn-primary" type="submit">Set up</button></form>
     {% endif %}
-    <a class="back" href="{% if session.get('role') == 'agent' %}{{ url_for('portal.agent_my_clients') }}{% elif session.get('role') == 'lender' %}{{ url_for('lender_clients') }}{% elif session.get('role') == 'homeowner' %}{{ url_for('portal.my_home') }}{% else %}{{ url_for('index') }}{% endif %}">&larr; Back</a>
+    <a class="back" href="{% if session.get('role') == 'agent' %}{{ url_for('agent_dashboard') }}{% elif session.get('role') == 'lender' %}{{ url_for('lender_dashboard') }}{% elif session.get('role') == 'homeowner' %}{{ url_for('portal.my_home') }}{% else %}{{ url_for('index') }}{% endif %}">&larr; Back</a>
   </div>
 </div>
 {% endblock %}
