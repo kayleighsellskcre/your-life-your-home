@@ -66,6 +66,7 @@ def lender_dashboard():
             metrics=metrics,
             loans=loans,
             borrowers=borrowers,
+            needs_today=lender_needs_today(user["id"]),
             shared_deals=automation.lender_shared_deals(user["id"]),
             today_digest=automation.build_digest(user["id"], "lender"),
         )

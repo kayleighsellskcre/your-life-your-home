@@ -347,6 +347,18 @@
 </style>
 
 <div class="dash">
+  <!-- ── STANDARD PAGE HEADER ── -->
+  <div class="ylh-page-hd fu">
+    <h1 class="ylh-page-hd__title" id="dash-greeting">Good morning, {{ (user.name or 'Agent').split()[0] }}</h1>
+    <p class="ylh-page-hd__sub">Here is what is happening with your business today.</p>
+    <div class="ylh-page-hd__actions">
+      <span class="date-badge">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+ <span id="today-date">{{ today_date if today_date else "" }}</span>
+      </span>
+ </div>
+ </div>
+
 {% include "_onboarding.html" %}
 {% if today_digest and today_digest.sections %}
 <section class="ylh-today" aria-label="Today">
@@ -368,55 +380,13 @@
 </style>
 {% endif %}
 
-
-  <!-- ── STANDARD PAGE HEADER ── -->
-  <div class="ylh-page-hd fu">
-    <h1 class="ylh-page-hd__title" id="dash-greeting">Good morning, {{ (user.name or 'Agent').split()[0] }}</h1>
-    <p class="ylh-page-hd__sub">Here is what is happening with your business today.</p>
-    <div class="ylh-page-hd__actions">
-      <span class="date-badge">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
- <span id="today-date">{{ today_date if today_date else "" }}</span>
-      </span>
- </div>
- </div>
-
-  <!-- ── DAILY BRIEF CARD ── -->
-  <div class="fu fu1" style="
-    background:linear-gradient(135deg,#F6EFE9 0%,#F1E6D8 100%);
-    border:1px solid rgba(120,90,64,.22);
-    border-radius:16px;
-    padding:1.25rem 1.5rem 1rem;
-    margin-bottom:1.2rem;
-    box-shadow:0 2px 14px rgba(76,57,41,.08);
-    position:relative;
-  ">
-    <!-- Quote + kindness — centered -->
-    <div style="text-align:center;margin-bottom:1rem;">
-      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:2.2rem;font-style:italic;font-weight:600;color:#7A5238;line-height:1.35;">Loading your daily inspiration...</div>
-      <div id="kindness-text" style="font-size:.88rem;color:rgba(76,57,41,.82);margin-top:.6rem;line-height:1.45;font-weight:500;letter-spacing:.01em;"></div>
- </div>
-
-    <!-- Divider -->
-    <div style="height:1px;background:rgba(120,90,64,.2);margin-bottom:.85rem;"></div>
-
-    <!-- Footer: shuffle + refresh priorities -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;">
-      <span onclick="shuffleBriefing()" role="button" title="New quote" style="font-size:.68rem;font-weight:600;color:rgba(76,57,41,.7);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
-        onmouseover="this.style.color='rgba(76,57,41,.98)'" onmouseout="this.style.color='rgba(76,57,41,.7)'">
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
-        Another quote
-      </span>
- </div>
- </div>
-
   <!-- ── KPI STRIP ── -->
   <div class="kpi-strip fu fu2">
 
     {% set kpis = [
+      { 'id':'kpi-followups',      'href':'/agent/followups',          'value': metrics.followups_today|default(0),         'accent':'#8F6244', 'icon_bg':'rgba(120,90,64,.12)', 'icon_color':'#7A5238', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
       { 'id':'kpi-new-leads',      'href':'/agent/crm',          'value': metrics.new_leads|default(0),              'accent':'#A47551', 'icon_bg':'rgba(120,90,64,.12)',  'icon_color':'#8F6244', 'label':'New Leads',      'sub':'Ready for your call',  'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>' },
       { 'id':'kpi-active-deals',   'href':'/agent/transactions', 'value': transactions|length if transactions else 0, 'accent':'#A68A4E', 'icon_bg':'rgba(166,138,78,.14)', 'icon_color':'#8A6D2F', 'label':'Active Deals',   'sub':'In your pipeline',     'svg':'<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
-      { 'id':'kpi-followups',      'href':'/agent/followups',          'value': metrics.followups_today|default(0),         'accent':'#8F6244', 'icon_bg':'rgba(120,90,64,.12)', 'icon_color':'#7A5238', 'label':'Follow-ups',     'sub':'Due today',            'svg':'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.59 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.77a16 16 0 0 0 6.29 6.29l1.42-1.42a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>' },
       { 'id':'kpi-total-contacts', 'href':'/agent/crm',          'value': metrics.total_contacts|default(0),          'accent':'#7A5238', 'icon_bg':'rgba(76,57,41,.12)',    'icon_color':'#7A5238', 'label':'Total Contacts', 'sub':'In your CRM',          'svg':'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>' }
     ] %}
 
@@ -459,6 +429,35 @@
     {% endfor %}
 
   </div><!-- /kpi-strip -->
+
+  <!-- ── DAILY BRIEF CARD ── -->
+  <div class="fu fu1" style="
+    background:linear-gradient(135deg,#F6EFE9 0%,#F1E6D8 100%);
+    border:1px solid rgba(120,90,64,.22);
+    border-radius:16px;
+    padding:1.25rem 1.5rem 1rem;
+    margin-bottom:1.2rem;
+    box-shadow:0 2px 14px rgba(76,57,41,.08);
+    position:relative;
+  ">
+    <!-- Quote + kindness — centered -->
+    <div style="text-align:center;margin-bottom:1rem;">
+      <div id="briefing-text" style="font-family:'Playfair Display',Georgia,serif;font-size:2.2rem;font-style:italic;font-weight:600;color:#7A5238;line-height:1.35;">Loading your daily inspiration...</div>
+      <div id="kindness-text" style="font-size:.88rem;color:rgba(76,57,41,.82);margin-top:.6rem;line-height:1.45;font-weight:500;letter-spacing:.01em;"></div>
+ </div>
+
+    <!-- Divider -->
+    <div style="height:1px;background:rgba(120,90,64,.2);margin-bottom:.85rem;"></div>
+
+    <!-- Footer: shuffle + refresh priorities -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;">
+      <span onclick="shuffleBriefing()" role="button" title="New quote" style="font-size:.68rem;font-weight:600;color:rgba(76,57,41,.7);cursor:pointer;display:inline-flex;align-items:center;gap:.28rem;transition:color .2s;"
+        onmouseover="this.style.color='rgba(76,57,41,.98)'" onmouseout="this.style.color='rgba(76,57,41,.7)'">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor"><path d="M13.65 2.35A8 8 0 1 0 15 8h-2a6 6 0 1 1-1.05-3.35l-1.6 1.6H14V2l-.35.35z"/></svg>
+        Another quote
+      </span>
+ </div>
+ </div>
 
   <!-- ── MAIN 3-COLUMN GRID ── -->
   <div class="dash-grid">

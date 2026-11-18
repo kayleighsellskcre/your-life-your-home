@@ -198,3 +198,30 @@ for _u, _want in (("/agent/crm/import", "Import Contacts"), ("/agent/invoices/ne
 _c = D.get_connection(); _c.execute("INSERT OR IGNORE INTO agent_profiles (user_id, bio) VALUES (?, NULL)", (agent,)) if False else None
 _tt = ca.get("/agent/settings/profile").get_data(as_text=True)
 ok(">None</textarea>" not in _tt, "an empty Bio box is empty, not the word None")
+
+# Dashboards: most important first
+_d = ca.get("/agent").get_data(as_text=True)
+ok(_d.index('id="dash-greeting"') < _d.index("Get started") if "Get started" in _d else True, "agent dashboard opens with the greeting, then the checklist")
+ok(_d.index('id="kpi-followups"') < _d.index('id="kpi-new-leads"') < _d.index('id="kpi-total-contacts"'), "agent tiles lead with Follow-ups due, Total Contacts last")
+ok(_d.index('id="kpi-followups"') < _d.index("Loading your daily inspiration"), "agent numbers come before the daily quote")
+
+from datetime import date as _dd, timedelta as _td
+_lender = D.create_user("Lena Lender", "lena@x.com", gp("password123"), "lender")
+_lo = A.lender_needs_today(_lender)
+ok(_lo["has_borrowers"] is False and _lo["total"] == 0, "lender with nobody added has nothing to chase")
+_c = D.get_connection(); _t0 = _dd.today()
+for _n, _st, _lt, _cd, _ph in (
+    ("Closing Cara", "preapproval", _t0.isoformat(), (_t0 + _td(days=3)).isoformat(), "9135550001"),
+    ("Quiet Quinn", "preapproval", (_t0 - _td(days=30)).isoformat(), "", ""),
+    ("Fresh Fay", "preapproval", _t0.isoformat(), "", "9135550002"),
+    ("Past Pat", "closed", (_t0 - _td(days=200)).isoformat(), "", "9135550003"),
+    ("Recent Rae", "closed", (_t0 - _td(days=10)).isoformat(), "", "")):
+    _c.execute("INSERT INTO lender_borrowers (lender_user_id, name, status, last_touch, close_date, phone) VALUES (?,?,?,?,?,?)", (_lender, _n, _st, _lt, _cd, _ph))
+_c.commit()
+_lo = A.lender_needs_today(_lender)
+ok([p["name"] for p in _lo["closing"]] == ["Closing Cara"] and _lo["closing"][0]["note"] == "Closing in 3 days", "lender sees loans closing soon")
+ok([p["name"] for p in _lo["quiet"]] == ["Quiet Quinn"] and "30 days" in _lo["quiet"][0]["note"], "lender sees a borrower going quiet")
+ok([p["name"] for p in _lo["past"]] == ["Past Pat"], "lender sees a past borrower to say hi to, not a recent one")
+_lt = who(_lender, "lender").get("/lender").get_data(as_text=True)
+ok("Needs you today" in _lt and "Closing Cara" in _lt and "Closing soon" in _lt and "tel:9135550001" in _lt, "lender dashboard shows the Needs you today card with a Call link")
+ok(_lt.index("Needs you today") < _lt.index("New Applications"), "the card comes before the number tiles")

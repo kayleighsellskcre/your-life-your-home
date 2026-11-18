@@ -2408,6 +2408,66 @@ def get_agent_dashboard_metrics(user_id):
     }
 
 
+def lender_needs_today(user_id, today=None):
+    """What a lender should look at this morning: loans closing soon, borrowers going quiet, and past borrowers
+    nobody has checked in with in a while. Read-only, built from the borrower CRM."""
+    from datetime import date as _d, datetime as _dt
+    today = today or _d.today()
+
+    def _when(s):
+        s = str(s or "").strip()
+        for fmt, n in (("%Y-%m-%d", 10), ("%m/%d/%Y", 10), ("%m/%d/%y", 8)):
+            try:
+                return _dt.strptime(s[:n], fmt).date()
+            except ValueError:
+                continue
+        return None
+
+    out = {"closing": [], "quiet": [], "past": []}
+    c = get_connection()
+    try:
+        rows = c.execute(
+            "SELECT id, name, status, phone, email, last_touch, close_date, loan_stage FROM lender_borrowers WHERE lender_user_id = ?",
+            (user_id,)).fetchall()
+    finally:
+        c.close()
+    for r in rows:
+        r = dict(r)
+        st = (r.get("status") or "").strip().lower()
+        if not (r.get("name") or "").strip():
+            continue
+        touched = _when(r.get("last_touch"))
+        idle = (today - touched).days if touched else None
+        r["idle"] = idle
+        r["how"] = "tel:" + r["phone"] if r.get("phone") else ("mailto:" + r["email"] if r.get("email") else "")
+        if st == "closed":
+            if idle is None or idle >= 90:
+                r["note"] = "Never contacted since closing" if idle is None else f"Last talked {idle} days ago"
+                out["past"].append(r)
+            continue
+        if st in ("lost", "hold", "past", "inactive"):
+            continue
+        cd = _when(r.get("close_date"))
+        if cd is not None and -7 <= (cd - today).days <= 14:
+            n = (cd - today).days
+            r["note"] = "Closing today" if n == 0 else (f"Closing in {n} day{'s' if n != 1 else ''}" if n > 0 else f"Closing date was {-n} day{'s' if n != -1 else ''} ago, is it done?")
+            r["sort"] = n
+            out["closing"].append(r)
+        elif idle is None or idle >= 14:
+            r["note"] = "Not contacted yet" if idle is None else f"Last talked {idle} days ago"
+            r["sort"] = idle if idle is not None else 9999
+            out["quiet"].append(r)
+    out["closing"].sort(key=lambda x: x["sort"])
+    out["quiet"].sort(key=lambda x: -x["sort"])
+    out["past"].sort(key=lambda x: -(x["idle"] if x["idle"] is not None else 9999))
+    out["counts"] = {k: len(out[k]) for k in ("closing", "quiet", "past")}
+    out["total"] = sum(out["counts"].values())
+    out["has_borrowers"] = bool(rows)
+    for k in ("closing", "quiet", "past"):
+        out[k] = out[k][:5]
+    return out
+
+
 def get_lender_dashboard_metrics(user_id):
     if not user_id:
         return {

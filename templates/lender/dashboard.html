@@ -507,6 +507,28 @@
  </div>
  {% endif %}
 
+ {% if needs_today and needs_today.has_borrowers %}
+ <div id="needs-today" style="background:#fff;border:1px solid rgba(120,90,64,.22);border-left:4px solid #8F6244;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;">
+ <div style="font-weight:700;color:#5C3D28;font-size:1.05rem;">Needs you today</div>
+ {% if needs_today.total == 0 %}
+ <p style="margin:.4rem 0 0;color:#7A5238;">You are all caught up. Nobody is waiting on you right now. Nice work.</p>
+ {% else %}
+ {% for key, heading in (('closing', 'Closing soon'), ('quiet', 'Going quiet'), ('past', 'Past borrowers to say hi to')) %}
+ {% if needs_today[key] %}
+ <div style="margin-top:.8rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:#8A6D2F;font-weight:700;">{{ heading }}{% if needs_today.counts[key] > needs_today[key]|length %} <span style="text-transform:none;letter-spacing:0;font-weight:400;">&middot; showing {{ needs_today[key]|length }} of {{ needs_today.counts[key] }}</span>{% endif %}</div>
+ {% for p in needs_today[key] %}
+ <div style="display:flex;justify-content:space-between;gap:.8rem;flex-wrap:wrap;align-items:center;padding:.45rem 0;border-top:1px solid rgba(120,90,64,.12);font-size:.92rem;">
+  <span><strong>{{ p.name }}</strong><br><span style="color:#8A684B;font-size:.8rem;">{{ p.note }}</span></span>
+  {% if p.how %}<a href="{{ p.how }}" style="color:#8F6244;font-weight:700;text-decoration:none;white-space:nowrap;">{{ 'Call' if p.how.startswith('tel:') else 'Email' }}</a>{% else %}<a href="/lender/crm" style="color:#8A684B;text-decoration:none;white-space:nowrap;">Add a phone</a>{% endif %}
+ </div>
+ {% endfor %}
+ {% endif %}
+ {% endfor %}
+ <div style="margin-top:.7rem;"><a href="/lender/crm" style="color:#7A5238;font-weight:600;font-size:.88rem;text-decoration:none;">Open my CRM &rarr;</a></div>
+ {% endif %}
+ </div>
+ {% endif %}
+
  <!-- Metrics Cards -->
  <div class="metrics-grid">
  <div class="metric-card">
