@@ -73,9 +73,9 @@
       <div class="ev-grid">
         <div><label for="rd">Date</label><input id="rd" type="date" name="run_date" value="{{ cur.run_date }}"></div>
         <div><label for="ra">About how many people</label><input id="ra" type="text" name="attendance" maxlength="100" value="{{ cur.attendance }}" placeholder="200 students"></div>
-        <div class="full"><label for="rw">What worked well</label><textarea id="rw" name="went_well" maxlength="2000">{{ cur.went_well }}</textarea></div>
-        <div class="full"><label for="ri">What to do better next time</label><textarea id="ri" name="improve" maxlength="2000">{{ cur.improve }}</textarea></div>
-        <div class="full"><label for="rn">Other notes (contacts, parking, set-up time)</label><textarea id="rn" name="notes" maxlength="6000">{{ cur.notes }}</textarea></div>
+        <div class="full"><label for="rw">What worked well</label><textarea id="rw" name="went_well" maxlength="2000">{{ cur.went_well or '' }}</textarea></div>
+        <div class="full"><label for="ri">What to do better next time</label><textarea id="ri" name="improve" maxlength="2000">{{ cur.improve or '' }}</textarea></div>
+        <div class="full"><label for="rn">Other notes (contacts, parking, set-up time)</label><textarea id="rn" name="notes" maxlength="6000">{{ cur.notes or '' }}</textarea></div>
       </div>
       <button class="ev-btn" type="submit">Save notes</button>
     </form>

@@ -40,7 +40,7 @@
     <label for="hv-phone">Phone (optional)</label>
     <input id="hv-phone" name="phone" type="tel" value="{{ f.phone }}" autocomplete="tel">
     <label for="hv-note">Anything we should know? (optional)</label>
-    <textarea id="hv-note" name="note" rows="3">{{ f.note }}</textarea>
+    <textarea id="hv-note" name="note" rows="3">{{ f.note or '' }}</textarea>
     <button class="hv-btn" type="submit">Send my request</button>
   </form>
   <p class="hv-note">Free, with no pressure. Your details go only to your agent.</p>

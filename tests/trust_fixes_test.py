@@ -190,3 +190,11 @@ ok(_f("2026-03-04T12:30:00") == "Mar 4, 2026" and _f("2026-03-04 09:00") == "Mar
 # Vendor starter chips
 _t = who(D.create_user("Vic Vendorless", "vic@x.com", gp("password123"), "agent")).get("/agent/vendors").get_data(as_text=True)
 ok("vendor-starter" in _t and "+ Lender" in _t and "+ Home inspector" in _t, "an empty Vendor Network offers one-tap starter categories")
+
+# Audit round: tab titles name the page, no stray "None" in boxes
+for _u, _want in (("/agent/crm/import", "Import Contacts"), ("/agent/invoices/new", "Invoice"), ("/agent/contests/new", "New Contest"), ("/agent/marketing", "Marketing")):
+    _tt = ca.get(_u).get_data(as_text=True)
+    ok("<title>" + _want in _tt, f"{_u} has its own tab title")
+_c = D.get_connection(); _c.execute("INSERT OR IGNORE INTO agent_profiles (user_id, bio) VALUES (?, NULL)", (agent,)) if False else None
+_tt = ca.get("/agent/settings/profile").get_data(as_text=True)
+ok(">None</textarea>" not in _tt, "an empty Bio box is empty, not the word None")

@@ -307,7 +307,7 @@
  
  <div class="form-group">
  <label>Bio / About Me</label>
- <textarea name="bio" placeholder="Tell borrowers and agents about yourself, your experience, and how you help clients achieve their homeownership goals...">{{ profile.bio if profile else '' }}</textarea>
+ <textarea name="bio" placeholder="Tell borrowers and agents about yourself, your experience, and how you help clients achieve their homeownership goals...">{{ (profile.bio or '') if profile else '' }}</textarea>
  <small>A brief, friendly description that will appear on your public profile</small>
  </div>
  
