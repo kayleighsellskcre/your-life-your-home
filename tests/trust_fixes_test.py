@@ -182,3 +182,7 @@ _r = D.get_connection().execute("SELECT name, phone, tags FROM agent_contacts WH
 ok(_r[0] == "Jane Doe" and _r[1] == "(913) 555-1234" and _r[2] == "Seller/Buyer, VIP", "tidy fixes name, phone and duplicate tags")
 ok(D.get_connection().execute("SELECT name FROM agent_contacts WHERE id=?", (_oid,)).fetchone()[0] == "KEEP ME", "tidy leaves other agents' contacts alone")
 ok("Tidied" in _t, "tidy says what it did")
+
+# Last Touch reads as a date
+_f = A.app.jinja_env.filters["touch_label"]
+ok(_f("2026-03-04T12:30:00") == "Mar 4, 2026" and _f("2026-03-04 09:00") == "Mar 4, 2026" and _f("") == "-" and _f(None) == "-" and _f("01/15/2026") == "01/15/2026" and _f("called Tuesday") == "called Tuesday", "Last Touch shows a friendly date, other text is left as typed")

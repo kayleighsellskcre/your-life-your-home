@@ -952,7 +952,7 @@
  <td class="c-td c-td--muted">{{ contact.birthday or '-' }}</td>
  <td class="c-td" onclick="event.stopPropagation()" title="Click to edit last touch">
  <div class="lt-wrap">
- <span class="lt-display" id="lt-disp-{{ contact.id }}" onclick="startLtEdit({{ contact.id }})">{{ contact.last_touch or '-' }}</span>
+ <span class="lt-display" id="lt-disp-{{ contact.id }}" onclick="startLtEdit({{ contact.id }})">{{ contact.last_touch|touch_label }}</span>
  <input type="text" class="lt-inp" id="lt-inp-{{ contact.id }}"
  value="{{ contact.last_touch or '' }}" placeholder="e.g. 01/15/2026"
  onblur="saveLt({{ contact.id }})"

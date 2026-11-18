@@ -529,6 +529,24 @@ def _days_since(value):
 app.jinja_env.filters["days_since"] = _days_since
 
 
+def _touch_label(value):
+    """'2026-03-04T12:30:00' or '2026-03-04 12:30' -> 'Mar 4, 2026'; anything else is left as typed."""
+    s = str(value or "").strip()
+    if not s:
+        return "-"
+    try:
+        from datetime import datetime as _dt
+        d = _dt.strptime(s[:10], "%Y-%m-%d")
+        if len(s) == 10 or s[10] in "T ":
+            return f"{d.strftime('%b')} {d.day}, {d.year}"
+    except Exception:
+        pass
+    return s
+
+
+app.jinja_env.filters["touch_label"] = _touch_label
+
+
 @app.template_filter("min")
 def jinja_min(value):
     """Return the minimum of an iterable (Jinja2 doesn't have |min built-in)."""
