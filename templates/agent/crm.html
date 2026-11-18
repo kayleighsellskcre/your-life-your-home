@@ -756,6 +756,7 @@
    <a href="{{ url_for('agent_crm_import') }}" class="stg-pill">&#8593; Import</a>
    <button class="stg-pill" onclick="doExport()">&#8595; Export</button>
    <a href="{{ url_for('agent_address_labels') }}" class="stg-pill">Labels</a>
+   <form method="post" action="/agent/crm/tidy" style="display:inline;margin:0;" onsubmit="return confirm('Tidy up phone numbers, name capitals and tags for everyone? Nothing gets deleted.');"><button class="stg-pill" type="submit" title="Make phone numbers, names and tags consistent">Tidy up</button></form>
   </div>
  </div>
 

@@ -168,3 +168,17 @@ _t = _r.get_data(as_text=True)
 _rows = {r[0]: r[1] for r in D.get_connection().execute("SELECT id, stage FROM agent_contacts WHERE id IN (?,?,?)", (_ids[0], _ids[1], _theirs)).fetchall()}
 ok(_rows[_ids[0]] == "past" and _rows[_ids[1]] == "past" and _rows[_theirs] == "new", "bulk move changes mine and never touches another agent's contact")
 ok("to past" in _t, "bulk move says what happened in plain words")
+
+# CRM tidy up
+_c = D.get_connection()
+_c.execute("INSERT INTO agent_contacts (agent_user_id, name, phone, tags, stage) VALUES (?,?,?,?,?)", (agent, "  JANE   DOE ", "913.555.1234", "Seller / Buyer,  seller/buyer, VIP", "new"))
+_tid = _c.execute("SELECT max(id) FROM agent_contacts").fetchone()[0]
+_c.execute("INSERT INTO agent_contacts (agent_user_id, name, phone, stage) VALUES (?,?,?,?)", (other, "KEEP ME", "9135551111", "new"))
+_oid = _c.execute("SELECT max(id) FROM agent_contacts").fetchone()[0]
+_c.commit()
+ok("Tidy up" in ca.get("/agent/crm").get_data(as_text=True), "CRM has a Tidy up button")
+_t = ca.post("/agent/crm/tidy", follow_redirects=True).get_data(as_text=True)
+_r = D.get_connection().execute("SELECT name, phone, tags FROM agent_contacts WHERE id=?", (_tid,)).fetchone()
+ok(_r[0] == "Jane Doe" and _r[1] == "(913) 555-1234" and _r[2] == "Seller/Buyer, VIP", "tidy fixes name, phone and duplicate tags")
+ok(D.get_connection().execute("SELECT name FROM agent_contacts WHERE id=?", (_oid,)).fetchone()[0] == "KEEP ME", "tidy leaves other agents' contacts alone")
+ok("Tidied" in _t, "tidy says what it did")

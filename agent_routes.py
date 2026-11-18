@@ -967,6 +967,51 @@ def agent_address_labels():
     )
 
 
+@route("/agent/crm/tidy", methods=["POST"])
+def agent_crm_tidy():
+    """One-click tidy: consistent phone numbers, names and tags. Never deletes anything."""
+    import re as _re
+    user = get_current_user()
+    if not user or user.get("role") not in ("agent", "admin"):
+        return redirect(url_for("login"))
+    from database import get_connection as _gc
+
+    def phone_fmt(p):
+        d = _re.sub(r"\D", "", p or "")
+        if len(d) == 11 and d.startswith("1"):
+            d = d[1:]
+        return f"({d[:3]}) {d[3:6]}-{d[6:]}" if len(d) == 10 else p
+
+    def name_fmt(n):
+        n = _re.sub(r"\s+", " ", n or "").strip()
+        return n.title() if n and (n.isupper() or n.islower()) else n
+
+    def tags_fmt(t):
+        seen, out = set(), []
+        for part in (t or "").split(","):
+            part = _re.sub(r"\s*/\s*", "/", _re.sub(r"\s+", " ", part)).strip()
+            if part and part.lower() not in seen:
+                seen.add(part.lower()); out.append(part)
+        return ", ".join(out)
+
+    conn = _gc()
+    rows = conn.execute("SELECT id, name, phone, tags FROM agent_contacts WHERE agent_user_id = ?", (user["id"],)).fetchall()
+    changed = 0
+    for r in rows:
+        nm, ph, tg = name_fmt(r["name"]), phone_fmt(r["phone"]), tags_fmt(r["tags"])
+        if nm != (r["name"] or "") or ph != (r["phone"] or "") or tg != (r["tags"] or ""):
+            conn.execute("UPDATE agent_contacts SET name = ?, phone = ?, tags = ? WHERE id = ? AND agent_user_id = ?",
+                         (nm, ph, tg, r["id"], user["id"]))
+            changed += 1
+    conn.commit()
+    conn.close()
+    if changed:
+        flash(f"Tidied {changed} {'contact' if changed == 1 else 'contacts'}: phone numbers, name capitals and tags now match. Nothing was deleted.", "success")
+    else:
+        flash("Everything was already tidy.", "success")
+    return redirect(url_for("agent_crm"))
+
+
 @route("/agent/crm/quick-update", methods=["POST"])
 def agent_crm_quick_update():
     """Inline quick-save for CRM fields (e.g. last_touch)."""
