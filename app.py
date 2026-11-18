@@ -1324,6 +1324,90 @@ def _already_emailed_today(conn, email_type):
         return set()
 
 
+AUTO_EMAILS = {
+    "birthday": ("Birthday email", "On their birthday"),
+    "anniversary": ("Home anniversary email", "On the anniversary of their move-in"),
+    "review": ("Thank-you and review request", "3 days after a deal closes"),
+}
+
+
+def auto_email_enabled(user_id, kind):
+    """Is this automatic email switched on for this agent or lender? On unless they turned it off."""
+    from database import get_connection
+    try:
+        c = get_connection()
+        try:
+            c.execute("CREATE TABLE IF NOT EXISTS auto_email_prefs (user_id INTEGER, kind TEXT, enabled INTEGER DEFAULT 1, PRIMARY KEY (user_id, kind))")
+            r = c.execute("SELECT enabled FROM auto_email_prefs WHERE user_id = ? AND kind = ?", (user_id, kind)).fetchone()
+        finally:
+            c.close()
+        return True if r is None else bool(r[0])
+    except Exception:
+        return True
+
+
+def set_auto_email(user_id, kind, on):
+    from database import get_connection
+    c = get_connection()
+    try:
+        c.execute("CREATE TABLE IF NOT EXISTS auto_email_prefs (user_id INTEGER, kind TEXT, enabled INTEGER DEFAULT 1, PRIMARY KEY (user_id, kind))")
+        c.execute("INSERT INTO auto_email_prefs (user_id, kind, enabled) VALUES (?, ?, ?) ON CONFLICT(user_id, kind) DO UPDATE SET enabled = excluded.enabled",
+                  (user_id, kind, 1 if on else 0))
+        c.commit()
+    finally:
+        c.close()
+
+
+def auto_email_preview(kind, pro_name, sample="Sam"):
+    """The exact words an automatic email uses, with a sample first name, so people can see what goes out in their name."""
+    pro = pro_name or "Your Name"
+    if kind == "birthday":
+        return (f"Happy birthday, {sample}!",
+                f"Hi {sample},\n\nHappy birthday! I hope your day is full of people you love and something delicious. I feel lucky to know you.\n\nWith warmth,\n{pro}")
+    if kind == "anniversary":
+        return (f"Happy home anniversary, {sample}!",
+                f"Hi {sample},\n\nHappy home anniversary! I hope your home has been filling your days with good memories. I am so glad I got to be part of your story.\n\n"
+                f"If you ever have a question about your home or what it is worth, I would love to help.\n\nWarmly,\n{pro}")
+    return (f"It was a pleasure working with you, {sample}!",
+            f"Hi {sample},\n\nCongratulations again on your closing! It was truly a pleasure working with you, and I hope you are settling in and loving your new home.\n\n"
+            f"If you have a moment, I would be so grateful if you left me a review: (your review link)\n\n"
+            f"And please remember that I am always here for you, your family, and anyone you know who is thinking about buying or selling. I love referrals!\n\nWarmly,\n{pro}")
+
+
+def auto_emails_context(user):
+    """Everything the Automatic emails page shows: each email with its on/off state and exact wording, and what went out lately."""
+    from database import get_connection
+    kinds = ["birthday", "anniversary"] + (["review"] if user.get("role") == "agent" else [])
+    items = []
+    for k in kinds:
+        subj, body = auto_email_preview(k, user.get("name"))
+        items.append({"kind": k, "title": AUTO_EMAILS[k][0], "when": AUTO_EMAILS[k][1], "enabled": auto_email_enabled(user["id"], k), "subject": subj, "body": body})
+    recent = []
+    c = get_connection()
+    try:
+        for r in c.execute("""SELECT l.email_type, l.sent_at, l.recipient_email, l.subject FROM automated_email_logs l
+                              WHERE l.professional_user_id = ? AND l.email_type IN ('birthday', 'anniversary') AND l.status = 'sent'
+                              ORDER BY l.sent_at DESC LIMIT 8""", (user["id"],)).fetchall():
+            recent.append({"kind": AUTO_EMAILS[r["email_type"]][0], "when": str(r["sent_at"] or "")[:10], "to": r["recipient_email"], "subject": r["subject"]})
+        if user.get("role") == "agent":
+            for r in c.execute("""SELECT client_email, client_name, sent_at FROM review_requests WHERE agent_user_id = ? AND status = 'sent'
+                                  ORDER BY sent_at DESC LIMIT 8""", (user["id"],)).fetchall():
+                recent.append({"kind": AUTO_EMAILS["review"][0], "when": str(r["sent_at"] or "")[:10], "to": r["client_email"], "subject": "Thank you, " + ((r["client_name"] or "").split(" ")[0] or "")})
+            waiting = c.execute("SELECT COUNT(*) FROM review_requests WHERE agent_user_id = ? AND status = 'pending'", (user["id"],)).fetchone()[0]
+        else:
+            waiting = 0
+    finally:
+        c.close()
+    recent.sort(key=lambda x: x["when"], reverse=True)
+    return {"items": items, "recent": recent[:8], "waiting": waiting}
+
+
+def save_auto_emails(user, form):
+    """Apply the switches from the page. A switch that is not in the form is off."""
+    for k in (["birthday", "anniversary"] + (["review"] if user.get("role") == "agent" else [])):
+        set_auto_email(user["id"], k, form.get("on_" + k) == "1")
+
+
 def get_birthday_contacts():
     """Get contacts with birthdays today."""
     from datetime import datetime
@@ -1377,7 +1461,7 @@ def get_birthday_contacts():
     
     done = _already_emailed_today(conn, 'birthday')
     conn.close()
-    return [c for c in contacts if (c['type'], c['id']) not in done]
+    return [c for c in contacts if (c['type'], c['id']) not in done and auto_email_enabled(c['professional_id'], 'birthday')]
 
 
 def get_anniversary_contacts():
@@ -1436,7 +1520,7 @@ def get_anniversary_contacts():
     
     done = _already_emailed_today(conn, 'anniversary')
     conn.close()
-    return [c for c in contacts if (c['type'], c['id']) not in done]
+    return [c for c in contacts if (c['type'], c['id']) not in done and auto_email_enabled(c['professional_id'], 'anniversary')]
 
 
 def _pro_names(professional_id):
@@ -2000,6 +2084,14 @@ def send_review_requests():
     conn.close()
     for row in rows:
         row = dict(row)
+        if not auto_email_enabled(row.get("agent_user_id"), "review"):
+            _sc = get_connection()
+            try:
+                _sc.execute("UPDATE review_requests SET status = 'skipped' WHERE id = ?", (row["id"],))
+                _sc.commit()
+            finally:
+                _sc.close()
+            continue
         client_first = (row.get("client_name") or "there").split()[0]
         agent_name = row.get("agent_name") or "your agent"
         review_link = row.get("google_review_link") or ""

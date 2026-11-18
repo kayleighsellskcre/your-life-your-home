@@ -1106,6 +1106,19 @@ Return ONLY the refined text, nothing else. Keep it roughly the same length."""
         return jsonify({"success": False, "error": "Failed to refine text"}), 500
 
 
+@route("/lender/automatic-emails", methods=["GET", "POST"])
+def lender_automatic_emails():
+    """Automatic emails: see what goes out in your name, read the exact words, and switch each one on or off."""
+    user = get_current_user()
+    if not user or user.get("role") != "lender":
+        return redirect(url_for("login", role="lender"))
+    if request.method == "POST":
+        save_auto_emails(user, request.form)
+        flash("Saved. Your automatic emails are set the way you chose.", "success")
+        return redirect(url_for("lender_automatic_emails"))
+    return render_template("lender/auto_emails.html", brand_name=FRONT_BRAND_NAME, user=user, ctx=auto_emails_context(user))
+
+
 @route("/lender/messages", methods=["GET"])
 def lender_messages():
     """Lender messages."""

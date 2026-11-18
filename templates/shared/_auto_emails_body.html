@@ -1,0 +1,47 @@
+<style>
+  .ae-w { max-width: 820px; margin: 0 auto; padding: 0 0 3rem; }
+  .ae-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1rem 1.2rem; margin-bottom: .9rem; }
+  .ae-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+  .ae-top b { display: block; color: #3A2518; font-size: 1.05rem; }
+  .ae-top span.when { color: #7A6855; font-size: .86rem; }
+  .ae-sw { display: inline-flex; align-items: center; gap: .55rem; font-weight: 700; color: #6B4630; cursor: pointer; white-space: nowrap; }
+  .ae-sw input { width: 1.3rem; height: 1.3rem; accent-color: #8F6244; cursor: pointer; }
+  .ae-card details { margin-top: .6rem; }
+  .ae-card summary { cursor: pointer; color: #7A5238; font-weight: 600; font-size: .9rem; }
+  .ae-mail { margin-top: .6rem; background: #F7F1E8; border-radius: 10px; padding: .8rem 1rem; font-size: .9rem; color: #3A2518; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ae-mail small { display: block; color: #7A6855; margin-bottom: .4rem; font-size: .8rem; white-space: normal; }
+  .ae-save { padding: .7rem 1.6rem; border: 0; border-radius: 99px; background: #8F6244; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; }
+  .ae-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
+  .ae-row { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .5rem 0; border-top: 1px solid rgba(120,90,64,.12); font-size: .9rem; color: #3A2518; }
+  .ae-row span { color: #7A6855; }
+</style>
+<div class="ae-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Account</div>
+    <h1 class="ylh-page-hd__title">Automatic Emails</h1>
+    <p class="ylh-page-hd__sub">Small, kind notes that go out in your name so you never forget a birthday or a thank-you. Read exactly what each one says, and switch off any you would rather send yourself.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="ae-flash">{{ m }}</div>{% endfor %}
+  <form method="post">
+    {% for it in ctx['items'] %}
+    <div class="ae-card">
+      <div class="ae-top">
+        <div><b>{{ it.title }}</b><span class="when">{{ it.when }}</span></div>
+        <label class="ae-sw"><input type="checkbox" name="on_{{ it.kind }}" value="1" {% if it.enabled %}checked{% endif %}> {{ 'On' if it.enabled else 'Off' }}</label>
+      </div>
+      <details><summary>Read what it says</summary>
+        <div class="ae-mail"><small>Subject: {{ it.subject }} &middot; shown with a sample first name</small>{{ it.body }}</div>
+      </details>
+    </div>
+    {% endfor %}
+    <p style="color:#7A6855;font-size:.88rem;margin:.2rem 0 1rem;">Each person you add to your CRM also has their own switches, so you can turn these off for one person and leave them on for everyone else. Nothing goes to someone with no email address.{% if role == 'agent' %} The thank-you uses your Google review link from <a href="{{ url_for('agent_settings_profile') }}" style="color:#7A5238;">Settings</a>.{% endif %}</p>
+    <button class="ae-save" type="submit">Save my choices</button>
+  </form>
+
+  <div class="ae-card" style="margin-top:1.4rem;">
+    <b style="color:#3A2518;">Sent lately</b>
+    {% if ctx['waiting'] %}<div style="color:#7A6855;font-size:.88rem;margin-top:.2rem;">{{ ctx['waiting'] }} thank-you {{ 'email is' if ctx['waiting'] == 1 else 'emails are' }} waiting for their send day.</div>{% endif %}
+    {% for r in ctx['recent'] %}<div class="ae-row"><div>{{ r.kind }} to {{ r.to }}<br><span>{{ r.subject }}</span></div><span>{{ r.when }}</span></div>
+    {% else %}<div style="color:#7A6855;font-size:.9rem;margin-top:.4rem;">Nothing has gone out yet. When one does, you will see it here.</div>{% endfor %}
+  </div>
+</div>
