@@ -459,6 +459,13 @@
 </style>
 
 <div class="dashboard-container">
+ <!-- Header -->
+ <div class="ylh-page-hd animate-in">
+ <div class="ylh-page-hd__label">Overview</div>
+ <h1 class="ylh-page-hd__title" id="dash-greeting">Good morning, {{ (user.name or 'there').split()[0] }}</h1>
+ <p class="ylh-page-hd__sub">Here is what is happening with your pipeline today.</p>
+ </div>
+ <script>(function(){var h=new Date().getHours(),p=h<12?"morning":h<17?"afternoon":"evening",e=document.getElementById("dash-greeting");if(e)e.textContent=e.textContent.replace(/Good \w+,/,"Good "+p+",");})();</script>
 {% include "_onboarding.html" %}
 {% if today_digest and today_digest.sections %}
 <section class="ylh-today" aria-label="Today">
@@ -480,13 +487,6 @@
 </style>
 {% endif %}
 
- <!-- Header -->
- <div class="ylh-page-hd animate-in">
- <div class="ylh-page-hd__label">Overview</div>
- <h1 class="ylh-page-hd__title" id="dash-greeting">Good morning, {{ (user.name or 'there').split()[0] }}</h1>
- <p class="ylh-page-hd__sub">Here is what is happening with your pipeline today.</p>
- </div>
- <script>(function(){var h=new Date().getHours(),p=h<12?"morning":h<17?"afternoon":"evening",e=document.getElementById("dash-greeting");if(e)e.textContent=e.textContent.replace(/Good \w+,/,"Good "+p+",");})();</script>
  
  <!-- AI Morning Briefing -->
  <div id="ai-briefing-bar" style="background:linear-gradient(135deg,#F8F5F0 0%,#F5F0EB 100%);border:1px solid rgba(107,91,77,.18);border-radius:10px;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.6rem;">
