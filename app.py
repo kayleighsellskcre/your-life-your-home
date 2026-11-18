@@ -1402,6 +1402,32 @@ def auto_emails_context(user):
     return {"items": items, "recent": recent[:8], "waiting": waiting}
 
 
+def send_auto_email_sample(user, kind):
+    """Send one automatic email, as it would read, to the person's own account address so they can see it in a real inbox."""
+    import time
+    from flask import session
+    if kind not in AUTO_EMAILS or (kind == "review" and user.get("role") != "agent"):
+        return False, "That email is not available."
+    addr = (user.get("email") or "").strip()
+    if not addr:
+        return False, "Your account has no email address to send the sample to."
+    if time.time() - session.get("auto_sample_at", 0) < 20:
+        return False, "Please wait a few seconds before sending another sample."
+    session["auto_sample_at"] = time.time()
+    first = ((user.get("name") or "").split(" ")[0]) or "there"
+    subject, body = auto_email_preview(kind, user.get("name"), sample=first)
+    body = body.replace("(your review link)", "https://g.page/r/your-review-link")
+    try:
+        sent = send_reminder_email(addr, "Sample: " + subject, "This is a sample of an automatic email, sent only to you. Your client would get the note below." + chr(10) * 2 + "-----" + chr(10) * 2 + body, **pro_sender(user["id"]))
+    except Exception as exc:
+        _EMAIL_LAST["detail"] = str(exc)[:160]
+        sent = False
+    if sent:
+        return True, f"Sample sent to {addr}. Check your inbox and your spam folder."
+    why = (_EMAIL_LAST.get("detail") or "").strip()
+    return False, "The sample did not go out." + (f" {why}" if why else " Email may not be switched on yet.")
+
+
 def save_auto_emails(user, form):
     """Apply the switches from the page. A switch that is not in the form is off."""
     for k in (["birthday", "anniversary"] + (["review"] if user.get("role") == "agent" else [])):

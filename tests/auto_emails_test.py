@@ -55,3 +55,18 @@ ok(A.schedule_review_request(agent, 2, "Dan Client", "dan@x.com") is True, "swit
 c = D.get_connection(); c.execute("UPDATE review_requests SET scheduled_date = '2000-01-01' WHERE status = 'pending'"); c.commit()
 A.send_review_requests()
 ok(len(sent) == 1 and sent[0][0] == "dan@x.com", "and it is sent")
+
+# Send me a sample to see it in a real inbox
+sent.clear()
+ca2 = who(agent, "agent")
+r = ca2.post("/agent/automatic-emails", data={"sample": "birthday"}, follow_redirects=True)
+ok(len(sent) == 1 and sent[0][0] == "amy@x.com" and sent[0][1] == "Sample: Happy birthday, Amy!" and "sent only to you" in sent[0][2], "the sample goes only to the agent's own address, labelled as a sample, with their first name")
+ok("Sample sent to amy@x.com" in r.get_data(as_text=True), "the page says where it went")
+ca2.post("/agent/automatic-emails", data={"sample": "anniversary"})
+ok(len(sent) == 1, "a second sample right away is held back")
+cx = who(agent, "agent")
+cx.post("/agent/automatic-emails", data={"sample": "review"})
+ok(sent[-1][2].count("g.page/r/your-review-link") == 1 and "(your review link)" not in sent[-1][2], "the thank-you sample shows a placeholder link, not raw brackets")
+cl2 = who(lender, "lender")
+cl2.post("/lender/automatic-emails", data={"sample": "review"})
+ok(all(s[0] != "lou@x.com" for s in sent), "lenders cannot send the agent-only thank-you sample")

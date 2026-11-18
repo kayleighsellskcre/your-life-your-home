@@ -1113,6 +1113,10 @@ def lender_automatic_emails():
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))
     if request.method == "POST":
+        if request.form.get("sample"):
+            _ok, _msg = send_auto_email_sample(user, request.form.get("sample"))
+            flash(_msg, "success" if _ok else "error")
+            return redirect(url_for("lender_automatic_emails"))
         save_auto_emails(user, request.form)
         flash("Saved. Your automatic emails are set the way you chose.", "success")
         return redirect(url_for("lender_automatic_emails"))

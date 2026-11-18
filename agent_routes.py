@@ -2363,6 +2363,10 @@ def agent_automatic_emails():
     if not user or user.get("role") != "agent":
         return redirect(url_for("login", role="agent"))
     if request.method == "POST":
+        if request.form.get("sample"):
+            _ok, _msg = send_auto_email_sample(user, request.form.get("sample"))
+            flash(_msg, "success" if _ok else "error")
+            return redirect(url_for("agent_automatic_emails"))
         save_auto_emails(user, request.form)
         flash("Saved. Your automatic emails are set the way you chose.", "success")
         return redirect(url_for("agent_automatic_emails"))

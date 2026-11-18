@@ -10,6 +10,7 @@
   .ae-card summary { cursor: pointer; color: #7A5238; font-weight: 600; font-size: .9rem; }
   .ae-mail { margin-top: .6rem; background: #F7F1E8; border-radius: 10px; padding: .8rem 1rem; font-size: .9rem; color: #3A2518; white-space: pre-wrap; overflow-wrap: anywhere; }
   .ae-mail small { display: block; color: #7A6855; margin-bottom: .4rem; font-size: .8rem; white-space: normal; }
+  .ae-sample { margin-top: .6rem; padding: .45rem 1rem; border-radius: 99px; border: 1.5px solid rgba(143,98,68,.5); background: #FFFDFA; color: #6B4630; font-weight: 700; font-size: .85rem; cursor: pointer; }
   .ae-save { padding: .7rem 1.6rem; border: 0; border-radius: 99px; background: #8F6244; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; }
   .ae-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
   .ae-row { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; padding: .5rem 0; border-top: 1px solid rgba(120,90,64,.12); font-size: .9rem; color: #3A2518; }
@@ -31,6 +32,7 @@
       </div>
       <details><summary>Read what it says</summary>
         <div class="ae-mail"><small>Subject: {{ it.subject }} &middot; shown with a sample first name</small>{{ it.body }}</div>
+        <button class="ae-sample" type="submit" name="sample" value="{{ it.kind }}" formnovalidate>Send me this one to see it</button>
       </details>
     </div>
     {% endfor %}
