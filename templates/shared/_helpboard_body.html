@@ -1,0 +1,90 @@
+<style>
+  .hb-w { max-width: 900px; margin: 0 auto; padding: 0 0 3rem; }
+  .hb-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1rem 1.2rem; margin-bottom: .8rem; }
+  .hb-card h3 { margin: 0 0 .2rem; color: #3A2518; font-size: 1.05rem; overflow-wrap: anywhere; }
+  .hb-meta { color: #7A6855; font-size: .86rem; overflow-wrap: anywhere; }
+  .hb-tag { display: inline-block; padding: .1rem .6rem; border-radius: 99px; font-size: .76rem; font-weight: 700; background: #F3EBDD; color: #7A5230; margin-right: .3rem; }
+  .hb-tag.ok { background: #E7F1E8; color: #2F6B3F; }
+  .hb-tag.when { background: #EFE3D2; color: #5F3F27; }
+  .hb-note { margin: .5rem 0 0; color: #3A2518; font-size: .92rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .hb-contact { margin-top: .6rem; background: #F7F1E8; border-radius: 10px; padding: .6rem .9rem; font-size: .9rem; color: #3A2518; overflow-wrap: anywhere; }
+  .hb-acts { margin-top: .7rem; display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+  .hb-acts form { margin: 0; }
+  .hb-btn, .hb-acts button { width: auto !important; min-height: 0 !important; margin: 0 !important; padding: .5rem 1.1rem !important; border-radius: 99px !important; border: 1.5px solid rgba(143,98,68,.5) !important; background: #FFFDFA !important; color: #6B4630 !important; font-size: .85rem !important; font-weight: 700 !important; text-decoration: none; cursor: pointer; display: inline-block; }
+  .hb-acts button.go, .hb-btn.go { background: #8F6244 !important; color: #fff !important; border-color: #8F6244 !important; }
+  .hb-sec { margin: 1.4rem 0 .6rem; color: #3A2518; font-size: 1.1rem; font-weight: 700; }
+  .hb-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #E7F1E8; color: #2F6B3F; font-weight: 700; }
+  .hb-flash.error { background: #F7E4E0; color: #A0392D; }
+  .hb-empty { text-align: center; color: #7A6855; padding: 1.2rem; }
+  .hb-mls { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-top: .5rem; }
+  .hb-mls input { flex: 1 1 14rem; min-width: 0; font-size: 16px; }
+</style>
+<div class="hb-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Colleagues</div>
+    <h1 class="ylh-page-hd__title">Help Board</h1>
+    <p class="ylh-page-hd__sub">Need someone to host your open house or cover a showing? Post it here and choose who can see it. Someone taps "I will take it" and you both get each other's contact details. Posts show only an address and a time, never client names or phone numbers.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="hb-flash {{ 'error' if cat == 'error' }}">{{ m }}</div>{% endfor %}
+
+  <div style="margin-bottom:1rem;"><a class="hb-btn go" href="{{ url_for('helpboard.new_post') }}">Ask for help</a></div>
+
+  {% if role == 'agent' %}
+  <div class="hb-card">
+    <b style="color:#3A2518;">Your MLS</b>
+    <div class="hb-meta">{% if me.mls %}You are on <b>{{ me.mls }}</b>. Requests posted for that MLS show up below.{% else %}Tell me which MLS you use and you will see requests meant for agents on it.{% endif %}
+      {% if me.brokerage %}Brokerage: <b>{{ me.brokerage }}</b>.{% else %}Add your brokerage in <a href="{{ url_for('agent_settings_profile') }}">Settings</a> to see requests from people at your brokerage.{% endif %}</div>
+    <form method="post" action="{{ url_for('helpboard.save_mls_route') }}" class="hb-mls">
+      <input type="text" name="mls_name" value="{{ me.mls }}" list="hb-mls-list" maxlength="80" placeholder="Start typing, or enter your own" aria-label="Your MLS">
+      <datalist id="hb-mls-list">{% for m in mls_options %}<option value="{{ m }}">{% endfor %}</datalist>
+      <button class="hb-btn" type="submit" style="margin:0;">Save</button>
+    </form>
+  </div>
+  {% elif not me.brokerage %}
+  <div class="hb-card"><div class="hb-meta">Add your company name in <a href="{{ url_for('lender_settings_profile') }}">Settings</a> to see requests from people at your company.</div></div>
+  {% endif %}
+
+  <div class="hb-sec">Open requests for you</div>
+  {% for p in open_posts %}
+  <div class="hb-card">
+    <span class="hb-tag">{{ p.kind_label }}</span><span class="hb-tag when">{{ p.when }}{% if p.time %}, {{ p.time }}{% endif %}</span>
+    <h3>{{ p.title }}</h3>
+    <div class="hb-meta">{% if p.address %}{{ p.address }} &middot; {% endif %}From {{ p.author_name }}{% if p.author_brokerage %}, {{ p.author_brokerage }}{% endif %}</div>
+    {% if p.details %}<p class="hb-note">{{ p.details }}</p>{% endif %}
+    <div class="hb-acts"><form method="post" action="{{ url_for('helpboard.post_act', post_id=p.id, action='claim') }}"><button class="go" type="submit" aria-label="I will take: {{ p.title }}">I will take it</button></form></div>
+  </div>
+  {% else %}
+  <div class="hb-card hb-empty">Nothing is waiting for you right now. When a colleague posts a request for your MLS, brokerage, or invites you, it shows up here.</div>
+  {% endfor %}
+
+  {% if taking %}
+  <div class="hb-sec">You said yes to</div>
+  {% for p in taking %}
+  <div class="hb-card">
+    <span class="hb-tag ok">You are on it</span><span class="hb-tag when">{{ p.when }}{% if p.time %}, {{ p.time }}{% endif %}</span>
+    <h3>{{ p.title }}</h3>
+    <div class="hb-meta">{% if p.address %}{{ p.address }}{% endif %}</div>
+    {% if p.details %}<p class="hb-note">{{ p.details }}</p>{% endif %}
+    <div class="hb-contact"><b>{{ p.author_name }}</b><br>{% if p.author_phone %}<a href="tel:{{ p.author_phone }}">{{ p.author_phone }}</a><br>{% endif %}<a href="mailto:{{ p.author_email }}">{{ p.author_email }}</a></div>
+    <div class="hb-acts"><form method="post" action="{{ url_for('helpboard.post_act', post_id=p.id, action='release') }}"><button type="submit">I can no longer make it</button></form></div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <div class="hb-sec">Your requests</div>
+  {% for p in mine %}
+  <div class="hb-card">
+    <span class="hb-tag">{{ p.kind_label }}</span>
+    {% if p.status == 'claimed' %}<span class="hb-tag ok">Taken</span>{% else %}<span class="hb-tag">Waiting for a yes</span>{% endif %}
+    <span class="hb-tag when">{{ p.when }}{% if p.time %}, {{ p.time }}{% endif %}</span>
+    <h3>{{ p.title }}</h3>
+    <div class="hb-meta">{% if p.address %}{{ p.address }} &middot; {% endif %}{% if p.audience == 'mls' %}Visible to agents on {{ p.audience_label }}{% elif p.audience == 'brokerage' %}Visible to people at {{ p.audience_label }}{% else %}Shared with {{ p.invited }} {{ 'person' if p.invited == 1 else 'people' }} you invited{% endif %}</div>
+    {% if p.status == 'claimed' %}
+    <div class="hb-contact"><b>{{ p.claimer_name }}</b> will help.<br>{% if p.claimer_phone %}<a href="tel:{{ p.claimer_phone }}">{{ p.claimer_phone }}</a><br>{% endif %}<a href="mailto:{{ p.claimer_email }}">{{ p.claimer_email }}</a></div>
+    {% endif %}
+    {% if not p.past %}<div class="hb-acts"><form method="post" action="{{ url_for('helpboard.post_act', post_id=p.id, action='cancel') }}" onsubmit="return confirm('Cancel this request?');"><button type="submit">Cancel request</button></form></div>{% endif %}
+  </div>
+  {% else %}
+  <div class="hb-card hb-empty">You have not asked for help yet. <a href="{{ url_for('helpboard.new_post') }}">Post your first request.</a></div>
+  {% endfor %}
+</div>

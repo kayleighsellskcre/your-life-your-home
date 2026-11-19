@@ -1,0 +1,48 @@
+<style>
+  .hn-w { max-width: 680px; margin: 0 auto; padding: 0 0 3rem; }
+  .hn-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 14px; box-shadow: 0 2px 12px rgba(110,72,40,.06); padding: 1.2rem 1.3rem; }
+  .hn-card label.f { display: block; margin: .9rem 0 .25rem; color: #3A2518; font-weight: 700; font-size: .92rem; }
+  .hn-card input[type=text], .hn-card input[type=date], .hn-card textarea { width: 100%; font-size: 16px; box-sizing: border-box; }
+  .hn-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .6rem; }
+  .hn-opt { display: flex; gap: .55rem; align-items: flex-start; padding: .55rem .2rem; color: #3A2518; cursor: pointer; }
+  .hn-opt input { width: 1.1rem; height: 1.1rem; margin-top: .2rem; accent-color: #8F6244; flex: none; }
+  .hn-opt small { display: block; color: #7A6855; }
+  .hn-flash { border-radius: 12px; padding: .7rem 1rem; margin-bottom: 1rem; background: #F7E4E0; color: #A0392D; font-weight: 700; }
+  .hn-go { margin-top: 1.2rem; padding: .75rem 1.8rem; border: 0; border-radius: 99px; background: #8F6244; color: #fff; font-weight: 700; font-size: 1rem; cursor: pointer; width: auto; }
+  @media (max-width: 600px) { .hn-row { grid-template-columns: 1fr; } }
+</style>
+<div class="hn-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">Help Board</div>
+    <h1 class="ylh-page-hd__title">Ask for help</h1>
+    <p class="ylh-page-hd__sub">Keep it to the address and the time. Please leave out client names and phone numbers.</p>
+  </div>
+  {% for cat, m in get_flashed_messages(with_categories=true) %}<div class="hn-flash">{{ m }}</div>{% endfor %}
+  <form method="post" class="hn-card">
+    <label class="f" for="hn-kind">What do you need?</label>
+    <select id="hn-kind" name="kind" style="width:100%;font-size:16px;">{% for k, v in kinds.items() %}<option value="{{ k }}" {{ 'selected' if form.get('kind') == k }}>{{ v[0] }}</option>{% endfor %}</select>
+    <label class="f" for="hn-title">A short title (optional)</label>
+    <input id="hn-title" type="text" name="title" maxlength="120" value="{{ form.get('title', '') }}" placeholder="e.g. Sunday open house, 3 bed ranch">
+    <label class="f" for="hn-addr">Address</label>
+    <input id="hn-addr" type="text" name="address" maxlength="160" value="{{ form.get('address', '') }}" placeholder="Street, city">
+    <div class="hn-row">
+      <div><label class="f" for="hn-date">Date</label><input id="hn-date" type="date" name="post_date" min="{{ today }}" value="{{ form.get('post_date', '') }}" required></div>
+      <div><label class="f" for="hn-st">From</label><input id="hn-st" type="text" name="start_time" maxlength="30" value="{{ form.get('start_time', '') }}" placeholder="1:00 PM"></div>
+      <div><label class="f" for="hn-et">To</label><input id="hn-et" type="text" name="end_time" maxlength="30" value="{{ form.get('end_time', '') }}" placeholder="3:00 PM"></div>
+    </div>
+    <label class="f" for="hn-det">Anything they should know?</label>
+    <textarea id="hn-det" name="details" rows="3" maxlength="800" placeholder="Lockbox code will be sent after you say yes. Sign-in sheet is in the kitchen.">{{ form.get('details', '') }}</textarea>
+
+    <label class="f">Who can see it?</label>
+    {% if 'mls' in audiences %}
+    <label class="hn-opt"><input type="radio" name="audience" value="mls" {{ 'checked' if form.get('audience') == 'mls' }}><span>Agents on my MLS<small>{% if me.mls %}{{ me.mls }}{% else %}Add your MLS on the Help Board page first{% endif %}</small></span></label>
+    {% endif %}
+    <label class="hn-opt"><input type="radio" name="audience" value="brokerage" {{ 'checked' if form.get('audience') == 'brokerage' }}><span>People at my brokerage<small>{% if me.brokerage %}{{ me.brokerage }}{% else %}Add your company name in Settings first{% endif %}</small></span></label>
+    <label class="hn-opt"><input type="radio" name="audience" value="custom" {{ 'checked' if form.get('audience', 'custom') == 'custom' }}><span>Only people I invite<small>They get an email now</small></span></label>
+    <label class="f" for="hn-inv">Emails to invite (only for "people I invite")</label>
+    <textarea id="hn-inv" name="invite" rows="2" placeholder="name@example.com, other@example.com">{{ form.get('invite', '') }}</textarea>
+
+    <button class="hn-go" type="submit">Post it</button>
+    <a href="{{ url_for('helpboard.board_page') }}" style="margin-left:1rem;color:#7A5238;">Cancel</a>
+  </form>
+</div>

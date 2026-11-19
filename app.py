@@ -405,6 +405,8 @@ _RATE_RULES = {
     "lead_intake_webhook": (30, 600),
     "resend_verification": (3, 3600),
     "login_verify": (10, 900),
+    "helpboard.new_post": (12, 3600),   # Help Board posts and yeses
+    "helpboard.post_act": (60, 3600),
 }
 
 
@@ -4742,6 +4744,8 @@ import followups as _followups
 _followups.init_app(app, get_current_user)
 import lender_followups as _lender_followups
 _lender_followups.init_app(app, get_current_user)
+import helpboard as _helpboard
+_helpboard.init_app(app, get_current_user, globals())
 import events as _events
 _events.init_app(app, get_current_user)
 import email_signature as _email_signature
