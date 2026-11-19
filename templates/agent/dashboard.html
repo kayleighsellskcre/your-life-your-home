@@ -360,6 +360,7 @@
  </div>
 
 <form method="get" action="/agent/crm" role="search" style="max-width:520px;margin:0 auto 1.1rem;display:flex;gap:.5rem;"><input type="search" name="search" placeholder="Find a person by name, email, phone or address" aria-label="Find a person" style="flex:1;min-width:0;padding:.7rem 1rem;border-radius:99px;border:1.5px solid rgba(143,98,68,.35);background:#FFFDFA;font-size:16px;color:#3A2518;"><button type="submit" style="width:auto!important;min-height:0!important;margin:0!important;padding:.7rem 1.2rem!important;border-radius:99px!important;border:0!important;background:#8F6244!important;color:#fff!important;font-weight:700;cursor:pointer;">Find</button></form>
+{% include "shared/_helpboard_strip.html" %}
 {% include "_onboarding.html" %}
 {% if today_digest and today_digest.sections %}
 <section class="ylh-today" aria-label="Today">

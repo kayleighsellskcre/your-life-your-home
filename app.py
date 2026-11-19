@@ -2470,6 +2470,7 @@ def start_scheduler():
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites
         scheduler.add_job(lambda: __import__("pies").send_reminders(), "cron", hour=17, minute=0)
+        scheduler.add_job(lambda: __import__("helpboard").send_reminders(), "cron", hour=17, minute=20)  # day-before Help Board reminders
         scheduler.add_job(lambda: __import__("booking").send_reminders(), "cron", hour=17, minute=10)  # day-before booking reminders
         scheduler.add_job(lambda: __import__("tc").send_deadline_reminders(), "cron", hour=9, minute=0)  # 9 AM Central deadline heads-ups  # day-before pie pickup reminders
         scheduler.add_job(lambda: __import__("pies").send_thank_yous(), "cron", hour=10, minute=15)  # pie thank-you emails on their chosen date

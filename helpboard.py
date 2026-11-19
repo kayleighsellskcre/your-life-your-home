@@ -11,6 +11,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 bp = Blueprint("helpboard", __name__)
 _H = {}
+NL = chr(10)
 MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 KINDS = {
     "open_house": ("Host my open house", "Open house"),
@@ -51,10 +52,11 @@ def ensure_tables():
     conn.execute("CREATE INDEX IF NOT EXISTS idx_help_posts_open ON help_posts (status, post_date)")
     conn.execute("""CREATE TABLE IF NOT EXISTS help_invites (
         post_id INTEGER NOT NULL, user_id INTEGER NOT NULL, PRIMARY KEY (post_id, user_id))""")
-    try:
-        conn.execute("ALTER TABLE user_profiles ADD COLUMN mls_name TEXT")
-    except Exception:
-        pass
+    for ddl in ("ALTER TABLE user_profiles ADD COLUMN mls_name TEXT", "ALTER TABLE help_posts ADD COLUMN reminded INTEGER DEFAULT 0"):
+        try:
+            conn.execute(ddl)
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -350,7 +352,65 @@ def post_act(post_id, action):
     return redirect(url_for("helpboard.board_page"))
 
 
+def strip_for(uid):
+    """What the dashboard strip shows: requests this person could take, and what they promised to help with soon."""
+    try:
+        openr, _mine, taking, _me = board_for(uid)
+    except Exception:
+        return {}
+    soon = (date.today() + timedelta(days=7)).isoformat()
+    coming = [p for p in taking if p["post_date"] <= soon]
+    if not openr and not coming:
+        return {}
+    return {"open": len(openr), "coming": coming[:3]}
+
+
+def send_reminders(today=None):
+    """The day before, one friendly note to the helper and one to the person who asked. Sent once per request."""
+    ns = _H.get("ns") or {}
+    send = ns.get("send_reminder_email")
+    if not send:
+        return 0
+    tomorrow = ((today or date.today()) + timedelta(days=1)).isoformat()
+    conn = _db()
+    try:
+        rows = conn.execute(
+            """SELECT p.*, au.name AS author_name, au.email AS author_email, cu.name AS claimer_name, cu.email AS claimer_email
+               FROM help_posts p JOIN users au ON au.id = p.author_id JOIN users cu ON cu.id = p.claimed_by
+               WHERE p.status = 'claimed' AND p.post_date = ? AND COALESCE(p.reminded, 0) = 0""", (tomorrow,)).fetchall()
+        sent = 0
+        for r in rows:
+            p = dict(r)
+            conn.execute("UPDATE help_posts SET reminded = 1 WHERE id = ?", (p["id"],))
+            conn.commit()
+            what = _summary(p)
+            if p["claimer_email"]:
+                send(p["claimer_email"], "Tomorrow: you are helping a colleague",
+                     NL.join(["Hi " + (p["claimer_name"] or "there").split()[0] + ",", "",
+                              "A friendly reminder that you are helping " + p["author_name"] + " tomorrow:", "", what, "",
+                              "You can reach them at " + p["author_email"] + ". Thank you for being a good colleague.", ""]))
+                sent += 1
+            if p["author_email"]:
+                send(p["author_email"], "Tomorrow: your helper is set",
+                     NL.join(["Hi " + (p["author_name"] or "there").split()[0] + ",", "",
+                              "A friendly reminder that " + p["claimer_name"] + " is helping you tomorrow:", "", what, "",
+                              "You can reach them at " + p["claimer_email"] + ".", ""]))
+                sent += 1
+    finally:
+        conn.close()
+    return sent
+
+
 def init_app(app, get_current_user, ns):
     _H.update(get_current_user=get_current_user, ns=ns)
     ensure_tables()
     app.register_blueprint(bp)
+
+    @app.context_processor
+    def _helpboard_strip():
+        from flask import request as _rq
+        if _rq.endpoint in ("agent_dashboard", "lender_dashboard"):
+            u = get_current_user()
+            if u and u.get("role") in ("agent", "lender"):
+                return {"helpboard_strip": strip_for(u["id"])}
+        return {}

@@ -95,3 +95,25 @@ ok(ca.post("/helpboard/99999/claim").status_code in (301, 302, 303), "a missing 
 # script in a title is shown as text
 ca.post("/helpboard/new", data={"title": "<script>alert(1)</script>", "post_date": soon, "audience": "brokerage"})
 ok("<script>alert(1)</script>" not in page(cb), "titles are shown safely")
+
+# dashboard strip
+conn = D.get_connection()
+conn.execute("UPDATE help_posts SET status='cancelled'")
+conn.commit(); conn.close()
+ca.post("/helpboard/new", data={"title": "Strip test", "post_date": soon, "audience": "mls", "address": "9 Elm"})
+dash = cb.get("/agent").get_data(as_text=True)
+ok("Help Board" in dash and "1 request could use you" in dash, "an agent's dashboard says how many requests could use them")
+ok("could use you" not in cc.get("/agent").get_data(as_text=True), "an agent outside the audience sees no count")
+ok("could use you" not in ca.get("/agent").get_data(as_text=True), "the poster is not told about their own request")
+conn = D.get_connection(); pid2 = conn.execute("SELECT id FROM help_posts WHERE title='Strip test'").fetchone()[0]; conn.close()
+cb.post(f"/helpboard/{pid2}/claim")
+ok("You are helping: Strip test" in cb.get("/agent").get_data(as_text=True), "the helper sees what they promised on their dashboard")
+
+# reminders
+sent = []
+A.send_reminder_email_orig = A.send_reminder_email
+H._H["ns"] = dict(H._H["ns"], send_reminder_email=lambda to, sub, body, **k: sent.append((to, sub, body)) or True)
+ok(H.send_reminders(date.today()) == 0, "nothing is sent when nothing is the next day")
+n = H.send_reminders(date.today() + timedelta(days=2))
+ok(n == 2 and {s[0] for s in sent} == {"amy@x.com", "bob@x.com"} and "Strip test" in sent[0][2], "the day before, the helper and the poster each get one note")
+ok(H.send_reminders(date.today() + timedelta(days=2)) == 0, "a reminder is never sent twice")
