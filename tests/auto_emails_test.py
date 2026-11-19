@@ -20,7 +20,8 @@ ca, cl = who(agent, "agent"), who(lender, "lender")
 t = ca.get("/agent/automatic-emails").get_data(as_text=True)
 ok("Automatic Emails" in t and "Birthday email" in t and "Home anniversary email" in t and "Thank-you and review request" in t, "agent page lists all three emails")
 ok("Happy birthday, Sam!" in t and "With warmth,\nAmy Agent" in t, "it shows the exact words with the agent's own name")
-ok("Thank-you and review request" not in cl.get("/lender/automatic-emails").get_data(as_text=True) and "Birthday email" in cl.get("/lender/automatic-emails").get_data(as_text=True), "lenders see birthday and anniversary only")
+_lt = cl.get("/lender/automatic-emails").get_data(as_text=True)
+ok("Thank-you and review request" in _lt and "closing your loan" in _lt and "Birthday email" in _lt, "lenders see all three, with loan wording on the thank-you")
 ok(ca.get("/lender/automatic-emails").status_code == 302 and who(home, "homeowner").get("/agent/automatic-emails").status_code == 302, "only the right person can open each page")
 ok(">Automatic Emails<" in ca.get("/agent").get_data(as_text=True) and ">Automatic Emails<" in cl.get("/lender").get_data(as_text=True), "both menus link to it")
 
@@ -69,7 +70,7 @@ cx.post("/agent/automatic-emails", data={"sample": "review"})
 ok(sent[-1][2].count("g.page/r/your-review-link") == 1 and "(your review link)" not in sent[-1][2], "the thank-you sample shows a placeholder link, not raw brackets")
 cl2 = who(lender, "lender")
 cl2.post("/lender/automatic-emails", data={"sample": "review"})
-ok(all(s[0] != "lou@x.com" for s in sent), "lenders cannot send the agent-only thank-you sample")
+ok(any(s[0] == "lou@x.com" and "closing your loan" in s[2] for s in sent), "lenders can send themselves the thank-you sample, worded for loans")
 
 # a sample press keeps the switches as they are on screen
 cy = who(agent, "agent")

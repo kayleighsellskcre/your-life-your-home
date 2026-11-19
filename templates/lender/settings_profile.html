@@ -297,6 +297,11 @@
  <input type="text" name="brokerage_name" value="{{ profile.brokerage_name if profile else '' }}" placeholder="e.g., ABC Mortgage">
  <small>Your lending company or institution name</small>
  </div>
+ <div class="form-group">
+ <label>Google Review Link</label>
+ <input type="url" name="google_review_link" value="{{ profile.google_review_link if profile and profile.google_review_link else '' }}" placeholder="https://g.page/r/your-review-link">
+ <small>Optional. When a loan is marked Closed, a thank-you email goes to your borrower 3 days later, with this link if you add it. You can switch it off under Automatic Emails.</small>
+ </div>
  </div>
  
  <div class="form-group">

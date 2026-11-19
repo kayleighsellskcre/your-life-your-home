@@ -296,6 +296,9 @@ def lender_crm():
                             updates.get("name") or _before.get("name"),
                             updates.get("email") or _before.get("email"),
                             updates["status"], send_reminder_email, _site_url())
+                    if updates.get("status") == "closed" and _before.get("status") != "closed":
+                        schedule_review_request(user["id"], int(borrower_id), updates.get("name") or _before.get("name"),
+                                                updates.get("email") or _before.get("email"))
                     flash("Borrower updated!", "success")
                 except Exception as e:
                     flash("We could not update that borrower. Please try again in a moment.", "error")
@@ -393,7 +396,10 @@ def lender_crm():
                         elif bulk_action_type == "change_status":
                             status = request.form.get("bulk_status", "").strip()
                             if status:
+                                _b = get_lender_borrower(int(borrower_id), user["id"]) or {}
                                 update_lender_borrower(int(borrower_id), user["id"], status=status)
+                                if status == "closed" and _b and _b.get("status") != "closed":
+                                    schedule_review_request(user["id"], int(borrower_id), _b.get("name"), _b.get("email"))
                     flash(f"Bulk action completed for {len(borrower_ids)} borrower(s)!", "success")
                 except Exception as e:
                     flash("We could not complete that bulk action. Please try again in a moment.", "error")
@@ -1381,6 +1387,7 @@ def lender_settings_profile():
                 va_rate_30yr=float(request.form.get("va_rate_30yr")) if request.form.get("va_rate_30yr") else None,
                 fha_rate_30yr=float(request.form.get("fha_rate_30yr")) if request.form.get("fha_rate_30yr") else None,
                 conventional_rate_30yr=float(request.form.get("conventional_rate_30yr")) if request.form.get("conventional_rate_30yr") else None,
+                google_review_link=request.form.get("google_review_link", "").strip() or None,
             )
             try:
                 _after = _rate_gp(user["id"]) or {}

@@ -131,3 +131,17 @@ ok(any(s[0] == "bob@x.com" and "You were wonderful" in s[2] for s in sent), "the
 ok("You have helped 1 colleague" in page(cb) and "You were wonderful" in page(cb), "the helper sees how many they have helped and the kind words")
 n = len(sent); ca.post(f"/helpboard/{pid2}/thank", data={"note": "again"})
 ok(len(sent) == n, "a thank-you is only sent once")
+
+# lender thank-you after a loan closes
+bor = D.add_lender_borrower(lou, "Pat Borrower", email="pat" + "@x.com")
+cl.post("/lender/crm", data={"action": "update", "borrower_id": bor, "name": "Pat Borrower", "status": "closed"})
+conn = D.get_connection(); rr = conn.execute("SELECT agent_user_id, client_name FROM review_requests").fetchall(); conn.close()
+ok(len(rr) == 1 and rr[0][0] == lou, "closing a loan schedules one thank-you for that borrower")
+cl.post("/lender/crm", data={"action": "update", "borrower_id": bor, "name": "Pat Borrower", "status": "closed"})
+conn = D.get_connection(); n2 = conn.execute("SELECT COUNT(*) FROM review_requests").fetchone()[0]; conn.close()
+ok(n2 == 1, "saving again does not schedule a second one")
+sent.clear(); H._H["ns"]["send_reminder_email"]  # keep helper
+conn = D.get_connection(); conn.execute("UPDATE review_requests SET scheduled_date='2000-01-01'"); conn.commit(); conn.close()
+A.send_reminder_email = lambda to, sub, body, **k: sent.append((to, sub, body)) or True
+A.send_review_requests()
+ok(sent and "closing your loan" in sent[0][2] and "(your review link)" not in sent[0][2], "the loan thank-you goes out with lender wording and no leftover placeholder")

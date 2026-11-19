@@ -1377,7 +1377,7 @@ def set_auto_email(user_id, kind, on):
         c.close()
 
 
-def auto_email_preview(kind, pro_name, sample="Sam"):
+def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
     """The exact words an automatic email uses, with a sample first name, so people can see what goes out in their name."""
     pro = pro_name or "Your Name"
     if kind == "birthday":
@@ -1387,6 +1387,11 @@ def auto_email_preview(kind, pro_name, sample="Sam"):
         return (f"Happy home anniversary, {sample}!",
                 f"Hi {sample},\n\nHappy home anniversary! I hope your home has been filling your days with good memories. I am so glad I got to be part of your story.\n\n"
                 f"If you ever have a question about your home or what it is worth, I would love to help.\n\nWarmly,\n{pro}")
+    if role == "lender":
+        return (f"It was a pleasure helping you, {sample}!",
+                f"Hi {sample},\n\nCongratulations again on closing your loan! It was truly a pleasure helping you with your home financing, and I hope you are settling in and loving your home.\n\n"
+                f"If you have a moment, I would be so grateful if you left me a review: (your review link)\n\n"
+                f"And please remember that I am always here for you, your family, and anyone you know who is thinking about buying or refinancing. I love referrals!\n\nWarmly,\n{pro}")
     return (f"It was a pleasure working with you, {sample}!",
             f"Hi {sample},\n\nCongratulations again on your closing! It was truly a pleasure working with you, and I hope you are settling in and loving your new home.\n\n"
             f"If you have a moment, I would be so grateful if you left me a review: (your review link)\n\n"
@@ -1396,10 +1401,10 @@ def auto_email_preview(kind, pro_name, sample="Sam"):
 def auto_emails_context(user):
     """Everything the Automatic emails page shows: each email with its on/off state and exact wording, and what went out lately."""
     from database import get_connection
-    kinds = ["birthday", "anniversary"] + (["review"] if user.get("role") == "agent" else [])
+    kinds = ["birthday", "anniversary", "review"]
     items = []
     for k in kinds:
-        subj, body = auto_email_preview(k, user.get("name"))
+        subj, body = auto_email_preview(k, user.get("name"), role=user.get("role"))
         items.append({"kind": k, "title": AUTO_EMAILS[k][0], "when": AUTO_EMAILS[k][1], "enabled": auto_email_enabled(user["id"], k), "subject": subj, "body": body})
     recent = []
     c = get_connection()
@@ -1408,7 +1413,7 @@ def auto_emails_context(user):
                               WHERE l.professional_user_id = ? AND l.email_type IN ('birthday', 'anniversary') AND l.status = 'sent'
                               ORDER BY l.sent_at DESC LIMIT 8""", (user["id"],)).fetchall():
             recent.append({"kind": AUTO_EMAILS[r["email_type"]][0], "when": str(r["sent_at"] or "")[:10], "to": r["recipient_email"], "subject": r["subject"]})
-        if user.get("role") == "agent":
+        if user.get("role") in ("agent", "lender"):
             for r in c.execute("""SELECT client_email, client_name, sent_at FROM review_requests WHERE agent_user_id = ? AND status = 'sent'
                                   ORDER BY sent_at DESC LIMIT 8""", (user["id"],)).fetchall():
                 recent.append({"kind": AUTO_EMAILS["review"][0], "when": str(r["sent_at"] or "")[:10], "to": r["client_email"], "subject": "Thank you, " + ((r["client_name"] or "").split(" ")[0] or "")})
@@ -1425,7 +1430,7 @@ def send_auto_email_sample(user, kind):
     """Send one automatic email, as it would read, to the person's own account address so they can see it in a real inbox."""
     import time
     from flask import session
-    if kind not in AUTO_EMAILS or (kind == "review" and user.get("role") != "agent"):
+    if kind not in AUTO_EMAILS:
         return False, "That email is not available."
     addr = (user.get("email") or "").strip()
     if not addr:
@@ -1434,7 +1439,7 @@ def send_auto_email_sample(user, kind):
         return False, "Please wait a few seconds before sending another sample."
     session["auto_sample_at"] = time.time()
     first = ((user.get("name") or "").split(" ")[0]) or "there"
-    subject, body = auto_email_preview(kind, user.get("name"), sample=first)
+    subject, body = auto_email_preview(kind, user.get("name"), sample=first, role=user.get("role"))
     body = body.replace("(your review link)", "https://g.page/r/your-review-link")
     try:
         sent = send_reminder_email(addr, "Sample: " + subject, "This is a sample of an automatic email, sent only to you. Your client would get the note below." + chr(10) * 2 + "-----" + chr(10) * 2 + body, **pro_sender(user["id"]))
@@ -2160,7 +2165,7 @@ def send_review_requests():
     cur = conn.cursor()
     cur.execute("""
         SELECT rr.id, rr.agent_user_id, rr.client_email, rr.client_name,
-               u.name as agent_name, up.phone as agent_phone,
+               u.name as agent_name, u.role as role, up.phone as agent_phone,
                up.google_review_link
         FROM review_requests rr
         LEFT JOIN users u ON u.id = rr.agent_user_id
@@ -2182,16 +2187,12 @@ def send_review_requests():
         client_first = (row.get("client_name") or "there").split()[0]
         agent_name = row.get("agent_name") or "your agent"
         review_link = row.get("google_review_link") or ""
-        review_cta = (f"\n\nIf you have a moment, I would be so grateful if you left me a review:\n{review_link}\n"
-                      if review_link else "\n\nIf you have a moment, a review or a referral means the world to me.\n")
-        subject = f"It was a pleasure working with you, {client_first}!"
-        body = (f"Hi {client_first},\n\n"
-                f"Congratulations again on your closing! It was truly a pleasure working with you, "
-                f"and I hope you are settling in and loving your new home.\n"
-                f"{review_cta}"
-                f"And please remember that I am always here for you, your family, and anyone you know "
-                f"who is thinking about buying or selling. I love referrals!\n\n"
-                f"Warmly,\n{agent_name}")
+        subject, body = auto_email_preview("review", agent_name, sample=client_first, role=row.get("role") or "agent")
+        if review_link:
+            body = body.replace("(your review link)", review_link)
+        else:
+            body = body.replace("If you have a moment, I would be so grateful if you left me a review: (your review link)",
+                                "If you have a moment, a review or a referral means the world to me.")
         try:
             send_reminder_email(row["client_email"], subject, body, **pro_sender(row.get("agent_user_id")))
             conn2 = get_connection()
