@@ -789,6 +789,49 @@ AI_FIELDS = {
 }
 
 
+def read_contract(stream, extra=None):
+    """Read a contract PDF and return (found fields, problem). problem is a friendly sentence when it could not be read."""
+    import os
+    try:
+        from pypdf import PdfReader
+        text = chr(10).join((p.extract_text() or "") for p in PdfReader(stream).pages)[:14000]
+    except Exception:
+        text = ""
+    if len(text.strip()) < 200:
+        return None, "That PDF looks like a scan, so I could not read it this time."
+    key = os.environ.get("OPENAI_API_KEY")
+    if not key:
+        return None, "Reading contracts needs the site's AI key, which is not switched on yet."
+    try:
+        from openai import OpenAI
+        client = OpenAI(api_key=key, timeout=60.0)
+        spec = chr(10).join(f"- {k}: {v}" for k, v in {**AI_FIELDS, **(extra or {})}.items())
+        r = client.chat.completions.create(
+            model="gpt-4o-mini", temperature=0, max_tokens=1100, response_format={"type": "json_object"},
+            messages=[{"role": "system", "content": "You read real estate purchase contracts and return JSON only. "
+                       "Use an empty string for anything not clearly stated. Never guess."},
+                      {"role": "user", "content": "Return a JSON object with these keys:" + chr(10) + spec + chr(10) * 2 + "Contract text:" + chr(10) + text}])
+        return json.loads(r.choices[0].message.content or "{}"), None
+    except Exception:
+        return None, "I could not read that contract just now."
+
+
+def merge_found(base, found, only_empty=True):
+    """Copy what was read into the contract details. Returns how many details were filled."""
+    filled = 0
+    for k in AI_FIELDS:
+        v = str(found.get(k) or "").strip()[:300]
+        if not v or (only_empty and base.get(k) not in (None, "")):
+            continue
+        if k in DATE_KEYS and not _d(v):
+            continue
+        if k.endswith("_days") and _int(re.sub(r"\D", "", v) or "x") is None:
+            continue
+        base[k] = re.sub(r"\D", "", v) if k.endswith("_days") else v
+        filled += 1
+    return filled
+
+
 @bp.route("/agent/transactions/<int:tx_id>/contract/upload", methods=["POST"])
 def upload(tx_id):
     user, tx = _mine(tx_id)
@@ -799,48 +842,75 @@ def upload(tx_id):
     if not f or not f.filename.lower().endswith(".pdf"):
         flash("Please choose the contract as a PDF and we will take it from there.", "error")
         return back
-    try:
-        from pypdf import PdfReader
-        text = "\n".join((p.extract_text() or "") for p in PdfReader(f.stream).pages)[:14000]
-    except Exception:
-        text = ""
-    if len(text.strip()) < 200:
-        flash("That PDF looks like a scan, so we could not read it this time. No worries, you can fill the form in by hand.", "error")
-        return back
-    import os
-    key = os.environ.get("OPENAI_API_KEY")
-    if not key:
-        flash("Auto-fill needs the site's AI key. No worries, you can fill the form in by hand for now.", "error")
-        return back
-    try:
-        from openai import OpenAI
-        client = OpenAI(api_key=key, timeout=60.0)
-        spec = "\n".join(f"- {k}: {v}" for k, v in AI_FIELDS.items())
-        r = client.chat.completions.create(
-            model="gpt-4o-mini", temperature=0, max_tokens=900, response_format={"type": "json_object"},
-            messages=[{"role": "system", "content": "You read real estate purchase contracts and return JSON only. "
-                       "Use an empty string for anything not clearly stated. Never guess."},
-                      {"role": "user", "content": f"Return a JSON object with these keys:\n{spec}\n\nContract text:\n{text}"}])
-        found = json.loads(r.choices[0].message.content or "{}")
-    except Exception:
-        flash("We could not read that contract just now. No worries, you can fill the form in by hand.", "error")
+    found, problem = read_contract(f.stream)
+    if problem:
+        flash(problem + " No worries, you can fill the form in by hand.", "error")
         return back
     data, _ = load(tx_id)
     base = {**defaults(tx, user), **{k: v for k, v in data.items() if v}}
-    filled = 0
-    for k in AI_FIELDS:
-        v = str(found.get(k) or "").strip()[:300]
-        if not v or base.get(k) not in (None, "") and data.get(k):
-            continue
-        if k in DATE_KEYS and not _d(v):
-            continue
-        if k.endswith("_days") and _int(re.sub(r"\D", "", v) or "x") is None:
-            continue
-        base[k] = re.sub(r"\D", "", v) if k.endswith("_days") else v
-        filled += 1
+    typed = {k for k in AI_FIELDS if data.get(k)}   # a detail you already typed is never overwritten
+    scratch = {}
+    filled = merge_found(scratch, {k: v for k, v in found.items() if k not in typed}, only_empty=False)
+    base.update(scratch)
     save(tx_id, {k: base.get(k, "") for k in ALL_KEYS})
     flash(f"Wonderful! We filled in {filled} details from your contract. Please give them a quick look before you share anything.", "success")
     return back
+
+
+def create_from_contract(user):
+    """Start a whole deal from the contract PDF: address, client, price and every date are read and filled in.
+    Returns a redirect, or None to let the normal form handle it (when the PDF could not be read but the form is filled in)."""
+    f = request.files.get("contract")
+    form = request.form
+    if not f or not f.filename.lower().endswith(".pdf"):
+        flash("Please choose the contract as a PDF.", "error")
+        return redirect(url_for("agent_transactions"))
+    coord_for = coord_email = ""
+    if form.get("deal_kind") == "coordinating":
+        coord_for, coord_email = form.get("coordinating_for", "").strip()[:120], form.get("coordinating_email", "").strip()[:160]
+        if not coord_for:
+            flash("Please tell me which agent you are coordinating this for.", "error")
+            return redirect(url_for("agent_transactions", view="others"))
+    found, problem = read_contract(f.stream, {"property_address": "full street address of the property with city, state and zip",
+                                              "buyer_names": "buyer name(s)", "purchase_price": "purchase price, digits only"})
+    if problem:
+        if form.get("property_address", "").strip() and form.get("client_name", "").strip():
+            flash(problem + " I started the deal from what you typed instead.", "error")
+            return None
+        flash(problem + " Type the address and client below and I will start the deal, then you can fill in the details by hand.", "error")
+        return redirect(url_for("agent_transactions", add="1"))
+    side = form.get("side", "buyer") if form.get("side") in ("buyer", "seller", "both") else "buyer"
+    address = (found.get("property_address") or form.get("property_address") or "").strip()[:200]
+    buyers = (found.get("buyer_names") or "").strip()[:160]
+    client = (form.get("client_name") or "").strip() or (buyers if side != "seller" else (found.get("seller") or ""))
+    if not address:
+        flash("I could not find the property address in that contract. Type it below and I will start the deal.", "error")
+        return redirect(url_for("agent_transactions", add="1"))
+    from transaction_helpers import create_transaction
+    digits = re.sub(r"[^\d.]", "", str(found.get("purchase_price") or ""))
+    tx_id = create_transaction(agent_id=user["id"], property_address=address, client_name=(client or "Client")[:160], side=side,
+                               current_stage="pre_contract", client_email=form.get("client_email", "").strip(),
+                               client_phone=form.get("client_phone", "").strip(), purchase_price=digits or None,
+                               coordinating_for=coord_for, coordinating_email=coord_email)
+    if coord_for and not form.get("coordinating_notify"):
+        conn = _db()
+        conn.execute("UPDATE transactions SET coordinating_notify = 0 WHERE id = ?", (tx_id,))
+        conn.commit()
+        conn.close()
+    tx = _H["get_tx"](tx_id)
+    base = defaults(tx, user)
+    filled = merge_found(base, found, only_empty=False)
+    for k in ALL_KEYS:
+        base.setdefault(k, "")
+    save(tx_id, {k: base.get(k, "") for k in ALL_KEYS})
+    sync_deadlines(tx_id, base)
+    _sync_transaction(tx, user, base)
+    try:
+        _H["log"](tx_id, "contract", "Deal started from the contract PDF", user["id"])
+    except Exception:
+        pass
+    flash(f"Done! I started the deal at {address} and filled in {filled} details from the contract. Please give them a quick look, then you are all set.", "success")
+    return redirect(url_for("tc.contract", tx_id=tx_id))
 
 
 # ───────────────────────── detail page card ─────────────────────────

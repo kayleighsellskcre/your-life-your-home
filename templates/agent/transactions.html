@@ -547,8 +547,13 @@
  New Transaction
  <button class="txmod-x" onclick="closeAddTx()">×</button>
  </div>
- <form method="post" action="{{ url_for('agent_transactions') }}">
+ <form method="post" action="{{ url_for('agent_transactions') }}" enctype="multipart/form-data" onsubmit="return txCheck(this);">
  <div class="txgrid">
+ <div class="txf txgrid-full" style="background:#F7F1E8;border-radius:12px;padding:.8rem 1rem;">
+ <label>The fastest way: add the contract</label>
+ <input type="file" name="contract" accept="application/pdf,.pdf" id="txContract" aria-label="Signed contract as a PDF">
+ <span style="font-size:.8rem;color:#6F6B4D;text-transform:none;letter-spacing:0;font-weight:400;">I read the address, buyer, price, dates, earnest money, title and lender, and start the deal for you. Then you just check it. Or skip this and type it in below.</span>
+ </div>
  <div class="txf txgrid-full">
  <label>Whose deal is this?</label>
  <div style="display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.9rem;">
@@ -568,12 +573,12 @@
  <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" name="coordinating_notify" value="1" checked style="width:auto;margin-right:.35rem;">Email the agent a friendly heads-up before each deadline (they can reply to you)</label>
  </div>
  <div class="txf txgrid-full">
- <label>Property Address *</label>
- <input type="text" name="property_address" required placeholder="123 Main St, City, State" id="txAddr">
+ <label>Property Address <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(not needed if you add the contract)</span></label>
+ <input type="text" name="property_address" placeholder="123 Main St, City, State" id="txAddr">
  </div>
  <div class="txf">
- <label>Client Name *</label>
- <input type="text" name="client_name" required placeholder="Jane Doe" value="{{ contact_info.name if contact_info else '' }}">
+ <label>Client Name <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(not needed if you add the contract)</span></label>
+ <input type="text" name="client_name" placeholder="Jane Doe" value="{{ contact_info.name if contact_info else '' }}">
  </div>
  <div class="txf">
  <label>Client Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(connects their portal)</span></label>
@@ -619,6 +624,14 @@
 </div>
 
 <script>
+function txCheck(f) {
+ var hasFile = document.getElementById('txContract').files.length > 0;
+ if (!hasFile && (!f.property_address.value.trim() || !f.client_name.value.trim())) {
+ alert('Please add the contract, or type the property address and the client name.');
+ return false;
+ }
+ return true;
+}
 function dealKind() {
  var coord = document.querySelector('input[name=deal_kind]:checked').value === 'coordinating';
  ['coordName', 'coordEmail', 'coordNotify'].forEach(function(id){ document.getElementById(id).style.display = coord ? '' : 'none'; });

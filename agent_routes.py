@@ -1375,6 +1375,12 @@ def agent_transactions():
         return redirect(url_for("login", role="agent"))
 
     if request.method == "POST":
+        _cf = request.files.get("contract")
+        if _cf and _cf.filename:   # fastest path: the contract PDF starts the whole deal
+            _resp = _tc.create_from_contract(user)
+            if _resp is not None:
+                return _resp
+            _cf.close()
         property_address = request.form.get("property_address", "").strip()
         client_name = request.form.get("client_name", "").strip()
         side = request.form.get("side", "buyer").strip()
