@@ -117,3 +117,17 @@ ok(H.send_reminders(date.today()) == 0, "nothing is sent when nothing is the nex
 n = H.send_reminders(date.today() + timedelta(days=2))
 ok(n == 2 and {s[0] for s in sent} == {"amy@x.com", "bob@x.com"} and "Strip test" in sent[0][2], "the day before, the helper and the poster each get one note")
 ok(H.send_reminders(date.today() + timedelta(days=2)) == 0, "a reminder is never sent twice")
+
+# thank-you notes
+sent.clear()
+conn = D.get_connection()
+conn.execute("UPDATE help_posts SET post_date = ? WHERE id = ?", (date.today().isoformat(), pid2))
+conn.commit(); conn.close()
+ok("Say thank you" in page(ca), "on the day, the poster is offered a way to say thank you")
+cb.post(f"/helpboard/{pid2}/thank", data={"note": "x"})
+ok(not sent, "only the poster can thank")
+ca.post(f"/helpboard/{pid2}/thank", data={"note": "You were wonderful"})
+ok(any(s[0] == "bob@x.com" and "You were wonderful" in s[2] for s in sent), "the helper gets the thank-you email")
+ok("You have helped 1 colleague" in page(cb) and "You were wonderful" in page(cb), "the helper sees how many they have helped and the kind words")
+n = len(sent); ca.post(f"/helpboard/{pid2}/thank", data={"note": "again"})
+ok(len(sent) == n, "a thank-you is only sent once")

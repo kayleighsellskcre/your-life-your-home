@@ -52,7 +52,8 @@ def ensure_tables():
     conn.execute("CREATE INDEX IF NOT EXISTS idx_help_posts_open ON help_posts (status, post_date)")
     conn.execute("""CREATE TABLE IF NOT EXISTS help_invites (
         post_id INTEGER NOT NULL, user_id INTEGER NOT NULL, PRIMARY KEY (post_id, user_id))""")
-    for ddl in ("ALTER TABLE user_profiles ADD COLUMN mls_name TEXT", "ALTER TABLE help_posts ADD COLUMN reminded INTEGER DEFAULT 0"):
+    for ddl in ("ALTER TABLE user_profiles ADD COLUMN mls_name TEXT", "ALTER TABLE help_posts ADD COLUMN reminded INTEGER DEFAULT 0",
+                "ALTER TABLE help_posts ADD COLUMN thanked_at TEXT", "ALTER TABLE help_posts ADD COLUMN thanks_note TEXT"):
         try:
             conn.execute(ddl)
         except Exception:
@@ -177,6 +178,20 @@ def board_for(uid):
     return [_decorate(r) for r in openr], [_decorate(r) for r in mine], [_decorate(r) for r in taking], me
 
 
+def thanks_for(uid):
+    """(how many colleagues this person has helped, recent thank-you notes they received)."""
+    conn = _db()
+    try:
+        helped = conn.execute("SELECT COUNT(*) FROM help_posts WHERE claimed_by = ? AND status = 'claimed' AND post_date <= ?",
+                              (uid, date.today().isoformat())).fetchone()[0]
+        rows = conn.execute(
+            """SELECT p.title, p.post_date, p.thanks_note, au.name AS author_name FROM help_posts p JOIN users au ON au.id = p.author_id
+               WHERE p.claimed_by = ? AND p.thanked_at IS NOT NULL ORDER BY p.thanked_at DESC LIMIT 5""", (uid,)).fetchall()
+    finally:
+        conn.close()
+    return helped, [dict(r) for r in rows]
+
+
 def open_count(uid):
     """How many open requests this person could take; used for the small number on the dashboard."""
     try:
@@ -218,7 +233,8 @@ def board_page():
     if not u:
         return redirect(url_for("login"))
     openr, mine, taking, me = board_for(u["id"])
-    return render_template(f"{u['role']}/helpboard.html", role=u["role"], open_posts=openr, mine=mine, taking=taking, me=me,
+    helped, thanks = thanks_for(u["id"])
+    return render_template(f"{u['role']}/helpboard.html", role=u["role"], open_posts=openr, mine=mine, taking=taking, me=me, helped=helped, thanks=thanks, today_iso=date.today().isoformat(),
                            mls_options=MLS_SUGGESTIONS, kinds=KINDS)
 
 
@@ -336,6 +352,20 @@ def post_act(post_id, action):
                 flash("Released. It is open again for others, and I let them know.", "success")
                 _notify(u, post["author_id"], "Your request is open again",
                         f"{u.get('name') or 'Your helper'} can no longer make it, so this is open again:\n\n{_summary(post)}")
+        elif action == "thank":
+            if post["author_id"] != u["id"] or post["status"] != "claimed" or not post["claimed_by"]:
+                flash("There is no helper to thank on that one.", "error")
+            elif post["post_date"] > date.today().isoformat():
+                flash("You can say thank you once the day has come.", "error")
+            elif post.get("thanked_at"):
+                flash("You already thanked them. That was kind.", "success")
+            else:
+                note = _clean(request.form.get("note"), 500)
+                conn.execute("UPDATE help_posts SET thanked_at = CURRENT_TIMESTAMP, thanks_note = ? WHERE id = ? AND author_id = ?", (note, post_id, u["id"]))
+                conn.commit()
+                flash("Your thank you is on its way. That will mean a lot.", "success")
+                _notify(u, post["claimed_by"], f"Thank you from {u.get('name') or 'a colleague'}",
+                        NL.join(["Thank you for helping with:", "", _summary(post), "", note or "It truly made a difference.", "", "With gratitude,", u.get("name") or ""]))
         elif action == "cancel":
             if post["author_id"] != u["id"] or post["status"] == "cancelled":
                 flash("That is not one of your requests.", "error")

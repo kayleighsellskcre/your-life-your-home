@@ -44,6 +44,13 @@
   <div class="hb-card"><div class="hb-meta">Add your company name in <a href="{{ url_for('lender_settings_profile') }}">Settings</a> to see requests from people at your company.</div></div>
   {% endif %}
 
+  {% if helped or thanks %}
+  <div class="hb-card" style="background:#F7F1E8;">
+    {% if helped %}<b style="color:#3A2518;">You have helped {{ helped }} {{ 'colleague' if helped == 1 else 'colleagues' }}. Thank you for being generous with your time.</b>{% endif %}
+    {% for t in thanks %}<div class="hb-note">&ldquo;{{ t.thanks_note or 'Thank you for your help!' }}&rdquo; <span class="hb-meta">&mdash; {{ t.author_name }}, {{ t.title }}</span></div>{% endfor %}
+  </div>
+  {% endif %}
+
   <div class="hb-sec">Open requests for you</div>
   {% for p in open_posts %}
   <div class="hb-card">
@@ -81,6 +88,12 @@
     <div class="hb-meta">{% if p.address %}{{ p.address }} &middot; {% endif %}{% if p.audience == 'mls' %}Visible to agents on {{ p.audience_label }}{% elif p.audience == 'brokerage' %}Visible to people at {{ p.audience_label }}{% else %}Shared with {{ p.invited }} {{ 'person' if p.invited == 1 else 'people' }} you invited{% endif %}</div>
     {% if p.status == 'claimed' %}
     <div class="hb-contact"><b>{{ p.claimer_name }}</b> will help.<br>{% if p.claimer_phone %}<a href="tel:{{ p.claimer_phone }}">{{ p.claimer_phone }}</a><br>{% endif %}<a href="mailto:{{ p.claimer_email }}">{{ p.claimer_email }}</a></div>
+    {% endif %}
+    {% if p.status == 'claimed' and p.post_date <= today_iso %}
+      {% if p.thanked_at %}<div class="hb-meta" style="margin-top:.5rem;">You thanked {{ p.claimer_name }}. That was kind.</div>
+      {% else %}<form method="post" class="hb-acts" action="{{ url_for('helpboard.post_act', post_id=p.id, action='thank') }}" style="flex-wrap:wrap;">
+        <input type="text" name="note" maxlength="500" placeholder="A few kind words (optional)" aria-label="A thank you note for {{ p.claimer_name }}" style="flex:1 1 14rem;min-width:0;font-size:16px;">
+        <button class="go" type="submit">Say thank you</button></form>{% endif %}
     {% endif %}
     {% if not p.past %}<div class="hb-acts"><form method="post" action="{{ url_for('helpboard.post_act', post_id=p.id, action='cancel') }}" onsubmit="return confirm('Cancel this request?');"><button type="submit">Cancel request</button></form></div>{% endif %}
   </div>
