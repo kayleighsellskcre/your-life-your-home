@@ -75,3 +75,29 @@ ok(all(s[0] != "lou@x.com" for s in sent), "lenders cannot send the agent-only t
 cy = who(agent, "agent")
 cy.post("/agent/automatic-emails", data={"on_birthday": "1", "sample": "birthday"})
 ok(A.auto_email_enabled(agent, "birthday") is True and A.auto_email_enabled(agent, "anniversary") is False and A.auto_email_enabled(agent, "review") is False, "pressing a sample button also saves the switches you changed")
+
+# every automatic note to a client ends with a working stop link
+from datetime import date as _d
+td = _d.today()
+c = D.get_connection()
+c.execute("INSERT INTO agent_contacts (agent_user_id, name, email, birthday, auto_birthday, auto_anniversary, auto_seasonal, auto_equity, auto_holidays) VALUES (?,?,?,?,1,1,1,1,1)",
+          (agent, "Stop Sam", "sam@x.com", td.strftime("1990-%m-%d")))
+sid = c.execute("SELECT max(id) FROM agent_contacts").fetchone()[0]
+c.commit()
+ca.post("/agent/automatic-emails", data={"on_birthday": "1", "on_anniversary": "1", "on_review": "1"})
+sent.clear()
+A._email_ready = lambda: True
+A.send_birthday_emails()
+mine = [s for s in sent if s[0] == "sam@x.com"]
+ok(len(mine) == 1 and "/stop/" in mine[0][2] and "stop them any time" in mine[0][2], "a birthday email ends with a stop link")
+import re as _re
+tok = _re.search(r"/stop/([A-Za-z0-9_\-\.]+)", mine[0][2]).group(1)
+anon = A.app.test_client()
+r = anon.get("/stop/" + tok)
+ok(r.status_code == 200 and "Yes, please stop them" in r.get_data(as_text=True), "the link opens a plain page with one button")
+row = D.get_connection().execute("SELECT auto_birthday, auto_holidays FROM agent_contacts WHERE id=?", (sid,)).fetchone()
+ok(tuple(row) == (1, 1), "just opening the link (an email scanner) changes nothing")
+r = anon.post("/stop/" + tok)
+row = D.get_connection().execute("SELECT auto_birthday, auto_anniversary, auto_seasonal, auto_equity, auto_holidays FROM agent_contacts WHERE id=?", (sid,)).fetchone()
+ok(r.status_code == 200 and "All set" in r.get_data(as_text=True) and tuple(row) == (0, 0, 0, 0, 0), "pressing the button switches every automatic email off for that person")
+ok(anon.get("/stop/not-a-real-token").status_code == 400 and anon.post("/stop/not-a-real-token").status_code == 400, "a broken link is refused kindly")

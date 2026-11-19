@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Stop Automatic Emails{% endblock %}
+{% block content %}
+<div style="max-width:520px;margin:3rem auto;padding:0 1rem;text-align:center;">
+  {% if state == 'ask' %}
+    <h1 style="font-family:'Playfair Display',Georgia,serif;color:#3A2518;">Would you like these notes to stop?</h1>
+    <p style="color:#6B5848;line-height:1.6;">No hard feelings at all. One click and you will not get any more birthday, anniversary, seasonal or holiday notes from us.</p>
+    <form method="post"><button type="submit" style="margin-top:1rem;padding:.8rem 1.8rem;border:0;border-radius:99px;background:#8F6244;color:#fff;font-weight:700;font-size:1rem;cursor:pointer;width:auto;">Yes, please stop them</button></form>
+  {% elif state == 'done' %}
+    <h1 style="font-family:'Playfair Display',Georgia,serif;color:#3A2518;">All set</h1>
+    <p style="color:#6B5848;line-height:1.6;">You will not get any more of these notes. Wishing you and your home all the best.</p>
+  {% else %}
+    <h1 style="font-family:'Playfair Display',Georgia,serif;color:#3A2518;">That link did not work</h1>
+    <p style="color:#6B5848;line-height:1.6;">It may have been copied incompletely. Replying to the email and asking to stop works too, and it will be taken care of.</p>
+  {% endif %}
+</div>
+{% endblock %}

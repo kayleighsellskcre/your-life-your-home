@@ -1222,7 +1222,7 @@ def homeowner_home_timeline():
     )
 
 
-@route("/homeowner/home-timeline/delete/<int:event_id>")
+@route("/homeowner/home-timeline/delete/<int:event_id>", methods=["POST"])
 def homeowner_timeline_delete(event_id):
     delete_timeline_event(event_id, get_current_user_id())
     return redirect(url_for("homeowner_home_timeline"))

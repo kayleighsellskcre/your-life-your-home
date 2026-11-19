@@ -778,7 +778,7 @@
    {% if stage_filter %}<input type="hidden" name="stage" value="{{ stage_filter }}">{% endif %}
    {% if search_query %}<input type="hidden" name="search" value="{{ search_query }}">{% endif %}
    {% if tag_filter %}<input type="hidden" name="tag" value="{{ tag_filter }}">{% endif %}
-   <select name="sort" class="t-sel" onchange="this.form.submit()">
+   <select name="sort" class="t-sel" aria-label="Sort people by" onchange="this.form.submit()">
     <option value="name" {% if sort_by=='name' %}selected{% endif %}>A–Z Name</option>
     <option value="stage" {% if sort_by=='stage' %}selected{% endif %}>By Stage</option>
     <option value="last_touch" {% if sort_by=='last_touch' %}selected{% endif %}>Last Touch</option>
@@ -838,11 +838,11 @@
  <form id="bulk-bar" method="post" action="/agent/crm" style="display:none;position:sticky;top:0;z-index:20;background:#FFF8EC;border:1.5px solid #C9A24A;border-radius:12px;padding:.6rem .8rem;margin:0 0 .6rem;align-items:center;gap:.6rem;flex-wrap:wrap;box-shadow:0 2px 10px rgba(110,72,40,.15);">
   <input type="hidden" name="action" value="bulk_action">
   <span id="bulk-count" style="font-weight:700;color:#5C3D28;"></span>
-  <select name="bulk_action_type" id="bulk-type" style="padding:.4rem;border-radius:8px;border:1px solid #C8B7A6;">
+  <select name="bulk_action_type" id="bulk-type" aria-label="What to do with the selected people" style="padding:.4rem;border-radius:8px;border:1px solid #C8B7A6;">
    <option value="change_stage">Move to stage…</option>
    <option value="add_tag">Add a tag…</option>
   </select>
-  <select name="bulk_stage" id="bulk-stage" style="padding:.4rem;border-radius:8px;border:1px solid #C8B7A6;">
+  <select name="bulk_stage" id="bulk-stage" aria-label="Stage to move them to" style="padding:.4rem;border-radius:8px;border:1px solid #C8B7A6;">
    <option value="new">New Lead</option><option value="attempted">Attempted</option><option value="contacted">Contacted</option><option value="appt_set">Appt Set</option><option value="appt_done">Appt Done</option><option value="active">Active</option><option value="under_contract">Under Contract</option><option value="closed">Closed</option><option value="past">Past Client</option><option value="nurture">Nurture</option><option value="sphere">Sphere</option><option value="hold">Hold</option>
   </select>
   <input type="text" name="bulk_tag" id="bulk-tag" placeholder="Tag, like Sphere 2026" style="display:none;padding:.4rem;border-radius:8px;border:1px solid #C8B7A6;">
@@ -905,7 +905,7 @@
   <td class="c-td"><span class="add-row-icon">+</span></td>
   <td class="c-td"><input type="text" name="name" form="quick-add-form" class="ar-inp" id="ar-name" placeholder="Full name…" required></td>
   <td class="c-td">
-   <select name="stage" form="quick-add-form" class="ar-sel" id="ar-stage">
+   <select name="stage" form="quick-add-form" class="ar-sel" id="ar-stage" aria-label="Stage for the new person">
     <option value="new"{% if stage_filter=='new' %} selected{% endif %}>New Lead</option>
     <option value="attempted"{% if stage_filter=='attempted' %} selected{% endif %}>Attempted</option>
     <option value="contacted"{% if stage_filter=='contacted' %} selected{% endif %}>Contacted</option>

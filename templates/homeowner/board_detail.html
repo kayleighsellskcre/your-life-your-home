@@ -1743,7 +1743,7 @@
  }
 
  function duplicateBoard() {
- const newName = prompt('Enter a name for the duplicated board:', '{{ selected_board }} (Copy)');
+ const newName = prompt('Enter a name for the duplicated board:', {{ (selected_board ~ ' (Copy)')|tojson }});
  if (newName && newName.trim()) {
  const form = document.createElement('form');
  form.method = 'POST';
@@ -1892,7 +1892,7 @@
  const formData = new FormData();
  formData.append('cropped_image', blob, 'cropped.png');
  formData.append('original_path', currentPhotoPath);
- formData.append('board_name', '{{ selected_board }}');
+ formData.append('board_name', {{ selected_board|tojson }});
 
  fetch('/homeowner/crop-photo', {
  method: 'POST',

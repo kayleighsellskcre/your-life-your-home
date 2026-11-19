@@ -251,7 +251,7 @@
  {% if messages %}
  <script>
  {% for category, message in messages %}
- alert('{{ message }}');
+ alert({{ message|tojson }});
  {% endfor %}
  </script>
  {% endif %}

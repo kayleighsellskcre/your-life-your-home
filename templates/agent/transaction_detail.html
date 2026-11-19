@@ -1067,7 +1067,7 @@ function calcTxComm() {
 document.addEventListener('DOMContentLoaded', function() {
   var sp = document.getElementById('tx-sale-price');
   if (!sp) return;
-  if (!sp.value) sp.value = '{{ transaction.purchase_price or "" }}';
+  if (!sp.value) sp.value = {{ (transaction.purchase_price or '')|tojson }};
   calcTxComm();
 });
 

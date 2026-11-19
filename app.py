@@ -303,12 +303,11 @@ except Exception as e:
 try:
     from database import ensure_promo_codes_table, seed_promo_codes
     ensure_promo_codes_table()
+    # Promo codes come from the environment, never from the source: this repository is public, so any code written here
+    # could be read and used by anyone. Set YLH_PROMO_CODES in Railway as  CODE1:Note one,CODE2:Note two
     seed_promo_codes([
-        ("YLH-GOLD-LAUNCH1", "VIP Launch Code 1"),
-        ("YLH-GOLD-LAUNCH2", "VIP Launch Code 2"),
-        ("YLH-GOLD-LAUNCH3", "VIP Launch Code 3"),
-        ("YLH-GOLD-LAUNCH4", "VIP Launch Code 4"),
-        ("YLH-GOLD-LAUNCH5", "VIP Launch Code 5"),
+        (_c.split(":", 1)[0].strip().upper(), (_c.split(":", 1)[1].strip() if ":" in _c else "VIP code"))
+        for _c in (os.environ.get("YLH_PROMO_CODES") or "").split(",") if _c.strip()
     ])
 except Exception as e:
     print(f"[Startup] Promo code init warning: {e}")
@@ -320,8 +319,10 @@ if not _secret:
     # The old fallback string is public in git history; anyone who knows it can forge
     # a session. Keep a fallback so the app still boots, but be loud about it.
     print("[SECURITY WARNING] YLH_SECRET_KEY is not set. Set it to a long random value "
-          "(python -c \"import secrets; print(secrets.token_hex(32))\") in your environment.")
-    _secret = "change-this-secret-key"
+          "(python -c \"import secrets; print(secrets.token_hex(32))\") in your environment. "
+          "Until then a random key is made at startup, so everyone is signed out whenever the app restarts.")
+    import secrets as _secrets
+    _secret = _secrets.token_hex(32)   # never a fixed string: a known key would let anyone forge a session
 app.secret_key = _secret
 app.config["TEMPLATES_AUTO_RELOAD"] = not _IS_PRODUCTION
 app.config["PERMANENT_SESSION_LIFETIME"] = 86400 * 30  # 30 days for persistent sessions
@@ -439,6 +440,22 @@ def _apply_rate_limits():
             return jsonify({"error": "Too many requests. Please slow down and try again shortly."}), 429
         flash("That was a lot of tries in a row. Please wait a few minutes and try again.", "error")
         return redirect(url_for("login")), 303
+    return None
+
+
+@app.before_request
+def _guard_ai_endpoints():
+    """AI calls cost real money. Only agents and lenders (and the site admin) may use the business AI tools, homeowners only their
+    own equity insight, and nobody can run them in a loop: one account gets a generous but finite number per ten minutes."""
+    if request.method != "POST" or not request.path.startswith("/api/ai/"):
+        return None
+    uid, role = session.get("user_id"), session.get("role")
+    if not uid:
+        return None  # each endpoint already answers signed-out requests with its own 401
+    if role == "homeowner" and "/homeowner/" not in request.path:
+        return jsonify({"error": "That tool is for agents and lenders."}), 403
+    if _rate_limited(f"ai:user:{uid}", 80, 600):
+        return jsonify({"error": "That was a lot of requests in a row. Please wait a few minutes and try again."}), 429
     return None
 
 
@@ -1565,6 +1582,48 @@ def _first(name):
     return (name or "").strip().split(" ")[0] or "there"
 
 
+def _contact_stop_serializer():
+    from itsdangerous import URLSafeSerializer
+    return URLSafeSerializer(app.secret_key, salt="ylh-contact-optout")
+
+
+def _with_stop_link(body, contact):
+    """Every automatic note to a client ends with a plain way to say "please stop". Their choice is honored for all automatic emails."""
+    try:
+        token = _contact_stop_serializer().dumps({"t": contact["type"], "i": int(contact["id"])})
+        base = os.environ.get("YLH_SITE_URL", "https://itsyourlifeyourhome.com").rstrip("/")
+        nl = chr(10)
+        return (body.rstrip() + nl * 2 + "--" + nl + "This is a friendly note from someone who likes keeping in touch. "
+                "If you would rather not get these, you can stop them any time here: " + f"{base}/stop/{token}" + nl)
+    except Exception:
+        return body
+
+
+_OPT_OUT_TABLES = {"agent_contact": "agent_contacts", "lender_borrower": "lender_borrowers"}
+
+
+@app.route("/stop/<token>", methods=["GET", "POST"])
+def stop_automatic_emails(token):
+    """Public page behind the link at the bottom of automatic emails. Needs a click on the button, so an email scanner
+    that merely opens the link cannot switch anyone off by accident."""
+    try:
+        data = _contact_stop_serializer().loads(token)
+        table = _OPT_OUT_TABLES[data["t"]]
+        cid = int(data["i"])
+    except Exception:
+        return render_template("contact/stop.html", state="bad"), 400
+    if request.method == "POST":
+        from database import get_connection
+        c = get_connection()
+        try:
+            c.execute(f"UPDATE {table} SET auto_birthday = 0, auto_anniversary = 0, auto_seasonal = 0, auto_equity = 0, auto_holidays = 0 WHERE id = ?", (cid,))
+            c.commit()
+        finally:
+            c.close()
+        return render_template("contact/stop.html", state="done")
+    return render_template("contact/stop.html", state="ask")
+
+
 def send_birthday_emails():
     """Send birthday emails to contacts."""
     if not _email_ready():
@@ -1581,7 +1640,7 @@ Happy birthday! I hope your day is full of people you love and something delicio
 With warmth,
 {pro_full}
 """
-        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
+        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'birthday', contact['email'], subject, 'sent'
@@ -1607,7 +1666,7 @@ If you ever have a question about your home or what it is worth, I would love to
 Warmly,
 {pro_full}
 """
-        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
+        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'anniversary', contact['email'], subject, 'sent'
@@ -1723,7 +1782,7 @@ I am thinking of you and your home. Reach out anytime if I can help with anythin
 Warmly,
 {pro_full}
 """
-        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
+        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'seasonal', contact['email'], subject, 'sent'
@@ -1830,7 +1889,7 @@ These are estimates, but they are a nice reminder of how much you have built. I 
 Warmly,
 {pro_full}
 """
-        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
+        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'equity', contact['email'], subject, 'sent'
@@ -1906,7 +1965,7 @@ def send_holiday_greetings():
 Warmly,
 {pro_full}
 """
-        if send_reminder_email(contact['email'], subject, body, **pro_sender(contact.get('professional_id'))):
+        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
             log_automated_email(
                 contact['id'], contact['type'], contact['professional_id'],
                 'holiday', contact['email'], subject, 'sent'
@@ -2771,7 +2830,10 @@ def robots_txt():
 
 @app.route("/sitemap.xml")
 def sitemap_xml():
-    urls = [url_for("index", _external=True), url_for("login", _external=True), url_for("signup", _external=True)]
+    # Every public page worth finding in a search, not just the front door.
+    root = request.url_root.rstrip("/")
+    known = {r.rule for r in app.url_map.iter_rules()}
+    urls = [root + "/"] + [root + p for p in ("/for-homeowners", "/for-agents", "/for-lenders", "/pricing", "/home-value", "/signup", "/login", "/privacy", "/terms") if p in known]
     xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     xml += "".join(f"<url><loc>{u}</loc></url>" for u in urls) + "</urlset>"
     return Response(xml, mimetype="application/xml")

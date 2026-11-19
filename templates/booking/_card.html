@@ -174,7 +174,7 @@
     </div>
     <p class="pie-hint" style="margin:.8rem 0 .3rem;">On a computer, or another calendar app, copy this link instead:</p>
     <div class="bk-copy">
-      <input class="pie-input" id="bkFeed" readonly value="{{ bk.feed_https }}" onclick="this.select()">
+      <input class="pie-input" id="bkFeed" aria-label="Your calendar feed link" readonly value="{{ bk.feed_https }}" onclick="this.select()">
       <button type="button" class="pie-btn secondary small" onclick="bkCopy('bkFeed', this)">Copy link</button>
     </div>
     <p class="pie-hint" style="margin:.7rem 0 0;">This link is just for you and shows your clients' names, so please do not share it. If it ever gets out, make a new one and the old one stops working.</p>

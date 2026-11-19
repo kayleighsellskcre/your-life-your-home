@@ -123,13 +123,13 @@
  </div>
  {% endif %}
 
- <a href="/homeowner/home-timeline/delete/{{item.id}}" 
- style="color: #b3574a; margin-top: 1.5rem; display: inline-block; font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; border: 2px solid #b3574a; border-radius: 8px; transition: all 0.3s ease; text-decoration: none;"
+ <form method="post" action="/homeowner/home-timeline/delete/{{item.id}}" style="display:inline;margin:0;" onsubmit="return confirm('Delete this timeline event?');">
+ <button type="submit"
+ style="color: #b3574a; margin-top: 1.5rem; display: inline-block; font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; border: 2px solid #b3574a; border-radius: 8px; transition: all 0.3s ease; text-decoration: none; background: transparent; cursor: pointer; width: auto;"
  onmouseover="this.style.background='#b3574a'; this.style.color='white';"
- onmouseout="this.style.background='transparent'; this.style.color='#b3574a';"
- onclick="return confirm('Delete this timeline event?');">
+ onmouseout="this.style.background='transparent'; this.style.color='#b3574a';">
  Delete Event
- </a>
+ </button></form>
  </div>
  {% endfor %}
  </div>

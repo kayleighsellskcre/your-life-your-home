@@ -21,7 +21,7 @@
     <h2>Your signature</h2>
     <p>Your name, company, phone and website work well. Plain text, up to {{ max_len }} characters.</p>
     <form method="post">
-      <textarea id="sig" name="signature" maxlength="{{ max_len }}" placeholder="Kayleigh Biggs&#10;Your brokerage&#10;785-555-0100&#10;itsyourlifeyourhome.com">{{ saved }}</textarea>
+      <textarea id="sig" name="signature" maxlength="{{ max_len }}" placeholder="Your Name&#10;Your brokerage&#10;(555) 555-0100&#10;yourwebsite.com">{{ saved }}</textarea>
       <button class="sg-btn" type="submit">Save signature</button>
       {% if suggestion %}<button class="sg-btn alt" type="button" id="useSug">Fill in from my profile</button>{% endif %}
     </form>
