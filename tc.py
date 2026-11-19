@@ -352,7 +352,8 @@ def build_blocks(tx, d, kind):
 def _sheet_html(tx, d, kind, pdf=False, share_token=None, can_back=True):
     return render_template("tc/sheet.html", tx=tx, kind=kind, blocks=build_blocks(tx, d, kind), pdf=pdf,
                            share_token=share_token, can_back=can_back, address=tx.get("property_address") or "Transaction",
-                           mls=d.get("mls"), county=d.get("county"))
+                           mls=d.get("mls"), county=d.get("county"), coordinated_for=(tx.get("coordinating_for") or ""),
+                           coordinator=(d.get("tc_name") or ""))
 
 
 def _respond(html, filename, want_pdf):
@@ -407,6 +408,12 @@ def defaults(tx, user):
          "comm_request": f"Please copy {first} on transaction emails." if first else ""}
     if not _d(d["closing_date"]):
         d["closing_date"] = ""
+    other = (tx.get("coordinating_for") or "").strip()
+    if other:   # coordinating for another agent: they are on our client's side, and we are the coordinator
+        key = "listing_agent" if (tx.get("side") or "") == "seller" else "buyer_agent"
+        d[key] = other
+        d[key + "_contact"] = tx.get("coordinating_email") or ""
+        d["comm_request"] = f"Please copy {first} and {other.split(' ')[0]} on transaction emails." if first else ""
     return d
 
 
@@ -528,6 +535,7 @@ def share(tx_id):
     for k in ("buyer_agent_contact", "listing_agent_contact", "buyer_title_contact", "seller_title_contact",
               "lender_contact", "tc_contact"):
         allowed.update(e.lower() for e in _first_emails(data.get(k)))
+    allowed.update(e.lower() for e in _first_emails(tx.get("coordinating_email")))
     recipients = []
     for e in picked:
         if e in allowed and e not in recipients:
@@ -616,6 +624,9 @@ def client_update(tx_id):
     if not tx:
         return redirect(url_for("login", role="agent"))
     back = redirect(url_for("agent_transaction_detail", tx_id=tx_id) + "#contract-card")
+    if tx.get("coordinating_for"):
+        flash(f"This deal belongs to {tx['coordinating_for']}, so I leave messages to their client to them. Share the sheet with {tx['coordinating_for'].split(' ')[0]} instead.", "error")
+        return back
     data, _ = load(tx_id)
     rows = [r for r in deadlines(tx_id) if not r["done"]]
     emails = []
@@ -833,7 +844,7 @@ def upload(tx_id):
 
 
 # ───────────────────────── detail page card ─────────────────────────
-def card_context(tx_id):
+def card_context(tx_id, tx=None):
     data, token = load(tx_id)
     dl = deadlines(tx_id) if data else []
     upcoming = [r for r in dl if not r["done"]][:4]
@@ -846,6 +857,9 @@ def card_context(tx_id):
             if not data.get(k) and not (k == "buyer_title" and data.get("seller_title")):
                 missing.append(label)
     recipients = []
+    if data and tx and tx.get("coordinating_email"):
+        for e in _first_emails(tx["coordinating_email"])[:1]:
+            recipients.append({"email": e.lower(), "label": f"{tx.get('coordinating_for') or 'The agent'} (you coordinate for them)"})
     if data:
         for key, label in (("listing_agent_contact", "Listing agent"), ("buyer_title_contact", "Buyers' title"),
                            ("seller_title_contact", "Seller's title"), ("lender_contact", "Lender")):
@@ -866,7 +880,8 @@ def send_deadline_reminders(today=None):
         return 0
     today = today or date.today()
     conn = _db()
-    rows = conn.execute("""SELECT d.*, t.property_address, t.agent_id, u.email AS agent_email, u.name AS agent_name
+    rows = conn.execute("""SELECT d.*, t.property_address, t.agent_id, u.email AS agent_email, u.name AS agent_name,
+                                  t.coordinating_for, t.coordinating_email, COALESCE(t.coordinating_notify, 1) AS coordinating_notify
                            FROM transaction_deadlines d JOIN transactions t ON t.id = d.transaction_id
                            JOIN users u ON u.id = t.agent_id
                            WHERE COALESCE(d.done,0)=0 AND COALESCE(t.status,'active')='active'
@@ -895,6 +910,20 @@ def send_deadline_reminders(today=None):
                  + (f" (+{len(items) - 1} more)" if len(items) > 1 else ""), body)
         except Exception:
             continue
+        # A deal coordinated for another agent: that agent gets the same friendly heads-up (unless it was switched off for the deal).
+        theirs = {}
+        for r, stage in items:
+            ce = (r["coordinating_email"] or "").strip()
+            if ce and r["coordinating_notify"] != 0:
+                theirs.setdefault((ce, r["coordinating_for"] or "there"), []).append((r, stage))
+        for (ce, cname), its in theirs.items():
+            lines2 = [f"{r['label']}, {'TODAY' if st == '0d' else 'in 2 days'} ({short_date(r['due_date'])})\n{r['property_address']}" for r, st in its]
+            body2 = (f"Hi {cname.split(' ')[0]},\n\nA friendly heads-up from {name or 'your transaction coordinator'} on what is coming up:\n\n" + "\n\n".join(lines2)
+                     + f"\n\nI have it handled and will keep you posted. You can reach me at {email}.\n\nWarmly,\n{name or ''}")
+            try:
+                send(ce, f"Coming up: {its[0][0]['label']} at {its[0][0]['property_address']}", body2)
+            except Exception:
+                pass
         for r, stage in items:
             conn.execute("UPDATE transaction_deadlines SET reminded=? WHERE id=?",
                          ((r["reminded"] + "," if r["reminded"] else "") + stage, r["id"]))

@@ -412,11 +412,15 @@
  <div class="ylh-page-hd">
  <div class="ylh-page-hd__label">Pipeline</div>
  <h1 class="ylh-page-hd__title">Transactions</h1>
- <p class="ylh-page-hd__sub">All active and recent deals, organized by stage</p>
+ <p class="ylh-page-hd__sub">{% if view == 'others' %}Deals you coordinate for other agents. They stay separate from your own pipeline, numbers and client emails.{% else %}All active and recent deals, organized by stage{% endif %}</p>
  <div class="ylh-page-hd__actions">
  <span style="font-size:.78rem;color:#6F6B4D;font-weight:600;background:rgba(107,91,77,.1);border-radius:10px;padding:.2rem .7rem;">{{ transactions|length if transactions else 0 }} deals</span>
- <button class="t-btn t-btn--solid" style="height:36px;padding:0 1.35rem;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;min-height:unset;width:auto;margin:0;white-space:nowrap;" onclick="openAddTx()">+ New Transaction</button>
+ <button class="t-btn t-btn--solid" style="height:36px;padding:0 1.35rem;font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border-radius:999px;min-height:unset;width:auto;margin:0;white-space:nowrap;" onclick="openAddTx('{{ 'coordinating' if view == 'others' else 'mine' }}')">+ New Transaction</button>
  </div>
+ </div>
+ <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin:.2rem 0 1rem;" role="tablist" aria-label="Which deals">
+ <a href="{{ url_for('agent_transactions') }}" class="stage-pill {{ 'stage-pill--on' if view == 'mine' }}" style="text-decoration:none;">My deals <span class="stage-pill__n">{{ own_count }}</span></a>
+ <a href="{{ url_for('agent_transactions', view='others') }}" class="stage-pill {{ 'stage-pill--on' if view == 'others' }}" style="text-decoration:none;">Deals I coordinate for others <span class="stage-pill__n">{{ others_count }}</span></a>
  </div>
 
  {% include "tc/_upcoming.html" %}
@@ -496,7 +500,7 @@
  <tr class="tx-row {% if loop.index is odd %}tx-row--odd{% endif %}"
  onclick="window.location.href='{{ url_for('agent_transaction_detail', tx_id=tx.id) }}'"
  title="Open Transaction Coordinator">
- <td class="tx-td tx-td--addr" title="{{ tx.property_address }}">{{ tx.property_address }}</td>
+ <td class="tx-td tx-td--addr" title="{{ tx.property_address }}">{{ tx.property_address }}{% if tx.coordinating_for %}<span style="display:block;font-size:.72rem;color:#7A5238;font-weight:600;">For {{ tx.coordinating_for }}</span>{% endif %}</td>
  <td class="tx-td" title="{{ tx.client_name }}">{{ tx.client_name }}</td>
  <td class="tx-td">
  <span class="stg stg--{{ tx.current_stage or 'summary' }}">
@@ -513,6 +517,7 @@
  <td class="tx-td tx-td--actions" onclick="event.stopPropagation()">
  <div class="tx-actions">
  <a href="{{ url_for('agent_transaction_detail', tx_id=tx.id) }}" class="tx-act">Open</a>
+ <a href="{{ url_for('tc.contract', tx_id=tx.id) }}" class="tx-act">Contract</a>
  <a href="{{ url_for('agent_transaction_edit', tx_id=tx.id) }}" class="tx-act">Edit</a>
  <form method="POST" action="{{ url_for('agent_transaction_delete', tx_id=tx.id) }}" style="display:inline;">
  <button type="submit" class="tx-act tx-act--del"
@@ -527,7 +532,8 @@
  {% else %}
  <div class="tx-empty">
  <div style="font-size:2rem;opacity:.15;margin-bottom:.75rem;"></div>
- <p>No transactions yet. Tap <strong>+ New Transaction</strong> whenever you are ready to start tracking a deal.</p>
+ {% if view == 'others' %}<p>You are not coordinating any deals for other agents yet. Tap <strong>+ New Transaction</strong> and choose "I am coordinating it for another agent". Their deals stay in this separate list.</p>
+ {% else %}<p>No transactions yet. Tap <strong>+ New Transaction</strong> whenever you are ready to start tracking a deal.</p>{% endif %}
  </div>
  {% endif %}
 </div>
@@ -544,6 +550,24 @@
  <form method="post" action="{{ url_for('agent_transactions') }}">
  <div class="txgrid">
  <div class="txf txgrid-full">
+ <label>Whose deal is this?</label>
+ <div style="display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.9rem;">
+ <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="radio" name="deal_kind" value="mine" checked onchange="dealKind()" style="width:auto;margin-right:.35rem;">My own deal</label>
+ <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="radio" name="deal_kind" value="coordinating" onchange="dealKind()" style="width:auto;margin-right:.35rem;">I am coordinating it for another agent</label>
+ </div>
+ </div>
+ <div class="txf" id="coordName" style="display:none;">
+ <label>Agent's name *</label>
+ <input type="text" name="coordinating_for" maxlength="120" placeholder="Their full name">
+ </div>
+ <div class="txf" id="coordEmail" style="display:none;">
+ <label>Agent's email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(so you can send them the sheet)</span></label>
+ <input type="email" name="coordinating_email" maxlength="160" placeholder="agent@brokerage.com">
+ </div>
+ <div class="txf txgrid-full" id="coordNotify" style="display:none;">
+ <label style="text-transform:none;letter-spacing:0;font-weight:600;"><input type="checkbox" name="coordinating_notify" value="1" checked style="width:auto;margin-right:.35rem;">Email the agent a friendly heads-up before each deadline (they can reply to you)</label>
+ </div>
+ <div class="txf txgrid-full">
  <label>Property Address *</label>
  <input type="text" name="property_address" required placeholder="123 Main St, City, State" id="txAddr">
  </div>
@@ -555,7 +579,7 @@
  <label>Client Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(connects their portal)</span></label>
  <input type="email" name="client_email" placeholder="jane@email.com" value="{{ contact_info.email if contact_info else '' }}">
  </div>
- <div class="txf">
+ <div class="txf" id="lenderEmailBox">
  <label>Lender Email <span style="font-weight:400;text-transform:none;font-size:.65em;color:#6F6B4D;">(optional, shares the deal)</span></label>
  <input type="email" name="lender_email" placeholder="lender@email.com">
  </div>
@@ -595,7 +619,16 @@
 </div>
 
 <script>
-function openAddTx() {
+function dealKind() {
+ var coord = document.querySelector('input[name=deal_kind]:checked').value === 'coordinating';
+ ['coordName', 'coordEmail', 'coordNotify'].forEach(function(id){ document.getElementById(id).style.display = coord ? '' : 'none'; });
+ document.getElementById('lenderEmailBox').style.display = coord ? 'none' : '';
+}
+function openAddTx(kind) {
+ if (kind === 'coordinating') {
+ document.querySelector('input[name=deal_kind][value=coordinating]').checked = true;
+ dealKind();
+ }
  document.getElementById('addTxModal').classList.add('open');
  setTimeout(function(){ document.getElementById('txAddr').focus(); }, 80);
 }

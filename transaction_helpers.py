@@ -37,14 +37,15 @@ def create_transaction(agent_id: int, property_address: str, client_name: str,
             cursor.execute("""
                 INSERT INTO transactions 
                 (agent_id, property_address, client_name, client_email, client_phone,
-                 side, current_stage, purchase_price, target_close_date, notes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 side, current_stage, purchase_price, target_close_date, notes, coordinating_for, coordinating_email)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 agent_id, property_address, client_name,
                 kwargs.get('client_email', ''), kwargs.get('client_phone', ''),
                 side, current_stage,
                 kwargs.get('purchase_price', None), target_close_date,
-                kwargs.get('notes', '')
+                kwargs.get('notes', ''),
+                kwargs.get('coordinating_for') or None, kwargs.get('coordinating_email') or None
             ))
             transaction_id = cursor.lastrowid
     # Log creation event (outside the with block to avoid nested DB writes)
@@ -55,18 +56,20 @@ def create_transaction(agent_id: int, property_address: str, client_name: str,
     )
     return transaction_id
 
-def get_agent_transactions(agent_id: int, status: str = 'active') -> List[Dict]:
-    """Get all transactions for an agent"""
+def get_agent_transactions(agent_id: int, status: str = 'active', coordinated=False) -> List[Dict]:
+    """Get an agent's transactions. By default only the agent's OWN deals; coordinated=True returns only the deals they
+    coordinate for other agents, and coordinated=None returns both."""
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("""
+    which = {False: "AND COALESCE(t.coordinating_for, '') = ''", True: "AND COALESCE(t.coordinating_for, '') != ''"}.get(coordinated, "")
+    cursor.execute(f"""
         SELECT t.*,
                COUNT(DISTINCT td.id) as document_count,
                COUNT(DISTINCT tp.id) as participant_count
         FROM transactions t
         LEFT JOIN transaction_documents td ON t.id = td.transaction_id
         LEFT JOIN transaction_participants tp ON t.id = tp.transaction_id
-        WHERE t.agent_id = ? AND t.status = ?
+        WHERE t.agent_id = ? AND t.status = ? {which}
         GROUP BY t.id
         ORDER BY t.created_at DESC
     """, (agent_id, status))

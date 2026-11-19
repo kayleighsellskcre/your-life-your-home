@@ -76,7 +76,7 @@ def link_transaction_parties(tx_id, lender_email=None):
         conn = get_connection()
         try:
             tx = _transaction(conn, tx_id)
-            if not tx:
+            if not tx or tx.get("coordinating_for"):   # another agent's deal: never link their client or lender to this account
                 return False
             named_lender = _user_by_email(conn, lender_email)
             named_lender_id = named_lender["id"] if named_lender and named_lender.get("role") == "lender" else None
@@ -115,7 +115,7 @@ def notify_stage_change(tx_id, new_stage, send_email, base_url):
         conn = get_connection()
         try:
             tx = _transaction(conn, tx_id)
-            if not tx:
+            if not tx or tx.get("coordinating_for"):   # another agent's client is never emailed by the coordinator
                 return []
             agent = _user(conn, tx.get("agent_id")) or {}
             lender = _user(conn, tx.get("lender_user_id"))
@@ -161,7 +161,7 @@ def on_transaction_closed(tx_id):
         conn = get_connection()
         try:
             tx = _transaction(conn, tx_id)
-            if not tx or not tx.get("homeowner_user_id") or not tx.get("property_address"):
+            if not tx or tx.get("coordinating_for") or not tx.get("homeowner_user_id") or not tx.get("property_address"):
                 return False
             uid = tx["homeowner_user_id"]
             addr = tx["property_address"].strip()
@@ -243,7 +243,7 @@ def invite_client_if_needed(tx_id, send_email, base_url):
         conn = get_connection()
         try:
             tx = _transaction(conn, tx_id)
-            if not tx:
+            if not tx or tx.get("coordinating_for"):
                 return False
             email = (tx.get("client_email") or "").strip()
             if not email or _user_by_email(conn, email):

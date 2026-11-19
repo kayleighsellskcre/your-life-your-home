@@ -104,7 +104,7 @@ def agent_add_participant(tx_id):
         
         try:
             import automation
-            if role == "lender" and email:
+            if role == "lender" and email and not transaction.get("coordinating_for"):
                 automation.link_transaction_parties(tx_id, email)  # a lender on the platform sees the deal on their own dashboard
             if email and role != "client":
                 _bg(automation.notify_partner_added, tx_id, name, email, role, send_reminder_email, _site_url())  # a warm welcome to the new partner
@@ -1403,6 +1403,13 @@ def agent_transactions():
         # Convert form stage to database stage, default to 'pre_contract' if not found
         db_stage = stage_mapping.get(stage, 'pre_contract')
 
+        coord_for = coord_email = ""
+        if request.form.get("deal_kind") == "coordinating":
+            coord_for = request.form.get("coordinating_for", "").strip()[:120]
+            coord_email = request.form.get("coordinating_email", "").strip()[:160]
+            if not coord_for:
+                flash("Please tell me which agent you are coordinating this for.", "error")
+                property_address = ""
         if property_address and client_name:
             try:
                 new_tx_id = create_transaction(
@@ -1416,11 +1423,18 @@ def agent_transactions():
                     client_phone=request.form.get("client_phone", "").strip(),
                     purchase_price=request.form.get("purchase_price", "").strip() or None,
                     notes=request.form.get("notes", "").strip(),
+                    coordinating_for=coord_for, coordinating_email=coord_email,
                 )
                 import automation
-                automation.link_transaction_parties(new_tx_id, request.form.get("lender_email", "").strip())
-                _bg(automation.invite_client_if_needed, new_tx_id, send_reminder_email, _site_url())
-                flash("Transaction created!", "success")
+                if coord_for and not request.form.get("coordinating_notify"):
+                    from database import get_connection as _cn
+                    _c = _cn(); _c.execute("UPDATE transactions SET coordinating_notify = 0 WHERE id = ?", (new_tx_id,)); _c.commit(); _c.close()
+                if not coord_for:   # a deal coordinated for someone else never links or invites that agent's client
+                    automation.link_transaction_parties(new_tx_id, request.form.get("lender_email", "").strip())
+                    _bg(automation.invite_client_if_needed, new_tx_id, send_reminder_email, _site_url())
+                flash(f"Added to the deals you coordinate for {coord_for}." if coord_for else "Transaction created!", "success")
+                if coord_for:
+                    return redirect(url_for("agent_transactions", view="others") if db_stage == "pre_contract" else url_for("tc.contract", tx_id=new_tx_id))
                 if db_stage != "pre_contract":
                     flash("Let us add the contract details next, so your deadlines and sheets are ready.", "success")
                     return redirect(url_for("tc.contract", tx_id=new_tx_id))
@@ -1444,12 +1458,17 @@ def agent_transactions():
         except Exception:
             pass
     
-    transactions = get_agent_transactions(user["id"])
+    own = get_agent_transactions(user["id"])
+    others = get_agent_transactions(user["id"], coordinated=True)
+    others.sort(key=lambda t: ((t.get("coordinating_for") or "").lower(), t.get("created_at") or ""))
+    view = "others" if request.args.get("view") == "others" else "mine"
+    transactions = others if view == "others" else own
     return render_template(
         "agent/transactions.html",
         brand_name=FRONT_BRAND_NAME,
         user=user,
-        transactions=transactions,
+        transactions=transactions, view=view, own_count=len(own), others_count=len(others),
+        other_agents=sorted({t["coordinating_for"] for t in others}),
         contact_info=contact_info,
         tc_up=_tc.upcoming_for_agent(user["id"]),
     )
@@ -1516,7 +1535,7 @@ def agent_transaction_detail(tx_id):
         timeline=timeline,
         doc_status=doc_status,
         tx_commission=tx_commission,
-        tc=_tc.card_context(tx_id),
+        tc=_tc.card_context(tx_id, transaction),
     )
 
 
@@ -1532,6 +1551,9 @@ def agent_transaction_commission_save(tx_id):
         flash("We could not find that transaction.", "error")
         return redirect(url_for("agent_transactions"))
 
+    if transaction.get("coordinating_for"):
+        flash("This deal belongs to another agent, so it stays out of your commissions.", "error")
+        return redirect(url_for("agent_transaction_detail", tx_id=tx_id))
     f = request.form
     sale_price   = float(f.get("sale_price") or transaction.get("purchase_price") or 0)
     comm_rate    = float(f.get("commission_rate") or 3.0)
@@ -1699,7 +1721,7 @@ def agent_transaction_edit(tx_id):
         if update_transaction(tx_id, user["id"], **update_data):
             flash("Transaction updated!", "success")
             # Schedule review request if stage was just set to closed
-            if db_stage == 'closed':
+            if db_stage == 'closed' and not transaction.get("coordinating_for"):
                 try:
                     c_email = update_data.get("client_email") or transaction.get("client_email") or ""
                     c_name = update_data.get("client_name") or transaction.get("client_name") or ""
@@ -1763,10 +1785,11 @@ def agent_transaction_change_stage(tx_id):
             flash("Transaction stage updated.", "success")
             try:
                 import automation
-                automation.link_transaction_parties(tx_id)
-                if new_stage == "closed":
-                    automation.on_transaction_closed(tx_id)
-                _bg(automation.notify_stage_change, tx_id, new_stage, send_reminder_email, _site_url())
+                if not transaction.get("coordinating_for"):   # never contact another agent's client or lender
+                    automation.link_transaction_parties(tx_id)
+                    if new_stage == "closed":
+                        automation.on_transaction_closed(tx_id)
+                    _bg(automation.notify_stage_change, tx_id, new_stage, send_reminder_email, _site_url())
             except Exception as _auto_err:
                 print(f"[AUTOMATION] stage hook failed: {_auto_err}")
             # AI: Auto-generate recommended tasks for the new stage (background thread)
@@ -1798,7 +1821,7 @@ def agent_transaction_change_stage(tx_id):
             except Exception:
                 pass
             # When a transaction closes, schedule a review request
-            if new_stage == 'closed':
+            if new_stage == 'closed' and not transaction.get("coordinating_for"):
                 try:
                     client_email = transaction.get("client_email") or ""
                     client_name = transaction.get("client_name") or ""

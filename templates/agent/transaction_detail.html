@@ -522,7 +522,7 @@
 <div class="tx-topbar">
   <div class="tx-topbar-left">
     <div class="tx-breadcrumb">
-      <a href="{{ url_for('agent_transactions') }}">← Transactions</a>
+      <a href="{{ url_for('agent_transactions', view='others') if transaction.coordinating_for else url_for('agent_transactions') }}">← {{ 'Deals I coordinate' if transaction.coordinating_for else 'Transactions' }}</a>
       &nbsp;/&nbsp;Transaction #{{ transaction.id }}
     </div>
     <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.2rem">
@@ -636,6 +636,10 @@
       </div>
     </div>
 
+    {% if transaction.coordinating_for %}
+    <div class="tx-panel"><div class="tx-panel-hd"><span>Coordinating for {{ transaction.coordinating_for }}</span></div>
+      <p style="margin:.4rem .2rem;font-size:.85rem;color:#6F6B4D;line-height:1.5;">This deal belongs to {{ transaction.coordinating_for }}. It stays out of your own pipeline, numbers and client emails. Share the sheet with them below so you are always on the same page.</p></div>
+    {% else %}
     <!-- Commission — Agent Only -->
     <div class="tx-panel">
       <div class="tx-panel-hd">
@@ -716,6 +720,7 @@
         </form>
       </div>
     </div>
+    {% endif %}
 
   </div><!-- /left -->
 

@@ -1250,6 +1250,13 @@ def init_db() -> None:
         cur.execute("ALTER TABLE transactions ADD COLUMN lender_user_id INTEGER REFERENCES users(id)")
     except:
         pass
+    # A deal the account holder coordinates for another agent (as a transaction coordinator) carries that agent's name.
+    for _ddl in ("ALTER TABLE transactions ADD COLUMN coordinating_for TEXT", "ALTER TABLE transactions ADD COLUMN coordinating_email TEXT",
+                 "ALTER TABLE transactions ADD COLUMN coordinating_notify INTEGER DEFAULT 1"):
+        try:
+            cur.execute(_ddl)
+        except Exception:
+            pass
 
     # Create transaction_participants if not exists
     try:
