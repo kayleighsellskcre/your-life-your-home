@@ -45,3 +45,13 @@ ok(A.schedule_review_request(agent, 11, "Cora Client", "cora@x.com") is False, "
 ok(A.schedule_review_request(agent, 12, "Cora Client", "CORA@x.com") is False, "the same person is not asked twice in six months")
 ok(A.schedule_review_request(agent, 13, "Dan Client", "dan@x.com") is True, "a different client still gets one")
 ok(A.schedule_review_request(agent, 14, "No Email", "") is False, "no email, nothing scheduled")
+
+# Find a person from the Dashboard
+with contextlib.redirect_stdout(io.StringIO()):
+    dpage = ca.get("/agent").get_data(as_text=True)
+    lpage2 = cl.get("/lender").get_data(as_text=True)
+ok('action="/agent/crm"' in dpage and 'name="search"' in dpage and dpage.index('role="search"') < dpage.index("Get started") if "Get started" in dpage else 'role="search"' in dpage, "the agent Dashboard has a Find a person box that searches the CRM")
+ok('action="/lender/crm"' in lpage2 and 'name="q"' in lpage2, "the lender Dashboard has a Find a person box that searches the CRM")
+with contextlib.redirect_stdout(io.StringIO()):
+    found = ca.get("/agent/crm?search=A+One").get_data(as_text=True)
+ok("A One" in found, "searching from the Dashboard lands on matching people")
