@@ -52,3 +52,28 @@ ok(all(re.search(r"^(flask|gunicorn|apscheduler|pandas|openai)[^\n]*<", req, re.
 # form fields that screen readers need names for
 page = ca.get("/agent/crm").get_data(as_text=True)
 ok('aria-label="Sort people by"' in page and 'aria-label="What to do with the selected people"' in page, "CRM selects have names for screen readers")
+
+# off-site backups
+import gzip as _gz
+class FakeR2:
+    def __init__(self): self.up, self.deleted, self.keys = [], [], [f"ylh-db/ylh-2026010{i}-030000.db.gz" for i in range(1, 10)] + [f"ylh-db/ylh-2026011{i}-030000.db.gz" for i in range(0, 9)]
+    def upload_file(self, path, bucket, key, ExtraArgs=None):
+        self.up.append((bucket, key, _gz.open(path, "rb").read(16)))
+    def list_objects_v2(self, Bucket, Prefix): return {"Contents": [{"Key": k} for k in self.keys + [self.up[-1][1]]]}
+    def delete_object(self, Bucket, Key): self.deleted.append(Key)
+snap = os.path.join(tempfile.mkdtemp(), "ylh-20261117-030000.db")
+import sqlite3 as _sq
+_c = _sq.connect(snap); _c.execute("create table t(x)"); _c.commit(); _c.close()
+os.environ.pop("YLH_BACKUP_BUCKET", None); os.environ.pop("R2_BACKUP_BUCKET", None)
+fake = FakeR2(); A.R2_CLIENT = fake
+ok(A.offsite_backup(snap) is False and not fake.up, "with no backup bucket set, nothing is uploaded and nothing breaks")
+os.environ["R2_BUCKET"] = "photos"; os.environ["R2_BACKUP_BUCKET"] = "photos"
+ok(A.offsite_backup(snap) is False and not fake.up, "it refuses to use the photo bucket, which may be public")
+os.environ["R2_BACKUP_BUCKET"] = "private-backups"
+ok(A.offsite_backup(snap) is True and fake.up and fake.up[0][0] == "private-backups" and fake.up[0][1].startswith("ylh-db/") and fake.up[0][2].startswith(b"SQLite format 3"), "a compressed, valid database copy goes to the private backup bucket")
+ok(len(fake.deleted) == 18 - 13 and fake.deleted[0] == "ylh-db/ylh-20260101-030000.db.gz", "only the newest 14 off-site copies are kept")
+class Boom(FakeR2):
+    def upload_file(self, *a, **k): raise RuntimeError("storage down")
+A.R2_CLIENT = Boom()
+ok(A.offsite_backup(snap) is False, "if the storage is down the nightly job carries on instead of crashing")
+A.R2_CLIENT = None

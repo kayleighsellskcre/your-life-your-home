@@ -2414,7 +2414,38 @@ def backup_database(keep=7):
         except OSError:
             pass
     print(f"[BACKUP] Saved {dest.name}")
+    offsite_backup(dest)
     return dest
+
+
+def offsite_backup(path, keep=14):
+    """Copy a database snapshot to a SEPARATE, PRIVATE storage bucket so losing the server's disk does not lose the data.
+
+    Needs R2_BACKUP_BUCKET (and the usual R2_ENDPOINT / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY). It deliberately never
+    uses the bucket that serves photos and files, because that one may have a public web address. Returns True when saved."""
+    bucket = (os.environ.get("YLH_BACKUP_BUCKET") or os.environ.get("R2_BACKUP_BUCKET") or "").strip()
+    if not bucket or R2_CLIENT is None:
+        return False
+    if bucket == (os.environ.get("R2_BUCKET") or "").strip():
+        print("[BACKUP] Off-site backup skipped: the backup bucket must be different from the photo/file bucket (that one may be public).")
+        return False
+    import gzip, shutil, tempfile
+    try:
+        gz = Path(tempfile.gettempdir()) / (Path(path).name + ".gz")
+        with open(path, "rb") as fin, gzip.open(gz, "wb", compresslevel=6) as fout:
+            shutil.copyfileobj(fin, fout)
+        key = "ylh-db/" + gz.name
+        R2_CLIENT.upload_file(str(gz), bucket, key, ExtraArgs={"ContentType": "application/gzip"})
+        gz.unlink(missing_ok=True)
+        # keep only the newest few
+        listed = R2_CLIENT.list_objects_v2(Bucket=bucket, Prefix="ylh-db/").get("Contents", [])
+        for old in sorted(listed, key=lambda o: o["Key"])[:-keep]:
+            R2_CLIENT.delete_object(Bucket=bucket, Key=old["Key"])
+        print(f"[BACKUP] Off-site copy saved: {key}")
+        return True
+    except Exception as exc:
+        print(f"[BACKUP] Off-site copy FAILED: {exc}")
+        return False
 
 
 def start_scheduler():

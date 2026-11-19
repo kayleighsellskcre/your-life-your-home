@@ -2100,7 +2100,7 @@ def agent_spotlight_cards_delete(set_id):
     if success:
         return jsonify({"success": True, "message": "Card set deleted successfully"})
     else:
-        return jsonify({"success": False, "error": "Failed to delete card set"}), 500
+        return jsonify({"success": False, "error": "That card set could not be found"}), 404
 
 
 @route("/agent/transactions/<int:tx_id>/marketing-hub")
