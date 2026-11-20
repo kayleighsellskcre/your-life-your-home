@@ -314,7 +314,7 @@
  
  <div class="form-group">
  <label>Phone Number</label>
- <input type="tel" name="phone" value="{{ profile.phone if profile else '' }}" placeholder="(555) 123-4567">
+ <input type="tel" name="phone" value="{{ (profile.phone|phone) if profile else '' }}" placeholder="(555) 123-4567">
  <small>This will be used for the call button on your public profile</small>
  </div>
  

@@ -59,7 +59,7 @@ h.post(f"/homeowner/team/{agent}", data={"body": "Hi Amy, who do you use for gut
 ok("who do you use for gutters" in h.get(f"/homeowner/team/{agent}").get_data(as_text=True), "a homeowner can message their agent and sees the conversation")
 t = a.get("/messages").get_data(as_text=True)
 ok("Hal Homeowner" in t and "gutters" in t, "the agent sees the conversation in Messages")
-ok('class="ylh-tab-badge">1<' in a.get("/agent/my-clients").get_data(as_text=True), "the agent's Messages tab shows an unread count")
+ok("(you have 1 new message)" in a.get("/agent/my-clients").get_data(as_text=True), "the agent's menu button shows an unread message")
 a.get(f"/messages/{home}")
 ok('class="ylh-tab-badge"' not in a.get("/agent/my-clients").get_data(as_text=True), "opening the conversation clears the count")
 a.post(f"/messages/{home}", data={"body": "I love Pro Gutters. Sending their number."})
@@ -75,7 +75,7 @@ conn = D.get_connection(); sc = conn.execute("SELECT * FROM shared_scenarios").f
 ok(len(sc) == 1 and json.loads(sc[0]["data"]) == {"home_value": 410000.0}, "only the numbers the homeowner ticked are saved (the others are never stored)")
 t = l.get("/lender/shared-scenarios").get_data(as_text=True)
 ok("Hal Homeowner" in t and "$410,000" in t and "Refinance scenario" in t and "250,000" not in t and "6.9" not in t, "the lender sees only the shared number, plus the note")
-ok(tab_labels(t) == ["My Clients", "Shared Scenarios", "Messages"], "the lender sees exactly three tabs: My Clients, Shared Scenarios, Messages")
+ok(tab_labels(t) == [], "the lender uses the menu, with no second tab bar")
 ok("Shared a refinance scenario" in h.get(f"/homeowner/team/{lender}").get_data(as_text=True), "the homeowner just sees their conversation with the lender")
 ok("410,000" not in signed_in(stranger, "agent").get("/lender/shared-scenarios").get_data(as_text=True), "other people cannot see shared scenarios")
 other_l = D.create_user("Other Lender", "ol@x.com", gp("password123"), "lender")
@@ -85,13 +85,13 @@ ok(count("SELECT COUNT(*) FROM shared_scenarios") == 1, "sharing nothing is refu
 
 # ---- 5. agent ----
 t = a.get("/agent/my-clients").get_data(as_text=True)
-ok(tab_labels(t) == ["My Clients", "Send an Update", "Messages"], "the agent sees exactly three tabs: My Clients, Send an Update, Messages")
+ok(tab_labels(t) == [], "the agent uses the grouped menu, with no second tab bar")
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
 for item in ("Weekly Planner", "CRM", "Follow-ups", "Events", "Booking &amp; Calendar", "Transactions", "Marketing Hub", "Financials", "Dashboard",
              "Invoices", "Vendor Network", "Client Contests", "Holiday Pie Pickup", "AI Concierge", "Seasonal Checklists", "Frost Alert", "Client Values"):
-    ok(f">{item}<" in menu or item == "Client Values", f"agent menu: '{item}' is still there, under More")
-ok("<summary>More</summary>" in menu and "<summary>Account</summary>" in menu and "Settings &amp; Profile" in menu and "Plan &amp; Billing" in menu and "Sign Out" in menu,
-   "there is a More section and an Account menu with Settings, Plan and Billing and Sign Out")
+    ok(f">{item}<" in menu or item == "Client Values", f"agent menu: '{item}' is still there, in its group")
+ok("<summary>People" in menu and "<summary>Money</summary>" in menu and "<summary>Account</summary>" in menu and "Settings &amp; Profile" in menu and "Plan &amp; Billing" in menu and "Sign Out" in menu,
+   "there are grouped sections and an Account menu with Settings, Plan and Billing and Sign Out")
 sent = []
 A.send_reminder_email = lambda to, subj, body, **kw: (sent.append((to, subj, body)) or True)
 A._bg = lambda fn, *a_, **k: fn(*a_, **k)
@@ -117,6 +117,7 @@ c.post("/homeowner/setup", data={"address": "12 Oak Lane, Shawnee, KS", "move_in
 t = c.get("/homeowner/my-home").get_data(as_text=True)
 ok("12 Oak Lane" in t and "Sprinkler system" in t and "November 20, 2026" in t, "the saved details appear on My Home")
 w = A.app.test_client()
+w.get("/signup?role=homeowner")
 with contextlib.redirect_stdout(io.StringIO()):
     r = w.post("/signup?role=homeowner", data={"name": "Walk In", "email": "walk@x.com", "password": "password123", "role": "homeowner"}, follow_redirects=True)
 ok("Welcome! You are connected to Kayleigh Biggs at Worth Clark Realty." in r.get_data(as_text=True), "someone who signs up with no link is connected to the default agent, shown by her real name and brokerage")
@@ -140,11 +141,11 @@ ok(sent == [], "someone who is not this agent's client cannot be emailed")
 t = l.get("/lender/clients").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
 for item in ("Weekly Planner", "CRM", "Loan Pipeline", "Refinance Opportunities", "Events", "Frost Alert", "Marketing Hub", "Checklists and Refinance Tools", "Key Contacts"):
-    ok(f">{item}<" in menu, f"lender menu: '{item}' is still there, under More")
+    ok(f">{item}<" in menu, f"lender menu: '{item}' is still there, in its group")
 t = h.get("/homeowner/my-home").get_data(as_text=True)
 menu = t[t.index('id="ylhHamMenu"'):].replace("</a>", "<")
 for item in ("My Profile", "Documents", "Home Timeline", "Care Guide", "Refinance &amp; Payoff", "Get Help"):
-    ok(f">{item}<" in menu, f"homeowner menu: '{item}' is still there, under More")
+    ok(f">{item}<" in menu, f"homeowner menu: '{item}' is still there, in its group")
 import re as _re
 ok(_re.search(r"ylh-hdr-title[^>]*>\s*Agent\s*<", a.get("/agent/my-clients").get_data(as_text=True)) and _re.search(r"ylh-hdr-title[^>]*>\s*Homeowner\s*<", h.get("/homeowner/team").get_data(as_text=True)), "the header names who is signed in (Agent, Homeowner) without calling every page a dashboard")
 ok(l.get("/lender/messages").status_code == 200 and "Shared a refinance" not in l.get("/lender/messages").get_data(as_text=True), "the lender's Email and Text Library page still opens as before")

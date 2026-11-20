@@ -84,6 +84,8 @@ def tab_context():
         tabs = [("My Clients", url_for("lender_clients"), ep in {"lender_clients", "lender_crm"}, 0),
                 ("Shared Scenarios", url_for("team.shared_scenarios"), ep == "team.shared_scenarios", 0),
                 ("Messages", url_for("team.pro_messages"), ep in {"team.pro_messages", "team.pro_thread"}, unread)]
+    if role in ("agent", "lender"):
+        tabs = []  # agents and lenders use the grouped menu; the same links in a second bar were just noise
     # Deeper pages (CRM, Financials, Marketing Hub and so on) get one plain way back to the day's main page.
     back_home = None
     if True:

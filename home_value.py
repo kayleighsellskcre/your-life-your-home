@@ -45,8 +45,19 @@ def _agent_for(ref):
     return get_or_create_default_agent()
 
 
+def _agent_name(ref):
+    """The first name of whoever will answer, so a visitor sees a real person instead of 'your agent'."""
+    try:
+        from database import get_user_by_id
+        u = get_user_by_id(_agent_for(ref))
+        return ((dict(u).get("name") or "").strip()) if u else ""
+    except Exception:
+        return ""
+
+
 def home_value_request():
     ref = (request.values.get("ref") or "").strip()[:80]
+    agent_name = _agent_name(ref)
     uid = session.get("user_id")
     prefill = {"name": "", "email": ""}
     if uid:
@@ -58,7 +69,7 @@ def home_value_request():
         f = {k: _clean(request.form.get(k), n) for k, n in (("name", 120), ("email", 200), ("phone", 40), ("address", 250), ("note", 1000))}
         if not f["address"] or not f["name"] or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", f["email"]):
             flash("Please add the home address, your name and a valid email so we can reply.", "error")
-            return render_template("main/home_value.html", f=f, ref=ref), 400
+            return render_template("main/home_value.html", f=f, ref=ref, agent_name=agent_name), 400
         agent_id = _agent_for(ref)
         conn = _db()
         conn.execute("INSERT INTO home_value_requests (agent_id, user_id, name, email, phone, address, note) VALUES (?,?,?,?,?,?,?)",
@@ -76,8 +87,8 @@ def home_value_request():
                 _ns["_bg"](_ns["send_reminder_email"], agent["email"], "Home value request: " + f["address"], body, reply_to=f["email"])
         except Exception as exc:
             print(f"home value email failed: {exc}")
-        return render_template("main/home_value.html", done=True, f=f, ref=ref)
-    return render_template("main/home_value.html", f=prefill | {"phone": "", "address": "", "note": ""}, ref=ref)
+        return render_template("main/home_value.html", done=True, f=f, ref=ref, agent_name=agent_name)
+    return render_template("main/home_value.html", f=prefill | {"phone": "", "address": "", "note": ""}, ref=ref, agent_name=agent_name)
 
 
 def init_app(app, ns):

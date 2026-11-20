@@ -35,7 +35,7 @@ ok(ch.get("/homeowner/home-timeline/delete/1").status_code == 405, "a timeline e
 
 # public site map
 sm = A.app.test_client().get("/sitemap.xml").get_data(as_text=True)
-ok(all(p in sm for p in ("/for-agents", "/for-lenders", "/for-homeowners", "/pricing", "/home-value", "/privacy", "/terms")), "the sitemap lists every public page")
+ok(all(p in sm for p in ("/agents", "/lenders", "/homeowners", "/pricing", "/home-value", "/privacy", "/terms")), "the sitemap lists every public page")
 
 # nothing secret-looking in the public source
 src = open("app.py", encoding="utf-8").read()

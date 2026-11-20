@@ -123,6 +123,11 @@
 @media (max-width:640px){
  .data-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap;}
 }
+
+/* One accent for the summary tiles, and quiet Remove links so they are never as loud as Mark Paid */
+.kpi.k-gci::before, .kpi.k-proj::before, .kpi.k-exp::before, .kpi.k-net::before, .kpi.k-miles::before, .kpi.k-ded::before { background: #8F6244; }
+body .btn-del, body button.btn-del { background: transparent !important; color: #8A6D5C !important; border: none !important; box-shadow: none !important; text-decoration: underline; font-weight: 600 !important; padding: .2rem .4rem !important; width: auto !important; min-height: 0 !important; }
+body .btn-del:hover { color: #A0392D !important; }
 </style>
 
 <div id="fin">
@@ -535,10 +540,7 @@
     </div>
     <div class="panel-body">
       <div id="insights-container">
-        <div style="background:linear-gradient(135deg,#F6F2E8,#F0EBE0);border-radius:8px;padding:.75rem;margin-bottom:.5rem">
-          <div style="height:.8rem;background:rgba(107,91,77,.15);border-radius:4px;width:80%;margin-bottom:.4rem"></div>
-          <div style="height:.8rem;background:rgba(107,91,77,.1);border-radius:4px;width:60%"></div>
-        </div>
+        <div class="ai-insight info"><div class="ai-ins-title">{% if commissions or expenses %}Looking at your numbers...{% else %}Ready when you are{% endif %}</div><div class="ai-ins-body">{% if commissions or expenses %}Your insights will appear here in a moment.{% else %}Add a commission or an expense and I will show you what stands out.{% endif %}</div></div>
       </div>
     </div>
   </div>
@@ -685,12 +687,14 @@ function buildContext() {
 function loadInsights() {
   var container = document.getElementById('insights-container');
   var btn = document.getElementById('insights-btn');
-  container.innerHTML = '<div style="background:linear-gradient(135deg,#F6F2E8,#F0EBE0);border-radius:8px;padding:.75rem;margin-bottom:.5rem"><div style="height:.8rem;background:rgba(107,91,77,.15);border-radius:4px;width:80%;margin-bottom:.4rem"></div><div style="height:.8rem;background:rgba(107,91,77,.1);border-radius:4px;width:60%"></div></div>';
+  container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Looking at your numbers...</div><div class="ai-ins-body">Your insights will appear here in a moment.</div></div>';
   if (btn) btn.disabled = true;
+  var ctl = (window.AbortController ? new AbortController() : null);
+  var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 15000);
   fetch('/api/ai/financials/agent-insights', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
+    method: 'POST', headers: {'Content-Type':'application/json'}, signal: ctl ? ctl.signal : undefined,
     body: JSON.stringify({context: buildContext()})
-  }).then(function(r){ return r.json(); }).then(function(d){
+  }).then(function(r){ clearTimeout(timer); return r.json(); }).then(function(d){
     var insights = d.insights || [];
     if (!insights.length) {
       container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Ready when you are</div><div class="ai-ins-body">Add commissions and expenses to unlock personalized insights.</div></div>';
@@ -701,7 +705,8 @@ function loadInsights() {
     }
     if (btn) btn.disabled = false;
   }).catch(function(){
-    container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Unavailable</div><div class="ai-ins-body">Could not load insights. Try again shortly.</div></div>';
+    clearTimeout(timer);
+    container.innerHTML = '<div class="ai-insight info"><div class="ai-ins-title">Taking a little longer than usual</div><div class="ai-ins-body">Tap Refresh and I will try again.</div></div>';
     if (btn) btn.disabled = false;
   });
 }
@@ -723,6 +728,6 @@ function loadCoach() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', function(){ loadInsights(); });
+document.addEventListener('DOMContentLoaded', function(){ {% if commissions or expenses %}loadInsights();{% endif %} });
 </script>
 {% endblock %}

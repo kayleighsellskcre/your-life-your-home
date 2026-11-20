@@ -9,6 +9,7 @@
   .hv-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 4px 24px rgba(70,45,30,.08); padding: 1.4rem 1.5rem; }
   .hv-card label { display: block; font-weight: 600; color: #3A2518; font-size: .95rem; margin: .9rem 0 .3rem; }
   .hv-card label:first-child { margin-top: 0; }
+  .hv-card input { height: 3rem; }
   .hv-card input, .hv-card textarea { width: 100%; box-sizing: border-box; padding: .75rem .85rem; border: 1px solid rgba(160,125,85,.4); border-radius: 10px; font: inherit; font-size: 1rem; background: #fff; color: #3A2518; }
   .hv-btn { display: block; width: 100%; margin-top: 1.2rem; padding: .95rem 1rem; border: 0; border-radius: 99px; background: #8F6244; color: #fff; font-weight: 700; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 14px rgba(110,72,40,.25); }
   .hv-btn:hover { background: #7A5238; }
@@ -22,12 +23,12 @@
   {% if done %}
   <h1>Thank you</h1>
   <div class="hv-card hv-done">
-    <p>We received your request for <strong>{{ f.address }}</strong>. Your agent will get back to you soon with what your home is worth.</p>
+    <p>We received your request for <strong>{{ f.address }}</strong>. {{ agent_name or 'Your agent' }} will get back to you soon with what your home is worth.</p>
     <p><a href="{{ url_for('index') }}">Back to the home page</a></p>
   </div>
   {% else %}
-  <h1>Discover your home's worth</h1>
-  <p class="hv-intro">Tell us the address and your agent will send you a value you can trust.</p>
+  <h1>Ask what your home is worth</h1>
+  <p class="hv-intro">Tell us the address and {{ agent_name or 'your agent' }} will personally send you a value you can trust. It usually takes a day or so.</p>
   <form class="hv-card" method="post" action="{{ url_for('home_value_request') }}">
     {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="hv-err">{{ m }}</div>{% endfor %}{% endwith %}
     <input type="hidden" name="ref" value="{{ ref }}">
@@ -43,7 +44,7 @@
     <textarea id="hv-note" name="note" rows="3">{{ f.note or '' }}</textarea>
     <button class="hv-btn" type="submit">Send my request</button>
   </form>
-  <p class="hv-note">Free, with no pressure. Your details go only to your agent.</p>
+  <p class="hv-note">Free, with no pressure. Your details go only to {{ agent_name or 'your agent' }}.</p>
   {% endif %}
 </div>
 {% endblock %}

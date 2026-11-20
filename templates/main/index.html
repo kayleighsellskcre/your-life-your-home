@@ -348,7 +348,7 @@
 
     <div class="hero-buttons">
       <a id="homepage-primary-btn" class="btn-primary btn-pulse" href="{{ url_for('home_value_request') }}">
-        Discover Your Home's Worth
+        Ask What My Home Is Worth
       </a>
       {% if session.get('user_id') %}
       <a class="btn-outline" id="homepage-secondary-btn" href="{{ url_for('agent_dashboard') if session.get('role') == 'agent' else url_for('lender_dashboard') if session.get('role') == 'lender' else url_for('portal.my_home') }}">Go to My Dashboard</a>

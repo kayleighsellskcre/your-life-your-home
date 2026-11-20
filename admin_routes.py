@@ -184,17 +184,20 @@ def admin_impersonate_user(user_id):
     reason = request.form.get('reason', 'Support assistance')
     session_id, _ = start_impersonation(admin['id'], user_id, reason)
     
-    # Store impersonation data in session
+    # Remember who the real admin is, then sign in as the person being viewed (the same fields the rest of the site reads)
     session['impersonation'] = {
         'session_id': session_id,
         'admin_id': admin['id'],
         'admin_name': admin['name'],
-        'original_user': admin
+        'viewing_name': target_user.get('name') or 'this person',
+        'viewing_role': target_user.get('role') or '',
+        'original': {'user_id': admin['id'], 'name': admin['name'], 'role': admin['role']},
     }
-    
-    # Switch to target user
-    session['user'] = target_user
-    
+    session['user_id'] = int(target_user['id'])
+    session['name'] = target_user.get('name') or ''
+    session['role'] = target_user.get('role') or ''
+    session.pop('user', None)
+
     flash(f"Support Mode: Now viewing as {target_user['name']}", "warning")
     
     # Redirect to appropriate dashboard based on target user's role
@@ -224,8 +227,8 @@ def admin_end_impersonation():
     end_impersonation(imp['session_id'], imp['admin_id'])
     
     # Restore admin session
-    orig = imp.get('original_user') or {}
-    session['user_id'] = int(orig.get('user_id') or imp['admin_id'])
+    orig = imp.get('original') or imp.get('original_user') or {}
+    session['user_id'] = int(orig.get('user_id') or orig.get('id') or imp['admin_id'])
     session['name'] = orig.get('name') or 'Admin'
     session['role'] = orig.get('role') or 'agent'
     del session['impersonation']

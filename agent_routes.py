@@ -3293,7 +3293,7 @@ def agent_settings_profile():
                 linkedin_url=request.form.get("linkedin_url", "").strip() or None,
                 twitter_url=request.form.get("twitter_url", "").strip() or None,
                 youtube_url=request.form.get("youtube_url", "").strip() or None,
-                phone=request.form.get("phone", "").strip() or None,
+                phone=__import__("phoneformat").pretty_phone(request.form.get("phone", "")) or None,
                 call_button_enabled=1 if request.form.get("call_button_enabled") == "on" else 0,
                 schedule_button_enabled=1 if request.form.get("schedule_button_enabled") == "on" else 0,
                 schedule_url=request.form.get("schedule_url", "").strip() or None,

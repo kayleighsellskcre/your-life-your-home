@@ -23,7 +23,7 @@ with contextlib.redirect_stdout(io.StringIO()):
 ok(brand(page) == "/agent" and brand(lpage) == "/lender", "the logo takes agents and lenders to the Dashboard")
 m = re.search(r'<div class="ylh-ham-menu".*?</div>\s*</div>', page, re.S)
 menu = page[page.index('id="ylhHamMenu"'):]
-ok(menu.index(">Dashboard<") < menu.index(">My Clients<") < menu.index("<summary>More"), "the menu opens with Dashboard, then My Clients, before More")
+ok(menu.index(">Dashboard<") < menu.index("<summary>Today") < menu.index("<summary>People") and "My Clients" in menu, "the menu opens with Dashboard, then the Today and People groups")
 ok(menu.count(">Dashboard<") == 1, "the menu names Dashboard once, not twice")
 lmenu = lpage[lpage.index('id="ylhHamMenu"'):]
 ok(lmenu.index(">Dashboard<") < lmenu.index(">My Clients<") and lmenu.count(">Dashboard<") == 1, "the lender menu opens with Dashboard once")

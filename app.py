@@ -2,6 +2,7 @@ import time
 print('>>> THIS IS THE REAL app.py BEING RUN <<<')
 
 import os
+import re
 import boto3
 from functools import wraps
 from typing import Optional, List, Dict, Tuple
@@ -532,6 +533,21 @@ def _security_headers(response):
 
 # ── Custom Jinja2 filters ────────────────────────────────────────────────────
 from mileage import usd as _usd, rate_label as _rate_label
+# Empty database values print as nothing, never as the word "None" (e.g. in profile fields that would be saved back)
+app.jinja_env.finalize = lambda value: "" if value is None else value
+app.jinja_env.filters["phone"] = lambda v: __import__("phoneformat").pretty_phone(v)
+def _nice_name(value):
+    """'BEARD, MICHAEL' -> 'Michael Beard'; 'jane doe' -> 'Jane Doe'. Anything already tidy is left alone."""
+    s = (value or "").strip()
+    if "," in s and "&" not in s and " and " not in s.lower():
+        last, first = [x.strip() for x in s.split(",", 1)]
+        s = (first + " " + last).strip()
+    if s and (s.isupper() or s.islower()):
+        s = s.title()
+    return s
+
+
+app.jinja_env.filters["nice_name"] = _nice_name
 app.jinja_env.filters["usd"] = _usd                  # -154 -> "-$154"
 app.jinja_env.filters["rate_label"] = _rate_label    # 0.725 -> "$0.725"
 
@@ -2868,7 +2884,7 @@ def sitemap_xml():
     # Every public page worth finding in a search, not just the front door.
     root = request.url_root.rstrip("/")
     known = {r.rule for r in app.url_map.iter_rules()}
-    urls = [root + "/"] + [root + p for p in ("/for-homeowners", "/for-agents", "/for-lenders", "/pricing", "/home-value", "/signup", "/login", "/privacy", "/terms") if p in known]
+    urls = [root + "/"] + [root + p for p in ("/homeowners", "/agents", "/lenders", "/pricing", "/home-value", "/signup", "/login", "/privacy", "/terms") if p in known]
     xml = '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
     xml += "".join(f"<url><loc>{u}</loc></url>" for u in urls) + "</urlset>"
     return Response(xml, mimetype="application/xml")
@@ -2931,6 +2947,39 @@ def _inviter_for_token(token):
         return None
 
 
+_LINKY = re.compile(r"(https?:|www\.|://|[<>{}\[\]|\\]|\.(com|net|org|ru|xyz|top|club|site|online|info|biz)\b|\d{5,})", re.I)
+
+
+def _signup_bot_problem(name):
+    """A gentle message when a sign-up looks like a bot or a spam link, otherwise None.
+
+    Layers: a hidden field only bots fill in, having opened the form first, names that are links, and
+    Cloudflare Turnstile when TURNSTILE_SECRET_KEY is set (free; add the keys on Railway to switch it on)."""
+    if request.form.get("website", "").strip():
+        return "Something about that did not look right. Please try again."
+    if not app.config.get("TESTING"):
+        if not session.get("signup_started"):
+            # Real visitors always load the form first; bots usually post straight to the address.
+            return "Please open the sign-up page and fill it in there, then try again."
+    if _LINKY.search(name or "") or len(name or "") > 80:
+        return "Please use your real name, without web links or numbers, so we can greet you properly."
+    secret = os.environ.get("TURNSTILE_SECRET_KEY", "").strip()
+    if secret and not app.config.get("TESTING"):
+        token = request.form.get("cf-turnstile-response", "")
+        try:
+            import json as _json
+            import urllib.parse as _up
+            import urllib.request as _ur
+            data = _up.urlencode({"secret": secret, "response": token}).encode()
+            with _ur.urlopen(_ur.Request("https://challenges.cloudflare.com/turnstile/v0/siteverify", data=data), timeout=6) as r:
+                ok = bool(_json.loads(r.read().decode()).get("success"))
+        except Exception:
+            ok = True  # never lock real people out if the check service is down
+        if not ok:
+            return "Please tick the box to show you are a person, then try again."
+    return None
+
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     """
@@ -2970,6 +3019,11 @@ def signup():
             role = role  # Use URL parameter
         else:
             role = "homeowner"  # Default fallback
+
+        bot_problem = _signup_bot_problem(name)
+        if bot_problem:
+            flash(bot_problem, "error")
+            return redirect(url_for("signup", role=role, ref=referral_token_from_form))
 
         # Validate required fields
         if not name:
@@ -3456,9 +3510,12 @@ def signup():
         
         return response
 
+    if request.method == "GET":
+        session["signup_started"] = _time.time()
     return render_template(
-        "auth/signup.html", 
-        role=role, 
+        "auth/signup.html",
+        turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", "").strip(),
+        role=role,
         brand_name=FRONT_BRAND_NAME,
         referral_code=referral_token,  # Keep for backward compatibility in template
         inviter=_inviter_for_token(referral_token) if role == "homeowner" else None,

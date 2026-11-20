@@ -577,6 +577,15 @@ def delete_transaction(transaction_id: int, agent_id: int) -> bool:
         cursor.execute("DELETE FROM transaction_timeline WHERE transaction_id = ?", (transaction_id,))
         cursor.execute("DELETE FROM transaction_stage_history WHERE transaction_id = ?", (transaction_id,))
         
+        # Money that was only ever projected for this deal goes with it; commissions already paid are kept, just unlinked.
+        try:
+            cursor.execute("DELETE FROM agent_commissions WHERE transaction_id = ? AND agent_user_id = ? AND COALESCE(status, '') != 'paid'",
+                           (transaction_id, agent_id))
+            cursor.execute("UPDATE agent_commissions SET transaction_id = NULL WHERE transaction_id = ? AND agent_user_id = ?",
+                           (transaction_id, agent_id))
+        except Exception as _e:
+            print(f"[DEBUG] commission cleanup skipped: {_e}")
+
         # Finally delete the transaction itself
         cursor.execute("DELETE FROM transactions WHERE id = ?", (transaction_id,))
         

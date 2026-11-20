@@ -5034,17 +5034,17 @@ def create_client_relationship(
         """, (referral_code, existing[0]))
         relationship_id = existing[0]
     else:
-        # Create new relationship using the correct column names
-        if homeowner_col == 'homeowner_id':
-            cur.execute("""
-                INSERT INTO client_relationships (homeowner_id, professional_id, professional_role, referral_code)
-                VALUES (?, ?, ?, ?)
-            """, (homeowner_id, professional_id, professional_role, referral_code))
-        else:
-            cur.execute("""
-                INSERT INTO client_relationships (client_id, professional_id, professional_type, referral_code)
-                VALUES (?, ?, ?, ?)
-            """, (homeowner_id, professional_id, professional_role, referral_code))
+        # Create the relationship, filling every role column this table has (older tables have both)
+        values = {homeowner_col: homeowner_id, 'professional_id': professional_id, 'referral_code': referral_code}
+        for rc in ('professional_role', 'professional_type'):
+            if rc in columns:
+                values[rc] = professional_role
+        try:
+            cur.execute("INSERT INTO client_relationships (%s) VALUES (%s)" % (", ".join(values), ", ".join("?" * len(values))),
+                        tuple(values.values()))
+        except Exception:
+            conn.close()
+            raise
         relationship_id = cur.lastrowid
     
     conn.commit()

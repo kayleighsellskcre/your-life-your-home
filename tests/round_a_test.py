@@ -35,9 +35,10 @@ ok(r.status_code == 302 and dest(r).endswith("/homeowner/my-home"), "signing in 
 
 # 3. pricing
 t = a.get("/pricing").get_data(as_text=True)
-ok("Change my plan" in t and "Start as an agent" not in t and "/agent/subscription" in t or ("Change my plan" in t and "Start as an agent" not in t), "a signed-in agent sees Change my plan")
-ok("Change my plan" in l.get("/pricing").get_data(as_text=True) and "Start as a lender" not in l.get("/pricing").get_data(as_text=True), "a signed-in lender sees Change my plan")
-ok("Start as an agent" in fresh().get("/pricing").get_data(as_text=True), "visitors still see the start buttons")
+ok("Start as an agent" not in t and ("Switch to Starter" in t or "This is your plan" in t), "a signed-in agent sees plan buttons, not sign-up buttons")
+_lp = l.get("/pricing").get_data(as_text=True)
+ok(("Switch to Starter" in _lp or "This is your plan" in _lp) and "Start as a lender" not in _lp.split("Are you a lender")[0], "a signed-in lender sees plan buttons")
+ok("Start free" in fresh().get("/pricing").get_data(as_text=True), "visitors see a Start free button on the plan card")
 t = h.get("/pricing").get_data(as_text=True)
 ok("Start as an agent" not in t and "Change my plan" not in t, "a homeowner is not pushed to sign up as a pro")
 

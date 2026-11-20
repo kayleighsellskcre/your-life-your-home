@@ -2,15 +2,22 @@
 {% block title %}Pricing | Your Life, Your Home{% endblock %}
 {% block content %}
 <style>
-  .pr-w { max-width: 760px; margin: 2rem auto 3rem; padding: 0 1rem; text-align: center; }
+  .pr-w { max-width: 1040px; margin: 2rem auto 3rem; padding: 0 1rem; text-align: center; }
   .pr-w h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.9rem, 6vw, 2.6rem); color: #3F2817; margin: 0 0 .6rem; }
   .pr-intro { color: #6B5B4D; font-size: 1.05rem; margin: 0 0 1.6rem; }
-  .pr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; text-align: left; }
+  .pr-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; text-align: left; }
   .pr-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 4px 24px rgba(70,45,30,.08); padding: 1.3rem 1.4rem; }
   .pr-card h2 { font-size: 1.1rem; color: #8F6244; margin: 0 0 .2rem; }
   .pr-price { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; color: #3F2817; margin: 0 0 .2rem; }
   .pr-who { color: #7A6855; font-size: .88rem; margin: 0 0 .7rem; }
-  .pr-card ul { margin: 0; padding-left: 1.1rem; color: #3A2518; font-size: .95rem; line-height: 1.5; }
+  .pr-card { display: flex; flex-direction: column; position: relative; }
+  .pr-card ul { margin: 0 0 1.2rem; padding: 0; list-style: none; color: #3A2518; font-size: .95rem; line-height: 1.5; flex: 1; }
+  .pr-card li { padding-left: 1.5rem; position: relative; margin-bottom: .35rem; }
+  .pr-card li::before { content: "\2713"; position: absolute; left: 0; color: #8F6244; font-weight: 700; }
+  .pr-pop { border: 2px solid #8F6244; box-shadow: 0 8px 30px rgba(143,98,68,.28); transform: translateY(-4px); }
+  .pr-flag { position: absolute; top: -.7rem; left: 50%; transform: translateX(-50%); background: #8F6244; color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: .2rem .8rem; border-radius: 99px; white-space: nowrap; }
+  .pr-card .pr-btn { text-align: center; padding: .75rem 1rem; }
+  .pr-btn.pr-quiet { background: #fff; color: #7A5238 !important; border: 1.5px solid #8F6244; }
   .pr-btns { margin-top: 1.6rem; display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
   .pr-btn { display: inline-block; padding: .85rem 1.8rem; border-radius: 99px; background: #8F6244; color: #fff !important; font-weight: 700; text-decoration: none; }
   .pr-now { border-color: #8F6244; box-shadow: 0 4px 24px rgba(143,98,68,.25); }
@@ -22,24 +29,25 @@
   <p class="pr-intro">Free for homeowners. Agents and lenders can start free and upgrade any time.</p>
   <div class="pr-grid">
     <div class="pr-card"><h2>Homeowners</h2><p class="pr-price">Free</p><p class="pr-who">Always</p>
-      <ul><li>Home value and equity</li><li>Next steps for your house</li><li>Your agent and lender in one place</li></ul></div>
+      <ul><li>Home value and equity</li><li>Next steps for your house</li><li>Your agent and lender in one place</li></ul>
+      {% if not role %}<a class="pr-btn pr-quiet" href="{{ url_for('signup', role='homeowner') }}">Create my free account</a>{% endif %}</div>
     {% if role in ('agent', 'lender') or not role %}
     <div class="pr-card{{ ' pr-now' if current_tier == 'free' }}"><h2>Starter{% if current_tier == 'free' %} <span class="pr-here">Your plan</span>{% endif %}</h2><p class="pr-price">Free</p><p class="pr-who">For agents and lenders</p>
-      <ul><li>CRM up to 50 contacts</li><li>5 active transactions</li><li>Basic email templates</li><li>Referral link page</li><li>Works in your phone's web browser</li></ul></div>
+      <ul><li>CRM up to 50 contacts</li><li>5 active transactions</li><li>Basic email templates</li><li>Referral link page</li><li>Works in your phone's web browser</li></ul>
+      {% if current_tier == 'free' %}<span class="pr-note" style="margin:0;text-align:center;">This is your plan</span>
+      {% elif plan_link %}<a class="pr-btn pr-quiet" href="{{ plan_link }}">Switch to Starter</a>
+      {% else %}<a class="pr-btn pr-quiet" href="{{ url_for('signup', role='agent') }}">Start free</a>{% endif %}</div>
     {% endif %}
     {% for t in tiers %}
-    <div class="pr-card{{ ' pr-now' if current_tier == t.key }}"><h2>{{ t.name }}{% if current_tier == t.key %} <span class="pr-here">Your plan</span>{% endif %}</h2><p class="pr-price">{{ t.price_display }}</p><p class="pr-who">For agents and lenders</p>
-      <ul>{% for f in t.features %}<li>{{ f }}</li>{% endfor %}</ul></div>
+    {% set pop = (t.name|lower == 'professional') or (loop.first and not tiers|selectattr('name', 'equalto', 'Professional')|list) %}
+    <div class="pr-card{{ ' pr-now' if current_tier == t.key }}{{ ' pr-pop' if pop }}">{% if pop %}<span class="pr-flag">Most popular</span>{% endif %}<h2>{{ t.name }}{% if current_tier == t.key %} <span class="pr-here">Your plan</span>{% endif %}</h2><p class="pr-price">{{ t.price_display }}</p><p class="pr-who">For agents and lenders</p>
+      <ul>{% for f in t.features %}<li>{{ f }}</li>{% endfor %}</ul>
+      {% if current_tier == t.key %}<span class="pr-note" style="margin:0;text-align:center;">This is your plan</span>
+      {% elif plan_link %}<a class="pr-btn{{ '' if pop else ' pr-quiet' }}" href="{{ plan_link }}">Choose {{ t.name }}</a>
+      {% else %}<a class="pr-btn{{ '' if pop else ' pr-quiet' }}" href="{{ url_for('signup', role='agent') }}">Start with {{ t.name }}</a>{% endif %}</div>
     {% endfor %}
   </div>
-  {% if plan_link %}
-  <div class="pr-btns"><a class="pr-btn" href="{{ plan_link }}">Change my plan</a></div>
-  {% elif not role %}
-  <div class="pr-btns">
-    <a class="pr-btn" href="{{ url_for('signup', role='agent') }}">Start as an agent</a>
-    <a class="pr-btn" href="{{ url_for('signup', role='lender') }}">Start as a lender</a>
-  </div>
-  {% endif %}
+  {% if not role %}<p class="pr-note">Are you a lender? <a href="{{ url_for('signup', role='lender') }}">Start as a lender</a>.</p>{% endif %}
   <p class="pr-note">Paid plans are billed monthly and securely through Stripe. Manage or cancel any time in Plan &amp; Billing.</p>
 </div>
 {% endblock %}

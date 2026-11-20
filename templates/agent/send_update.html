@@ -25,15 +25,15 @@
       <div style="display:flex;gap:1rem;font-size:.85rem;margin-bottom:.3rem;"><a href="#" id="all">Select all</a><a href="#" id="none">Select none</a></div>
       {% for p in people %}
       <div class="tm-row"><input type="checkbox" name="who" value="{{ p.key }}" id="w{{ loop.index }}" {{ 'checked' if p.ok }} {{ 'disabled' if not p.ok }}>
-        <label class="tm-lbl" for="w{{ loop.index }}" style="margin:0;">{{ p.name }}<span style="display:block;font-weight:400;color:#7A6855;font-size:.82rem;">{{ p.email }}{% if not p.ok %} &middot; opted out{% endif %}</span></label></div>
+        <label class="tm-lbl" for="w{{ loop.index }}" style="margin:0;">{{ p.name|nice_name }}<span style="display:block;font-weight:400;color:#7A6855;font-size:.82rem;">{{ p.email }}{% if not p.ok %} &middot; opted out{% endif %}</span></label></div>
       {% else %}<p>No clients with an email yet. Invite one from My Clients.</p>{% endfor %}
       {% if left_out %}
       <details style="margin-top:.8rem;"><summary style="cursor:pointer;font-weight:600;color:#7A5238;">{{ left_out|length }} {{ 'person is' if left_out|length == 1 else 'people are' }} not on this list. See why.</summary>
         <p style="font-size:.85rem;color:#7A6855;margin:.4rem 0;">This list is for clients whose home we can check. Add a home address to a contact in your CRM and they join the list.</p>
-        {% for p in left_out %}<div style="font-size:.88rem;padding:.2rem 0;"><b>{{ p.name }}</b> <span style="color:#7A6855;">&middot; {{ p.email }} &middot; {{ p.reason }}</span></div>{% endfor %}
+        {% for p in left_out %}<div style="font-size:.88rem;padding:.2rem 0;"><b>{{ p.name|nice_name }}</b> <span style="color:#7A6855;">&middot; {{ p.email }} &middot; {{ p.reason }}</span></div>{% endfor %}
       </details>
       {% endif %}
-      <div class="tm-btns"><button class="tm-btn" type="submit">Send</button></div>
+      <div class="tm-btns"><button class="tm-btn" type="submit" id="sendbtn">Send</button></div>
     </div>
   </form>
 </div>
@@ -50,6 +50,22 @@
   function setAll(v) { document.querySelectorAll('input[name=who]:not(:disabled)').forEach(function (c) { c.checked = v; }); }
   document.getElementById('all').addEventListener('click', function (e) { e.preventDefault(); setAll(true); });
   document.getElementById('none').addEventListener('click', function (e) { e.preventDefault(); setAll(false); });
+  function count() { return document.querySelectorAll('input[name=who]:checked').length; }
+  function label() {
+    var n = count(), b = document.getElementById('sendbtn');
+    b.textContent = n === 0 ? 'Choose who to send to' : 'Preview and send to ' + n + (n === 1 ? ' person' : ' people');
+    b.disabled = n === 0;
+  }
+  document.querySelectorAll('input[name=who]').forEach(function (c) { c.addEventListener('change', label); });
+  document.getElementById('all').addEventListener('click', label); document.getElementById('none').addEventListener('click', label);
+  label();
+  document.querySelector('form.tm-form').addEventListener('submit', function (e) {
+    var n = count();
+    var first = (document.querySelector('input[name=who]:checked + label') || {}).textContent || '';
+    if (!confirm('Send "' + document.getElementById('subject').value + '" to ' + n + (n === 1 ? ' person' : ' people') + ' now?
+
+Each one sees their own first name where you wrote {first}.')) e.preventDefault();
+  });
 })();
 </script>
 {% endblock %}

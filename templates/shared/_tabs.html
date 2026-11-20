@@ -9,5 +9,5 @@
 <nav class="ylh-tabs" aria-label="Main sections">
   {% for label, href, on, badge in tabs %}<a href="{{ href }}" {% if on %}class="on" aria-current="page"{% endif %}>{{ label }}{% if badge %}<span class="ylh-tab-badge">{{ badge }}</span>{% endif %}</a>{% endfor %}
 </nav>
-{% if back_home %}<div style="max-width:760px;margin:.35rem auto 0;padding:0 1rem;"><a href="{{ back_home[1] }}" style="display:inline-block;padding:.3rem 0;color:#7A5238;font-weight:600;font-size:.9rem;text-decoration:none;">&larr; {{ back_home[0] }}</a></div>{% endif %}
 {% endif %}
+{% if back_home %}<div style="max-width:760px;margin:.35rem auto 0;padding:0 1rem;"><a href="{{ back_home[1] }}" style="display:inline-block;padding:.3rem 0;color:#7A5238;font-weight:600;font-size:.9rem;text-decoration:none;">&larr; {{ back_home[0] }}</a></div>{% endif %}

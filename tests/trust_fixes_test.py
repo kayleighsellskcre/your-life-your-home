@@ -125,7 +125,7 @@ conn.commit(); conn.close()
 t = cn.get("/agent/my-clients").get_data(as_text=True)
 ok("1 of 4 done" in t or "2 of 4 done" in t, "inviting a homeowner ticks that step")
 t = cn.get("/agent").get_data(as_text=True)
-ok("Seasonal and extras" in t and t.index("Today") < t.index("Seasonal and extras"), "the menu starts with Today and tucks the seasonal extras at the end")
+ok("<summary>Today" in t and t.index("<summary>Today") < t.index("<summary>Client care") < t.index("<summary>Account"), "the menu starts with Today and keeps the client-care extras near the end")
 ok("keep only the one nearest the content" in t, "duplicate messages are collapsed to one")
 
 # ---- round 5: lender and homeowner first day ----

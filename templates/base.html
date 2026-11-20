@@ -775,44 +775,51 @@
    <!-- Right: Hamburger (logged in) or Sign In (guest) -->
    {% if session.get('user_id') %}
    <div class="ylh-ham-wrap" style="flex-shrink:0;">
-     <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Open menu" aria-haspopup="true" aria-controls="ylhHamMenu" aria-expanded="false">
-       <span></span><span></span><span></span>
+     <button class="ylh-ham-btn" id="ylhHamBtn" aria-label="Open menu{% if unread_messages %} (you have {{ unread_messages }} new message{{ '' if unread_messages == 1 else 's' }}){% endif %}" aria-haspopup="true" aria-controls="ylhHamMenu" aria-expanded="false" style="position:relative;">
+       <span></span><span></span><span></span>{% if unread_messages and session.get('role') in ('agent', 'lender') %}<i aria-hidden="true" style="position:absolute;top:4px;right:4px;width:11px;height:11px;border-radius:50%;background:#A0392D;border:2px solid #f3e6c1;"></i>{% endif %}
      </button>
      <div class="ylh-ham-menu" id="ylhHamMenu">
 
        {% if session.get('role') == 'agent' %}
        <a class="ylh-ham-item" href="{{ url_for('agent_dashboard') }}"><strong>Dashboard</strong></a>
-       <a class="ylh-ham-item" href="{{ url_for('portal.agent_my_clients') }}">My Clients</a>
-       <a class="ylh-ham-item" href="{{ url_for('portal.send_update') }}">Send an Update</a>
-       <a class="ylh-ham-item" href="{{ url_for('team.pro_messages') }}">Messages{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</a>
-       <details class="ylh-ham-more"><summary>More</summary>
-       <div class="ylh-ham-head">Today</div>
+       <details class="ylh-ham-more"><summary>Today</summary>
        <a class="ylh-ham-item" href="{{ url_for('followups.followups_page') }}">Follow-ups</a>
        <a class="ylh-ham-item" href="{{ url_for('planner.planner_page') }}">Weekly Planner</a>
-       <div class="ylh-ham-head">Clients and deals</div>
+       </details>
+       <details class="ylh-ham-more"><summary>People{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_crm') }}">CRM</a>
+       <a class="ylh-ham-item" href="{{ url_for('portal.agent_my_clients') }}">My Clients</a>
+       <a class="ylh-ham-item" href="{{ url_for('team.pro_messages') }}">Messages{% if unread_messages %} <span style="display:inline-block;min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:#A0392D;color:#fff;font-size:.72rem;font-weight:700;text-align:center;">{{ unread_messages }}</span>{% endif %}</a>
        {% if client_values_on() %}<a class="ylh-ham-item" href="{{ url_for('client_values.client_values_page') }}">Client Values</a>{% endif %}
+       </details>
+       <details class="ylh-ham-more"><summary>Deals</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_transactions') }}">Transactions</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_booking') }}">Booking &amp; Calendar</a>
-       <a class="ylh-ham-item" href="{{ url_for('helpboard.board_page') }}">Help Board</a>
-       <div class="ylh-ham-head">Marketing</div>
+       </details>
+       <details class="ylh-ham-more"><summary>Stay in touch</summary>
+       <a class="ylh-ham-item" href="{{ url_for('portal.send_update') }}">Send an Update</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_automatic_emails') }}">Automatic Emails</a>
+       <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
+       </details>
+       <details class="ylh-ham-more"><summary>Marketing</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_marketing_hub_global') }}">Marketing Hub</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_concierge_dashboard') }}">AI Concierge</a>
-       <div class="ylh-ham-head">Business</div>
+       <a class="ylh-ham-item" href="{{ url_for('agent_seasonal_checklists') }}">Seasonal Checklists</a>
+       </details>
+       <details class="ylh-ham-more"><summary>Client care</summary>
+       <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_contests') }}">Client Contests</a>
+       <a class="ylh-ham-item" href="{{ url_for('pies.manage_list') }}">Holiday Pie Pickup</a>
+       <a class="ylh-ham-item" href="{{ url_for('agent_vendors') }}">Vendor Network</a>
+       <a class="ylh-ham-item" href="{{ url_for('helpboard.board_page') }}">Help Board</a>
+       </details>
+       <details class="ylh-ham-more"><summary>Money</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_financials') }}">Financials</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_invoices') }}">Invoices</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_vendors') }}">Vendor Network</a>
-       <div class="ylh-ham-head">Seasonal and extras</div>
-       <a class="ylh-ham-item" href="{{ url_for('agent_seasonal_checklists') }}">Seasonal Checklists</a>
-       <a class="ylh-ham-item" href="{{ url_for('care_alerts.frost_page') }}">Frost Alert</a>
-       <a class="ylh-ham-item" href="{{ url_for('events.events_page') }}">Events</a>
-       <a class="ylh-ham-item" href="{{ url_for('pies.manage_list') }}">Holiday Pie Pickup</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_contests') }}">Client Contests</a>
        </details>
        <details class="ylh-ham-more"><summary>Account</summary>
        <a class="ylh-ham-item" href="{{ url_for('agent_settings_profile') }}">Settings &amp; Profile</a>
        <a class="ylh-ham-item" href="{{ url_for('agent_subscription') }}">Plan &amp; Billing</a>
-       <a class="ylh-ham-item" href="{{ url_for('agent_automatic_emails') }}">Automatic Emails</a>
        <a class="ylh-ham-item" href="{{ url_for('email_signature.signature_page') }}">Email Signature</a>
        <a class="ylh-ham-item" href="{{ url_for('account_security') }}">Account security</a>
        {% if is_site_admin %}<a class="ylh-ham-item" href="{{ url_for('admin_dashboard') }}">Site Admin</a>{% endif %}
@@ -913,6 +920,11 @@
      document.documentElement.style.overflowY = o ? 'hidden' : '';
    }
    btn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); setOpen(!menu.classList.contains('open')); });
+   var groups = menu.querySelectorAll('details.ylh-ham-more');
+   groups.forEach(function(g){
+     if (g.querySelector('a[href="' + location.pathname + '"]')) g.open = true;
+     g.addEventListener('toggle', function(){ if (g.open) groups.forEach(function(o){ if (o !== g) o.open = false; }); });
+   });
    scrim.addEventListener('click', function(){ setOpen(false); });
    x.addEventListener('click', function(){ setOpen(false); });
    document.addEventListener('keydown', function(e){ if(e.key === 'Escape') setOpen(false); });
@@ -921,6 +933,12 @@
 
  <div class="ylh-shell">
  <main class="ylh-main" id="main-content">
+ {% if session.get('impersonation') %}
+ <div style="position:sticky;top:0;z-index:60;margin-bottom:.8rem;padding:.65rem 1rem;background:#3a2a1f;color:#fff;border-radius:10px;font-size:.9rem;display:flex;gap:.75rem;align-items:center;justify-content:space-between;flex-wrap:wrap;box-shadow:0 4px 14px rgba(0,0,0,.18);">
+   <span>Support mode: you are viewing as <b>{{ session.impersonation.viewing_name }}</b>{% if session.impersonation.viewing_role %} ({{ session.impersonation.viewing_role }}){% endif %}.</span>
+   <form method="post" action="{{ url_for('admin_end_impersonation') }}" style="margin:0;"><button type="submit" style="background:#fff!important;color:#3a2a1f!important;border:none!important;border-radius:99px!important;width:auto!important;min-height:0!important;margin:0!important;padding:.4rem 1rem!important;font-weight:700;cursor:pointer;font-size:.85rem!important;">Exit support mode</button></form>
+ </div>
+ {% endif %}
  {% if email_unverified %}
  <div style="margin-bottom:.8rem;padding:.65rem 1rem;background:#fbf6e9;border:1px solid #d9c79a;border-left:4px solid #8A6D2F;border-radius:8px;font-size:.88rem;color:#4a4130;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
    <span>Please confirm your email address. We sent a message to your inbox.</span>

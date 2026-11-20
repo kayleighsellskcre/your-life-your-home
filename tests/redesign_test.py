@@ -48,7 +48,7 @@ for path, role, label in (("/homeowners", "homeowner", "Create my free account")
     main = t[t.index('class="fg-w"'):t.index("</main>")]
     ok(main.count('class="fg-btn"') == 1 and f"/signup?role={role}" in main and label in main, f"{path} has exactly one button, '{label}', that goes to the {role} sign-up")
     ok(EM not in main and "–" not in main, f"{path} has no dashes used as punctuation")
-ok(anon.get("/for-agents").status_code == 200 and anon.get("/for-lenders").status_code == 200, "the longer addresses work too")
+ok(anon.get("/for-agents", follow_redirects=True).status_code == 200 and anon.get("/for-lenders", follow_redirects=True).status_code == 200, "the longer addresses forward to the main pages")
 home_t = anon.get("/").get_data(as_text=True)
 for label in ("For Homeowners", "For Agents", "For Lenders"):
     ok(home_t.count(label) >= 2, f"'{label}' is in the menu and in the footer")
@@ -59,6 +59,7 @@ for role, word in (("agent", "Start Your Agent Account"), ("lender", "Start Your
 # a real agent and lender can sign up from those pages
 for role, email in (("agent", "newagent@x.com"), ("lender", "newlender@x.com")):
     c = A.app.test_client()
+    c.get(f"/signup?role={role}")
     with contextlib.redirect_stdout(io.StringIO()):
         c.post(f"/signup?role={role}", data={"name": "New Person", "email": email, "password": "password123", "role": role})
     u = D.get_user_by_email(email)
