@@ -2,29 +2,50 @@
 {% block title %}{{ page.label }} | Your Life, Your Home{% endblock %}
 {% block content %}
 <style>
-  .fg-w { max-width: 640px; margin: 2rem auto 3rem; padding: 0 1rem; text-align: center; }
+  .fg-w { max-width: 980px; margin: 0 auto 3rem; padding: 0 1rem; text-align: center; }
+  .fg-hero { background: linear-gradient(180deg, #F7EFE7 0%, #FDF9F4 100%); border-radius: 0 0 28px 28px; padding: 3rem 1.2rem 2.6rem; margin: 0 -1rem 2rem; }
   .fg-kicker { font-size: .8rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #8F6244; margin: 0 0 .6rem; }
-  .fg-w h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(1.9rem, 6vw, 2.8rem); color: #3F2817; line-height: 1.15; margin: 0 0 .8rem; }
-  .fg-intro { color: #6B5B4D; font-size: 1.08rem; line-height: 1.55; margin: 0 0 1.6rem; }
-  .fg-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 4px 24px rgba(70,45,30,.08); padding: 1.4rem 1.6rem; text-align: left; margin-bottom: 1.6rem; }
-  .fg-card ul { list-style: none; margin: 0; padding: 0; }
-  .fg-card li { position: relative; padding: .55rem 0 .55rem 1.7rem; color: #3A2518; font-size: 1.02rem; line-height: 1.5; border-top: 1px solid rgba(160,125,85,.15); }
-  .fg-card li:first-child { border-top: 0; }
-  .fg-card li::before { content: ""; position: absolute; left: .2rem; top: 1.05rem; width: .55rem; height: .55rem; border-radius: 50%; background: #B08560; }
+  .fg-w h1 { font-family: 'Playfair Display', Georgia, serif; font-size: clamp(2rem, 6vw, 3.1rem); color: #3F2817; line-height: 1.12; margin: 0 auto .8rem; max-width: 18ch; }
+  .fg-intro { color: #6B5B4D; font-size: 1.15rem; line-height: 1.55; margin: 0 auto 1.6rem; max-width: 36rem; }
   .fg-btn { display: inline-block; padding: .95rem 2.2rem; border-radius: 99px; background: #8F6244; color: #fff !important; font-weight: 700; font-size: 1.05rem; text-decoration: none; box-shadow: 0 4px 14px rgba(110,72,40,.25); }
   .fg-btn:hover { background: #7A5238; }
   .fg-note { color: #7A6855; font-size: .92rem; margin: 1rem 0 0; }
+  .fg-h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.6rem; color: #3F2817; margin: 2.6rem 0 1.1rem; }
+  .fg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; text-align: left; }
+  .fg-feat { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 4px 20px rgba(70,45,30,.07); padding: 1.3rem 1.4rem; }
+  .fg-feat h3 { margin: 0 0 .4rem; font-size: 1.08rem; color: #3A2518; }
+  .fg-feat p { margin: 0; color: #5E4E41; line-height: 1.55; font-size: .98rem; }
+  .fg-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; text-align: left; counter-reset: s; }
+  .fg-step { position: relative; padding: .2rem 0 0 3rem; color: #3A2518; line-height: 1.5; counter-increment: s; }
+  .fg-step::before { content: counter(s); position: absolute; left: 0; top: 0; width: 2.2rem; height: 2.2rem; border-radius: 50%; background: #8F6244; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .fg-faq { max-width: 700px; margin: 0 auto; text-align: left; }
+  .fg-faq details { border-top: 1px solid rgba(160,125,85,.25); padding: .9rem 0; }
+  .fg-faq details:last-child { border-bottom: 1px solid rgba(160,125,85,.25); }
+  .fg-faq summary { cursor: pointer; font-weight: 700; color: #3A2518; }
+  .fg-faq p { margin: .5rem 0 0; color: #5E4E41; line-height: 1.55; }
+  .fg-end { background: #F7EFE7; border-radius: 20px; padding: 2.2rem 1.2rem; margin-top: 2.8rem; }
+  .fg-end h2 { font-family: 'Playfair Display', Georgia, serif; color: #3F2817; margin: 0 0 1rem; font-size: 1.5rem; }
   .fg-signin { color: #7A6855; font-size: .9rem; margin-top: 1.2rem; }
   .fg-signin a { color: #8F6244; }
 </style>
 <div class="fg-w">
-  <p class="fg-kicker">{{ page.label }}</p>
-  <h1>{{ page.title }}</h1>
-  <p class="fg-intro">{{ page.intro }}</p>
-  <div class="fg-card"><ul>{% for p in page.points %}<li>{{ p }}</li>{% endfor %}</ul></div>
-  <a class="fg-btn" href="{{ url_for('signup', role=page.role) }}">{{ page.button }}</a>
-  <p class="fg-note">{{ page.note }}</p>
-  {% if page.role != "homeowner" %}<p class="fg-signin"><a href="{{ url_for("pricing") }}">See pricing</a></p>{% endif %}
-  {% if not session.get('user_id') %}<p class="fg-signin">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>{% endif %}
+  <div class="fg-hero">
+    <p class="fg-kicker">{{ page.label }}</p>
+    <h1>{{ page.title }}</h1>
+    <p class="fg-intro">{{ page.intro }}</p>
+    <a class="fg-btn" href="{{ url_for('signup', role=page.role) }}">{{ page.button }}</a>
+    <p class="fg-note">{{ page.note }}</p>
+  </div>
+  <div class="fg-grid">{% for title, text in page.features %}<div class="fg-feat"><h3>{{ title }}</h3><p>{{ text }}</p></div>{% endfor %}</div>
+  <h2 class="fg-h2">How it works</h2>
+  <div class="fg-steps">{% for s in page.steps %}<div class="fg-step">{{ s }}</div>{% endfor %}</div>
+  <h2 class="fg-h2">Good to know</h2>
+  <div class="fg-faq">{% for q, a in page.faq %}<details><summary>{{ q }}</summary><p>{{ a }}</p></details>{% endfor %}</div>
+  <div class="fg-end">
+    <h2>We would love to have you.</h2>
+    <a class="fg-btn fg-btn--end" href="{{ url_for('signup', role=page.role) }}">{{ page.button }}</a>
+    {% if page.role != "homeowner" %}<p class="fg-signin"><a href="{{ url_for("pricing") }}">See pricing</a></p>{% endif %}
+    {% if not session.get('user_id') %}<p class="fg-signin">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>{% endif %}
+  </div>
 </div>
 {% endblock %}
