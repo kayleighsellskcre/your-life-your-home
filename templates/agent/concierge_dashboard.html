@@ -256,12 +256,14 @@
     <div class="con-kpi__value">{{ stats.total_leads }}</div>
     <div class="con-kpi__sub con-kpi__sub--red">{{ stats.hot_leads }} hot leads</div>
   </div>
+  {% if stats.monthly_revenue %}
   <div class="con-kpi">
     <div class="con-kpi__icon con-kpi__icon--green"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 6v12M15 9.5c-.6-.9-1.7-1.5-3-1.5-1.7 0-3 .9-3 2.2s1.3 1.8 3 2.1c1.7.3 3 .8 3 2.2S13.7 16.5 12 16.5c-1.3 0-2.4-.6-3-1.5"/></svg></div>
     <div class="con-kpi__label">Monthly Revenue</div>
     <div class="con-kpi__value">{{ (stats.monthly_revenue)|usd(0) }}</div>
     <div class="con-kpi__sub">{{ stats.active_vendors }} active lead partners</div>
   </div>
+  {% endif %}
 </div>
 
 <!-- ── 3 ACTION CARDS ────────────────────────────────────── -->

@@ -206,6 +206,7 @@
  box-shadow:0 3px 10px rgba(159,129,90,.32)!important;
  font-weight:700!important;
 }
+.stg-grp{flex:0 0 auto;align-self:center;margin:0 .1rem 0 .5rem;padding-left:.7rem;border-left:2px solid #E4D6C6;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9A8470;white-space:nowrap;}
 .stg-pill-x{
  display:inline-flex!important;align-items:center!important;justify-content:center!important;
  width:14px!important;height:14px!important;background:rgba(255,255,255,.25)!important;
@@ -810,6 +811,7 @@
 <div class="pills-bar" id="stage-pills-bar">
  <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill {% if not stage_filter %}stg-pill--on{% endif %}">All <span class="pill-count" id="cnt-all">{{ stats.total }}</span></a>
  {% for slug,lbl,cnt_key in [('new','New Lead','new'),('attempted','Attempted',None),('contacted','Contacted',None),('appt_set','Appt Set',None),('appt_done','Appt Done',None),('active','Active','active'),('under_contract','Under Contract',None),('closed','Closed',None),('past','Past Client',None),('nurture','Nurture',None),('sphere','Sphere',None),('hold','Hold',None)] %}
+ {% set grp = {'new':'Leads','active':'Active','closed':'Past','nurture':'Keep warm'}.get(slug) %}{% if grp %}<span class="stg-grp">{{ grp }}</span>{% endif %}
  {% if stage_filter==slug %}
  <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if tag_filter %}tag={{ tag_filter }}&{% endif %}sort={{ sort_by }}" class="stg-pill stg-pill--on">{{ lbl }}&nbsp;<span class="stg-pill-x" title="Clear filter">×</span></a>
  {% else %}
