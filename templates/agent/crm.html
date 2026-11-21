@@ -938,7 +938,7 @@
  <td class="c-td" onclick="event.stopPropagation()">
  <input type="checkbox" class="c-chk contact-checkbox" value="{{ contact.id }}">
  </td>
- <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}{% if contact.partner_name %}<div class="c-partner">with {{ contact.partner_name }}</div>{% endif %}{% if contact.next_call %}<div class="c-call">Call booked: {{ contact.next_call }}</div>{% endif %}</td>
+ <td class="c-td c-td--name" title="{{ contact.name }}">{{ contact.name }}{% if contact.partner_name %}<div class="c-partner">with {{ contact.partner_name }}</div>{% endif %}{% if contact.has_portal %}<div class="c-call" style="color:#5E7A55;">&#10003; Joined the app</div>{% endif %}{% if contact.next_call %}<div class="c-call">Call booked: {{ contact.next_call }}</div>{% endif %}</td>
  <td class="c-td"><span class="s-badge s-badge--{{ contact.stage }}">{{ (contact.stage or "")|replace("_"," ") }}</span></td>
  <td class="c-td">
  {% if contact.email %}<a href="mailto:{{ contact.email }}" onclick="event.stopPropagation()" title="{{ contact.email }}">{{ contact.email }}</a>{% else %}<span class="c-td--muted"> - </span>{% endif %}
