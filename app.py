@@ -3259,6 +3259,14 @@ def signup():
 
         # CRITICAL: Create client relationship AND CRM contact - MUST WORK
         if role == "homeowner":
+            # A real street address from the sign-up form becomes their home right away (the form is optional)
+            _addr = (request.form.get("home_address") or "").strip()[:200]
+            if _addr and not re.search(r"https?:|www[.]|://|[<>{}|]", _addr, re.I):
+                try:
+                    from database import add_property as _add_prop
+                    _add_prop(user_id, _addr, None, "primary")
+                except Exception as _e:
+                    print(f"SIGNUP: could not save the home address: {_e}")
             print(f"\n{'='*60}")
             print(f"SIGNUP: Setting up homeowner relationships")
             print(f"  Homeowner ID: {user_id}")

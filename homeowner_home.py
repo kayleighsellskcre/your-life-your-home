@@ -98,7 +98,7 @@ def value_hero(user_id, props):
         pct = change / float(hist[0]["value_estimate"]) * 100
         since = hist[0]["snapshot_date"]
     live = valuation.provider_configured()
-    has_address = bool((p.get("address") or "").strip())
+    has_address = bool((p.get("address") or "").strip()) and (p.get("address") or "").strip().lower() != "my home"
     state = "value" if value else ("pending" if (live and has_address) else "empty")
     return dict(
         id=p["id"], address=p.get("address") or "", value=value, low=snap.get("value_low"), high=snap.get("value_high"),

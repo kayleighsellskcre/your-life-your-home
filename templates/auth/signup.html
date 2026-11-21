@@ -245,6 +245,13 @@
  </div>
  </div>
  
+ {% if role == 'homeowner' %}
+ <div class="auth-form-group">
+ <label for="home_address">Your home's street address <span style="font-weight:400;opacity:.7;">(optional)</span></label>
+ <input id="home_address" name="home_address" type="text" autocomplete="street-address" maxlength="200" placeholder="123 Maple Street, Shawnee, KS" />
+ <small style="opacity:.75;">So we can show what your home is worth right away.</small>
+ </div>
+ {% endif %}
  <input type="hidden" name="role" value="{{ role }}" />
  <div style="position:absolute;left:-9999px;" aria-hidden="true"><label>Leave this empty<input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
  {% if turnstile_site_key %}
