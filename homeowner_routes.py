@@ -2219,14 +2219,14 @@ def homeowner_next_plan_move():
 
     plan = get_next_move_plan(user["id"]) if user else None
     # Parse JSON notes if present
-    if plan and hasattr(plan, 'notes') and plan.notes:
+    if plan:
         try:
-            plan_dict = dict(plan) if hasattr(plan, 'keys') else plan
-            parsed_notes = json.loads(plan_dict.get('notes', '{}'))
-            # Merge parsed data back into plan for template access
-            if isinstance(plan_dict, dict):
-                plan_dict.update(parsed_notes)
-                plan = type('obj', (object,), plan_dict)
+            plan_dict = dict(plan) if hasattr(plan, 'keys') else dict(vars(plan))
+            parsed_notes = json.loads(plan_dict.get('notes') or '{}')
+            # Merge the saved answers back so every field shows what they entered last time
+            if isinstance(parsed_notes, dict):
+                plan_dict.update({k: v for k, v in parsed_notes.items() if k != 'notes'})
+            plan = type('obj', (object,), plan_dict)
         except Exception:
             pass
     
