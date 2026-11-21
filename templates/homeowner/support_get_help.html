@@ -332,19 +332,19 @@
  <!-- Hero -->
  <div class="gh-hero">
  <h1>Get Help</h1>
- <p>Whatever you need, a quick answer, a real conversation, or a resource to read at your own pace, it's all right here.</p>
+ <p>Find a quick answer here. For anything personal, your team is one tap away on My Team.</p>
  </div>
 
  <!-- Tabs -->
  <div class="gh-tabs">
- <button class="gh-tab active" onclick="showTab('ask', this)">Ask a Question</button>
- <button class="gh-tab" onclick="showTab('schedule', this)">Talk to Us</button>
+ <button class="gh-tab active" onclick="showTab('faq', this)">Quick Answers</button>
  <button class="gh-tab" onclick="showTab('resources', this)">Resources</button>
- <button class="gh-tab" onclick="showTab('faq', this)">FAQ</button>
+ <button class="gh-tab" onclick="showTab('schedule', this)">Book a Chat</button>
+ <button class="gh-tab" onclick="showTab('ask', this)">Ask a Question</button>
  </div>
 
  <!-- Ask a Question Tab -->
- <div id="tab-ask" class="gh-panel active">
+ <div id="tab-ask" class="gh-panel">
  {% if question_submitted %}
  <div style="max-width:640px;margin:0 auto 1.5rem;background:rgba(163,123,88,.08);border:1px solid #A37B58;border-radius:8px;padding:1rem 1.25rem;">
  <strong style="color:#6F543C;"> Your question was sent!</strong>
@@ -445,7 +445,7 @@
  </div>
 
  <!-- Meet the Team Tab -->
- <div id="tab-faq" class="gh-panel">
+ <div id="tab-faq" class="gh-panel active">
  <div class="gh-faq">
  <div class="gh-faq-item">
  <div class="gh-faq-q" onclick="toggleFaq(this)">How do I update my home's estimated value? <span class="arr">▾</span></div>
@@ -461,11 +461,11 @@
  </div>
  <div class="gh-faq-item">
  <div class="gh-faq-q" onclick="toggleFaq(this)">How do I reach my agent or lender directly? <span class="arr">▾</span></div>
- <div class="gh-faq-a">Go to the <strong>Contact Us</strong> tab above and click "Chat with a Human." You can also use the Ask a Question form and they'll respond to you directly.</div>
+ <div class="gh-faq-a">Open <strong>My Team</strong> and tap <strong>Message</strong> or <strong>Call</strong>. They would love to hear from you. You can also book a chat or send a question from the tabs above.</div>
  </div>
  <div class="gh-faq-item">
  <div class="gh-faq-q" onclick="toggleFaq(this)">Can I upload my own home documents? <span class="arr">▾</span></div>
- <div class="gh-faq-a">Yes. Head to <strong>Care → Documents & Timeline</strong> in the top navigation. You can upload closing docs, warranties, receipts, and more.</div>
+ <div class="gh-faq-a">Yes. Open the menu, then <strong>More</strong>, then <strong>Documents</strong>. You can upload closing docs, warranties, receipts, and more.</div>
  </div>
  <div class="gh-faq-item">
  <div class="gh-faq-q" onclick="toggleFaq(this)">What's the difference between this platform and my agent just texting me? <span class="arr">▾</span></div>
@@ -491,7 +491,7 @@ function toggleFaq(el) {
 // Deep links: ?tab=ask | schedule (or contact) | resources | faq
 (function(){
  var t = new URLSearchParams(window.location.search).get('tab');
- var map = {ask: 0, schedule: 1, contact: 1, team: 1, resources: 2, faq: 3};
+ var map = {faq: 0, resources: 1, schedule: 2, contact: 2, team: 2, ask: 3};
  if (t in map) {
   showTab(t === 'contact' || t === 'team' ? 'schedule' : t, document.querySelectorAll('.gh-tab')[map[t]]);
  }
