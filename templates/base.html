@@ -24,7 +24,8 @@
  <meta property="og:title" content="Your Life, Your Home: your home's story, beautifully organized" />
  <meta property="og:description" content="Understand your equity, plan your next move, and keep every detail of your home in one calm space." />
  <meta property="og:url" content="{{ request.base_url }}" />
- <meta name="twitter:card" content="summary" />
+ <meta property="og:image" content="{{ url_for('static', filename='img/hero-1.jpg', _external=True) }}" />
+ <meta name="twitter:card" content="summary_large_image" />
  {% endblock %}
  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/favicon.svg') }}" />
 
