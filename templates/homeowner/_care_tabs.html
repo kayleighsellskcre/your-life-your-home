@@ -1,0 +1,10 @@
+{% set _tabs = [('Care Guide', 'homeowner_care_maintenance_guide'), ('Seasonal Checklists', 'homeowner_care_seasonal_checklists'), ('Safety &amp; Protection', 'homeowner_care_home_protection'), ('Energy Savings', 'homeowner_care_energy_savings')] %}
+<nav class="care-tabs" aria-label="Home care">
+  {% for label, ep in _tabs %}<a href="{{ url_for(ep) }}" class="{{ 'on' if request.endpoint == ep }}">{{ label|safe }}</a>{% endfor %}
+</nav>
+<style>
+  .care-tabs { display: flex; gap: .4rem; overflow-x: auto; padding: .2rem 0 .9rem; margin: 0 0 .6rem; border-bottom: 1px solid rgba(160,125,85,.22); scrollbar-width: none; }
+  .care-tabs::-webkit-scrollbar { display: none; }
+  .care-tabs a { flex: 0 0 auto; padding: .5rem 1rem; border-radius: 99px; border: 1.5px solid rgba(143,98,68,.35); color: #6B4630; font-weight: 700; font-size: .88rem; text-decoration: none; background: #fff; white-space: nowrap; }
+  .care-tabs a.on { background: #8F6244; color: #fff; border-color: #8F6244; }
+</style>
