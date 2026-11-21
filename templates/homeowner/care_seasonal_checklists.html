@@ -3,6 +3,31 @@
 
 {% block homeowner_content %}
 <style>
+ .seasonal-hero { margin: 0 0 1.5rem !important; border-radius: 16px; }
+ .season-name { overflow-wrap: normal !important; word-break: keep-all !important; }
+ @media (max-width: 600px) { .season-nav { grid-template-columns: repeat(2, 1fr) !important; } }
+ .task-priority.priority-critical, .task-priority.priority-high { background: #F6F4F3 !important; color: #6B5B4D !important; border-color: #C2B1A1 !important; }
+ .more-tasks-btn { display: block; margin: .6rem auto 1.2rem; padding: .6rem 1.4rem; border-radius: 99px; border: 1.5px solid #8F6244; background: #fff; color: #7A5238; font-weight: 700; cursor: pointer; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.season-section').forEach(function (sec) {
+    var items = sec.querySelectorAll('.checklist-item');
+    if (items.length <= 5) return;
+    var extra = [];
+    items.forEach(function (it, i) { if (i >= 5 && !it.querySelector('input:checked')) { it.style.display = 'none'; extra.push(it); } });
+    if (!extra.length) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'more-tasks-btn';
+    b.textContent = 'Show ' + extra.length + ' more ' + (extra.length === 1 ? 'task' : 'tasks');
+    b.onclick = function () { extra.forEach(function (it) { it.style.display = ''; }); b.remove(); };
+    sec.insertBefore(b, sec.querySelector('.season-complete, .complete-message') || null);
+    var last = items[items.length - 1];
+    last.parentNode.parentNode.insertBefore(b, last.parentNode.nextSibling);
+  });
+});
+</script>
+<style>
  .seasonal-hero {
  background: linear-gradient(135deg, rgba(107, 91, 77, 0.05) 0%, rgba(200, 180, 151, 0.05) 100%);
  padding: 0.75rem;

@@ -20,14 +20,14 @@
 </style>
 <div class="hr-wrap">
   <div class="ylh-page-hd">
-    <div class="ylh-page-hd__label">Home Value</div>
+    <div class="ylh-page-hd__label">My Home</div>
     <h1 class="ylh-page-hd__title">Home Report</h1>
     <p class="ylh-page-hd__sub">{{ snap.address or 'Your home' }}{% if snap.address %}<br>{% endif %}Prepared {{ today }}</p>
   </div>
 
   <div class="hr-grid">
     <div class="hr-stat"><small>Estimated value</small><b>{% if value %}${{ '{:,.0f}'.format(value) }}{% else %}Not set{% endif %}</b><span>{% if snap.last_value_refresh %}updated {{ snap.last_value_refresh[:10] }}{% else %}add your home details{% endif %}</span></div>
-    <div class="hr-stat"><small>Your equity</small><b>{% if equity is not none %}${{ '{:,.0f}'.format(equity) }}{% else %}-{% endif %}</b><span>{% if snap.loan_balance %}loan balance ${{ '{:,.0f}'.format(snap.loan_balance) }}{% endif %}</span></div>
+    <div class="hr-stat"><small>Your equity</small>{% if equity is not none %}<b>${{ '{:,.0f}'.format(equity) }}</b><span>loan balance ${{ '{:,.0f}'.format(snap.loan_balance) }}</span>{% else %}<b style="font-size:1.05rem;">Add your loan to see equity</b><span><a href="{{ url_for('homeowner_home.refinance_page') }}">Add your loan</a></span>{% endif %}</div>
     <div class="hr-stat"><small>Since you bought</small><b>{% if growth is not none %}{{ '+' if growth >= 0 else '-' }}${{ '{:,.0f}'.format(growth|abs) }}{% else %}-{% endif %}</b><span>{% if bought %}bought at ${{ '{:,.0f}'.format(bought) }}{% else %}add your purchase price{% endif %}</span></div>
     <div class="hr-stat"><small>Spent on care this year</small><b>${{ '{:,.0f}'.format(spent) }}</b><span>{{ care|length }} {{ 'job' if care|length == 1 else 'jobs' }} logged</span></div>
   </div>
@@ -38,18 +38,18 @@
     {% else %}<p class="hr-empty">Nothing logged yet. Add maintenance to your Home Timeline as you do it and it will show up here.</p>{% endfor %}
   </div>
 
-  <div class="hr-card">
+  {% if projects %}<div class="hr-card">
     <h2>Projects</h2>
     {% for p in projects[:8] %}<div class="hr-li"><div>{{ p.name }}</div><span>{{ (p.status or 'planned')|replace('_', ' ')|title }}{% if p.budget %} &middot; ${{ '{:,.0f}'.format(p.budget) }}{% endif %}</span></div>
-    {% else %}<p class="hr-empty">No projects yet. Plan one in the Renovation Planner to see the costs and payback.</p>{% endfor %}
-  </div>
+    {% endfor %}
+  </div>{% endif %}
 
-  <div class="hr-card">
+  {% if active_w or docs %}<div class="hr-card">
     <h2>Warranties and papers</h2>
     {% for w in active_w[:8] %}<div class="hr-li"><div>{{ w.item_name }}</div><span>covered until {{ w.warranty_expiry }}</span></div>
-    {% else %}<p class="hr-empty">No active warranties on file.</p>{% endfor %}
-    <p class="hr-empty" style="margin-top:.6rem;">{{ docs }} {{ 'document' if docs == 1 else 'documents' }} saved in your home vault.</p>
-  </div>
+    {% endfor %}
+    {% if docs %}<p class="hr-empty" style="margin-top:.6rem;">{{ docs }} {{ 'document' if docs == 1 else 'documents' }} saved in your home vault.</p>{% endif %}
+  </div>{% endif %}
 
   <div class="hr-card">
     <h2>Ideas for the year ahead</h2>

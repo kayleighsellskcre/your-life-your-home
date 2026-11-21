@@ -86,7 +86,7 @@
   {% endif %}
   <div class="acts">
     {% if hv.can_refresh %}<form method="post" action="{{ url_for('homeowner_value_refresh') }}"><input type="hidden" name="property_id" value="{{ hv.id }}"><button type="submit" class="btn btn-primary">{{ 'Refresh my value' if hv.state == 'value' else 'Find my value' }}</button></form>{% endif %}
-    <a class="btn btn-secondary" href="{{ url_for('homeowner_value_equity_overview') }}">{{ 'Value details and what-ifs' if hv.state == 'value' else 'Add my home' }}</a>
+    <a class="btn btn-secondary" href="{{ url_for('homeowner_value_equity_overview') }}">{{ 'See what-ifs' if hv.state == 'value' else 'Add my home' }}</a>
   </div>
   {% if hv.state == 'value' %}<div class="off"><a href="{{ url_for('homeowner_support_get_help') }}?tab=ask">Does this look off? Ask your agent</a></div>{% endif %}
 </div>
@@ -236,14 +236,11 @@
 {% if x and x.props and x.goal != 'buyer' and not x.show_portfolio %}
 <div class="ho-card">
   <h2>Your home's numbers</h2>
-  <p class="ho-sub">{{ x.props[0].address }}</p>
   <div class="ho-stats">
-    <div class="ho-stat"><b>{% if snapshot and snapshot.get('value_estimate') %}{{ (snapshot.get('value_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_value_equity_overview') }}">Add</a>{% endif %}</b><span>Value</span></div>
-    <div class="ho-stat"><b>{% if snapshot and snapshot.get('equity_estimate') %}{{ (snapshot.get('equity_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_value_equity_overview') }}">Add loan</a>{% endif %}</b><span>Equity</span></div>
+    <div class="ho-stat"><b>{% if snapshot and snapshot.get('equity_estimate') is not none and snapshot.get('loan_balance') is not none %}{{ (snapshot.get('equity_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_home.refinance_page') }}">Add your loan</a>{% endif %}</b><span>Equity</span></div>
     <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_payment') %}{{ (snapshot.get('loan_payment'))|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Monthly payment</span></div>
     <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_rate') %}{{ "{:.2f}".format(snapshot.get('loan_rate')) }}%{% else %}&ndash;{% endif %}</b><span>Rate</span></div>
   </div>
-  <p style="margin:.9rem 0 0;text-align:center;"><a class="btn btn-secondary" href="{{ url_for('homeowner_value_equity_overview') }}" style="display:inline-block;">See value and what-ifs</a></p>
 </div>
 {% endif %}
 

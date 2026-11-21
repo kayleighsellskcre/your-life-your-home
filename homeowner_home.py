@@ -307,8 +307,9 @@ def home_report():
             snap[k_] = _num(snap[k_]) if snap[k_] not in (None, "") else None
     value = float(snap.get("value_estimate") or 0)
     bought = float(snap.get("initial_purchase_value") or 0)
-    equity = snap.get("equity_estimate")
-    if equity is None and value:
+    # Equity only means something once a loan balance is entered; otherwise we ask for the loan instead of guessing 100%
+    equity = None
+    if value and snap.get("loan_balance") not in (None, ""):
         equity = value - float(snap.get("loan_balance") or 0)
     spent = sum(float(c.get("cost") or 0) for c in care)
     active_w = [w for w in warranties if (w.get("warranty_expiry") or "") >= today]

@@ -30,7 +30,7 @@ ce = A.app.test_client()
 with ce.session_transaction() as s: s["user_id"] = empty; s["role"] = "homeowner"
 for u in ("/homeowner/value/refinance", "/homeowner/report"):
     r = ce.get(u); ok(r.status_code == 200 and "Traceback" not in r.get_data(as_text=True), f"{u} works with no loan or home details")
-t = ce.get("/homeowner/report").get_data(as_text=True); ok("Nothing logged yet" in t and "No projects yet" in t, "friendly empty states")
+t = ce.get("/homeowner/report").get_data(as_text=True); ok("Nothing logged yet" in t and "No projects yet" not in t and "Add your loan" in t, "friendly empty states: empty sections hide, equity asks for the loan instead of guessing")
 ok("Full Owner" not in ce.get("/homeowner/report").get_data(as_text=True) and "1 Maple" not in ce.get("/homeowner/report").get_data(as_text=True), "another homeowner's report is private")
 cs = A.app.test_client()
 ok("/login" in cs.get("/homeowner/report", follow_redirects=True).request.path, "signed-out visitors go to login")

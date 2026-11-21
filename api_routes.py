@@ -560,10 +560,12 @@ def ai_homeowner_equity_insight_endpoint():
     )
     agent_name = data.get("agent_name") or "your agent"
 
+    no_loan = False
     if not home_value:
         try:
             snap = get_homeowner_snapshot_for_user(user["id"])
             if snap:
+                no_loan = snap.get("loan_balance") in (None, "")
                 home_value     = float(snap.get("value_estimate") or 0)
                 original_price = float(snap.get("original_price") or 0)
                 loan_balance   = float(snap.get("loan_balance") or 0)
@@ -575,6 +577,9 @@ def ai_homeowner_equity_insight_endpoint():
         except Exception:
             pass
 
+    if no_loan:
+        # No loan entered yet: do not guess an equity number, just invite them to add it
+        return jsonify({"insight": "Add your loan balance and we will show your equity and how it could grow. It only takes a minute, and you can change it any time."})
     insight = ai_homeowner_equity_insight(
         home_value=home_value,
         original_price=original_price,

@@ -14,7 +14,7 @@
   </div>
   {% elif not groups %}
   <div class="card" style="padding:1.4rem;text-align:center;">
-    <p style="margin:0 0 .8rem;">{{ agent.name.split(' ')[0] }} has not added any recommended pros yet. Ask them who they would call. They are always happy to help.</p>
+    <p style="margin:0 0 .8rem;">{{ agent.name.split(' ')[0] }} has not added any recommended pros yet. Send a quick message and ask who they would call. It is always a pleasure to help.</p>
     <a class="btn btn-primary" href="{{ url_for('homeowner_support_get_help') }}?tab=ask">Ask {{ agent.name.split(' ')[0] }}</a>
   </div>
   {% else %}

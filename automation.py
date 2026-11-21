@@ -469,6 +469,20 @@ def _when(ts):
     return d.strftime("%b %d, %Y").replace(" 0", " ")
 
 
+def _tidy_text(s):
+    """Friendly wording for feed lines: commas in dollar amounts, 'Nov 10, 2026' instead of '2026-11-10'."""
+    import re as _re
+    from datetime import datetime as _dt
+    s = str(s or "")
+    s = _re.sub(r"\$(\d{4,})", lambda m: "$" + format(int(m.group(1)), ","), s)
+    def _d(m):
+        try:
+            return _dt.strptime(m.group(0), "%Y-%m-%d").strftime("%b %d, %Y").replace(" 0", " ")
+        except ValueError:
+            return m.group(0)
+    return _re.sub(r"\d{4}-\d{2}-\d{2}", _d, s)
+
+
 def homeowner_activity(user_id, q=None, type_=None, range_=None, from_date=None, to_date=None, limit=60):
     """One feed of everything happening on a homeowner's account, newest first."""
     from datetime import datetime, timedelta
@@ -492,7 +506,7 @@ def homeowner_activity(user_id, q=None, type_=None, range_=None, from_date=None,
                 continue
             try:
                 for r in conn.execute(sql, (user_id,)).fetchall():
-                    items.append({"type": kind, "type_label": _TYPE_LABEL[kind], "title": r["title"], "summary": r["summary"], "ts": r["ts"] or "", "endpoint": endpoint})
+                    items.append({"type": kind, "type_label": _TYPE_LABEL[kind], "title": _tidy_text(r["title"]), "summary": _tidy_text(r["summary"]), "ts": r["ts"] or "", "endpoint": endpoint})
             except Exception:
                 continue
     finally:
