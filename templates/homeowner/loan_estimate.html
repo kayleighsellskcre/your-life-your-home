@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Estimate my loan{% endblock %}
+{% block content %}
+<style>
+  .le-w { max-width: 560px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+  .le-card { background: #FFFDFA; border: 1px solid rgba(160,125,85,.24); border-radius: 16px; box-shadow: 0 2px 16px rgba(110,72,40,.07); padding: 1.2rem 1.3rem 1.3rem; margin-bottom: 1rem; }
+  .le-card label { display: block; font-size: .78rem; font-weight: 700; color: #6B4630; margin: .8rem 0 .25rem; }
+  .le-card input, .le-card select { width: 100%; box-sizing: border-box; padding: .7rem .8rem; border: 1.5px solid rgba(143,98,68,.4); border-radius: 10px; background: #fff; font-size: 16px; color: #3A2518; }
+  .le-hint { font-size: .8rem; color: #7A6855; margin-top: .2rem; }
+  .le-res { background: #F3EBDD; border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 1rem; color: #3A2518; line-height: 1.5; }
+  .le-res b { font-size: 1.5rem; display: block; }
+  .le-row { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+</style>
+<div class="le-w">
+  <div class="ylh-page-hd">
+    <div class="ylh-page-hd__label">My Home</div>
+    <h1 class="ylh-page-hd__title">Estimate my loan</h1>
+    <p class="ylh-page-hd__sub">Not sure of your exact numbers? Tell us what you paid and when you bought, and we will make a good guess so your equity shows up right away.</p>
+  </div>
+  {% if result %}
+  <div class="le-res">
+    <span>Your loan balance is probably about</span>
+    <b>${{ '{:,.0f}'.format(result.balance) }}</b>
+    <span>That assumes a 30 year loan at about {{ result.rate }}%, the typical rate the year you bought, and a payment near ${{ '{:,.0f}'.format(result.payment) }} a month.</span>
+  </div>
+  {% endif %}
+  <form method="post" class="le-card">
+    <label for="price">What you paid for the home ($)</label>
+    <input id="price" name="price" inputmode="decimal" placeholder="350000" value="{{ form.price }}" required>
+    <label for="year">Year you bought</label>
+    <input id="year" name="year" inputmode="numeric" placeholder="2019" value="{{ form.year }}" required>
+    <label for="down">About how much you put down</label>
+    <select id="down" name="down">{% for v, l in down_choices %}<option value="{{ v }}"{% if form.down == v %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>
+    <p class="le-hint">An estimate, not a fact. Your real balance is on your latest mortgage statement, and you can swap it in any time.</p>
+    <div class="le-row">
+      {% if result %}<button type="submit" name="save" value="1" class="btn btn-primary" style="width:auto;">Use this estimate</button>{% endif %}
+      <button type="submit" class="btn {{ 'btn-secondary' if result else 'btn-primary' }}" style="width:auto;">{{ 'Recalculate' if result else 'Estimate my loan' }}</button>
+    </div>
+  </form>
+  <p class="le-hint">I know my exact numbers. <a href="{{ url_for('homeowner_value_equity_overview') }}">Enter them myself</a>.</p>
+</div>
+{% endblock %}

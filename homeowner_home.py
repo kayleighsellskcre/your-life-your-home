@@ -25,6 +25,9 @@ def ensure_tables():
     for col in ("monthly_rent", "monthly_expenses"):
         if have and col not in have:
             conn.execute(f"ALTER TABLE properties ADD COLUMN {col} REAL")
+    snaps = {r[1] for r in conn.execute("PRAGMA table_info(homeowner_snapshots)").fetchall()}
+    if snaps and "loan_is_estimate" not in snaps:
+        conn.execute("ALTER TABLE homeowner_snapshots ADD COLUMN loan_is_estimate INTEGER DEFAULT 0")
     conn.commit()
     conn.close()
 
@@ -160,7 +163,13 @@ def overview_extras(user_id):
     total_value = sum(p.get("value_estimate") or 0 for p in props)
     total_equity = sum(p["equity"] for p in props if p["equity"] is not None)
     rents = [p for p in props if p.get("monthly_rent")]
+    _c = _db()
+    try:
+        loan_est = bool(_primary_snapshot(_c, user_id).get("loan_is_estimate"))
+    finally:
+        _c.close()
     return dict(
+        loan_est=loan_est,
         hero=(value_hero(user_id, props) if goal != "buyer" else None),
         goal=goal, goals=GOALS, steps=pending[:3], steps_done=len(steps) - len(pending), steps_total=len(steps),
         props=props, show_portfolio=(goal == "investor" or len(props) > 1),
@@ -228,7 +237,7 @@ def _primary_snapshot(conn, user_id):
     """The snapshot for the primary property (or the newest one) as a dict, with the address."""
     row = conn.execute(
         """SELECT p.address, s.value_estimate, s.equity_estimate, s.loan_rate, s.loan_payment, s.loan_balance,
-                  s.loan_term_years, s.loan_start_date, s.initial_purchase_value, s.last_value_refresh
+                  s.loan_term_years, s.loan_start_date, s.initial_purchase_value, s.last_value_refresh, s.loan_is_estimate
            FROM homeowner_snapshots s LEFT JOIN properties p ON p.id = s.property_id
            WHERE s.user_id = ? ORDER BY COALESCE(p.is_primary, 0) DESC, s.updated_at DESC, s.id DESC LIMIT 1""",
         (user_id,)).fetchone()
@@ -267,6 +276,45 @@ def refinance_page():
         closing=int(round(bal * 0.02 / 100.0) * 100) if bal else "",
     )
     return render_template("homeowner/refinance.html", loan=loan, has_loan=bool(bal))
+
+
+@bp.route("/homeowner/loan/estimate", methods=["GET", "POST"])
+def loan_estimate_page():
+    """Not sure of the exact loan? Say what you paid and when, and we estimate it (clearly marked as an estimate)."""
+    from flask import render_template
+    import loan_estimate as LE
+    from database import get_primary_property, upsert_homeowner_snapshot_for_property
+    u = _user()
+    if not u:
+        return redirect(url_for("login"))
+    conn = _db()
+    snap = _primary_snapshot(conn, u["id"])
+    move = conn.execute("SELECT move_in_date FROM home_details WHERE user_id = ?", (u["id"],)).fetchone()
+    conn.close()
+    prop = get_primary_property(u["id"])
+    if not prop:
+        flash("Add your home first, and then we can help with your loan.", "info")
+        return redirect(url_for("homeowner_value_equity_overview"))
+    bought = (move[0] if move and move[0] else "") or ""
+    form = dict(price=int(snap["initial_purchase_value"]) if snap.get("initial_purchase_value") else "", year=str(bought)[:4], down="10")
+    result = None
+    if request.method == "POST":
+        form = dict(price=request.form.get("price", ""), year=request.form.get("year", "").strip(), down=request.form.get("down", "10"))
+        result = LE.estimate(form["price"], form["year"], form["down"])
+        if not result:
+            flash("We need what you paid and the year you bought, like 350000 and 2019.", "error")
+        elif request.form.get("save"):
+            upsert_homeowner_snapshot_for_property(
+                user_id=u["id"], property_id=prop["id"], loan_balance=result["balance"], loan_rate=result["rate"],
+                loan_payment=result["payment"], loan_term_years=result["term"], loan_start_date=result["start"])
+            conn = _db()
+            conn.execute("UPDATE homeowner_snapshots SET loan_is_estimate = 1, initial_purchase_value = ? WHERE user_id = ? AND property_id = ?",
+                         (float(str(form["price"]).replace(",", "").replace("$", "")), u["id"], prop["id"]))
+            conn.commit()
+            conn.close()
+            flash("Saved. Your equity now uses this estimate. Swap in your real numbers any time.", "success")
+            return redirect(url_for("homeowner_overview"))
+    return render_template("homeowner/loan_estimate.html", form=form, result=result, down_choices=LE.DOWN_CHOICES)
 
 
 @bp.route("/homeowner/report")

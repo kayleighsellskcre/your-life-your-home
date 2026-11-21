@@ -237,7 +237,7 @@
 <div class="ho-card">
   <h2>Your home's numbers</h2>
   <div class="ho-stats">
-    <div class="ho-stat"><b>{% if snapshot and snapshot.get('equity_estimate') is not none and snapshot.get('loan_balance') is not none %}{{ (snapshot.get('equity_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_home.refinance_page') }}">Add your loan</a>{% endif %}</b><span>Equity</span></div>
+    <div class="ho-stat"><b>{% if snapshot and snapshot.get('equity_estimate') is not none and snapshot.get('loan_balance') is not none %}{{ (snapshot.get('equity_estimate'))|usd(0) }}{% else %}<a href="{{ url_for('homeowner_home.loan_estimate_page') }}">Add your loan</a>{% endif %}</b><span>Equity{% if x.loan_est %} (estimate, <a href="{{ url_for('homeowner_home.loan_estimate_page') }}">adjust</a>){% endif %}</span></div>
     <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_payment') %}{{ (snapshot.get('loan_payment'))|usd(0) }}{% else %}&ndash;{% endif %}</b><span>Monthly payment</span></div>
     <div class="ho-stat"><b>{% if snapshot and snapshot.get('loan_rate') %}{{ "{:.2f}".format(snapshot.get('loan_rate')) }}%{% else %}&ndash;{% endif %}</b><span>Rate</span></div>
   </div>

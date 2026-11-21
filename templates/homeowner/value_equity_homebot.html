@@ -773,7 +773,7 @@
  <!-- Financial Snapshot Cards - INTERACTIVE -->
  {% if not (snapshot and snapshot.get('value_estimate')) %}
  <div style="background:#FFF7EA;border:1px solid rgba(143,98,68,.3);border-radius:12px;padding:1rem 1.2rem;margin:0 0 1.2rem;color:#4C3929;line-height:1.5;">
- <strong>Let's fill this in together.</strong> Tap <em>Estimated Home Value</em> below and enter what you think your home is worth. A rough number is perfectly fine. Add your loan balance too, and we will work out your equity and show how it could grow. You can change any number at any time.
+ <strong>Let's fill this in together.</strong> Tap <em>Estimated Home Value</em> below and enter what you think your home is worth. A rough number is perfectly fine. Add your loan balance too, and we will work out your equity and show how it could grow. You can change any number at any time. Not sure of your loan? <a href="{{ url_for('homeowner_home.loan_estimate_page') }}">We can estimate it for you</a>.
  </div>
  {% endif %}
  <div class="snapshot-grid">

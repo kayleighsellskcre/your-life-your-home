@@ -1472,6 +1472,17 @@ def homeowner_value_equity_overview():
                 pmi_monthly=pmi_monthly,
             )
             
+            if loan_balance is not None:
+                # real numbers replace any earlier estimate
+                from database import get_connection as _gc
+                _c = _gc()
+                try:
+                    _c.execute("UPDATE homeowner_snapshots SET loan_is_estimate = 0 WHERE user_id = ? AND property_id = ?", (homeowner_id, property_id))
+                    _c.commit()
+                except Exception:
+                    pass
+                finally:
+                    _c.close()
             print(f"[LOAN UPDATE] Successfully updated snapshot")
             flash("Loan details updated! Your equity numbers have been recalculated.", "success")
             return redirect(url_for("homeowner_value_equity_overview"))
