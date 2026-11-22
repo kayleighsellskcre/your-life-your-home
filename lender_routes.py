@@ -87,7 +87,7 @@ def lender_seasonal_checklists():
     return render_template("shared/seasonal_checklists.html",
                            brand_name=FRONT_BRAND_NAME, user=user,
                            role="lender", previews=previews,
-                           back_url=url_for("lender_power_suite"))
+                           back_url=url_for("lender_dashboard"))
 
 
 @route("/lender/seasonal-checklists/<season>")
@@ -1168,7 +1168,11 @@ def _lender_roles_unused():
 
 @route("/lender/power-suite", methods=["GET"])
 def lender_power_suite():
-    """Lender power suite."""
+    return redirect(url_for("refi_alerts.refi_page"))
+
+
+def _lender_power_suite_unused():
+    """Old Checklists and Refinance Tools page, now folded into Refinance Opportunities and Seasonal Checklists."""
     user = get_current_user()
     if not user or user.get("role") != "lender":
         return redirect(url_for("login", role="lender"))

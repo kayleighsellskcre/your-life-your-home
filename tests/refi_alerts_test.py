@@ -62,7 +62,7 @@ for q in ("?sort=equity", "?sort=quiet", "?sort=name", "?sort=bogus", "?rate=7",
     ok(cl.get("/lender/refinance-opportunities" + q).status_code == 200, "page ok with " + q)
 ok("(what-if)" in cl.get("/lender/refinance-opportunities?rate=7").get_data(as_text=True), "what-if is labeled")
 t = cl.get("/lender").get_data(as_text=True); ok("Refinance Opportunities" in t, "lender menu has the link")
-t = cl.get("/lender/power-suite").get_data(as_text=True); ok("Refinance Opportunities" in t and "Refinance opportunity alerts based on" not in t, "Power Suite lists it as live, not coming soon")
+t = cl.get("/lender/power-suite", follow_redirects=True).get_data(as_text=True); ok("Refinance Opportunities" in t and "Refinance opportunity alerts based on" not in t, "the old Power Suite link lands on Refinance Opportunities")
 
 # other roles and signed-out
 for role in ("agent", "homeowner"):

@@ -335,7 +335,7 @@
 <div id="panel-revenue" class="fin-panel active">
  <div class="sec-hdr">
  <h3>Loan Revenue Tracker</h3>
- <button class="btn-add" onclick="document.getElementById('modal-revenue').classList.add('open')">+ Add Loan</button>
+ <button class="btn-add" onclick="document.getElementById('modal-revenue').classList.add('open')">+ Log Funded Loan</button>
  </div>
  {% if revenues %}
  <div class="fin-table-wrap">
@@ -383,7 +383,7 @@
  <div class="empty-msg">
  <div class="big">&#x1f3e6;</div>
  No loans logged for {{ year }} yet.<br>
- <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-revenue').classList.add('open')">Log Your First Loan</button>
+ <button class="btn-add" style="margin-top:.9rem;" onclick="document.getElementById('modal-revenue').classList.add('open')">Log Your First Funded Loan</button>
  </div>
  {% endif %}
 </div>
@@ -496,7 +496,7 @@
 <!-- Add Loan Revenue -->
 <div class="fin-modal-overlay" id="modal-revenue" onclick="if(event.target===this)this.classList.remove('open')">
  <div class="fin-modal">
- <h2>Add Loan</h2>
+ <h2>Log a Funded Loan</h2>
  <form method="POST" action="{{ url_for('lender_financials_revenue_add') }}">
  <div class="fm-row">
  <div class="fmg">
