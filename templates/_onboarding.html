@@ -21,8 +21,9 @@
 .ylh-onboard__top>div{display:flex;align-items:baseline;gap:.5rem;flex-wrap:nowrap;white-space:nowrap}
 .ylh-onboard__bar{height:6px;background:#F0E5DC;border-radius:3px;margin:.6rem 0 .8rem;overflow:hidden}
 .ylh-onboard__bar i{display:block;height:100%;background:#8F6244}
-.ylh-onboard ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.4rem .9rem}
-.ylh-onboard a{display:flex;align-items:center;gap:.6rem;padding:.35rem 0;color:#7A5238;text-decoration:none;font-size:.9rem}
+.ylh-onboard ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:.4rem .9rem}
+.ylh-onboard li{min-width:0}
+.ylh-onboard a{overflow-wrap:anywhere;display:flex;align-items:center;gap:.6rem;padding:.35rem 0;color:#7A5238;text-decoration:none;font-size:.9rem}
 .ylh-onboard a:hover{text-decoration:underline}
 .ylh-onboard__dot{width:20px;height:20px;border-radius:50%;border:2px solid #A47551;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;flex-shrink:0;color:#fff}
 .ylh-onboard li.is-done a{color:#8C6A4C;text-decoration:line-through}
