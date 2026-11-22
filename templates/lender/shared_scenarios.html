@@ -22,6 +22,19 @@
   </div>
   {% else %}
   <div class="tm-card" style="text-align:center;"><p>Nothing shared yet. When a client chooses to share a payment or refinance scenario with you, it shows up here.</p></div>
+  <div class="tm-card" style="opacity:.8;" aria-label="Example of a shared scenario">
+    <div style="display:flex;justify-content:space-between;gap:.8rem;align-items:center;">
+      <div><b style="color:#3A2518;">Example: Sam and Jo</b><div style="color:#7A6855;font-size:.85rem;">Refinance question &middot; just a sample</div></div>
+      <span class="tm-badge">Example</span>
+    </div>
+    <div class="tm-sc" style="background:#F6EFE4;">
+      <div><span>Current rate</span><span>6.75%</span></div>
+      <div><span>Loan balance</span><span>$280,000</span></div>
+      <div><span>Monthly payment</span><span>$2,180</span></div>
+    </div>
+    <p style="color:#3A2518;">Could we lower our payment if rates drop a little? Happy to talk whenever you have time.</p>
+    <p style="color:#7A6855;font-size:.82rem;margin:0;">This is what a real one looks like. You only ever see the numbers your client ticked.</p>
+  </div>
   {% endfor %}
 </div>
 {% endblock %}
