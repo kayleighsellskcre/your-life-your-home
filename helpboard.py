@@ -23,6 +23,17 @@ MLS_SUGGESTIONS = [
     "Heartland MLS", "Canopy MLS", "CRMLS", "Bright MLS", "Stellar MLS", "NTREIS", "HAR (Houston)", "REcolorado",
     "Northwest MLS", "MLS PIN", "Beaches MLS", "Triangle MLS", "FMLS (Georgia)", "Midwest Real Estate Data (MRED)",
     "Regional MLS", "SmartMLS", "Hudson Gateway MLS", "Greater Las Vegas MLS", "ARMLS (Arizona)", "UtahRealEstate.com",
+    "ACTRIS (Austin)", "Alaska MLS", "BAREIS (Bay Area)", "Cape Cod and Islands MLS", "Central Virginia Regional MLS (CVR MLS)",
+    "Charleston Trident MLS", "CincyMLS (Cincinnati)", "Coastal Carolinas MLS", "Columbus REALTORS MLS", "Des Moines Area MLS (DMAAR)",
+    "Georgia MLS (GAMLS)", "Greater Greenville MLS", "GSMLS (Garden State)", "Gulf South Real Estate Information Network (GSREIN)",
+    "HiCentral MLS (Hawaii)", "Intermountain MLS (Idaho)", "Indiana Regional MLS (IRMLS)", "IRES (Northern Colorado)",
+    "Maine Listings", "MetroList (Sacramento)", "Metro MLS (Milwaukee)", "MFRMLS (My Florida Regional)", "MIBOR (Indianapolis)",
+    "Miami MLS", "MLS Grand Rapids", "MLSListings (Silicon Valley)", "MLSOK (Oklahoma)", "Montana Regional MLS",
+    "NEREN (New England)", "NJMLS", "North Florida MLS", "NorthstarMLS (Minnesota)", "Northern Nevada Regional MLS",
+    "NYSAMLS (New York State)", "OneKey MLS (New York)", "Pikes Peak MLS", "Realcomp (Detroit)", "RealTracs (Nashville)",
+    "RMLS (Portland)", "SABOR (San Antonio)", "Sandicor (San Diego)", "Southwest Florida MLS", "Southwest MLS (New Mexico)",
+    "South Central Wisconsin MLS", "Willamette Valley MLS", "Central Oregon MLS", "West Penn MLS (Pittsburgh)", "MLS of Memphis (MAAR)",
+    "Mid America Regional Information Systems (MARIS, St. Louis)", "Great Plains Regional MLS (Nebraska)", "MLS Now (Northeast Ohio)",
 ]
 _COMPANY_WORDS = {"realty", "real", "estate", "group", "inc", "llc", "co", "company", "brokerage", "the", "and", "of", "associates", "properties"}
 
@@ -30,6 +41,24 @@ _COMPANY_WORDS = {"realty", "real", "estate", "group", "inc", "llc", "co", "comp
 def _db():
     from database import get_connection
     return get_connection()
+
+
+def _mls_options():
+    """Our list plus any MLS an agent here has already typed in, so the list grows by itself."""
+    seen = {norm_mls(x) for x in MLS_SUGGESTIONS}
+    extra = []
+    try:
+        conn = _db()
+        rows = conn.execute("SELECT DISTINCT mls_name FROM user_profiles WHERE mls_name IS NOT NULL AND TRIM(mls_name) <> ''").fetchall()
+        conn.close()
+        for r in rows:
+            name = (r[0] or "").strip()
+            if name and norm_mls(name) not in seen:
+                seen.add(norm_mls(name))
+                extra.append(name)
+    except Exception:
+        pass
+    return MLS_SUGGESTIONS + sorted(extra, key=str.lower)
 
 
 def norm_mls(s):
@@ -235,7 +264,7 @@ def board_page():
     openr, mine, taking, me = board_for(u["id"])
     helped, thanks = thanks_for(u["id"])
     return render_template(f"{u['role']}/helpboard.html", role=u["role"], open_posts=openr, mine=mine, taking=taking, me=me, helped=helped, thanks=thanks, today_iso=date.today().isoformat(),
-                           mls_options=MLS_SUGGESTIONS, kinds=KINDS)
+                           mls_options=_mls_options(), kinds=KINDS)
 
 
 @bp.route("/helpboard/mls", methods=["POST"])

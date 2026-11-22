@@ -145,3 +145,8 @@ conn = D.get_connection(); conn.execute("UPDATE review_requests SET scheduled_da
 A.send_reminder_email = lambda to, sub, body, **k: sent.append((to, sub, body)) or True
 A.send_review_requests()
 ok(sent and "closing your loan" in sent[0][2] and "(your review link)" not in sent[0][2], "the loan thank-you goes out with lender wording and no leftover placeholder")
+
+# the MLS suggestions are broad, and an MLS an agent typed in joins the list for everyone
+ok(len(H.MLS_SUGGESTIONS) >= 60 and "ACTRIS (Austin)" in H._mls_options(), "the MLS list covers many regions")
+H.save_mls(amy, "agent", "Prairie Test MLS")
+ok("Prairie Test MLS" in H._mls_options() and H._mls_options().count("Heartland MLS") == 1, "an MLS typed by one agent shows up in the list, without duplicates")
