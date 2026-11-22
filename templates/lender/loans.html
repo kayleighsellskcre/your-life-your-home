@@ -264,6 +264,9 @@
  <span class="detail-value">{{ loan.close_date or 'Not set' }}</span>
  </div>
  </div>
+ {% if loan.stage == 'closed' %}
+ <a href="{{ url_for('lender_financials', log=loan.borrower_name, closed=loan.close_date or '') }}" style="display:inline-block;margin-top:.7rem;font-size:.85rem;font-weight:600;color:var(--olive-green);">Log it in Financials &rarr;</a>
+ {% endif %}
  </div>
  {% endfor %}
  </div>

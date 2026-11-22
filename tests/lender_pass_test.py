@@ -43,3 +43,12 @@ t = c.get("/lender/crm?status=joined").get_data(as_text=True)
 ok("Joined Jo" in t and "Not Yet Ned" not in t, "the Joined the app filter shows only people with an account")
 t = c.get("/lender/crm").get_data(as_text=True)
 ok("Joined the app</a>" in t and "&#10003; Joined the app" in t, "the CRM has the filter chip and marks who joined")
+
+# A closed loan links to Financials with the form prefilled
+conn = D.get_connection()
+conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, status, loan_stage) VALUES (?, 'Closed Cora', 'closed', 'closed')", (ln,))
+conn.commit(); conn.close()
+t = c.get("/lender/loans").get_data(as_text=True)
+ok("log=Closed+Cora" in t and "Log it in Financials" in t, "a closed loan offers to log itself in Financials")
+f = c.get("/lender/financials?log=Closed+Cora").get_data(as_text=True)
+ok("URLSearchParams(location.search)" in f and "modal-revenue" in f, "Financials opens the funded loan form from that link")

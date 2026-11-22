@@ -729,6 +729,17 @@ Net Income: {{ (net_income)|usd(0) }}
 {% if goals %}Goals, Revenue: {{ (goals[0].revenue_goal or 0)|usd(0) }}, Loans: {{ goals[0].loan_count_goal or 0 }}, Volume: {{ (goals[0].loan_volume_goal or 0)|usd(0) }}, Expense Budget: {{ (goals[0].expenses_budget or 0)|usd(0) }}{% else %}No goals set yet.{% endif %}
 Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_cat else 'None logged' }}`;
 
+// Coming from a closed loan in the Loan Pipeline: open the form with what we already know
+(function () {
+ var q = new URLSearchParams(location.search), who = q.get('log');
+ if (!who) return;
+ var f = document.querySelector('#modal-revenue form');
+ f.elements['borrower_name'].value = who;
+ if (/^\d{4}-\d{2}-\d{2}$/.test(q.get('closed') || '')) f.elements['close_date'].value = q.get('closed');
+ f.elements['status'].value = 'funded';
+ document.getElementById('modal-revenue').classList.add('open');
+})();
+
 // Auto-load insights
 async function loadInsights() {
  try {
