@@ -34,7 +34,7 @@ d = c2.get("/lender").get_data(as_text=True)
 ok("✦" in d and "⚙" in d, "Marketing Tools and Settings have icons")
 
 # CRM: a "Joined the app" filter and marker for borrowers who have an account
-ho = D.create_user("Jo Owner", "owner1@example.test", gp("password123"), "homeowner")
+ho = D.create_user("Jo Owner", "owner1@example.test", gp("password123"), "homeowner", lender_id=ln)
 conn = D.get_connection()
 conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, status, user_id) VALUES (?, 'Joined Jo', 'prospect', ?)", (ln, ho))
 conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, status) VALUES (?, 'Not Yet Ned', 'prospect')", (ln,))
