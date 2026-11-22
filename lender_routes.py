@@ -795,14 +795,18 @@ def lender_loans():
         borrower_name = request.form.get("borrower_name", "").strip()
         borrower_email = request.form.get("borrower_email", "").strip()
         loan_type = request.form.get("loan_type", "").strip() or "Conventional"
-        status = request.form.get("status", "preapproval").strip()
+        stage_in = request.form.get("stage", "preapproval_started").strip()
+        status = {"preapproval_started": "preapproval", "preapproval_verified": "preapproval",
+                  "loan_processing": "processing", "appraisal_ordered": "processing", "appraisal_received": "processing",
+                  "uw_approval": "underwriting", "clear_to_close": "clear_to_close", "funding_closing": "clear_to_close",
+                  "closed": "closed"}.get(stage_in, "preapproval")
 
         if borrower_name:
             try:
                 add_lender_loan(
                     user["id"], borrower_name, status, loan_type,
                     request.form.get("target_payment", "").strip(),
-                    request.form.get("stage", "preapproval_started").strip(),
+                    stage_in,
                     request.form.get("close_date", "").strip(),
                     borrower_email,
                 )
@@ -1146,6 +1150,10 @@ def lender_messages():
 
 @route("/lender/roles", methods=["GET"])
 def lender_roles():
+    return redirect(url_for("lender_dashboard"))
+
+
+def _lender_roles_unused():
     """Lender roles and partners."""
     user = get_current_user()
     if not user or user.get("role") != "lender":

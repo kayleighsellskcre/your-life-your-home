@@ -81,7 +81,7 @@ def tab_context():
                 ("Send an Update", url_for("portal.send_update"), ep == "portal.send_update" or ep.startswith("care_alerts.frost"), 0),
                 ("Messages", url_for("team.pro_messages"), ep.startswith("team."), unread)]
     else:
-        tabs = [("My Clients", url_for("lender_clients"), ep in {"lender_clients", "lender_crm"}, 0),
+        tabs = [("My Clients", url_for("lender_clients"), ep in {"lender_clients"}, 0),
                 ("Shared Scenarios", url_for("team.shared_scenarios"), ep == "team.shared_scenarios", 0),
                 ("Messages", url_for("team.pro_messages"), ep in {"team.pro_messages", "team.pro_thread"}, unread)]
     if role in ("agent", "lender"):

@@ -226,11 +226,43 @@
  <div class="empty-state">
  <span class="empty-state-icon"></span>
  <h3>No Borrowers Yet</h3>
- <p>Add borrowers to your CRM to create borrower-specific marketing.</p>
+ <p>Borrower-specific materials appear here once you add someone to your CRM. The ready-to-use posts below need no borrower at all.</p>
  </div>
  {% endif %}
  </div>
+
+ <!-- Ready-to-use posts: no borrower needed -->
+ {% set me = (user.name or 'Your name') %}
+ {% set posts = [
+   ('Rate update', 'Rates have moved, and it may be a good time for a fresh look at your numbers. If you bought or refinanced in the last few years, I would be glad to see whether a change could help you, with no pressure and no obligation. Just send me a message. - ' ~ me),
+   ('Thinking of refinancing?', 'Thinking about refinancing? A quick, friendly review can show whether a lower rate or the equity in your home could work for you. It takes a few minutes and costs nothing to ask. I am only a message away. - ' ~ me),
+   ('Buying a home? Start here', 'Dreaming of a home of your own? Let us talk about what you can afford, what to gather, and what to expect, one gentle step at a time. A pre-approval gives you confidence before you ever tour a home. - ' ~ me),
+   ('Partnering with local agents', 'I love working with great local agents. If you have buyers who want clear answers, fast pre-approvals and kind communication all the way to closing, I would be honored to help. Let us chat about how we can take care of your clients together. - ' ~ me),
+   ('Just closed', 'Another family just got their keys! Congratulations to my wonderful clients on closing on their new home. It was an honor to be part of it. If you are thinking about your own next step, I would love to help. - ' ~ me),
+   ('Client thank-you', 'A big thank you to the clients and agents who trust me with their loans and their referrals. Your kindness means the world to me. If I can help with anything, I am only a message away. - ' ~ me),
+ ] %}
+ <div class="selection-card" style="margin-top:1.2rem;">
+ <h2 class="selection-title">Ready-to-use posts</h2>
+ <p style="color:#7A6855;font-size:.92rem;margin:-.3rem 0 1rem;">Tap Copy, paste into Facebook, Instagram or a text, and add a photo. Change any words you like.</p>
+ <div style="display:grid;gap:.8rem;">
+ {% for title, text in posts %}
+ <div style="border:1px solid rgba(143,98,68,.25);border-radius:12px;padding:.9rem 1rem;background:#FFFDFA;">
+ <div style="font-weight:700;color:#4C3929;margin-bottom:.3rem;">{{ title }}</div>
+ <p style="margin:0 0 .6rem;color:#3A2518;font-size:.93rem;line-height:1.5;" class="mh-post">{{ text }}</p>
+ <button type="button" class="mh-copy" style="border:1px solid #8F6244;background:#fff;color:#8F6244;border-radius:99px;padding:.45rem 1rem;font-weight:700;cursor:pointer;min-height:40px;">Copy</button>
+ </div>
+ {% endfor %}
+ </div>
+ </div>
 </div>
+<script>
+document.querySelectorAll('.mh-copy').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var txt = b.parentNode.querySelector('.mh-post').textContent.trim();
+    function done() { var o = b.textContent; b.textContent = 'Copied'; setTimeout(function () { b.textContent = o; }, 1600); }
+    try { navigator.clipboard.writeText(txt).then(done, done); } catch (e) { done(); }
+  });
+});
+</script>
 
 {% endblock %}
-

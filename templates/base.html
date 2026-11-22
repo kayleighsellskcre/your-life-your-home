@@ -850,7 +850,6 @@
        <a class="ylh-ham-item" href="{{ url_for('lender_booking') }}">Booking &amp; Calendar</a>
        <a class="ylh-ham-item" href="{{ url_for('helpboard.board_page') }}">Help Board</a>
        <a class="ylh-ham-item" href="{{ url_for('lender_financials') }}">Financials</a>
-       <a class="ylh-ham-item" href="{{ url_for('lender_roles') }}">Key Contacts</a>
        </details>
        <details class="ylh-ham-more"><summary>Account</summary>
        <a class="ylh-ham-item" href="{{ url_for('lender_settings_profile') }}">Settings &amp; Profile</a>
@@ -938,20 +937,24 @@
    <form method="post" action="{{ url_for('admin_end_impersonation') }}" style="margin:0;"><button type="submit" style="background:#fff!important;color:#3a2a1f!important;border:none!important;border-radius:99px!important;width:auto!important;min-height:0!important;margin:0!important;padding:.4rem 1rem!important;font-weight:700;cursor:pointer;font-size:.85rem!important;">Exit support mode</button></form>
  </div>
  {% endif %}
+ {% set _flashes = get_flashed_messages(with_categories=True) %}
+ {% set _wn = namespace(on=false) %}{% for _c, _m in _flashes %}{% if email_unverified and _m.startswith('Account created') %}{% set _wn.on = true %}{% endif %}{% endfor %}{% set _welcome = _wn.on %}
  {% if email_unverified %}
  <div style="margin-bottom:.8rem;padding:.65rem 1rem;background:#fbf6e9;border:1px solid #d9c79a;border-left:4px solid #8A6D2F;border-radius:8px;font-size:.88rem;color:#4a4130;display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
-   <span>Please confirm your email address. We sent a message to your inbox.</span>
+   <span>{% if _welcome %}Welcome to Your Life, Your Home! {% endif %}Please confirm your email address. We sent a message to your inbox.</span>
    <form method="post" action="{{ url_for('resend_verification') }}" style="margin:0;"><button type="submit" style="background:none!important;border:none!important;box-shadow:none!important;width:auto!important;min-height:0!important;margin:0!important;color:#8A6D2F;font-weight:600;text-decoration:underline;cursor:pointer;padding:0!important;font-size:.88rem!important;">Resend email</button></form>
  </div>
  {% endif %}
  {# Optional flash messages section #}
- {% with messages = get_flashed_messages(with_categories=True) %}
+ {% with messages = _flashes %}
  {% if messages %}
  <div style="margin-bottom:0.8rem;">
  {% for category, message in messages %}
+ {% if not (_welcome and message.startswith('Account created')) %}
  <div class="ylh-flash {{ category }}">
  {{ message }}
  </div>
+ {% endif %}
  {% endfor %}
  </div>
  {% endif %}

@@ -264,7 +264,15 @@
 </div>
 
 <!-- Stats Cards - 2 Columns, 3 boxes each -->
-<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
+<style>
+ .crm-stats-line { display:none; }
+ @media (max-width: 700px) {
+  .crm-stats { display:none !important; }
+  .crm-stats-line { display:block; margin:0 0 1rem; font-size:.95rem; color:var(--charcoal-brown); }
+ }
+</style>
+<p class="crm-stats-line">{{ stats.total|default(0) }} borrower{{ '' if stats.total|default(0) == 1 else 's' }}, {{ stats.in_process|default(0) }} in process</p>
+<div class="crm-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
  <!-- Column 1 -->
  <div class="stat-card-clickable" onclick="openStatModal('total')" style="background: var(--gradient-warm); border: var(--border-light); box-shadow: var(--shadow-light); padding: 0.75rem 1rem; border-radius: var(--border-radius-lg); cursor: pointer; transition: var(--transition-base);">
  <h3 style="font-size: 0.85rem; font-weight: 600; color: var(--charcoal-brown); margin-bottom: 0.25rem; font-family: var(--font-heading);"> Total Borrowers</h3>

@@ -144,7 +144,16 @@ def refi_page():
         market = None
     own = _market_rate(u["id"])
     rows, used = find(u["id"], market=market, sort=sort)
-    return render_template("lender/refi_alerts.html", rows=rows, sort=sort, sorts=SORTS, rate=used,
+    when = ""
+    try:
+        from database import get_connection
+        _c = get_connection()
+        _r = _c.execute("SELECT rates_updated_at FROM user_profiles WHERE user_id = ?", (u["id"],)).fetchone()
+        _c.close()
+        when = (_r[0] if _r and _r[0] else "")
+    except Exception:
+        when = ""
+    return render_template("lender/refi_alerts.html", rows=rows, sort=sort, sorts=SORTS, rate=used, rate_date=when,
                            posted=own, custom=market is not None, drop=DEFAULT_DROP)
 
 

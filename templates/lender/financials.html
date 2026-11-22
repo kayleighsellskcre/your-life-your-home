@@ -33,13 +33,8 @@
  .fin-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
  .fin-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:1.3rem 1.5rem; position:relative; overflow:hidden; box-shadow:var(--shadow-sm); transition:transform .2s,box-shadow .2s; }
  .fin-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
- .fin-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
- .fin-card.green::before { background:linear-gradient(90deg,#614934,#B49274); }
- .fin-card.amber::before { background:linear-gradient(90deg,#b45309,#fbbf24); }
- .fin-card.red::before { background:linear-gradient(90deg,#C04242,#DA8F8F); }
- .fin-card.blue::before { background:linear-gradient(90deg,#8B7A6A,#B8ADA2); }
- .fin-card.purple::before { background:linear-gradient(90deg,#8E7EA9,#C0B3CD); }
- .fin-card-icon { position:absolute; top:1.1rem; right:1.1rem; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
+ .fin-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--olive); }
+      .fin-card-icon { position:absolute; top:1.1rem; right:1.1rem; width:34px; height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; }
  .fin-card.green .fin-card-icon { background:rgba(97,73,52,.1); }
  .fin-card.amber .fin-card-icon { background:rgba(180,83,9,.1); }
  .fin-card.red .fin-card-icon { background:rgba(192,66,66,.09); }
@@ -185,6 +180,8 @@
  .fm-cancel { background:none; border:1.5px solid var(--border); color:var(--olive); border-radius:9px; padding:.62rem 1.1rem; font-size:.88rem; font-weight:600; cursor:pointer; }
 
  @media(max-width:768px) {
+ .fin-card-icon { display:none; }
+ .chart-row { grid-template-columns:1fr; }
  .fin-cards { grid-template-columns:1fr 1fr; }
  .chart-row { grid-template-columns:1fr; }
  .fm-row { grid-template-columns:1fr; }
@@ -229,7 +226,7 @@
  <div class="fin-card blue">
  <div class="fin-card-icon">&#x7e;</div>
  <div class="fin-card-label">YTD Loan Volume</div>
- <div class="fin-card-value">{{ (ytd_loan_volume // 1000)|usd(0) }}k</div>
+ <div class="fin-card-value">{% set _v = (ytd_loan_volume or 0) %}{% if _v >= 1000000 %}${{ '%.1f'|format(_v / 1000000) }}M{% elif _v >= 1000 %}${{ (_v // 1000)|int }}k{% else %}$0{% endif %}</div>
  <div class="fin-card-sub">Total funded loan volume</div>
  </div>
  <div class="fin-card red">
@@ -256,7 +253,7 @@
 <div class="chart-row">
  <div class="chart-card">
  <h4>Monthly Revenue / {{ year }}</h4>
- <canvas id="monthlyChart" height="95"></canvas>
+ <div style="position:relative;height:260px;width:100%;"><canvas id="monthlyChart"></canvas></div>
  </div>
  <div class="chart-card">
  <h4>Expenses by Category</h4>
@@ -283,7 +280,9 @@
 
  <!-- Smart Insights -->
  <div class="ai-cc-panel active" id="ai-insights">
- <div id="insightsLoading" class="ai-insights-loading">
+ {% set has_fin = (revenues or expenses) %}
+ {% if not has_fin %}<div class="ai-insights-loading" style="padding:.5rem 0;">Add your first loan in the <a href="{{ url_for('lender_loans') }}">Loan Pipeline</a> and your insights will show up here.</div>{% endif %}
+ <div id="insightsLoading" class="ai-insights-loading" {% if not has_fin %}style="display:none;"{% endif %}>
  <div class="ai-spinner"></div>
  Analyzing your {{ year }} financials&hellip;
  </div>
@@ -465,7 +464,7 @@
  <div class="goal-card">
  <div class="goal-label">
  <span>Loan Volume</span>
- <span>{{ ((ytd_loan_volume or 0) // 1000)|usd(0) }}k / {{ ((g.loan_volume_goal or 0) // 1000)|usd(0) }}k</span>
+ <span>{{ (ytd_loan_volume or 0)|usd(0) }} / {{ (g.loan_volume_goal or 0)|usd(0) }}</span>
  </div>
  <div class="goal-bar-bg"><div class="goal-bar-fill" style="width:{{ vol_pct|int }}%;"></div></div>
  <div class="goal-sub">{{ "{:.0f}".format(vol_pct) }}% complete</div>
@@ -698,10 +697,10 @@ new Chart(document.getElementById('monthlyChart').getContext('2d'), {
  }]
  },
  options: {
- responsive: true,
+ responsive: true, maintainAspectRatio: false,
  plugins: { legend: { display: false } },
  scales: {
- y: { beginAtZero: true, ticks: { callback: v => '$'+(v>=1000?(v/1000).toFixed(0)+'k':v), font:{size:10} }, grid: { color: 'rgba(200,180,151,.15)' } },
+ y: { beginAtZero: true, ticks: { precision: 0, maxTicksLimit: 6, callback: v => Number.isInteger(v) ? '$'+(v>=1000?(v/1000)+'k':v) : null, font:{size:10} }, grid: { color: 'rgba(200,180,151,.15)' } },
  x: { ticks: { font: { size: 10 } }, grid: { display: false } }
  }
  }
@@ -858,6 +857,6 @@ function escHtml(s) {
  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-loadInsights();
+{% if has_fin %}loadInsights();{% endif %}
 </script>
 {% endblock %}

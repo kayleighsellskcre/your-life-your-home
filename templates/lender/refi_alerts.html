@@ -33,7 +33,7 @@
   </div>
 
   <div class="rf-rate">
-    <span>Compared with today's rate of <b>{{ '{:.2f}'.format(rate) }}%</b>{% if custom %} (what-if){% elif posted %} (your posted 30-year rate){% else %} (a typical rate; <a href="{{ url_for('lender_settings_profile') }}">post yours in Settings</a>){% endif %}</span>
+    <span>Compared with today's rate of <b>{{ '{:.2f}'.format(rate) }}%</b>{% if custom %} (what-if){% elif posted %} (your posted 30-year rate{% if rate_date %}, set {{ rate_date }}{% endif %}){% else %} (a typical rate; <a href="{{ url_for('lender_settings_profile') }}">post yours in Settings</a>){% endif %}</span>
     <form method="get">
       <input type="hidden" name="sort" value="{{ sort }}">
       <input type="number" name="rate" step="0.01" min="1" max="15" value="{{ '{:.2f}'.format(rate) }}" aria-label="Try a different rate">
@@ -62,7 +62,7 @@
     </div>
   </div>
   {% else %}
-  <div class="rf-row" style="display:block;text-align:center;color:#7A6855;">No one stands out right now. Clients appear here when their rate is at least {{ drop }} points above {{ '{:.2f}'.format(rate) }}% or they have $75,000 or more in equity. Rates and loan balances come from your CRM and from what clients share in their portal.</div>
+  <div class="rf-row" style="display:block;text-align:center;color:#7A6855;">No one stands out right now. Clients appear here when their rate is at least {{ drop }} points above {{ '{:.2f}'.format(rate) }}% or they have $75,000 or more in equity. Rates and loan balances come from your CRM and from what clients share in their portal.<div style="margin-top:.8rem;"><a class="btn btn-primary" href="{{ url_for('lender_crm') }}">Add a borrower's rate</a></div></div>
   {% endfor %}
 
   <p class="rf-note">Savings are rough: the monthly principal and interest on their balance at their rate compared with today's rate over 30 years. It is a reason to talk, not a quote. Equity uses the home's latest estimated value.</p>
