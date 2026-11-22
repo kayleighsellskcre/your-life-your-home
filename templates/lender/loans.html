@@ -157,6 +157,19 @@
  max-width: 500px;
  margin: 0 auto;
  }
+
+ .loan-form { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:1rem 1.25rem; max-width:900px; }
+ .loan-form__save { grid-column:1 / -1; justify-self:start; }
+ .pipe-cols { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:1rem; align-items:start; }
+ .pipe-col { background:var(--light-cream); border:1px solid var(--taupe-beige); border-radius:var(--border-radius-lg); padding:.8rem; }
+ .pipe-col h3 { font-size:.85rem; text-transform:uppercase; letter-spacing:.05em; color:var(--charcoal-brown); margin:0 0 .7rem; display:flex; justify-content:space-between; }
+ .pipe-col .loan-card { padding:1rem; margin-bottom:.7rem; cursor:default; }
+ .pipe-col .loan-card:hover { transform:none; box-shadow:none; }
+ .pipe-col .loan-borrower { font-size:1rem; margin-bottom:.35rem; }
+ .pipe-col .loan-details { grid-template-columns:1fr; gap:.5rem; margin-top:.7rem; padding-top:.7rem; }
+ .pipe-col .loan-header { margin-bottom:.5rem; }
+ @media (max-width: 1000px) { .pipe-cols { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+ @media (max-width: 640px) { .pipe-cols { grid-template-columns:1fr; } .loan-form { grid-template-columns:1fr; } }
 </style>
 
 <div class="ylh-page-hd">
@@ -169,7 +182,7 @@
  <!-- Add Loan Form -->
  <div class="card" style="margin-bottom: 0.75rem;">
  <h2>Add a Loan</h2>
- <form method="post" style="display:grid;gap:1rem;max-width:640px;margin-top:1.5rem;">
+ <form method="post" class="loan-form" style="margin-top:1.5rem;">
  <div>
  <label for="borrower_name" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Borrower Name</label>
  <input type="text" id="borrower_name" name="borrower_name" required />
@@ -204,7 +217,7 @@
  <label for="close_date" style="display: block; font-size: 0.9rem; font-weight: 600; color: var(--olive-green); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.5rem;">Target Close Date</label>
  <input type="date" id="close_date" name="close_date" />
  </div>
- <button class="btn btn-primary" type="submit">Save Loan</button>
+ <button class="btn btn-primary loan-form__save" type="submit">Save Loan</button>
  </form>
  </div>
 
@@ -212,7 +225,17 @@
  {% if loans %}
  <h2 style="margin-bottom: 1.5rem; font-family: var(--font-heading); color: var(--charcoal-brown);">Your Pipeline</h2>
  
- {% for loan in loans %}
+ {% set groups = [
+ ('Pre-approval', ['preapproval_started','preapproval_verified']),
+ ('In process', ['loan_processing','appraisal_ordered','appraisal_received']),
+ ('Approved', ['uw_approval','clear_to_close']),
+ ('Closing', ['funding_closing','closed']) ] %}
+ <div class="pipe-cols">
+ {% for title, keys in groups %}
+ {% set grp = loans|selectattr('stage','in',keys)|list %}
+ <div class="pipe-col">
+ <h3><span>{{ title }}</span><span>{{ grp|length }}</span></h3>
+ {% for loan in grp %}
  <div class="loan-card">
  <div class="loan-header">
  <div class="loan-main-info">
@@ -243,6 +266,9 @@
  </div>
  </div>
  {% endfor %}
+ </div>
+ {% endfor %}
+ </div>
  {% else %}
  <div class="empty-state">
  <div class="empty-state-icon"></div>
