@@ -21,7 +21,7 @@ ca, cl, ch = client(amy, "agent"), client(lou, "lender"), client(hom, "homeowner
 
 ok(A.app.test_client().get("/email-signature").status_code == 302 and ch.get("/email-signature").status_code == 302, "signed-out visitors and homeowners cannot open the signature page")
 ok(ca.get("/email-signature").status_code == 200 and cl.get("/email-signature").status_code == 200, "agents and lenders can")
-ok("Email Signature" in ca.get("/agent/dashboard").get_data(as_text=True) and "/email-signature" in cl.get("/lender/dashboard").get_data(as_text=True), "it is in the menu for both")
+ok("Email Signature" in ca.get("/agent/dashboard").get_data(as_text=True) and "/email-signature" in cl.get("/lender/settings/profile").get_data(as_text=True), "it is in the agent menu and the lender Settings tabs")
 ok("Amy Agent" in ca.get("/email-signature").get_data(as_text=True), "'fill in from my profile' offers their name")
 
 sig = "Amy Agent\nRealtor, Best Homes\n785-555-0100"

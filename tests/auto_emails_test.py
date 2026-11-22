@@ -23,7 +23,7 @@ ok("Happy birthday, Sam!" in t and "With warmth,\nAmy Agent" in t, "it shows the
 _lt = cl.get("/lender/automatic-emails").get_data(as_text=True)
 ok("Thank-you and review request" in _lt and "closing your loan" in _lt and "Birthday email" in _lt, "lenders see all three, with loan wording on the thank-you")
 ok(ca.get("/lender/automatic-emails").status_code == 302 and who(home, "homeowner").get("/agent/automatic-emails").status_code == 302, "only the right person can open each page")
-ok(">Automatic Emails<" in ca.get("/agent").get_data(as_text=True) and ">Automatic Emails<" in cl.get("/lender").get_data(as_text=True), "both menus link to it")
+ok(">Automatic Emails<" in ca.get("/agent").get_data(as_text=True) and "Automatic Emails" in cl.get("/lender/settings/profile").get_data(as_text=True), "the agent menu and the lender Settings tabs link to it")
 
 ok(A.auto_email_enabled(agent, "birthday") is True, "everything is on until someone switches it off")
 ca.post("/agent/automatic-emails", data={"on_anniversary": "1"})

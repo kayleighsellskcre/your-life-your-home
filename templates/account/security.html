@@ -3,6 +3,7 @@
 {% block content %}
 {% include "auth/_auth_styles.html" %}
 <div class="auth-page">
+{% if session.get('role') == 'lender' %}<div style="max-width:640px;margin:0 auto;">{% include "lender/_account_tabs.html" %}</div>{% endif %}
   <div class="auth-card">
     <h1>Account security</h1>
     {% if setup %}
