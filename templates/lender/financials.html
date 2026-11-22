@@ -736,6 +736,7 @@ Top expense categories: {{ expense_by_cat.keys()|list|join(', ') if expense_by_c
  var f = document.querySelector('#modal-revenue form');
  f.elements['borrower_name'].value = who;
  if (/^\d{4}-\d{2}-\d{2}$/.test(q.get('closed') || '')) f.elements['close_date'].value = q.get('closed');
+ if (/^\d+$/.test(q.get('amount') || '')) { f.elements['loan_amount'].value = q.get('amount'); try { calcRevenue(); } catch (e) {} }
  f.elements['status'].value = 'funded';
  document.getElementById('modal-revenue').classList.add('open');
 })();
