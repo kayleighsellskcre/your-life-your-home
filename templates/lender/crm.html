@@ -380,6 +380,7 @@
  <a href="?status=preapproval{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'preapproval' %}active{% endif %}">Pre-Approval</a>
  <a href="?status=in_process{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'in_process' %}active{% endif %}">In Process</a>
  <a href="?status=closed{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'closed' %}active{% endif %}">Closed</a>
+ <a href="?status=joined{% if search_query %}&q={{ search_query|urlencode }}{% endif %}" class="filter-btn {% if status_filter == 'joined' %}active{% endif %}">Joined the app</a>
  </div>
  </div>
  </div>
@@ -403,6 +404,7 @@
  <div>
  <h3 class="borrower-name">{{ borrower.name }}</h3>
  <span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span>
+ {% if borrower.user_id %}<div style="color:#5E7A55;font-size:.8rem;margin-top:.25rem;">&#10003; Joined the app</div>{% endif %}
  </div>
  <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Edit</button>
  </div>

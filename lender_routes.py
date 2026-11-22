@@ -424,7 +424,10 @@ def lender_crm():
                 flash("Invalid number. Please enter a number between 1 and 365.", "error")
 
     status_filter = request.args.get("status")
-    borrowers_all = list_lender_borrowers(user["id"], status_filter)
+    if status_filter == "joined":
+        borrowers_all = [b for b in list_lender_borrowers(user["id"], None) if b.get("user_id")]
+    else:
+        borrowers_all = list_lender_borrowers(user["id"], status_filter)
     search_query = (request.args.get("q") or "").strip()
     if search_query:
         _q = search_query.lower()

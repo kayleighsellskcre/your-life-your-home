@@ -32,3 +32,14 @@ ok("loadInsights();" not in f.split("// Auto-load insights")[-1] and "Add your f
 ok('maintainAspectRatio: false' in f and "precision: 0" in f, "the revenue chart fills its card with a whole-dollar axis")
 d = c2.get("/lender").get_data(as_text=True)
 ok("✦" in d and "⚙" in d, "Marketing Tools and Settings have icons")
+
+# CRM: a "Joined the app" filter and marker for borrowers who have an account
+ho = D.create_user("Jo Owner", "owner1@example.test", gp("password123"), "homeowner")
+conn = D.get_connection()
+conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, status, user_id) VALUES (?, 'Joined Jo', 'prospect', ?)", (ln, ho))
+conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, status) VALUES (?, 'Not Yet Ned', 'prospect')", (ln,))
+conn.commit(); conn.close()
+t = c.get("/lender/crm?status=joined").get_data(as_text=True)
+ok("Joined Jo" in t and "Not Yet Ned" not in t, "the Joined the app filter shows only people with an account")
+t = c.get("/lender/crm").get_data(as_text=True)
+ok("Joined the app</a>" in t and "&#10003; Joined the app" in t, "the CRM has the filter chip and marks who joined")
