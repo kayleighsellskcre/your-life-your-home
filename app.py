@@ -2108,6 +2108,13 @@ def send_review_requests():
             finally:
                 _sc.close()
             continue
+        _hc = get_connection()
+        try:
+            held = _recently_emailed(_hc, row["client_email"])
+        finally:
+            _hc.close()
+        if held:
+            continue  # emailed this week already; stays pending and is tried again tomorrow
         client_first = (row.get("client_name") or "there").split()[0]
         agent_name = row.get("agent_name") or "your agent"
         review_link = row.get("google_review_link") or ""
@@ -2127,6 +2134,7 @@ def send_review_requests():
             """, (row["id"],))
             conn2.commit()
             conn2.close()
+            log_automated_email(0, "lender_borrower" if row.get("role") == "lender" else "agent_contact", row["agent_user_id"], "review", row["client_email"], subject, "sent")
             print(f"[REVIEW] Sent review request to {row['client_email']}")
         except Exception as e:
             print(f"[REVIEW] Error sending to {row.get('client_email')}: {e}")

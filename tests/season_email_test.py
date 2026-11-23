@@ -54,3 +54,21 @@ c = A.app.test_client()
 with c.session_transaction() as s: s["user_id"] = ag; s["role"] = "agent"
 t = c.get("/agent/automatic-emails").get_data(as_text=True)
 ok("Your home this season" in t, "the Automatic emails page lists the seasonal note")
+
+# review thank-yous respect the week, and are logged so later notes yield to them
+conn = D.get_connection()
+conn.execute("INSERT INTO review_requests (agent_user_id, transaction_id, client_email, client_name, scheduled_date, status) "
+             "VALUES (?, 0, 'rev@example.test', 'Rae Review', date('now','-1 day'), 'pending')", (ag,))
+conn.commit(); conn.close()
+D.log_automated_email(2, "agent_contact", ag, "birthday", "rev@example.test", "Happy birthday", "sent")
+sent.clear(); A.send_review_requests()
+ok(sent == [], "a thank-you waits when the person was emailed this week")
+conn = D.get_connection()
+conn.execute("UPDATE automated_email_logs SET sent_at = datetime('now','-8 days') WHERE recipient_email='rev@example.test'")
+conn.commit(); conn.close()
+sent.clear(); A.send_review_requests()
+ok(sent == ["rev@example.test"], "and goes out once the week has passed")
+conn = D.get_connection()
+n = conn.execute("SELECT COUNT(*) FROM automated_email_logs WHERE email_type='review' AND recipient_email='rev@example.test'").fetchone()[0]
+conn.close()
+ok(n == 1, "the thank-you is logged")
