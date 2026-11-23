@@ -497,10 +497,10 @@
  <span class="auto-badge"> Home Anniversary</span>
  {% endif %}
  {% if borrower.auto_seasonal %}
- <span class="auto-badge"> Seasonal Checklists</span>
+ <span class="auto-badge"> Your Home This Season</span>
  {% endif %}
  {% if borrower.auto_equity %}
- <span class="auto-badge"> Equity Updates ({{ borrower.equity_frequency }})</span>
+ <span class="auto-badge"> Home Value in Season Note</span>
  {% endif %}
  {% if borrower.auto_holidays %}
  <span class="auto-badge"> Holiday Greetings</span>
@@ -675,14 +675,6 @@
  <input type="text" name="property_address" id="edit_property_address">
  </div>
  <div>
- <label>Equity Update Frequency</label>
- <select name="equity_frequency" id="edit_equity_frequency">
- <option value="monthly">Monthly</option>
- <option value="bimonthly">Every 2 Months</option>
- <option value="quarterly">Quarterly</option>
- </select>
- </div>
- <div>
  <label>Follow up on</label>
  <input type="date" name="next_action_date" id="edit_next_action_date">
  </div>
@@ -712,11 +704,11 @@
  </div>
  <div class="toggle-switch">
  <input type="checkbox" name="auto_seasonal" id="edit_auto_seasonal" value="1">
- <label for="edit_auto_seasonal">Send Seasonal Checklists</label>
+ <label for="edit_auto_seasonal">Send the seasonal home care note</label>
  </div>
  <div class="toggle-switch">
  <input type="checkbox" name="auto_equity" id="edit_auto_equity" value="1">
- <label for="edit_auto_equity">Send Equity Updates</label>
+ <label for="edit_auto_equity">Include home value and equity in it</label>
  </div>
  <div class="toggle-switch">
  <input type="checkbox" name="auto_holidays" id="edit_auto_holidays" value="1">
@@ -998,7 +990,6 @@ function openEditModal(borrowerId) {
  document.getElementById('edit_home_anniversary').value = borrower.home_anniversary || '';
  document.getElementById('edit_address').value = borrower.address || '';
  document.getElementById('edit_property_address').value = borrower.property_address || '';
- document.getElementById('edit_equity_frequency').value = borrower.equity_frequency || 'monthly';
  document.getElementById('edit_next_action_date').value = (borrower.next_action_date || '').slice(0, 10);
  document.getElementById('edit_next_action_note').value = borrower.next_action_note || '';
  document.getElementById('edit_tags').value = borrower.tags || '';

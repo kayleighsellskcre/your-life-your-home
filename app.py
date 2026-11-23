@@ -1363,6 +1363,7 @@ AUTO_EMAILS = {
     "birthday": ("Birthday email", "On their birthday"),
     "anniversary": ("Home anniversary email", "On the anniversary of their move-in"),
     "review": ("Thank-you and review request", "3 days after a deal closes"),
+    "seasonal": ("Your home this season", "Once a season: home value, three things to do, one way to save"),
 }
 
 
@@ -1396,6 +1397,12 @@ def set_auto_email(user_id, kind, on):
 def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
     """The exact words an automatic email uses, with a sample first name, so people can see what goes out in their name."""
     pro = pro_name or "Your Name"
+    if kind == "seasonal":
+        from datetime import datetime
+        _m = datetime.now().month
+        season = SEASON_MONTHS.get(_m) or {1: "winter", 2: "winter", 4: "spring", 5: "spring", 7: "summer", 8: "summer", 10: "fall", 11: "fall"}[_m]
+        return season_email_text(season, {"name": sample, "type": "lender_borrower" if role == "lender" else "agent_contact", "address": "your home",
+                                          "value": 450000, "equity": 160000, "care": True, "show_equity": role != "lender"}, pro, (pro or "").split(" ")[0])
     if kind == "birthday":
         return (f"Happy birthday, {sample}!",
                 f"Hi {sample},\n\nHappy birthday! I hope your day is full of people you love and something delicious. I feel lucky to know you.\n\nWith warmth,\n{pro}")
@@ -1417,7 +1424,7 @@ def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
 def auto_emails_context(user):
     """Everything the Automatic emails page shows: each email with its on/off state and exact wording, and what went out lately."""
     from database import get_connection
-    kinds = ["birthday", "anniversary", "review"]
+    kinds = ["birthday", "anniversary", "seasonal", "review"]
     items = []
     for k in kinds:
         subj, body = auto_email_preview(k, user.get("name"), role=user.get("role"))
@@ -1426,7 +1433,7 @@ def auto_emails_context(user):
     c = get_connection()
     try:
         for r in c.execute("""SELECT l.email_type, l.sent_at, l.recipient_email, l.subject FROM automated_email_logs l
-                              WHERE l.professional_user_id = ? AND l.email_type IN ('birthday', 'anniversary') AND l.status = 'sent'
+                              WHERE l.professional_user_id = ? AND l.email_type IN ('birthday', 'anniversary', 'seasonal') AND l.status = 'sent'
                               ORDER BY l.sent_at DESC LIMIT 8""", (user["id"],)).fetchall():
             recent.append({"kind": AUTO_EMAILS[r["email_type"]][0], "when": str(r["sent_at"] or "")[:10], "to": r["recipient_email"], "subject": r["subject"]})
         if user.get("role") in ("agent", "lender"):
@@ -1470,7 +1477,7 @@ def send_auto_email_sample(user, kind):
 
 def save_auto_emails(user, form):
     """Apply the switches from the page. A switch that is not in the form is off."""
-    for k in (["birthday", "anniversary"] + (["review"] if user.get("role") == "agent" else [])):
+    for k in (["birthday", "anniversary", "seasonal"] + (["review"] if user.get("role") == "agent" else [])):
         set_auto_email(user["id"], k, form.get("on_" + k) == "1")
 
 
@@ -1696,227 +1703,122 @@ Warmly,
             )
 
 
+QUIET_DAYS = 7  # no household gets more than one automatic email in this many days
+
+
+def _recently_emailed(conn, email, days=QUIET_DAYS):
+    """Has this address already had an automatic email in the last week? One kind note is plenty."""
+    try:
+        r = conn.execute(
+            "SELECT 1 FROM automated_email_logs WHERE lower(recipient_email) = lower(?) AND status = 'sent' "
+            "AND sent_at >= datetime('now', ?) LIMIT 1", (email, f"-{int(days)} days")).fetchone()
+        return bool(r)
+    except Exception:
+        return False
+
+
+SEASON_MONTHS = {3: "spring", 6: "summer", 9: "fall", 12: "winter"}
+
+# Three things worth doing, one easy way to save on the mortgage, for each season
+SEASON_TIPS = {
+    "spring": ["Clean the gutters and check the roof for winter wear",
+               "Have the air conditioning serviced before the first hot day",
+               "Look over the deck, patio and outdoor faucets"],
+    "summer": ["Change the air filter and keep the vents clear",
+               "Check around the house for pests and loose screens",
+               "Look over outdoor lighting and get ready for storm season"],
+    "fall": ["Clean the gutters and check the roof and chimney",
+             "Have the heating system serviced and change the filter",
+             "Seal drafty windows and doors and turn off outdoor water"],
+    "winter": ["Test the smoke and carbon monoxide alarms",
+               "Insulate exposed pipes so they do not freeze",
+               "Check the heating filter and the weatherstripping"],
+}
+
+
+def _mortgage_tip(role, pro_first):
+    if role == "lender_borrower":
+        return ("One easy way to save: if you bought or refinanced a while ago, a quick look at your rate costs nothing. "
+                "I am glad to run the numbers whenever you like, with no pressure.")
+    return ("One easy way to save: if it has been a while since you looked at your mortgage, a quick rate check costs nothing. "
+            "I would be happy to connect you with someone kind who can take a look.")
+
+
+def _season_contacts():
+    """People who get the seasonal note: those with seasonal care or equity updates switched on."""
+    from database import get_connection
+    conn = get_connection()
+    out = []
+    try:
+        for r in conn.execute("""SELECT id, agent_user_id, name, email, property_address, property_value, equity_estimate,
+                                        auto_seasonal, auto_equity FROM agent_contacts
+                                 WHERE email IS NOT NULL AND email != '' AND (auto_seasonal = 1 OR auto_equity = 1)""").fetchall():
+            d = dict(r)
+            out.append({"id": d["id"], "type": "agent_contact", "professional_id": d["agent_user_id"], "name": d["name"], "email": d["email"],
+                        "address": d.get("property_address"), "value": d.get("property_value"), "equity": d.get("equity_estimate"),
+                        "care": bool(d["auto_seasonal"]), "show_equity": bool(d["auto_equity"])})
+        for r in conn.execute("""SELECT id, lender_user_id, name, email, property_address, auto_seasonal, auto_equity FROM lender_borrowers
+                                 WHERE email IS NOT NULL AND email != '' AND (auto_seasonal = 1 OR auto_equity = 1)""").fetchall():
+            d = dict(r)
+            out.append({"id": d["id"], "type": "lender_borrower", "professional_id": d["lender_user_id"], "name": d["name"], "email": d["email"],
+                        "address": d.get("property_address"), "value": None, "equity": None,
+                        "care": bool(d["auto_seasonal"]), "show_equity": False})
+        done = {(r[0], r[1]) for r in conn.execute(
+            "SELECT contact_type, contact_id FROM automated_email_logs WHERE email_type = 'seasonal' AND status = 'sent' "
+            "AND sent_at >= datetime('now', '-60 days')").fetchall()}
+    finally:
+        conn.close()
+    return [c for c in out if (c["type"], c["id"]) not in done]
+
+
+def season_email_text(season, contact, pro_full, pro_first):
+    """"Your home this [season]": what the home is worth, three things worth doing, one way to save on the mortgage."""
+    first = _first(contact["name"])
+    parts = [f"Hi {first},", "", f"Here is a gentle look at your home this {season}. There is no need to do it all, just pick what feels helpful."]
+    value, equity = contact.get("value"), contact.get("equity")
+    if contact.get("show_equity") and (value or equity):
+        lines = [f"Your home{(' at ' + contact['address']) if contact.get('address') else ''}:"]
+        if value:
+            lines.append(f"  Estimated value: ${float(value):,.0f}")
+        if equity:
+            lines.append(f"  Estimated equity: ${float(equity):,.0f}")
+        lines.append("  These are estimates, but they are a nice reminder of how much you have built.")
+        parts += ["", *lines]
+    if contact.get("care", True):
+        parts += ["", "Three things worth doing around the house:"] + [f"  - {t}" for t in SEASON_TIPS[season]]
+    parts += ["", _mortgage_tip(contact["type"], pro_first), "", "I am thinking of you and your home. If anything comes up, just hit reply.", "", "Warmly,", pro_full, ""]
+    return f"Your home this {season}", "\n".join(parts)
+
+
 def send_seasonal_checklists():
-    """Send seasonal home maintenance checklists."""
+    """"Your home this [season]": one note a season (March, June, September, December) that replaces the separate seasonal
+    checklist and equity emails. Runs daily; a household that was emailed in the last 7 days is simply tried again tomorrow."""
     if not _email_ready():
         return
-    
     from datetime import datetime
     from database import get_connection
-    month = datetime.now().month
-    
-    # Determine season
-    if month in [12, 1, 2]:
-        season = "Winter"
-        checklist = """Winter Home Maintenance Checklist:
-- Check heating system and change filters
-- Inspect roof for ice dams
-- Seal windows and doors
-- Test smoke and carbon monoxide detectors
-- Clean gutters and downspouts
-- Insulate pipes to prevent freezing
-- Check weatherstripping
-- Service snow removal equipment"""
-    elif month in [3, 4, 5]:
-        season = "Spring"
-        checklist = """Spring Home Maintenance Checklist:
-- Clean gutters and downspouts
-- Inspect roof for winter damage
-- Service air conditioning system
-- Check exterior paint and siding
-- Clean windows and screens
-- Inspect deck and patio
-- Fertilize lawn and garden
-- Check irrigation system"""
-    elif month in [6, 7, 8]:
-        season = "Summer"
-        checklist = """Summer Home Maintenance Checklist:
-- Service air conditioning
-- Check and clean outdoor spaces
-- Inspect and clean pool/spa if applicable
-- Check for pest issues
-- Maintain landscaping
-- Inspect exterior for damage
-- Check outdoor lighting
-- Prepare for storm season"""
-    else:  # 9, 10, 11
-        season = "Fall"
-        checklist = """Fall Home Maintenance Checklist:
-- Clean gutters and downspouts
-- Inspect roof and chimney
-- Service heating system
-- Seal windows and doors
-- Check insulation
-- Winterize outdoor plumbing
-- Rake leaves and maintain yard
-- Test smoke detectors"""
-    
-    # Get contacts with seasonal emails enabled
-    contacts = []
-    conn = get_connection()
-    cur = conn.cursor()
-    
-    cur.execute(
-        """
-        SELECT id, agent_user_id, name, email
-        FROM agent_contacts
-        WHERE email IS NOT NULL AND email != '' AND auto_seasonal = 1
-        """
-    )
-    for row in cur.fetchall():
-        contacts.append({
-            'id': row['id'],
-            'type': 'agent_contact',
-            'professional_id': row['agent_user_id'],
-            'name': row['name'],
-            'email': row['email']
-        })
-    
-    cur.execute(
-        """
-        SELECT id, lender_user_id, name, email
-        FROM lender_borrowers
-        WHERE email IS NOT NULL AND email != '' AND auto_seasonal = 1
-        """
-    )
-    for row in cur.fetchall():
-        contacts.append({
-            'id': row['id'],
-            'type': 'lender_borrower',
-            'professional_id': row['lender_user_id'],
-            'name': row['name'],
-            'email': row['email']
-        })
-    
-    conn.close()
-    
-    # Send to all contacts (only once per season - you may want to track this)
-    for contact in contacts:
-        pro_full, pro_first = _pro_names(contact.get('professional_id'))
-        subject = f"Your {season.lower()} home care list"
-        body = f"""Hi {_first(contact['name'])},
-
-I put together a few things to help you care for your home this {season.lower()}. There is no need to do it all, just pick what feels helpful:
-
-{checklist}
-
-I am thinking of you and your home. Reach out anytime if I can help with anything.
-
-Warmly,
-{pro_full}
-"""
-        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
-            log_automated_email(
-                contact['id'], contact['type'], contact['professional_id'],
-                'seasonal', contact['email'], subject, 'sent'
-            )
+    season = SEASON_MONTHS.get(datetime.now().month)
+    if not season:
+        return
+    for contact in _season_contacts():
+        if not auto_email_enabled(contact["professional_id"], "seasonal"):
+            continue
+        conn = get_connection()
+        try:
+            held = _recently_emailed(conn, contact["email"])
+        finally:
+            conn.close()
+        if held:
+            continue
+        pro_full, pro_first = _pro_names(contact.get("professional_id"))
+        subject, body = season_email_text(season, contact, pro_full, pro_first)
+        if send_reminder_email(contact["email"], subject, _with_stop_link(body, contact), **pro_sender(contact.get("professional_id"))):
+            log_automated_email(contact["id"], contact["type"], contact["professional_id"], "seasonal", contact["email"], subject, "sent")
 
 
 def send_equity_updates():
-    """Send equity update emails based on frequency."""
-    if not _email_ready():
-        return
-    
-    from datetime import datetime
-    from database import get_connection
-    today = datetime.now()
-    
-    # Only send on 1st of month for monthly, 1st of odd months for bimonthly, etc.
-    if today.day != 1:
-        return
-    
-    contacts = []
-    conn = get_connection()
-    cur = conn.cursor()
-    
-    # Monthly contacts
-    if today.month % 1 == 0:  # Every month
-        cur.execute(
-            """
-            SELECT id, agent_user_id, name, email, property_address, 
-                   property_value, equity_estimate
-            FROM agent_contacts
-            WHERE email IS NOT NULL AND email != '' 
-              AND auto_equity = 1 
-              AND equity_frequency = 'monthly'
-              AND equity_estimate IS NOT NULL
-            """
-        )
-        for row in cur.fetchall():
-            contacts.append(dict(row) | {'type': 'agent_contact', 'professional_id': row['agent_user_id']})
-    
-    # Bimonthly contacts (odd months)
-    if today.month % 2 == 1:
-        cur.execute(
-            """
-            SELECT id, agent_user_id, name, email, property_address,
-                   property_value, equity_estimate
-            FROM agent_contacts
-            WHERE email IS NOT NULL AND email != '' 
-              AND auto_equity = 1 
-              AND equity_frequency = 'bimonthly'
-              AND equity_estimate IS NOT NULL
-            """
-        )
-        for row in cur.fetchall():
-            contacts.append(dict(row) | {'type': 'agent_contact', 'professional_id': row['agent_user_id']})
-    
-    # Quarterly contacts (Jan, Apr, Jul, Oct)
-    if today.month in [1, 4, 7, 10]:
-        cur.execute(
-            """
-            SELECT id, agent_user_id, name, email, property_address,
-                   property_value, equity_estimate
-            FROM agent_contacts
-            WHERE email IS NOT NULL AND email != '' 
-              AND auto_equity = 1 
-              AND equity_frequency = 'quarterly'
-              AND equity_estimate IS NOT NULL
-            """
-        )
-        for row in cur.fetchall():
-            contacts.append(dict(row) | {'type': 'agent_contact', 'professional_id': row['agent_user_id']})
-    
-    # Same for lender borrowers
-    if today.month % 1 == 0:
-        cur.execute(
-            """
-            SELECT id, lender_user_id, name, email, property_address,
-                   loan_amount, loan_rate
-            FROM lender_borrowers
-            WHERE email IS NOT NULL AND email != '' 
-              AND auto_equity = 1 
-              AND equity_frequency = 'monthly'
-            """
-        )
-        for row in cur.fetchall():
-            contacts.append(dict(row) | {'type': 'lender_borrower', 'professional_id': row['lender_user_id']})
-    
-    conn.close()
-    
-    for contact in contacts:
-        equity = contact.get('equity_estimate', 0)
-        property_val = contact.get('property_value', 0)
-        pro_full, pro_first = _pro_names(contact.get('professional_id'))
-        subject = f"Your home equity update for {today.strftime('%B %Y')}"
-        body = f"""Hi {_first(contact['name'])},
-
-Here is a quick look at where your home stands this month:
-
-Home: {contact.get('property_address', 'Your home')}
-Estimated value: ${property_val:,.0f}
-Estimated equity: ${equity:,.0f}
-
-These are estimates, but they are a nice reminder of how much you have built. I am proud of you. If you would like to talk it through, I am just a call or message away.
-
-Warmly,
-{pro_full}
-"""
-        if send_reminder_email(contact['email'], subject, _with_stop_link(body, contact), **pro_sender(contact.get('professional_id'))):
-            log_automated_email(
-                contact['id'], contact['type'], contact['professional_id'],
-                'equity', contact['email'], subject, 'sent'
-            )
+    """Retired: home value and equity now arrive inside the seasonal note, so nobody gets a second email for it."""
+    return
 
 
 def send_holiday_greetings():
@@ -1979,6 +1881,12 @@ def send_holiday_greetings():
     conn.close()
     
     for contact in contacts:
+        _hc = get_connection()
+        try:
+            if _recently_emailed(_hc, contact['email']):
+                continue
+        finally:
+            _hc.close()
         pro_full, pro_first = _pro_names(contact.get('professional_id'))
         subject = f"{holiday}, {_first(contact['name'])}!"
         body = f"""Hi {_first(contact['name'])},
@@ -2477,8 +2385,7 @@ def start_scheduler():
         # CRM automated emails
         scheduler.add_job(send_birthday_emails, "cron", hour=9, minute=0)  # 9 AM daily
         scheduler.add_job(send_anniversary_emails, "cron", hour=9, minute=5)  # 9:05 AM daily
-        scheduler.add_job(send_seasonal_checklists, "cron", day=1, hour=10, minute=0)  # 1st of month, 10 AM
-        scheduler.add_job(send_equity_updates, "cron", day=1, hour=10, minute=5)  # 1st of month, 10:05 AM
+        scheduler.add_job(send_seasonal_checklists, "cron", hour=10, minute=0)  # daily; sends in Mar, Jun, Sep, Dec
         scheduler.add_job(send_holiday_greetings, "cron", hour=9, minute=10)  # 9:10 AM daily
         # Drip sequences and review requests
         scheduler.add_job(send_drip_emails, "cron", hour=9, minute=20)  # 9:20 AM daily
