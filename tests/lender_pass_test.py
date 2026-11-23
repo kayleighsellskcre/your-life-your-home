@@ -63,3 +63,12 @@ ok('class="b-table"' in t and 'id="bexp-' in t and "toggleBorrowerRow" in t, "th
 ok(t.count('class="borrower-checkbox"') >= 2 and "openEditModal(" in t, "the table keeps the checkboxes and the Edit button")
 t = c.get("/lender/crm").get_data(as_text=True)
 ok("/agent/transactions" not in t and "b-pri" in t and "b-sec" in t, "the lender CRM row buttons use one main look and one quiet look, and no agent links")
+
+# Marketing Hub: a picture maker next to the ready-to-use posts
+t = c.get("/lender/marketing-hub").get_data(as_text=True)
+ok('id="pic-canvas"' in t and "Download picture" in t, "the lender Marketing Hub has a picture maker")
+ag = D.create_user("Ann Agent", "agent9@example.test", gp("password123"), "agent")
+c3 = A.app.test_client()
+with c3.session_transaction() as s: s["user_id"] = ag; s["role"] = "agent"
+t = c3.get("/agent/marketing-hub").get_data(as_text=True)
+ok('id="pic-canvas"' in t and "Welcome home" in t, "the agent Marketing Hub has the picture maker too")

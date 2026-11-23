@@ -1,0 +1,72 @@
+{# A simple picture maker: pick a look, type a headline, download a square image for Instagram or Facebook. #}
+<div class="selection-card" style="margin-top:1.2rem;" id="pic-maker">
+ <h2 class="selection-title">Make a picture</h2>
+ <p style="color:#7A6855;font-size:.92rem;margin:-.3rem 0 1rem;">Pick a look, type a few words, and download an image to post. Pair it with any of the posts above.</p>
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;align-items:start;" class="pic-grid">
+  <div>
+   <label for="pic-head" style="font-weight:700;color:#4C3929;font-size:.9rem;">Headline</label>
+   <input id="pic-head" type="text" maxlength="60" value="{{ pic_headline or 'Welcome home' }}" style="width:100%;box-sizing:border-box;padding:.6rem .75rem;border:1px solid rgba(143,98,68,.35);border-radius:10px;font-size:16px;margin:.25rem 0 .8rem;">
+   <label for="pic-sub" style="font-weight:700;color:#4C3929;font-size:.9rem;">A short line underneath</label>
+   <input id="pic-sub" type="text" maxlength="90" value="{{ pic_sub or 'Caring for you every step of the way' }}" style="width:100%;box-sizing:border-box;padding:.6rem .75rem;border:1px solid rgba(143,98,68,.35);border-radius:10px;font-size:16px;margin:.25rem 0 .8rem;">
+   <label for="pic-name" style="font-weight:700;color:#4C3929;font-size:.9rem;">Your name</label>
+   <input id="pic-name" type="text" maxlength="50" value="{{ user.name or '' }}" style="width:100%;box-sizing:border-box;padding:.6rem .75rem;border:1px solid rgba(143,98,68,.35);border-radius:10px;font-size:16px;margin:.25rem 0 .8rem;">
+   <div style="font-weight:700;color:#4C3929;font-size:.9rem;margin-bottom:.3rem;">Look</div>
+   <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem;">
+    {% for key, label in [('cream','Cream'),('tan','Warm tan'),('olive','Olive'),('night','Evening')] %}
+    <button type="button" class="pic-look" data-look="{{ key }}" style="border:1px solid #8F6244;background:{{ '#8F6244' if loop.first else '#fff' }};color:{{ '#fff' if loop.first else '#8F6244' }};border-radius:99px;padding:.4rem .9rem;font-weight:700;cursor:pointer;min-height:40px;">{{ label }}</button>
+    {% endfor %}
+   </div>
+   <button type="button" id="pic-dl" style="border:none;background:#8F6244;color:#fff;border-radius:99px;padding:.6rem 1.4rem;font-weight:700;cursor:pointer;min-height:44px;">Download picture</button>
+  </div>
+  <canvas id="pic-canvas" width="1080" height="1080" style="width:100%;height:auto;border-radius:14px;border:1px solid rgba(143,98,68,.25);" aria-label="Preview of your picture"></canvas>
+ </div>
+</div>
+<style>@media (max-width:700px){ .pic-grid{grid-template-columns:1fr!important;} }</style>
+<script>
+(function () {
+  var looks = {
+    cream: { bg: '#F7F1E8', fg: '#4C3929', sub: '#7A6855', accent: '#B08968' },
+    tan:   { bg: '#A9794F', fg: '#FFFFFF', sub: '#FBF3EA', accent: '#FFFFFF' },
+    olive: { bg: '#6F7B4F', fg: '#FFFFFF', sub: '#F0F2E6', accent: '#E6D9B8' },
+    night: { bg: '#3A2E26', fg: '#F7F1E8', sub: '#D9C7B2', accent: '#C9A27E' }
+  };
+  var look = 'cream', cv = document.getElementById('pic-canvas'), cx = cv.getContext('2d');
+  function wrap(text, maxW, font) {
+    cx.font = font; var words = text.split(/\s+/), lines = [], cur = '';
+    words.forEach(function (w) { var t = cur ? cur + ' ' + w : w; if (cx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else { cur = t; } });
+    if (cur) lines.push(cur); return lines;
+  }
+  function draw() {
+    var L = looks[look], W = 1080;
+    cx.fillStyle = L.bg; cx.fillRect(0, 0, W, W);
+    cx.strokeStyle = L.accent; cx.lineWidth = 4; cx.strokeRect(60, 60, W - 120, W - 120);
+    cx.textAlign = 'center'; cx.textBaseline = 'alphabetic';
+    var head = document.getElementById('pic-head').value.trim() || ' ';
+    var sub = document.getElementById('pic-sub').value.trim();
+    var name = document.getElementById('pic-name').value.trim();
+    var size = head.length > 28 ? 84 : 110, font = '700 ' + size + 'px Georgia, "Playfair Display", serif';
+    var hl = wrap(head, 800, font), lh = size * 1.15, subLines = sub ? wrap(sub, 760, '400 44px Georgia, serif') : [];
+    var total = hl.length * lh + (subLines.length ? 40 + subLines.length * 58 : 0), y = (W - total) / 2 + size * 0.85;
+    cx.fillStyle = L.fg; cx.font = font;
+    hl.forEach(function (t) { cx.fillText(t, W / 2, y); y += lh; });
+    if (subLines.length) {
+      y += 10; cx.fillStyle = L.accent; cx.fillRect(W / 2 - 50, y - 40, 100, 4); y += 40;
+      cx.fillStyle = L.sub; cx.font = '400 44px Georgia, serif';
+      subLines.forEach(function (t) { cx.fillText(t, W / 2, y); y += 58; });
+    }
+    if (name) { cx.fillStyle = L.accent; cx.font = '700 36px Georgia, serif'; cx.fillText(name, W / 2, W - 110); }
+  }
+  ['pic-head', 'pic-sub', 'pic-name'].forEach(function (id) { document.getElementById(id).addEventListener('input', draw); });
+  document.querySelectorAll('.pic-look').forEach(function (b) {
+    b.addEventListener('click', function () {
+      look = b.getAttribute('data-look');
+      document.querySelectorAll('.pic-look').forEach(function (o) { var on = o === b; o.style.background = on ? '#8F6244' : '#fff'; o.style.color = on ? '#fff' : '#8F6244'; });
+      draw();
+    });
+  });
+  document.getElementById('pic-dl').addEventListener('click', function () {
+    var a = document.createElement('a'); a.download = 'my-post.png'; a.href = cv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove();
+  });
+  draw();
+})();
+</script>
