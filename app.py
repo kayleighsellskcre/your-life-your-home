@@ -1363,6 +1363,7 @@ AUTO_EMAILS = {
     "birthday": ("Birthday email", "On their birthday"),
     "anniversary": ("Home anniversary email", "On the anniversary of their move-in"),
     "review": ("Thank-you and review request", "3 days after a deal closes"),
+    "freeze": ("Freeze heads-up", "Once a winter, when the first hard freeze is forecast near their home"),
     "welcome": ("Welcome home", "About a week after a deal closes, with your trusted vendors"),
     "seasonal": ("Your home this season", "Once a season: home value, three things to do, one way to save"),
 }
@@ -1404,6 +1405,8 @@ def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
         season = SEASON_MONTHS.get(_m) or {1: "winter", 2: "winter", 4: "spring", 5: "spring", 7: "summer", 8: "summer", 10: "fall", 11: "fall"}[_m]
         return season_email_text(season, {"name": sample, "type": "lender_borrower" if role == "lender" else "agent_contact", "address": "your home",
                                           "value": 450000, "equity": 160000, "care": True, "show_equity": role != "lender"}, pro, (pro or "").split(" ")[0])
+    if kind == "freeze":
+        return freeze_email_text(sample, pro, 26)
     if kind == "welcome":
         return welcome_email_text(sample, pro, [{"category": "Plumber", "name": "Sample Plumbing Co", "phone": "(555) 010-0100"},
                                                   {"category": "Electrician", "name": "Sample Electric", "phone": "(555) 010-0101"}])
@@ -1428,7 +1431,7 @@ def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
 def auto_emails_context(user):
     """Everything the Automatic emails page shows: each email with its on/off state and exact wording, and what went out lately."""
     from database import get_connection
-    kinds = ["birthday", "anniversary", "seasonal", "review"] + (["welcome"] if user.get("role") == "agent" else [])
+    kinds = ["birthday", "anniversary", "seasonal", "review"] + (["welcome", "freeze"] if user.get("role") == "agent" else [])
     items = []
     for k in kinds:
         subj, body = auto_email_preview(k, user.get("name"), role=user.get("role"))
@@ -1437,7 +1440,7 @@ def auto_emails_context(user):
     c = get_connection()
     try:
         for r in c.execute("""SELECT l.email_type, l.sent_at, l.recipient_email, l.subject FROM automated_email_logs l
-                              WHERE l.professional_user_id = ? AND l.email_type IN ('birthday', 'anniversary', 'seasonal') AND l.status = 'sent'
+                              WHERE l.professional_user_id = ? AND l.email_type IN ('birthday', 'anniversary', 'seasonal', 'welcome', 'freeze') AND l.status = 'sent'
                               ORDER BY l.sent_at DESC LIMIT 8""", (user["id"],)).fetchall():
             recent.append({"kind": AUTO_EMAILS[r["email_type"]][0], "when": str(r["sent_at"] or "")[:10], "to": r["recipient_email"], "subject": r["subject"]})
         if user.get("role") in ("agent", "lender"):
@@ -1481,7 +1484,7 @@ def send_auto_email_sample(user, kind):
 
 def save_auto_emails(user, form):
     """Apply the switches from the page. A switch that is not in the form is off."""
-    for k in (["birthday", "anniversary", "seasonal"] + (["review", "welcome"] if user.get("role") == "agent" else [])):
+    for k in (["birthday", "anniversary", "seasonal"] + (["review", "welcome", "freeze"] if user.get("role") == "agent" else [])):
         set_auto_email(user["id"], k, form.get("on_" + k) == "1")
 
 
@@ -2056,6 +2059,91 @@ def send_drip_emails():
             print(f"[DRIP] Error sending to {row.get('contact_email')}: {e}")
 
 
+_ZIP_CACHE = {}
+FREEZE_QUIET_MONTHS = (5, 6, 7, 8, 9)  # no freeze notes in the warm months
+FREEZE_F = 28  # a hard freeze: pipes and outdoor faucets are at risk
+
+
+def _zip_coords(zip5):
+    """Latitude and longitude for a US zip code (free lookup), remembered for the life of the server."""
+    if zip5 in _ZIP_CACHE:
+        return _ZIP_CACHE[zip5]
+    import json as _json
+    import urllib.request as _req
+    pt = None
+    try:
+        with _req.urlopen(f"https://api.zippopotam.us/us/{zip5}", timeout=8) as r:
+            place = _json.loads(r.read().decode("utf-8"))["places"][0]
+            pt = (float(place["latitude"]), float(place["longitude"]))
+    except Exception:
+        pt = None
+    _ZIP_CACHE[zip5] = pt
+    return pt
+
+
+def _forecast_low(lat, lon):
+    """The coldest forecast low, in Fahrenheit, over the next two days (free forecast service). None if it cannot be read."""
+    import json as _json
+    import urllib.request as _req
+    try:
+        url = (f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
+               "&daily=temperature_2m_min&temperature_unit=fahrenheit&forecast_days=3&timezone=auto")
+        with _req.urlopen(url, timeout=8) as r:
+            lows = _json.loads(r.read().decode("utf-8"))["daily"]["temperature_2m_min"][:3]
+        lows = [x for x in lows if x is not None]
+        return min(lows) if lows else None
+    except Exception:
+        return None
+
+
+def freeze_email_text(first, pro_full, low):
+    return (f"A hard freeze is coming, {first}", "\n".join([
+        f"Hi {first},", "",
+        f"A quick, friendly heads-up: the forecast near your home shows a low of about {int(round(low))} degrees in the next couple of days.", "",
+        "A few small things that help:",
+        "  - Unhook garden hoses and cover outdoor faucets",
+        "  - Let a faucet drip overnight if pipes run along an outside wall",
+        "  - Open cabinet doors under sinks on exterior walls",
+        "  - Know where your main water shut-off is, just in case", "",
+        "No need to do anything fancy. If you would like help with anything, just hit reply.", "",
+        "Thinking of you and your home,", pro_full, ""]))
+
+
+def send_freeze_alerts():
+    """Once a winter, when a hard freeze is forecast near a client's home: a short, caring heads-up. This one is not held back
+    by the one-a-week rule, because it is time sensitive."""
+    from datetime import datetime
+    if not _email_ready() or datetime.now().month in FREEZE_QUIET_MONTHS:
+        return
+    from database import get_connection
+    conn = get_connection()
+    try:
+        rows = [dict(r) for r in conn.execute(
+            """SELECT id, agent_user_id, name, email, zip_code FROM agent_contacts
+               WHERE email IS NOT NULL AND email != '' AND zip_code IS NOT NULL AND zip_code != '' AND auto_seasonal = 1""").fetchall()]
+        done = {r[0] for r in conn.execute(
+            "SELECT contact_id FROM automated_email_logs WHERE email_type = 'freeze' AND contact_type = 'agent_contact' AND status = 'sent' "
+            "AND sent_at >= datetime('now', '-150 days')").fetchall()}
+    finally:
+        conn.close()
+    lows = {}
+    for row in rows:
+        if row["id"] in done or not auto_email_enabled(row["agent_user_id"], "freeze"):
+            continue
+        z = str(row["zip_code"]).strip()[:5]
+        if z not in lows:
+            pt = _zip_coords(z)
+            lows[z] = _forecast_low(*pt) if pt else None
+        low = lows[z]
+        if low is None or low > FREEZE_F:
+            continue
+        pro_full, _ = _pro_names(row["agent_user_id"])
+        first = (row.get("name") or "there").split()[0]
+        subject, body = freeze_email_text(first, pro_full, low)
+        if send_reminder_email(row["email"], subject, _with_stop_link(body, {"id": row["id"], "type": "agent_contact"}), **pro_sender(row["agent_user_id"])):
+            log_automated_email(row["id"], "agent_contact", row["agent_user_id"], "freeze", row["email"], subject, "sent")
+
+
 def welcome_email_text(first, pro_full, vendors):
     """A warm note a week after closing: settling in, and the people the agent trusts for the first home calls."""
     parts = [f"Hi {first},", "", "I hope the first week in your home has been full of good moments. There is a lot to figure out at the start, so I wanted to make one part easier."]
@@ -2457,6 +2545,7 @@ def start_scheduler():
         scheduler.add_job(send_drip_emails, "cron", hour=9, minute=20)  # 9:20 AM daily
         scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
         scheduler.add_job(send_welcome_emails, "cron", hour=9, minute=35)  # 9:35 AM daily
+        scheduler.add_job(send_freeze_alerts, "cron", hour=8, minute=30)  # 8:30 AM daily, winter only
         # Nightly home value refresh from real market data
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites

@@ -94,3 +94,31 @@ sent.clear(); A.send_welcome_emails()
 ok(sent == [], "switched off means nothing is sent")
 t = c.get("/agent/automatic-emails").get_data(as_text=True)
 ok("Welcome home" in t, "the Automatic emails page lists the welcome note")
+
+# freeze heads-up: only when a hard freeze is forecast, once, and only with the switch on
+import datetime as _dt
+class _D(_dt.datetime):
+    @classmethod
+    def now(cls, tz=None): return cls(2026, 12, 10, 8, 0)
+_real_dt = _dt.datetime
+conn = D.get_connection()
+conn.execute("INSERT INTO agent_contacts (agent_user_id, name, email, zip_code, auto_seasonal) VALUES (?, 'Fay Frost', 'fay@example.test', '80202', 1)", (ag,))
+conn.commit(); conn.close()
+A.set_auto_email(ag, "freeze", True)
+A.FREEZE_QUIET_MONTHS = ()
+A._zip_coords = lambda z: (39.7, -104.9)
+A._forecast_low = lambda la, lo: 40
+sent.clear(); A.send_freeze_alerts()
+ok(sent == [], "a mild forecast sends no freeze note")
+A._forecast_low = lambda la, lo: 24
+sent.clear(); A.send_freeze_alerts()
+ok(sent == ["fay@example.test"] and "24 degrees" in bodies[-1] and "—" not in bodies[-1], "a hard freeze sends one caring heads-up")
+sent.clear(); A.send_freeze_alerts()
+ok(sent == [], "and only once a winter")
+A.set_auto_email(ag, "freeze", False)
+conn = D.get_connection()
+conn.execute("DELETE FROM automated_email_logs WHERE email_type='freeze'"); conn.commit(); conn.close()
+sent.clear(); A.send_freeze_alerts()
+ok(sent == [], "switched off means nothing is sent")
+t = c.get("/agent/automatic-emails").get_data(as_text=True)
+ok("Freeze heads-up" in t, "the Automatic emails page lists the freeze note")
