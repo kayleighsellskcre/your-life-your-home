@@ -48,6 +48,18 @@
  background: var(--olive-green);
  color: var(--white);
  }
+ .b-table { width:100%; border-collapse:collapse; background:var(--white); border:var(--border-light); border-radius:var(--border-radius-lg); overflow:hidden; box-shadow:var(--shadow-light); margin-bottom:1rem; }
+ .b-table th { text-align:left; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:var(--charcoal-brown); opacity:.75; padding:.7rem .75rem; background:var(--warm-cream); }
+ .b-table td { padding:.65rem .75rem; border-top:1px solid rgba(107,91,77,.12); vertical-align:middle; font-size:.92rem; max-width:16rem; overflow:hidden; text-overflow:ellipsis; }
+ .b-row { cursor:pointer; }
+ .b-row:hover { background:var(--light-cream); }
+ .b-name { font-weight:700; color:var(--charcoal-brown); min-width:7rem; }
+ .b-table td:nth-child(5), .b-table td:nth-child(6) { white-space:nowrap; }
+ .b-muted { opacity:.55; }
+ .b-exp { display:none; }
+ .b-exp.open { display:table-row; }
+ .b-exp > td { max-width:none; white-space:normal; background:var(--light-cream); padding:1rem 1.25rem; }
+ @media (max-width:700px) { .b-hide { display:none; } .b-table td, .b-table th { padding:.6rem .5rem; } }
  .borrower-card {
  background: var(--gradient-warm);
  border-radius: var(--border-radius-lg);
@@ -395,33 +407,21 @@
  </div>
  <button onclick="openBulkActionModal(getSelectedBorrowerIds())" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;" id="bulkActionBtn" disabled>Bulk Actions</button>
  </div>
- {% for borrower in borrowers %}
- <div class="borrower-card" style="position: relative;">
- <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10;">
- <input type="checkbox" class="borrower-checkbox" value="{{ borrower.id }}" onchange="updateBulkActionButton()" style="width: 18px; height: 18px; cursor: pointer;">
- </div>
- <div class="borrower-header">
- <div>
- <h3 class="borrower-name">{{ borrower.name }}</h3>
- <span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span>
- {% if borrower.user_id %}<div style="color:#5E7A55;font-size:.8rem;margin-top:.25rem;">&#10003; Joined the app</div>{% endif %}
- </div>
- <button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;">Edit</button>
- </div>
-
+<table class="b-table">
+<thead><tr><th style="width:2rem;"></th><th>Name</th><th>Status</th><th class="b-hide">Email</th><th class="b-hide">Phone</th><th class="b-hide">Last touch</th><th style="text-align:right;">Actions</th></tr></thead>
+<tbody>
+{% for borrower in borrowers %}
+<tr class="b-row" id="brow-{{ borrower.id }}" onclick="toggleBorrowerRow({{ borrower.id }}, event)">
+ <td onclick="event.stopPropagation()"><input type="checkbox" class="borrower-checkbox" value="{{ borrower.id }}" onchange="updateBulkActionButton()" style="width:18px;height:18px;cursor:pointer;" aria-label="Select {{ borrower.name }}"></td>
+ <td class="b-name">{{ borrower.name }}{% if borrower.user_id %}<div style="color:#5E7A55;font-size:.78rem;font-weight:400;">&#10003; Joined the app</div>{% endif %}</td>
+ <td><span class="borrower-badge badge-{{ borrower.status }}">{{ borrower.status|replace('_', ' ')|title }}</span></td>
+ <td class="b-hide">{% if borrower.email %}<a href="mailto:{{ borrower.email }}" onclick="event.stopPropagation()">{{ borrower.email }}</a>{% else %}<span class="b-muted">-</span>{% endif %}</td>
+ <td class="b-hide">{% if borrower.phone %}<a href="tel:{{ borrower.phone }}" onclick="event.stopPropagation()">{{ borrower.phone }}</a>{% else %}<span class="b-muted">-</span>{% endif %}</td>
+ <td class="b-hide b-muted">{{ borrower.last_touch or '-' }}</td>
+ <td style="text-align:right;" onclick="event.stopPropagation()"><button onclick="openEditModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;width:auto!important;margin:0!important;">Edit</button></td>
+</tr>
+<tr class="b-exp" id="bexp-{{ borrower.id }}"><td colspan="7"><div class="b-exp-in">
  <div class="borrower-info">
- {% if borrower.email %}
- <div class="info-item">
- <strong>Email:</strong>
- <a href="mailto:{{ borrower.email }}">{{ borrower.email }}</a>
- </div>
- {% endif %}
- {% if borrower.phone %}
- <div class="info-item">
- <strong>Phone:</strong>
- <a href="tel:{{ borrower.phone }}">{{ borrower.phone }}</a>
- </div>
- {% endif %}
  {% if borrower.loan_type %}
  <div class="info-item">
  <strong>Loan Type:</strong>
@@ -564,8 +564,9 @@
  <button onclick="openHistoryModal({{ borrower.id }})" class="btn btn-small" style="background: rgba(107, 91, 77, 0.2); color: var(--charcoal-brown); border: none;"> History ({{ borrower.interaction_count }})</button>
  {% endif %}
  </div>
- </div>
- {% endfor %}
+</div></td></tr>
+{% endfor %}
+</tbody></table>
  {% if pages > 1 %}
  <nav class="crm-pager" aria-label="Pages" style="display:flex;justify-content:center;align-items:center;gap:1rem;margin:1rem 0;flex-wrap:wrap;">
  {% if page > 1 %}<a class="btn btn-small" style="width:auto!important;margin:0!important;" href="?page={{ page - 1 }}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&q={{ search_query|urlencode }}{% endif %}">&larr; Previous</a>{% endif %}
@@ -1297,6 +1298,12 @@ function generateDealsList(borrowers) {
  
  html += '</div>';
  return html;
+}
+
+function toggleBorrowerRow(id, ev) {
+ if (ev && ev.target.closest('a, button, input')) return;
+ const r = document.getElementById('bexp-' + id);
+ if (r) r.classList.toggle('open');
 }
 
 function toggleAllBorrowers(checked) {

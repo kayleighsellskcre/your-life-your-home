@@ -16,7 +16,7 @@ conn.commit()
 c = A.app.test_client()
 with c.session_transaction() as s: s["user_id"] = ln; s["role"] = "lender"
 t0 = time.time(); r = c.get("/lender/crm"); dt = time.time() - t0; t = r.get_data(as_text=True)
-ok(r.status_code == 200 and t.count('class="borrower-card"') == 50 and "Page 1 of 3" in t, "page one shows 50 borrowers with pager (%d cards)" % t.count('class="borrower-card"'))
+ok(r.status_code == 200 and t.count('class="b-row"') == 50 and "Page 1 of 3" in t, "page one shows 50 borrowers with pager (%d cards)" % t.count('class="b-row"'))
 ok("Secret Sam" not in t, "other lender's borrowers never show")
 ok(">130<" in t.replace(" ", "").replace("\n", ""), "stats count everyone, not just the page")
 t3 = c.get("/lender/crm?page=3").get_data(as_text=True); ok("Page 3 of 3" in t3 and "Borrower 129" in t3, "last page works")

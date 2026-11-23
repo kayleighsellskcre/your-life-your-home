@@ -56,3 +56,8 @@ conn = D.get_connection()
 conn.execute("UPDATE lender_borrowers SET loan_amount=425000 WHERE name='Closed Cora'")
 conn.commit(); conn.close()
 ok("amount=425000" in c.get("/lender/loans").get_data(as_text=True), "the closed loan's amount travels to the Financials form")
+
+# The lender CRM lists people in a table like the agent CRM, with details one click away
+t = c.get("/lender/crm").get_data(as_text=True)
+ok('class="b-table"' in t and 'id="bexp-' in t and "toggleBorrowerRow" in t, "the lender CRM is a table with expandable rows")
+ok(t.count('class="borrower-checkbox"') >= 2 and "openEditModal(" in t, "the table keeps the checkboxes and the Edit button")
