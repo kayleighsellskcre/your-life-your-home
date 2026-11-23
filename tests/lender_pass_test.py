@@ -61,3 +61,5 @@ ok("amount=425000" in c.get("/lender/loans").get_data(as_text=True), "the closed
 t = c.get("/lender/crm").get_data(as_text=True)
 ok('class="b-table"' in t and 'id="bexp-' in t and "toggleBorrowerRow" in t, "the lender CRM is a table with expandable rows")
 ok(t.count('class="borrower-checkbox"') >= 2 and "openEditModal(" in t, "the table keeps the checkboxes and the Edit button")
+t = c.get("/lender/crm").get_data(as_text=True)
+ok("/agent/transactions" not in t and "b-pri" in t and "b-sec" in t, "the lender CRM row buttons use one main look and one quiet look, and no agent links")

@@ -56,6 +56,9 @@
  .b-name { font-weight:700; color:var(--charcoal-brown); min-width:7rem; }
  .b-table td:nth-child(5), .b-table td:nth-child(6) { white-space:nowrap; }
  .b-muted { opacity:.55; }
+ .b-pri { background:var(--olive-green)!important; color:var(--white)!important; border:none!important; text-decoration:none!important; width:auto!important; }
+ .b-sec { background:transparent!important; color:var(--charcoal-brown)!important; border:1px solid var(--taupe-beige)!important; text-decoration:none!important; width:auto!important; }
+ .b-sec:hover { background:var(--light-cream)!important; }
  .b-exp { display:none; }
  .b-exp.open { display:table-row; }
  .b-exp > td { max-width:none; white-space:normal; background:var(--light-cream); padding:1rem 1.25rem; }
@@ -551,18 +554,12 @@
  {% endif %}
 
  <div class="borrower-actions">
- <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small" style="background: var(--olive-green); color: var(--white); border: none;"> Log Interaction</button>
- <button onclick="openTaskModal({{ borrower.id }})" class="btn btn-small" style="background: #ffc107; color: var(--charcoal-brown); border: none;"> Add Task</button>
- <a href="/agent/transactions?borrower_id={{ borrower.id }}" class="btn btn-small" style="background: #A37B58; color: var(--white); text-decoration: none; border: none; display: inline-block;"> Add Transaction</a>
- {% if borrower.email %}
- <a href="mailto:{{ borrower.email }}" class="btn btn-small" style="background: var(--taupe-beige); color: var(--charcoal-brown); text-decoration: none; border: none;"> Email</a>
- {% endif %}
- {% if borrower.phone %}
- <a href="tel:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;"> Call</a> <a href="sms:{{ borrower.phone }}" class="btn btn-small" style="background: var(--soft-tan); color: var(--charcoal-brown); text-decoration: none; border: none;"> Text</a>
- {% endif %}
- {% if borrower.interaction_count > 0 %}
- <button onclick="openHistoryModal({{ borrower.id }})" class="btn btn-small" style="background: rgba(107, 91, 77, 0.2); color: var(--charcoal-brown); border: none;"> History ({{ borrower.interaction_count }})</button>
- {% endif %}
+ <button onclick="openInteractionModal({{ borrower.id }})" class="btn btn-small b-pri">Log Interaction</button>
+ <button onclick="openTaskModal({{ borrower.id }})" class="btn btn-small b-sec">Add Task</button>
+ <a href="{{ url_for('lender_loans') }}" class="btn btn-small b-sec">Add Loan</a>
+ {% if borrower.email %}<a href="mailto:{{ borrower.email }}" class="btn btn-small b-sec">Email</a>{% endif %}
+ {% if borrower.phone %}<a href="tel:{{ borrower.phone }}" class="btn btn-small b-sec">Call</a> <a href="sms:{{ borrower.phone }}" class="btn btn-small b-sec">Text</a>{% endif %}
+ {% if borrower.interaction_count > 0 %}<button onclick="openHistoryModal({{ borrower.id }})" class="btn btn-small b-sec">History ({{ borrower.interaction_count }})</button>{% endif %}
  </div>
 </div></td></tr>
 {% endfor %}
