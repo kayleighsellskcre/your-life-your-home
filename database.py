@@ -1065,6 +1065,11 @@ def init_db() -> None:
     except:
         pass
 
+    try:
+        cur.execute("ALTER TABLE review_requests ADD COLUMN welcome_sent_at TEXT")
+    except Exception:
+        pass
+
     # ------------- LENDER BORROWERS -------------
     cur.execute(
         """

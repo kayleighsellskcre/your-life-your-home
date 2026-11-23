@@ -1363,6 +1363,7 @@ AUTO_EMAILS = {
     "birthday": ("Birthday email", "On their birthday"),
     "anniversary": ("Home anniversary email", "On the anniversary of their move-in"),
     "review": ("Thank-you and review request", "3 days after a deal closes"),
+    "welcome": ("Welcome home", "About a week after a deal closes, with your trusted vendors"),
     "seasonal": ("Your home this season", "Once a season: home value, three things to do, one way to save"),
 }
 
@@ -1403,6 +1404,9 @@ def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
         season = SEASON_MONTHS.get(_m) or {1: "winter", 2: "winter", 4: "spring", 5: "spring", 7: "summer", 8: "summer", 10: "fall", 11: "fall"}[_m]
         return season_email_text(season, {"name": sample, "type": "lender_borrower" if role == "lender" else "agent_contact", "address": "your home",
                                           "value": 450000, "equity": 160000, "care": True, "show_equity": role != "lender"}, pro, (pro or "").split(" ")[0])
+    if kind == "welcome":
+        return welcome_email_text(sample, pro, [{"category": "Plumber", "name": "Sample Plumbing Co", "phone": "(555) 010-0100"},
+                                                  {"category": "Electrician", "name": "Sample Electric", "phone": "(555) 010-0101"}])
     if kind == "birthday":
         return (f"Happy birthday, {sample}!",
                 f"Hi {sample},\n\nHappy birthday! I hope your day is full of people you love and something delicious. I feel lucky to know you.\n\nWith warmth,\n{pro}")
@@ -1424,7 +1428,7 @@ def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
 def auto_emails_context(user):
     """Everything the Automatic emails page shows: each email with its on/off state and exact wording, and what went out lately."""
     from database import get_connection
-    kinds = ["birthday", "anniversary", "seasonal", "review"]
+    kinds = ["birthday", "anniversary", "seasonal", "review"] + (["welcome"] if user.get("role") == "agent" else [])
     items = []
     for k in kinds:
         subj, body = auto_email_preview(k, user.get("name"), role=user.get("role"))
@@ -1477,7 +1481,7 @@ def send_auto_email_sample(user, kind):
 
 def save_auto_emails(user, form):
     """Apply the switches from the page. A switch that is not in the form is off."""
-    for k in (["birthday", "anniversary", "seasonal"] + (["review"] if user.get("role") == "agent" else [])):
+    for k in (["birthday", "anniversary", "seasonal"] + (["review", "welcome"] if user.get("role") == "agent" else [])):
         set_auto_email(user["id"], k, form.get("on_" + k) == "1")
 
 
@@ -2052,6 +2056,60 @@ def send_drip_emails():
             print(f"[DRIP] Error sending to {row.get('contact_email')}: {e}")
 
 
+def welcome_email_text(first, pro_full, vendors):
+    """A warm note a week after closing: settling in, and the people the agent trusts for the first home calls."""
+    parts = [f"Hi {first},", "", "I hope the first week in your home has been full of good moments. There is a lot to figure out at the start, so I wanted to make one part easier."]
+    if vendors:
+        parts += ["", "These are people I trust, for whenever you need a hand:"]
+        for v in vendors:
+            line = f"  - {v['category']}: {v['name']}"
+            if v.get("phone"):
+                line += f", {v['phone']}"
+            parts.append(line)
+    parts += ["", "If you cannot find something or are not sure who to call, just hit reply and I will help.", "", "Welcome home,", pro_full, ""]
+    return f"Welcome home, {first}", "\n".join(parts)
+
+
+def send_welcome_emails():
+    """About a week after closing: a welcome note listing the agent's trusted vendors. Waits a day if the person was just emailed."""
+    if not _email_ready():
+        return
+    from database import get_connection
+    conn = get_connection()
+    try:
+        # the thank-you is scheduled 3 days after closing, so closing + 7 days is 4 days after that date; recent closings only
+        rows = [dict(r) for r in conn.execute(
+            """SELECT rr.id, rr.agent_user_id, rr.client_email AS addr, rr.client_name AS who FROM review_requests rr
+               JOIN users u ON u.id = rr.agent_user_id AND u.role = 'agent'
+               WHERE rr.welcome_sent_at IS NULL AND rr.client_email IS NOT NULL AND rr.client_email != ''
+                 AND rr.scheduled_date <= date('now', '-4 day') AND rr.scheduled_date >= date('now', '-14 day')""").fetchall()]
+    finally:
+        conn.close()
+    for row in rows:
+        pro = row["agent_user_id"]
+        if not auto_email_enabled(pro, "welcome"):
+            continue
+        conn = get_connection()
+        try:
+            if _recently_emailed(conn, row["addr"]):
+                continue
+            vendors = [dict(v) for v in conn.execute(
+                "SELECT category, name, phone FROM trusted_vendors WHERE agent_id = ? AND is_active = 1 ORDER BY category, name LIMIT 6", (pro,)).fetchall()]
+        finally:
+            conn.close()
+        pro_full, pro_first = _pro_names(pro)
+        first = (row.get("who") or "there").split()[0]
+        subject, body = welcome_email_text(first, pro_full, vendors)
+        if send_reminder_email(row["addr"], subject, body, **pro_sender(pro)):
+            c2 = get_connection()
+            try:
+                c2.execute("UPDATE review_requests SET welcome_sent_at = CURRENT_TIMESTAMP WHERE id = ?", (row["id"],))
+                c2.commit()
+            finally:
+                c2.close()
+            log_automated_email(0, "agent_contact", pro, "welcome", row["addr"], subject, "sent")
+
+
 def schedule_review_request(agent_user_id: int, transaction_id: int,
                              client_name: str, client_email: str):
     """Schedule a Google review request 3 days after closing."""
@@ -2398,6 +2456,7 @@ def start_scheduler():
         # Drip sequences and review requests
         scheduler.add_job(send_drip_emails, "cron", hour=9, minute=20)  # 9:20 AM daily
         scheduler.add_job(send_review_requests, "cron", hour=9, minute=25)  # 9:25 AM daily
+        scheduler.add_job(send_welcome_emails, "cron", hour=9, minute=35)  # 9:35 AM daily
         # Nightly home value refresh from real market data
         scheduler.add_job(update_home_values_daily, "cron", hour=2, minute=0)  # 2 AM daily
         scheduler.add_job(lambda: send_contest_invites_scheduled(), "cron", hour=9, minute=30)  # 9:30 AM daily, bracket contest invites

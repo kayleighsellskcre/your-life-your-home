@@ -72,3 +72,25 @@ conn = D.get_connection()
 n = conn.execute("SELECT COUNT(*) FROM automated_email_logs WHERE email_type='review' AND recipient_email='rev@example.test'").fetchone()[0]
 conn.close()
 ok(n == 1, "the thank-you is logged")
+
+# welcome note a week after closing, with the agent's trusted vendors
+conn = D.get_connection()
+conn.execute("INSERT INTO trusted_vendors (agent_id, name, category, phone) VALUES (?, 'Oak Plumbing', 'Plumber', '555-0100')", (ag,))
+conn.execute("INSERT INTO review_requests (agent_user_id, transaction_id, client_email, client_name, scheduled_date, status) "
+             "VALUES (?, 7, 'wel@example.test', 'Wes Welcome', date('now','-4 day'), 'sent')", (ag,))
+conn.commit(); conn.close()
+bodies = []
+A.send_reminder_email = lambda to, subject, body, **kw: (sent.append(to), bodies.append(body), True)[2]
+sent.clear(); A.send_welcome_emails()
+ok(sent == ["wel@example.test"] and "Oak Plumbing" in bodies[-1] and "—" not in bodies[-1], "a welcome note goes out a week after closing with the vendors")
+sent.clear(); A.send_welcome_emails()
+ok(sent == [], "and only once")
+A.set_auto_email(ag, "welcome", False)
+conn = D.get_connection()
+conn.execute("INSERT INTO review_requests (agent_user_id, transaction_id, client_email, client_name, scheduled_date, status) "
+             "VALUES (?, 8, 'off@example.test', 'Olive Off', date('now','-4 day'), 'sent')", (ag,))
+conn.commit(); conn.close()
+sent.clear(); A.send_welcome_emails()
+ok(sent == [], "switched off means nothing is sent")
+t = c.get("/agent/automatic-emails").get_data(as_text=True)
+ok("Welcome home" in t, "the Automatic emails page lists the welcome note")
