@@ -1363,7 +1363,7 @@ AUTO_EMAILS = {
     "birthday": ("Birthday email", "On their birthday"),
     "anniversary": ("Home anniversary email", "On the anniversary of their move-in"),
     "review": ("Thank-you and review request", "3 days after a deal closes"),
-    "freeze": ("Freeze heads-up", "Once a winter, when the first hard freeze is forecast near their home"),
+    "freeze": ("Freeze heads-up", "Once a winter, when a hard freeze is forecast near their home. You can also send one yourself from Frost Alert"),
     "welcome": ("Welcome home", "About a week after a deal closes, with your trusted vendors"),
     "seasonal": ("Your home this season", "Once a season: home value, three things to do, one way to save"),
 }
@@ -2124,11 +2124,17 @@ def send_freeze_alerts():
         done = {r[0] for r in conn.execute(
             "SELECT contact_id FROM automated_email_logs WHERE email_type = 'freeze' AND contact_type = 'agent_contact' AND status = 'sent' "
             "AND sent_at >= datetime('now', '-150 days')").fetchall()}
+        try:
+            # people the agent already warned by hand on the Frost Alert page this week should not get a second note
+            warned = {(r[0], r[1]) for r in conn.execute(
+                "SELECT sender_id, person_key FROM frost_sends WHERE sent_at >= datetime('now', '-7 days')").fetchall()}
+        except Exception:
+            warned = set()
     finally:
         conn.close()
     lows = {}
     for row in rows:
-        if row["id"] in done or not auto_email_enabled(row["agent_user_id"], "freeze"):
+        if row["id"] in done or (row["agent_user_id"], "c%d" % row["id"]) in warned or not auto_email_enabled(row["agent_user_id"], "freeze"):
             continue
         z = str(row["zip_code"]).strip()[:5]
         if z not in lows:

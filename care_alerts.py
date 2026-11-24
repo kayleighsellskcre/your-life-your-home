@@ -266,7 +266,15 @@ def recently_alerted(sender_id):
     conn = _db()
     try:
         cutoff = (datetime.utcnow() - timedelta(hours=RESEND_HOURS)).strftime("%Y-%m-%d %H:%M:%S")
-        return {r[0] for r in conn.execute("SELECT person_key FROM frost_sends WHERE sender_id = ? AND sent_at >= ?", (sender_id, cutoff)).fetchall()}
+        keys = {r[0] for r in conn.execute("SELECT person_key FROM frost_sends WHERE sender_id = ? AND sent_at >= ?", (sender_id, cutoff)).fetchall()}
+        try:
+            # the automatic freeze note counts too, so nobody is warned twice
+            keys |= {"c%d" % r[0] for r in conn.execute(
+                "SELECT contact_id FROM automated_email_logs WHERE professional_user_id = ? AND email_type = 'freeze' AND status = 'sent' AND sent_at >= ?",
+                (sender_id, cutoff)).fetchall()}
+        except Exception:
+            pass
+        return keys
     finally:
         conn.close()
 

@@ -126,3 +126,21 @@ ok("Freeze heads-up" in t, "the Automatic emails page lists the freeze note")
 # every page names its form fields for screen readers (one shared enhancer in the base template)
 t = c.get("/agent/crm").get_data(as_text=True)
 ok("Give every form field a name a screen reader can announce" in t and "btn-close" in t, "pages carry the field-naming enhancer")
+
+# someone already warned by hand on the Frost Alert page this week does not get the automatic freeze note too
+import care_alerts as _CA
+conn = D.get_connection()
+conn.execute("CREATE TABLE IF NOT EXISTS frost_sends (id INTEGER PRIMARY KEY AUTOINCREMENT, sender_id INTEGER, person_key TEXT, low REAL, sent_at TEXT DEFAULT CURRENT_TIMESTAMP)")
+fid = conn.execute("SELECT id FROM agent_contacts WHERE email='fay@example.test'").fetchone()[0]
+conn.execute("DELETE FROM automated_email_logs WHERE email_type='freeze'")
+conn.execute("INSERT INTO frost_sends (sender_id, person_key, low) VALUES (?, ?, 24)", (ag, "c%d" % fid))
+conn.commit(); conn.close()
+A.set_auto_email(ag, "freeze", True)
+sent.clear(); A.send_freeze_alerts()
+ok(sent == [], "a person warned by hand this week is not warned again automatically")
+A.FREEZE_QUIET_MONTHS = ()
+conn = D.get_connection()
+conn.execute("DELETE FROM frost_sends"); conn.execute("DELETE FROM automated_email_logs WHERE email_type='freeze'")
+conn.commit(); conn.close()
+sent.clear(); A.send_freeze_alerts()
+ok("c%d" % fid in _CA.recently_alerted(ag), "the Frost Alert page knows who the automatic note already reached")
