@@ -1312,5 +1312,34 @@ table td { padding: 0.26rem 0.58rem !important; font-size: 0.76rem !important; }
    if (mq.addEventListener) mq.addEventListener('change', later);
  })();
  </script>
+<script>
+/* Give every form field a name a screen reader can announce: use the nearest label text, or the field's own name. */
+(function () {
+  function nameFor(el) {
+    var lab = null, n = el.parentElement, depth = 0;
+    while (n && depth < 3 && !lab) {
+      var cand = n.querySelector(':scope > label, :scope > .form-label, :scope > .field-label');
+      if (cand && !cand.querySelector('input,select,textarea')) lab = cand;
+      n = n.parentElement; depth++;
+    }
+    var txt = lab ? lab.textContent.replace(/\s+/g, ' ').trim() : '';
+    if (!txt) { var nm = el.getAttribute('name') || ''; txt = nm.replace(/\[\]$/, '').replace(/[_-]+/g, ' ').trim(); txt = txt.charAt(0).toUpperCase() + txt.slice(1); }
+    return txt;
+  }
+  function run() {
+    document.querySelectorAll('input, select, textarea').forEach(function (el) {
+      var t = (el.getAttribute('type') || 'text').toLowerCase();
+      if (['hidden', 'submit', 'button', 'image', 'reset'].indexOf(t) > -1) return;
+      if (el.getAttribute('aria-label') || el.getAttribute('aria-labelledby') || el.getAttribute('placeholder')) return;
+      if (el.id && document.querySelector('label[for="' + el.id.replace(/"/g, '\\"') + '"]')) return;
+      if (el.closest('label')) return;
+      var name = nameFor(el); if (name) el.setAttribute('aria-label', name);
+    });
+    document.querySelectorAll('.btn-close:not([aria-label])').forEach(function (b) { b.setAttribute('aria-label', 'Close'); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+  window.addEventListener('load', run);
+})();
+</script>
 </body>
 </html>

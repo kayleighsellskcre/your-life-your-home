@@ -122,3 +122,7 @@ sent.clear(); A.send_freeze_alerts()
 ok(sent == [], "switched off means nothing is sent")
 t = c.get("/agent/automatic-emails").get_data(as_text=True)
 ok("Freeze heads-up" in t, "the Automatic emails page lists the freeze note")
+
+# every page names its form fields for screen readers (one shared enhancer in the base template)
+t = c.get("/agent/crm").get_data(as_text=True)
+ok("Give every form field a name a screen reader can announce" in t and "btn-close" in t, "pages carry the field-naming enhancer")
