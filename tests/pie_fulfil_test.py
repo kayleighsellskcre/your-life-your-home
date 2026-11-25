@@ -85,3 +85,20 @@ with contextlib.redirect_stdout(io.StringIO()):
     c.post(f"/pies/{ev['id']}/edit", data={**{k: v for k, v in form.items() if k not in ("offer_delivery", "home_address")}, "slot_id": [str(slot)]})
 page2 = A.app.test_client().get(f"/pies/r/{tok}").get_data(as_text=True)
 ok("How would you like to get it?" not in page2 and "Pickup day, time and place" in page2, "with delivery and home pickup off, guests just choose a pickup time")
+
+# the page a guest sees right after ordering says the right thing for each way
+def thanks_text(**extra):
+    g = A.app.test_client()
+    data = {"choice": "pickup", "pie_type": "Apple", "name": "Tess Thanks", "email": "tess%d@example.test" % len(sent), "phone": "9135550100"}
+    data.update(extra)
+    with contextlib.redirect_stdout(io.StringIO()):
+        return g.post(f"/pies/r/{tok}", data=data, follow_redirects=True).get_data(as_text=True)
+
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post(f"/pies/{ev['id']}/edit", data={**form, "slot_id": [str(slot)]})
+t1 = thanks_text(fulfillment="delivery", delivery_address="7 Birch Way, Lenexa, KS")
+ok("as soon as they can" in t1 and "Birch Way" in t1, "after ordering delivery she is told it will be brought when possible")
+t2 = thanks_text(fulfillment="home", want_date="2030-12-22", want_time="10:00")
+ok("12 Oak Lane" in t2 and "Get directions" in t2, "after choosing home pickup she gets the address and directions")
+t3 = thanks_text(fulfillment="pickup", slot_id=str(slot))
+ok("Pickup:" in t3 and "Thank you" in t3, "after choosing a pickup time she sees the time and place")
