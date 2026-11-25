@@ -594,7 +594,115 @@ def mark_picked_up(event_id, response_id):
                  (response_id, ev["id"]))
     conn.commit()
     conn.close()
+    back = request.form.get("next", "")
+    if back.startswith("/pies/") and "//" not in back and "\\" not in back:
+        return redirect(back)   # e.g. the handout sheet
     return redirect(url_for("pies.event_detail", event_id=ev["id"]) + "#responses")
+
+
+def _round_chain(conn, ev):
+    """Every round of this event, first to last (a single event is a chain of one)."""
+    first = ev
+    for _ in range(20):
+        prev = conn.execute("SELECT * FROM pie_events WHERE next_id=? AND owner_id=?", (first["id"], ev["owner_id"])).fetchone()
+        if not prev:
+            break
+        first = prev
+    chain, cur = [first], first
+    for _ in range(20):
+        if not cur["next_id"]:
+            break
+        cur = conn.execute("SELECT * FROM pie_events WHERE id=? AND owner_id=?", (cur["next_id"], ev["owner_id"])).fetchone()
+        if not cur:
+            break
+        chain.append(cur)
+    return chain
+
+
+def _base_title(title):
+    import re
+    return re.sub(r"\s*-\s*Round \d+\s*$", "", title or "").strip() or "Pie pickup"
+
+
+def _handout(conn, event_ids, day=""):
+    """Everything for handing pies out, organized by where and when: each pickup time and place, home pickups by day and time,
+    deliveries, and anyone still needing a time. Works for one round or all rounds together. With `day`, only that day's pickups
+    are listed (deliveries have no set day, so they always stay)."""
+    marks = ",".join("?" * len(event_ids))
+    rows = conn.execute(f"""SELECT r.*, e.round_no, e.home_address AS ev_home, s.slot_date, s.start_time, s.end_time,
+                                  s.location AS slot_location
+                           FROM pie_responses r JOIN pie_events e ON e.id = r.event_id
+                           LEFT JOIN pie_slots s ON s.id = r.slot_id
+                           WHERE r.event_id IN ({marks}) AND r.choice IN ('pickup', 'cant_make')
+                           ORDER BY e.round_no, r.name""", list(event_ids)).fetchall()
+    groups = {}
+    for r in rows:
+        d = dict(r)
+        ful = d.get("fulfillment") or ""
+        person = dict(id=d["id"], event_id=d["event_id"], name=d["name"] or "", phone=d["phone"] or "", email=d["email"] or "",
+                      pie=d["pie_type"] or "Any", qty=d["quantity"] or 1, notes=d["notes"] or "", done=bool(d["picked_up"]),
+                      round=d["round_no"] or 1, address="", time="", sort="")
+        if ful == "home":
+            key = (1, d["want_date"] or "", "", "")
+            meta = dict(kind="home", date=d["want_date"] or "", title=(fmt_date(d["want_date"]) or "Day to be set") + ": at the house",
+                        sub=(d["ev_home"] or "").strip(), where=(d["ev_home"] or "").strip())
+            person["time"] = fmt_time(d["want_time"])
+            person["sort"] = d["want_time"] or ""
+        elif ful == "delivery":
+            key = (3, "", "", "")
+            meta = dict(kind="delivery", date="", title="Deliveries", sub="No set day. Bring them when you can.", where="")
+            person["address"] = d["address"] or ""
+        elif d["slot_id"] and d["slot_date"]:
+            times = " to ".join(x for x in (fmt_time(d["start_time"]), fmt_time(d["end_time"])) if x)
+            key = (0, d["slot_date"], d["start_time"] or "", d["slot_location"] or "")
+            meta = dict(kind="slot", date=d["slot_date"], title=", ".join(x for x in (fmt_date(d["slot_date"]), times) if x),
+                        sub=d["slot_location"] or "", where=d["slot_location"] or "")
+        else:
+            key = (4, "", "", "")
+            meta = dict(kind="other", date="", title="Needs a time arranged", sub="Reach out to find a time that works.", where="")
+        g = groups.setdefault(key, dict(meta, people=[], pies=0, by_type={}))
+        g["people"].append(person)
+        g["pies"] += person["qty"]
+        g["by_type"][person["pie"]] = g["by_type"].get(person["pie"], 0) + person["qty"]
+    days = sorted({k[1] for k in groups if k[0] in (0, 1) and k[1]})
+    ordered = []
+    for key in sorted(groups):
+        g = groups[key]
+        if day and g["kind"] in ("slot", "home") and g["date"] != day:
+            continue
+        g["people"].sort(key=lambda p: (p["sort"], p["name"].lower()))
+        g["by_type_text"] = ", ".join(f"{n} {k}" for k, n in sorted(g["by_type"].items()))
+        g["done"] = sum(1 for p in g["people"] if p["done"])
+        ordered.append(g)
+    by_type = {}
+    for g in ordered:
+        for k, n in g["by_type"].items():
+            by_type[k] = by_type.get(k, 0) + n
+    totals = dict(pies=sum(g["pies"] for g in ordered), people=sum(len(g["people"]) for g in ordered),
+                  done=sum(g["done"] for g in ordered), by_type=sorted(by_type.items()),
+                  pickups=sum(len(g["people"]) for g in ordered if g["kind"] == "slot"),
+                  homes=sum(len(g["people"]) for g in ordered if g["kind"] == "home"),
+                  deliveries=sum(len(g["people"]) for g in ordered if g["kind"] == "delivery"),
+                  other=sum(len(g["people"]) for g in ordered if g["kind"] == "other"))
+    return dict(groups=ordered, days=days, totals=totals)
+
+
+@bp.route("/pies/<int:event_id>/handout")
+def handout(event_id):
+    """The day-of-handouts sheet: how many pies, who, where, and when, for this round or every round together."""
+    user, ev = _owned_event(event_id)
+    if not ev:
+        return _need_owner()
+    conn = _db()
+    chain = _round_chain(conn, ev)
+    all_rounds = len(chain) > 1 and request.args.get("all", "1") != "0"
+    ids = [e["id"] for e in chain] if all_rounds else [ev["id"]]
+    day = (request.args.get("day") or "").strip()
+    data = _handout(conn, ids, day)
+    conn.close()
+    return render_template("pies/handout.html", ev=dict(ev), chain=[dict(e) for e in chain], all_rounds=all_rounds, day=day, data=data,
+                           title=_base_title(ev["title"]), brand=_branding(user["id"]), role=user["role"],
+                           fmt_date=fmt_date, maps_url=maps_url, today=_today())
 
 
 @bp.route("/pies/<int:event_id>/export.csv")
@@ -620,10 +728,13 @@ def export_csv(event_id):
 
 
 def _response_rows(conn, event_id):
-    """Every response with its pickup place and day/time worked out, for the Excel download."""
-    rows = conn.execute("""SELECT r.*, s.location AS slot_location, s.slot_date, s.start_time, s.end_time
-                           FROM pie_responses r LEFT JOIN pie_slots s ON s.id = r.slot_id
-                           WHERE r.event_id=? ORDER BY r.slot_label, r.name""", (event_id,)).fetchall()
+    """Every response with its pickup place and day/time worked out, for the Excel download. Pass one event id or a list of them
+    (all the rounds together)."""
+    ids = [event_id] if isinstance(event_id, int) else list(event_id)
+    rows = conn.execute(f"""SELECT r.*, e.round_no, s.location AS slot_location, s.slot_date, s.start_time, s.end_time
+                           FROM pie_responses r JOIN pie_events e ON e.id = r.event_id
+                           LEFT JOIN pie_slots s ON s.id = r.slot_id
+                           WHERE r.event_id IN ({",".join("?" * len(ids))}) ORDER BY e.round_no, r.slot_label, r.name""", ids).fetchall()
     out = []
     for r in rows:
         d = dict(r)
@@ -657,7 +768,11 @@ def export_xlsx(event_id):
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
     conn = _db()
-    rows = _response_rows(conn, ev["id"])
+    chain = _round_chain(conn, ev)
+    all_rounds = len(chain) > 1 and request.args.get("all") == "1"
+    ids = [e["id"] for e in chain] if all_rounds else [ev["id"]]
+    rows = _response_rows(conn, ids)
+    handout_data = _handout(conn, ids)
     conn.close()
     names = {"pickup": "Yes, pickup", "cant_make": "Yes, needs another time", "no": "No thank you"}
     head_fill = PatternFill("solid", fgColor="364A2B")
@@ -692,7 +807,7 @@ def export_xlsx(event_id):
     sm = wb.active
     sm.title = "Summary"
     import re as _re
-    clean_title = _re.sub(r"[𐀀-􏿿☀-➿️‍]", "", ev["title"] or "").strip() or "Pie pickup"   # emoji show as blank boxes in Excel
+    clean_title = _re.sub(r"[𐀀-􏿿☀-➿️‍]", "", (_base_title(ev["title"]) + " (all rounds)") if all_rounds else (ev["title"] or "")).strip() or "Pie pickup"   # emoji show as blank boxes in Excel
     sm.append([clean_title])
     sm["A1"].font = Font(bold=True, size=15)
     sm.merge_cells("A1:D1")
@@ -722,11 +837,11 @@ def export_xlsx(event_id):
         put(sm, [k, v])
 
     ws = wb.create_sheet("Responses")
-    put(ws, ["Name", "Phone", "Email", "Answer", "Place", "Day and time, or delivery address", "Pie", "Pies", "Notes", "Picked up", "Submitted"])
+    put(ws, (["Round"] if all_rounds else []) + ["Name", "Phone", "Email", "Answer", "Place", "Day and time, or delivery address", "Pie", "Pies", "Notes", "Picked up", "Submitted"])
     for r in rows:
-        put(ws, [r["name"], r["phone"], r["email"], names.get(r["choice"], r["choice"]), r["place"], r["when"],
+        put(ws, ([r["round_no"] or 1] if all_rounds else []) + [r["name"], r["phone"], r["email"], names.get(r["choice"], r["choice"]), r["place"], r["when"],
                  r["pie_type"], r["pies"] or "", r["notes"], "Yes" if r["picked_up"] else "", r["created_at"]])
-    style_header(ws, [24, 16, 30, 24, 28, 38, 14, 7, 40, 11, 20])
+    style_header(ws, ([7] if all_rounds else []) + [24, 16, 30, 24, 28, 38, 14, 7, 40, 11, 20])
     ws.freeze_panes = "A2"
     ws.auto_filter.ref = ws.dimensions
     for row in ws.iter_rows(min_row=2):
@@ -767,10 +882,34 @@ def export_xlsx(event_id):
         c.font = bold
     pk.freeze_panes = "A2"
 
+    # the day-of sheet: one block per pickup time and place, with a blank column to tick off as pies go out
+    hd = wb.create_sheet("Handout day")
+    cols = (["Round"] if all_rounds else []) + ["Name", "Phone", "Pie", "Notes or address", "Handed out"]
+    widths = ([7] if all_rounds else []) + [26, 16, 16, 48, 12]
+    t = handout_data["totals"]
+    put(hd, [clean_title + ": handout day"])
+    hd["A1"].font = Font(bold=True, size=14)
+    put(hd, [f"{t['pies']} pies for {t['people']} people: " + ", ".join(f"{n} {k}" for k, n in t["by_type"])])
+    hd.append([])
+    for g in handout_data["groups"]:
+        put(hd, [g["title"] + (f"  |  {g['sub']}" if g["sub"] else "") + f"  |  {g['pies']} pie{'' if g['pies'] == 1 else 's'}"
+                 + (f" ({g['by_type_text']})" if g["by_type_text"] else "")])
+        for c in hd[hd.max_row]:
+            c.font, c.fill = bold, soft_fill
+        put(hd, cols)
+        for c in hd[hd.max_row]:
+            c.font = bold
+        for p in g["people"]:
+            extra = p["address"] or (("At " + p["time"] + ". ") if p["time"] else "") + p["notes"]
+            put(hd, ([p["round"]] if all_rounds else []) + [p["name"], p["phone"], p["pie"] if p["qty"] == 1 else f"{p['qty']} x {p['pie']}", extra, "Yes" if p["done"] else ""])
+        hd.append([])
+    for i, w in enumerate(widths, 1):
+        hd.column_dimensions[get_column_letter(i)].width = w
+
     buf = io.BytesIO()
     wb.save(buf)
     return Response(buf.getvalue(), mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    headers={"Content-Disposition": f"attachment; filename=pie-responses-{ev['id']}.xlsx"})
+                    headers={"Content-Disposition": f"attachment; filename=pie-responses-{ev['id']}{'-all-rounds' if all_rounds else ''}.xlsx"})
 
 
 @bp.route("/pies/<int:event_id>/flyer")

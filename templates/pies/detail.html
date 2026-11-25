@@ -35,7 +35,9 @@
     <div class="pie-actions">
       <a class="pie-btn secondary small" href="{{ url_for('pies.flyer', event_id=ev.id) }}" target="_blank" rel="noopener">Print or save flyer</a>
       <a class="pie-btn secondary small" href="{{ url_for('pies.edit_event', event_id=ev.id) }}">Edit event</a>
-      <a class="pie-btn secondary small" href="{{ url_for('pies.export_xlsx', event_id=ev.id) }}">Download Excel</a>
+      <a class="pie-btn small" href="{{ url_for('pies.handout', event_id=ev.id) }}">Handout day sheet</a>
+      <a class="pie-btn secondary small" href="{{ url_for('pies.export_xlsx', event_id=ev.id) }}">Download Excel{% if prev_round or next_round %}, this round{% endif %}</a>
+      {% if prev_round or next_round %}<a class="pie-btn secondary small" href="{{ url_for('pies.export_xlsx', event_id=ev.id, all=1) }}">Download Excel, all rounds</a>{% endif %}
       <a class="pie-btn secondary small" href="{{ public_url }}" target="_blank" rel="noopener">See what clients see</a>
     </div>
   </div>
@@ -103,7 +105,7 @@
           <td>
             {% if r.choice != 'no' %}
             <form method="post" action="{{ url_for('pies.mark_picked_up', event_id=ev.id, response_id=r.id) }}">
-              <button class="pie-link" type="submit">{{ 'Yes. Undo' if r.picked_up else 'Mark picked up' }}</button>
+              <button class="pie-link" type="submit">{{ 'Yes. Undo' if r.picked_up else ('Mark delivered' if r.fulfillment == 'delivery' else 'Mark picked up') }}</button>
             </form>
             {% endif %}
             <a class="pie-link" href="{{ url_for('pies.owner_edit_response', event_id=ev.id, response_id=r.id) }}">Edit</a>

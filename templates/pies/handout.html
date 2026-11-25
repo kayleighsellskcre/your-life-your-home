@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title|no_emoji }}: handout day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: letter; margin: .5in; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #F7F1E8; font-family: 'Lato', Arial, sans-serif; color: #4C3929; font-size: 16px; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 1rem; }
+  .bar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+  .bar a, .bar button, .bar select { padding: .55rem 1rem; border-radius: 99px; border: 1px solid #8F6244; background: #fff; color: #8F6244; font: 700 .9rem 'Lato', Arial, sans-serif; cursor: pointer; text-decoration: none; min-height: 44px; }
+  .bar .main { background: #8F6244; color: #fff; }
+  .bar .on { background: #8F6244; color: #fff; }
+  h1 { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; margin: .2rem 0; color: #4C3929; }
+  .sub { color: #7A6855; margin: 0 0 1rem; }
+  .tot { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .6rem; margin-bottom: 1rem; }
+  .tot div { background: #fff; border: 1px solid rgba(143,98,68,.25); border-radius: 12px; padding: .7rem .8rem; }
+  .tot b { display: block; font-size: 1.6rem; font-family: 'Playfair Display', Georgia, serif; }
+  .tot span { font-size: .85rem; color: #7A6855; }
+  .types { background: #fff; border: 1px solid rgba(143,98,68,.25); border-radius: 12px; padding: .7rem .9rem; margin-bottom: 1rem; }
+  .types b { margin-right: .3rem; }
+  .types .chip { display: inline-block; background: #F7F1E8; border-radius: 99px; padding: .2rem .7rem; margin: .15rem .2rem .15rem 0; font-size: .92rem; }
+  .grp { background: #fff; border: 1px solid rgba(143,98,68,.25); border-radius: 14px; margin-bottom: 1rem; overflow: hidden; page-break-inside: avoid; }
+  .grp h2 { margin: 0; padding: .7rem .9rem .1rem; font-family: 'Playfair Display', Georgia, serif; font-size: 1.2rem; }
+  .grp .where { padding: 0 .9rem; color: #7A6855; font-size: .92rem; }
+  .grp .where a { color: #8F6244; font-weight: 700; }
+  .grp .count { padding: .2rem .9rem .6rem; font-size: .92rem; color: #4C3929; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; color: #7A6855; padding: .4rem .9rem; background: #F7F1E8; }
+  td { padding: .55rem .9rem; border-top: 1px solid #F1E6D8; vertical-align: top; font-size: .98rem; }
+  td.chk, th.chk { width: 52px; text-align: center; padding-left: .4rem; padding-right: .4rem; }
+  .chk form { margin: 0; }
+  .chk button { width: 34px; height: 34px; border: 2px solid #8F6244; border-radius: 8px; background: #fff; color: #fff; font-weight: 700; font-size: 1.1rem; cursor: pointer; line-height: 1; }
+  .chk button.on { background: #6F7B4F; border-color: #6F7B4F; }
+  tr.done td { color: #9A8B7A; }
+  tr.done td.nm { text-decoration: line-through; }
+  td a { color: #8F6244; font-weight: 700; }
+  .muted { color: #7A6855; font-size: .88rem; }
+  .show-sm { display: none; }
+  .none { background: #fff; border-radius: 14px; padding: 1.2rem; text-align: center; color: #7A6855; }
+  .round { display: inline-block; background: #F7F1E8; border-radius: 99px; padding: 0 .5rem; font-size: .78rem; color: #7A6855; }
+  @media (max-width: 640px) { .hide-sm { display: none; } .show-sm { display: block; } td, th { padding-left: .6rem; padding-right: .6rem; } }
+  @media print {
+    body { background: #fff; font-size: 12pt; }
+    .wrap { padding: 0; max-width: none; }
+    .noprint, .bar { display: none !important; }
+    .grp, .tot div, .types { border-color: #999; }
+    .chk button { width: 22px; height: 22px; border-color: #333; background: #fff !important; color: #000 !important; font-size: .9rem; }
+    .chk button.on { background: #fff !important; }
+    .hide-sm { display: table-cell !important; }
+    .show-sm { display: none !important; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="bar noprint">
+    <button class="main" type="button" onclick="window.print()">Print this sheet</button>
+    <a href="{{ url_for('pies.event_detail', event_id=ev.id) }}">Back to event</a>
+    {% if chain|length > 1 %}
+      <a class="{{ 'on' if all_rounds }}" href="{{ url_for('pies.handout', event_id=ev.id, all=1, day=day or None) }}">All rounds together</a>
+      <a class="{{ 'on' if not all_rounds }}" href="{{ url_for('pies.handout', event_id=ev.id, all=0, day=day or None) }}">Round {{ ev.round_no or 1 }} only</a>
+    {% endif %}
+    {% if data.days|length > 1 or day %}
+    <form method="get" style="margin:0;">
+      {% if chain|length > 1 %}<input type="hidden" name="all" value="{{ 1 if all_rounds else 0 }}">{% endif %}
+      <select name="day" aria-label="Show one day" onchange="this.form.submit()">
+        <option value="">All days</option>
+        {% for d in data.days %}<option value="{{ d }}" {{ 'selected' if d == day }}>{{ fmt_date(d) }}</option>{% endfor %}
+      </select>
+    </form>
+    {% endif %}
+    <a href="{{ url_for('pies.export_xlsx', event_id=ev.id, all=1 if all_rounds else 0) }}">Download Excel</a>
+  </div>
+
+  <h1>{{ title }}: handout day</h1>
+  <p class="sub">
+    {% if all_rounds %}All {{ chain|length }} rounds together{% elif chain|length > 1 %}Round {{ ev.round_no or 1 }} only{% else %}Everyone who ordered{% endif %}{% if day %}, {{ fmt_date(day) }}{% endif %}.
+    {% if brand.name %}Prepared for {{ brand.name }}.{% endif %}
+  </p>
+
+  {% set t = data.totals %}
+  {% if t.people %}
+  <div class="tot">
+    <div><b>{{ t.pies }}</b><span>pie{{ '' if t.pies == 1 else 's' }} in all</span></div>
+    <div><b>{{ t.people }}</b><span>{{ 'person' if t.people == 1 else 'people' }}</span></div>
+    <div><b>{{ t.done }} of {{ t.people }}</b><span>handed out</span></div>
+    {% if t.pickups %}<div><b>{{ t.pickups }}</b><span>at pickup times</span></div>{% endif %}
+    {% if t.homes %}<div><b>{{ t.homes }}</b><span>at your home</span></div>{% endif %}
+    {% if t.deliveries %}<div><b>{{ t.deliveries }}</b><span>deliveries</span></div>{% endif %}
+    {% if t.other %}<div><b>{{ t.other }}</b><span>need a time</span></div>{% endif %}
+  </div>
+  <div class="types"><b>To bake:</b>{% for k, n in t.by_type %}<span class="chip">{{ n }} {{ k }}</span>{% endfor %}</div>
+
+  {% for g in data.groups %}
+  <section class="grp">
+    <h2>{{ g.title }}</h2>
+    {% if g.sub %}<div class="where">{{ g.sub }}{% if g.where %} <a class="noprint" href="{{ maps_url(g.where) }}" target="_blank" rel="noopener">Directions</a>{% endif %}</div>{% endif %}
+    <div class="count"><b>{{ g.pies }} pie{{ '' if g.pies == 1 else 's' }}</b> for {{ g.people|length }} {{ 'person' if g.people|length == 1 else 'people' }}: {{ g.by_type_text }} &middot; {{ g.done }} handed out</div>
+    <table>
+      <thead><tr>
+        <th class="chk">Done</th><th>Name</th>
+        {% if g.kind == 'home' %}<th>Time</th>{% endif %}
+        <th>Pie</th><th class="hide-sm">Phone</th>
+        <th>{{ 'Where' if g.kind == 'delivery' else 'Notes' }}</th>
+      </tr></thead>
+      <tbody>
+      {% for p in g.people %}
+        <tr class="{{ 'done' if p.done }}">
+          <td class="chk">
+            <form method="post" action="{{ url_for('pies.mark_picked_up', event_id=p.event_id, response_id=p.id) }}">
+              <input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+              <button type="submit" class="{{ 'on' if p.done }}" aria-label="{{ 'Undo handed out for ' ~ p.name if p.done else 'Mark ' ~ p.name ~ ' handed out' }}">{{ '&#10003;'|safe if p.done }}</button>
+            </form>
+          </td>
+          <td class="nm"><b>{{ p.name }}</b>{% if all_rounds and chain|length > 1 %} <span class="round">Round {{ p.round }}</span>{% endif %}<div class="muted show-sm">{{ p.phone }}</div></td>
+          {% if g.kind == 'home' %}<td>{{ p.time }}</td>{% endif %}
+          <td>{% if p.qty != 1 %}{{ p.qty }} &times; {% endif %}{{ p.pie }}</td>
+          <td class="hide-sm">{{ p.phone }}</td>
+          <td>{% if g.kind == 'delivery' %}{{ p.address }}{% if p.address %} <a class="noprint" href="{{ maps_url(p.address) }}" target="_blank" rel="noopener">Directions</a>{% endif %}{% if p.notes %}<div class="muted">{{ p.notes }}</div>{% endif %}{% else %}{{ p.notes }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endfor %}
+  {% else %}
+  <div class="none">No pie orders to hand out yet{% if day %} for that day{% endif %}. When people sign up, they will appear here, organized by pickup time and place.</div>
+  {% endif %}
+</div>
+</body>
+</html>

@@ -21,4 +21,4 @@ sm = wb["Summary"]
 ok(sm["A1"].value == "Pie Pickup: A Little Holiday Thank You", "title has no emoji that Excel would show as a box")
 ok("A1:D1" in [str(m) for m in sm.merged_cells.ranges], "title spans several columns so it is not cut off")
 ok(sm.column_dimensions["A"].width >= 55, "first column is wide enough for pickup place names")
-ok(wb.sheetnames == ["Summary", "Responses", "Bake list", "By pickup"], "all four sheets are there")
+ok(wb.sheetnames == ["Summary", "Responses", "Bake list", "By pickup", "Handout day"], "all five sheets are there")

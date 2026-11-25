@@ -70,6 +70,7 @@
         {% for s in slots %}
         <p class="slot"><b>{{ s.slot_date|pie_date }}{% if s.start_time %}, {{ s.start_time|pie_time }}{% if s.end_time %} to {{ s.end_time|pie_time }}{% endif %}{% endif %}</b>{{ s.location }}</p>
         {% else %}<p class="slot">Details coming soon.</p>{% endfor %}
+        {% if ev.offer_delivery or ev.home_address %}<p class="slot" style="margin-top:.12in;"><b>Also available</b>{% if ev.offer_delivery and ev.home_address %}Delivery, or pickup at {{ (brand.name or 'our').split(' ')[0] }}'s home{% elif ev.offer_delivery %}Delivery to your door{% else %}Pickup at {{ (brand.name or 'our').split(' ')[0] }}'s home{% endif %}</p>{% endif %}
       </div>
       {% if pies %}
       <div>
