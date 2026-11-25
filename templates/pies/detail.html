@@ -56,7 +56,9 @@
   <div class="pie-stats">
     <div class="pie-stat"><b>{{ stats.pies }}</b><span>pies requested</span></div>
     <div class="pie-stat"><b>{{ stats.pickup }}</b><span>picking up</span></div>
-    <div class="pie-stat"><b>{{ stats.cant_make }}</b><span>need another time</span></div>
+    {% if stats.home %}<div class="pie-stat"><b>{{ stats.home }}</b><span>picking up at your home</span></div>{% endif %}
+    {% if stats.delivery %}<div class="pie-stat"><b>{{ stats.delivery }}</b><span>delivery</span></div>{% endif %}
+    {% if stats.cant_make %}<div class="pie-stat"><b>{{ stats.cant_make }}</b><span>need another time</span></div>{% endif %}
     <div class="pie-stat"><b>{{ stats.no }}</b><span>no thank you</span></div>
     <div class="pie-stat"><b>{{ stats.picked_up }}</b><span>picked up</span></div>
   </div>
@@ -90,11 +92,10 @@
           <td><strong>{{ r.name }}</strong></td>
           <td>{% if r.phone %}{{ r.phone }}<br>{% endif %}{% if r.email %}<a href="mailto:{{ r.email }}">{{ r.email }}</a>{% endif %}</td>
           <td>
-            {% if r.choice == 'pickup' %}<span class="pie-pill">Pickup</span><br>{{ r.slot_label }}
-            {% elif r.choice == 'cant_make' %}
-              {% if r.fulfillment == 'delivery' %}<span class="pie-pill warn">Deliver</span><br>{{ r.address }}<br><a class="pie-maplink" href="{{ maps_url(r.address) }}" target="_blank" rel="noopener">Directions</a>
-              {% elif r.fulfillment == 'home' %}<span class="pie-pill">Home pickup</span><br>{{ r.slot_label }}
-              {% else %}<span class="pie-pill warn">Needs another time</span>{% endif %}
+            {% if r.choice in ('pickup', 'cant_make') and r.fulfillment == 'delivery' %}<span class="pie-pill warn">Deliver</span><br>{{ r.address }}<br><a class="pie-maplink" href="{{ maps_url(r.address) }}" target="_blank" rel="noopener">Directions</a>
+            {% elif r.choice in ('pickup', 'cant_make') and r.fulfillment == 'home' %}<span class="pie-pill">Home pickup</span><br>{{ r.slot_label }}
+            {% elif r.choice == 'pickup' %}<span class="pie-pill">Pickup</span><br>{{ r.slot_label }}
+            {% elif r.choice == 'cant_make' %}<span class="pie-pill warn">Needs another time</span>
             {% else %}<span class="pie-pill grey">No thank you</span>{% endif %}
           </td>
           <td>{% if r.choice != 'no' %}{{ r.quantity }} &times; {{ r.pie_type or 'Any' }}{% endif %}</td>

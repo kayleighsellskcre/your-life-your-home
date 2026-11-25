@@ -22,7 +22,7 @@ from flask import (Blueprint, Response, abort, current_app, flash, redirect,
 
 bp = Blueprint("pies", __name__)
 
-CHOICES = ("pickup", "cant_make", "no")
+CHOICES = ("pickup", "no")   # yes (how they get it is the fulfillment) or no; "cant_make" only exists on older answers
 DEFAULT_CANT_MAKE = ("No problem at all! I would still love to get you a pie. "
                      "Choose below whether you would like it delivered or would rather pick it up at my home.")
 DEFAULT_PIES = "Pumpkin\nApple\nPecan\nCherry"
@@ -94,6 +94,9 @@ def ensure_tables():
             cur.execute(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}")
     _add("pie_events", "home_address", "TEXT")
     _add("pie_events", "offer_delivery", "INTEGER DEFAULT 1")
+    _add("pie_responses", "fulfillment", "TEXT")
+    # delivery and home pickup are now ways of getting a pie, not a separate answer
+    cur.execute("UPDATE pie_responses SET choice='pickup' WHERE choice='cant_make' AND fulfillment IN ('delivery','home')")
     _add("pie_events", "home_from", "TEXT")
     _add("pie_events", "home_to", "TEXT")
     _add("pie_responses", "fulfillment", "TEXT")
@@ -502,8 +505,10 @@ def event_detail(event_id):
             key = r["pie_type"] or "No preference"
             pie_totals[key] = pie_totals.get(key, 0) + (r["quantity"] or 1)
     stats = {
-        "pickup": sum(1 for r in responses if r["choice"] == "pickup"),
-        "cant_make": sum(1 for r in responses if r["choice"] == "cant_make"),
+        "pickup": sum(1 for r in responses if r["choice"] == "pickup" and not r.get("fulfillment")),
+        "home": sum(1 for r in responses if r["choice"] in ("pickup", "cant_make") and r.get("fulfillment") == "home"),
+        "delivery": sum(1 for r in responses if r["choice"] in ("pickup", "cant_make") and r.get("fulfillment") == "delivery"),
+        "cant_make": sum(1 for r in responses if r["choice"] == "cant_make" and not r.get("fulfillment")),
         "no": sum(1 for r in responses if r["choice"] == "no"),
         "pies": sum(pie_totals.values()),
         "picked_up": sum(1 for r in responses if r["picked_up"]),
@@ -604,8 +609,10 @@ def export_csv(event_id):
     w = csv.writer(out)
     w.writerow(["Name", "Phone", "Email", "Answer", "Pickup", "Pie", "Quantity", "Notes", "Picked up", "Submitted"])
     names = {"pickup": "Yes, pickup", "cant_make": "Yes, needs another time", "no": "No thank you"}
+    ways = {"delivery": "Yes, delivery", "home": "Yes, pickup at home"}
     for r in rows:
-        w.writerow([_csv_safe(r["name"]), _csv_safe(r["phone"]), _csv_safe(r["email"]), names.get(r["choice"], r["choice"]),
+        w.writerow([_csv_safe(r["name"]), _csv_safe(r["phone"]), _csv_safe(r["email"]),
+                    ways.get(r["fulfillment"] or "") if r["choice"] != "no" and ways.get(r["fulfillment"] or "") else names.get(r["choice"], r["choice"]),
                     _csv_safe(r["slot_label"]), _csv_safe(r["pie_type"]), r["quantity"] if r["choice"] != "no" else "",
                     _csv_safe(r["notes"]), "Yes" if r["picked_up"] else "", r["created_at"]])
     return Response(out.getvalue(), mimetype="text/csv",
@@ -621,16 +628,17 @@ def _response_rows(conn, event_id):
     for r in rows:
         d = dict(r)
         d["place"], d["when"] = "", ""
-        if d["choice"] == "pickup":
+        yes = d["choice"] in ("pickup", "cant_make")
+        if yes and d.get("fulfillment") == "home":
+            d["place"] = "Home pickup"
+            d["when"] = f"{fmt_date(d.get('want_date'))} at {fmt_time(d.get('want_time'))}"
+        elif yes and d.get("fulfillment") == "delivery":
+            d["place"] = "Delivery"
+            d["when"] = d.get("address") or ""
+        elif d["choice"] == "pickup":
             d["place"] = d.get("slot_location") or "Pickup"
             times = " to ".join(x for x in (fmt_time(d.get("start_time")), fmt_time(d.get("end_time"))) if x)
             d["when"] = ", ".join(x for x in (fmt_date(d.get("slot_date")), times) if x)
-        elif d["choice"] == "cant_make" and d.get("fulfillment") == "home":
-            d["place"] = "Home pickup"
-            d["when"] = f"{fmt_date(d.get('want_date'))} at {fmt_time(d.get('want_time'))}"
-        elif d["choice"] == "cant_make" and d.get("fulfillment") == "delivery":
-            d["place"] = "Delivery"
-            d["when"] = d.get("address") or ""
         elif d["choice"] == "cant_make":
             d["place"] = "Needs another time"
             d["when"] = d.get("notes") or ""
@@ -676,7 +684,9 @@ def export_xlsx(event_id):
     for r in yes:
         by_type[r["pie_type"] or "No preference"] = by_type.get(r["pie_type"] or "No preference", 0) + 1
         by_place[r["place"]] = by_place.get(r["place"], 0) + 1
-    count = lambda ch, f=None: sum(1 for r in rows if r["choice"] == ch and (f is None or r.get("fulfillment") == f))
+    count = lambda ch, f=None: sum(1 for r in rows if r["choice"] == ch and (f is None or (r.get("fulfillment") or "") == f))
+    n_home = sum(1 for r in rows if r["choice"] in ("pickup", "cant_make") and r.get("fulfillment") == "home")
+    n_delivery = sum(1 for r in rows if r["choice"] in ("pickup", "cant_make") and r.get("fulfillment") == "delivery")
 
     wb = Workbook()
     sm = wb.active
@@ -692,9 +702,9 @@ def export_xlsx(event_id):
     sm.append(["Totals", ""])
     style_header(sm, [58, 14], row=3)
     for label, val in (("Total pies to bake", len(yes)), ("People who said yes", len(yes)),
-                       ("  Picking up at a pickup time", count("pickup")),
-                       ("  Picking up at your home", count("cant_make", "home")),
-                       ("  Delivery", count("cant_make", "delivery")),
+                       ("  Picking up at a pickup time", count("pickup", "")),
+                       ("  Picking up at your home", n_home),
+                       ("  Delivery", n_delivery),
                        ("  Needs another time", sum(1 for r in rows if r["choice"] == "cant_make" and not r.get("fulfillment"))),
                        ("No thank you", count("no")), ("People who answered", len(rows))):
         put(sm, [label, val])
@@ -933,7 +943,7 @@ def _edit_link(token, edit_token):
 
 
 def _form_from_response(r):
-    return {"choice": r["choice"], "slot_id": str(r["slot_id"] or ""), "fulfillment": r["fulfillment"] or "",
+    return {"choice": "pickup" if r["choice"] in ("pickup", "cant_make") else r["choice"], "slot_id": str(r["slot_id"] or ""), "fulfillment": r["fulfillment"] or "",
             "delivery_address": r["address"] or "", "want_date": r["want_date"] or "", "want_time": r["want_time"] or "",
             "pie_type": r["pie_type"] or "", "notes": r["notes"] or "", "name": r["name"] or "",
             "phone": r["phone"] or "", "email": r["email"] or ""}
@@ -1035,6 +1045,9 @@ def public_event(token, edit_token=None):
             flash("Sorry, sign-ups for this event are closed.", "error")
             return render_template("pies/public.html", **ctx)
         choice = f.get("choice")
+        fulfil_in = (f.get("fulfillment") or "").strip()
+        if choice == "cant_make" and fulfil_in in ("delivery", "home"):
+            choice = "pickup"   # an older open page: delivery and home pickup are now ways of getting a pie
         name = (f.get("name") or "").strip()[:100]
         phone = (f.get("phone") or "").strip()[:40]
         email = (f.get("email") or "").strip().lower()[:150]
@@ -1044,7 +1057,7 @@ def public_event(token, edit_token=None):
         fulfil, address, want_date, want_time, cal, where = "", "", "", "", None, ""
         can_deliver, has_home = bool(ev["offer_delivery"]), bool((ev["home_address"] or "").strip())
         if choice not in CHOICES:
-            err = "Please choose one of the three answers."
+            err = "Please tell us whether you would like a pie."
         elif not name:
             err = "Please enter your name."
         elif choice != "no":
@@ -1058,7 +1071,12 @@ def public_event(token, edit_token=None):
                 if pies and pie_type not in pies:
                     err = "Please choose a type of pie."
                 qty = 1  # one pie per household
-                if choice == "pickup" and not err:
+                fulfil = fulfil_in if (choice == "pickup" and fulfil_in in ("delivery", "home")) else ""
+                if fulfil == "delivery" and not can_deliver:
+                    err = "Delivery is not offered for this event. Please choose another way to get your pie."
+                elif fulfil == "home" and not has_home:
+                    err = "Pickup at the host's home is not offered for this event. Please choose another way to get your pie."
+                if choice == "pickup" and not fulfil and not err:
                     sid = f.get("slot_id", "")
                     match = next((s for s in slots if str(s["id"]) == sid), None)
                     if not match:
@@ -1070,39 +1088,33 @@ def public_event(token, edit_token=None):
                         where = match.get("location") or ""
                         cal = {"date": match["slot_date"], "start": match["start_time"], "end": match["end_time"],
                                "location": where}
-                if choice == "cant_make" and not err:
-                    if can_deliver or has_home:
-                        fulfil = f.get("fulfillment", "")
-                        if fulfil == "delivery" and can_deliver:
-                            address = (f.get("delivery_address") or "").strip()[:250]
-                            if len(address) < 6:
-                                err = "Please enter the address where we should deliver your pie."
-                            else:
-                                slot_lbl = f"Delivery to {address}"
-                                where = address
-                        elif fulfil == "home" and has_home:
-                            want_date = (f.get("want_date") or "").strip()
-                            want_time = (f.get("want_time") or "").strip()
-                            try:
-                                d_ok = datetime.strptime(want_date, "%Y-%m-%d").date() >= _today()
-                                datetime.strptime(want_time, "%H:%M")
-                            except ValueError:
-                                d_ok = None
-                            if d_ok is None:
-                                err = "Please choose the day and time you would like to pick up."
-                            elif not d_ok:
-                                err = "Please choose a day that has not passed yet."
-                            elif (ev["home_from"] and want_date < ev["home_from"]) or (ev["home_to"] and want_date > ev["home_to"]):
-                                rng = " to ".join(x for x in (fmt_date(ev["home_from"]), fmt_date(ev["home_to"])) if x)
-                                err = f"Please choose a day between {rng}."
-                            else:
-                                where = ev["home_address"].strip()
-                                slot_lbl = f"Home pickup, {fmt_date(want_date)} at {fmt_time(want_time)}"
-                                cal = {"date": want_date, "start": want_time, "end": "", "location": where, "minutes": 30}
+                if choice == "pickup" and fulfil and not err:
+                    if fulfil == "delivery" and can_deliver:
+                        address = (f.get("delivery_address") or "").strip()[:250]
+                        if len(address) < 6:
+                            err = "Please enter the address where we should deliver your pie."
                         else:
-                            err = "Please choose delivery or pickup at the host's home."
-                    elif not notes:
-                        err = "Please tell us what would work for you."
+                            slot_lbl = f"Delivery to {address}"
+                            where = address
+                    elif fulfil == "home" and has_home:
+                        want_date = (f.get("want_date") or "").strip()
+                        want_time = (f.get("want_time") or "").strip()
+                        try:
+                            d_ok = datetime.strptime(want_date, "%Y-%m-%d").date() >= _today()
+                            datetime.strptime(want_time, "%H:%M")
+                        except ValueError:
+                            d_ok = None
+                        if d_ok is None:
+                            err = "Please choose the day and time you would like to pick up."
+                        elif not d_ok:
+                            err = "Please choose a day that has not passed yet."
+                        elif (ev["home_from"] and want_date < ev["home_from"]) or (ev["home_to"] and want_date > ev["home_to"]):
+                            rng = " to ".join(x for x in (fmt_date(ev["home_from"]), fmt_date(ev["home_to"])) if x)
+                            err = f"Please choose a day between {rng}."
+                        else:
+                            where = ev["home_address"].strip()
+                            slot_lbl = f"Home pickup, {fmt_date(want_date)} at {fmt_time(want_time)}"
+                            cal = {"date": want_date, "start": want_time, "end": "", "location": where, "minutes": 30}
         elif email and "@" not in email:
             err = "That email address doesn't look right."
         if err:
@@ -1181,15 +1193,15 @@ def _client_email(ev, brand, name, choice, slot_lbl, pie_type, qty, notes, updat
               if updated else
               f"Hi {first}, it's {(brand['name'] or 'your host').split(' ')[0]}! Thank you so much for ordering, I'm really glad you said yes.")
     lines = [opener, ""]
-    if choice == "pickup":
-        lines += [f"Here's what I have for you: one {pie}, ready for pickup.", "", f"When and where: {slot_lbl}"]
-        if where:
-            lines += [f"Address: {where}", f"Directions: {maps_url(where)}"]
-    elif choice == "cant_make" and fulfil == "delivery":
+    if fulfil == "delivery":
         lines += [f"Here's what I have for you: one {pie}, delivered.", "", f"I'll bring it to: {where}",
                   "There's no set day or time, so I'll text or email you before I stop by."]
-    elif choice == "cant_make" and fulfil == "home":
+    elif fulfil == "home":
         lines += [f"Here's what I have for you: one {pie}, waiting at my house.", "", f"When: {slot_lbl.replace('Home pickup, ', '')}"]
+        if where:
+            lines += [f"Address: {where}", f"Directions: {maps_url(where)}"]
+    elif choice == "pickup":
+        lines += [f"Here's what I have for you: one {pie}, ready for pickup.", "", f"When and where: {slot_lbl}"]
         if where:
             lines += [f"Address: {where}", f"Directions: {maps_url(where)}"]
     else:
@@ -1216,12 +1228,12 @@ def _notify(ev, brand, name, phone, email, choice, slot_lbl, pie_type, qty, note
             edit_link=""):
     """One confirmation to the guest, and a short heads-up to the host. Never blocks the response."""
     _bg, send_reminder_email = _H["bg"], _H["send_email"]
-    if choice == "pickup":
-        line = f"{qty} x {pie_type or 'pie'} for pickup: {slot_lbl}"
-    elif choice == "cant_make" and fulfil == "delivery":
+    if fulfil == "delivery":
         line = f"{qty} x {pie_type or 'pie'}, delivered to {where}"
-    elif choice == "cant_make" and fulfil == "home":
+    elif fulfil == "home":
         line = f"{qty} x {pie_type or 'pie'}, pickup at my home: {slot_lbl}\nAddress: {where}"
+    elif choice == "pickup":
+        line = f"{qty} x {pie_type or 'pie'} for pickup: {slot_lbl}"
     elif choice == "cant_make":
         line = f"{qty} x {pie_type or 'pie'}. Needs a different time: {notes}"
     else:
@@ -1252,12 +1264,13 @@ def send_reminders(today=None):
                            FROM pie_responses r JOIN pie_events e ON e.id = r.event_id
                            LEFT JOIN pie_slots s ON s.id = r.slot_id
                            WHERE COALESCE(r.reminded,0)=0 AND COALESCE(r.picked_up,0)=0 AND r.email != ''
-                             AND ((r.choice='pickup' AND s.slot_date=?) OR (r.choice='cant_make' AND r.fulfillment='home' AND r.want_date=?))""",
+                             AND ((r.choice='pickup' AND COALESCE(r.fulfillment,'')='' AND s.slot_date=?)
+                                  OR (r.choice IN ('pickup','cant_make') AND r.fulfillment='home' AND r.want_date=?))""",
                         (target, target)).fetchall()
     sent = 0
     for r in rows:
         brand = _branding(r["owner_id"])
-        if r["choice"] == "pickup":
+        if not (r["fulfillment"] or ""):
             cal = {"date": r["slot_date"], "start": r["start_time"], "end": r["end_time"], "location": r["location"] or ""}
             when = slot_label({"slot_date": r["slot_date"], "start_time": r["start_time"], "end_time": r["end_time"], "location": r["location"]})
             where = r["location"] or ""

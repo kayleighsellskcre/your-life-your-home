@@ -33,10 +33,23 @@
 
     <div class="pie-card">
       <h2>Would you like a pie?</h2>
-      <label class="pie-choice"><input type="radio" name="choice" value="pickup" {{ 'checked' if form.get('choice') == 'pickup' }}><span><b>Yes, I'll pick one up</b><small>Choose a day, time and place below.</small></span></label>
-      <label class="pie-choice"><input type="radio" name="choice" value="cant_make" {{ 'checked' if form.get('choice') == 'cant_make' }}><span><b>Yes, but I can't make those times</b><small>Tell us what would work for you.</small></span></label>
+      <label class="pie-choice"><input type="radio" name="choice" value="pickup" {{ 'checked' if form.get('choice') == 'pickup' }}><span><b>Yes, I'd love a pie</b><small>{% if ev.offer_delivery or ev.home_address %}Choose how you would like to get it next.{% else %}Choose a day, time and place below.{% endif %}</small></span></label>
       <label class="pie-choice"><input type="radio" name="choice" value="no" {{ 'checked' if form.get('choice') == 'no' }}><span><b>No thank you, I don't need a pie this year</b><small>We'd still love to hear from you.</small></span></label>
     </div>
+
+    {% set fu_now = form.get('fulfillment') if form.get('fulfillment') in ('delivery', 'home') else 'pickup' %}
+    {% if ev.offer_delivery or ev.home_address %}
+    <div class="pie-card" id="sec-how" style="display:none;">
+      <h2>How would you like to get it?</h2>
+      <label class="pie-choice"><input type="radio" name="fulfillment" value="pickup" {{ 'checked' if fu_now == 'pickup' }}><span><b>I'll pick it up at a pickup time</b><small>Choose a day, time and place.</small></span></label>
+      {% if ev.offer_delivery %}
+      <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if fu_now == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it. I will deliver when I can, so there is no set day or time.</small></span></label>
+      {% endif %}
+      {% if ev.home_address %}
+      <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if fu_now == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you{% if home_range %}, {{ home_range }}{% endif %}.</small></span></label>
+      {% endif %}
+    </div>
+    {% endif %}
 
     <div class="pie-card" id="sec-slots" style="display:none;">
       <h2>Pickup day, time and place</h2>
@@ -51,41 +64,32 @@
       {% else %}<p class="pie-hint">No pickup times have been added yet.</p>{% endif %}
     </div>
 
-    <div class="pie-card" id="sec-cant" style="display:none;">
-      <h2>What would work for you?</h2>
-      <p class="pie-hint" style="margin:-.3rem 0 .5rem;white-space:pre-line;">{{ ev.cant_make_prompt }}</p>
-      {% if ev.offer_delivery or ev.home_address %}
-      <div id="fulfil-opts">
-        {% if ev.offer_delivery %}
-        <label class="pie-choice"><input type="radio" name="fulfillment" value="delivery" {{ 'checked' if form.get('fulfillment') == 'delivery' }}><span><b>Please deliver my pie</b><small>Tell us where to bring it. I will deliver when I can, so there is no set day or time.</small></span></label>
-        {% endif %}
-        {% if ev.home_address %}
-        <label class="pie-choice"><input type="radio" name="fulfillment" value="home" {{ 'checked' if form.get('fulfillment') == 'home' }}><span><b>I'll pick it up at {{ (brand.name or 'your host').split(' ')[0] }}'s home</b><small>Choose a day and time that works for you{% if home_range %}, {{ home_range }}{% endif %}.<br><b>Address: {{ ev.home_address }}</b></small></span></label>
-        {% endif %}
-      </div>
-      <div id="fulfil-delivery" style="display:none;margin-top:.6rem;">
-        <label class="pie-label" for="delivery_address" style="margin-top:0;">Delivery address</label>
-        <textarea id="delivery_address" name="delivery_address" rows="2" maxlength="250" placeholder="Street, city and zip">{{ form.get('delivery_address', '') }}</textarea>
-        <p class="pie-hint" style="margin:.5rem 0 0;">I will bring it as soon as I can, so please be flexible on timing. I will reach out before I stop by.</p>
-      </div>
-      <div id="fulfil-home" style="display:none;margin-top:.6rem;">
-        {% if ev.home_address %}
-        <div class="pie-card" style="background:#F8F2ED;margin:0 0 .8rem;">
-          <b>Pickup address</b>
-          <div style="white-space:pre-line;margin:.2rem 0 .1rem;">{{ ev.home_address }}</div>
-          <div class="pie-dir"><a href="{{ maps_url(ev.home_address) }}" target="_blank" rel="noopener">Get directions</a> <span>&middot;</span> <a href="{{ apple_maps_url(ev.home_address) }}" target="_blank" rel="noopener">Apple Maps</a></div>
-        </div>
-        {% endif %}
-        <div class="pie-row">
-          <div><label class="pie-label" for="want_date" style="margin-top:0;">Day</label>
-            <input class="pie-input" type="date" id="want_date" name="want_date" min="{{ home_min }}"{% if home_max %} max="{{ home_max }}"{% endif %} value="{{ form.get('want_date', '') }}"></div>
-          <div><label class="pie-label" for="want_time" style="margin-top:0;">Time</label>
-            <input class="pie-input" type="time" id="want_time" name="want_time" value="{{ form.get('want_time', '') }}"></div>
-        </div>
-        <p class="pie-hint" style="margin:.5rem 0 0;">I'll have your pie ready. We'll also email you the address and a directions link.</p>
-      </div>
-      {% endif %}
+    {% if ev.offer_delivery %}
+    <div class="pie-card" id="fulfil-delivery" style="display:none;">
+      <h2>Where should we bring it?</h2>
+      <label class="pie-label" for="delivery_address" style="margin-top:0;">Delivery address</label>
+      <textarea id="delivery_address" name="delivery_address" rows="2" maxlength="250" placeholder="Street, city and zip">{{ form.get('delivery_address', '') }}</textarea>
+      <p class="pie-hint" style="margin:.5rem 0 0;">I will bring it as soon as I can, so please be flexible on timing. I will reach out before I stop by.</p>
     </div>
+    {% endif %}
+
+    {% if ev.home_address %}
+    <div class="pie-card" id="fulfil-home" style="display:none;">
+      <h2>When would you like to come by?</h2>
+      <div class="pie-card" style="background:#F8F2ED;margin:0 0 .8rem;">
+        <b>Pickup address</b>
+        <div style="white-space:pre-line;margin:.2rem 0 .1rem;">{{ ev.home_address }}</div>
+        <div class="pie-dir"><a href="{{ maps_url(ev.home_address) }}" target="_blank" rel="noopener">Get directions</a> <span>&middot;</span> <a href="{{ apple_maps_url(ev.home_address) }}" target="_blank" rel="noopener">Apple Maps</a></div>
+      </div>
+      <div class="pie-row">
+        <div><label class="pie-label" for="want_date" style="margin-top:0;">Day</label>
+          <input class="pie-input" type="date" id="want_date" name="want_date" min="{{ home_min }}"{% if home_max %} max="{{ home_max }}"{% endif %} value="{{ form.get('want_date', '') }}"></div>
+        <div><label class="pie-label" for="want_time" style="margin-top:0;">Time</label>
+          <input class="pie-input" type="time" id="want_time" name="want_time" value="{{ form.get('want_time', '') }}"></div>
+      </div>
+      <p class="pie-hint" style="margin:.5rem 0 0;">I'll have your pie ready. We'll also email you the address and a directions link.</p>
+    </div>
+    {% endif %}
 
     <div class="pie-card" id="sec-pie" style="display:none;">
       <h2>Your pie</h2>
@@ -128,19 +132,17 @@
   function show(id, on) { var e = document.getElementById(id); if (e) e.style.display = on ? '' : 'none'; }
   function sync() {
     var v = (document.querySelector('input[name=choice]:checked') || {}).value;
-    show('sec-slots', v === 'pickup');
-    show('sec-cant', v === 'cant_make');
-    show('sec-pie', v === 'pickup' || v === 'cant_make');
+    var yes = v === 'pickup';
+    var hasHow = !!document.getElementById('sec-how');
+    var fu = hasHow ? ((document.querySelector('input[name=fulfillment]:checked') || {}).value || 'pickup') : 'pickup';
+    show('sec-how', yes);
+    show('sec-slots', yes && fu === 'pickup');
+    show('fulfil-delivery', yes && fu === 'delivery');
+    show('fulfil-home', yes && fu === 'home');
+    show('sec-pie', yes);
     show('sec-you', !!v);
-    var fu = (document.querySelector('input[name=fulfillment]:checked') || {}).value;
-    show('fulfil-delivery', v === 'cant_make' && fu === 'delivery');
-    show('fulfil-home', v === 'cant_make' && fu === 'home');
-    var yes = v !== 'no';
-    document.getElementById('req-phone') && (document.getElementById('req-phone').textContent = yes ? '(required)' : '(optional)');
-    document.getElementById('req-email') && (document.getElementById('req-email').textContent = yes ? '(required)' : '(optional)');
-    var nl = document.getElementById('notes-label');
-    var hasOpts = !!document.getElementById('fulfil-opts');
-    if (nl) nl.firstChild.textContent = (v === 'cant_make' && !hasOpts) ? 'What day, time or place would work? ' : 'Anything we should know? ';
+    document.getElementById('req-phone') && (document.getElementById('req-phone').textContent = v === 'no' ? '(optional)' : '(required)');
+    document.getElementById('req-email') && (document.getElementById('req-email').textContent = v === 'no' ? '(optional)' : '(required)');
   }
   radios.forEach(function (r) { r.addEventListener('change', sync); });
   document.querySelectorAll('input[name=fulfillment]').forEach(function (r) { r.addEventListener('change', sync); });

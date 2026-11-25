@@ -412,7 +412,7 @@ def build_feed(user_id):
         slots = conn.execute("""SELECT s.*, e.title FROM pie_slots s JOIN pie_events e ON e.id = s.event_id
                                 WHERE e.owner_id=? AND s.slot_date IS NOT NULL AND s.slot_date != ''""", (user_id,)).fetchall()
         homes = conn.execute("""SELECT r.*, e.title, e.home_address FROM pie_responses r JOIN pie_events e ON e.id = r.event_id
-                                WHERE e.owner_id=? AND r.choice='cant_make' AND r.fulfillment='home' AND r.want_date != ''
+                                WHERE e.owner_id=? AND r.choice IN ('pickup','cant_make') AND r.fulfillment='home' AND r.want_date != ''
                                   AND COALESCE(r.picked_up,0)=0""", (user_id,)).fetchall()
     except sqlite3.Error:
         slots, homes = [], []
