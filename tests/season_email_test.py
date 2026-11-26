@@ -144,3 +144,20 @@ conn.execute("DELETE FROM frost_sends"); conn.execute("DELETE FROM automated_ema
 conn.commit(); conn.close()
 sent.clear(); A.send_freeze_alerts()
 ok("c%d" % fid in _CA.recently_alerted(ag), "the Frost Alert page knows who the automatic note already reached")
+
+# lenders' borrowers get the freeze heads-up too, with the zip taken from the home address
+ld = D.create_user("Lee Lender", "lender1@example.test", gp("password123"), "lender")
+conn = D.get_connection()
+conn.execute("DELETE FROM frost_sends"); conn.execute("DELETE FROM automated_email_logs WHERE email_type='freeze'")
+conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, email, property_address, auto_seasonal) VALUES (?, 'Bo Borrower', 'bo@example.test', '5 Pine Rd, Denver, CO 80202', 1)", (ld,))
+conn.execute("INSERT INTO lender_borrowers (lender_user_id, name, email, property_address, auto_seasonal) VALUES (?, 'No Zip', 'nozip@example.test', '5 Pine Rd', 1)", (ld,))
+conn.commit(); conn.close()
+A.set_auto_email(ag, "freeze", False)
+A.set_auto_email(ld, "freeze", True)
+sent.clear(); A.send_freeze_alerts()
+ok(sent == ["bo@example.test"], "a lender's borrower with a zip in the address gets the freeze heads-up (%s)" % sent)
+sent.clear(); A.send_freeze_alerts()
+ok(sent == [], "and only once a winter")
+cl = A.app.test_client()
+with cl.session_transaction() as s: s["user_id"] = ld; s["role"] = "lender"
+ok("Freeze heads-up" in cl.get("/lender/automatic-emails").get_data(as_text=True), "the lender's Automatic emails page lists the freeze note")

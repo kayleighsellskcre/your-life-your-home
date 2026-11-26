@@ -1431,7 +1431,7 @@ def auto_email_preview(kind, pro_name, sample="Sam", role="agent"):
 def auto_emails_context(user):
     """Everything the Automatic emails page shows: each email with its on/off state and exact wording, and what went out lately."""
     from database import get_connection
-    kinds = ["birthday", "anniversary", "seasonal", "review"] + (["welcome", "freeze"] if user.get("role") == "agent" else [])
+    kinds = ["birthday", "anniversary", "seasonal", "review"] + (["welcome"] if user.get("role") == "agent" else []) + ["freeze"]
     items = []
     for k in kinds:
         subj, body = auto_email_preview(k, user.get("name"), role=user.get("role"))
@@ -1484,7 +1484,7 @@ def send_auto_email_sample(user, kind):
 
 def save_auto_emails(user, form):
     """Apply the switches from the page. A switch that is not in the form is off."""
-    for k in (["birthday", "anniversary", "seasonal"] + (["review", "welcome", "freeze"] if user.get("role") == "agent" else [])):
+    for k in (["birthday", "anniversary", "seasonal", "freeze"] + (["review", "welcome"] if user.get("role") == "agent" else [])):
         set_auto_email(user["id"], k, form.get("on_" + k) == "1")
 
 
@@ -2118,14 +2118,21 @@ def send_freeze_alerts():
     from database import get_connection
     conn = get_connection()
     try:
-        rows = [dict(r) for r in conn.execute(
-            """SELECT id, agent_user_id, name, email, zip_code FROM agent_contacts
+        rows = [dict(r, type="agent_contact") for r in conn.execute(
+            """SELECT id, agent_user_id AS pro, name, email, zip_code FROM agent_contacts
                WHERE email IS NOT NULL AND email != '' AND zip_code IS NOT NULL AND zip_code != '' AND auto_seasonal = 1""").fetchall()]
-        done = {r[0] for r in conn.execute(
-            "SELECT contact_id FROM automated_email_logs WHERE email_type = 'freeze' AND contact_type = 'agent_contact' AND status = 'sent' "
+        # lenders keep a home address rather than a separate zip code, so take the zip from the end of it
+        for r in conn.execute(
+                """SELECT id, lender_user_id AS pro, name, email, COALESCE(NULLIF(property_address, ''), address) AS addr FROM lender_borrowers
+                   WHERE email IS NOT NULL AND email != '' AND auto_seasonal = 1""").fetchall():
+            m = re.findall(r"\b(\d{5})(?:-\d{4})?\b", r["addr"] or "")
+            if m:
+                rows.append({"id": r["id"], "pro": r["pro"], "name": r["name"], "email": r["email"], "zip_code": m[-1], "type": "lender_borrower"})
+        done = {(r[0], r[1]) for r in conn.execute(
+            "SELECT contact_type, contact_id FROM automated_email_logs WHERE email_type = 'freeze' AND status = 'sent' "
             "AND sent_at >= datetime('now', '-150 days')").fetchall()}
         try:
-            # people the agent already warned by hand on the Frost Alert page this week should not get a second note
+            # people the sender already warned by hand on the Frost Alert page this week should not get a second note
             warned = {(r[0], r[1]) for r in conn.execute(
                 "SELECT sender_id, person_key FROM frost_sends WHERE sent_at >= datetime('now', '-7 days')").fetchall()}
         except Exception:
@@ -2134,7 +2141,7 @@ def send_freeze_alerts():
         conn.close()
     lows = {}
     for row in rows:
-        if row["id"] in done or (row["agent_user_id"], "c%d" % row["id"]) in warned or not auto_email_enabled(row["agent_user_id"], "freeze"):
+        if (row["type"], row["id"]) in done or (row["pro"], "c%d" % row["id"]) in warned or not auto_email_enabled(row["pro"], "freeze"):
             continue
         z = str(row["zip_code"]).strip()[:5]
         if z not in lows:
@@ -2143,11 +2150,11 @@ def send_freeze_alerts():
         low = lows[z]
         if low is None or low > FREEZE_F:
             continue
-        pro_full, _ = _pro_names(row["agent_user_id"])
+        pro_full, _ = _pro_names(row["pro"])
         first = (row.get("name") or "there").split()[0]
         subject, body = freeze_email_text(first, pro_full, low)
-        if send_reminder_email(row["email"], subject, _with_stop_link(body, {"id": row["id"], "type": "agent_contact"}), **pro_sender(row["agent_user_id"])):
-            log_automated_email(row["id"], "agent_contact", row["agent_user_id"], "freeze", row["email"], subject, "sent")
+        if send_reminder_email(row["email"], subject, _with_stop_link(body, {"id": row["id"], "type": row["type"]}), **pro_sender(row["pro"])):
+            log_automated_email(row["id"], row["type"], row["pro"], "freeze", row["email"], subject, "sent")
 
 
 def welcome_email_text(first, pro_full, vendors):
