@@ -108,6 +108,8 @@ def ensure_tables():
     _add("pie_responses", "thanked", "INTEGER DEFAULT 0")
     _add("pie_events", "thank_date", "TEXT")
     _add("pie_events", "thank_message", "TEXT")
+    _add("pie_events", "thank_subject", "TEXT")
+    _add("pie_events", "thank_on", "INTEGER DEFAULT 1")   # 0 = the owner chose not to send a thank-you email
     _add("pie_events", "closed_message", "TEXT")
     _add("pie_events", "next_id", "INTEGER")          # the next round of this event, if there is one
     _add("pie_events", "round_no", "INTEGER DEFAULT 1")
@@ -398,6 +400,12 @@ def edit_event(event_id=None):
         except ValueError:
             thank_date = ""
         thank_message = (f.get("thank_message") or "").strip()[:1200]
+        thank_subject = (f.get("thank_subject") or "").strip()[:150]
+        # the form always sends thank_on_shown, so an unchecked box means "off"; without it, keep what was there
+        if f.get("thank_on_shown"):
+            thank_on = 1 if f.get("thank_on") else 0
+        else:
+            thank_on = (ev["thank_on"] if ev and ev["thank_on"] is not None else 1)
         closed_message = (f.get("closed_message") or "").strip()[:600]
         home_address = (f.get("home_address") or "").strip()[:250]
         offer_delivery = 1 if f.get("offer_delivery") else 0
@@ -444,7 +452,8 @@ def edit_event(event_id=None):
                          thank_date, thank_message))
             eid = cur.lastrowid
 
-        cur.execute("UPDATE pie_events SET closed_message=? WHERE id=?", (closed_message, eid))
+        cur.execute("UPDATE pie_events SET closed_message=?, thank_subject=?, thank_on=? WHERE id=?",
+                    (closed_message, thank_subject, thank_on, eid))
 
         # pickup slots: update existing, add new, remove the ones taken off the form
         ids = f.getlist("slot_id")
@@ -480,7 +489,7 @@ def edit_event(event_id=None):
 
     defaults = {"pie_types": DEFAULT_PIES, "cant_make_prompt": DEFAULT_CANT_MAKE, "title": "Holiday Pie Pickup",
                 "offer_delivery": 1, "home_address": "", "home_from": "", "home_to": "",
-                "thank_date": "", "thank_message": ""}
+                "thank_date": "", "thank_message": "", "thank_subject": "", "thank_on": 1}
     return render_template("pies/edit.html", ev=dict(ev) if ev else defaults, slots=slots, is_new=ev is None,
                            role=user["role"])
 
@@ -557,6 +566,8 @@ def new_round(event_id):
                  ev["price_note"], ev["cant_make_prompt"], ev["flyer_image"], ev["art_image"], ev["home_address"], ev["offer_delivery"],
                  ev["home_from"], ev["home_to"], ev["thank_message"], n))
     new_id = cur.lastrowid
+    cur.execute("UPDATE pie_events SET thank_subject=?, thank_on=? WHERE id=?",
+                (ev["thank_subject"], 1 if ev["thank_on"] is None else ev["thank_on"], new_id))
     for s in cur.execute("SELECT * FROM pie_slots WHERE event_id=? ORDER BY slot_date, start_time, id", (ev["id"],)).fetchall():
         cur.execute("INSERT INTO pie_slots (event_id, slot_date, start_time, end_time, location, capacity) VALUES (?,?,?,?,?,?)",
                     (new_id, s["slot_date"], s["start_time"], s["end_time"], s["location"], s["capacity"]))
@@ -1442,6 +1453,11 @@ DEFAULT_THANK = ("Thank you so much for being part of {title}. It was a joy to s
                  "to have you in my life. Wishing you and your family a warm, happy holiday season.")
 
 
+def _thank_subject(ev, brand):
+    custom = (ev["thank_subject"] or "").strip() if "thank_subject" in ev.keys() else ""
+    return custom or f"Thank you from {brand['name'] or 'us'}"
+
+
 def _thank_body(ev, r, brand):
     first = (r["name"] or "there").split(" ")[0]
     msg = (ev["thank_message"] or "").strip() or DEFAULT_THANK.format(title=ev["title"])
@@ -1458,9 +1474,10 @@ def send_thank_yous(today=None, event_id=None):
     day = (today or _today()).isoformat()
     conn = _db()
     if event_id:
-        events = conn.execute("SELECT * FROM pie_events WHERE id=?", (event_id,)).fetchall()
+        events = conn.execute("SELECT * FROM pie_events WHERE id=? AND COALESCE(thank_on,1)=1", (event_id,)).fetchall()
     else:
-        events = conn.execute("SELECT * FROM pie_events WHERE thank_date IS NOT NULL AND thank_date != '' AND thank_date <= ?",
+        events = conn.execute("""SELECT * FROM pie_events WHERE COALESCE(thank_on,1)=1
+                                 AND thank_date IS NOT NULL AND thank_date != '' AND thank_date <= ?""",
                               (day,)).fetchall()
     sent = 0
     for ev in events:
@@ -1469,7 +1486,7 @@ def send_thank_yous(today=None, event_id=None):
                                AND COALESCE(thanked,0)=0 AND email IS NOT NULL AND email != ''""", (ev["id"],)).fetchall()
         for r in rows:
             try:
-                send(r["email"], f"Thank you from {brand['name'] or 'us'}", _thank_body(ev, r, brand),
+                send(r["email"], _thank_subject(ev, brand), _thank_body(ev, r, brand),
                      brand["name"] or None, brand["email"] or None)
                 conn.execute("UPDATE pie_responses SET thanked=1 WHERE id=?", (r["id"],))
                 conn.commit()
@@ -1485,6 +1502,9 @@ def thank_now(event_id):
     user, ev = _owned_event(event_id)
     if not ev:
         return _need_owner()
+    if ev["thank_on"] == 0:
+        flash("The thank-you email is turned off for this event. Turn it on under Edit event to send it.", "error")
+        return redirect(url_for("pies.event_detail", event_id=ev["id"]))
     n = send_thank_yous(event_id=ev["id"])
     flash(f"Thank-you email sent to {n} {'person' if n == 1 else 'people'}." if n else
           "Everyone who ordered has already been thanked, or there are no email addresses to send to.", "success")

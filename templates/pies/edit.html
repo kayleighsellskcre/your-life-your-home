@@ -34,12 +34,18 @@
     <div class="pie-card">
       <h2>Thank-you email</h2>
       <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Everyone who orders a pie gets a thank-you email on the day you choose. Leave the date empty if you don't want one. You can also send it right away from the event page.</p>
+      <input type="hidden" name="thank_on_shown" value="1">
+      <label class="pie-check" style="display:flex;gap:.5rem;align-items:center;margin:0 0 .8rem;font-weight:600;">
+        <input type="checkbox" name="thank_on" value="1" {{ 'checked' if ev.thank_on is none or ev.thank_on }}> Send a thank-you email for this event
+      </label>
       <div class="pie-row">
         <div>
           <label class="pie-label" for="thank_date">Send on <span class="pie-hint">(optional)</span></label>
           <input class="pie-input" type="date" id="thank_date" name="thank_date" value="{{ ev.thank_date or '' }}">
         </div>
       </div>
+      <label class="pie-label" for="thank_subject">Subject line <span class="pie-hint">(optional, "Thank you from" and your name if you leave it empty)</span></label>
+      <input class="pie-input" type="text" id="thank_subject" name="thank_subject" maxlength="150" placeholder="Happy Thanksgiving" value="{{ ev.thank_subject or '' }}">
       <label class="pie-label" for="thank_message">Your message <span class="pie-hint">(optional, we write a warm one if you leave it empty)</span></label>
       <textarea id="thank_message" name="thank_message" rows="4" maxlength="1200" placeholder="Thank you so much for being part of this. It was a joy to share a pie with you and your family.">{{ ev.thank_message or '' }}</textarea>
     </div>
