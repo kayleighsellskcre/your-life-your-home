@@ -108,6 +108,7 @@ def ensure_tables():
     _add("pie_responses", "thanked", "INTEGER DEFAULT 0")
     _add("pie_events", "thank_date", "TEXT")
     _add("pie_events", "thank_message", "TEXT")
+    _add("pie_events", "thank_subject", "TEXT")
     _add("pie_events", "closed_message", "TEXT")
     _add("pie_events", "next_id", "INTEGER")          # the next round of this event, if there is one
     _add("pie_events", "round_no", "INTEGER DEFAULT 1")
@@ -398,6 +399,7 @@ def edit_event(event_id=None):
         except ValueError:
             thank_date = ""
         thank_message = (f.get("thank_message") or "").strip()[:1200]
+        thank_subject = (f.get("thank_subject") or "").strip()[:150]
         closed_message = (f.get("closed_message") or "").strip()[:600]
         home_address = (f.get("home_address") or "").strip()[:250]
         offer_delivery = 1 if f.get("offer_delivery") else 0
@@ -444,7 +446,7 @@ def edit_event(event_id=None):
                          thank_date, thank_message))
             eid = cur.lastrowid
 
-        cur.execute("UPDATE pie_events SET closed_message=? WHERE id=?", (closed_message, eid))
+        cur.execute("UPDATE pie_events SET closed_message=?, thank_subject=? WHERE id=?", (closed_message, thank_subject, eid))
 
         # pickup slots: update existing, add new, remove the ones taken off the form
         ids = f.getlist("slot_id")
@@ -557,6 +559,7 @@ def new_round(event_id):
                  ev["price_note"], ev["cant_make_prompt"], ev["flyer_image"], ev["art_image"], ev["home_address"], ev["offer_delivery"],
                  ev["home_from"], ev["home_to"], ev["thank_message"], n))
     new_id = cur.lastrowid
+    cur.execute("UPDATE pie_events SET thank_subject=? WHERE id=?", (ev["thank_subject"], new_id))
     for s in cur.execute("SELECT * FROM pie_slots WHERE event_id=? ORDER BY slot_date, start_time, id", (ev["id"],)).fetchall():
         cur.execute("INSERT INTO pie_slots (event_id, slot_date, start_time, end_time, location, capacity) VALUES (?,?,?,?,?,?)",
                     (new_id, s["slot_date"], s["start_time"], s["end_time"], s["location"], s["capacity"]))
@@ -1442,6 +1445,11 @@ DEFAULT_THANK = ("Thank you so much for being part of {title}. It was a joy to s
                  "to have you in my life. Wishing you and your family a warm, happy holiday season.")
 
 
+def _thank_subject(ev, brand):
+    custom = (ev["thank_subject"] or "").strip() if "thank_subject" in ev.keys() else ""
+    return custom or f"Thank you from {brand['name'] or 'us'}"
+
+
 def _thank_body(ev, r, brand):
     first = (r["name"] or "there").split(" ")[0]
     msg = (ev["thank_message"] or "").strip() or DEFAULT_THANK.format(title=ev["title"])
@@ -1469,7 +1477,7 @@ def send_thank_yous(today=None, event_id=None):
                                AND COALESCE(thanked,0)=0 AND email IS NOT NULL AND email != ''""", (ev["id"],)).fetchall()
         for r in rows:
             try:
-                send(r["email"], f"Thank you from {brand['name'] or 'us'}", _thank_body(ev, r, brand),
+                send(r["email"], _thank_subject(ev, brand), _thank_body(ev, r, brand),
                      brand["name"] or None, brand["email"] or None)
                 conn.execute("UPDATE pie_responses SET thanked=1 WHERE id=?", (r["id"],))
                 conn.commit()
