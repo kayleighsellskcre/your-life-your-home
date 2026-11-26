@@ -59,3 +59,30 @@ conn = D.get_connection()
 nxt = conn.execute("SELECT thank_subject FROM pie_events WHERE id != ? ORDER BY id DESC", (ev["id"],)).fetchone()
 conn.close()
 ok(nxt is not None and nxt["thank_subject"] == "Happy Thanksgiving 🥧", "a new round keeps the subject line")
+
+# The on/off checkbox
+edit_page = c.get(f"/pies/{ev['id']}/edit").get_data(as_text=True)
+ok('name="thank_on"' in edit_page and "checked" in edit_page.split('name="thank_on"')[1][:40], "the thank-you checkbox is there and on by default")
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post(f"/pies/{ev['id']}/edit", data={**base, "thank_date": "2000-01-01", "thank_on_shown": "1"})  # box left unchecked
+conn = D.get_connection()
+ok(conn.execute("SELECT thank_on FROM pie_events WHERE id=?", (ev["id"],)).fetchone()["thank_on"] == 0, "unchecking the box saves it as off")
+conn.close()
+reset()
+P.send_thank_yous()
+ok(not sent, "the daily run sends nothing for an event that is turned off, even when its date has come")
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post(f"/pies/{ev['id']}/thank-now")
+ok(not sent, "Send thank-yous now sends nothing while it is turned off")
+page = c.get(f"/pies/{ev['id']}").get_data(as_text=True)
+ok("Off for this event" in page and "Send thank-yous now" not in page, "the event page says it is off and hides the send button")
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post(f"/pies/{ev['id']}/edit", data={**base, "thank_date": "2000-01-01"})  # an older form without the box keeps the setting
+conn = D.get_connection()
+ok(conn.execute("SELECT thank_on FROM pie_events WHERE id=?", (ev["id"],)).fetchone()["thank_on"] == 0, "a save without the checkbox field leaves the setting alone")
+conn.close()
+with contextlib.redirect_stdout(io.StringIO()):
+    c.post(f"/pies/{ev['id']}/edit", data={**base, "thank_date": "2000-01-01", "thank_on_shown": "1", "thank_on": "1"})
+reset()
+P.send_thank_yous()
+ok(len(sent) == 1, "checking the box again turns the daily send back on")

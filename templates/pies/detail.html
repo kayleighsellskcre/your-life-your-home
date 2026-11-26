@@ -46,11 +46,11 @@
     <div>
       <b>Thank-you email</b>
       <div class="pie-hint" style="margin:.15rem 0 0;">
-        {% if ev.thank_date %}Goes out {{ ev.thank_date|pie_date }}{% else %}No date set. Add one under Edit event, or send it now.{% endif %}
+        {% if ev.thank_on == 0 %}Off for this event. Turn it on under Edit event.{% elif ev.thank_date %}Goes out {{ ev.thank_date|pie_date }}{% else %}No date set. Add one under Edit event, or send it now.{% endif %}
         &middot; {{ stats.thanked }} sent{% if stats.to_thank %}, {{ stats.to_thank }} waiting{% endif %}
       </div>
     </div>
-    {% if stats.to_thank %}
+    {% if stats.to_thank and ev.thank_on != 0 %}
     <form method="post" action="{{ url_for('pies.thank_now', event_id=ev.id) }}" onsubmit="return confirm('Send the thank-you email now to everyone who ordered?');"><button class="pie-btn secondary small" type="submit">Send thank-yous now</button></form>
     {% endif %}
   </div>

@@ -34,6 +34,10 @@
     <div class="pie-card">
       <h2>Thank-you email</h2>
       <p class="pie-hint" style="margin:-.3rem 0 .8rem;">Everyone who orders a pie gets a thank-you email on the day you choose. Leave the date empty if you don't want one. You can also send it right away from the event page.</p>
+      <input type="hidden" name="thank_on_shown" value="1">
+      <label class="pie-check" style="display:flex;gap:.5rem;align-items:center;margin:0 0 .8rem;font-weight:600;">
+        <input type="checkbox" name="thank_on" value="1" {{ 'checked' if ev.thank_on is none or ev.thank_on }}> Send a thank-you email for this event
+      </label>
       <div class="pie-row">
         <div>
           <label class="pie-label" for="thank_date">Send on <span class="pie-hint">(optional)</span></label>
