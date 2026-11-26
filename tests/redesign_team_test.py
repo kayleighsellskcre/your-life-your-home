@@ -130,6 +130,13 @@ ok("Freezing temperatures ahead" in t and "Disconnect garden hoses" in t and "Fr
 sent.clear()
 a.post("/agent/send-update/send", data={"who": [f"u{home}"], "subject": "Freeze tonight", "message": "Hi {first},\n\nCover the faucets."})
 ok(len(sent) == 1 and sent[0][0] == "hal@x.com" and "Hi Hal," in sent[0][2] and "Amy Agent" in sent[0][2], "it sends to the chosen people with their first name filled in")
+import database as _D
+_c = _D.get_connection()
+_n = _c.execute("SELECT COUNT(*) FROM automated_email_logs WHERE email_type='update' AND recipient_email='hal@x.com'").fetchone()[0]
+ok(_n == 1, "an update sent by hand is logged, so the one-email-a-week rule counts it")
+import app as _A
+ok(_A._recently_emailed(_c, "hal@x.com"), "and an automatic note waits a week after it")
+_c.close()
 sent.clear()
 a.post("/agent/send-update/send", data={"who": ["u99999", f"u{other_h}"], "subject": "x", "message": "y"})
 ok(len(sent) == 1 and sent[0][0] == "oh@x.com", "only this agent's own clients can be emailed")

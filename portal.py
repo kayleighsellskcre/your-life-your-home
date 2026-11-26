@@ -536,6 +536,12 @@ def send_update_go():
                  else "\n\nIf you would rather not get notes like this, just reply and let me know.")
         ns["_bg"](ns["send_reminder_email"], p["email"], subject, body, **sender)
         sent += 1
+        try:
+            # a note you send by hand counts toward the one-email-a-week rule, so an automatic note does not follow it right away
+            from database import log_automated_email
+            log_automated_email(0, "agent_contact", u["id"], "update", p["email"], subject, "sent")
+        except Exception:
+            pass
     flash(f"Sent to {sent} {'person' if sent == 1 else 'people'}." + (f" Skipped {skipped} who opted out or have no email." if skipped else ""), "success")
     return redirect(url_for("portal.send_update"))
 
